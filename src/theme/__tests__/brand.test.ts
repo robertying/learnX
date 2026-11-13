@@ -45,12 +45,8 @@ describe('brand color', () => {
   });
 
   it('is what the widgets use', () => {
-    for (const widget of [
-      'Deadlines',
-      'Deadlines.android',
-      'UpNext',
-      'UpNext.android',
-    ]) {
+    // The iOS layouts take it from their kit.
+    for (const widget of ['kit', 'Deadlines.android', 'UpNext.android']) {
       const source = read(`src/widgets/${widget}.tsx`);
       expect(source).toContain(`'${brandColors.light}'`);
       expect(source).toContain(`'${brandColors.dark}'`);

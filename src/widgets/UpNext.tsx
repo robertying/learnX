@@ -1,6 +1,5 @@
 import { HStack, Link, Spacer, Text, VStack } from '@expo/ui/swift-ui';
 import {
-  containerBackground,
   font,
   foregroundStyle,
   frame,
@@ -9,14 +8,15 @@ import {
   widgetURL,
 } from '@expo/ui/swift-ui/modifiers';
 import { createWidget, type WidgetEnvironment } from 'expo-widgets';
-import type { ReactElement, ReactNode } from 'react';
-import { PlatformColor } from 'react-native';
+import type { ReactElement } from 'react';
+import { withWidgetKit, type WidgetKit } from 'widgets/kit';
 import type { UpNextWidgetProps } from 'widgets/props';
 
 /**
  * Runs in the widget extension, not the app: the `widget` directive turns it
  * into a string at build time. It can't use hooks, imports or anything outside
- * the function; only its props, `environment` and the @expo/ui components.
+ * the function; only its props, `environment`, the @expo/ui components and
+ * what `kit` (widgets/kit) shares between the layouts.
  *
  * Every timeline entry has the same props; the class on now and the next ones
  * are picked by the entry's date. Tapping opens Today, and a deadline row in a
@@ -25,35 +25,17 @@ import type { UpNextWidgetProps } from 'widgets/props';
 function UpNextWidget(
   props: UpNextWidgetProps,
   environment: WidgetEnvironment,
+  kit: WidgetKit,
 ) {
   'widget';
   const family = environment.widgetFamily ?? 'systemMedium';
-  const accent = environment.colorScheme === 'dark' ? '#F4ABFF' : '#660874';
-  const secondary = foregroundStyle({
-    type: 'hierarchical',
-    style: 'secondary',
-  });
-  const background = containerBackground(
-    PlatformColor('systemBackground'),
-    'widget',
-  );
+  const accent = kit.accent(environment);
   const openToday = props.url ? [widgetURL(props.url)] : [];
 
   const date = environment.date ?? new Date();
   const now = date.getTime();
   const classes = (props.classes ?? []).filter(c => c.end > now);
   const deadlines = (props.deadlines ?? []).filter(d => d.deadline > now);
-  // The deadline's color by the app's rule (deadlineUrgency in
-  // helpers/assignments): red under a day left, orange when it's due by the
-  // end of tomorrow. The timeline has an entry at each change.
-  const dueColor = (d: UpNextWidgetProps['deadlines'][number]) =>
-    foregroundStyle(
-      now > d.urgentFrom
-        ? PlatformColor('systemRed')
-        : now >= d.soonFrom
-          ? PlatformColor('systemOrange')
-          : { type: 'hierarchical', style: 'secondary' },
-    );
   const featured = classes[0];
   const current = !!featured && featured.start <= now;
 
@@ -71,71 +53,41 @@ function UpNextWidget(
   };
   const whenAndWhere = (c: UpNextWidgetProps['classes'][number]) =>
     c.location ? `${when(c)} · ${c.location}` : when(c);
-
-  // The time left, live, in days, hours and minutes (no seconds), and
-  // SwiftUI's ViewThatFits, both from our expo-widgets patch. A widget can't
-  // import, so this makes the elements itself.
-  const Countdown = (countdownProps: {
-    date: Date;
-    maxFieldCount?: number;
-    modifiers: unknown[];
-  }) =>
-    ({
-      type: 'CountdownView',
-      key: null,
-      props: countdownProps,
-    }) as unknown as ReactElement;
-  const ViewThatFits = (fitProps: {
-    axes: 'vertical';
-    modifiers: unknown[];
-    children: ReactNode;
-  }) =>
-    ({
-      type: 'ViewThatFitsView',
-      key: null,
-      props: fitProps,
-    }) as unknown as ReactElement;
+  const today = !!featured && daysAway(featured.start) === 0;
 
   // The countdown after its label. A small widget has room for its largest
   // unit only ("Starts in 2 hours").
-  const countdown = (textStyle: 'caption' | 'footnote', small: boolean) => {
-    if (!featured || daysAway(featured.start) !== 0) {
-      return null;
-    }
-    const label = (
-      <Text
-        modifiers={[
-          font({ textStyle }),
-          foregroundStyle(accent),
-          lineLimit(1),
-          layoutPriority(1),
-        ]}
-      >
-        {`${current ? props.endsIn : props.startsIn} `}
-      </Text>
-    );
-    const time = (
-      <Countdown
-        date={new Date(current ? featured.end : featured.start)}
-        maxFieldCount={small ? 1 : undefined}
-        modifiers={[font({ textStyle }), foregroundStyle(accent), lineLimit(1)]}
-      />
-    );
-    return (
+  const countdown = (textStyle: 'caption' | 'footnote', small: boolean) =>
+    featured && today ? (
       <HStack spacing={0}>
-        {label}
-        {time}
+        <Text
+          modifiers={[
+            font({ textStyle }),
+            foregroundStyle(accent),
+            lineLimit(1),
+            layoutPriority(1),
+          ]}
+        >
+          {`${current ? props.endsIn : props.startsIn} `}
+        </Text>
+        <kit.Countdown
+          date={new Date(current ? featured.end : featured.start)}
+          maxFieldCount={small ? 1 : undefined}
+          modifiers={[
+            font({ textStyle }),
+            foregroundStyle(accent),
+            lineLimit(1),
+          ]}
+        />
       </HStack>
-    );
-  };
+    ) : null;
 
   if (family === 'accessoryRectangular') {
-    const today = !!featured && daysAway(featured.start) === 0;
     return (
       <VStack
         alignment="leading"
         spacing={0}
-        modifiers={[background, ...openToday]}
+        modifiers={[kit.background, ...openToday]}
       >
         <Text modifiers={[font({ textStyle: 'headline' }), lineLimit(1)]}>
           {featured ? featured.courseName : props.noClasses}
@@ -153,7 +105,7 @@ function UpNextWidget(
               </Text>
             ) : null}
             {today ? (
-              <Countdown
+              <kit.Countdown
                 date={new Date(current ? featured.end : featured.start)}
                 maxFieldCount={1}
                 modifiers={[lineLimit(1)]}
@@ -167,19 +119,7 @@ function UpNextWidget(
 
   const small = family === 'systemSmall';
   const large = family === 'systemLarge' || family === 'systemExtraLarge';
-  const later = classes.slice(1, large ? 5 : small ? 0 : 1);
-  const due = deadlines.slice(0, large ? 3 : small ? 0 : 1);
-
-  const sectionLabel = (text: string) => (
-    <Text
-      modifiers={[
-        font({ textStyle: 'caption', weight: 'semibold' }),
-        foregroundStyle(accent),
-      ]}
-    >
-      {text}
-    </Text>
-  );
+  const spacing = large ? 10 : 4;
 
   const featuredClass = (withCountdown: boolean) =>
     featured ? (
@@ -195,7 +135,7 @@ function UpNextWidget(
         <Text
           modifiers={[
             font({ textStyle: small ? 'caption' : 'subheadline' }),
-            secondary,
+            kit.secondary,
             lineLimit(small ? 2 : 1),
           ]}
         >
@@ -207,19 +147,13 @@ function UpNextWidget(
       </VStack>
     ) : null;
 
-  return (
-    <VStack
-      alignment="leading"
-      spacing={large ? 10 : 4}
-      modifiers={[
-        frame({ maxWidth: 10000, maxHeight: 10000, alignment: 'topLeading' }),
-        background,
-        ...openToday,
-      ]}
-    >
+  // The label (now, next, or the widget's name) and the class on now or next.
+  const top = (
+    <VStack key="top" alignment="leading" spacing={spacing}>
       <HStack>
-        {sectionLabel(
+        {kit.label(
           featured ? (current ? props.now : props.next) : props.title,
+          accent,
         )}
         <Spacer />
       </HStack>
@@ -227,92 +161,136 @@ function UpNextWidget(
         small ? (
           // The countdown when it fits under the course and its time and
           // place, which take two lines each at most.
-          <ViewThatFits axes="vertical" modifiers={[]}>
+          <kit.ViewThatFits axes="vertical" modifiers={[]}>
             {featuredClass(true)}
             {featuredClass(false)}
-          </ViewThatFits>
+          </kit.ViewThatFits>
         ) : (
           featuredClass(true)
         )
       ) : (
-        <Text modifiers={[font({ textStyle: 'footnote' }), secondary]}>
+        <Text modifiers={[font({ textStyle: 'footnote' }), kit.secondary]}>
           {props.noClasses}
         </Text>
       )}
-      {later.length > 0 && large ? sectionLabel(props.later) : null}
-      {later.map(c => (
-        <HStack key={c.key} spacing={6}>
-          <Text
-            modifiers={[
-              font({ textStyle: 'caption' }),
-              secondary,
-              lineLimit(1),
-              layoutPriority(1),
-            ]}
-          >
-            {when(c)}
-          </Text>
-          <Text modifiers={[font({ textStyle: 'caption' }), lineLimit(1)]}>
-            {c.courseName}
-          </Text>
-          <Spacer />
-        </HStack>
-      ))}
-      {due.length > 0 && large ? sectionLabel(props.due) : null}
-      {due.map(item => (
-        <Link
-          key={item.id}
-          destination={item.url}
-          modifiers={[
-            // Not the link tint: the row keeps its colors.
-            foregroundStyle({ type: 'hierarchical', style: 'primary' }),
-          ]}
-        >
-          {/* The title keeps its width, then the countdown; the course name
-              shortens first. */}
-          <HStack spacing={0}>
-            <Text
-              modifiers={[
-                font({ textStyle: 'caption' }),
-                lineLimit(1),
-                layoutPriority(2),
-              ]}
-            >
-              {large ? `${item.title} · ` : `${props.due}: ${item.title} · `}
-            </Text>
-            <Text
-              modifiers={[
-                font({ textStyle: 'caption' }),
-                secondary,
-                lineLimit(1),
-              ]}
-            >
-              {item.courseName}
-            </Text>
-            <Text
-              modifiers={[
-                font({ textStyle: 'caption' }),
-                secondary,
-                layoutPriority(1),
-              ]}
-            >
-              {' · '}
-            </Text>
-            <Countdown
-              date={new Date(item.deadline)}
-              modifiers={[
-                font({ textStyle: 'caption' }),
-                dueColor(item),
-                lineLimit(1),
-                layoutPriority(1),
-              ]}
-            />
-          </HStack>
-        </Link>
-      ))}
-      <Spacer />
     </VStack>
   );
+
+  if (small) {
+    return (
+      <VStack
+        alignment="leading"
+        spacing={0}
+        modifiers={[
+          frame({ maxWidth: 10000, maxHeight: 10000, alignment: 'topLeading' }),
+          kit.background,
+          ...openToday,
+        ]}
+      >
+        {top}
+        <Spacer />
+      </VStack>
+    );
+  }
+
+  const laterRow = (c: UpNextWidgetProps['classes'][number]) => (
+    <HStack key={c.key} spacing={6}>
+      <Text
+        modifiers={[
+          font({ textStyle: 'caption' }),
+          kit.secondary,
+          lineLimit(1),
+          layoutPriority(1),
+        ]}
+      >
+        {when(c)}
+      </Text>
+      <Text modifiers={[font({ textStyle: 'caption' }), lineLimit(1)]}>
+        {c.courseName}
+      </Text>
+      <Spacer />
+    </HStack>
+  );
+
+  const dueRow = (item: UpNextWidgetProps['deadlines'][number]) => (
+    <Link
+      key={item.id}
+      destination={item.url}
+      modifiers={[
+        // Not the link tint: the row keeps its colors.
+        foregroundStyle({ type: 'hierarchical', style: 'primary' }),
+      ]}
+    >
+      {kit.dueLine({
+        title: large ? item.title : `${props.due}: ${item.title}`,
+        courseName: item.courseName,
+        due: item,
+        textStyle: 'caption',
+        color: kit.dueColor(item, now),
+      })}
+    </Link>
+  );
+
+  // A large widget names its sections; the name stays with the first row.
+  const section = (name: string, first: ReactElement) =>
+    large ? (
+      <VStack key={String(first.key)} alignment="leading" spacing={spacing}>
+        {kit.label(name, accent)}
+        {first}
+      </VStack>
+    ) : (
+      first
+    );
+
+  // The deadlines and the classes after this one, as many as fit. Rows go to
+  // the deadlines and the classes in turn, so both sections show once
+  // there's room for two; one version per pair of counts, the most first.
+  const laterClasses = classes.slice(1, large ? 9 : 4);
+  const dueDeadlines = deadlines.slice(0, large ? 6 : 3);
+  // (No array destructuring: Babel turns it into a helper the widget runtime
+  // doesn't have.)
+  const counts = [{ classes: 0, deadlines: 0 }];
+  for (;;) {
+    const last = counts[counts.length - 1];
+    const classTurn = counts.length % 2 === 0;
+    if (
+      last.classes < laterClasses.length &&
+      (classTurn || last.deadlines >= dueDeadlines.length)
+    ) {
+      counts.push({ ...last, classes: last.classes + 1 });
+    } else if (last.deadlines < dueDeadlines.length) {
+      counts.push({ ...last, deadlines: last.deadlines + 1 });
+    } else {
+      break;
+    }
+  }
+
+  return kit.fitted({
+    versions: counts.reverse().map(count => ({
+      key: `${count.classes}-${count.deadlines}`,
+      top,
+      rows: [
+        ...laterClasses
+          .slice(0, count.classes)
+          .map((cl, i) =>
+            i === 0 ? section(props.later, laterRow(cl)) : laterRow(cl),
+          ),
+        ...dueDeadlines
+          .slice(0, count.deadlines)
+          .map((item, i) =>
+            i === 0 ? section(props.due, dueRow(item)) : dueRow(item),
+          ),
+      ],
+      cut:
+        count.classes < classes.length - 1 ||
+        count.deadlines < deadlines.length,
+    })),
+    spacing,
+    modifiers: [kit.background, ...openToday],
+  });
 }
 
-export default createWidget<UpNextWidgetProps>('UpNext', UpNextWidget);
+export default createWidget<UpNextWidgetProps>(
+  'UpNext',
+  withWidgetKit(UpNextWidget),
+);
