@@ -209,6 +209,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
   children,
   title,
   footer,
+  footerHidden,
 }) => {
   const colors = useMaterialColors();
   const rows = positionRows(children);
@@ -231,7 +232,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
           {rows}
         </Column>
       ) : null}
-      {footer ? (
+      {footer && !footerHidden ? (
         <Caption modifiers={[padding(16, 4, 16, 0)]}>{footer}</Caption>
       ) : null}
     </Column>

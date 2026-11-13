@@ -112,6 +112,24 @@ it('names the assignment and its deadline at the top', async () => {
   expect(screen.queryByText(t('lateSubmission'), { exact: false })).toBeNull();
 });
 
+it('gives a deadline over a year away as its date once', async () => {
+  const deadline = dayjs('2099-09-30T08:59:00+08:00');
+  await renderScreen({
+    ...unsubmitted,
+    deadline: deadline.toISOString(),
+    lateSubmissionDeadline: undefined,
+  });
+  expect(
+    screen.getByText(deadline.format(t('fullDateTimeFormat'))),
+  ).toBeTruthy();
+});
+
+it('keeps the Draft Saved footer in place, hidden, until there is a draft', async () => {
+  await renderScreen();
+  // Hidden: transparent and left out for VoiceOver
+  expect(screen.getByText(t('draftSaved')).props.modifiers).toHaveLength(2);
+});
+
 it('adds the late deadline once the deadline has passed', async () => {
   const late = dayjs().add(2, 'day');
   await renderScreen({
@@ -240,7 +258,7 @@ it('restores a draft and discards it once confirmed', async () => {
   const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   await renderScreen();
   expect(screen.getByDisplayValue('Saved answer')).toBeTruthy();
-  expect(screen.getByText(t('draftSaved'))).toBeTruthy();
+  expect(screen.getByText(t('draftSaved')).props.modifiers).toBeUndefined();
 
   await userEvent.press(screen.getByText(t('discardDraftEllipsis')));
   await act(() => alert.mock.calls[0][2]![1].onPress!());

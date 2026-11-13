@@ -131,10 +131,22 @@ const lastSectionModifiers = [
   listSectionMargins({ edges: 'bottom', length: Spacing.l }),
 ];
 
-const lastSectionMarked = (children: ReactNode) =>
+// The space above the first section, as iOS spaces it under an inline title.
+// Left to SwiftUI, it is smaller while the header still has the large title
+// of the screen pushed from (Today, the lists), and grows as the push ends:
+// the rows slid down as the screen came in.
+const firstSectionModifiers = [
+  listSectionMargins({ edges: 'top', length: 35 }),
+];
+
+/** Marks the first and last sections for their margins. */
+const sectionsMarked = (children: ReactNode) =>
   sectionRows(children).map((section, index, sections) =>
-    index === sections.length - 1
-      ? cloneElement(section as ReactElement<FormSectionProps>, { last: true })
+    index === 0 || index === sections.length - 1
+      ? cloneElement(section as ReactElement<FormSectionProps>, {
+          first: index === 0,
+          last: index === sections.length - 1,
+        })
       : section,
   );
 
@@ -204,7 +216,7 @@ export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
             ...(onRefresh ? [refreshable(onRefresh)] : []),
           ]}
         >
-          {lastSectionMarked(children)}
+          {sectionsMarked(children)}
         </SwiftUIForm>
       </NumberFocusContext>
     </ThemedHost>
@@ -256,6 +268,8 @@ export const FormSection: React.FC<FormSectionProps> = ({
   children,
   title,
   footer,
+  footerHidden,
+  first,
   last,
 }) => {
   const isMac = DeviceInfo.isMac();
@@ -267,15 +281,29 @@ export const FormSection: React.FC<FormSectionProps> = ({
           <Text modifiers={macHeaderModifiers}>{title}</Text>
         ) : undefined
       }
-      footer={footer ? <Text>{footer}</Text> : undefined}
+      footer={
+        footer ? (
+          <Text modifiers={footerHidden ? hiddenFooterModifiers : undefined}>
+            {footer}
+          </Text>
+        ) : undefined
+      }
       modifiers={
-        isMac ? macSectionModifiers : last ? lastSectionModifiers : undefined
+        isMac
+          ? macSectionModifiers
+          : [
+              ...(first ? firstSectionModifiers : []),
+              ...(last ? lastSectionModifiers : []),
+            ]
       }
     >
       {sectionRows(children)}
     </Section>
   );
 };
+
+// A footer that keeps its place while hidden (`footerHidden`)
+const hiddenFooterModifiers = [opacity(0), accessibilityHidden(true)];
 
 const secondaryText = foregroundStyle(PlatformColor('secondaryLabel'));
 const subtitleModifiers = [font({ textStyle: 'subheadline' }), secondaryText];
@@ -663,7 +691,9 @@ export const FormFile: React.FC<FormFileProps> = ({
 // Starts a few lines tall, as a box to write in, and grows with the text.
 // Mac rows are tight, so the box gets the room above and below its text
 // that the row's side inset gives it.
-const multilineModifiers = [lineLimit({ min: 6, max: 20 })];
+// Six lines to start with, then the field grows with its text and the Form
+// scrolls, rather than the field scrolling inside the Form.
+const multilineModifiers = [lineLimit({ min: 6, max: 10000 })];
 const macMultilineModifiers = [...multilineModifiers, padding({ vertical: 6 })];
 const plainTextModifiers = [
   textInputAutocapitalization('never'),
