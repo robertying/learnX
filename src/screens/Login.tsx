@@ -60,9 +60,11 @@ const Login: React.FC<Props> = ({ navigation }) => {
         if (previous.loggingIn && !state.loggingIn && state.error) {
           const message = t('loginFailed');
           toast(
-            // Debug builds also say what the server answered.
+            // Debug builds say first why it failed and what the server
+            // answered: the toast shows three lines, which the message
+            // alone can fill.
             __DEV__
-              ? `${message}\n${state.error}${state.errorDetail ? `: ${state.errorDetail}` : ''}`
+              ? `${state.error}${state.errorDetail ? `: ${state.errorDetail}` : ''}\n${message}`
               : message,
             'error',
             8 * 1000,

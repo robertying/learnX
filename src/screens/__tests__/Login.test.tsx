@@ -244,9 +244,10 @@ describe('Login', () => {
         failure: 'rejected',
       }),
     );
-    // Debug builds (tests run as one) add the reason and the server's answer.
+    // Debug builds (tests run as one) start with the reason and the server's
+    // answer.
     expect(toast).toHaveBeenLastCalledWith(
-      `${t('loginFailed')}\n${FailReason.BAD_CREDENTIAL}`,
+      `${FailReason.BAD_CREDENTIAL}\n${t('loginFailed')}`,
       'error',
       8000,
     );
@@ -261,7 +262,7 @@ describe('Login', () => {
       }),
     );
     expect(toast).toHaveBeenLastCalledWith(
-      `${t('loginFailed')}\n${FailReason.ERROR_FETCH_FROM_ID}: Two-factor page`,
+      `${FailReason.ERROR_FETCH_FROM_ID}: Two-factor page\n${t('loginFailed')}`,
       'error',
       8000,
     );

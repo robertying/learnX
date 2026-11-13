@@ -4,7 +4,8 @@
 # login (DUMMY_*), as fastlane's release lanes also check. It catches what Jest
 # can't: a Babel or Metro config change that breaks the production build, a
 # broken import in a file no test loads, and a .env value leaking into a
-# release bundle (babel/inline-env.js).
+# release bundle (babel/inline-env.js). It also fails if a bundle would replace
+# React Native's fetch with expo/fetch.
 #
 #   scripts/check-release-bundle.sh
 #
@@ -61,6 +62,13 @@ for (const bundle of process.argv.slice(2)) {
       console.error(`${bundle} contains the .env value of ${key}`);
       leaked = true;
     }
+  }
+  // Expo's runtime installs expo/fetch unless EXPO_PUBLIC_USE_RN_FETCH was
+  // set when the bundle was built (babel.config.js); its install code is left
+  // in only when it runs. expo/fetch can't send the SSO login's form.
+  if (code.includes('expo/fetch expected')) {
+    console.error(`${bundle} replaces React Native's fetch with expo/fetch`);
+    leaked = true;
   }
   if (!code.includes(env.DUMMY_USERNAME ?? '\0')) {
     console.error(`${bundle} doesn't contain the mock login: .env wasn't inlined`);
