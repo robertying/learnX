@@ -76,7 +76,7 @@ describe('with the native split (iOS, iPadOS and Mac)', () => {
         : { gestureEnabled: false },
     );
     expect(config().screens[2].options).toEqual(config().screens[1].options);
-    expect(config().screens[3].options).toEqual({ gestureEnabled: false });
+    expect(config().screens[3].options).toEqual(config().screens[1].options);
   });
 });
 

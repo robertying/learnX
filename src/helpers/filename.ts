@@ -87,3 +87,20 @@ export const formatFileSize = (bytes: number) => {
   }
   return `${value.toFixed(1)} ${units[unit]}`;
 };
+
+/**
+ * A size as Web Learning writes it ("35K", "2.3M", "44.92KB"), with a space
+ * and the unit spelled as the system does ("35 KB", "2.3 MB"), keeping its
+ * number. Bytes alone ("512B", a picked file's) show as `formatFileSize` does;
+ * anything else as it is.
+ */
+export const displayFileSize = (size: string) => {
+  const match = /^\s*(\d+(?:\.\d+)?)\s*([KMGT]?)i?B?\s*$/i.exec(size);
+  if (!match) {
+    return size;
+  }
+  const [, value, unit] = match;
+  return unit
+    ? `${value} ${unit.toUpperCase()}B`
+    : formatFileSize(Number(value));
+};

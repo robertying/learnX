@@ -1,3 +1,4 @@
+import { displayFileSize } from 'helpers/filename';
 import { File } from 'data/types/state';
 import { removeTags } from 'helpers/text';
 import { listTime } from 'helpers/listTime';
@@ -8,6 +9,11 @@ import CardRow, { cardAccessibilityLabel } from './CardRow';
 export interface FileCardProps extends CardWrapperProps {
   data: File;
   hideCourseName?: boolean;
+  /**
+   * Marks an archived item with a glyph, in a list that shows archived items
+   * among the rest (a course's lists), where they can't be favorited.
+   */
+  markArchived?: boolean;
 }
 
 const FileCard: React.FC<FileCardProps> = ({
@@ -23,11 +29,16 @@ const FileCard: React.FC<FileCardProps> = ({
     category,
   },
   hideCourseName,
+  markArchived,
   ...restProps
 }) => {
   // Re-renders the row at midnight, past the list's row memoization.
   const today = useToday();
-  const details = [category?.title, fileType?.toUpperCase(), size]
+  const details = [
+    category?.title,
+    fileType?.toUpperCase(),
+    size && displayFileSize(size),
+  ]
     .filter(Boolean)
     .join(' · ');
   const strippedDescription = removeTags(description);
@@ -40,6 +51,7 @@ const FileCard: React.FC<FileCardProps> = ({
   const flags = [
     markedImportant && 'important',
     restProps.fav && 'favorited',
+    markArchived && restProps.archived && 'archived',
   ] as const;
 
   return (

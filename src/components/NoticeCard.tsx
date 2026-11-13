@@ -8,6 +8,11 @@ import CardRow, { cardAccessibilityLabel } from './CardRow';
 export interface NoticeCardProps extends CardWrapperProps {
   data: Notice;
   hideCourseName?: boolean;
+  /**
+   * Marks an archived item with a glyph, in a list that shows archived items
+   * among the rest (a course's lists), where they can't be favorited.
+   */
+  markArchived?: boolean;
 }
 
 const NoticeCard: React.FC<NoticeCardProps> = ({
@@ -22,6 +27,7 @@ const NoticeCard: React.FC<NoticeCardProps> = ({
     attachment,
   },
   hideCourseName,
+  markArchived,
   ...restProps
 }) => {
   // Re-renders the row at midnight, past the list's row memoization.
@@ -34,6 +40,7 @@ const NoticeCard: React.FC<NoticeCardProps> = ({
     attachment && 'attachment',
     markedImportant && 'important',
     restProps.fav && 'favorited',
+    markArchived && restProps.archived && 'archived',
   ] as const;
 
   return (

@@ -1,3 +1,4 @@
+import { displayFileSize } from 'helpers/filename';
 import { useCallback, useEffect, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -162,7 +163,10 @@ const FileInfo: React.FC<{
         title={t('fileType')}
         detail={file.fileType?.toUpperCase() || t('unknownFileType')}
       />
-      <FormText title={t('fileSize')} detail={file.size ?? t('noFileSize')} />
+      <FormText
+        title={t('fileSize')}
+        detail={file.size ? displayFileSize(file.size) : t('noFileSize')}
+      />
       {file.courseTeacherName ? (
         <FormText title={t('fileTeacher')} detail={file.courseTeacherName} />
       ) : null}

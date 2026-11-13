@@ -1,3 +1,4 @@
+import { displayFileSize } from 'helpers/filename';
 import { useCallback } from 'react';
 import dayjs from 'dayjs';
 import {
@@ -262,7 +263,7 @@ const AssignmentDetailContent: React.FC<{
           {attachment ? (
             <FormFile
               title={attachment.name}
-              detail={attachment.size}
+              detail={displayFileSize(attachment.size)}
               icon="file"
               onPress={() => handleFileOpen(attachment)}
             />
@@ -281,7 +282,7 @@ const AssignmentDetailContent: React.FC<{
             {submittedAttachment ? (
               <FormFile
                 title={submittedAttachment.name}
-                detail={submittedAttachment.size}
+                detail={displayFileSize(submittedAttachment.size)}
                 icon="file"
                 onPress={() => handleFileOpen(submittedAttachment)}
               />
@@ -294,7 +295,7 @@ const AssignmentDetailContent: React.FC<{
             {gradeAttachment ? (
               <FormFile
                 title={gradeAttachment.name}
-                detail={gradeAttachment.size}
+                detail={displayFileSize(gradeAttachment.size)}
                 icon="file"
                 onPress={() => handleFileOpen(gradeAttachment)}
               />
@@ -307,7 +308,7 @@ const AssignmentDetailContent: React.FC<{
             {answerAttachment ? (
               <FormFile
                 title={answerAttachment.name}
-                detail={answerAttachment.size}
+                detail={displayFileSize(answerAttachment.size)}
                 icon="answer"
                 onPress={() => handleFileOpen(answerAttachment)}
               />

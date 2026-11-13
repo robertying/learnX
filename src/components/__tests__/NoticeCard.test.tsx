@@ -106,6 +106,15 @@ describe('NoticeCard', () => {
     expect(screen.getByTestId('unread-dot')).toBeTruthy();
   });
 
+  it("marks an archived notice only where asked (a course's lists)", async () => {
+    const view = await render(<NoticeCard data={notice()} archived />);
+    expect(screen.queryByTestId('icon-archived')).toBeNull();
+    await view.rerender(<NoticeCard data={notice()} archived markArchived />);
+    expect(screen.getByTestId('icon-archived')).toBeTruthy();
+    await view.rerender(<NoticeCard data={notice()} markArchived />);
+    expect(screen.queryByTestId('icon-archived')).toBeNull();
+  });
+
   it('tells screen readers the title first, then what only shows', async () => {
     await render(
       <NoticeCard

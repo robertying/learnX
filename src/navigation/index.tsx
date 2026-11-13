@@ -76,7 +76,9 @@ const renderMainScreens = () => (
     <RootNavigator.Screen
       name="AssignmentSubmissionStack"
       component={AssignmentSubmissionStack}
-      options={{ gestureEnabled: false }}
+      // A sheet like Search; the draft is saved as it's written, so a swipe
+      // down loses nothing (the screen holds it while uploading).
+      options={sheetOptions}
     />
     {/* Android shows these above its split view (AndroidRootNavigator). */}
     {nativeSplit && renderSheets()}

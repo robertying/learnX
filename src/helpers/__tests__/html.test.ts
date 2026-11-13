@@ -44,6 +44,13 @@ describe('getWebViewTemplate', () => {
     expect(html.length).toBeLessThan(5_000);
   });
 
+  it("fits images to the width in their own shape, over the editor's sizes", () => {
+    const html = getWebViewTemplate('<p><img style="height:380px" /></p>');
+    expect(html).toMatch(
+      /img \{\s*max-width: 100% !important;\s*height: auto !important;/,
+    );
+  });
+
   it('inlines KaTeX when there is math', () => {
     const html = getWebViewTemplate('<p>$$x^2$$</p>');
     expect(html).toContain('renderMathInElement');

@@ -1,3 +1,4 @@
+import { displayFileSize } from 'helpers/filename';
 import dayjs from 'dayjs';
 import Spotlight, { SpotlightDomain, SpotlightItem } from 'modules/spotlight';
 import { Assignment, File, Notice } from 'data/types/state';
@@ -46,7 +47,7 @@ export const fileSpotlightItem = (file: File): SpotlightItem => ({
   details: details(
     file.courseName,
     file.fileType.toUpperCase(),
-    file.size,
+    displayFileSize(file.size),
     removeTags(file.description),
   ),
   keywords: keywords(file.courseName, file.courseTeacherName, file.fileType),
