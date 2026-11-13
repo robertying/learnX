@@ -33,8 +33,14 @@ export interface UpNextWidgetClass {
   end: number;
   /** Start to end, e.g. 08:00–09:35 or 4:00–5:35 PM. */
   time: string;
-  /** Its day, e.g. "Mon 11/9", shown when it isn't today or tomorrow. */
+  /** The start alone, e.g. 08:00 or 4:00 PM, where a range doesn't fit. */
+  startTime: string;
+  /** Its weekday, e.g. "Mon", shown when it's later this week. */
+  weekday: string;
+  /** Its day with the date, e.g. "Mon 11/9", shown when it's a week or more away. */
   day: string;
+  /** The learnx:// link that opens its course, or none when the course is unknown. */
+  url?: string;
 }
 
 /**
@@ -45,15 +51,12 @@ export interface UpNextWidgetClass {
 export interface UpNextWidgetProps {
   /** The classes not over yet when the props were made, earliest first. */
   classes: UpNextWidgetClass[];
-  /** The open assignments, earliest deadline first. */
-  deadlines: DeadlineWidgetProps['deadlines'];
   title: string;
   /** Labels for the class on now and the next one. */
   now: string;
   next: string;
-  /** Labels for the classes after it and the next deadline. */
+  /** Label for the classes after it. */
   later: string;
-  due: string;
   /** Before the countdowns ("Starts in", "Ends in"); iOS only. */
   startsIn: string;
   endsIn: string;

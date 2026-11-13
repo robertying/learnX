@@ -58,14 +58,13 @@ describe('upcomingClasses', () => {
 });
 
 describe('upNextTimes', () => {
-  it('changes now, at each start and end, and at each deadline', () => {
+  it('changes now, and at each start and end', () => {
     const classes = [
       { start: at('09:50'), end: at('12:15') },
       { start: at('13:30'), end: at('15:05') },
     ];
-    expect(upNextTimes(classes, [at('12:00')], { now: at('10:00') })).toEqual([
+    expect(upNextTimes(classes, { now: at('10:00') })).toEqual([
       at('10:00'),
-      at('12:00'),
       at('12:15'),
       at('13:30'),
       at('15:05'),
@@ -74,15 +73,13 @@ describe('upNextTimes', () => {
 
   it('skips past times and caps the count', () => {
     const classes = [{ start: at('08:00'), end: at('09:35') }];
-    expect(upNextTimes(classes, [], { now: at('09:00') })).toEqual([
+    expect(upNextTimes(classes, { now: at('09:00') })).toEqual([
       at('09:00'),
       at('09:35'),
     ]);
-    expect(
-      upNextTimes(classes, [at('10:00'), at('11:00')], {
-        now: at('07:00'),
-        max: 3,
-      }),
-    ).toEqual([at('07:00'), at('08:00'), at('09:35')]);
+    expect(upNextTimes(classes, { now: at('07:00'), max: 2 })).toEqual([
+      at('07:00'),
+      at('08:00'),
+    ]);
   });
 });

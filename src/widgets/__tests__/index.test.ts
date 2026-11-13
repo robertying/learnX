@@ -99,6 +99,7 @@ describe('updateUpNextWidget', () => {
     {
       key: 'calculus',
       courseName: 'Calculus',
+      courseId: 'c1',
       location: '六教6A414',
       start: at('08:00'),
       end: at('09:35'),
@@ -122,38 +123,41 @@ describe('updateUpNextWidget', () => {
     updateUpNextWidget();
   });
 
-  it('gives iOS the same props at each class start and end and deadline change', () => {
+  it('gives iOS the same props at each class start and end', () => {
     jest.replaceProperty(Platform, 'OS', 'ios');
-    updateUpNextWidget(classes, assignments, options);
+    updateUpNextWidget(classes);
 
     const [entries] = jest.mocked(iosUpNext.updateTimeline).mock.calls[0];
     expect(entries.map(e => e.date.getTime())).toEqual([
       new Date('2026-03-15T20:00:00+08:00').getTime(),
-      // Assignment b turns orange.
-      at('00:00'),
-      // Also assignment a's deadline (00:00Z), and b turning red.
       at('08:00'),
       at('09:35'),
       at('13:30'),
       at('15:05'),
-      new Date('2026-03-17T00:00:00Z').getTime(),
     ]);
     expect(new Set(entries.map(e => e.props)).size).toBe(1);
     expect(entries[0].props).toMatchObject({
       title: 'Up Next',
       url: 'learnx://today',
       classes: [
-        { courseName: 'Calculus', time: '08:00–09:35', day: 'Mon 3/16' },
-        { courseName: 'Physics', time: '13:30–15:05' },
+        {
+          courseName: 'Calculus',
+          time: '08:00–09:35',
+          startTime: '08:00',
+          weekday: 'Mon',
+          day: 'Mon 3/16',
+          url: 'learnx://course/c1',
+        },
+        { courseName: 'Physics', time: '13:30–15:05', url: undefined },
       ],
     });
-    expect(entries[0].props.deadlines.map(d => d.id)).toEqual(['a', 'b']);
+    expect(entries[0].props).not.toHaveProperty('deadlines');
   });
 
   it('gives Android a snapshot, once for the same props', () => {
     jest.replaceProperty(Platform, 'OS', 'android');
-    updateUpNextWidget(classes, assignments, options);
-    updateUpNextWidget(classes, assignments, options);
+    updateUpNextWidget(classes);
+    updateUpNextWidget(classes);
 
     expect(androidUpNext.updateSnapshot).toHaveBeenCalledTimes(1);
     expect(iosUpNext.updateTimeline).not.toHaveBeenCalled();
@@ -161,11 +165,11 @@ describe('updateUpNextWidget', () => {
 
   it('empties the widget when given nothing', () => {
     jest.replaceProperty(Platform, 'OS', 'android');
-    updateUpNextWidget(classes, assignments, options);
+    updateUpNextWidget(classes);
     updateUpNextWidget();
 
     expect(androidUpNext.updateSnapshot).toHaveBeenLastCalledWith(
-      expect.objectContaining({ classes: [], deadlines: [] }),
+      expect.objectContaining({ classes: [] }),
     );
   });
 });
@@ -183,7 +187,7 @@ describe('a widget that is missing or fails', () => {
   it('does nothing where there are no widgets', () => {
     jest.replaceProperty(Platform, 'OS', 'web' as never);
     updateDeadlineWidget(assignments, options);
-    updateUpNextWidget([], assignments, options);
+    updateUpNextWidget([]);
     for (const widget of [iosWidget, androidWidget, iosUpNext, androidUpNext]) {
       expect(widget.updateSnapshot).not.toHaveBeenCalled();
       expect(widget.updateTimeline).not.toHaveBeenCalled();
@@ -201,8 +205,11 @@ describe('a widget that is missing or fails', () => {
     jest.mocked(androidUpNext.updateSnapshot).mockImplementationOnce(() => {
       throw new Error('no widget host');
     });
-    expect(() => updateUpNextWidget([], assignments, options)).not.toThrow();
-    updateUpNextWidget([], assignments, options);
+    const classes = [
+      { key: 'a', courseName: 'A', location: '', start: 1, end: 2 },
+    ];
+    expect(() => updateUpNextWidget(classes)).not.toThrow();
+    updateUpNextWidget(classes);
     expect(androidUpNext.updateSnapshot).toHaveBeenCalledTimes(2);
     expect(warn).toHaveBeenCalledTimes(2);
   });

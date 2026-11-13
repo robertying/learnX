@@ -121,7 +121,10 @@ const klass = (
   start,
   end,
   time: `${key}-time`,
+  startTime: `${key}-start`,
+  weekday: `${key}-weekday`,
   day: `${key}-day`,
+  url: `learnx://course/${key}`,
 });
 
 const deadline = (
@@ -176,18 +179,10 @@ const upNextProps: UpNextWidgetProps = {
     klass('c5', at('08:00') + 4 * DAY, at('09:35') + 4 * DAY),
     klass('c6', at('08:00') + 5 * DAY, at('09:35') + 5 * DAY),
   ],
-  deadlines: [
-    deadline('gone', at('09:00')),
-    deadline('d1', at('23:59')),
-    deadline('d2', at('23:59') + DAY),
-    deadline('d3', at('23:59') + 2 * DAY),
-    deadline('d4', at('23:59') + 3 * DAY),
-  ],
   title: 'Up Next',
   now: 'Now',
   next: 'Next',
   later: 'Later',
-  due: 'Due',
   startsIn: 'Starts in',
   endsIn: 'Ends in',
   tomorrow: 'Tomorrow',
@@ -232,46 +227,41 @@ describe('Up Next on iOS', () => {
   const render = (widgetFamily?: string, props = upNextProps) =>
     layout(props, { widgetFamily, date: new Date(now) });
 
-  /** How many later classes and deadlines each version shows, in order. */
+  /** How many later classes each version shows, in order. */
   const shown = (widget: Node) => {
     expect(widget.type).toBe('ViewThatFitsView');
-    return childrenOf(widget).map(v => [
-      texts(v).filter(w => w.endsWith('-time')).length,
-      links(v).length,
-    ]);
+    return childrenOf(widget).map(
+      v =>
+        texts(v).filter(w => w.startsWith(' · ') && w.endsWith('-time')).length,
+    );
   };
 
-  it('shows the class on now with its end countdown, and the next deadline', () => {
+  it('shows the class on now with its end countdown, and the classes after it', () => {
     const widget = render('systemMedium');
-    // Deadlines and classes in turn, up to three each, the most first.
-    expect(shown(widget)).toEqual([
-      [3, 3],
-      [2, 3],
-      [2, 2],
-      [1, 2],
-      [1, 1],
-      [0, 1],
-      [0, 0],
-    ]);
-    const oneDeadline = childrenOf(widget)[5];
-    expect(texts(oneDeadline)).toEqual([
+    // Up to four, the most first.
+    expect(shown(widget)).toEqual([4, 3, 2, 1, 0]);
+    const oneLater = childrenOf(widget)[3];
+    expect(texts(oneLater)).toEqual([
       'Now',
       'Course now',
-      'now-time · 六教6A414',
+      'now-time',
+      ' · 六教6A414',
       'Ends in ',
       `in ${iso(at('11:25'))}`,
-      'Due: Assignment d1 · ',
-      'Course of d1',
-      ' · ',
-      `in ${iso(at('23:59'))}`,
+      'Course later',
+      ' · Tomorrow later-time',
     ]);
     expect(
-      all(oneDeadline)
+      all(oneLater)
         .filter(n => n.type === 'CountdownView')
         .map(n => modifier(n, 'font')),
-    ).toEqual([{ textStyle: 'footnote' }, { textStyle: 'caption' }]);
-    expect(links(oneDeadline)).toEqual(['learnx://assignment/d1']);
-    // Medium widgets don't name the sections.
+    ).toEqual([{ textStyle: 'footnote' }]);
+    // Each class opens its course; no deadlines.
+    expect(links(oneLater)).toEqual([
+      'learnx://course/now',
+      'learnx://course/later',
+    ]);
+    // Medium widgets don't name the section.
     expect(texts(childrenOf(widget)[0])).not.toContain('Later');
     expect(modifier(widget, 'widgetURL')).toBe('learnx://today');
     expect(modifier(widget, 'containerBackground')).toEqual([
@@ -280,42 +270,97 @@ describe('Up Next on iOS', () => {
     ]);
   });
 
-  it("counts down to today's next class, and dates the ones after tomorrow", () => {
+  it("counts down to today's next class, and names the days after tomorrow", () => {
     const props = { ...upNextProps, classes: upNextProps.classes.slice(2) };
     const today = layout(
       { ...props, classes: [klass('soon', at('13:30'), at('15:05'))] },
       { widgetFamily: 'systemMedium', date: new Date(now) },
     );
-    expect(texts(today).slice(0, 5)).toEqual([
+    expect(texts(today).slice(0, 6)).toEqual([
       'Next',
       'Course soon',
-      'soon-time · 六教6A414',
+      'soon-time',
+      ' · 六教6A414',
       'Starts in ',
       `in ${iso(at('13:30'))}`,
     ]);
 
     const widget = render('systemLarge', props);
-    expect(texts(widget).slice(0, 5)).toEqual([
+    // The weekday within a week, the date from a week on.
+    expect(texts(widget).slice(0, 6)).toEqual([
       'Next',
       'Course later',
       'Tomorrow later-time',
       'Later',
-      'c3-day c3-time',
+      'Course c3',
+      ' · c3-weekday c3-time',
+    ]);
+    const nextWeek = layout(
+      {
+        ...props,
+        classes: [klass('far', at('08:00') + 7 * DAY, at('09:35') + 7 * DAY)],
+      },
+      { widgetFamily: 'systemMedium', date: new Date(now) },
+    );
+    expect(texts(nextWeek).slice(2, 4)).toEqual([
+      'far-day far-time',
+      ' · 六教6A414',
+    ]);
+    // A long place is cut in the middle, keeping the room number.
+    expect(
+      modifier(
+        all(nextWeek).find(n => n.props.children === ' · 六教6A414')!,
+        'truncationMode',
+      ),
+    ).toBe('middle');
+    // Each class row opens its course.
+    expect(links(childrenOf(widget)[0]).slice(0, 2)).toEqual([
+      'learnx://course/later',
+      'learnx://course/c3',
     ]);
   });
 
-  it('shows the countdown in a small widget only when it fits', () => {
+  it('lists the classes after this one in a small widget as they fit', () => {
     const widget = render('systemSmall');
-    const fits = all(widget).find(n => n.type === 'ViewThatFitsView')!;
-    expect(fits.props.axes).toBe('vertical');
-    const [withCountdown, without] = childrenOf(fits);
-    expect(texts(withCountdown)).toEqual([
+    expect(widget.type).toBe('ViewThatFitsView');
+    const versions = childrenOf(widget);
+    // Three classes after it, then two, one, and none with the class in full,
+    // in two ways.
+    expect(
+      versions.map(v => texts(v).filter(w => /^[^n].*-start$/.test(w)).length),
+    ).toEqual([3, 2, 1, 0, 0]);
+    // In short: the start alone, under each course.
+    expect(texts(versions[1])).toEqual([
+      'Now',
       'Course now',
-      'now-time · 六教6A414',
+      'now-start',
+      ' · 六教6A414',
+      'Ends in ',
+      `in ${iso(at('11:25'))}`,
+      'Course later',
+      'Tomorrow later-start',
+      'Course c3',
+      'c3-weekday c3-start',
+    ]);
+    // With no room for them, the class in full with its place on a line of
+    // its own, then without the countdown.
+    const withCountdown = versions[3];
+    expect(texts(withCountdown)).toEqual([
+      'Now',
+      'Course now',
+      'now-time',
+      '六教6A414',
       'Ends in ',
       `in ${iso(at('11:25'))}`,
     ]);
-    expect(texts(without)).toEqual(['Course now', 'now-time · 六教6A414']);
+    expect(texts(versions[4])).toEqual([
+      'Now',
+      'Course now',
+      'now-time',
+      '六教6A414',
+    ]);
+    // One tap target: Today.
+    expect(modifier(widget, 'widgetURL')).toBe('learnx://today');
     // Its largest unit only, to fit the width.
     expect(
       all(withCountdown).find(n => n.type === 'CountdownView')!.props
@@ -324,45 +369,52 @@ describe('Up Next on iOS', () => {
     expect(links(widget)).toEqual([]);
   });
 
-  it('lists as many classes and deadlines as fit under headings when large', () => {
+  it('lists as many classes as fit under a heading when large', () => {
     for (const family of ['systemLarge', 'systemExtraLarge']) {
       const widget = render(family);
-      // All five classes after this one and the four deadlines still open,
-      // then one fewer at a time.
-      expect(shown(widget).slice(0, 4)).toEqual([
-        [5, 4],
-        [4, 4],
-        [3, 4],
-        [3, 3],
-      ]);
-      const [all9, cut] = childrenOf(widget);
-      const words = texts(all9);
-      expect(words.indexOf('Later')).toBeLessThan(words.indexOf('Due'));
-      expect(words).toContain('c6-day c6-time');
-      expect(words).toContain('Assignment d4 · ');
-      expect(words).toContain('Course of d4');
+      // All five classes after this one, then one fewer at a time.
+      expect(shown(widget)).toEqual([5, 4, 3, 2, 1, 0]);
+      const [all5, cut] = childrenOf(widget);
+      expect(texts(all5)).toContain(' · c6-weekday c6-time');
       // Showing everything, it keeps to the top; leaving rows out, it
-      // spreads them, each section's name staying with its first row.
+      // spreads them, the heading staying with the first row.
       const spacers = (v: Node) =>
         childrenOf(v).filter(child => child.type === 'Spacer');
-      expect(spacers(all9)).toEqual([]);
+      expect(spacers(all5)).toEqual([]);
       expect(spacers(cut).map(spacer => spacer.props.minLength)).toEqual(
-        Array(8).fill(10),
+        Array(4).fill(10),
       );
-      expect(texts(childrenOf(cut)[2]).slice(0, 2)).toEqual([
+      expect(texts(childrenOf(cut)[2]).slice(0, 3)).toEqual([
         'Later',
-        'Tomorrow later-time',
+        'Course later',
+        ' · Tomorrow later-time',
       ]);
     }
   });
 
-  it('shows the class, its time, and its place with the countdown on the Lock Screen', () => {
+  it('shows the class, its day and start with the countdown, and its place on the Lock Screen', () => {
+    // The start and the countdown, the place on a line of its own.
     expect(texts(render('accessoryRectangular'))).toEqual([
       'Course now',
-      'now-time',
-      '六教6A414 · ',
+      'now-start · ',
       `in ${iso(at('11:25'))}`,
+      '六教6A414',
     ]);
+    // Opens the class's course, or Today when its course isn't known.
+    expect(modifier(render('accessoryRectangular'), 'widgetURL')).toBe(
+      'learnx://course/now',
+    );
+    expect(
+      modifier(
+        render('accessoryRectangular', {
+          ...upNextProps,
+          classes: [
+            { ...klass('x', at('13:30'), at('15:05')), url: undefined },
+          ],
+        }),
+        'widgetURL',
+      ),
+    ).toBe('learnx://today');
     expect(
       all(render('accessoryRectangular')).find(n => n.type === 'CountdownView')!
         .props.maxFieldCount,
@@ -377,19 +429,19 @@ describe('Up Next on iOS', () => {
     );
     expect(texts(unplaced)).toEqual([
       'Course soon',
-      'soon-time',
+      'soon-start · ',
       `in ${iso(at('13:30'))}`,
     ]);
     const later = { ...upNextProps, classes: upNextProps.classes.slice(3) };
     expect(texts(render('accessoryRectangular', later))).toEqual([
       'Course c3',
-      'c3-day c3-time',
+      'c3-weekday c3-start',
       '六教6A414',
     ]);
     const tomorrow = { ...upNextProps, classes: upNextProps.classes.slice(2) };
     expect(texts(render('accessoryRectangular', tomorrow))).toEqual([
       'Course later',
-      'Tomorrow later-time',
+      'Tomorrow later-start',
     ]);
     expect(
       texts(render('accessoryRectangular', { ...upNextProps, classes: [] })),
@@ -508,13 +560,14 @@ describe('Deadlines on iOS', () => {
     );
   });
 
-  it('lists rows without courses or links in a small widget', () => {
+  it('lists rows with courses after their titles and no links in a small widget', () => {
     const widget = render('systemSmall');
     expect(texts(version(widget, 3))).toEqual([
       'Deadlines',
       '+6',
       ...[1, 2, 3].flatMap(i => [
-        `Assignment d${i}`,
+        `Assignment d${i} · `,
+        `Course of d${i}`,
         `in ${iso(at('23:59') + i * DAY)}`,
       ]),
     ]);
@@ -643,19 +696,20 @@ describe('Up Next on Android', () => {
     jest.spyOn(Date, 'now').mockReturnValue(now);
   });
 
-  it('shows the class on now, the one after and the next deadline', () => {
+  it('shows the class on now and the two after it', () => {
     const widget = layout(upNextProps, { colorScheme: 'dark' });
     expect(texts(widget)).toEqual([
       'Now',
       'Course now',
       'now-time · 六教6A414',
-      'Later: Tomorrow later-time Course later',
-      'Due d1-due  ',
-      'Assignment d1',
+      'Later: Course later · Tomorrow later-time',
+      'Course c3 · c3-weekday c3-time',
     ]);
     expect(openUrls(widget)).toEqual([
       'learnx://today',
-      'learnx://assignment/d1',
+      'learnx://course/now',
+      'learnx://course/later',
+      'learnx://course/c3',
     ]);
   });
 
@@ -668,7 +722,7 @@ describe('Up Next on Android', () => {
     expect(texts(layout(props, {}))).toEqual([
       'Next',
       'Course c3',
-      'c3-day c3-time',
+      'c3-weekday c3-time',
     ]);
     const today = {
       ...props,
