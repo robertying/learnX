@@ -32,7 +32,10 @@
 # (scripts/maestro/build.sh: it finds an app outside the full screen and folds
 # the Duo with setFoldPosture): put its bin folder first on PATH.
 #
-# Results, with Maestro's output and a JUnit report: build/e2e/<profile>/
+# Results, with Maestro's output and a JUnit report:
+# build/e2e/devices/<run start time>/<profile>/. A run keeps the earlier ones'
+# results (failure screenshots included); only the latest $E2E_KEEP_RUNS
+# (10) runs are kept.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -51,7 +54,9 @@ max_booted="${E2E_MAX_BOOTED:-3}"
 ios_app_id="io.robertying.learnX"
 android_app_id="io.robertying.learnx"
 sdk="${ANDROID_HOME:-$HOME/Library/Android/sdk}"
-out_root="build/e2e"
+runs_root="build/e2e/devices"
+out_root="$runs_root/$(date +%Y-%m-%d_%H%M%S)"
+keep_runs="${E2E_KEEP_RUNS:-10}"
 
 # The device this script booted ("ios <udid>" or "android <serial>"), shut
 # down before the next device boots and on exit.
@@ -309,7 +314,6 @@ run_android_suite() {
 
 run_profile() {
   local profile="$1" out="$out_root/$1"
-  rm -rf "$out"
   mkdir -p "$out"
   # set -e is off inside a function called from an if, so each step that
   # can fail ends the profile with || return.
@@ -357,6 +361,12 @@ run_profile() {
     ;;
   esac
 }
+
+# Drop the oldest runs' results, keeping the latest keep_runs with this one.
+mkdir -p "$out_root"
+find "$runs_root" -mindepth 1 -maxdepth 1 -type d | sort |
+  awk -v keep="$keep_runs" '{ runs[NR] = $0 } END { for (i = 1; i <= NR - keep; i++) print runs[i] }' |
+  while IFS= read -r old; do rm -rf "$old"; done
 
 for profile in $profiles; do
   log "Profile: $profile"
