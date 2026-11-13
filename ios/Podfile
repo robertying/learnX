@@ -176,6 +176,27 @@ target 'learnX' do
         .each { |phase| phase.shell_script += "\nbash \"${PODS_ROOT}/../../scripts/fix-catalyst-frameworks.sh\" \"${PODS_ROOT}\" #{framework}\n" }
     end
   end
+
+  # React Native and CocoaPods save learnX.xcodeproj on every install, and the
+  # xcodeproj gem writes it a little differently from Xcode: CocoaPods drops
+  # the empty input and output paths of its script phases, and the gem writes
+  # an empty `exceptions` list on each synchronized folder. Write those the way
+  # Xcode does, so an install leaves the committed project as it is.
+  post_integrate do |installer|
+    installer.aggregate_targets.map(&:user_project).uniq.each do |project|
+      project.objects.grep(Xcodeproj::Project::Object::PBXShellScriptBuildPhase).each do |phase|
+        phase.input_paths ||= []
+        phase.output_paths ||= []
+        phase.input_file_list_paths ||= []
+        phase.output_file_list_paths ||= []
+      end
+      project.save
+      pbxproj = File.join(project.path, 'project.pbxproj')
+      contents = File.read(pbxproj)
+      normalized = contents.gsub(/^\t+exceptions = \(\n\t+\);\n/, '')
+      File.write(pbxproj, normalized) unless normalized == contents
+    end
+  end
 end
 
 # The share extension (ShareExtension/ShareViewController.swift) uses no pods.
