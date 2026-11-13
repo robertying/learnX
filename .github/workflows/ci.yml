@@ -3,7 +3,8 @@ name: CI
 # Pull requests run the required checks: JS checks, Release bundles, and
 # Android (whose steps skip themselves when no Android path changed). Main
 # pushes and manual runs (Actions > CI > Run workflow, on main or a branch)
-# always build Android and run the Android E2E flows on that build. The Apple builds are in apple.yml, by hand only.
+# always build Android and run the Android E2E flows on that build. The Apple
+# builds are in apple.yml, by hand only.
 on:
   pull_request:
   push:

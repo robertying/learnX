@@ -25,10 +25,14 @@
 # booted. It refuses to boot one while E2E_MAX_BOOTED (3) simulators and
 # emulators are already running.
 #
-# Devices, by simulator name or UDID and by AVD name:
-#   E2E_IPHONE (learnX iPhone 18 Pro), E2E_IPAD (learnX iPad Pro 11),
-#   E2E_IPAD_WINDOWED (learnX iPad Pro 11 Windowed), E2E_DUO (learnX iPhone
-#   Duo), E2E_AVD (Pixel_10_Pro_Fold)
+# Devices, by simulator name or UDID and by AVD name, each needed only by the
+# profiles that use it (a profile whose device isn't set fails):
+#   E2E_IPHONE         an iPhone (iphone)
+#   E2E_IPAD           an iPad (ipad, ipad-landscape)
+#   E2E_IPAD_WINDOWED  a second iPad, set to Settings > Multitasking &
+#                      Gestures > Windowed Apps (ipad-windowed)
+#   E2E_DUO            an iPhone Duo (duo-*)
+#   E2E_AVD            a foldable emulator, such as a Pixel Fold (fold-*)
 # The ipad-windowed and iPhone Duo profiles need the patched Maestro
 # (scripts/maestro/build.sh: it finds an app outside the full screen and folds
 # the Duo with setFoldPosture): put its bin folder first on PATH.
@@ -44,12 +48,11 @@ cd "$(dirname "$0")/.."
 all_profiles="iphone ipad ipad-landscape ipad-windowed duo-folded duo-half-open duo-open fold-folded fold-unfolded"
 profiles="${*:-$all_profiles}"
 
-iphone="${E2E_IPHONE:-learnX iPhone 18 Pro}"
-ipad="${E2E_IPAD:-learnX iPad Pro 11}"
-# A second iPad, set to Settings › Multitasking & Gestures › Windowed Apps.
-ipad_windowed="${E2E_IPAD_WINDOWED:-learnX iPad Pro 11 Windowed}"
-duo="${E2E_DUO:-learnX iPhone Duo}"
-avd="${E2E_AVD:-Pixel_10_Pro_Fold}"
+iphone="${E2E_IPHONE:-}"
+ipad="${E2E_IPAD:-}"
+ipad_windowed="${E2E_IPAD_WINDOWED:-}"
+duo="${E2E_DUO:-}"
+avd="${E2E_AVD:-}"
 build="${E2E_BUILD:-0}"
 max_booted="${E2E_MAX_BOOTED:-3}"
 ios_app_id="io.robertying.learnX"
@@ -154,10 +157,15 @@ sim_udid() {
     grep -oE '[0-9A-F]{8}-([0-9A-F]{4}-){3}[0-9A-F]{12}' | head -n 1
 }
 
-# Boot the simulator named $1 if needed and set $device to its UDID. (Not
-# printed: a command substitution's subshell would lose $booted.)
+# Boot simulator $1 (a name or UDID, from variable $2) if needed and set
+# $device to its UDID. (Not printed: a command substitution's subshell would
+# lose $booted.)
 use_sim() {
   local udid
+  if [ -z "$1" ]; then
+    echo "set $2 to the simulator's name or UDID" >&2
+    return 1
+  fi
   udid="$(sim_udid "$1")"
   device="$udid"
   if [ -z "$udid" ]; then
@@ -271,6 +279,10 @@ emulator_serial() {
 # Boot the AVD named $1 if needed and set $device to its serial.
 use_emulator() {
   local serial waited=0
+  if [ -z "$1" ]; then
+    echo "set E2E_AVD to the foldable emulator's AVD name" >&2
+    return 1
+  fi
   serial="$(emulator_serial "$1")"
   if [ -n "$booted" ] && [ "$booted" != "android $serial" ]; then
     release_device
@@ -323,32 +335,32 @@ run_profile() {
   # can fail ends the profile with || return.
   case "$profile" in
   iphone)
-    use_sim "$iphone" || return 1
+    use_sim "$iphone" E2E_IPHONE || return 1
     run_ios_suite "$device" PORTRAIT "$out" 1
     ;;
   ipad)
-    use_sim "$ipad" || return 1
+    use_sim "$ipad" E2E_IPAD || return 1
     run_ios_suite "$device" PORTRAIT "$out" 1
     ;;
   ipad-windowed)
-    use_sim "$ipad_windowed" || return 1
+    use_sim "$ipad_windowed" E2E_IPAD_WINDOWED || return 1
     run_ios_suite "$device" PORTRAIT "$out"
     ;;
   ipad-landscape)
-    use_sim "$ipad" || return 1
+    use_sim "$ipad" E2E_IPAD || return 1
     run_ios_suite "$device" LANDSCAPE_LEFT "$out"
     ;;
   duo-folded)
-    use_sim "$duo" || return 1
+    use_sim "$duo" E2E_DUO || return 1
     set_hinge "$device" closed || return 1
     run_ios_suite "$device" PORTRAIT "$out"
     ;;
   duo-half-open)
-    use_sim "$duo" || return 1
+    use_sim "$duo" E2E_DUO || return 1
     run_duo_postures "$device" halfFold "$out"
     ;;
   duo-open)
-    use_sim "$duo" || return 1
+    use_sim "$duo" E2E_DUO || return 1
     run_duo_postures "$device" flat "$out"
     ;;
   fold-folded)
