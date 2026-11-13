@@ -48,6 +48,25 @@ tags:
       true: ${ACCOUNT == 'mock'}
     commands:
       - assertVisible: '.*(${MOCK_COURSE}).*'
+      # On iOS a swipe from the screen's edge goes back from course details,
+      # also when it starts on a card, which would otherwise take it.
+      - runFlow:
+          file: subflows/open.yaml
+          env:
+            CARD: '.*(${MOCK_COURSE}).*'
+            DETAIL: course-detail
+      - runFlow:
+          file: subflows/back.yaml
+          env:
+            LIST: '${T_filter}'
+      # iPad and unfolded Android show course details beside the list.
+      - runFlow:
+          when:
+            platform: iOS
+            true: ${IPAD != 'true'}
+          commands:
+            - assertNotVisible:
+                id: course-detail
 - runFlow:
     when:
       true: ${ACCOUNT == 'live'}
