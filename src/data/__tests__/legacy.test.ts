@@ -136,6 +136,7 @@ describe('importing user data saved by 18.0.x', () => {
     expect(m.settings.getSettings()).toEqual({
       ...m.settings.defaultSettings,
       assignmentCalendarSync: true,
+      calendarEventLength: 45,
       graduate: true,
       tabFilterSelections: {
         notice: 'fav',

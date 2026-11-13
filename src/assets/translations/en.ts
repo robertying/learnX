@@ -135,6 +135,7 @@ export default {
   syncCourseSchedule: 'Sync Course Schedule',
   classAlarm: 'Class Alert',
   classAlarmBefore: 'Alert Before Class (Minutes)',
+  calendarEventLength: 'Event Length (Minutes)',
   assignmentCalendarAlarm: 'Calendar Alert',
   assignmentCalendarAlarmOffset: 'Alert Before Deadline (Minutes)',
   assignmentCalendarSecondAlarm: 'Second Calendar Alert',

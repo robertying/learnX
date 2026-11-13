@@ -131,6 +131,7 @@ const zh: typeof en = {
   syncCourseSchedule: '同步课表',
   classAlarm: '上课日历提醒',
   classAlarmBefore: '课前提醒（分钟）',
+  calendarEventLength: '日程长度（分钟）',
   assignmentCalendarAlarm: '日历提醒',
   assignmentCalendarAlarmOffset: '截止前提醒（分钟）',
   assignmentCalendarSecondAlarm: '日历第二次提醒',

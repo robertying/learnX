@@ -36,6 +36,9 @@ const CalendarSettings: React.FC<Props> = () => {
   );
   const alarms = useSettings(settings => settings.alarms);
   const graduate = useSettings(settings => settings.graduate);
+  const calendarEventLength = useSettings(
+    settings => settings.calendarEventLength,
+  );
   const courseEventOmitLocation = useSettings(
     settings => settings.courseEventOmitLocation,
   );
@@ -194,6 +197,13 @@ const CalendarSettings: React.FC<Props> = () => {
             title={t('setupCalendarSection')}
             footer={footer(undefined, 'calendar')}
           >
+            <FormNumberField
+              title={t('calendarEventLength')}
+              value={
+                calendarEventLength ?? calendarDefaults.calendarEventLength
+              }
+              onValueChange={value => setSetting('calendarEventLength', value)}
+            />
             <FormToggle
               icon="reminder"
               title={t('assignmentCalendarAlarm')}

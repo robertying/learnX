@@ -127,6 +127,7 @@ it('shows the alert options of the syncs that are on', async () => {
   });
   await renderScreen();
   for (const label of [
+    'calendarEventLength',
     'assignmentCalendarAlarmOffset',
     'assignmentCalendarSecondAlarmOffset',
     'assignmentReminderAlarmOffset',

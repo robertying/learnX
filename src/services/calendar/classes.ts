@@ -25,12 +25,6 @@ import {
   requirePermission,
 } from 'services/calendar/calendars';
 
-/**
- * Bumped when `buildCourseEventDetails` writes something new, so the synced
- * classes from today on are written again with it.
- */
-const CLASS_EVENT_VERSION = 1;
-
 const dayStart = (day: string) => new Date(`${day}T00:00:00+08:00`);
 const addDays = (day: string, days: number) =>
   dayjs(day).add(days, 'day').format('YYYY-MM-DD');
@@ -82,7 +76,6 @@ const replaceDays = async (
 const weekKey = (classes: CalendarClass[], settings: SettingsState) =>
   hash(
     JSON.stringify([
-      CLASS_EVENT_VERSION,
       settings.alarms.courseAlarm,
       settings.alarms.courseAlarmOffset,
       settings.courseEventOmitLocation,

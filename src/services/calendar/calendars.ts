@@ -253,7 +253,7 @@ const time = (date: Date | string | undefined) =>
  * keeps the calendar and adopts it by its title) updates them instead of
  * adding each assignment a second time. Nothing in an entry names its
  * assignment, so one matches by title (with or without the submitted mark)
- * and deadline: an event ends at it, a reminder is due at or before it.
+ * and deadline: an event starts at it, a reminder is due at or before it.
  */
 const adoptExistingEntries = async (
   type: AssignmentEventType,
@@ -278,7 +278,7 @@ const adoptExistingEntries = async (
             new Date(Math.min(...deadlines) - DAY_MS),
             new Date(Math.max(...deadlines) + DAY_MS),
           )
-        ).map(e => ({ id: e.id, title: e.title, due: time(e.endDate) }));
+        ).map(e => ({ id: e.id, title: e.title, due: time(e.startDate) }));
   } catch {
     return;
   }
@@ -330,11 +330,9 @@ export const saveAssignmentEvent = async (
     }
     if (entry) {
       await (reminder
-        ? (entry as Calendar.ExpoCalendarReminder).update({
-            ...buildAssignmentReminderDetails(settings, input),
-            // Reminders written before had one; null clears it.
-            startDate: null as unknown as undefined,
-          })
+        ? (entry as Calendar.ExpoCalendarReminder).update(
+            buildAssignmentReminderDetails(settings, input),
+          )
         : (entry as Calendar.ExpoCalendarEvent).update(
             buildAssignmentEventDetails(settings, input),
           ));

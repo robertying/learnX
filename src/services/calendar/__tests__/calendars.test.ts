@@ -244,10 +244,10 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
       update: jest.fn(async () => {}),
     });
     assignments.listEvents.mockResolvedValue([
-      { id: 'e2', title: 'Homework - Calculus', endDate: deadline },
-      { id: 'other', title: 'Homework - Physics', endDate: deadline },
-      { id: 'later', title: 'Homework - Calculus', endDate: new Date(0) },
-      { id: 'e1', title: '✅ Homework - Calculus', endDate: deadline },
+      { id: 'e2', title: 'Homework - Calculus', startDate: deadline },
+      { id: 'other', title: 'Homework - Physics', startDate: deadline },
+      { id: 'later', title: 'Homework - Calculus', startDate: new Date(0) },
+      { id: 'e1', title: '✅ Homework - Calculus', startDate: deadline },
     ]);
 
     await saveAsUser('calendar', [a1, a2]);

@@ -252,6 +252,7 @@ const surfaces: Surface[] = [
       i.archived,
       i.settings.assignmentCalendarSync,
       i.settings.alarms,
+      i.settings.calendarEventLength,
     ],
     update: inputs =>
       inputs.settings.assignmentCalendarSync
