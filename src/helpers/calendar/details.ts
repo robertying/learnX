@@ -62,7 +62,6 @@ export function sanitizeLocation(location: string): string {
 /** What the optional calendar settings (in minutes) are until they're set. */
 export const calendarDefaults = {
   courseAlarmOffset: 15,
-  assignmentReminderAlarmOffset: 24 * 60,
   assignmentCalendarAlarmOffset: 24 * 60,
   assignmentCalendarSecondAlarmOffset: 30,
   calendarEventLength: 30,
@@ -113,9 +112,8 @@ export interface AssignmentEventInput {
 }
 
 /**
- * iOS reminder for an assignment, due at the deadline. With the alert on, it
- * alerts then, and the chosen time before as Reminders' Early Reminder. Its
- * link opens the assignment in learnX.
+ * iOS reminder for an assignment, due at the deadline, and alerting then with
+ * the alert on. Its link opens the assignment in learnX.
  */
 export const buildAssignmentReminderDetails = (
   settings: SettingsState,
@@ -131,19 +129,12 @@ export const buildAssignmentReminderDetails = (
   const alarms = settings.alarms;
   return {
     title,
-    // No start date, so the early alert counts from the due date.
     dueDate: dueDate.toDate(),
-    alarms: alarms.assignmentReminderAlarm
-      ? [
-          { relativeOffset: 0 },
-          {
-            relativeOffset: -(
-              alarms.assignmentReminderAlarmOffset ??
-              calendarDefaults.assignmentReminderAlarmOffset
-            ),
-          },
-        ]
-      : [],
+    // Only at the due date: Reminders shows a reminder at its earliest alarm,
+    // so an earlier one would move it off the deadline (and make it overdue
+    // from then). Apps can't set Early Reminder. learnX's own deadline
+    // notifications alert ahead of time.
+    alarms: alarms.assignmentReminderAlarm ? [{ relativeOffset: 0 }] : [],
     // The device's zone: Reminders labels any other zone (e.g. "GMT+8").
     timeZone: deviceTimeZone(),
     completed,

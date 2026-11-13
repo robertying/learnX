@@ -144,7 +144,6 @@ it('shows the alert options of the syncs that are on', async () => {
     'calendarEventLength',
     'assignmentCalendarAlarmOffset',
     'assignmentCalendarSecondAlarmOffset',
-    'assignmentReminderAlarmOffset',
   ] as const) {
     expect(screen.getAllByText(t(label)).length).toBeGreaterThan(0);
   }

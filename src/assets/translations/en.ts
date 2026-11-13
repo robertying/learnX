@@ -141,8 +141,7 @@ export default {
   assignmentCalendarSecondAlarm: 'Second Calendar Alert',
   assignmentCalendarSecondAlarmOffset: 'Second Alert Before Deadline (Minutes)',
   assignmentCalendarNoAlarmIfComplete: 'No Alerts for Submitted Assignments',
-  assignmentReminderAlarm: 'Reminder Alert',
-  assignmentReminderAlarmOffset: 'Alert Before Deadline (Minutes)',
+  assignmentReminderAlarm: 'Alert at Deadline',
   assignmentSyncDescription:
     "Upcoming assignments are added and kept up to date whenever learnX gets assignments. Past-due assignments aren't added, and archived ones and those of hidden courses are removed.",
   clearFileCache: 'Delete All Downloads',

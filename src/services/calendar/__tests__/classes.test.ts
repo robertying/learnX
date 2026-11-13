@@ -195,6 +195,16 @@ describe('updateSyncedClasses', () => {
       expect.objectContaining({ location: undefined }),
     );
 
+    // Today fetches the week again and a class has moved.
+    setWeek(week1, [cls('2026-03-13T10:00:00+08:00')]);
+    await updateSyncedClasses(now);
+    expect(calendar.listEvents).toHaveBeenCalledTimes(3);
+    expect(calendar.createEvent).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        startDate: new Date('2026-03-13T10:00:00+08:00'),
+      }),
+    );
+
     // A week Today or Schedule fetches next.
     setWeek(week2, [cls('2026-03-17T08:00:00+08:00')]);
     await updateSyncedClasses(now);

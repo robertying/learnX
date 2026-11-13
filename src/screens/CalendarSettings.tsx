@@ -290,18 +290,6 @@ const CalendarSettings: React.FC<Props> = () => {
                 setAlarm('assignmentReminderAlarm', value)
               }
             />
-            {alarms.assignmentReminderAlarm && (
-              <FormNumberField
-                title={t('assignmentReminderAlarmOffset')}
-                value={
-                  alarms.assignmentReminderAlarmOffset ??
-                  calendarDefaults.assignmentReminderAlarmOffset
-                }
-                onValueChange={value =>
-                  setAlarm('assignmentReminderAlarmOffset', value)
-                }
-              />
-            )}
           </FormSection>
         )}
         <FormSection
