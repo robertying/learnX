@@ -1,5 +1,13 @@
 const path = require('path');
 
+// Keeps React Native's own fetch as the global fetch (setupEnv.ts says why).
+// In release bundles babel-preset-expo inlines EXPO_PUBLIC_* variables from the
+// environment Babel runs in, so the app setting it at runtime is too late
+// there: the flag must be set here as well. Without it, a release build installs
+// expo/fetch, which throws on a FormData body (the SSO login's) because the
+// ReadableStream it checks for only exists under Expo's own Metro config.
+process.env.EXPO_PUBLIC_USE_RN_FETCH = '1';
+
 const srcDir = path.join(__dirname, 'src') + path.sep;
 const widgetsDir = path.join(srcDir, 'widgets') + path.sep;
 
