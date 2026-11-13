@@ -4,6 +4,8 @@ import {
   foregroundStyle,
   layoutPriority,
   lineLimit,
+  minimumScaleFactor,
+  truncationMode,
   widgetURL,
 } from '@expo/ui/swift-ui/modifiers';
 import { createWidget, type WidgetEnvironment } from 'expo-widgets';
@@ -56,10 +58,9 @@ function UpNextWidget(
           ? `${c.weekday || c.day} ${time}`
           : `${c.day} ${time}`;
   };
-  const whenAndWhere = (
-    c: UpNextWidgetProps['classes'][number],
-    start?: boolean,
-  ) => (c.location ? `${when(c, start)} · ${c.location}` : when(c, start));
+  // Rooms can be long ("建华/经管新楼 A101"): cut in the middle to keep the
+  // room number.
+  const place = truncationMode('middle');
   const today = !!featured && daysAway(featured.start) === 0;
   const small = family === 'systemSmall';
   // A class's course, where it's known.
@@ -140,7 +141,9 @@ function UpNextWidget(
           </HStack>
         ) : null}
         {featured?.location ? (
-          <Text modifiers={[lineLimit(1)]}>{featured.location}</Text>
+          <Text modifiers={[lineLimit(1), minimumScaleFactor(0.8), place]}>
+            {featured.location}
+          </Text>
         ) : null}
       </VStack>
     );
@@ -149,9 +152,13 @@ function UpNextWidget(
   const large = family === 'systemLarge' || family === 'systemExtraLarge';
   const spacing = large ? 10 : 4;
 
-  // The class on now or next. A small widget gives its name and its time and
-  // place two lines each, unless it's `compact` to make room for the classes
-  // after it, with the start alone.
+  // The class on now or next. A small widget gives its name and its time two
+  // lines each and its place a line of its own, unless it's `compact` to make
+  // room for the classes after it, with the start alone.
+  const detail = [
+    font({ textStyle: small ? 'caption' : 'subheadline' }),
+    kit.secondary,
+  ];
   const featuredClass = (withCountdown: boolean, compact = false) =>
     featured ? (
       <VStack
@@ -167,15 +174,30 @@ function UpNextWidget(
         >
           {featured.courseName}
         </Text>
-        <Text
-          modifiers={[
-            font({ textStyle: small ? 'caption' : 'subheadline' }),
-            kit.secondary,
-            lineLimit(small && !compact ? 2 : 1),
-          ]}
-        >
-          {whenAndWhere(featured, compact)}
-        </Text>
+        {small && !compact ? (
+          // Its time in up to two lines, then its place.
+          <VStack alignment="leading" spacing={0}>
+            <Text modifiers={[...detail, lineLimit(2)]}>{when(featured)}</Text>
+            {featured.location ? (
+              <Text modifiers={[...detail, lineLimit(1), place]}>
+                {featured.location}
+              </Text>
+            ) : null}
+          </VStack>
+        ) : (
+          // Its time and place in a line, where the place shortens first.
+          <HStack spacing={0}>
+            <Text modifiers={[...detail, lineLimit(1), layoutPriority(1)]}>
+              {when(featured, compact)}
+            </Text>
+            {featured.location ? (
+              <Text modifiers={[...detail, lineLimit(1), place]}>
+                {` · ${featured.location}`}
+              </Text>
+            ) : null}
+            <Spacer />
+          </HStack>
+        )}
         {withCountdown ? countdown(small ? 'caption' : 'footnote') : null}
       </VStack>
     ) : null;

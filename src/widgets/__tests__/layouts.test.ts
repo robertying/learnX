@@ -239,7 +239,7 @@ describe('Up Next on iOS', () => {
   const shown = (widget: Node) => {
     expect(widget.type).toBe('ViewThatFitsView');
     return childrenOf(widget).map(v => [
-      texts(v).filter(w => w.endsWith('-time')).length,
+      texts(v).filter(w => w.startsWith(' · ') && w.endsWith('-time')).length,
       links(v).filter(l => String(l).startsWith('learnx://assignment/')).length,
     ]);
   };
@@ -260,7 +260,8 @@ describe('Up Next on iOS', () => {
     expect(texts(oneDeadline)).toEqual([
       'Now',
       'Course now',
-      'now-time · 六教6A414',
+      'now-time',
+      ' · 六教6A414',
       'Ends in ',
       `in ${iso(at('11:25'))}`,
       'Due: Assignment d1 · ',
@@ -293,10 +294,11 @@ describe('Up Next on iOS', () => {
       { ...props, classes: [klass('soon', at('13:30'), at('15:05'))] },
       { widgetFamily: 'systemMedium', date: new Date(now) },
     );
-    expect(texts(today).slice(0, 5)).toEqual([
+    expect(texts(today).slice(0, 6)).toEqual([
       'Next',
       'Course soon',
-      'soon-time · 六教6A414',
+      'soon-time',
+      ' · 六教6A414',
       'Starts in ',
       `in ${iso(at('13:30'))}`,
     ]);
@@ -318,7 +320,17 @@ describe('Up Next on iOS', () => {
       },
       { widgetFamily: 'systemMedium', date: new Date(now) },
     );
-    expect(texts(nextWeek)[2]).toBe('far-day far-time · 六教6A414');
+    expect(texts(nextWeek).slice(2, 4)).toEqual([
+      'far-day far-time',
+      ' · 六教6A414',
+    ]);
+    // A long place is cut in the middle, keeping the room number.
+    expect(
+      modifier(
+        all(nextWeek).find(n => n.props.children === ' · 六教6A414')!,
+        'truncationMode',
+      ),
+    ).toBe('middle');
     // Each class row opens its course.
     expect(links(childrenOf(widget)[0]).slice(0, 2)).toEqual([
       'learnx://course/later',
@@ -333,13 +345,14 @@ describe('Up Next on iOS', () => {
     // Three classes after it, then two, one, and none with the class in full,
     // in two ways.
     expect(
-      versions.map(v => texts(v).filter(w => w.endsWith('-start')).length),
+      versions.map(v => texts(v).filter(w => /^[^n].*-start$/.test(w)).length),
     ).toEqual([3, 2, 1, 0, 0]);
     // In short: the start alone, under each course.
     expect(texts(versions[1])).toEqual([
       'Now',
       'Course now',
-      'now-start · 六教6A414',
+      'now-start',
+      ' · 六教6A414',
       'Ends in ',
       `in ${iso(at('11:25'))}`,
       'Course later',
@@ -347,19 +360,22 @@ describe('Up Next on iOS', () => {
       'Course c3',
       'c3-weekday c3-start',
     ]);
-    // With no room for them, the class in full, then without the countdown.
+    // With no room for them, the class in full with its place on a line of
+    // its own, then without the countdown.
     const withCountdown = versions[3];
     expect(texts(withCountdown)).toEqual([
       'Now',
       'Course now',
-      'now-time · 六教6A414',
+      'now-time',
+      '六教6A414',
       'Ends in ',
       `in ${iso(at('11:25'))}`,
     ]);
     expect(texts(versions[4])).toEqual([
       'Now',
       'Course now',
-      'now-time · 六教6A414',
+      'now-time',
+      '六教6A414',
     ]);
     // One tap target: Today.
     expect(modifier(widget, 'widgetURL')).toBe('learnx://today');
