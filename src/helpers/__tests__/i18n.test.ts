@@ -82,7 +82,7 @@ describe('times of day', () => {
     mockClock.uses24hourClock = false;
     mockLocale.current = 'zh-CN';
     expect(evening.locale('zh-cn').format(t('shortDateTimeFormat'))).toBe(
-      '11 月 12 日 晚上9:30',
+      '11 月 12 日 下午9:30',
     );
   });
 
@@ -116,12 +116,14 @@ describe('timeRange', () => {
     expect(timeRange(at('11:00'), at('12:35'))).toBe('11:00 AM–12:35 PM');
   });
 
-  it('names a shared period of the day once in Chinese', () => {
+  it('marks only 上午 and 下午 in Chinese, once for a shared half', () => {
     mockClock.uses24hourClock = false;
     mockLocale.current = 'zh-CN';
     dayjs.locale('zh-cn');
     expect(timeRange(at('16:00'), at('17:35'))).toBe('下午4:00–5:35');
-    expect(timeRange(at('17:00'), at('19:35'))).toBe('下午5:00–晚上7:35');
+    expect(timeRange(at('17:00'), at('19:35'))).toBe('下午5:00–7:35');
+    expect(timeRange(at('08:00'), at('09:35'))).toBe('上午8:00–9:35');
+    expect(timeRange(at('09:50'), at('12:15'))).toBe('上午9:50–下午12:15');
   });
 });
 
