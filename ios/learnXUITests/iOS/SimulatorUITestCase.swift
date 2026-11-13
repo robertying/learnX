@@ -1,7 +1,7 @@
 #if !targetEnvironment(macCatalyst)
 import XCTest
 
-/// The base of the UI tests that run on an iOS simulator (`scripts/e2e-simulator.sh`): launches the app in Chinese
+/// The base of the UI tests that run on an iOS simulator (`scripts/e2e.sh ios`): launches the app in Chinese
 /// (`-AppleLanguages`, as the Mac tests do) with no emulated server delay, logs in with the mock account the script
 /// passes from `.env` unless the app is logged in already, and has the steps and queries the tests share.
 @MainActor
@@ -32,8 +32,8 @@ class SimulatorUITestCase: XCTestCase {
       return
     }
     let env = ProcessInfo.processInfo.environment
-    let username = try XCTUnwrap(env["E2E_USERNAME"], "E2E_USERNAME missing; run scripts/e2e-simulator.sh")
-    let password = try XCTUnwrap(env["E2E_PASSWORD"], "E2E_PASSWORD missing; run scripts/e2e-simulator.sh")
+    let username = try XCTUnwrap(env["E2E_USERNAME"], "E2E_USERNAME missing; run scripts/e2e.sh ios")
+    let password = try XCTUnwrap(env["E2E_PASSWORD"], "E2E_PASSWORD missing; run scripts/e2e.sh ios")
 
     let welcome = element(id: "welcome-continue")
     if welcome.exists {

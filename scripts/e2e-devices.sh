@@ -1,11 +1,12 @@
 #!/bin/bash
-# Run the Maestro flows on each device setup, one device at a time.
+# Run the Maestro flows on each device setup, one device at a time, and the
+# iOS UI tests (ios/learnXUITests/iOS) on the iPhone and the iPad.
 #
 #   scripts/e2e-devices.sh [profile ...]     (no profile: all of them)
 #
 # Profiles:
-#   iphone          every flow on the iPhone
-#   ipad            every flow on the iPad, portrait
+#   iphone          every flow and the iOS UI tests on the iPhone
+#   ipad            every flow and the iOS UI tests on the iPad, portrait
 #   ipad-landscape  every flow on the iPad, landscape
 #   ipad-windowed   every flow on an iPad set to Windowed Apps, in the
 #                   app's default window
@@ -204,10 +205,13 @@ app_running() {
   grep -q "UIKitApplication:$ios_app_id" <<<"$list"
 }
 
-# Every flow, on simulator $1 in orientation $2.
+# Every flow, on simulator $1 in orientation $2, then the UI tests
+# (ios/learnXUITests/iOS) when $4 is 1: on the iPhone and the iPad, the
+# devices they're for (they set the orientation themselves).
 run_ios_suite() {
-  local udid="$1" orientation="$2" out="$3"
-  MAESTRO_DEVICE="$udid" E2E_ORIENTATION="$orientation" scripts/e2e.sh ios \
+  local udid="$1" orientation="$2" out="$3" ui="${4:-0}"
+  MAESTRO_DEVICE="$udid" E2E_ORIENTATION="$orientation" E2E_UI_TESTS="$ui" \
+    E2E_UI_RESULT="$out/ui.xcresult" scripts/e2e.sh ios \
     --format junit --output "$out/report.xml" --test-output-dir "$out"
 }
 
@@ -320,11 +324,11 @@ run_profile() {
   case "$profile" in
   iphone)
     use_sim "$iphone" || return 1
-    run_ios_suite "$device" PORTRAIT "$out"
+    run_ios_suite "$device" PORTRAIT "$out" 1
     ;;
   ipad)
     use_sim "$ipad" || return 1
-    run_ios_suite "$device" PORTRAIT "$out"
+    run_ios_suite "$device" PORTRAIT "$out" 1
     ;;
   ipad-windowed)
     use_sim "$ipad_windowed" || return 1
