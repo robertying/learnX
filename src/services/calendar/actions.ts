@@ -10,6 +10,7 @@ import {
   exportSyncedCalendarsToICS,
   removeCalendars,
   requireAssignmentAccess,
+  requirePermission,
   saveAssignmentsToReminderOrCalendar,
 } from 'services/calendar/calendars';
 import { saveClassesToCalendar } from 'services/calendar/classes';
@@ -132,6 +133,21 @@ export const syncCourseSchedule = async (
       return { text: t('courseScheduleSyncPartial'), type: 'warning' };
     }
     return { text: t('courseScheduleSyncSucceeded'), type: 'success' };
+  } catch (err) {
+    return courseSyncErrorToast(err);
+  }
+};
+
+/**
+ * Asks for the calendar access course calendar sync needs, as the user turns
+ * it on; the writes follow the setting (services/calendar/classes). The toast
+ * to show when the access is denied.
+ */
+export const allowCourseCalendarSync = async (): Promise<
+  ToastMessage | undefined
+> => {
+  try {
+    await requirePermission('calendar', { ask: true });
   } catch (err) {
     return courseSyncErrorToast(err);
   }

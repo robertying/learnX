@@ -42,6 +42,11 @@ export interface NotificationSettings {
   classReminderOffset: number;
 }
 export interface SettingsState {
+  /**
+   * Writes the fetched timetable's classes from today on to the course
+   * calendar, and keeps them up to date.
+   */
+  courseCalendarSync: boolean;
   assignmentCalendarSync: boolean;
   calendarEventLength?: number;
   assignmentReminderSync: boolean;

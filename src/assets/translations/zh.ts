@@ -383,7 +383,7 @@ const zh: typeof en = {
   shareFile: '分享文件',
   submissionAttachmentName: '{title}-提交.{ext}',
   courseScheduleSyncCaption:
-    '将所选日期的{type}课表同步到日历；此后今天起已同步的课程会随课表和提醒、位置设置自动更新。',
+    '开启后，learnX 已获取的今天起的{type}课程会添加到日历，并随课表和以上设置自动更新。同步课表可添加所选日期的课程。',
   graduateSchedule: '研究生',
   undergraduateSchedule: '本科生',
   courseInformationSharingOnCaption:
@@ -456,6 +456,7 @@ const zh: typeof en = {
   setupNewContent: '新内容',
   setupCalendarSection: '日历',
   setupCalendar: '将作业添加到日历',
+  setupCourseCalendar: '将课表添加到日历',
   setupReminders: '将作业添加到提醒事项',
   remindersSection: '提醒事项',
   lastSynced: '上次同步于 {time}。',

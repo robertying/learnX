@@ -63,7 +63,7 @@ interface Inputs {
   classes: string;
   /** How many times the app came back to the foreground. */
   resumes: number;
-  /** The saved timetable weeks of the classes synced to the calendar. */
+  /** The saved timetable weeks the course calendar follows. */
   classWeeks: unknown[];
 }
 
@@ -275,10 +275,12 @@ const surfaces: Surface[] = [
   },
   {
     name: 'Calendar classes',
-    // The synced weeks' timetables and the class settings; each week is
+    // The followed weeks' timetables and the class settings; each week is
     // written again only when what it's written from changed.
     deps: i => [
       ...i.classWeeks,
+      i.settings.courseCalendarSync,
+      i.settings.graduate,
       i.settings.alarms,
       i.settings.courseEventOmitLocation,
     ],

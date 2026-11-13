@@ -29,17 +29,18 @@ describe('getNotificationTarget', () => {
     });
   });
 
-  it('opens Today from a class reminder', () => {
+  it('opens the course or Today from a class reminder', () => {
     expect(getNotificationTarget(response({ type: 'today' }))).toEqual({
       type: 'today',
     });
+    expect(
+      getNotificationTarget(response({ type: 'course', id: 'c1' })),
+    ).toEqual({ type: 'course', id: 'c1' });
   });
 
   it("ignores notifications that aren't ours", () => {
     expect(getNotificationTarget(response(null))).toBeNull();
-    expect(
-      getNotificationTarget(response({ type: 'course', id: 'c' })),
-    ).toBeNull();
+    expect(getNotificationTarget(response({ type: 'class' }))).toBeNull();
     expect(getNotificationTarget(response({ url: 'https://x' }))).toBeNull();
   });
 });

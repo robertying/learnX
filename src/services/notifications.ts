@@ -257,9 +257,13 @@ export const getNotificationData = (
 export const getNotificationTarget = (
   response: Notifications.NotificationResponse,
 ): OpenTarget | null => {
-  // A class reminder opens Today.
-  if (responseData(response)?.type === 'today') {
+  // A class reminder opens its course, or Today.
+  const raw = responseData(response);
+  if (raw?.type === 'today') {
     return { type: 'today' };
+  }
+  if (raw?.type === 'course' && typeof raw.id === 'string') {
+    return { type: 'course', id: raw.id };
   }
   const data = getNotificationData(response);
   return data ? { type: data.type, id: data.id } : null;

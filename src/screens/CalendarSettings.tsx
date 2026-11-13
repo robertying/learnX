@@ -43,7 +43,15 @@ const CalendarSettings: React.FC<Props> = () => {
     settings => settings.courseEventOmitLocation,
   );
 
-  const { syncing: courseSyncing, picker } = useCourseScheduleSync();
+  const courseCalendarSync = useSettings(
+    settings => settings.courseCalendarSync,
+  );
+  const {
+    syncing: courseSyncing,
+    enabling: courseSyncEnabling,
+    setSyncEnabled: handleCourseSync,
+    picker,
+  } = useCourseScheduleSync();
   const {
     calendarSyncing: assignmentCalendarSyncing,
     reminderSyncing: assignmentReminderSyncing,
@@ -132,6 +140,13 @@ const CalendarSettings: React.FC<Props> = () => {
           )}
         >
           <FormToggle
+            icon="calendar"
+            title={t('setupCourseCalendar')}
+            value={courseCalendarSync}
+            onValueChange={handleCourseSync}
+            loading={courseSyncEnabling}
+          />
+          <FormToggle
             icon="graduate"
             title={t('graduate')}
             value={graduate}
@@ -162,7 +177,7 @@ const CalendarSettings: React.FC<Props> = () => {
           />
           {/* Last: it writes the schedule with the settings above. */}
           <FormButton
-            icon="calendar"
+            icon="sync"
             title={t('syncCourseSchedule')}
             onPress={picker.openPicker}
             loading={courseSyncing}

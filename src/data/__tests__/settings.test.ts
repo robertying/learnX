@@ -32,6 +32,7 @@ describe('settings', () => {
        },
        "assignmentCalendarSync": false,
        "assignmentReminderSync": false,
+       "courseCalendarSync": false,
        "courseEventOmitLocation": false,
        "courseInformationSharing": false,
        "graduate": false,

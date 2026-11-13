@@ -7,6 +7,7 @@ import { SettingsState } from 'data/types/state';
 export const SETTINGS_KEY = 'settings';
 
 export const defaultSettings: SettingsState = {
+  courseCalendarSync: false,
   assignmentCalendarSync: false,
   assignmentReminderSync: false,
   graduate: false,

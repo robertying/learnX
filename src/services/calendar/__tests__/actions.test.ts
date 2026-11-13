@@ -6,6 +6,7 @@ import { fetchCalendarRange } from 'data/schedule';
 import { Assignment } from 'data/types/state';
 import {
   allowAssignmentSync,
+  allowCourseCalendarSync,
   assignmentSyncErrorToast,
   calendarDeleteErrorToast,
   calendarExportErrorToast,
@@ -20,6 +21,7 @@ import {
   exportSyncedCalendarsToICS,
   removeCalendars,
   requireAssignmentAccess,
+  requirePermission,
   saveAssignmentsToReminderOrCalendar,
 } from 'services/calendar/calendars';
 import { saveClassesToCalendar } from 'services/calendar/classes';
@@ -35,6 +37,7 @@ jest.mock('services/calendar/calendars', () => ({
   exportSyncedCalendarsToICS: jest.fn(),
   removeCalendars: jest.fn(),
   requireAssignmentAccess: jest.fn(async () => {}),
+  requirePermission: jest.fn(async () => {}),
   saveAssignmentsToReminderOrCalendar: jest.fn(),
 }));
 jest.mock('services/calendar/classes', () => ({
@@ -275,6 +278,19 @@ describe('allowAssignmentSync', () => {
       text: t('assignmentSyncNoReminderPermission'),
       type: 'error',
     });
+  });
+});
+
+describe('allowCourseCalendarSync', () => {
+  it('asks for calendar access, and says why when it is denied', async () => {
+    await expect(allowCourseCalendarSync()).resolves.toBeUndefined();
+    expect(requirePermission).toHaveBeenCalledWith('calendar', { ask: true });
+    jest
+      .mocked(requirePermission)
+      .mockImplementationOnce(fail('calendarPermission'));
+    await expect(allowCourseCalendarSync()).resolves.toEqual(
+      courseSyncErrorToast(new CalendarError('calendarPermission')),
+    );
   });
 });
 

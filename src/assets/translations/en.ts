@@ -396,7 +396,7 @@ export default {
   shareFile: 'Share File',
   submissionAttachmentName: '{title} Submission.{ext}',
   courseScheduleSyncCaption:
-    'Syncs the {type} course schedule for the days you pick. From then on, synced classes from today on follow the timetable and the alert and location settings.',
+    'When on, the {type} classes learnX has fetched, from today on, are added to your calendar and kept up to date with the timetable and these settings. Sync adds the days you pick.',
   graduateSchedule: 'graduate',
   undergraduateSchedule: 'undergraduate',
   courseInformationSharingOnCaption:
@@ -472,6 +472,7 @@ export default {
   setupNewContent: 'New Content',
   setupCalendarSection: 'Calendar',
   setupCalendar: 'Add Assignments to Calendar',
+  setupCourseCalendar: 'Add Schedule to Calendar',
   setupReminders: 'Add Assignments to Reminders',
   remindersSection: 'Reminders',
   lastSynced: 'Last synced {time}.',

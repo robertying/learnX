@@ -40,6 +40,12 @@ const picker = {
   onRangeConfirm: jest.fn(),
 };
 const setSyncEnabled = jest.fn();
+const setCourseSyncEnabled = jest.fn();
+const courseSync = {
+  syncing: false,
+  enabling: false,
+  setSyncEnabled: setCourseSyncEnabled,
+};
 const exportToICS = jest.fn();
 
 const renderScreen = () => render(<CalendarSettings {...screenProps()} />);
@@ -61,9 +67,7 @@ const access = (
 beforeEach(() => {
   resetSettings();
   access();
-  jest
-    .mocked(useCourseScheduleSync)
-    .mockReturnValue({ syncing: false, picker });
+  jest.mocked(useCourseScheduleSync).mockReturnValue({ ...courseSync, picker });
   jest.mocked(useAssignmentSync).mockReturnValue({
     calendarSyncing: false,
     reminderSyncing: false,
@@ -81,6 +85,8 @@ it('saves the course schedule settings and opens the range picker', async () => 
       t('courseScheduleSyncCaption', { type: t('undergraduateSchedule') }),
     ),
   ).toBeTruthy();
+  await toggle(t('setupCourseCalendar'), true);
+  expect(setCourseSyncEnabled).toHaveBeenCalledWith(true);
   await toggle(t('graduate'), true);
   expect(getSettings().graduate).toBe(true);
   expect(
@@ -169,7 +175,7 @@ it('exports, deletes and opens the system settings', async () => {
 it('saves the range picked in the picker', async () => {
   jest
     .mocked(useCourseScheduleSync)
-    .mockReturnValue({ syncing: false, picker: { ...picker, open: true } });
+    .mockReturnValue({ ...courseSync, picker: { ...picker, open: true } });
   await renderScreen();
   await userEvent.press(screen.getByText(t('datePickerSaveLabel')));
   expect(picker.onRangeConfirm).toHaveBeenCalledWith({

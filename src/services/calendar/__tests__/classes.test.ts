@@ -88,11 +88,6 @@ describe('saveClassesToCalendar', () => {
         location: '清华大学第六教学楼 六教6A017',
       }),
     );
-    expect(getCalendarSync().classSync).toEqual({
-      first: '2026-03-09',
-      last: '2026-03-15',
-      graduate: false,
-    });
     expect(Object.keys(getCalendarSync().writtenClassWeeks)).toEqual([week1]);
   });
 
@@ -123,7 +118,6 @@ describe('saveClassesToCalendar', () => {
       saveClassesToCalendar([], { first: week1, last: week1, graduate: false }),
     ).rejects.toThrow(new CalendarError('calendarPermission'));
     expect(mocked.requestCalendarPermissions).toHaveBeenCalled();
-    expect(getCalendarSync().classSync).toBeUndefined();
   });
 
   it('writes one sync at a time', async () => {
@@ -165,88 +159,90 @@ describe('updateSyncedClasses', () => {
   let calendar: ReturnType<typeof fakeCalendar>;
 
   beforeEach(() => {
-    jest.spyOn(Date, 'now').mockReturnValue(now);
     calendar = fakeCalendar([
       event('2026-03-10T08:00:00+08:00'),
       event('2026-03-12T08:00:00+08:00'),
     ]);
     mocked.getCalendars.mockResolvedValue([calendar]);
-    useCalendarSyncStore.setState({
-      classSync: { first: week1, last: '2026-03-22', graduate: false },
-    });
+    setSetting('courseCalendarSync', true);
+    // A week already over, and this week.
+    setWeek('2026-03-02', [cls('2026-03-03T08:00:00+08:00')]);
     setWeek(week1, [
       cls('2026-03-10T08:00:00+08:00'),
       cls('2026-03-12T08:00:00+08:00'),
     ]);
   });
 
-  it('writes the synced days from today on, once per change', async () => {
-    await updateSyncedClasses();
+  it('writes the saved weeks from today on, once per change', async () => {
+    await updateSyncedClasses(now);
 
-    // Only week 1 is saved; from today, not the classes already over.
+    // This week only, from today: not the classes already over.
     expect(calendar.listEvents).toHaveBeenCalledTimes(1);
     expect(calendar.listEvents).toHaveBeenCalledWith(
       new Date('2026-03-11T00:00:00+08:00'),
       new Date('2026-03-16T00:00:00+08:00'),
     );
     expect(calendar.createEvent).toHaveBeenCalledTimes(1);
+    expect(getCalendarSync().lastSynced?.courseSchedule).toBeGreaterThan(0);
 
-    await updateSyncedClasses();
+    await updateSyncedClasses(now);
     expect(calendar.listEvents).toHaveBeenCalledTimes(1);
 
     setSetting('courseEventOmitLocation', true);
-    await updateSyncedClasses();
+    await updateSyncedClasses(now);
     expect(calendar.listEvents).toHaveBeenCalledTimes(2);
     expect(calendar.createEvent).toHaveBeenLastCalledWith(
       expect.objectContaining({ location: undefined }),
     );
 
+    // A week Today or Schedule fetches next.
     setWeek(week2, [cls('2026-03-17T08:00:00+08:00')]);
-    await updateSyncedClasses();
+    await updateSyncedClasses(now);
     expect(calendar.listEvents).toHaveBeenLastCalledWith(
       new Date('2026-03-16T00:00:00+08:00'),
       new Date('2026-03-23T00:00:00+08:00'),
     );
   });
 
-  it('follows the timetable the classes were synced from', async () => {
+  it('follows the timetable the settings pick', async () => {
     setSetting('graduate', true);
-    await updateSyncedClasses();
+    await updateSyncedClasses(now);
+    expect(calendar.listEvents).not.toHaveBeenCalled();
+    setWeek(week1, [cls('2026-03-12T08:00:00+08:00')], true);
+    await updateSyncedClasses(now);
     expect(calendar.createEvent).toHaveBeenCalledTimes(1);
   });
 
-  it('does nothing once the synced days are over', async () => {
-    useCalendarSyncStore.setState({
-      classSync: { first: week1, last: '2026-03-10', graduate: false },
-    });
-    await updateSyncedClasses();
+  it('does nothing while the sync is off', async () => {
+    setSetting('courseCalendarSync', false);
+    await updateSyncedClasses(now);
     expect(mocked.getCalendars).not.toHaveBeenCalled();
-    expect(syncedClassWeeks()).toEqual([]);
-  });
-
-  it('does nothing before a sync', async () => {
-    useCalendarSyncStore.setState({ classSync: undefined });
-    await updateSyncedClasses();
-    expect(mocked.getCalendars).not.toHaveBeenCalled();
+    expect(syncedClassWeeks(now)).toEqual([]);
   });
 
   it('never asks for the permission, and skips without it', async () => {
     grant('denied');
-    await updateSyncedClasses();
+    await updateSyncedClasses(now);
     expect(mocked.requestCalendarPermissions).not.toHaveBeenCalled();
     expect(calendar.listEvents).not.toHaveBeenCalled();
   });
 
-  it("doesn't make the calendar again once it's deleted", async () => {
-    mocked.getCalendars.mockResolvedValue([]);
-    await updateSyncedClasses();
-    expect(mocked.createCalendar).not.toHaveBeenCalled();
+  it('makes the calendar when there is none', async () => {
+    useCalendarSyncStore.setState({ courseCalendarId: undefined });
+    mocked.getCalendars.mockResolvedValue([
+      { id: 'x', title: 'Home', source: { id: 'src', type: 'local' } },
+    ]);
+    mocked.createCalendar.mockResolvedValue(calendar);
+    await updateSyncedClasses(now);
+    expect(mocked.createCalendar).toHaveBeenCalled();
+    expect(calendar.createEvent).toHaveBeenCalled();
   });
 
-  it('lists the saved weeks it follows', () => {
-    expect(syncedClassWeeks()).toEqual([
+  it('lists the saved weeks it follows, earliest first', () => {
+    setWeek(week2, []);
+    expect(syncedClassWeeks(now)).toEqual([
       queryClient.getQueryData(calendarWeekQuery(week1, false).queryKey),
-      undefined,
+      [],
     ]);
   });
 });

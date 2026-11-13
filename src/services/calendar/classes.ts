@@ -1,16 +1,17 @@
-// The classes learnX writes to the course calendar. Sync writes the days the
-// user picks; from then on, the synced days from today on follow the
-// timetable's weeks as they're fetched and the class settings as they change.
+// The classes learnX writes to the course calendar. With course calendar sync
+// on, every timetable week fetched (by Today, Schedule or Sync) is written from
+// today on and kept in step with the timetable and the class settings. Sync
+// fetches and writes the days the user picks, beyond the weeks Today shows.
 import type * as Calendar from 'expo-calendar';
 import dayjs from 'dayjs';
 import {
-  type ClassSyncRange,
   getCalendarSync,
-  setClassSync,
   setClassWeekWritten,
+  setLastSynced,
 } from 'data/calendarSync';
 import { getCachedCourses } from 'data/queries';
 import { queryClient } from 'data/queryClient';
+import { queryKeys } from 'data/queryKeys';
 import { calendarWeekQuery, type FailedRange } from 'data/schedule';
 import { getSettings } from 'data/settings';
 import { SettingsState } from 'data/types/state';
@@ -19,7 +20,6 @@ import { type CalendarClass, startOfWeek } from 'helpers/schedule';
 import { beijingDate } from 'helpers/serverTime';
 import { hash } from 'helpers/text';
 import {
-  findCourseCalendar,
   getCourseCalendar,
   hasPermission,
   requirePermission,
@@ -30,7 +30,6 @@ const addDays = (day: string, days: number) =>
   dayjs(day).add(days, 'day').format('YYYY-MM-DD');
 const classDay = (c: CalendarClass) => beijingDate(Date.parse(c.start));
 const later = (a: string, b: string) => (a > b ? a : b);
-const earlier = (a: string, b: string) => (a < b ? a : b);
 
 /** Class writes run one at a time, so two never delete each other's events. */
 let queue: Promise<unknown> = Promise.resolve();
@@ -99,16 +98,22 @@ const weeksOf = (first: string, last: string) => {
 const cachedWeek = (week: string, graduate: boolean) =>
   queryClient.getQueryData(calendarWeekQuery(week, graduate).queryKey);
 
+/** Beijing days (YYYY-MM-DD) to write, and which timetable they're from. */
+export interface ClassRange {
+  first: string;
+  last: string;
+  graduate: boolean;
+}
+
 /**
  * Writes the classes of the Beijing days in `range` to the course calendar,
  * replacing what's there, except the days in `failedRanges` (weeks the
- * registrar didn't answer for). From then on, the range follows the
- * timetable and the settings (`updateSyncedClasses`). Asks for the calendar
- * permission when it's missing: only for Sync, which the user taps.
+ * registrar didn't answer for). Asks for the calendar permission when it's
+ * missing: only for Sync, which the user taps.
  */
 export const saveClassesToCalendar = (
   classes: CalendarClass[],
-  range: ClassSyncRange,
+  range: ClassRange,
   failedRanges: FailedRange[] = [],
 ) =>
   serially(async () => {
@@ -129,7 +134,6 @@ export const saveClassesToCalendar = (
       settings,
       failed,
     );
-    setClassSync(range);
     for (const week of weeksOf(range.first, range.last)) {
       const weekClasses = cachedWeek(week, range.graduate);
       if (weekClasses && !failed(later(week, range.first))) {
@@ -139,57 +143,60 @@ export const saveClassesToCalendar = (
   });
 
 /**
- * Brings the synced classes from today on in step with the saved timetable
- * and the class settings: a week whose classes or settings changed since it
- * was written is written again. Never asks for a permission, and does
- * nothing without one, or once the course calendar is gone.
+ * The saved timetable weeks still under way or ahead (by Monday), of the
+ * timetable the settings pick.
  */
-export const updateSyncedClasses = () =>
+const followedWeeks = (now: number) => {
+  const { courseCalendarSync, graduate } = getSettings();
+  if (!courseCalendarSync) {
+    return [];
+  }
+  const thisWeek = startOfWeek(beijingDate(now)).format('YYYY-MM-DD');
+  const kind = graduate ? 'graduate' : 'undergraduate';
+  return queryClient
+    .getQueriesData<CalendarClass[]>({ queryKey: queryKeys.calendarAll })
+    .flatMap(([key, classes]) =>
+      classes && key[2] === kind && String(key[1]) >= thisWeek
+        ? [{ week: String(key[1]), classes }]
+        : [],
+    )
+    .sort((a, b) => (a.week < b.week ? -1 : 1));
+};
+
+/**
+ * With course calendar sync on, writes the saved timetable's classes from
+ * today on: each week whose classes or class settings changed since it was
+ * last written. Never asks for the permission and does nothing without it.
+ */
+export const updateSyncedClasses = (now = Date.now()) =>
   serially(async () => {
-    const { classSync: range, writtenClassWeeks } = getCalendarSync();
-    const today = beijingDate(Date.now());
-    if (!range || range.last < today) {
-      return;
-    }
+    const { writtenClassWeeks } = getCalendarSync();
+    const today = beijingDate(now);
     const settings = getSettings();
-    const first = later(range.first, today);
-    const changedWeeks = weeksOf(first, range.last).flatMap(week => {
-      const classes = cachedWeek(week, range.graduate);
-      const key = classes && weekKey(classes, settings);
-      return classes && key && writtenClassWeeks[week] !== key
-        ? [{ week, classes, key }]
-        : [];
+    const changedWeeks = followedWeeks(now).flatMap(({ week, classes }) => {
+      const key = weekKey(classes, settings);
+      return writtenClassWeeks[week] !== key ? [{ week, classes, key }] : [];
     });
     if (changedWeeks.length === 0 || !(await hasPermission('calendar'))) {
       return;
     }
-    const calendar = await findCourseCalendar();
-    if (!calendar) {
-      return;
-    }
+    const calendar = await getCourseCalendar();
     for (const { week, classes, key } of changedWeeks) {
       await replaceDays(
         calendar,
         classes,
-        later(first, week),
-        earlier(range.last, addDays(week, 6)),
+        later(today, week),
+        addDays(week, 6),
         settings,
       );
       setClassWeekWritten(week, key);
     }
+    setLastSynced('courseSchedule');
   });
 
 /**
- * The saved timetable weeks the synced classes follow, for the surfaces to
- * notice when one is fetched (`services/surfaces`).
+ * The saved timetable weeks the calendar follows, for the surfaces to notice
+ * when one is fetched (`services/surfaces`).
  */
-export const syncedClassWeeks = (now = Date.now()) => {
-  const range = getCalendarSync().classSync;
-  const today = beijingDate(now);
-  if (!range || range.last < today) {
-    return [];
-  }
-  return weeksOf(later(range.first, today), range.last).map(week =>
-    cachedWeek(week, range.graduate),
-  );
-};
+export const syncedClassWeeks = (now = Date.now()) =>
+  followedWeeks(now).map(({ classes }) => classes);

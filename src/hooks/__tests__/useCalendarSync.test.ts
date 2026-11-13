@@ -5,6 +5,7 @@ import { toast } from 'components/Toast';
 import { getSettings, resetSettings } from 'data/settings';
 import {
   allowAssignmentSync,
+  allowCourseCalendarSync,
   deleteCalendars,
   exportCalendars,
   syncCourseSchedule,
@@ -21,6 +22,7 @@ jest.mock('components/Toast', () => ({ toast: jest.fn() }));
 jest.mock('services/calendar/actions', () => ({
   syncCourseSchedule: jest.fn(async () => undefined),
   allowAssignmentSync: jest.fn(async () => undefined),
+  allowCourseCalendarSync: jest.fn(async () => undefined),
   exportCalendars: jest.fn(async () => undefined),
   deleteCalendars: jest.fn(async () => ({ text: 'Deleted', type: 'success' })),
 }));
@@ -40,6 +42,27 @@ afterEach(() => {
 });
 
 describe('useCourseScheduleSync', () => {
+  it('asks for access, turns the sync on and waits for the surfaces to write', async () => {
+    const { result } = await renderHook(() => useCourseScheduleSync());
+    let written = false;
+    jest.mocked(refreshSurfaces).mockImplementationOnce(async () => {
+      // The setting is on before the surfaces run.
+      written = getSettings().courseCalendarSync;
+    });
+    jest
+      .mocked(allowCourseCalendarSync)
+      .mockResolvedValueOnce({ text: 'Denied', type: 'error' });
+    await act(() => result.current.setSyncEnabled(true));
+    expect(written).toBe(true);
+    expect(result.current.enabling).toBe(false);
+    expect(toast).toHaveBeenCalledWith('Denied', 'error');
+    expect(getSettings().courseCalendarSync).toBe(true);
+
+    await act(() => result.current.setSyncEnabled(false));
+    expect(getSettings().courseCalendarSync).toBe(false);
+    expect(allowCourseCalendarSync).toHaveBeenCalledTimes(1);
+  });
+
   it('starts with the next four weeks and syncs a confirmed range', async () => {
     const { result } = await renderHook(() => useCourseScheduleSync());
     const { startDate, endDate } = result.current.picker;
