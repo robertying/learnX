@@ -122,12 +122,37 @@ describe('buildAssignmentReminderDetails', () => {
     });
   });
 
-  it('alerts only at the deadline, keeping it as the date', () => {
-    const details = buildAssignmentReminderDetails(
+  it('alerts at the deadline, and early by the offset, a day by default', () => {
+    const daily = buildAssignmentReminderDetails(
       settingsWith({}, { assignmentReminderAlarm: true }),
       input(),
     );
-    expect(details.dueDate).toEqual(new Date('2026-03-20T23:59:00+08:00'));
+    expect(daily.dueDate).toEqual(new Date('2026-03-20T23:59:00+08:00'));
+    expect(daily.alarms).toEqual([
+      { relativeOffset: 0 },
+      { relativeOffset: -24 * 60 },
+    ]);
+    const hourly = buildAssignmentReminderDetails(
+      settingsWith(
+        {},
+        { assignmentReminderAlarm: true, assignmentReminderAlarmOffset: 60 },
+      ),
+      input(),
+    );
+    expect(hourly.alarms).toEqual([
+      { relativeOffset: 0 },
+      { relativeOffset: -60 },
+    ]);
+  });
+
+  it('alerts only at the deadline with no minutes before', () => {
+    const details = buildAssignmentReminderDetails(
+      settingsWith(
+        {},
+        { assignmentReminderAlarm: true, assignmentReminderAlarmOffset: 0 },
+      ),
+      input(),
+    );
     expect(details.alarms).toEqual([{ relativeOffset: 0 }]);
   });
 });

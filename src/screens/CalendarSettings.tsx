@@ -281,7 +281,12 @@ const CalendarSettings: React.FC<Props> = () => {
         {Platform.OS === 'ios' && assignmentReminderSync && (
           <FormSection
             title={t('remindersSection')}
-            footer={footer(undefined, 'reminder')}
+            footer={footer(
+              alarms.assignmentReminderAlarm
+                ? t('assignmentReminderAlarmCaption')
+                : undefined,
+              'reminder',
+            )}
           >
             <FormToggle
               icon="reminder"
@@ -291,6 +296,18 @@ const CalendarSettings: React.FC<Props> = () => {
                 setAlarm('assignmentReminderAlarm', value)
               }
             />
+            {alarms.assignmentReminderAlarm && (
+              <FormNumberField
+                title={t('assignmentReminderAlarmOffset')}
+                value={
+                  alarms.assignmentReminderAlarmOffset ??
+                  calendarDefaults.assignmentReminderAlarmOffset
+                }
+                onValueChange={value =>
+                  setAlarm('assignmentReminderAlarmOffset', value)
+                }
+              />
+            )}
           </FormSection>
         )}
         <FormSection
