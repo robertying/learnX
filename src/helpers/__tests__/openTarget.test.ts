@@ -10,6 +10,7 @@ it('round-trips targets through learnx:// links', () => {
     { type: 'notice', id: 'n/1' },
     { type: 'assignment', id: 'a 1' },
     { type: 'file', id: undefined },
+    { type: 'course', id: 'c1' },
     { type: 'today' },
   ] as const) {
     expect(getUrlTarget(getTargetUrl(target))).toEqual(
@@ -26,8 +27,18 @@ it('ignores links that open nothing it knows', () => {
 });
 
 it('routes each item type to its tab, list and page', () => {
-  expect(Object.keys(targetRoutes).every(isItemType)).toBe(true);
+  expect(Object.keys(targetRoutes).filter(isItemType)).toEqual([
+    'notice',
+    'assignment',
+    'file',
+  ]);
+  // A course isn't an item a notification or Spotlight result opens.
   expect(isItemType('course')).toBe(false);
+  expect(targetRoutes.course).toEqual({
+    tab: 'CourseStack',
+    list: 'Courses',
+    detail: 'CourseDetail',
+  });
   expect(targetRoutes.file).toEqual({
     tab: 'FileStack',
     list: 'Files',

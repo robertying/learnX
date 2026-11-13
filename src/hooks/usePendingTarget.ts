@@ -1,18 +1,18 @@
 import { useContext, useEffect, useEffectEvent } from 'react';
 import { create } from 'zustand';
 import { SplitViewContext } from 'navigation/SplitView';
-import { ItemTarget } from 'helpers/openTarget';
+import { ListTarget } from 'helpers/openTarget';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 
 /**
  * The item a tapped notification, widget row, learnx:// link or Spotlight
  * result points to, until its list screen opens it (`useOpenTarget`).
  */
-const usePendingTargetStore = create<{ target: ItemTarget | null }>(() => ({
+const usePendingTargetStore = create<{ target: ListTarget | null }>(() => ({
   target: null,
 }));
 
-export const setPendingTarget = (target: ItemTarget | null) =>
+export const setPendingTarget = (target: ListTarget | null) =>
   usePendingTargetStore.setState({ target });
 
 /**
@@ -21,7 +21,7 @@ export const setPendingTarget = (target: ItemTarget | null) =>
  * (`inDetail`), or else pushed on the list.
  */
 const usePendingTarget = (
-  type: ItemTarget['type'],
+  type: ListTarget['type'],
   open: (id: string, inDetail: boolean) => void,
 ) => {
   const target = usePendingTargetStore(state => state.target);

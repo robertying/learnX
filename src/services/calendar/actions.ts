@@ -11,8 +11,8 @@ import {
   removeCalendars,
   requireAssignmentAccess,
   saveAssignmentsToReminderOrCalendar,
-  saveCoursesToCalendar,
 } from 'services/calendar/calendars';
+import { saveClassesToCalendar } from 'services/calendar/classes';
 import { setLastSynced } from 'data/calendarSync';
 import { calendarErrorCode } from 'services/calendar/errors';
 import { exportTextFile } from 'services/files/share';
@@ -94,8 +94,9 @@ export const calendarDeleteErrorToast = (err: unknown): ToastMessage => {
 };
 
 /**
- * Fetches the course schedule in the range, through the same week queries as
- * Today's timetable, and writes it to the calendar
+ * Fetches the course schedule in the range afresh, through the same week
+ * queries as Today's timetable, and writes it to the calendar. The days then
+ * follow the timetable and the class settings (services/calendar/classes).
  */
 export const syncCourseSchedule = async (
   start: Dayjs,
@@ -111,12 +112,21 @@ export const syncCourseSchedule = async (
       start,
       end,
       graduate,
+      { fresh: true },
     );
 
     if (classes.length === 0 && failedRanges.length === 0) {
       return { text: t('courseScheduleSyncNoCourse'), type: 'warning' };
     }
-    await saveCoursesToCalendar(classes, start, end, failedRanges);
+    await saveClassesToCalendar(
+      classes,
+      {
+        first: start.format('YYYY-MM-DD'),
+        last: end.format('YYYY-MM-DD'),
+        graduate,
+      },
+      failedRanges,
+    );
     setLastSynced('courseSchedule');
     if (failedRanges.length > 0) {
       return { text: t('courseScheduleSyncPartial'), type: 'warning' };

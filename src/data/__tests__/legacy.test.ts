@@ -136,7 +136,6 @@ describe('importing user data saved by 18.0.x', () => {
     expect(m.settings.getSettings()).toEqual({
       ...m.settings.defaultSettings,
       assignmentCalendarSync: true,
-      calendarEventLength: 45,
       graduate: true,
       tabFilterSelections: {
         notice: 'fav',
@@ -162,6 +161,7 @@ describe('importing user data saved by 18.0.x', () => {
       courseCalendarId: 'cal-2',
       syncedCalendarAssignments: { a1: 'e1', a2: 'e2' },
       syncedReminderAssignments: {},
+      writtenClassWeeks: {},
     });
     expect(m.appState.useAppStateStore.getState()).toEqual({
       courseSharingSeen: true,

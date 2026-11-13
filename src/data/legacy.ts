@@ -123,11 +123,6 @@ const moveOutOfSettings = (saved: Record<string, unknown>) => {
   return rest;
 };
 
-/** Settings whose default is undefined, with the type they must have. */
-const optionalSettings: Partial<Record<keyof SettingsState, 'number'>> = {
-  calendarEventLength: 'number',
-};
-
 /**
  * Keeps the saved settings whose type matches what the app expects. What
  * 18.0.x kept in settings besides settings goes through `moveOutOfSettings`
@@ -136,13 +131,10 @@ const optionalSettings: Partial<Record<keyof SettingsState, 'number'>> = {
 export const legacySettings = (saved: Json): Partial<SettingsState> => {
   const result: Json = {};
   for (const [key, value] of Object.entries(saved)) {
-    const optional = optionalSettings[key as keyof SettingsState];
     const fallback = defaultSettings[key as keyof SettingsState];
-    const valid = optional
-      ? typeof value === optional
-      : isObject(fallback)
-        ? isObject(value)
-        : fallback !== undefined && typeof value === typeof fallback;
+    const valid = isObject(fallback)
+      ? isObject(value)
+      : fallback !== undefined && typeof value === typeof fallback;
     if (valid) {
       result[key] = value;
     }

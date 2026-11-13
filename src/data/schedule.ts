@@ -97,6 +97,12 @@ export const fetchCalendarRange = async (
   start: dayjs.Dayjs,
   end: dayjs.Dayjs,
   graduate: boolean,
+  {
+    fresh = false,
+  }: {
+    /** Asks the registrar for every week, even one fetched a moment ago. */
+    fresh?: boolean;
+  } = {},
 ): Promise<{ classes: CalendarClass[]; failedRanges: FailedRange[] }> => {
   const first = start.format('YYYY-MM-DD');
   const last = end.format('YYYY-MM-DD');
@@ -111,9 +117,10 @@ export const fetchCalendarRange = async (
   ) {
     weeks += 1;
     try {
-      const weekClasses = await queryClient.fetchQuery(
-        calendarWeekQuery(week.format('YYYY-MM-DD'), graduate),
-      );
+      const weekClasses = await queryClient.fetchQuery({
+        ...calendarWeekQuery(week.format('YYYY-MM-DD'), graduate),
+        ...(fresh && { staleTime: 0 }),
+      });
       classes.push(
         ...weekClasses.filter(c => {
           const day = beijingDate(Date.parse(c.start));

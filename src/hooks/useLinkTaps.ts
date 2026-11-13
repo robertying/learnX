@@ -11,8 +11,9 @@ import useOpenTarget from 'hooks/useOpenTarget';
 let initialUrlHandled = false;
 
 /**
- * Opens the learnx:// links of tapped widget rows: the assignment's detail, or
- * the list. Handles the link that launched the app as well as links while it
+ * Opens learnx:// links: those of tapped widget rows (the assignment's detail,
+ * or the list) and of calendar events and reminders (an assignment, a course
+ * or Today). Handles the link that launched the app as well as links while it
  * runs. Other learnx:// links (the share extension's) are left alone.
  */
 const useLinkTaps = () => {

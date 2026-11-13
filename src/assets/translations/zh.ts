@@ -131,7 +131,6 @@ const zh: typeof en = {
   syncCourseSchedule: '同步课表',
   classAlarm: '上课日历提醒',
   classAlarmBefore: '课前提醒（分钟）',
-  calendarEventLength: '日程长度（分钟）',
   assignmentCalendarAlarm: '日历提醒',
   assignmentCalendarAlarmOffset: '截止前提醒（分钟）',
   assignmentCalendarSecondAlarm: '日历第二次提醒',
@@ -382,7 +381,8 @@ const zh: typeof en = {
   semesterSummer: '夏季学期',
   shareFile: '分享文件',
   submissionAttachmentName: '{title}-提交.{ext}',
-  courseScheduleSyncCaption: '将{type}课表同步到日历；更改设置后请重新同步。',
+  courseScheduleSyncCaption:
+    '将所选日期的{type}课表同步到日历；此后今天起已同步的课程会随课表和提醒、位置设置自动更新。',
   graduateSchedule: '研究生',
   undergraduateSchedule: '本科生',
   courseInformationSharingOnCaption:

@@ -8,8 +8,17 @@ export interface ItemTarget {
   id?: string;
 }
 
-/** What a learnx:// link opens: an item or list, or the Today tab. */
-export type OpenTarget = ItemTarget | { type: 'today'; id?: undefined };
+/** A course's page, or without an id, the course list: class events link here. */
+export interface CourseTarget {
+  type: 'course';
+  id?: string;
+}
+
+/** Something opened from its tab's list: an item or a course. */
+export type ListTarget = ItemTarget | CourseTarget;
+
+/** What a learnx:// link opens: an item, a course or a list, or Today. */
+export type OpenTarget = ListTarget | { type: 'today'; id?: undefined };
 
 /** Where each kind of item opens: its tab, the tab's list, and the item's page. */
 export const targetRoutes = {
@@ -20,12 +29,14 @@ export const targetRoutes = {
     detail: 'AssignmentDetail',
   },
   file: { tab: 'FileStack', list: 'Files', detail: 'FileDetail' },
+  course: { tab: 'CourseStack', list: 'Courses', detail: 'CourseDetail' },
 } as const satisfies Record<
-  ItemTarget['type'],
+  ListTarget['type'],
   { tab: string; list: string; detail: string }
 >;
 
-const itemTypes = new Set<string>(Object.keys(targetRoutes));
+const itemTypes = new Set<string>(['notice', 'assignment', 'file']);
+const listTypes = new Set<string>(Object.keys(targetRoutes));
 
 export const isItemType = (type: string): type is ItemTarget['type'] =>
   itemTypes.has(type);
@@ -45,12 +56,12 @@ export const getUrlTarget = (url: string): OpenTarget | null => {
   if (match?.[1] === 'today') {
     return { type: 'today' };
   }
-  if (!match || !isItemType(match[1])) {
+  if (!match || !listTypes.has(match[1])) {
     return null;
   }
   try {
     return {
-      type: match[1] as ItemTarget['type'],
+      type: match[1] as ListTarget['type'],
       id: match[2] ? decodeURIComponent(match[2]) : undefined,
     };
   } catch {

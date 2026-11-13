@@ -135,7 +135,6 @@ export default {
   syncCourseSchedule: 'Sync Course Schedule',
   classAlarm: 'Class Alert',
   classAlarmBefore: 'Alert Before Class (Minutes)',
-  calendarEventLength: 'Event Length (Minutes)',
   assignmentCalendarAlarm: 'Calendar Alert',
   assignmentCalendarAlarmOffset: 'Alert Before Deadline (Minutes)',
   assignmentCalendarSecondAlarm: 'Second Calendar Alert',
@@ -396,7 +395,7 @@ export default {
   shareFile: 'Share File',
   submissionAttachmentName: '{title} Submission.{ext}',
   courseScheduleSyncCaption:
-    'Syncs the {type} course schedule to your calendar. Sync again after changing these settings.',
+    'Syncs the {type} course schedule for the days you pick. From then on, synced classes from today on follow the timetable and the alert and location settings.',
   graduateSchedule: 'graduate',
   undergraduateSchedule: 'undergraduate',
   courseInformationSharingOnCaption:

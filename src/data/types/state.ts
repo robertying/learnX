@@ -43,7 +43,6 @@ export interface NotificationSettings {
 }
 export interface SettingsState {
   assignmentCalendarSync: boolean;
-  calendarEventLength?: number;
   assignmentReminderSync: boolean;
   tabFilterSelections: {
     [tab in Tab]?: FilterSelection;

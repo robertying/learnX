@@ -64,11 +64,9 @@ describe('settings', () => {
 
   it('replaces a setting', () => {
     setSetting('graduate', true);
-    setSetting('calendarEventLength', 45);
     setSetting('alarms', { ...defaultSettings.alarms, courseAlarm: true });
     expect(getSettings()).toMatchObject({
       graduate: true,
-      calendarEventLength: 45,
       alarms: { ...defaultSettings.alarms, courseAlarm: true },
     });
   });

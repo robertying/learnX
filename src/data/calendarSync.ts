@@ -29,6 +29,24 @@ export interface CalendarSyncState {
   syncedReminderAssignments: Record<string, string>;
   /** When each sync last finished without an error (ms), for Settings. */
   lastSynced?: Partial<Record<SyncKind, number>>;
+  /**
+   * The days the user last synced classes for. Classes from today to its end
+   * follow the timetable and the class settings from then on.
+   */
+  classSync?: ClassSyncRange;
+  /**
+   * What each week's classes in the calendar were last written from (a hash
+   * of its timetable and the class settings), by the week's Monday, so a week
+   * is written again only when one of them changed.
+   */
+  writtenClassWeeks: Record<string, string>;
+}
+
+/** Beijing days (YYYY-MM-DD) of synced classes, and which timetable. */
+export interface ClassSyncRange {
+  first: string;
+  last: string;
+  graduate: boolean;
 }
 
 /** The syncs Settings › Calendar & Reminders shows a time for. */
@@ -37,6 +55,7 @@ export type SyncKind = 'courseSchedule' | AssignmentEventType;
 export const emptyCalendarSync = (): CalendarSyncState => ({
   syncedCalendarAssignments: {},
   syncedReminderAssignments: {},
+  writtenClassWeeks: {},
 });
 
 export const useCalendarSyncStore = create<CalendarSyncState>()(
@@ -92,6 +111,18 @@ export const removeEventIdForAssignment = (
 export const setLastSynced = (kind: SyncKind, time = Date.now()) => {
   useCalendarSyncStore.setState(state => ({
     lastSynced: { ...state.lastSynced, [kind]: time },
+  }));
+};
+
+/** Remembers the days whose classes the user synced. */
+export const setClassSync = (range: ClassSyncRange) => {
+  useCalendarSyncStore.setState({ classSync: range });
+};
+
+/** Notes what a week's classes in the calendar were just written from. */
+export const setClassWeekWritten = (weekStart: string, key: string) => {
+  useCalendarSyncStore.setState(state => ({
+    writtenClassWeeks: { ...state.writtenClassWeeks, [weekStart]: key },
   }));
 };
 

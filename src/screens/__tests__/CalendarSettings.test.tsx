@@ -106,14 +106,19 @@ it('asks how long before a class to alarm once class alarms are on', async () =>
 
 it('turns assignment sync on and off through the sync hook', async () => {
   await renderScreen();
+  expect(screen.getByText(t('assignmentSyncDescription'))).toBeTruthy();
+  // Each sync's options show only while it's on.
+  expect(screen.queryByText(t('assignmentCalendarAlarm'))).toBeNull();
+  expect(screen.queryByText(t('assignmentReminderAlarm'))).toBeNull();
   await toggle(t('setupCalendar'), true);
   expect(setSyncEnabled).toHaveBeenCalledWith('calendar', true);
   await toggle(t('setupReminders'), true);
   expect(setSyncEnabled).toHaveBeenCalledWith('reminder', true);
 });
 
-it('shows the event length and alarm options while calendar sync is on', async () => {
+it('shows the alert options of the syncs that are on', async () => {
   setSetting('assignmentCalendarSync', true);
+  setSetting('assignmentReminderSync', true);
   setSetting('alarms', {
     ...getSettings().alarms,
     assignmentCalendarAlarm: true,
@@ -122,7 +127,6 @@ it('shows the event length and alarm options while calendar sync is on', async (
   });
   await renderScreen();
   for (const label of [
-    'calendarEventLength',
     'assignmentCalendarAlarmOffset',
     'assignmentCalendarSecondAlarmOffset',
     'assignmentReminderAlarmOffset',
