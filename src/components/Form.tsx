@@ -221,9 +221,19 @@ const NumberFocusContext = createContext<((focused: boolean) => void) | null>(
  * Form keeps its rows inside the safe area itself and draws its grouped
  * background out to the screen's edges, as Settings does in landscape; inside
  * `SafeArea` that background would stop at the safe area instead.
+ *
+ * Not collapsable: a view with only a background color doesn't form a
+ * stacking context, so React Native would mount the Form beside it instead of
+ * inside. UIKit looks for the scroll view that collapses a large title and
+ * tints the header down the screen's first subviews, and would stop at this
+ * empty view: Today's large title stayed over the list as it scrolled.
  */
 export const FormScreen: React.FC<ViewProps> = ({ style, ...props }) => (
-  <View style={[styles.fill, styles.screen, style]} {...props} />
+  <View
+    collapsable={false}
+    style={[styles.fill, styles.screen, style]}
+    {...props}
+  />
 );
 
 // The header's glass over what scrolls under it, as for the app's other

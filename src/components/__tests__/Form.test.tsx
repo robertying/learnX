@@ -16,6 +16,7 @@ import {
   FormNumberField,
   FormParagraph,
   FormProgress,
+  FormScreen,
   FormSection,
   FormText,
   FormTextField,
@@ -401,6 +402,23 @@ describe('Form', () => {
     await screen.rerender(view(false));
     expect(screen.queryByTestId('progress')).toBeNull();
     expect(screen.getByText('Chapters 4 and 5')).toBeTruthy();
+  });
+  it("keeps the Form inside the screen's view, where UIKit finds its scroll view", async () => {
+    await render(
+      <FormScreen testID="screen">
+        <Form testID="form">
+          <FormSection>
+            <FormText title="Row" />
+          </FormSection>
+        </Form>
+      </FormScreen>,
+    );
+    // A collapsable view with only a background would have its children
+    // mounted beside it, and the large title would never collapse.
+    expect(screen.getByTestId('screen')).toHaveProp('collapsable', false);
+    expect(screen.getByTestId('screen')).toContainElement(
+      screen.getByTestId('form'),
+    );
   });
 });
 
