@@ -266,8 +266,14 @@ jobs:
           arch: x86_64
           profile: pixel_7
           disable-animations: true
+          # About a minute after boot, the emulator sometimes drops its adb
+          # connection for a moment ("device offline"), which fails whichever
+          # flow is running. A throwaway reset first starts Maestro's driver
+          # and gets past that window, so the flows below start on a settled
+          # device; its result doesn't count.
           script: |
             adb install -r build/app-x86_64-release.apk
+            scripts/e2e.sh android .maestro/subflows/reset.yaml || echo "Warm-up run failed; running the flows anyway"
             mkdir -p build/maestro; scripts/e2e.sh android --format junit --output build/maestro/report.xml --test-output-dir build/maestro; status=$?; adb logcat -d > build/maestro/logcat.txt; exit $status
 
       - name: Upload results
