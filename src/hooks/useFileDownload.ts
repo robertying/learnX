@@ -10,16 +10,13 @@ import { toast } from 'components/Toast';
 import { useSettings } from 'data/settings';
 import { DownloadableFile } from 'data/types/state';
 import { downloadFile } from 'services/files/downloads';
-import {
-  copyFileToMacDownloads,
-  openFile,
-  shareFile,
-} from 'services/files/share';
+import { saveFileOnMac, openFile, shareFile } from 'services/files/share';
+import { fileNameOf } from 'helpers/filename';
 import { t } from 'helpers/i18n';
 
 /**
  * Downloads a file on mount (from the cache when it is there) and offers
- * re-download, share, copy to the Mac Downloads folder and open. On Android
+ * re-download, share, save where people pick (Mac) and open. On Android
  * a non-PDF opens by itself after the download when the setting is on.
  *
  * Only the file given on first render is used: FileDetail remounts its
@@ -89,12 +86,16 @@ const useFileDownload = (file: DownloadableFile) => {
     }
   }, [downloadable]);
 
-  const copyToDownloads = useCallback(async () => {
+  const save = useCallback(async () => {
     try {
-      await copyFileToMacDownloads(downloadable, path);
-      toast(t('downloadToDownloadsSucceeded'), 'success');
+      if (await saveFileOnMac(downloadable, path)) {
+        toast(
+          t('saveFileSucceeded', { name: fileNameOf(downloadable) }),
+          'success',
+        );
+      }
     } catch {
-      toast(t('downloadToDownloadsFailed'), 'error');
+      toast(t('saveFileFailed'), 'error');
     }
   }, [path, downloadable]);
 
@@ -132,7 +133,7 @@ const useFileDownload = (file: DownloadableFile) => {
     }
   }, [path]);
 
-  return { path, progress, error, redownload, share, copyToDownloads, open };
+  return { path, progress, error, redownload, share, save, open };
 };
 
 export default useFileDownload;

@@ -123,7 +123,6 @@ const zh: typeof en = {
     '如果 learnX 无法访问日历或提醒事项，请在系统设置中允许。',
   exportSyncedCalendarsDescription:
     '将已同步到日历的课表与作业导出为 .ics 文件，可导入其他日历应用；不包含提醒事项。',
-  calendarExportSavedToDownloads: '已将 learnX.ics 导出到“下载”文件夹',
   calendarExportNoCalendarPermission:
     '导出失败：请在系统设置中允许 learnX 完全访问日历；如已允许，请重启 learnX。',
   calendarExportNoCalendarPermissionAndroid:
@@ -268,8 +267,8 @@ const zh: typeof en = {
   retryLogin: '使用已保存的账号登录',
   offlineMode: '离线使用',
   download: '下载',
-  downloadToDownloadsSucceeded: '已保存到“下载”文件夹',
-  downloadToDownloadsFailed: '无法保存到“下载”文件夹',
+  saveFileSucceeded: '已保存 {name}',
+  saveFileFailed: '无法保存文件',
   sso: '清华大学用户电子身份服务系统',
   ssoNote:
     '请在即将打开的网页中完成登录。如需更改网页中预填的账号或密码，请关闭网页，再在 learnX 登录界面重新输入正确的账号及密码。',

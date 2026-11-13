@@ -2,7 +2,6 @@
 // resolve to the toast to show. hooks/useCalendarSync adds loading state.
 import dayjs, { Dayjs } from 'dayjs';
 import type { ToastType } from 'components/Toast';
-import DeviceInfo from 'constants/DeviceInfo';
 import { ensureSession } from 'data/source';
 import { fetchCalendarRange } from 'data/schedule';
 import { Assignment } from 'data/types/state';
@@ -209,13 +208,13 @@ export const allowAssignmentSync = async (
   }
 };
 
-/** Shares (or on Mac, saves) the synced calendars as learnX.ics */
+/** Shares (or on Mac, saves where people pick) the synced calendars as learnX.ics */
 export const exportCalendars = async (): Promise<ToastMessage | undefined> => {
   try {
     const ics = await exportSyncedCalendarsToICS();
-    await exportTextFile('learnX.ics', ics, 'text/calendar');
-    if (DeviceInfo.isMac()) {
-      return { text: t('calendarExportSavedToDownloads'), type: 'success' };
+    const name = 'learnX.ics';
+    if (await exportTextFile(name, ics, 'text/calendar')) {
+      return { text: t('saveFileSucceeded', { name }), type: 'success' };
     }
   } catch (err) {
     return calendarExportErrorToast(err);

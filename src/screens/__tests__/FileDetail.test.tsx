@@ -48,7 +48,7 @@ const download = {
   error: false,
   redownload: jest.fn(),
   share: jest.fn(),
-  copyToDownloads: jest.fn(),
+  save: jest.fn(),
   open: jest.fn(),
 };
 const downloaded = (overrides: Partial<typeof download> = {}) =>
@@ -135,7 +135,7 @@ it('offers download on the Mac and open on Android', async () => {
   await renderScreen({ id: zip.id });
   const user = userEvent.setup();
   await user.press(screen.getByText(t('download')));
-  expect(download.copyToDownloads).toHaveBeenCalled();
+  expect(download.save).toHaveBeenCalled();
   await user.press(screen.getByText(t('open')));
   expect(download.open).toHaveBeenCalled();
   expect(screen.getByText(t('noFileDescription'))).toBeTruthy();

@@ -66,6 +66,7 @@ jest.mock('../modules/share', () => ({
   default: {
     takeSharedItem: jest.fn(() => null),
     getSharedFilesDirectory: jest.fn(() => null),
+    saveFile: jest.fn(() => Promise.resolve(true)),
     addListener: jest.fn(() => ({ remove: jest.fn() })),
   },
 }));

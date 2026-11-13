@@ -2,27 +2,52 @@ import { Directory, File, Paths } from 'expo-file-system';
 import * as IntentLauncher from 'expo-intent-launcher';
 import Share from 'react-native-share';
 import mime from 'mime';
+import ShareModule from '../../../modules/share';
 import { DownloadableFile } from 'data/types/state';
 import DeviceInfo from 'constants/DeviceInfo';
 import { fileNameOf, sanitizeFileName } from 'helpers/filename';
 import { t } from 'helpers/i18n';
 import { downloadFile, SHARED_DIR } from './downloads';
 
-/**
- * The Mac app's Downloads folder, next to its Documents folder in the app
- * container. The sandbox links it to the user's ~/Downloads.
- */
-const getMacDownloadDirectory = () =>
-  new Directory(Paths.document.parentDirectory, 'Downloads');
+/** Where a file is named for the save panel, under Caches. */
+const SAVE_DIR = 'save';
 
-export const copyFileToMacDownloads = async (
+/**
+ * Asks where to save a copy of a file named `name` (the Mac save panel; the
+ * Mac app may only write where people pick), after `stage` puts it in Caches
+ * under that name. Resolves to false when cancelled.
+ */
+const saveOnMac = async (
+  name: string,
+  stage: (file: File) => Promise<void>,
+) => {
+  if (!ShareModule) {
+    throw new Error('Saving files needs the LearnXShare module');
+  }
+  const dir = new Directory(Paths.cache, SAVE_DIR);
+  dir.create({ intermediates: true, idempotent: true });
+  const staged = new File(dir, name);
+  await stage(staged);
+  try {
+    return await ShareModule.saveFile(staged.uri);
+  } finally {
+    try {
+      staged.delete();
+    } catch {}
+  }
+};
+
+/**
+ * Asks where to save a copy of a downloaded file (Mac). Resolves to false when
+ * cancelled.
+ */
+export const saveFileOnMac = (
   file: Pick<DownloadableFile, 'title' | 'fileType'>,
   fromPath: string,
-) => {
-  const to = new File(getMacDownloadDirectory(), fileNameOf(file));
-  await new File(fromPath).copy(to, { overwrite: true });
-  return to.uri;
-};
+) =>
+  saveOnMac(fileNameOf(file), staged =>
+    new File(fromPath).copy(staged, { overwrite: true }),
+  );
 
 export const shareFile = async (file: DownloadableFile) => {
   const path = await downloadFile(file);
@@ -39,15 +64,18 @@ export const shareFile = async (file: DownloadableFile) => {
   });
 };
 
+/**
+ * Shares text as a file, or on Mac asks where to save it. Resolves to whether
+ * it was saved on Mac (false for the share sheet, or when cancelled).
+ */
 export const exportTextFile = async (
   filename: string,
   content: string,
   type: string,
-) => {
+): Promise<boolean> => {
   const name = sanitizeFileName(filename);
   if (DeviceInfo.isMac()) {
-    await new File(getMacDownloadDirectory(), name).write(content);
-    return;
+    return await saveOnMac(name, staged => staged.write(content));
   }
 
   const file = new File(Paths.cache, name);
@@ -60,6 +88,7 @@ export const exportTextFile = async (
     showAppsToView: true,
     failOnCancel: false,
   });
+  return false;
 };
 
 /** Lets the app that opens a file read it through its content URI. */
