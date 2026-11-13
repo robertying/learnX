@@ -64,7 +64,6 @@ interface CourseItemListProps<T extends Notice | Assignment | File> {
     onToggleFav?: () => void;
     archived?: boolean;
     onToggleArchived?: () => void;
-    swipeDisabled?: boolean;
     hideCourseName?: boolean;
     onPress?: () => void;
     last?: boolean;
@@ -76,11 +75,6 @@ interface CourseItemListProps<T extends Notice | Assignment | File> {
   refresh: { isPending: boolean; mutate: () => void };
   /** The height of the tabs floating over the top of the list. */
   topInset: number;
-  /**
-   * The pager swipes between the tabs (Android, and iOS before 26), so the
-   * cards don't: their actions are in the long-press menu.
-   */
-  swipeDisabled: boolean;
 }
 
 /** One of the course's notices, assignments and files tabs. */
@@ -91,15 +85,13 @@ const CourseItemList = <T extends Notice | Assignment | File>({
   type,
   refresh,
   topInset,
-  swipeDisabled,
 }: CourseItemListProps<T>) => {
   const navigation = useNavigation<NavigationProp>();
   const loggedIn = useLoggedIn();
+  // Every item of the course, archived ones too, which their cards show as
+  // such (Unarchive in their actions).
   const archivedIds = useUserData(userData => userData.archived[type]);
-  // As on the tab's All list, an archived item is gone from here too, so a
-  // swipe that archives takes the row away.
   const archivedSet = new Set(archivedIds);
-  const shown = data.filter(item => !archivedSet.has(item.id));
 
   const handleRefresh = () => {
     if (loggedIn) {
@@ -109,22 +101,23 @@ const CourseItemList = <T extends Notice | Assignment | File>({
 
   return (
     <View style={Styles.flex1}>
-      {shown.length ? null : (
+      {data.length ? null : (
         <ListBackground>
           <Empty type={type} />
         </ListBackground>
       )}
       <FlatList
-        data={shown}
+        data={data}
         renderItem={({ item, index }) => (
           <Card
             data={item}
-            last={index === shown.length - 1}
+            last={index === data.length - 1}
             fav={!!item.isFavorite}
             onToggleFav={() => toggleFavorite(type, item.id, !!item.isFavorite)}
-            archived={false}
-            onToggleArchived={() => toggleArchived(type, [item.id], false)}
-            swipeDisabled={swipeDisabled}
+            archived={archivedSet.has(item.id)}
+            onToggleArchived={() =>
+              toggleArchived(type, [item.id], archivedSet.has(item.id))
+            }
             hideCourseName
             onPress={() => navigation.push(detailScreen, { id: item.id })}
           />
@@ -221,7 +214,6 @@ const CourseDetailContent: React.FC<{
             type="notice"
             refresh={refreshNotices}
             topInset={tabsHeight}
-            swipeDisabled={!hasGlassHeader}
           />
         );
       case 'assignment':
@@ -233,7 +225,6 @@ const CourseDetailContent: React.FC<{
             type="assignment"
             refresh={refreshAssignments}
             topInset={tabsHeight}
-            swipeDisabled={!hasGlassHeader}
           />
         );
       case 'file':
@@ -245,7 +236,6 @@ const CourseDetailContent: React.FC<{
             type="file"
             refresh={refreshFiles}
             topInset={tabsHeight}
-            swipeDisabled={!hasGlassHeader}
           />
         );
       default:
@@ -318,6 +308,9 @@ const CourseDetailContent: React.FC<{
         renderScene={renderScene}
         renderTabBar={renderTabBar}
         onIndexChange={setIndex}
+        // The cards swipe for their actions, so the pages change only from
+        // the tabs, as with the floating tabs from iOS 26.
+        swipeEnabled={false}
         tabBarPosition="top"
         initialLayout={{ width: initialWidth }}
       />
