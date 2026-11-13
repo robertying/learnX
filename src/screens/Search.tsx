@@ -112,24 +112,30 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
     assignments: assignmentResult,
     files: fileResult,
   } = useSearch(notices, assignments, files, searchQuery);
+  const hasResults =
+    noticeResult.length > 0 ||
+    assignmentResult.length > 0 ||
+    fileResult.length > 0;
 
   return (
     <SafeArea>
       <View style={Styles.flex1}>
-        {noticeResult.length === 0 &&
-        assignmentResult.length === 0 &&
-        fileResult.length === 0 ? (
+        {/* Behind the results and always mounted: a KeyboardAvoidingView
+            that mounts while the keyboard is up (after the query is cleared)
+            never learns its height, so the prompt would sit behind it. */}
+        <View style={StyleSheet.absoluteFill} pointerEvents="none">
           <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={Styles.flex1}
           >
-            {searchQuery.trim() ? (
+            {hasResults ? null : searchQuery.trim() ? (
               <StatusView icon="noResults" message={t('noResults')} />
             ) : (
               <StatusView icon="search" message={t('searchPrompt')} />
             )}
           </KeyboardAvoidingView>
-        ) : (
+        </View>
+        {hasResults ? (
           <SectionList<Notice | Assignment | File>
             contentInsetAdjustmentBehavior="automatic"
             keyboardDismissMode="on-drag"
@@ -189,7 +195,7 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
               ) : null
             }
           />
-        )}
+        ) : null}
       </View>
     </SafeArea>
   );

@@ -18,7 +18,14 @@ describe('attachmentFile', () => {
       title: 'report',
       downloadUrl: 'https://learn.tsinghua.edu.cn/f1',
       fileType: 'docx',
+      size: '1 MB',
     });
+  });
+
+  it('leaves the size out when the attachment has none', () => {
+    expect(attachmentFile(course, { ...remote, size: '' })).not.toHaveProperty(
+      'size',
+    );
   });
 
   it('takes the extension from the MIME type when there is one', () => {

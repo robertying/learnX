@@ -127,6 +127,11 @@ const CourseItemList = <T extends Notice | Assignment | File>({
         onRefresh={handleRefresh}
         contentInsetAdjustmentBehavior={listContentInsetAdjustmentBehavior}
         contentInset={{ top: topInset }}
+        // Starts at the top of its inset. React Native reuses scroll views,
+        // and one that showed a list before keeps the offset it was given
+        // (none: zero), which UIKit then moves by the header's height only,
+        // so a list opened after a tab switch sat under the tabs.
+        contentOffset={{ x: 0, y: -topInset }}
         scrollIndicatorInsets={{ top: topInset }}
       />
     </View>
