@@ -1,5 +1,5 @@
 diff --git a/android/build.gradle b/android/build.gradle
-index 34da324..c712401 100644
+index 34da3248a540ad228acc7c4efdf294bf2f3b79e4..c71240157665954cdced448a99991ee37b97577a 100644
 --- a/android/build.gradle
 +++ b/android/build.gradle
 @@ -143,6 +143,6 @@ dependencies {
@@ -13,7 +13,7 @@ index 34da324..c712401 100644
  }
 diff --git a/android/src/main/java/com/github/barteksc/pdfviewer/RecycleSafeRendering.java b/android/src/main/java/com/github/barteksc/pdfviewer/RecycleSafeRendering.java
 new file mode 100644
-index 0000000..9baf55a
+index 0000000000000000000000000000000000000000..9baf55a7fcd7d3f53bd912f02ea600beaf07d759
 --- /dev/null
 +++ b/android/src/main/java/com/github/barteksc/pdfviewer/RecycleSafeRendering.java
 @@ -0,0 +1,92 @@
@@ -110,7 +110,7 @@ index 0000000..9baf55a
 +    }
 +}
 diff --git a/android/src/main/java/org/wonday/pdf/PdfView.java b/android/src/main/java/org/wonday/pdf/PdfView.java
-index c3d3245..f992212 100644
+index c3d32451689234c3036e5ebb9340f0e49b359f8e..f9922125c3a11c2075757e6db15118ae9a735493 100644
 --- a/android/src/main/java/org/wonday/pdf/PdfView.java
 +++ b/android/src/main/java/org/wonday/pdf/PdfView.java
 @@ -34,6 +34,7 @@ import io.legere.pdfiumandroid.DefaultLogger;
@@ -145,10 +145,10 @@ index c3d3245..f992212 100644
      // the view leaves the window — e.g. while another screen is stacked over this
      // one on Android. Snapshot the viewport before that happens; loadComplete
 diff --git a/ios/RNPDFPdf/RNPDFPdfView.mm b/ios/RNPDFPdf/RNPDFPdfView.mm
-index 1bc263b..870fd96 100644
+index 1bc263bb95c584c950583d42485059b8bf34168b..f62c4f00ce8b147fe298a2c2ccfde2810403e477 100644
 --- a/ios/RNPDFPdf/RNPDFPdfView.mm
 +++ b/ios/RNPDFPdf/RNPDFPdfView.mm
-@@ -451,32 +451,30 @@ - (void)didSetProps:(NSArray<NSString *> *)changedProps
+@@ -451,32 +451,30 @@ using namespace facebook::react;
                  pdfPageRect = CGRectMake(0, 0, pdfPageRect.size.height, pdfPageRect.size.width);
              }
  
@@ -191,3 +191,12 @@ index 1bc263b..870fd96 100644
          }
  
          if (_pdfDocument && ([changedProps containsObject:@"path"] || [changedProps containsObject:@"scale"])) {
+@@ -544,7 +542,7 @@ using namespace facebook::react;
+                     for (UIView *subview in self->_pdfView.subviews) {
+                         if ([subview isKindOfClass:[UIScrollView class]]) {
+                             UIScrollView *scrollView = (UIScrollView *)subview;
+-                            [scrollView setContentOffset:CGPointMake(0, 0) animated:NO];
++                            [scrollView setContentOffset:CGPointMake(-scrollView.adjustedContentInset.left, -scrollView.adjustedContentInset.top) animated:NO];
+                             break;
+                         }
+                     }

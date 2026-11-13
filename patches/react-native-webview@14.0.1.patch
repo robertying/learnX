@@ -1,8 +1,50 @@
 diff --git a/apple/RNCWebViewImpl.m b/apple/RNCWebViewImpl.m
-index 3890426..a84c336 100644
+index 38904266dc37b006274104f4680778ffbfece369..37f90812d5ce295f70d948dcc5b458b4c39f8ed1 100644
 --- a/apple/RNCWebViewImpl.m
 +++ b/apple/RNCWebViewImpl.m
-@@ -1216,11 +1216,16 @@ - (void)                    webView:(WKWebView *)webView
+@@ -148,6 +148,8 @@ RCTAutoInsetsProtocol>
+ 
+ #if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= 110000 /* __IPHONE_11_0 */
+   UIScrollViewContentInsetAdjustmentBehavior _savedContentInsetAdjustmentBehavior;
++  // Set when a page finishes loading at its top, until someone scrolls or zooms.
++  BOOL _keepsTopInset;
+ #endif
+ #if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= 130000 /* __IPHONE_13_0 */
+   BOOL _savedAutomaticallyAdjustsScrollIndicatorInsets;
+@@ -1038,8 +1040,24 @@ RCTAutoInsetsProtocol>
+ // UIScrollViewDelegate method
+ - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
+ {
++  _keepsTopInset = NO;
+   scrollView.decelerationRate = _decelerationRate;
+ }
++
++// UIScrollViewDelegate method
++- (void)scrollViewWillBeginZooming:(UIScrollView *)scrollView withView:(UIView *)view
++{
++  _keepsTopInset = NO;
++}
++
++- (void)keepTopInset:(UIScrollView *)scrollView
++{
++  CGFloat top = scrollView.adjustedContentInset.top;
++  if (_keepsTopInset && top > 0 && scrollView.contentOffset.y > -top &&
++      scrollView.contentOffset.y <= 0) {
++    scrollView.contentOffset = CGPointMake(scrollView.contentOffset.x, -top);
++  }
++}
+ #endif // !TARGET_OS_OSX
+ 
+ - (void)setUserAgent:(NSString*)userAgent
+@@ -1060,6 +1078,7 @@ RCTAutoInsetsProtocol>
+ // UIScrollViewDelegate method
+ - (void)scrollViewDidScroll:(UIScrollView *)scrollView
+ {
++  [self keepTopInset:scrollView];
+   // Don't allow scrolling the scrollView.
+   if (!_scrollEnabled) {
+     scrollView.bounds = _webView.bounds;
+@@ -1216,11 +1235,16 @@ RCTAutoInsetsProtocol>
  - (void)webView:(WKWebView *)webView runJavaScriptAlertPanelWithMessage:(NSString *)message initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(void))completionHandler
  {
  #if !TARGET_OS_OSX
@@ -20,7 +62,7 @@ index 3890426..a84c336 100644
  #else
    NSAlert *alert = [[NSAlert alloc] init];
    [alert setMessageText:message];
-@@ -1235,6 +1240,11 @@ - (void)webView:(WKWebView *)webView runJavaScriptAlertPanelWithMessage:(NSStrin
+@@ -1235,6 +1259,11 @@ RCTAutoInsetsProtocol>
   */
  - (void)webView:(WKWebView *)webView runJavaScriptConfirmPanelWithMessage:(NSString *)message initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(BOOL))completionHandler{
  #if !TARGET_OS_OSX
@@ -32,7 +74,7 @@ index 3890426..a84c336 100644
    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"" message:message preferredStyle:UIAlertControllerStyleAlert];
    [alert addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(__unused UIAlertAction *action) {
      completionHandler(YES);
-@@ -1242,7 +1252,7 @@ - (void)webView:(WKWebView *)webView runJavaScriptConfirmPanelWithMessage:(NSStr
+@@ -1242,7 +1271,7 @@ RCTAutoInsetsProtocol>
    [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(__unused UIAlertAction *action) {
      completionHandler(NO);
    }]];
@@ -41,7 +83,7 @@ index 3890426..a84c336 100644
  #else
    NSAlert *alert = [[NSAlert alloc] init];
    [alert setMessageText:message];
-@@ -1260,6 +1270,11 @@ - (void)webView:(WKWebView *)webView runJavaScriptConfirmPanelWithMessage:(NSStr
+@@ -1260,6 +1289,11 @@ RCTAutoInsetsProtocol>
   */
  - (void)webView:(WKWebView *)webView runJavaScriptTextInputPanelWithPrompt:(NSString *)prompt defaultText:(NSString *)defaultText initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(NSString *))completionHandler{
  #if !TARGET_OS_OSX
@@ -53,7 +95,7 @@ index 3890426..a84c336 100644
    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"" message:prompt preferredStyle:UIAlertControllerStyleAlert];
    [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
      textField.text = defaultText;
-@@ -1273,7 +1288,7 @@ - (void)webView:(WKWebView *)webView runJavaScriptTextInputPanelWithPrompt:(NSSt
+@@ -1273,7 +1307,7 @@ RCTAutoInsetsProtocol>
    }];
    [alert addAction:cancelAction];
    alert.preferredAction = okAction;
@@ -62,7 +104,7 @@ index 3890426..a84c336 100644
  #else
    NSAlert *alert = [[NSAlert alloc] init];
    [alert setMessageText:prompt];
-@@ -1333,6 +1348,19 @@ -(UIViewController *)topViewController{
+@@ -1333,6 +1367,19 @@ RCTAutoInsetsProtocol>
    return RCTPresentedViewController();
  }
  
@@ -82,8 +124,24 @@ index 3890426..a84c336 100644
  #endif // !TARGET_OS_OSX
  
  /**
+@@ -1586,6 +1633,15 @@ didFinishNavigation:(WKNavigation *)navigation
+     [self forceIgnoreSilentHardwareSwitch:true];
+   }
+ 
++#if !TARGET_OS_OSX
++  // A page that loads at its top stays at the top of the content inset (under
++  // a translucent navigation bar) until someone scrolls: WebKit scales an
++  // image document to fit after it loads and leaves it at offset 0, with its
++  // top under the bar.
++  _keepsTopInset = _webView.scrollView.contentOffset.y <= 0;
++  [self keepTopInset:_webView.scrollView];
++#endif // !TARGET_OS_OSX
++
+   if (_onLoadingFinish) {
+     _onLoadingFinish([self baseEvent]);
+   }
 diff --git a/index.d.ts b/index.d.ts
-index 10b9c14..f3268db 100644
+index 10b9c145b920a6a2ba1fb09bd72150328fafe211..f3268db390f7cc90d455c9ccab179a2b9b3419a2 100644
 --- a/index.d.ts
 +++ b/index.d.ts
 @@ -5,7 +5,9 @@ export { FileDownload, WebViewMessageEvent, WebViewNavigation } from './lib/WebV
