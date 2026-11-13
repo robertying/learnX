@@ -1,0 +1,31 @@
+// Tests of what the patches in patches/ change in libraries' Android code
+// (src/test: JUnit, Robolectric, MockK; scripts/test-android.sh runs them).
+// Nothing links this project: it only has tests, against the patched
+// libraries' Gradle projects.
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+// The Expo module plugin wants both, though nothing is published.
+group = 'io.robertying.learnx'
+version = '1.0.0'
+
+android {
+  namespace = "io.robertying.learnx.patches"
+}
+
+apply from: "../../modules/unit-tests.gradle"
+
+dependencies {
+  testImplementation project(':expo-calendar')
+  testImplementation project(':expo-document-picker')
+  testImplementation project(':expo-widgets')
+  testImplementation project(':react-native-pdf')
+  // What those libraries use without exposing it to their dependents.
+  testImplementation 'com.facebook.react:react-android'
+  testImplementation 'androidx.glance:glance-appwidget:1.2.0'
+  testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2'
+  testImplementation 'com.github.zacharee:AndroidPdfViewer:4.0.1'
+  testImplementation 'io.legere:pdfiumandroid:1.0.35'
+}

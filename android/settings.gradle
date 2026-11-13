@@ -39,4 +39,6 @@ rootProject.name = "learnX"
 expoAutolinking.useExpoVersionCatalog()
 
 include ":app"
+// Tests of what the patches in patches/ change (android/patch-tests).
+include ":patch-tests"
 includeBuild(expoAutolinking.reactNativeGradlePlugin)
