@@ -150,10 +150,16 @@ export default {
     'Reminders alerts at the deadline and the minutes before it, and lists each reminder at its earliest alert.',
   assignmentSyncDescription:
     "Upcoming assignments are added and kept up to date whenever learnX gets assignments. Past-due assignments aren't added, and archived ones and those of hidden courses are removed.",
+  assignmentCalendarSyncOffCaption:
+    'Adds upcoming assignments to your calendar and keeps them up to date.',
+  assignmentReminderSyncOffCaption:
+    'Adds upcoming assignments to Reminders and keeps them up to date.',
   clearFileCache: 'Delete All Downloads',
   clearFileCacheEllipsis: 'Delete All Downloads…',
   clearFileCacheConfirmation:
-    "Delete all downloaded files? This can't be undone.",
+    "Delete all downloaded files? Files you exported or saved elsewhere aren't deleted. This can't be undone.",
+  downloadsDeleteKeepsExported:
+    "Files you exported or saved elsewhere aren't deleted.",
   clearFileCacheSucceeded: 'Deleted all downloads',
   fileDownloadFailed: "Couldn't download the file. Try again.",
   openFileFailed:
@@ -402,8 +408,11 @@ export default {
   semesterSummer: 'Summer',
   shareFile: 'Share File',
   submissionAttachmentName: '{title} Submission.{ext}',
-  courseScheduleSyncCaption:
-    "When on, this week's and next week's {type} classes are added to your calendar and kept up to date with the timetable and these settings. For more weeks, tap Sync More Dates and pick the dates; those classes are kept up to date too.",
+  courseScheduleSyncOffCaption:
+    "Adds this week's and next week's {type} classes to your calendar and keeps them up to date with the timetable.",
+  courseScheduleSyncOnCaption:
+    "This week's and next week's {type} classes are kept up to date with the timetable and the settings above. For more weeks, tap Sync More Dates and pick the dates; those classes are kept up to date too.",
+  syncDatesBeijingCaption: 'The dates you pick are Beijing dates.',
   graduateSchedule: 'graduate',
   undergraduateSchedule: 'undergraduate',
   courseInformationSharingOnCaption:
@@ -482,7 +491,8 @@ export default {
   setupCalendar: 'Add Assignments to Calendar',
   setupCourseCalendar: 'Add Schedule to Calendar',
   setupReminders: 'Add Assignments to Reminders',
-  remindersSection: 'Reminders',
+  assignmentsInCalendarSection: 'Assignments in Calendar',
+  assignmentsInRemindersSection: 'Assignments in Reminders',
   lastSynced: 'Last synced {time}.',
   syncedEventsSection: 'Synced Events',
   setupCaption: 'You can change these any time in Settings.',

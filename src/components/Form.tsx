@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import {
+  Keyboard,
   PlatformColor,
   StyleSheet,
   useWindowDimensions,
@@ -32,6 +33,8 @@ import {
   Text,
   TextField,
   Toggle,
+  Toolbar,
+  ToolbarItem,
   useNativeState,
   VStack,
   ZStack,
@@ -160,18 +163,39 @@ export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
       });
   }, [navigation]);
 
+  const form = (
+    <SwiftUIForm
+      modifiers={[
+        // Dragging the form down pulls the keyboard away, as in Notes.
+        scrollDismissesKeyboard('interactively'),
+        ...(DeviceInfo.isMac() ? macFormModifiers : glassHeaderModifiers),
+        ...(onRefresh ? [refreshable(onRefresh)] : []),
+      ]}
+    >
+      {lastSectionMarked(children)}
+    </SwiftUIForm>
+  );
+
   return (
     <ThemedHost style={styles.fill} testID={testID}>
-      <SwiftUIForm
-        modifiers={[
-          // Dragging the form down pulls the keyboard away, as in Notes.
-          scrollDismissesKeyboard('interactively'),
-          ...(DeviceInfo.isMac() ? macFormModifiers : glassHeaderModifiers),
-          ...(onRefresh ? [refreshable(onRefresh)] : []),
-        ]}
-      >
-        {lastSectionMarked(children)}
-      </SwiftUIForm>
+      {DeviceInfo.isMac() ? (
+        form
+      ) : (
+        // Done above the keyboard puts it away: the number pad has no
+        // return key. (The Mac's keyboard has one.)
+        <Toolbar>
+          {form}
+          <Toolbar.Content>
+            <ToolbarItem placement="keyboard">
+              <Button
+                label={t('done')}
+                onPress={() => Keyboard.dismiss()}
+                testID="keyboard-done"
+              />
+            </ToolbarItem>
+          </Toolbar.Content>
+        </Toolbar>
+      )}
     </ThemedHost>
   );
 };

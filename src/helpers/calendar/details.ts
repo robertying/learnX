@@ -116,7 +116,8 @@ export interface AssignmentEventInput {
  * iOS reminder for an assignment, due at the deadline. With the alert on, it
  * alerts then and the chosen minutes before. Reminders lists a reminder at its
  * earliest alert (apps can't set Early Reminder), while the due date stays
- * the deadline. Its link opens the assignment in learnX.
+ * the deadline. Its link, at the end of its notes, opens the assignment in
+ * learnX.
  */
 export const buildAssignmentReminderDetails = (
   settings: SettingsState,
@@ -133,6 +134,7 @@ export const buildAssignmentReminderDetails = (
   const before =
     alarms.assignmentReminderAlarmOffset ??
     calendarDefaults.assignmentReminderAlarmOffset;
+  const url = getTargetUrl({ type: 'assignment', id: assignmentId });
   return {
     title,
     // No start date, so the alerts count from the due date.
@@ -147,8 +149,10 @@ export const buildAssignmentReminderDetails = (
     timeZone: deviceTimeZone(),
     completed,
     completionDate: completionDate?.toDate(),
-    notes: note,
-    url: getTargetUrl({ type: 'assignment', id: assignmentId }),
+    // Reminders doesn't show the url field that apps can set, so the link
+    // also ends the notes, where it can be tapped.
+    notes: [note, url].filter(Boolean).join('\n\n'),
+    url,
   };
 };
 

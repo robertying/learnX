@@ -145,9 +145,14 @@ const zh: typeof en = {
     '提醒事项会在截止时和截止前提醒，列表中显示最早的提醒时间。',
   assignmentSyncDescription:
     'learnX 每次获取作业时都会添加并更新未截止的作业；已截止的作业不会添加，已归档的作业和已屏蔽课程的作业会被移除。',
+  assignmentCalendarSyncOffCaption: '将未截止的作业添加到日历，并自动更新。',
+  assignmentReminderSyncOffCaption:
+    '将未截止的作业添加到提醒事项，并自动更新。',
   clearFileCache: '删除全部已下载文件',
   clearFileCacheEllipsis: '删除全部已下载文件…',
-  clearFileCacheConfirmation: '确定删除全部已下载的文件？此操作不可撤销。',
+  clearFileCacheConfirmation:
+    '确定删除全部已下载的文件？已导出或存储到其他位置的文件不会被删除。此操作不可撤销。',
+  downloadsDeleteKeepsExported: '已导出或存储到其他位置的文件不会被删除。',
   clearFileCacheSucceeded: '已删除全部已下载文件',
   fileDownloadFailed: '文件下载失败，请重试。',
   openFileFailed: '无法打开文件。请重新下载，或安装可打开此类文件的应用。',
@@ -388,8 +393,11 @@ const zh: typeof en = {
   semesterSummer: '夏季学期',
   shareFile: '分享文件',
   submissionAttachmentName: '{title}-提交.{ext}',
-  courseScheduleSyncCaption:
-    '开启后，本周和下周的{type}课程会自动添加到日历，并随课表和以上设置更新。如需更多周，点按同步更多日期并选择日期，这些课程同样会自动更新。',
+  courseScheduleSyncOffCaption:
+    '将本周和下周的{type}课程添加到日历，并随课表自动更新。',
+  courseScheduleSyncOnCaption:
+    '本周和下周的{type}课程会随课表和以上设置自动更新。如需更多周，点按同步更多日期并选择日期，这些课程同样会自动更新。',
+  syncDatesBeijingCaption: '所选日期为北京时间的日期。',
   graduateSchedule: '研究生',
   undergraduateSchedule: '本科生',
   courseInformationSharingOnCaption:
@@ -465,7 +473,8 @@ const zh: typeof en = {
   setupCalendar: '将作业添加到日历',
   setupCourseCalendar: '将课表添加到日历',
   setupReminders: '将作业添加到提醒事项',
-  remindersSection: '提醒事项',
+  assignmentsInCalendarSection: '日历中的作业',
+  assignmentsInRemindersSection: '提醒事项中的作业',
   lastSynced: '上次同步于 {time}。',
   syncedEventsSection: '已同步的日程',
   setupCaption: '之后可以随时在设置中更改。',

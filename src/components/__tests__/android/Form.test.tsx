@@ -7,7 +7,7 @@ import {
 } from '@testing-library/react-native';
 import { useState } from 'react';
 import type * as ReactNative from 'react-native';
-import { StyleSheet, Text } from 'react-native';
+import { Keyboard, StyleSheet, Text } from 'react-native';
 import { showChoices } from 'components/choiceSheet';
 import { playHaptic } from 'services/haptics';
 import {
@@ -284,6 +284,10 @@ describe('Form (Android)', () => {
     expect(onValueChange).not.toHaveBeenCalled();
     await fireEvent.changeText(field, '30');
     expect(onValueChange).toHaveBeenCalledWith(30);
+    // The keyboard's done key puts the keyboard away.
+    const dismiss = jest.spyOn(Keyboard, 'dismiss');
+    await fireEvent(field, 'submitEditing');
+    expect(dismiss).toHaveBeenCalled();
   });
 
   it('shows paragraphs, the profile and React Native views in rows', async () => {

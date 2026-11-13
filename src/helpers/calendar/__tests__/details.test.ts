@@ -117,9 +117,16 @@ describe('buildAssignmentReminderDetails', () => {
       timeZone: 'Asia/Shanghai',
       completed: true,
       completionDate: completionDate.toDate(),
-      notes: 'Read chapter 2',
+      // Reminders shows the link only in the notes.
+      notes: 'Read chapter 2\n\nlearnx://assignment/a1',
       url: 'learnx://assignment/a1',
     });
+  });
+
+  it('has only the link for notes when the assignment has none', () => {
+    expect(
+      buildAssignmentReminderDetails(settingsWith(), input({ note: '' })).notes,
+    ).toBe('learnx://assignment/a1');
   });
 
   it('alerts at the deadline, and early by the offset, a day by default', () => {

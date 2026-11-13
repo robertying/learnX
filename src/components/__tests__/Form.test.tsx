@@ -6,7 +6,7 @@ import {
   waitFor,
 } from '@testing-library/react-native';
 import { useState } from 'react';
-import { PlatformColor, Text } from 'react-native';
+import { Keyboard, PlatformColor, Text } from 'react-native';
 import {
   Form,
   FormButton,
@@ -234,6 +234,27 @@ describe('Form', () => {
     await fireEvent.changeText(field, '30');
     expect(onValueChange).toHaveBeenCalledTimes(1);
     expect(onValueChange).toHaveBeenCalledWith(30);
+  });
+
+  it('puts the keyboard away with Done above it, except on the Mac', async () => {
+    const dismiss = jest.spyOn(Keyboard, 'dismiss');
+    await render(
+      <Form>
+        <FormSection>
+          <FormNumberField
+            title="Minutes"
+            value={15}
+            onValueChange={jest.fn()}
+          />
+        </FormSection>
+      </Form>,
+    );
+    await userEvent.setup().press(screen.getByTestId('keyboard-done'));
+    expect(dismiss).toHaveBeenCalled();
+
+    jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+    await render(<Form />);
+    expect(screen.queryByTestId('keyboard-done')).toBeNull();
   });
 
   it('names a text field for screen readers by its label', async () => {
