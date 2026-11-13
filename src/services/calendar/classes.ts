@@ -20,6 +20,7 @@ import { type CalendarClass, startOfWeek } from 'helpers/schedule';
 import { beijingDate } from 'helpers/serverTime';
 import { hash } from 'helpers/text';
 import {
+  findCourseCalendar,
   getCourseCalendar,
   hasPermission,
   requirePermission,
@@ -164,24 +165,67 @@ const followedWeeks = (now: number) => {
 };
 
 /**
+ * The followed weeks to write: each whose classes or class settings changed
+ * since it was last written, and each with fewer events from today on than
+ * classes, as when the user deleted some, or the whole calendar, in the
+ * Calendar app. One listing of the calendar at most. Never asks for the
+ * permission: none without it.
+ */
+const weeksToWrite = async (now: number) => {
+  const weeks = followedWeeks(now);
+  if (weeks.length === 0 || !(await hasPermission('calendar'))) {
+    return [];
+  }
+  const { writtenClassWeeks } = getCalendarSync();
+  const today = beijingDate(now);
+  const settings = getSettings();
+  const calendar = await findCourseCalendar();
+  const events = new Map<string, number>();
+  if (calendar) {
+    const listed = await calendar.listEvents(
+      dayStart(later(today, weeks[0].week)),
+      dayStart(addDays(weeks[weeks.length - 1].week, 7)),
+    );
+    for (const e of listed) {
+      const week = startOfWeek(beijingDate(new Date(e.startDate))).format(
+        'YYYY-MM-DD',
+      );
+      events.set(week, (events.get(week) ?? 0) + 1);
+    }
+  }
+  return weeks.flatMap(({ week, classes }) => {
+    const key = weekKey(classes, settings);
+    const ahead = classes.filter(c => classDay(c) >= today).length;
+    return writtenClassWeeks[week] !== key || (events.get(week) ?? 0) < ahead
+      ? [{ week, classes, key }]
+      : [];
+  });
+};
+
+/**
+ * Whether the course calendar is behind the saved timetable: a week changed,
+ * or classes from today on are missing from it. For the surfaces to check on
+ * each refresh (`services/surfaces`).
+ */
+export const syncedClassesMissing = async (now = Date.now()) =>
+  (await weeksToWrite(now)).length > 0;
+
+/**
  * With course calendar sync on, writes the saved timetable's classes from
  * today on: each week whose classes or class settings changed since it was
- * last written. Never asks for the permission and does nothing without it.
+ * last written, or whose events were deleted outside learnX. Never asks for
+ * the permission and does nothing without it.
  */
 export const updateSyncedClasses = (now = Date.now()) =>
   serially(async () => {
-    const { writtenClassWeeks } = getCalendarSync();
-    const today = beijingDate(now);
-    const settings = getSettings();
-    const changedWeeks = followedWeeks(now).flatMap(({ week, classes }) => {
-      const key = weekKey(classes, settings);
-      return writtenClassWeeks[week] !== key ? [{ week, classes, key }] : [];
-    });
-    if (changedWeeks.length === 0 || !(await hasPermission('calendar'))) {
+    const weeks = await weeksToWrite(now);
+    if (weeks.length === 0) {
       return;
     }
+    const today = beijingDate(now);
+    const settings = getSettings();
     const calendar = await getCourseCalendar();
-    for (const { week, classes, key } of changedWeeks) {
+    for (const { week, classes, key } of weeks) {
       await replaceDays(
         calendar,
         classes,

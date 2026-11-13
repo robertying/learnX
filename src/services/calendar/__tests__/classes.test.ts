@@ -10,6 +10,7 @@ import { resetSettings, setSetting } from 'data/settings';
 import type { CalendarClass } from 'helpers/schedule';
 import {
   saveClassesToCalendar,
+  syncedClassesMissing,
   syncedClassWeeks,
   updateSyncedClasses,
 } from 'services/calendar/classes';
@@ -24,17 +25,47 @@ const cls = (start: string, courseName = 'Calculus'): CalendarClass => ({
   end: start.replace(/T\d\d/, m => `T${Number(m.slice(1)) + 1}`),
 });
 
-const event = (startDate: string) => ({
-  startDate,
-  delete: jest.fn(async () => {}),
-});
+interface FakeEvent {
+  startDate: string;
+  delete: jest.Mock;
+}
 
-const fakeCalendar = (events: ReturnType<typeof event>[] = []) => ({
-  id: 'courses',
-  title: 'learnX 课表',
-  listEvents: jest.fn(async () => events),
-  createEvent: jest.fn(async () => ({ id: 'new' })),
-});
+/** An event in `events`, which deleting takes out. */
+const event = (startDate: string, events?: FakeEvent[]): FakeEvent => {
+  const e: FakeEvent = {
+    startDate,
+    delete: jest.fn(async () => {
+      events?.splice(events.indexOf(e), 1);
+    }),
+  };
+  return e;
+};
+
+/**
+ * A calendar that keeps the events made in it, listed by their start. Events
+ * given by their start leave it when deleted.
+ */
+const fakeCalendar = (initial: (FakeEvent | string)[] = []) => {
+  const events: FakeEvent[] = [];
+  events.push(
+    ...initial.map(e => (typeof e === 'string' ? event(e, events) : e)),
+  );
+  return {
+    id: 'courses',
+    title: 'learnX 课表',
+    events,
+    listEvents: jest.fn(async (from: Date, to: Date) =>
+      events.filter(e => {
+        const t = new Date(e.startDate).getTime();
+        return from.getTime() <= t && t < to.getTime();
+      }),
+    ),
+    createEvent: jest.fn(async (details: { startDate: Date }) => {
+      events.push(event(details.startDate.toISOString(), events));
+      return { id: 'new' };
+    }),
+  };
+};
 
 const grant = (status = 'granted') => {
   mocked.getCalendarPermissions.mockResolvedValue({ status });
@@ -160,8 +191,8 @@ describe('updateSyncedClasses', () => {
 
   beforeEach(() => {
     calendar = fakeCalendar([
-      event('2026-03-10T08:00:00+08:00'),
-      event('2026-03-12T08:00:00+08:00'),
+      '2026-03-10T08:00:00+08:00',
+      '2026-03-12T08:00:00+08:00',
     ]);
     mocked.getCalendars.mockResolvedValue([calendar]);
     setSetting('courseCalendarSync', true);
@@ -177,20 +208,24 @@ describe('updateSyncedClasses', () => {
     await updateSyncedClasses(now);
 
     // This week only, from today: not the classes already over.
-    expect(calendar.listEvents).toHaveBeenCalledTimes(1);
     expect(calendar.listEvents).toHaveBeenCalledWith(
       new Date('2026-03-11T00:00:00+08:00'),
       new Date('2026-03-16T00:00:00+08:00'),
     );
     expect(calendar.createEvent).toHaveBeenCalledTimes(1);
+    expect(calendar.events.map(e => e.startDate)).toEqual([
+      '2026-03-10T08:00:00+08:00',
+      '2026-03-12T00:00:00.000Z',
+    ]);
     expect(getCalendarSync().lastSynced?.courseSchedule).toBeGreaterThan(0);
 
+    // Nothing changed: only listed to check.
     await updateSyncedClasses(now);
-    expect(calendar.listEvents).toHaveBeenCalledTimes(1);
+    expect(calendar.createEvent).toHaveBeenCalledTimes(1);
 
     setSetting('courseEventOmitLocation', true);
     await updateSyncedClasses(now);
-    expect(calendar.listEvents).toHaveBeenCalledTimes(2);
+    expect(calendar.createEvent).toHaveBeenCalledTimes(2);
     expect(calendar.createEvent).toHaveBeenLastCalledWith(
       expect.objectContaining({ location: undefined }),
     );
@@ -198,7 +233,6 @@ describe('updateSyncedClasses', () => {
     // Today fetches the week again and a class has moved.
     setWeek(week1, [cls('2026-03-13T10:00:00+08:00')]);
     await updateSyncedClasses(now);
-    expect(calendar.listEvents).toHaveBeenCalledTimes(3);
     expect(calendar.createEvent).toHaveBeenLastCalledWith(
       expect.objectContaining({
         startDate: new Date('2026-03-13T10:00:00+08:00'),
@@ -212,6 +246,61 @@ describe('updateSyncedClasses', () => {
       new Date('2026-03-16T00:00:00+08:00'),
       new Date('2026-03-23T00:00:00+08:00'),
     );
+  });
+
+  it('writes a week again when its events were deleted in Calendar', async () => {
+    setWeek(week2, [cls('2026-03-17T08:00:00+08:00')]);
+    await updateSyncedClasses(now);
+    await expect(syncedClassesMissing(now)).resolves.toBe(false);
+    const written = calendar.createEvent.mock.calls.length;
+
+    // The user deletes next week's class; this week's stay.
+    const deleted = calendar.events.find(
+      e => new Date(e.startDate) >= new Date('2026-03-16T00:00:00+08:00'),
+    )!;
+    calendar.events.splice(calendar.events.indexOf(deleted), 1);
+    await expect(syncedClassesMissing(now)).resolves.toBe(true);
+
+    await updateSyncedClasses(now);
+    expect(calendar.createEvent).toHaveBeenCalledTimes(written + 1);
+    expect(calendar.createEvent).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        startDate: new Date('2026-03-17T08:00:00+08:00'),
+      }),
+    );
+    await expect(syncedClassesMissing(now)).resolves.toBe(false);
+  });
+
+  it('makes the calendar again with every week when it was deleted', async () => {
+    setWeek(week2, [cls('2026-03-17T08:00:00+08:00')]);
+    await updateSyncedClasses(now);
+
+    // The user deletes the whole calendar.
+    const remade = fakeCalendar();
+    mocked.getCalendars.mockResolvedValue([
+      { id: 'x', title: 'Home', source: { id: 'src', type: 'local' } },
+    ]);
+    mocked.createCalendar.mockImplementation(async () => {
+      mocked.getCalendars.mockResolvedValue([remade]);
+      return remade;
+    });
+    await expect(syncedClassesMissing(now)).resolves.toBe(true);
+
+    await updateSyncedClasses(now);
+    expect(mocked.createCalendar).toHaveBeenCalledTimes(1);
+    expect(remade.events).toHaveLength(2);
+    expect(Object.keys(getCalendarSync().writtenClassWeeks).sort()).toEqual([
+      week1,
+      week2,
+    ]);
+    await expect(syncedClassesMissing(now)).resolves.toBe(false);
+  });
+
+  it("doesn't count classes already over today", async () => {
+    await updateSyncedClasses(now);
+    // The class on Tuesday, before today, is gone; Thursday's is there.
+    calendar.events.splice(0, 1);
+    await expect(syncedClassesMissing(now)).resolves.toBe(false);
   });
 
   it('follows the timetable the settings pick', async () => {
@@ -232,6 +321,7 @@ describe('updateSyncedClasses', () => {
 
   it('never asks for the permission, and skips without it', async () => {
     grant('denied');
+    await expect(syncedClassesMissing(now)).resolves.toBe(false);
     await updateSyncedClasses(now);
     expect(mocked.requestCalendarPermissions).not.toHaveBeenCalled();
     expect(calendar.listEvents).not.toHaveBeenCalled();

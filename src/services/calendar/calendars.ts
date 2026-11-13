@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import { getSettings } from 'data/settings';
 import {
   type AssignmentEventType,
+  clearClassWeeksWritten,
   clearEventIds,
   getAssignmentEventIds,
   getCalendarSync,
@@ -199,32 +200,50 @@ const createCalendar = async ({
   return newCalendar;
 };
 
-export const getCourseCalendar = () =>
-  getOrCreateCalendar({
-    setting: 'courseCalendarId',
-    title: courseCalendarName,
-    name: courseCalendarName,
-    entityType: Calendar.EntityTypes.EVENT,
-  });
+const courseCalendar: CalendarSpec = {
+  setting: 'courseCalendarId',
+  title: courseCalendarName,
+  name: courseCalendarName,
+  entityType: Calendar.EntityTypes.EVENT,
+  // Every week is written again into the new calendar.
+  onCreate: () => clearClassWeeksWritten(),
+};
+
+const assignmentCalendar: CalendarSpec = {
+  setting: 'assignmentCalendarId',
+  title: assignmentCalendarReminderName,
+  // Not a typo: this calendar has always used the course calendar's name
+  name: courseCalendarName,
+  entityType: Calendar.EntityTypes.EVENT,
+  onCreate: () => clearEventIds('calendar'),
+};
+
+const assignmentReminderList: CalendarSpec = {
+  setting: 'assignmentReminderId',
+  title: assignmentCalendarReminderName,
+  name: assignmentCalendarReminderName,
+  entityType: Calendar.EntityTypes.REMINDER,
+  onCreate: () => clearEventIds('reminder'),
+};
+
+export const getCourseCalendar = () => getOrCreateCalendar(courseCalendar);
+
+/**
+ * The course calendar if it's there (stored, or adopted by its title), else
+ * undefined: it isn't created.
+ */
+export const findCourseCalendar = () =>
+  findCalendar(
+    courseCalendar.setting,
+    courseCalendar.title,
+    courseCalendar.entityType,
+  );
 
 export const getAssignmentCalendar = () =>
-  getOrCreateCalendar({
-    setting: 'assignmentCalendarId',
-    title: assignmentCalendarReminderName,
-    // Not a typo: this calendar has always used the course calendar's name
-    name: courseCalendarName,
-    entityType: Calendar.EntityTypes.EVENT,
-    onCreate: () => clearEventIds('calendar'),
-  });
+  getOrCreateCalendar(assignmentCalendar);
 
 export const getAssignmentReminder = () =>
-  getOrCreateCalendar({
-    setting: 'assignmentReminderId',
-    title: assignmentCalendarReminderName,
-    name: assignmentCalendarReminderName,
-    entityType: Calendar.EntityTypes.REMINDER,
-    onCreate: () => clearEventIds('reminder'),
-  });
+  getOrCreateCalendar(assignmentReminderList);
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 /**
@@ -290,6 +309,67 @@ const adoptExistingEntries = async (
       setEventIdForAssignment(type, input.assignmentId, match.id);
     }
   }
+};
+
+/**
+ * The ids of the entries in `calendar` around these assignments' deadlines:
+ * every reminder (done ones too), or the events from a day before the first
+ * deadline to a day after the last.
+ */
+const listEntryIds = async (
+  type: AssignmentEventType,
+  calendar: Calendar.ExpoCalendar,
+  inputs: AssignmentEventInput[],
+) => {
+  if (isReminderList(type)) {
+    return (await calendar.listReminders()).map(r => r.id);
+  }
+  const deadlines = inputs.map(input => input.dueDate.valueOf());
+  return (
+    await calendar.listEvents(
+      new Date(Math.min(...deadlines) - DAY_MS),
+      new Date(Math.max(...deadlines) + DAY_MS),
+    )
+  ).map(e => e.id);
+};
+
+/**
+ * Whether an assignment the sync would write has no event or reminder: never
+ * written, deleted in Calendar or Reminders, or gone with its whole calendar
+ * or list. One listing at most, so it can run on every refresh, while the
+ * sync itself runs only when the assignments or settings change. False
+ * without the access (it never asks) or when the calendar can't be listed.
+ */
+export const assignmentEntriesMissing = async (
+  type: AssignmentEventType,
+  assignments: Assignment[],
+) => {
+  const inputs = buildAssignmentEventInputs(assignments, getCachedCourses());
+  if (
+    inputs.length === 0 ||
+    !(await hasPermission(isReminderList(type) ? 'reminder' : 'calendar'))
+  ) {
+    return false;
+  }
+  const spec = isReminderList(type)
+    ? assignmentReminderList
+    : assignmentCalendar;
+  const calendar = await findCalendar(
+    spec.setting,
+    spec.title,
+    spec.entityType,
+  );
+  const synced = getAssignmentEventIds(type);
+  if (!calendar || inputs.some(input => !synced[input.assignmentId])) {
+    return true;
+  }
+  let ids: Set<string | undefined>;
+  try {
+    ids = new Set(await listEntryIds(type, calendar, inputs));
+  } catch {
+    return false;
+  }
+  return inputs.some(input => !ids.has(synced[input.assignmentId]));
 };
 
 /** The synced event or reminder with this id; throws when it's gone. */

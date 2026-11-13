@@ -7,6 +7,7 @@ import {
 } from 'data/calendarSync';
 import { Assignment } from 'data/types/state';
 import {
+  assignmentEntriesMissing,
   exportSyncedCalendarsToICS,
   getAssignmentCalendar,
   getAssignmentReminder,
@@ -146,6 +147,17 @@ describe('synced calendars', () => {
     expect(getCalendarSync().assignmentCalendarId).toBe('created');
     expect(getCalendarSync().syncedCalendarAssignments).toEqual({});
     expect(getCalendarSync().syncedReminderAssignments).toEqual({ a1: 'r1' });
+  });
+
+  it('forgets the written class weeks before creating the course calendar', async () => {
+    useCalendarSyncStore.setState({
+      writtenClassWeeks: { '2026-03-09': 'key' },
+    });
+    mocked.getCalendars.mockResolvedValue([
+      { id: 'x', title: 'Local', source: local },
+    ]);
+    await getCourseCalendar();
+    expect(getCalendarSync().writtenClassWeeks).toEqual({});
   });
 
   it('creates the reminder list from reminder sources', async () => {
@@ -576,5 +588,105 @@ describe('more of the sync', () => {
     await removeCalendars();
     expect(mocked.getCalendars).not.toHaveBeenCalledWith('reminder');
     expect(course.delete).toHaveBeenCalled();
+  });
+});
+
+describe('assignmentEntriesMissing', () => {
+  const assignment = (id: string, days = 1) =>
+    ({
+      id,
+      courseId: 'c1',
+      title: 'Homework',
+      description: '',
+      deadline: dayjs().add(days, 'day').toISOString(),
+      submitted: false,
+    }) as Assignment;
+
+  let events: ReturnType<typeof fakeCalendar>;
+  let reminders: ReturnType<typeof fakeCalendar>;
+
+  beforeEach(() => {
+    events = fakeCalendar({
+      id: 'assignments',
+      listEvents: jest.fn(async () => [{ id: 'e1' }, { id: 'e2' }]),
+    });
+    reminders = fakeCalendar({
+      id: 'reminders',
+      listReminders: jest.fn(async () => [{ id: 'r1' }]),
+    });
+    useCalendarSyncStore.setState({
+      assignmentCalendarId: 'assignments',
+      assignmentReminderId: 'reminders',
+      syncedCalendarAssignments: { a1: 'e1', a2: 'e2' },
+      syncedReminderAssignments: { a1: 'r1' },
+    });
+    mocked.getCalendars.mockImplementation(async (type?: string) => [
+      type === 'reminder' ? reminders : events,
+    ]);
+  });
+
+  it('is false while every event is there, listing once around the deadlines', async () => {
+    const a1 = assignment('a1');
+    const a2 = assignment('a2', 3);
+    await expect(assignmentEntriesMissing('calendar', [a1, a2])).resolves.toBe(
+      false,
+    );
+    expect(events.listEvents).toHaveBeenCalledTimes(1);
+    expect(events.listEvents).toHaveBeenCalledWith(
+      new Date(new Date(a1.deadline).getTime() - 24 * 60 * 60 * 1000),
+      new Date(new Date(a2.deadline).getTime() + 24 * 60 * 60 * 1000),
+    );
+    expect(mocked.ExpoCalendarEvent.get).not.toHaveBeenCalled();
+  });
+
+  it('is true when the user deleted an event', async () => {
+    events.listEvents.mockResolvedValue([{ id: 'e1' }]);
+    await expect(
+      assignmentEntriesMissing('calendar', [
+        assignment('a1'),
+        assignment('a2'),
+      ]),
+    ).resolves.toBe(true);
+  });
+
+  it('is true for an assignment with no event yet', async () => {
+    await expect(
+      assignmentEntriesMissing('calendar', [assignment('a3')]),
+    ).resolves.toBe(true);
+    expect(events.listEvents).not.toHaveBeenCalled();
+  });
+
+  it('is true when the whole calendar was deleted, without making it', async () => {
+    mocked.getCalendars.mockResolvedValue([]);
+    await expect(
+      assignmentEntriesMissing('calendar', [assignment('a1')]),
+    ).resolves.toBe(true);
+    expect(mocked.createCalendar).not.toHaveBeenCalled();
+  });
+
+  it('checks the reminders on iOS, done ones too', async () => {
+    await expect(
+      assignmentEntriesMissing('reminder', [assignment('a1')]),
+    ).resolves.toBe(false);
+    expect(reminders.listReminders).toHaveBeenCalledWith();
+    reminders.listReminders.mockResolvedValue([]);
+    await expect(
+      assignmentEntriesMissing('reminder', [assignment('a1')]),
+    ).resolves.toBe(true);
+  });
+
+  it('is false with nothing to write, without the access, or when listing fails', async () => {
+    await expect(assignmentEntriesMissing('calendar', [])).resolves.toBe(false);
+
+    events.listEvents.mockRejectedValue(new Error('gone'));
+    await expect(
+      assignmentEntriesMissing('calendar', [assignment('a1')]),
+    ).resolves.toBe(false);
+
+    grant('denied');
+    await expect(
+      assignmentEntriesMissing('calendar', [assignment('a3')]),
+    ).resolves.toBe(false);
+    expect(mocked.requestCalendarPermissions).not.toHaveBeenCalled();
   });
 });

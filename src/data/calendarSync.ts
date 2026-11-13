@@ -109,6 +109,11 @@ export const setClassWeekWritten = (weekStart: string, key: string) => {
   }));
 };
 
+/** Forgets which weeks' classes were written, as for a new course calendar. */
+export const clearClassWeeksWritten = () => {
+  useCalendarSyncStore.setState({ writtenClassWeeks: {} });
+};
+
 export const clearEventIds = (type: AssignmentEventType) => {
   useCalendarSyncStore.setState({ [syncedKey(type)]: {} });
 };
