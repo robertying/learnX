@@ -21,6 +21,7 @@
     "e2e:android": "scripts/e2e.sh android",
     "e2e:devices": "scripts/e2e-devices.sh",
     "e2e:mac": "scripts/e2e-mac.sh",
+    "e2e:simulator": "scripts/e2e-simulator.sh",
     "e2e:store": "scripts/store-screenshots.sh"
   },
   "dependencies": {

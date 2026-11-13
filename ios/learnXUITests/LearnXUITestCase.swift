@@ -1,3 +1,4 @@
+#if targetEnvironment(macCatalyst)
 import XCTest
 
 /// The base of the Mac app's UI tests (`LearnXUITests`, `StoreScreenshots`): launches the app in Chinese
@@ -147,3 +148,4 @@ class LearnXUITestCase: XCTestCase {
     return element
   }
 }
+#endif
