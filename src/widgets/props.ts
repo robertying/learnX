@@ -33,8 +33,14 @@ export interface UpNextWidgetClass {
   end: number;
   /** Start to end, e.g. 08:00–09:35 or 4:00–5:35 PM. */
   time: string;
-  /** Its day, e.g. "Mon 11/9", shown when it isn't today or tomorrow. */
+  /** The start alone, e.g. 08:00 or 4:00 PM, where a range doesn't fit. */
+  startTime: string;
+  /** Its weekday, e.g. "Mon", shown when it's later this week. */
+  weekday: string;
+  /** Its day with the date, e.g. "Mon 11/9", shown when it's a week or more away. */
   day: string;
+  /** The learnx:// link that opens its course, or none when the course is unknown. */
+  url?: string;
 }
 
 /**

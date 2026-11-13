@@ -13,6 +13,7 @@ export default {
   widgetTomorrow: 'Tomorrow',
   widgetNoClasses: 'No upcoming classes',
   widgetClassDay: 'ddd M/D',
+  widgetClassWeekday: 'ddd',
   files: 'Files',
   courses: 'Courses',
   calendarsAndReminders: 'Calendars & Reminders',

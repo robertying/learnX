@@ -15,6 +15,7 @@ const zh: typeof en = {
   widgetTomorrow: '明天',
   widgetNoClasses: '近期没有课',
   widgetClassDay: 'M月D日 ddd',
+  widgetClassWeekday: 'ddd',
   files: '文件',
   courses: '课程',
   calendarsAndReminders: '日历与提醒事项',

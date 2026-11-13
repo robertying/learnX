@@ -99,6 +99,7 @@ describe('updateUpNextWidget', () => {
     {
       key: 'calculus',
       courseName: 'Calculus',
+      courseId: 'c1',
       location: '六教6A414',
       start: at('08:00'),
       end: at('09:35'),
@@ -143,8 +144,15 @@ describe('updateUpNextWidget', () => {
       title: 'Up Next',
       url: 'learnx://today',
       classes: [
-        { courseName: 'Calculus', time: '08:00–09:35', day: 'Mon 3/16' },
-        { courseName: 'Physics', time: '13:30–15:05' },
+        {
+          courseName: 'Calculus',
+          time: '08:00–09:35',
+          startTime: '08:00',
+          weekday: 'Mon',
+          day: 'Mon 3/16',
+          url: 'learnx://course/c1',
+        },
+        { courseName: 'Physics', time: '13:30–15:05', url: undefined },
       ],
     });
     expect(entries[0].props.deadlines.map(d => d.id)).toEqual(['a', 'b']);

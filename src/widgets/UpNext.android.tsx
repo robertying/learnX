@@ -22,7 +22,7 @@ import type { UpNextWidgetProps } from 'widgets/props';
  * res/xml/up_next_info.xml) and whenever the app sends new props. The build
  * embeds it with `initialProps` (see expo-widgets-layout-registry.config.json)
  * so a widget added before the app has run asks to open it. Tapping it opens
- * Today, and the deadline row its assignment.
+ * Today, a class its course and the deadline row its assignment.
  */
 function UpNextWidget(
   props: UpNextWidgetProps,
@@ -87,7 +87,9 @@ function UpNextWidget(
       ? c.time
       : days === 1
         ? `${props.tomorrow} ${c.time}`
-        : `${c.day} ${c.time}`;
+        : days < 7
+          ? `${c.weekday || c.day} ${c.time}`
+          : `${c.day} ${c.time}`;
   };
 
   return (
@@ -109,30 +111,30 @@ function UpNextWidget(
       </Text>
       <Spacer modifiers={[height(4)]} />
       {featured ? (
-        <Text
-          color={colors.title}
-          style={{ fontSize: 16, fontWeight: 'bold' }}
-          maxLines={1}
-        >
-          {featured.courseName}
-        </Text>
+        <Column modifiers={[fillMaxWidth(), ...openUrl(featured.url)]}>
+          <Text
+            color={colors.title}
+            style={{ fontSize: 16, fontWeight: 'bold' }}
+            maxLines={1}
+          >
+            {featured.courseName}
+          </Text>
+          <Text color={colors.caption} style={{ fontSize: 13 }} maxLines={1}>
+            {featured.location
+              ? `${when(featured)} · ${featured.location}`
+              : when(featured)}
+          </Text>
+        </Column>
       ) : (
         <Text color={colors.caption} style={{ fontSize: 13 }}>
           {noClasses}
         </Text>
       )}
-      {featured ? (
-        <Text color={colors.caption} style={{ fontSize: 13 }} maxLines={1}>
-          {featured.location
-            ? `${when(featured)} · ${featured.location}`
-            : when(featured)}
-        </Text>
-      ) : null}
       {following ? (
-        <Column modifiers={[fillMaxWidth()]}>
+        <Column modifiers={[fillMaxWidth(), ...openUrl(following.url)]}>
           <Spacer modifiers={[height(6)]} />
           <Text color={colors.caption} style={{ fontSize: 12 }} maxLines={1}>
-            {`${props.later}: ${when(following)} ${following.courseName}`}
+            {`${props.later}: ${following.courseName} · ${when(following)}`}
           </Text>
         </Column>
       ) : null}

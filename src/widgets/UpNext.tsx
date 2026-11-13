@@ -2,7 +2,6 @@ import { HStack, Link, Spacer, Text, VStack } from '@expo/ui/swift-ui';
 import {
   font,
   foregroundStyle,
-  frame,
   layoutPriority,
   lineLimit,
   widgetURL,
@@ -19,8 +18,9 @@ import type { UpNextWidgetProps } from 'widgets/props';
  * what `kit` (widgets/kit) shares between the layouts.
  *
  * Every timeline entry has the same props; the class on now and the next ones
- * are picked by the entry's date. Tapping opens Today, and a deadline row in a
- * medium or large widget its assignment.
+ * are picked by the entry's date. A class opens its course (the Lock Screen
+ * widget its class's, a medium or large one each tapped class's) and a
+ * deadline row its assignment; the rest, and a small widget, open Today.
  */
 function UpNextWidget(
   props: UpNextWidgetProps,
@@ -43,21 +43,49 @@ function UpNextWidget(
   const beijingDay = (ms: number) =>
     Math.floor((ms + 8 * 60 * 60 * 1000) / 86400000);
   const daysAway = (ms: number) => beijingDay(ms) - beijingDay(now);
-  const when = (c: UpNextWidgetProps['classes'][number]) => {
+  // Its day (none today, the weekday within a week, else with the date) and
+  // its time: the range, or where that doesn't fit, the start.
+  const when = (c: UpNextWidgetProps['classes'][number], start?: boolean) => {
     const days = daysAway(c.start);
+    const time = start ? c.startTime || c.time : c.time;
     return days === 0
-      ? c.time
+      ? time
       : days === 1
-        ? `${props.tomorrow} ${c.time}`
-        : `${c.day} ${c.time}`;
+        ? `${props.tomorrow} ${time}`
+        : days < 7
+          ? `${c.weekday || c.day} ${time}`
+          : `${c.day} ${time}`;
   };
-  const whenAndWhere = (c: UpNextWidgetProps['classes'][number]) =>
-    c.location ? `${when(c)} · ${c.location}` : when(c);
+  const whenAndWhere = (
+    c: UpNextWidgetProps['classes'][number],
+    start?: boolean,
+  ) => (c.location ? `${when(c, start)} · ${c.location}` : when(c, start));
   const today = !!featured && daysAway(featured.start) === 0;
+  const small = family === 'systemSmall';
+  // A class's course, where it's known. A small widget can't have links.
+  const linked = (
+    c: UpNextWidgetProps['classes'][number],
+    key: string,
+    content: ReactElement,
+  ) =>
+    c.url && !small ? (
+      <Link
+        key={key}
+        destination={c.url}
+        modifiers={[
+          // Not the link tint: the row keeps its colors.
+          foregroundStyle({ type: 'hierarchical', style: 'primary' }),
+        ]}
+      >
+        {content}
+      </Link>
+    ) : (
+      content
+    );
 
   // The countdown after its label. A small widget has room for its largest
   // unit only ("Starts in 2 hours").
-  const countdown = (textStyle: 'caption' | 'footnote', small: boolean) =>
+  const countdown = (textStyle: 'caption' | 'footnote') =>
     featured && today ? (
       <HStack spacing={0}>
         <Text
@@ -87,23 +115,21 @@ function UpNextWidget(
       <VStack
         alignment="leading"
         spacing={0}
-        modifiers={[kit.background, ...openToday]}
+        modifiers={[
+          kit.background,
+          ...(featured?.url ? [widgetURL(featured.url)] : openToday),
+        ]}
       >
         <Text modifiers={[font({ textStyle: 'headline' }), lineLimit(1)]}>
           {featured ? featured.courseName : props.noClasses}
         </Text>
+        {/* Its day and start, then for a class today the countdown in its
+            largest unit; the place gets a line of its own. */}
         {featured ? (
-          <Text modifiers={[lineLimit(1)]}>{when(featured)}</Text>
-        ) : null}
-        {/* The place, then the countdown to a class today in the rest, in
-            its largest unit to fit beside it. */}
-        {featured && (featured.location || today) ? (
           <HStack spacing={0}>
-            {featured.location ? (
-              <Text modifiers={[lineLimit(1), layoutPriority(1)]}>
-                {today ? `${featured.location} · ` : featured.location}
-              </Text>
-            ) : null}
+            <Text modifiers={[lineLimit(1), layoutPriority(1)]}>
+              {today ? `${when(featured, true)} · ` : when(featured, true)}
+            </Text>
             {today ? (
               <kit.Countdown
                 date={new Date(current ? featured.end : featured.start)}
@@ -113,21 +139,30 @@ function UpNextWidget(
             ) : null}
           </HStack>
         ) : null}
+        {featured?.location ? (
+          <Text modifiers={[lineLimit(1)]}>{featured.location}</Text>
+        ) : null}
       </VStack>
     );
   }
 
-  const small = family === 'systemSmall';
   const large = family === 'systemLarge' || family === 'systemExtraLarge';
   const spacing = large ? 10 : 4;
 
-  const featuredClass = (withCountdown: boolean) =>
+  // The class on now or next. A small widget gives its name and its time and
+  // place two lines each, unless it's `compact` to make room for the classes
+  // after it, with the start alone.
+  const featuredClass = (withCountdown: boolean, compact = false) =>
     featured ? (
-      <VStack key={String(withCountdown)} alignment="leading" spacing={1}>
+      <VStack
+        key={`${withCountdown}-${compact}`}
+        alignment="leading"
+        spacing={1}
+      >
         <Text
           modifiers={[
             font({ textStyle: 'headline', weight: 'semibold' }),
-            lineLimit(small ? 2 : 1),
+            lineLimit(small && !compact ? 2 : 1),
           ]}
         >
           {featured.courseName}
@@ -136,19 +171,17 @@ function UpNextWidget(
           modifiers={[
             font({ textStyle: small ? 'caption' : 'subheadline' }),
             kit.secondary,
-            lineLimit(small ? 2 : 1),
+            lineLimit(small && !compact ? 2 : 1),
           ]}
         >
-          {whenAndWhere(featured)}
+          {whenAndWhere(featured, compact)}
         </Text>
-        {withCountdown
-          ? countdown(small ? 'caption' : 'footnote', small)
-          : null}
+        {withCountdown ? countdown(small ? 'caption' : 'footnote') : null}
       </VStack>
     ) : null;
 
   // The label (now, next, or the widget's name) and the class on now or next.
-  const top = (
+  const topWith = (featuredView: ReactElement | null) => (
     <VStack key="top" alignment="leading" spacing={spacing}>
       <HStack>
         {kit.label(
@@ -158,16 +191,7 @@ function UpNextWidget(
         <Spacer />
       </HStack>
       {featured ? (
-        small ? (
-          // The countdown when it fits under the course and its time and
-          // place, which take two lines each at most.
-          <kit.ViewThatFits axes="vertical" modifiers={[]}>
-            {featuredClass(true)}
-            {featuredClass(false)}
-          </kit.ViewThatFits>
-        ) : (
-          featuredClass(true)
-        )
+        featuredView
       ) : (
         <Text modifiers={[font({ textStyle: 'footnote' }), kit.secondary]}>
           {props.noClasses}
@@ -176,40 +200,66 @@ function UpNextWidget(
     </VStack>
   );
 
-  if (small) {
-    return (
-      <VStack
-        alignment="leading"
-        spacing={0}
-        modifiers={[
-          frame({ maxWidth: 10000, maxHeight: 10000, alignment: 'topLeading' }),
-          kit.background,
-          ...openToday,
-        ]}
-      >
-        {top}
+  // A class after the featured one in a line, like a deadline's: its course,
+  // then when (the start alone in a small widget). The course shortens first.
+  const laterRow = (c: UpNextWidgetProps['classes'][number]) =>
+    linked(
+      c,
+      c.key,
+      <HStack key={c.key} spacing={0}>
+        <Text modifiers={[font({ textStyle: 'caption' }), lineLimit(1)]}>
+          {c.courseName}
+        </Text>
+        <Text
+          modifiers={[
+            font({ textStyle: 'caption' }),
+            kit.secondary,
+            lineLimit(1),
+            layoutPriority(1),
+          ]}
+        >
+          {` · ${when(c, small)}`}
+        </Text>
         <Spacer />
-      </VStack>
+      </HStack>,
     );
+
+  if (small) {
+    // One tap target, which opens Today. As many classes after this one as
+    // fit under it in short; with none, the countdown when it fits under the
+    // class's name and its time and place in full.
+    const after = classes.slice(1, 4);
+    const fullTop = (withCountdown: boolean) => ({
+      key: `full-${withCountdown}`,
+      top: topWith(featuredClass(withCountdown)),
+      rows: [],
+      cut: false,
+    });
+    return kit.fitted({
+      versions: featured
+        ? [
+            ...after.map((_, i) => {
+              const count = after.length - i;
+              return {
+                key: String(count),
+                top: topWith(featuredClass(true, true)),
+                rows: after.slice(0, count).map(laterRow),
+                cut: count < classes.length - 1,
+              };
+            }),
+            fullTop(true),
+            fullTop(false),
+          ]
+        : [fullTop(false)],
+      spacing,
+      modifiers: [kit.background, ...openToday],
+    });
   }
 
-  const laterRow = (c: UpNextWidgetProps['classes'][number]) => (
-    <HStack key={c.key} spacing={6}>
-      <Text
-        modifiers={[
-          font({ textStyle: 'caption' }),
-          kit.secondary,
-          lineLimit(1),
-          layoutPriority(1),
-        ]}
-      >
-        {when(c)}
-      </Text>
-      <Text modifiers={[font({ textStyle: 'caption' }), lineLimit(1)]}>
-        {c.courseName}
-      </Text>
-      <Spacer />
-    </HStack>
+  const top = topWith(
+    featured
+      ? linked(featured, 'featured', featuredClass(true) as ReactElement)
+      : null,
   );
 
   const dueRow = (item: UpNextWidgetProps['deadlines'][number]) => (
