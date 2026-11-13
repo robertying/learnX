@@ -27,6 +27,13 @@ export interface FormSectionProps {
   title?: string;
   /** A caption below the rows, explaining them. */
   footer?: string;
+  /**
+   * Keeps the footer's place without showing it, for a footer that comes and
+   * goes (Draft Saved). On iOS a Section with a footer is another SwiftUI view
+   * than one without, so adding the footer would rebuild the rows and drop
+   * the keyboard from a field being typed in.
+   */
+  footerHidden?: boolean;
   /** Set by `Form` on iOS for its first section, whose top margin it fixes. */
   first?: boolean;
   /** Set by `Form` on iOS for its last section, which keeps clear of the tab bar. */

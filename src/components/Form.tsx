@@ -268,6 +268,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
   children,
   title,
   footer,
+  footerHidden,
   first,
   last,
 }) => {
@@ -280,7 +281,13 @@ export const FormSection: React.FC<FormSectionProps> = ({
           <Text modifiers={macHeaderModifiers}>{title}</Text>
         ) : undefined
       }
-      footer={footer ? <Text>{footer}</Text> : undefined}
+      footer={
+        footer ? (
+          <Text modifiers={footerHidden ? hiddenFooterModifiers : undefined}>
+            {footer}
+          </Text>
+        ) : undefined
+      }
       modifiers={
         isMac
           ? macSectionModifiers
@@ -294,6 +301,9 @@ export const FormSection: React.FC<FormSectionProps> = ({
     </Section>
   );
 };
+
+// A footer that keeps its place while hidden (`footerHidden`)
+const hiddenFooterModifiers = [opacity(0), accessibilityHidden(true)];
 
 const secondaryText = foregroundStyle(PlatformColor('secondaryLabel'));
 const subtitleModifiers = [font({ textStyle: 'subheadline' }), secondaryText];
@@ -681,7 +691,9 @@ export const FormFile: React.FC<FormFileProps> = ({
 // Starts a few lines tall, as a box to write in, and grows with the text.
 // Mac rows are tight, so the box gets the room above and below its text
 // that the row's side inset gives it.
-const multilineModifiers = [lineLimit({ min: 6, max: 20 })];
+// Six lines to start with, then the field grows with its text and the Form
+// scrolls, rather than the field scrolling inside the Form.
+const multilineModifiers = [lineLimit({ min: 6, max: 10000 })];
 const macMultilineModifiers = [...multilineModifiers, padding({ vertical: 6 })];
 const plainTextModifiers = [
   textInputAutocapitalization('never'),

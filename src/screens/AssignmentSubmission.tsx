@@ -78,8 +78,13 @@ const AssignmentSubmissionContent: React.FC<{
 
   // What is being submitted and until when, as on the assignment's page.
   const now = useMinute();
+  // How far off it is, except for a deadline over a year away, which
+  // deadlineText gives as its date: that's already the first part.
+  const deadlineDate = dayjs(deadline).format(t('fullDateTimeFormat'));
   const deadlineSubtitle = [
-    `${dayjs(deadline).format(t('fullDateTimeFormat'))} · ${deadlineText(deadline, now)}`,
+    dayjs(deadline).isAfter(dayjs(now).add(1, 'year'))
+      ? deadlineDate
+      : `${deadlineDate} · ${deadlineText(deadline, now)}`,
     lateSubmissionDeadline && !dayjs(now).isBefore(deadline)
       ? `${t('lateSubmission')} ${dayjs(lateSubmissionDeadline).format(t('fullDateTimeFormat'))}`
       : null,
@@ -253,7 +258,8 @@ const AssignmentSubmissionContent: React.FC<{
         ) : null}
         <FormSection
           title={t('submissionContent')}
-          footer={hasDraft ? t('draftSaved') : undefined}
+          footer={t('draftSaved')}
+          footerHidden={!hasDraft}
         >
           <FormTextField
             multiline
