@@ -103,6 +103,8 @@ describe('buildCourseEventDetails', () => {
 });
 
 describe('buildAssignmentReminderDetails', () => {
+  const weekBefore = dayjs('2026-03-13T12:00:00+08:00');
+
   it('is due at the deadline, links the assignment, and has no alert', () => {
     const completionDate = dayjs('2026-03-12T10:00:00+08:00');
     expect(
@@ -133,6 +135,7 @@ describe('buildAssignmentReminderDetails', () => {
     const daily = buildAssignmentReminderDetails(
       settingsWith({}, { assignmentReminderAlarm: true }),
       input(),
+      weekBefore,
     );
     expect(daily.dueDate).toEqual(new Date('2026-03-20T23:59:00+08:00'));
     expect(daily.alarms).toEqual([
@@ -145,11 +148,22 @@ describe('buildAssignmentReminderDetails', () => {
         { assignmentReminderAlarm: true, assignmentReminderAlarmOffset: 60 },
       ),
       input(),
+      weekBefore,
     );
     expect(hourly.alarms).toEqual([
       { relativeOffset: 0 },
       { relativeOffset: -60 },
     ]);
+  });
+
+  it('leaves out an early alert whose time has passed', () => {
+    expect(
+      buildAssignmentReminderDetails(
+        settingsWith({}, { assignmentReminderAlarm: true }),
+        input(),
+        dayjs('2026-03-20T12:00:00+08:00'),
+      ).alarms,
+    ).toEqual([{ relativeOffset: 0 }]);
   });
 
   it('alerts only at the deadline with no minutes before', () => {
