@@ -1,3 +1,4 @@
+import { displayFileSize } from 'helpers/filename';
 import { useEffect } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import dayjs from 'dayjs';
@@ -90,7 +91,7 @@ const NoticeDetailContent: React.FC<{
           <FormSection title={t('attachment')}>
             <FormFile
               title={attachment.name}
-              detail={attachment.size}
+              detail={displayFileSize(attachment.size)}
               icon="file"
               onPress={handleFileOpen}
             />

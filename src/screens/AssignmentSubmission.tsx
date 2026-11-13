@@ -1,7 +1,7 @@
-import { useEffect, useEffectEvent, useState } from 'react';
+import { useEffect, useEffectEvent, useLayoutEffect, useState } from 'react';
 import useHeaderButtons from 'hooks/useHeaderButtons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { showChoices } from 'components/choiceSheet';
 import { toast } from 'components/Toast';
 import {
@@ -145,6 +145,20 @@ const AssignmentSubmissionContent: React.FC<{
       navigation.goBack();
     },
   );
+
+  // Not swiped away while uploading: back beside a list, or the sheet down.
+  useLayoutEffect(() => {
+    navigation.setOptions({ gestureEnabled: !uploading });
+    const parent = navigation.getParent();
+    const parentState = parent?.getState();
+    if (
+      Platform.OS === 'ios' &&
+      parentState?.routes[parentState.index]?.name ===
+        'AssignmentSubmissionStack'
+    ) {
+      parent?.setOptions({ gestureEnabled: !uploading });
+    }
+  }, [navigation, uploading]);
 
   const handleDraftDiscard = () => {
     Alert.alert(
@@ -324,7 +338,6 @@ const AssignmentSubmissionContent: React.FC<{
             <FormButton
               title={t('removePickedAttachment')}
               icon="remove"
-              destructive
               disabled={uploading}
               onPress={handlePickedAttachmentRemove}
             />

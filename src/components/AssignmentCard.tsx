@@ -13,6 +13,11 @@ import CardRow, { CardPill, cardAccessibilityLabel } from 'components/CardRow';
 export interface AssignmentCardProps extends CardWrapperProps {
   data: Assignment;
   hideCourseName?: boolean;
+  /**
+   * Marks an archived item with a glyph, in a list that shows archived items
+   * among the rest (a course's lists), where they can't be favorited.
+   */
+  markArchived?: boolean;
 }
 
 const AssignmentCard: React.FC<AssignmentCardProps> = ({
@@ -32,6 +37,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
     isLateSubmission,
   },
   hideCourseName,
+  markArchived,
   ...restProps
 }) => {
   const now = useMinute();
@@ -69,6 +75,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
     attachment && 'attachment',
     hasAnswer && 'answer',
     restProps.fav && 'favorited',
+    markArchived && restProps.archived && 'archived',
   ] as const;
 
   return (

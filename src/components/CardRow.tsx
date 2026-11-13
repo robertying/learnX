@@ -159,7 +159,12 @@ export const CardGutter: React.FC<{ unread?: boolean }> = ({ unread }) => {
  * screen reader says for it and the status hue it is drawn in (the caption
  * color when it has none).
  */
-export type CardFlag = 'attachment' | 'answer' | 'important' | 'favorited';
+export type CardFlag =
+  | 'attachment'
+  | 'answer'
+  | 'important'
+  | 'favorited'
+  | 'archived';
 
 const cardFlags: Record<CardFlag, { label: () => string; tone?: StatusTone }> =
   {
@@ -167,6 +172,7 @@ const cardFlags: Record<CardFlag, { label: () => string; tone?: StatusTone }> =
     answer: { label: () => t('a11yHasAnswer') },
     important: { label: () => t('a11yImportant'), tone: 'orange' },
     favorited: { label: () => t('a11yFavorited'), tone: 'red' },
+    archived: { label: () => t('archived') },
   };
 
 /** A row's flags in the order shown; `false` and `undefined` are left out. */

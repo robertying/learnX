@@ -83,6 +83,13 @@ export const getWebViewTemplate = (
         }
         #root > p:last-child {
           margin-bottom: 0px;
+        }
+        /* An image keeps its own shape and fits the width. Web Learning's
+           editor writes the size it was given inline, which can be wider
+           than the screen or not match the picture. */
+        img {
+          max-width: 100% !important;
+          height: auto !important;
         }${
           colors?.linkColor
             ? `

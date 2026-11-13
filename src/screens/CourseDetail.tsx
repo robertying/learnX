@@ -65,6 +65,7 @@ interface CourseItemListProps<T extends Notice | Assignment | File> {
     archived?: boolean;
     onToggleArchived?: () => void;
     hideCourseName?: boolean;
+    markArchived?: boolean;
     onPress?: () => void;
     last?: boolean;
   }>;
@@ -119,6 +120,7 @@ const CourseItemList = <T extends Notice | Assignment | File>({
               toggleArchived(type, [item.id], archivedSet.has(item.id))
             }
             hideCourseName
+            markArchived
             onPress={() => navigation.push(detailScreen, { id: item.id })}
           />
         )}

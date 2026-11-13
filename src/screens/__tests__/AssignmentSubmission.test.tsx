@@ -48,10 +48,19 @@ const unsubmitted = mockAssignments.find(
 )!;
 const withUpload = mockAssignments.find(a => !!a.submittedAttachment)!;
 
+// The sheet's stack in the root navigator
+const parent = {
+  setOptions: jest.fn(),
+  getState: () => ({
+    index: 0,
+    routes: [{ name: 'AssignmentSubmissionStack' }],
+  }),
+};
 const navigation = {
   setOptions: jest.fn(),
   push: jest.fn(),
   goBack: jest.fn(),
+  getParent: () => parent,
 };
 
 const renderScreen = (assignment: Assignment | undefined = unsubmitted) => {
@@ -128,6 +137,19 @@ it('keeps the Draft Saved footer in place, hidden, until there is a draft', asyn
   await renderScreen();
   // Hidden: transparent and left out for VoiceOver
   expect(screen.getByText(t('draftSaved')).props.modifiers).toHaveLength(2);
+});
+
+it("can't be swiped away while uploading", async () => {
+  await renderScreen();
+  expect(navigation.setOptions).toHaveBeenCalledWith({ gestureEnabled: true });
+  expect(parent.setOptions).toHaveBeenLastCalledWith({ gestureEnabled: true });
+  jest.mocked(useSubmitAssignment).mockReturnValue({
+    ...submit,
+    uploading: true,
+  } as never);
+  await renderScreen();
+  expect(navigation.setOptions).toHaveBeenCalledWith({ gestureEnabled: false });
+  expect(parent.setOptions).toHaveBeenLastCalledWith({ gestureEnabled: false });
 });
 
 it('adds the late deadline once the deadline has passed', async () => {

@@ -11,6 +11,7 @@ export const systemIcons = {
   attachment: { ios: 'paperclip', android: 'attach_file' },
   important: { ios: 'flag.fill', android: 'flag' },
   favorited: { ios: 'heart.fill', android: 'favorite' },
+  archived: { ios: 'archivebox', android: 'archive' },
   answer: { ios: 'key', android: 'key' },
   deadline: { ios: 'clock', android: 'schedule' },
   lateSubmission: { ios: 'clock.badge.exclamationmark', android: 'more_time' },

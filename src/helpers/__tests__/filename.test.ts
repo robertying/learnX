@@ -1,5 +1,6 @@
 import {
   fileNameOf,
+  displayFileSize,
   formatFileSize,
   getExtension,
   sanitizeFileName,
@@ -88,5 +89,25 @@ describe('formatFileSize', () => {
   it('moves to the next unit instead of showing 1000.0', () => {
     expect(formatFileSize(999_950)).toBe('1.0 MB');
     expect(formatFileSize(999_940)).toBe('999.9 KB');
+  });
+});
+
+describe('displayFileSize', () => {
+  it("spaces Web Learning's sizes and spells their units", () => {
+    expect(displayFileSize('44.92KB')).toBe('44.92 KB');
+    expect(displayFileSize('35K')).toBe('35 KB');
+    expect(displayFileSize('2.3M')).toBe('2.3 MB');
+    expect(displayFileSize('1.1G')).toBe('1.1 GB');
+    expect(displayFileSize('12 kb')).toBe('12 KB');
+  });
+
+  it('shows bytes alone as the system does', () => {
+    expect(displayFileSize('12345B')).toBe('12.3 KB');
+    expect(displayFileSize('512')).toBe('512 B');
+  });
+
+  it('leaves anything else as it is', () => {
+    expect(displayFileSize('')).toBe('');
+    expect(displayFileSize('unknown')).toBe('unknown');
   });
 });
