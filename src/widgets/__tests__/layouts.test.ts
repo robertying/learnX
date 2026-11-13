@@ -583,17 +583,23 @@ describe('Deadlines on iOS', () => {
     );
   });
 
-  it('lists rows with courses after their titles and no links in a small widget', () => {
+  it('lists rows with the time left and the course, and no links, in a small widget', () => {
     const widget = render('systemSmall');
     expect(texts(version(widget, 3))).toEqual([
       'Deadlines',
       '+6',
       ...[1, 2, 3].flatMap(i => [
-        `Assignment d${i} · `,
-        `Course of d${i}`,
+        `Assignment d${i}`,
         `in ${iso(at('23:59') + i * DAY)}`,
+        ` · Course of d${i}`,
       ]),
     ]);
+    // The time left in its largest unit, to leave the course room.
+    expect(
+      all(version(widget, 3))
+        .filter(n => n.type === 'CountdownView')
+        .map(n => n.props.maxFieldCount),
+    ).toEqual([1, 1, 1]);
     expect(texts(version(widget, 1)).slice(0, 2)).toEqual(['Deadlines', '+8']);
     expect(links(widget)).toEqual([]);
   });

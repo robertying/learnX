@@ -17,7 +17,8 @@ import type { DeadlineWidgetProps } from 'widgets/props';
  * the function; only its props, `environment`, the @expo/ui components and
  * what `kit` (widgets/kit) shares between the layouts.
  *
- * A small widget names each course after its title, the rest on the due line.
+ * Each row names its course on the due line; a small widget shows the time
+ * left there in its largest unit only, to leave the course room.
  * A small widget or a Lock Screen one has one tap target, so it opens the
  * list, or the next assignment. Medium and large ones open the tapped row's
  * assignment, and the list when tapped elsewhere.
@@ -111,28 +112,40 @@ function DeadlinesWidget(
   const row = (item: (typeof deadlines)[number]) => {
     const content = (
       <VStack key={item.id} alignment="leading" spacing={large ? 2 : 1}>
+        <Text modifiers={[...titleFont, lineLimit(1)]}>{item.title}</Text>
         {small ? (
-          // No room for the course on the due line: it follows the title, to
-          // tell apart same-named assignments. The title keeps its width (as
-          // in kit.dueLine) and the course shortens.
+          // Too narrow for the full countdown and the course: the time left in
+          // its largest unit, then the course, which shortens.
           <HStack spacing={0}>
-            <Text modifiers={[...titleFont, lineLimit(1), layoutPriority(1)]}>
-              {`${item.title} · `}
-            </Text>
-            <Text modifiers={[...titleFont, kit.secondary, lineLimit(1)]}>
-              {item.courseName}
+            <kit.Countdown
+              date={new Date(item.deadline)}
+              maxFieldCount={1}
+              modifiers={[
+                font({ textStyle: 'caption' }),
+                kit.dueColor(item, now),
+                lineLimit(1),
+                layoutPriority(1),
+              ]}
+            />
+            <Text
+              modifiers={[
+                font({ textStyle: 'caption' }),
+                kit.secondary,
+                lineLimit(1),
+              ]}
+            >
+              {` · ${item.courseName}`}
             </Text>
             <Spacer />
           </HStack>
         ) : (
-          <Text modifiers={[...titleFont, lineLimit(1)]}>{item.title}</Text>
+          kit.dueLine({
+            courseName: item.courseName,
+            due: item,
+            textStyle: large ? 'subheadline' : 'caption',
+            color: kit.dueColor(item, now),
+          })
         )}
-        {kit.dueLine({
-          courseName: small ? undefined : item.courseName,
-          due: item,
-          textStyle: large ? 'subheadline' : 'caption',
-          color: kit.dueColor(item, now),
-        })}
         {large ? (
           <Text
             modifiers={[
