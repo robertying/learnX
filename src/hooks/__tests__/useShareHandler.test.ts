@@ -37,7 +37,9 @@ describe('useShareHandler', () => {
       data: file.uri,
       mimeType: 'application/pdf',
     });
-    expect(toast).toHaveBeenCalledWith(expect.any(String), 'success', 5000);
+    expect(toast).toHaveBeenCalledWith(expect.any(String), 'success', {
+      duration: 5000,
+    });
   });
 
   it('keeps a file shared while running', async () => {
@@ -61,6 +63,8 @@ describe('useShareHandler', () => {
     await renderHook(() => useShareHandler());
     await act(async () => listener!({ kind: 'unsupported' }));
     expect(usePendingAssignmentStore.getState().data).toBeNull();
-    expect(toast).toHaveBeenCalledWith(expect.any(String), 'error', 3000);
+    expect(toast).toHaveBeenCalledWith(expect.any(String), 'error', {
+      duration: 3000,
+    });
   });
 });

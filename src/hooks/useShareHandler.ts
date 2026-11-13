@@ -13,7 +13,7 @@ import { setPendingAssignmentData } from 'data/pendingAssignment';
 const useShareHandler = () => {
   const handleShare = useEffectEvent(async (item: SharedItem) => {
     if (item.kind === 'unsupported') {
-      toast(t('shareUnsupported'), 'error', 3 * 1000);
+      toast(t('shareUnsupported'), 'error', { duration: 3 * 1000 });
       return;
     }
 
@@ -25,13 +25,13 @@ const useShareHandler = () => {
       try {
         uri = await copyFileToCache(uri);
       } catch {
-        toast(t('shareError'), 'error', 3 * 1000);
+        toast(t('shareError'), 'error', { duration: 3 * 1000 });
         return;
       }
     }
 
     setPendingAssignmentData({ data: uri, mimeType: item.mimeType });
-    toast(t('shareReceived'), 'success', 5 * 1000);
+    toast(t('shareReceived'), 'success', { duration: 5 * 1000 });
   });
 
   useEffect(() => {

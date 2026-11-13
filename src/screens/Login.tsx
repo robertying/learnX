@@ -67,7 +67,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
               ? `${state.error}${state.errorDetail ? `: ${state.errorDetail}` : ''}\n${message}`
               : message,
             'error',
-            8 * 1000,
+            { duration: 8 * 1000 },
           );
         }
       }),

@@ -23,9 +23,11 @@ import useFilterListHeader, {
   type FilterListHeaderOptions,
 } from 'hooks/useFilterListHeader';
 import type { AppCommand } from 'modules/menus';
+import { playHaptic } from 'services/haptics';
 
 jest.mock('@react-navigation/native', () => ({ useIsFocused: () => true }));
 jest.mock('hooks/useFilterListHeader', () => jest.fn());
+jest.mock('services/haptics', () => ({ playHaptic: jest.fn() }));
 jest.mock('hooks/useDetailNavigator', () => ({
   __esModule: true,
   default: jest.fn(() => undefined),
@@ -232,6 +234,18 @@ it('hides and moves courses, which have no favorites', async () => {
   expect(header().reorderMode).toBe(true);
   await user.press(screen.getByText('down b'));
   expect(moveCourse).toHaveBeenCalledWith(['a', 'b', 'c'], 1, 2);
+});
+
+it('taps when a course lifts and as it passes others', async () => {
+  await renderList({ type: 'course' });
+  await act(() => header().onReorder());
+  const list = screen.getByTestId('filter-list');
+  await act(() => list.props.onDragStart({ index: 0 }));
+  await act(() => list.props.onIndexChange({ index: 1 }));
+  expect(jest.mocked(playHaptic).mock.calls).toEqual([
+    ['dragStart'],
+    ['dragTick'],
+  ]);
 });
 
 it('shows a spinner for the first load and an empty state after', async () => {

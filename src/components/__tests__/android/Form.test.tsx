@@ -9,6 +9,7 @@ import { useState } from 'react';
 import type * as ReactNative from 'react-native';
 import { StyleSheet, Text } from 'react-native';
 import { showChoices } from 'components/choiceSheet';
+import { playHaptic } from 'services/haptics';
 import {
   Form,
   FormButton,
@@ -28,6 +29,7 @@ import {
 } from 'components/Form';
 
 jest.mock('components/choiceSheet', () => ({ showChoices: jest.fn() }));
+jest.mock('services/haptics', () => ({ playHaptic: jest.fn() }));
 
 describe('Form (Android)', () => {
   it('asks from a row with a dialog', async () => {
@@ -105,6 +107,23 @@ describe('Form (Android)', () => {
     expect(row.props.accessibilityRole).toBe('switch');
     await userEvent.setup().press(row);
     expect(onValueChange).toHaveBeenCalledWith(true);
+    // The Compose switch is silent, so the row plays Android's toggle haptic.
+    expect(playHaptic).toHaveBeenCalledWith('toggleOn');
+  });
+
+  it('plays the off haptic when a switch turns off', async () => {
+    await render(
+      <FormSection>
+        <FormToggle
+          title="Notifications"
+          value
+          onValueChange={jest.fn()}
+          testID="notifications"
+        />
+      </FormSection>,
+    );
+    await userEvent.setup().press(screen.getByTestId('notifications'));
+    expect(playHaptic).toHaveBeenCalledWith('toggleOff');
   });
 
   it('marks the chosen row of a list as a selected radio button', async () => {

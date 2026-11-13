@@ -1,9 +1,8 @@
 import { ToastAndroid } from 'react-native';
-import * as Haptics from 'expo-haptics';
+import { playHaptic } from 'services/haptics';
+import { toastHaptic, type ToastOptions, type ToastType } from './Toast.shared';
 
-import { toastHaptics, type ToastType } from './Toast.shared';
-
-export type { ToastType } from './Toast.shared';
+export type { ToastOptions, ToastType } from './Toast.shared';
 
 /**
  * Shows the system toast, which draws above dialogs. The system picks how
@@ -11,15 +10,20 @@ export type { ToastType } from './Toast.shared';
  * Errors and warnings get the longer one. An empty `text` does nothing: a
  * system toast can't be hidden early.
  */
-export const toast = (text: string, type: ToastType, duration?: number) => {
+export const toast = (
+  text: string,
+  type: ToastType,
+  options?: ToastOptions,
+) => {
   if (!text) {
     return;
   }
+  const duration = options?.duration;
   const long = duration !== undefined ? duration > 3000 : type !== 'success';
   ToastAndroid.show(text, long ? ToastAndroid.LONG : ToastAndroid.SHORT);
-  const feedback = toastHaptics[type];
-  if (feedback !== undefined) {
-    void Haptics.notificationAsync(feedback);
+  const haptic = toastHaptic(type, options);
+  if (haptic) {
+    playHaptic(haptic);
   }
 };
 

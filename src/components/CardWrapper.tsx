@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import { SharedValue, useSharedValue } from 'react-native-reanimated';
 import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
-import * as Haptics from 'expo-haptics';
 import DeviceInfo from 'constants/DeviceInfo';
 import { useSettings } from 'data/settings';
 import { CardAction, cardActions, swipeAction } from 'helpers/cardActions';
@@ -22,6 +21,7 @@ import SelectionMark from './SelectionMark';
 import SystemIcon from './SystemIcon';
 import { useTheme } from 'theme';
 import { ContextMenuView } from 'modules/menus';
+import { playHaptic } from 'services/haptics';
 
 // A long press (or a pointer's right-click) shows the actions in a menu: the
 // system context menu on iOS, iPadOS and Mac, a Material dropdown on Android.
@@ -265,7 +265,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
     if (reorderMode) {
       onDrag?.();
     } else if (actionsEnabled && !contextMenuSupported) {
-      void Haptics.selectionAsync();
+      playHaptic('longPress');
       setMenuMounted(true);
       setMenuVisible(true);
     }

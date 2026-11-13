@@ -106,10 +106,13 @@ describe('useCardSwipe', () => {
     it('runs the action of a full swipe and closes', async () => {
       const { result, methods, onSwipe } = await setup();
       result.current.onArmedChange('leading', true);
-      expect(Haptics.selectionAsync).toHaveBeenCalledTimes(1);
+      expect(Haptics.impactAsync).toHaveBeenCalledTimes(1);
       result.current.onWillOpen(right);
       expect(onSwipe).toHaveBeenCalledWith('leading');
       expect(methods.close).toHaveBeenCalledTimes(1);
+      // The card closing back under the point is silent.
+      result.current.onArmedChange('leading', false);
+      expect(Haptics.impactAsync).toHaveBeenCalledTimes(1);
 
       // armed only for that swipe
       result.current.onWillOpen(right);
@@ -124,7 +127,12 @@ describe('useCardSwipe', () => {
       result.current.onArmedChange('trailing', true);
       result.current.onWillOpen(right);
       expect(onSwipe).not.toHaveBeenCalled();
-      expect(Haptics.selectionAsync).toHaveBeenCalledTimes(2);
+      // A tap at each crossing: armed, back under, armed again.
+      expect((Haptics.impactAsync as jest.Mock).mock.calls).toEqual([
+        [Haptics.ImpactFeedbackStyle.Medium],
+        [Haptics.ImpactFeedbackStyle.Light],
+        [Haptics.ImpactFeedbackStyle.Medium],
+      ]);
     });
   });
 });

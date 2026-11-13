@@ -66,6 +66,7 @@ import {
 import { showChoices } from './choiceSheet';
 import ThemedHost from 'components/ThemedHost';
 import SystemIcon from 'components/SystemIcon';
+import { playHaptic } from 'services/haptics';
 
 export * from './Form.shared';
 
@@ -574,10 +575,18 @@ export const FormToggle: React.FC<FormToggleProps> = ({
     action={
       loading
         ? undefined
-        : toggleable(value, () => onValueChange(!value), {
-            role: 'switch',
-            enabled: !disabled,
-          })
+        : toggleable(
+            value,
+            () => {
+              // The Compose switch plays none of its own.
+              playHaptic(value ? 'toggleOff' : 'toggleOn');
+              onValueChange(!value);
+            },
+            {
+              role: 'switch',
+              enabled: !disabled,
+            },
+          )
     }
     trailing={
       loading ? (

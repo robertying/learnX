@@ -304,7 +304,7 @@ describe('swipe actions', () => {
       .mock.calls.map(([props]) => props)
       .find(props => props.side === 'trailing')!;
     await act(() => trailing.onArmedChange(true));
-    expect(Haptics.selectionAsync).toHaveBeenCalledTimes(1);
+    expect(Haptics.impactAsync).toHaveBeenCalledTimes(1);
     await act(() => swipeable().onSwipeableWillOpen(SwipeDirection.LEFT));
     expect(onToggleFav).toHaveBeenCalled();
     expect(mockSwipeableMethods.close).toHaveBeenCalledTimes(1);

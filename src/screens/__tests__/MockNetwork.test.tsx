@@ -51,5 +51,7 @@ it('rejects logins, and logs in again on demand', async () => {
 
   await userEvent.press(screen.getByTestId('mock-network-relogin'));
   expect(login).toHaveBeenCalledWith({});
-  expect(toast).toHaveBeenCalledWith(t('loggingIn'), 'none', 1000);
+  expect(toast).toHaveBeenCalledWith(t('loggingIn'), 'none', {
+    duration: 1000,
+  });
 });

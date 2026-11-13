@@ -224,11 +224,9 @@ it('shows progress while uploading, and a failure as a toast', async () => {
     .mocked(useSubmitAssignment)
     .mockImplementation(() => ({ ...submit, uploadError: true }) as never);
   await renderScreen();
-  expect(toast).toHaveBeenCalledWith(
-    t('assignmentSubmissionFailed'),
-    'error',
-    3000,
-  );
+  expect(toast).toHaveBeenCalledWith(t('assignmentSubmissionFailed'), 'error', {
+    duration: 3000,
+  });
   expect(submit.dismissUploadError).toHaveBeenCalled();
 });
 

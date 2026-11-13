@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Alert, Keyboard } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
-import * as Haptics from 'expo-haptics';
 import * as ImagePicker from 'expo-image-picker';
 import { toast } from 'components/Toast';
 import { refreshCourseAssignments } from 'data/content';
@@ -170,8 +169,7 @@ export const useSubmitAssignment = (
       setUploading(false);
       setUploadError(true);
       setProgress(0);
-
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      // The screen's error toast plays the haptic.
       return;
     }
 

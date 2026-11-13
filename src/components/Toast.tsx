@@ -20,7 +20,6 @@ import Animated, {
 import { scheduleOnRN } from 'react-native-worklets';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FullWindowOverlay } from 'react-native-screens';
-import * as Haptics from 'expo-haptics';
 import { create } from 'zustand';
 import DeviceInfo from 'constants/DeviceInfo';
 import Spacing from 'constants/Spacing';
@@ -28,9 +27,10 @@ import { textStyles } from 'components/Text';
 import { useTheme } from 'theme';
 import { ToastBackground, ToastSymbol } from 'modules/toast';
 
-import { toastHaptics, type ToastType } from './Toast.shared';
+import { playHaptic } from 'services/haptics';
+import { toastHaptic, type ToastOptions, type ToastType } from './Toast.shared';
 
-export type { ToastType } from './Toast.shared';
+export type { ToastOptions, ToastType } from './Toast.shared';
 
 interface ToastState {
   /** Changes with every toast, so that each one mounts afresh. */
@@ -75,7 +75,11 @@ const symbols: Partial<Record<ToastType, { name: string; color: ColorValue }>> =
  * Shows a toast. A plain function, so it is safe to call from anywhere. An
  * empty `text` hides the current one.
  */
-export const toast = (text: string, type: ToastType, duration?: number) => {
+export const toast = (
+  text: string,
+  type: ToastType,
+  options?: ToastOptions,
+) => {
   if (!text) {
     useToastStore.setState({ text: '', visible: false });
     return;
@@ -84,12 +88,12 @@ export const toast = (text: string, type: ToastType, duration?: number) => {
     id: state.id + 1,
     text,
     type,
-    duration: duration ?? defaultDurations[type],
+    duration: options?.duration ?? defaultDurations[type],
     visible: true,
   }));
-  const feedback = toastHaptics[type];
-  if (feedback !== undefined) {
-    void Haptics.notificationAsync(feedback);
+  const haptic = toastHaptic(type, options);
+  if (haptic) {
+    playHaptic(haptic);
   }
   // The toast lives in its own window, outside the screen VoiceOver is on.
   AccessibilityInfo.announceForAccessibility(text);

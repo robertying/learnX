@@ -46,7 +46,7 @@ describe('Toast (iOS)', () => {
     await act(() => jest.advanceTimersByTime(1 + exitDuration));
     expect(screen.queryByText('Failed')).toBeNull();
 
-    await act(() => toast('Quick', 'error', 1000));
+    await act(() => toast('Quick', 'error', { duration: 1000 }));
     await act(() => jest.advanceTimersByTime(1000 + exitDuration));
     expect(screen.queryByText('Quick')).toBeNull();
   });
@@ -167,6 +167,7 @@ describe('Toast (iOS)', () => {
     toast('Careful', 'warning');
     toast('Failed', 'error');
     toast('Note', 'none');
+    toast('Archived', 'success', { haptic: false });
     toast('', 'error');
     expect((Haptics.notificationAsync as jest.Mock).mock.calls).toEqual([
       [Haptics.NotificationFeedbackType.Success],
@@ -181,14 +182,16 @@ describe('Toast (Android)', () => {
     const show = jest.spyOn(ToastAndroid, 'show').mockImplementation();
     androidToast('Saved', 'success');
     androidToast('Failed', 'error');
-    androidToast('Logging in', 'none', 1000);
-    androidToast('Shared', 'success', 5000);
+    androidToast('Logging in', 'none', { duration: 1000 });
+    androidToast('Shared', 'success', { duration: 5000 });
+    androidToast('Archived', 'success', { haptic: false });
     androidToast('', 'error');
     expect(show.mock.calls).toEqual([
       ['Saved', ToastAndroid.SHORT],
       ['Failed', ToastAndroid.LONG],
       ['Logging in', ToastAndroid.SHORT],
       ['Shared', ToastAndroid.LONG],
+      ['Archived', ToastAndroid.SHORT],
     ]);
     expect((Haptics.notificationAsync as jest.Mock).mock.calls).toEqual([
       [Haptics.NotificationFeedbackType.Success],
