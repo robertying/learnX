@@ -205,14 +205,56 @@ const deadlineProps: DeadlineWidgetProps = {
   url: 'learnx://assignment',
 };
 
+describe('iOS layouts', () => {
+  it('use no Babel helpers, which the widget runtime lacks', () => {
+    for (const load of [
+      () => require('widgets/UpNext'),
+      () => require('widgets/Deadlines'),
+    ]) {
+      jest.isolateModules(() => {
+        const { createWidget } = require('expo-widgets');
+        load();
+        const source: string = jest.mocked(createWidget).mock.calls.at(-1)![1];
+        // Calls to underscored names other than the JSX runtime's, such as
+        // _slicedToArray for array destructuring.
+        expect(
+          new Set(source.match(/\b_[a-zA-Z]+(?=\()/g)).difference(
+            new Set(['_jsx', '_jsxs']),
+          ),
+        ).toEqual(new Set());
+      });
+    }
+  });
+});
+
 describe('Up Next on iOS', () => {
   const layout = layoutOf<UpNextWidgetProps>(() => require('widgets/UpNext'));
   const render = (widgetFamily?: string, props = upNextProps) =>
     layout(props, { widgetFamily, date: new Date(now) });
 
+  /** How many later classes and deadlines each version shows, in order. */
+  const shown = (widget: Node) => {
+    expect(widget.type).toBe('ViewThatFitsView');
+    return childrenOf(widget).map(v => [
+      texts(v).filter(w => w.endsWith('-time')).length,
+      links(v).length,
+    ]);
+  };
+
   it('shows the class on now with its end countdown, and the next deadline', () => {
     const widget = render('systemMedium');
-    expect(texts(widget)).toEqual([
+    // Deadlines and classes in turn, up to three each, the most first.
+    expect(shown(widget)).toEqual([
+      [3, 3],
+      [2, 3],
+      [2, 2],
+      [1, 2],
+      [1, 1],
+      [0, 1],
+      [0, 0],
+    ]);
+    const oneDeadline = childrenOf(widget)[5];
+    expect(texts(oneDeadline)).toEqual([
       'Now',
       'Course now',
       'now-time · 六教6A414',
@@ -224,11 +266,13 @@ describe('Up Next on iOS', () => {
       `in ${iso(at('23:59'))}`,
     ]);
     expect(
-      all(widget)
+      all(oneDeadline)
         .filter(n => n.type === 'CountdownView')
         .map(n => modifier(n, 'font')),
     ).toEqual([{ textStyle: 'footnote' }, { textStyle: 'caption' }]);
-    expect(links(widget)).toEqual(['learnx://assignment/d1']);
+    expect(links(oneDeadline)).toEqual(['learnx://assignment/d1']);
+    // Medium widgets don't name the sections.
+    expect(texts(childrenOf(widget)[0])).not.toContain('Later');
     expect(modifier(widget, 'widgetURL')).toBe('learnx://today');
     expect(modifier(widget, 'containerBackground')).toEqual([
       'PlatformColor(systemBackground)',
@@ -280,17 +324,35 @@ describe('Up Next on iOS', () => {
     expect(links(widget)).toEqual([]);
   });
 
-  it('lists four more classes and three deadlines under headings when large', () => {
+  it('lists as many classes and deadlines as fit under headings when large', () => {
     for (const family of ['systemLarge', 'systemExtraLarge']) {
       const widget = render(family);
-      const words = texts(widget);
-      expect(words).toContain('Later');
-      expect(words).toContain('Due');
-      expect(words).toContain('c5-day c5-time');
-      expect(words).not.toContain('Course c6');
-      expect(words).toContain('Assignment d3 · ');
-      expect(words).toContain('Course of d3');
-      expect(links(widget)).toHaveLength(3);
+      // All five classes after this one and the four deadlines still open,
+      // then one fewer at a time.
+      expect(shown(widget).slice(0, 4)).toEqual([
+        [5, 4],
+        [4, 4],
+        [3, 4],
+        [3, 3],
+      ]);
+      const [all9, cut] = childrenOf(widget);
+      const words = texts(all9);
+      expect(words.indexOf('Later')).toBeLessThan(words.indexOf('Due'));
+      expect(words).toContain('c6-day c6-time');
+      expect(words).toContain('Assignment d4 · ');
+      expect(words).toContain('Course of d4');
+      // Showing everything, it keeps to the top; leaving rows out, it
+      // spreads them, each section's name staying with its first row.
+      const spacers = (v: Node) =>
+        childrenOf(v).filter(child => child.type === 'Spacer');
+      expect(spacers(all9)).toEqual([]);
+      expect(spacers(cut).map(spacer => spacer.props.minLength)).toEqual(
+        Array(8).fill(10),
+      );
+      expect(texts(childrenOf(cut)[2]).slice(0, 2)).toEqual([
+        'Later',
+        'Tomorrow later-time',
+      ]);
     }
   });
 
