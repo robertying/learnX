@@ -242,7 +242,7 @@ it('restores a draft and discards it once confirmed', async () => {
   expect(screen.getByDisplayValue('Saved answer')).toBeTruthy();
   expect(screen.getByText(t('draftSaved'))).toBeTruthy();
 
-  await userEvent.press(screen.getByText(t('discardDraft')));
+  await userEvent.press(screen.getByText(t('discardDraftEllipsis')));
   await act(() => alert.mock.calls[0][2]![1].onPress!());
   expect(screen.queryByDisplayValue('Saved answer')).toBeNull();
   expect(picker.removePicked).toHaveBeenCalled();

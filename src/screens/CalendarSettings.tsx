@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import { Platform } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import DateRangePicker from 'components/DateRangePicker';
+import DeviceInfo from 'constants/DeviceInfo';
 import {
   Form,
   FormButton,
@@ -294,7 +295,13 @@ const CalendarSettings: React.FC<Props> = () => {
         >
           <FormButton
             icon="export"
-            title={t('exportSyncedCalendars')}
+            title={
+              // The Mac saves the file to Downloads; elsewhere a share sheet
+              // asks where it goes.
+              DeviceInfo.isMac()
+                ? t('exportSyncedCalendars')
+                : t('exportSyncedCalendarsEllipsis')
+            }
             onPress={exportToICS}
             loading={exporting}
           />
@@ -319,8 +326,8 @@ const CalendarSettings: React.FC<Props> = () => {
             icon="delete"
             title={
               Platform.OS === 'ios'
-                ? t('deleteSyncedCalendarsAndReminders')
-                : t('deleteSyncedCalendars')
+                ? t('deleteSyncedCalendarsAndRemindersEllipsis')
+                : t('deleteSyncedCalendarsEllipsis')
             }
             onPress={confirmDeleteCalendars}
           />

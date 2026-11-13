@@ -49,15 +49,14 @@ tags:
 
 - tapOn:
     id: settings-logout
-# The alert's button repeats the Settings row's label. On iOS the alert comes
-# after the list in the snapshot; on Android the dialog hides the list.
+# The alert's button is the Settings row's label without its ellipsis. On
+# Android the dialog's button has a fixed id.
 - runFlow:
     when:
       platform: iOS
     commands:
       - tapOn:
           text: '${T_logout}'
-          index: 1
 - runFlow:
     when:
       platform: Android
