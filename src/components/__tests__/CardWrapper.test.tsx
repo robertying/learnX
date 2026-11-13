@@ -13,6 +13,7 @@ import * as Haptics from 'expo-haptics';
 import CardSwipeAction from 'components/CardSwipeAction';
 import CardWrapper, { CardWrapperProps } from 'components/CardWrapper';
 import { defaultSettings, setSetting } from 'data/settings';
+import useBackSwipeEdge from 'hooks/useBackSwipeEdge';
 import * as menus from 'test-utils/mocks/menus';
 import { mockSwipeableMethods } from 'test-utils/mocks/swipeable';
 
@@ -20,6 +21,12 @@ import { mockSwipeableMethods } from 'test-utils/mocks/swipeable';
 jest.mock('components/CardSwipeAction', () => ({
   __esModule: true,
   default: jest.fn(jest.requireActual('components/CardSwipeAction').default),
+}));
+
+jest.mock('hooks/useBackSwipeEdge', () => ({
+  ...jest.requireActual('hooks/useBackSwipeEdge'),
+  __esModule: true,
+  default: jest.fn(),
 }));
 
 const card = (props: CardWrapperProps = {}) => (
@@ -52,6 +59,7 @@ const menu = () =>
 
 beforeEach(() => {
   jest.useFakeTimers();
+  jest.mocked(useBackSwipeEdge).mockReturnValue(false);
 });
 
 afterEach(() => {
@@ -255,6 +263,14 @@ describe('swipe actions', () => {
       .queryAllByTestId(/^card-/, hidden)
       .map(el => el.props.testID);
   const swipeable = () => screen.getByTestId('swipeable').props;
+
+  it("leaves the screen's edge to the swipe back where there is one", async () => {
+    await render(card());
+    expect(swipeable().swipeHitSlop).toBeUndefined();
+    jest.mocked(useBackSwipeEdge).mockReturnValue(true);
+    await render(card());
+    expect(swipeable().swipeHitSlop).toEqual({ left: -20 });
+  });
 
   it('archives on a right swipe and favorites on a left one by default', async () => {
     await render(card());

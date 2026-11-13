@@ -14,7 +14,7 @@ type RenderActions = (
 
 /**
  * Stand-in for gesture handler's ReanimatedSwipeable: renders its children in
- * a view (testID `swipeable`, with `enabled` and its swipe callbacks on its
+ * a view (testID `swipeable`, with `enabled`, `hitSlop` as `swipeHitSlop` and its swipe callbacks on its
  * props, for tests to call) and gives the ref mocked `openRight` / `close`.
  * Both sides' actions are drawn as if swiped open (in `swipe-actions-left`
  * and `swipe-actions-right`), but hidden from queries as a closed swipe's
@@ -25,6 +25,7 @@ const ReanimatedSwipeable = ({
   ref,
   children,
   enabled,
+  hitSlop,
   renderLeftActions,
   renderRightActions,
   onSwipeableWillOpen,
@@ -33,6 +34,7 @@ const ReanimatedSwipeable = ({
 }: ViewProps & {
   ref?: React.Ref<unknown>;
   enabled?: boolean;
+  hitSlop?: unknown;
   renderLeftActions?: RenderActions;
   renderRightActions?: RenderActions;
   onSwipeableWillOpen?: (direction: SwipeDirection) => void;
@@ -45,6 +47,7 @@ const ReanimatedSwipeable = ({
       testID="swipeable"
       {...{
         enabled,
+        swipeHitSlop: hitSlop,
         onSwipeableWillOpen,
         onSwipeableOpen,
         onSwipeableWillClose,
