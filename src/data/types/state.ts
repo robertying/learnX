@@ -22,6 +22,7 @@ export interface AlarmSettings {
   assignmentCalendarAlarmOffset?: number;
   assignmentCalendarNoAlarmIfComplete: boolean;
   assignmentReminderAlarm: boolean;
+  assignmentReminderAlarmOffset?: number;
 }
 /** Which notifications the app posts; all off until the user turns them on. */
 export interface NotificationSettings {

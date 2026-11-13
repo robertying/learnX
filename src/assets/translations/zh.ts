@@ -142,7 +142,10 @@ const zh: typeof en = {
   assignmentCalendarSecondAlarm: '日历第二次提醒',
   assignmentCalendarSecondAlarmOffset: '截止前第二次提醒（分钟）',
   assignmentCalendarNoAlarmIfComplete: '已提交的作业不提醒',
-  assignmentReminderAlarm: '截止时提醒',
+  assignmentReminderAlarm: '提醒事项提醒',
+  assignmentReminderAlarmOffset: '截止前提醒（分钟）',
+  assignmentReminderAlarmCaption:
+    '提醒事项会在截止时和截止前提醒，列表中显示最早的提醒时间。',
   assignmentSyncDescription:
     'learnX 每次获取作业时都会添加并更新未截止的作业；已截止的作业不会添加，已归档的作业和已屏蔽课程的作业会被移除。',
   clearFileCache: '删除全部已下载文件',
