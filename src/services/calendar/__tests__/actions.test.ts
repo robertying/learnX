@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import DeviceInfo from 'constants/DeviceInfo';
 import { resetCalendarSync, useCalendarSyncStore } from 'data/calendarSync';
 import { ensureSession } from 'data/source';
 import { fetchCalendarRange } from 'data/schedule';
@@ -44,7 +43,6 @@ jest.mock('services/calendar/classes', () => ({
   saveClassesToCalendar: jest.fn(),
 }));
 jest.mock('services/files/share', () => ({ exportTextFile: jest.fn() }));
-jest.mock('constants/DeviceInfo', () => ({ isMac: jest.fn(() => false) }));
 
 const fail = (code: CalendarErrorCode) => async () => {
   throw new CalendarError(code);
@@ -295,7 +293,7 @@ describe('allowCourseCalendarSync', () => {
 });
 
 describe('exportCalendars', () => {
-  it('exports learnX.ics without a toast outside Mac', async () => {
+  it('exports learnX.ics without a toast', async () => {
     jest.mocked(exportSyncedCalendarsToICS).mockResolvedValue('ICS');
 
     await expect(exportCalendars()).resolves.toBeUndefined();
@@ -304,16 +302,6 @@ describe('exportCalendars', () => {
       'ICS',
       'text/calendar',
     );
-  });
-
-  it('says where the file went on Mac', async () => {
-    jest.mocked(exportSyncedCalendarsToICS).mockResolvedValue('ICS');
-    jest.mocked(DeviceInfo.isMac).mockReturnValue(true);
-
-    await expect(exportCalendars()).resolves.toEqual({
-      text: t('calendarExportSavedToDownloads'),
-      type: 'success',
-    });
   });
 
   it('turns failures into toasts', async () => {

@@ -4,18 +4,14 @@ import { toast } from 'components/Toast';
 import { setSetting } from 'data/settings';
 import { DownloadableFile } from 'data/types/state';
 import { downloadFile } from 'services/files/downloads';
-import {
-  copyFileToMacDownloads,
-  openFile,
-  shareFile,
-} from 'services/files/share';
+import { openFile, saveFileOnMac, shareFile } from 'services/files/share';
 import useFileDownload from 'hooks/useFileDownload';
 
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
 jest.mock('services/files/downloads', () => ({ downloadFile: jest.fn() }));
 jest.mock('services/files/share', () => ({
-  copyFileToMacDownloads: jest.fn(),
   openFile: jest.fn(),
+  saveFileOnMac: jest.fn(),
   shareFile: jest.fn(),
 }));
 
@@ -131,16 +127,16 @@ describe('useFileDownload', () => {
     expect(toast).not.toHaveBeenCalled();
   });
 
-  it('copies to Downloads and says how it went', async () => {
+  it('saves where people pick, and says when it fails', async () => {
     const { result } = await setup();
     await waitFor(() => expect(result.current.path).toBe(PATH));
 
-    await act(() => result.current.copyToDownloads());
-    expect(copyFileToMacDownloads).toHaveBeenCalledWith(file, PATH);
-    expect(toast).toHaveBeenLastCalledWith(expect.any(String), 'success');
+    await act(() => result.current.save());
+    expect(saveFileOnMac).toHaveBeenCalledWith(file, PATH);
+    expect(toast).not.toHaveBeenCalled();
 
-    jest.mocked(copyFileToMacDownloads).mockRejectedValueOnce(new Error());
-    await act(() => result.current.copyToDownloads());
+    jest.mocked(saveFileOnMac).mockRejectedValueOnce(new Error());
+    await act(() => result.current.save());
     expect(toast).toHaveBeenLastCalledWith(expect.any(String), 'error');
   });
 

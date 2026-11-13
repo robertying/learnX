@@ -127,7 +127,6 @@ export default {
     "If learnX can't access your calendars or reminders, allow it in System Settings.",
   exportSyncedCalendarsDescription:
     "Saves the course schedule and assignments already synced to your calendar as an .ics file that other calendar apps can import. Reminders aren't included.",
-  calendarExportSavedToDownloads: 'Exported learnX.ics to Downloads',
   calendarExportNoCalendarPermission:
     "Couldn't export. Give learnX full access to Calendars in System Settings. If it already has access, restart learnX.",
   calendarExportNoCalendarPermissionAndroid:
@@ -279,8 +278,7 @@ export default {
   retryLogin: 'Log In with Saved Account',
   offlineMode: 'Continue Offline',
   download: 'Download',
-  downloadToDownloadsSucceeded: 'Saved to Downloads',
-  downloadToDownloadsFailed: "Couldn't save to Downloads",
+  saveFileFailed: "Couldn't save the file",
   sso: 'Electronic ID Service System of Tsinghua University',
   ssoNote:
     'Finish logging in on the web page that opens. To change the prefilled username or password, close the page and enter them again on the learnX login screen.',

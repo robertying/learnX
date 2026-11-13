@@ -1,11 +1,12 @@
 import * as IntentLauncher from 'expo-intent-launcher';
 import Share from 'react-native-share';
 import DeviceInfo from 'constants/DeviceInfo';
+import ShareModule from '../../../../modules/share';
 import {
   copyFileToCache,
-  copyFileToMacDownloads,
   exportTextFile,
   openFile,
+  saveFileOnMac,
   shareFile,
 } from 'services/files/share';
 
@@ -67,18 +68,36 @@ it('exports text through the share sheet', async () => {
   );
 });
 
-it('exports text straight to Downloads on Mac', async () => {
-  jest.mocked(DeviceInfo.isMac).mockReturnValue(true);
-  await exportTextFile('c.ics', 'BEGIN', 'text/calendar');
-  expect(__fs.files('file:///app/Downloads')).toEqual(['c.ics']);
-  expect(Share.open).not.toHaveBeenCalled();
-});
+describe('on Mac', () => {
+  const saveFile = jest.mocked(ShareModule!.saveFile);
+  let saved: Record<string, string>;
 
-it('copies a file to the Mac Downloads folder', async () => {
-  __fs.write(downloaded, 'pdf');
-  await expect(copyFileToMacDownloads(file, downloaded)).resolves.toBe(
-    'file:///app/Downloads/Lecture 1.pdf',
-  );
+  beforeEach(() => {
+    jest.mocked(DeviceInfo.isMac).mockReturnValue(true);
+    saved = {};
+    saveFile.mockImplementation(async uri => {
+      saved[uri] = __fs.read(uri);
+      return true;
+    });
+  });
+
+  it('asks where to save exported text', async () => {
+    await exportTextFile('a/b.ics', 'BEGIN', 'text/calendar');
+    expect(saved).toEqual({ [`${CACHES}/save/a_b.ics`]: 'BEGIN' });
+    expect(Share.open).not.toHaveBeenCalled();
+    // The copy for the save panel goes after.
+    expect(__fs.files(`${CACHES}/save`)).toEqual([]);
+  });
+
+  it('asks where to save a downloaded file, under its title', async () => {
+    __fs.write(downloaded, 'pdf');
+    await expect(saveFileOnMac(file, downloaded)).resolves.toBe(true);
+    expect(saved).toEqual({ [`${CACHES}/save/Lecture 1.pdf`]: 'pdf' });
+
+    saveFile.mockResolvedValueOnce(false);
+    await expect(saveFileOnMac(file, downloaded)).resolves.toBe(false);
+    expect(__fs.files(`${CACHES}/save`)).toEqual([]);
+  });
 });
 
 it('copies a file shared into the app to Caches', async () => {

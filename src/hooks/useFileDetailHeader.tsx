@@ -21,7 +21,7 @@ const useFileDetailHeader = ({
   showInfo,
   onRefresh,
   onShare,
-  onCopyToDownloads,
+  onSave,
   onOpen,
   onToggleInfo,
 }: {
@@ -33,7 +33,7 @@ const useFileDetailHeader = ({
   showInfo: boolean;
   onRefresh: () => void;
   onShare: () => void;
-  onCopyToDownloads: () => void;
+  onSave: () => void;
   onOpen: () => void;
   onToggleInfo: () => void;
 }) => {
@@ -76,7 +76,7 @@ const useFileDetailHeader = ({
       id: 'download',
       label: t('download'),
       icon: 'download',
-      onPress: onCopyToDownloads,
+      onPress: onSave,
       disabled: unavailable,
     },
     Platform.OS === 'android' && {

@@ -2,8 +2,11 @@ import ExpoModulesCore
 
 /// Hands files shared through the share extension to JS. The extension saves the file (`SharedFileInbox`) and opens
 /// `learnx://`; the link reaches `ShareAppDelegateSubscriber`, which tells a listening module to send it. Before JS
-/// listens (the link that launched the app), the file waits in the app group until `takeSharedItem`.
+/// listens (the link that launched the app), the file waits in the app group until `takeSharedItem`. Also saves files
+/// where people pick (`saveFile`).
 public final class ShareModule: Module {
+  @MainActor private lazy var saver = FileSaver()
+
   public func definition() -> ModuleDefinition {
     Name("LearnXShare")
 
@@ -14,6 +17,24 @@ public final class ShareModule: Module {
 
     Function("takeSharedItem", Self.takeSharedItem)
     Function("getSharedFilesDirectory", Self.getSharedFilesDirectory)
+
+    AsyncFunction("saveFile") { (url: URL, promise: Promise) in
+      MainActor.assumeIsolated {
+        self.saveFile(url, promise: promise)
+      }
+    }
+    .runOnQueue(.main)
+  }
+
+  /// Resolves to whether the file was saved; rejects when there is no screen to ask on.
+  @MainActor func saveFile(_ url: URL, promise: Promise) {
+    guard let presenter = appContext?.utilities?.currentViewController() else {
+      promise.reject("ERR_NO_SCREEN", "No screen to ask where to save on")
+      return
+    }
+    saver.save(url, from: presenter) { saved in
+      promise.resolve(saved)
+    }
   }
 
   /// The app's inbox, in the group the share extension shares with it (`LearnXAppGroup` in both Info.plists).
