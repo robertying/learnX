@@ -105,7 +105,13 @@ export const buildCourseEventDetails = (
 
 export interface AssignmentEventInput {
   assignmentId: string;
+  /** "Title · Course", as the widgets and the app join them. */
   title: string;
+  /**
+   * The "Title - Course" name earlier versions wrote, so their entries are
+   * still taken over (see `adoptExistingEntries` in services/calendar).
+   */
+  formerTitle?: string;
   note: string;
   dueDate: Dayjs;
   completed: boolean;
@@ -225,7 +231,7 @@ export const buildAssignmentEventDetails = (
 
 /**
  * Assignments still open at `now` whose course is known, as event inputs.
- * The title gets the course name appended.
+ * The title gets the course name appended, after a middle dot.
  */
 export const buildAssignmentEventInputs = (
   assignments: Assignment[],
@@ -242,7 +248,8 @@ export const buildAssignmentEventInputs = (
       return [
         {
           assignmentId: assignment.id,
-          title: assignment.title + ' - ' + course.name,
+          title: `${assignment.title} · ${course.name}`,
+          formerTitle: `${assignment.title} - ${course.name}`,
           note: removeTags(assignment.description),
           dueDate: dayjs(assignment.deadline),
           completed: assignment.submitted,
