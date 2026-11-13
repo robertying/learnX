@@ -1,0 +1,155 @@
+name: Apple
+
+# Builds the app for iOS and Mac Catalyst, so a broken patch, Podfile or native
+# module change shows up in CI rather than on a Mac later, and runs the native
+# iOS tests. By hand only (Actions > Apple > Run workflow), for the boxes
+# ticked; not required checks. No signing secrets, no uploads.
+# - iOS, build + native tests (~47 min cold): run it on main to refresh the
+#   compilation cache, or on a branch to check it.
+# - Mac, build (~35 min, uncached).
+# Android builds and E2E are in ci.yml.
+on:
+  workflow_dispatch:
+    inputs:
+      ios:
+        description: 'iOS: build and native tests'
+        type: boolean
+        default: true
+      mac:
+        description: 'Mac: build'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+# Only main saves caches (Pods, Xcode compilation cache), so branches start
+# from main's and can't evict or poison them. caches.yml prunes superseded
+# ones afterwards.
+env:
+  SAVE_CACHE: ${{ github.ref == 'refs/heads/main' }}
+
+jobs:
+  apple:
+    # A static name: a skipped matrix job can't expand ${{ matrix.name }}, so
+    # GitHub would show the raw expression. Rows show as "Apple (iOS)" (build
+    # and native tests) and "Apple (Mac)" (build).
+    name: Apple
+    if: inputs.ios || inputs.mac
+    runs-on: macos-26
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        name: ${{ fromJSON(inputs.ios && (inputs.mac && '["iOS","Mac"]' || '["iOS"]') || '["Mac"]') }}
+    env:
+      # Only iOS keeps a compilation cache (see the top of this file).
+      CACHE_CAS: ${{ matrix.name == 'iOS' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up JS
+        uses: ./.github/actions/setup-js
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          # Version comes from .ruby-version.
+          bundler-cache: true
+
+      - name: Restore Pods
+        id: pods
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            ios/Pods
+            ~/Library/Caches/CocoaPods
+          key: pods-${{ runner.os }}-${{ hashFiles('ios/Podfile.lock', 'patches/**') }}
+          restore-keys: pods-${{ runner.os }}-
+
+      # Not --deployment: ExpoWidgets' podspec embeds the checkout's absolute
+      # path, so its checksum in Podfile.lock differs on every machine.
+      - name: Install pods
+        working-directory: ios
+        run: bundle exec pod install
+        env:
+          LANG: en_US.UTF-8
+
+      # Both matrix jobs make the same Pods; whichever finishes second skips the save.
+      - name: Save Pods
+        if: env.SAVE_CACHE == 'true' && steps.pods.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            ios/Pods
+            ~/Library/Caches/CocoaPods
+          key: ${{ steps.pods.outputs.cache-primary-key }}
+
+      # Xcode's own compilation cache (Swift and C-family). ccache doesn't work
+      # here: Xcode 26 never calls the CC wrapper React Native sets up.
+      - name: Restore compilation cache
+        if: env.CACHE_CAS == 'true'
+        uses: actions/cache/restore@v6
+        with:
+          path: build/DerivedData/CompilationCache.noindex
+          key: xcode-cas-${{ matrix.name }}-${{ github.sha }}
+          restore-keys: xcode-cas-${{ matrix.name }}-
+
+      - name: Pick a simulator
+        if: matrix.name == 'iOS'
+        run: |
+          device="$(xcrun simctl list devices available --json |
+            jq -r '[.devices | to_entries | sort_by(.key)[] | select(.key | contains("iOS")) | .value[] | select(.name | startswith("iPhone"))] | last | .udid')"
+          echo "Simulator: $device"
+          echo "SIMULATOR=$device" >> "$GITHUB_ENV"
+
+      # iOS: the native tests (scripts/test-ios.sh) build the app and every
+      # module, so they also prove it compiles. Signed to run locally (the
+      # simulator default), which keeps the App Group entitlement the tests
+      # need; no certificates involved.
+      - name: Test
+        id: test
+        if: matrix.name == 'iOS'
+        run: scripts/test-ios.sh "$SIMULATOR"
+        env:
+          DERIVED_DATA: build/DerivedData
+          XCODEBUILD_ARGS: COMPILER_INDEX_STORE_ENABLE=NO COMPILATION_CACHE_ENABLE_CACHING=YES
+
+      # Mac: no signing certificates on CI, so this only proves the code
+      # compiles and links. Build signed when running the app.
+      - name: Build
+        if: matrix.name == 'Mac'
+        run: |
+          mkdir -p build
+          xcodebuild build \
+            -workspace ios/learnX.xcworkspace \
+            -scheme learnX \
+            -configuration Debug \
+            -destination "generic/platform=macOS,variant=Mac Catalyst" \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            > build/xcodebuild.log 2>&1 || {
+            grep -E 'error:' build/xcodebuild.log | sort -u | head -50
+            tail -n 80 build/xcodebuild.log
+            exit 1
+          }
+          tail -n 5 build/xcodebuild.log
+
+      - name: Save compilation cache
+        if: always() && env.CACHE_CAS == 'true' && env.SAVE_CACHE == 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: build/DerivedData/CompilationCache.noindex
+          key: xcode-cas-${{ matrix.name }}-${{ github.sha }}
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: xcodebuild-${{ matrix.name }}
+          path: |
+            build/xcodebuild.log
+            build/DerivedData/results/*.xcresult
+          if-no-files-found: ignore

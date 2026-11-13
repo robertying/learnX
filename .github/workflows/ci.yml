@@ -1,9 +1,14 @@
 name: CI
 
+# Pull requests run the required checks: JS checks, Release bundles, and
+# Android (whose steps skip themselves when no Android path changed). Main
+# pushes and manual runs (Actions > CI > Run workflow, on main or a branch)
+# always build Android and run the Android E2E flows on that build. The Apple builds are in apple.yml, by hand only.
 on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
 
 # A new push to a PR cancels that PR's older run. Main pushes and manual runs
 # each get their own group, so another merge can't cancel them (and the caches
@@ -15,22 +20,21 @@ concurrency:
 permissions:
   contents: read
 
-# Only main saves the Jest cache, so other refs don't spend the repo's 10 GB
-# cache limit, which the Xcode caches in native.yml need.
+# Only main saves caches (Jest, Gradle, ccache), so other refs start from
+# main's and can't evict or poison them. caches.yml prunes superseded ones
+# after each main run.
 env:
   SAVE_CACHE: ${{ github.ref == 'refs/heads/main' }}
   JEST_CACHE_DIR: ${{ github.workspace }}/.jest-cache
+  # Main pushes and manual runs: build Android every time and run E2E on it.
+  FULL_RUN: ${{ github.event_name != 'pull_request' }}
 
 jobs:
   js:
-    # Typecheck, lint, format, ShellCheck, Jest (with its coverage
-    # thresholds) and the release JS bundles
+    # Typecheck, lint, format, ShellCheck and Jest (with its coverage
+    # thresholds)
     name: JS checks
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      # To prune superseded caches on main
-      actions: write
     timeout-minutes: 15
     steps:
       - name: Checkout repository
@@ -83,12 +87,23 @@ jobs:
           path: ${{ env.JEST_CACHE_DIR }}
           key: ${{ steps.jest-cache.outputs.cache-primary-key }}
 
+  release-bundles:
+    # A job of its own, as it takes longer than every other JS check together.
+    name: Release bundles
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up JS
+        uses: ./.github/actions/setup-js
+
       # Builds the Android and iOS release JS bundles (production Babel and
       # Metro, which Jest doesn't run) and fails if one contains a .env value
       # other than the mock login. The .env has a made-up value for every key,
       # and one babel/inline-env.js doesn't know, so any leak shows up.
       - name: Release bundles
-        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: |
           cat > .env <<'ENV'
           DUMMY_USERNAME=ci-mock-user
@@ -101,55 +116,164 @@ jobs:
           ENV
           scripts/check-release-bundle.sh
 
-      # Drops caches that newer ones replaced (old Gradle, ccache, Pods, Xcode
-      # and Jest entries), so the repo stays under its 10 GB limit.
-      - name: Prune caches
-        if: always() && env.SAVE_CACHE == 'true'
-        run: scripts/prune-caches.sh
-        env:
-          GH_TOKEN: ${{ github.token }}
-
-  android-unit-tests:
-    # The local modules' JVM unit tests (scripts/test-android.sh). A required
-    # check: when nothing Android changed, every step after the first is
-    # skipped and the job passes in seconds.
-    name: Android unit tests
+  android:
+    # The local modules' JVM unit tests (scripts/test-android.sh) and a release
+    # APK (R8 and the bundled JS; -PciRelease signs it with the debug key and
+    # turns off Crashlytics uploads, android/app/build.gradle). A required
+    # check: on a pull request that changes nothing Android, every step after
+    # the first is skipped and the job passes in seconds.
+    name: Android
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 90
+    env:
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_BASEDIR: ${{ github.workspace }}
+      CCACHE_MAXSIZE: 2G
+      CCACHE_COMPRESS: 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
         with:
           fetch-depth: 2
 
-      # What the Android unit tests compile or run: the app's Gradle setup,
-      # the local modules' Android code and autolinking, patched and installed
-      # packages, and the scripts and workflow that run them.
+      # Pull requests only: the app's Gradle setup, the modules' Android code
+      # and autolinking, patched and installed packages, app config, and the
+      # scripts and workflow that build them. The steps below run unless this
+      # says nothing changed.
       - name: Detect changed files
         id: changes
-        run: >-
-          scripts/changed-files.sh android-unit >> "$GITHUB_OUTPUT"
+        if: env.FULL_RUN != 'true'
+        run: scripts/changed-files.sh >> "$GITHUB_OUTPUT"
 
       - name: Set up JS
-        if: steps.changes.outputs.changed == 'true'
+        id: install
+        if: steps.changes.outputs.changed != 'false'
         uses: ./.github/actions/setup-js
 
       - name: Set up Java
-        if: steps.changes.outputs.changed == 'true'
+        if: steps.changes.outputs.changed != 'false'
         uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 17
 
+      # The build cache lives in the Gradle home that setup-gradle restores,
+      # so pull requests reuse main's compiled outputs (dependency modules,
+      # Gradle plugins) and only rebuild what changed.
       - name: Set up Gradle
-        if: steps.changes.outputs.changed == 'true'
+        id: gradle
+        if: steps.changes.outputs.changed != 'false'
         uses: gradle/actions/setup-gradle@v6
         with:
           cache-read-only: ${{ env.SAVE_CACHE != 'true' }}
 
-      # The build cache lives in the Gradle home that setup-gradle restores,
-      # so PRs reuse main's compiled outputs (dependency modules, Gradle
-      # plugins) and only rebuild what changed.
-      - name: Test
-        if: steps.changes.outputs.changed == 'true'
+      # Keeps compiled C/C++ between runs.
+      - name: Set up ccache
+        id: ccache
+        if: steps.changes.outputs.changed != 'false'
+        uses: hendrikmuhs/ccache-action@v1.2.24
+        with:
+          key: android
+          save: ${{ env.SAVE_CACHE }}
+
+      - name: Unit tests
+        if: steps.changes.outputs.changed != 'false'
         run: scripts/test-android.sh --build-cache
+
+      # The release bundle inlines .env; the mock login is what E2E logs in
+      # with. Any non-empty values work, as they only switch to mock data.
+      # One ABI is enough to compile every native module and keeps the build
+      # short. CMake (3.17+) picks up the compiler launchers from the
+      # environment. Runs even if the unit tests failed, so one push shows
+      # both, and reuses their Gradle daemon.
+      - name: Build release APK
+        if: >-
+          !cancelled() && steps.changes.outputs.changed != 'false' &&
+          steps.install.outcome == 'success' && steps.gradle.outcome == 'success' &&
+          steps.ccache.outcome == 'success'
+        run: |
+          printf 'DUMMY_USERNAME=e2e\nDUMMY_PASSWORD=e2e\n' > .env
+          cd android
+          ./gradlew app:assembleRelease -PciRelease -PreactNativeArchitectures=x86_64 --build-cache
+        env:
+          CMAKE_C_COMPILER_LAUNCHER: ccache
+          CMAKE_CXX_COMPILER_LAUNCHER: ccache
+          # An E2E build, as scripts/e2e-build.sh makes (babel/inline-env.js).
+          TEST_LOGIN: '1'
+
+      - name: Show ccache stats
+        if: ${{ !cancelled() && steps.ccache.outcome == 'success' }}
+        run: ccache --show-stats || true
+
+      - name: Upload APK for E2E
+        if: env.FULL_RUN == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: apk
+          path: android/app/build/outputs/apk/release/app-x86_64-release.apk
+          retention-days: 1
+
+  android-e2e:
+    # The Maestro flows (scripts/e2e.sh) in an emulator on the APK from
+    # Android, after each main push and in manual runs. The first flow logs in
+    # through the real SSO login, so it needs id.tsinghua.edu.cn reachable from
+    # the runner. The flows are kept passing here, as on the local devices
+    # (.maestro/AGENTS.md). No iOS E2E in CI.
+    name: Android E2E tests
+    needs: android
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      MAESTRO_VERSION: 2.12.1
+      MAESTRO_CLI_NO_ANALYTICS: 'true'
+      MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED: 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Download APK
+        uses: actions/download-artifact@v8
+        with:
+          name: apk
+          path: build
+
+      # scripts/e2e.sh reads the flows' labels and mock texts from the
+      # translations and mock data (scripts/e2e-env.mjs), which import packages.
+      - name: Set up JS
+        uses: ./.github/actions/setup-js
+
+      # scripts/e2e.sh types the mock login from .env; same values as the build.
+      - name: Write .env
+        run: printf 'DUMMY_USERNAME=e2e\nDUMMY_PASSWORD=e2e\n' > .env
+
+      - name: Install Maestro
+        run: |
+          curl -fsSL https://get.maestro.mobile.dev | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run flows
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 36
+          target: google_apis
+          arch: x86_64
+          profile: pixel_7
+          disable-animations: true
+          script: |
+            adb install -r build/app-x86_64-release.apk
+            mkdir -p build/maestro; scripts/e2e.sh android --format junit --output build/maestro/report.xml --test-output-dir build/maestro; status=$?; adb logcat -d > build/maestro/logcat.txt; exit $status
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-android
+          path: build/maestro
+          if-no-files-found: ignore
