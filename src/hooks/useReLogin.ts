@@ -63,7 +63,7 @@ const useReLogin = () => {
     }
     const auth = getAuth();
     if (dayjs().diff(lastActiveTime.current, 'minute') >= 10) {
-      toast(t('loggingIn'), 'none', 1 * 1000);
+      toast(t('loggingIn'), 'none', { duration: 1 * 1000 });
       // At launch there's no session yet; after a break the session may
       // still be good, which saves a full SSO login.
       await login(auth.loggedIn ? { resume: true } : {});

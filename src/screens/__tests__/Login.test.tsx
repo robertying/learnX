@@ -249,7 +249,7 @@ describe('Login', () => {
     expect(toast).toHaveBeenLastCalledWith(
       `${FailReason.BAD_CREDENTIAL}\n${t('loginFailed')}`,
       'error',
-      8000,
+      { duration: 8000 },
     );
 
     await act(() => useAuthStore.setState({ loggingIn: true, error: null }));
@@ -264,7 +264,7 @@ describe('Login', () => {
     expect(toast).toHaveBeenLastCalledWith(
       `${FailReason.ERROR_FETCH_FROM_ID}: Two-factor page\n${t('loginFailed')}`,
       'error',
-      8000,
+      { duration: 8000 },
     );
     expect(toast).toHaveBeenCalledTimes(2);
 
@@ -289,7 +289,9 @@ describe('Login', () => {
         );
       };
       await fail();
-      expect(toast).toHaveBeenLastCalledWith(t('loginFailed'), 'error', 8000);
+      expect(toast).toHaveBeenLastCalledWith(t('loginFailed'), 'error', {
+        duration: 8000,
+      });
 
       // The login check flow (.maestro/00-login-check.yaml) reads it.
       (env as { TEST_LOGIN?: boolean }).TEST_LOGIN = true;
@@ -297,7 +299,7 @@ describe('Login', () => {
       expect(toast).toHaveBeenLastCalledWith(
         `${FailReason.BAD_CREDENTIAL}\n${t('loginFailed')}`,
         'error',
-        8000,
+        { duration: 8000 },
       );
     } finally {
       (globalThis as unknown as { __DEV__: boolean }).__DEV__ = dev;

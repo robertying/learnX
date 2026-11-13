@@ -4,9 +4,9 @@ import {
   SwipeableMethods,
   SwipeDirection,
 } from 'react-native-gesture-handler/ReanimatedSwipeable';
-import * as Haptics from 'expo-haptics';
 import type { SwipeSide } from 'components/CardSwipeAction';
 import { pressWhileSwiped } from 'helpers/cardActions';
+import { playHaptic } from 'services/haptics';
 
 /** Closes the card whose actions are open, so only one is open at a time, as in Mail */
 let closeOpenCard: (() => void) | null = null;
@@ -60,10 +60,18 @@ const useCardSwipe = ({
     close();
   };
 
+  /**
+   * The swipe crossed the full-swipe point: a tap each way, as in Mail and
+   * Gmail. Going back under it after the action ran (the card closing) is
+   * silent: `commit` already disarmed the side.
+   */
   const onArmedChange = (side: SwipeSide, armed: boolean) => {
+    const wasArmed = armedRef.current[side];
     armedRef.current[side] = armed;
     if (armed) {
-      void Haptics.selectionAsync();
+      playHaptic('threshold');
+    } else if (wasArmed) {
+      playHaptic('thresholdRelease');
     }
   };
 

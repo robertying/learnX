@@ -322,7 +322,8 @@ describe('useSubmitAssignment', () => {
 
     expect(result.current.uploadError).toBe(true);
     expect(result.current.uploading).toBe(false);
-    expect(Haptics.notificationAsync).toHaveBeenCalled();
+    // The screen's error toast plays the haptic, so it plays once.
+    expect(Haptics.notificationAsync).not.toHaveBeenCalled();
     expect(onSubmitted).not.toHaveBeenCalled();
     expect(refreshCourseAssignments).not.toHaveBeenCalled();
     expect(usePendingAssignmentStore.getState().data).not.toBeNull();

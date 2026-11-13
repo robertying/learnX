@@ -6,7 +6,6 @@ import { runOnJS } from 'react-native-reanimated';
 import ReorderableList, {
   ReorderableListReorderEvent,
 } from 'react-native-reorderable-list';
-import * as Haptics from 'expo-haptics';
 import { Assignment, Course, File, Notice } from 'data/types/state';
 import { getSettings, setSetting, useSettings } from 'data/settings';
 import useAppCommand from 'hooks/useAppCommand';
@@ -36,6 +35,7 @@ import FilterListRow, {
 } from './FilterListRow';
 import FlatList from './FlatList';
 import ListBackground from './ListBackground';
+import { playHaptic } from 'services/haptics';
 
 export type { ItemComponentProps };
 
@@ -166,9 +166,14 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     }
   };
 
+  const handleDragStart = () => {
+    'worklet';
+    runOnJS(playHaptic)('dragStart');
+  };
+
   const handleDragChange = () => {
     'worklet';
-    runOnJS(Haptics.selectionAsync)();
+    runOnJS(playHaptic)('dragTick');
   };
 
   const handleSelect = () => {
@@ -339,6 +344,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
           dragEnabled={reorderMode}
           panActivateAfterLongPress={520}
           onReorder={handleReorderDone}
+          onDragStart={handleDragStart}
           onIndexChange={handleDragChange}
         />
       ) : (

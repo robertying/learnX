@@ -84,7 +84,10 @@ it('shows calendar write failures as toasts until unmounted', async () => {
   const hook = await renderHook(() => useMainStartup());
   const listener = jest.mocked(subscribeSurfaceErrors).mock.calls[0][0];
   listener({ text: 'Calendar failed', type: 'error' });
-  expect(toast).toHaveBeenCalledWith('Calendar failed', 'error');
+  // Silent: a background write failing isn't something the user just did.
+  expect(toast).toHaveBeenCalledWith('Calendar failed', 'error', {
+    haptic: false,
+  });
   await hook.unmount();
   expect(mockUnsubscribe).toHaveBeenCalled();
 });

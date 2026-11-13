@@ -13,7 +13,9 @@ export const toggleFavorite = (
   isFav: boolean,
 ) => {
   setFavorite(type, id, !isFav);
-  toast(isFav ? t('removeFromFav') : t('addToFav'), 'success');
+  toast(isFav ? t('removeFromFav') : t('addToFav'), 'success', {
+    haptic: false,
+  });
 };
 
 /** Archives items, or restores them when they are archived. */
@@ -23,13 +25,17 @@ export const toggleArchived = (
   isArchived: boolean,
 ) => {
   setArchived(type, ids, !isArchived);
-  toast(isArchived ? t('undoArchive') : t('archiveSucceeded'), 'success');
+  toast(isArchived ? t('undoArchive') : t('archiveSucceeded'), 'success', {
+    haptic: false,
+  });
 };
 
 /** Hides a course, or shows it again when it is hidden. */
 export const toggleCourseHidden = (id: string, isHidden: boolean) => {
   setCourseHidden(id, !isHidden);
-  toast(isHidden ? t('undoHide') : t('hideSucceeded'), 'success');
+  toast(isHidden ? t('undoHide') : t('hideSucceeded'), 'success', {
+    haptic: false,
+  });
 };
 
 /** Saves the course order after moving one course from `from` to `to`. */

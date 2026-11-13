@@ -21,16 +21,19 @@ describe('list actions', () => {
     expect(setFavorite).toHaveBeenLastCalledWith('file', 'f1', true);
     toggleFavorite('file', 'f1', true);
     expect(setFavorite).toHaveBeenLastCalledWith('file', 'f1', false);
-    expect(jest.mocked(toast).mock.calls.map(call => call[1])).toEqual([
-      'success',
-      'success',
+    // Silent: the swipe or menu that ran it already gave feedback.
+    expect(jest.mocked(toast).mock.calls.map(call => call.slice(1))).toEqual([
+      ['success', { haptic: false }],
+      ['success', { haptic: false }],
     ]);
   });
 
   it('archives and restores items, confirming each', () => {
     toggleArchived('notice', ['n1', 'n2'], false);
     expect(useUserDataStore.getState().archived.notice).toEqual(['n1', 'n2']);
-    expect(toast).toHaveBeenLastCalledWith('Archived', 'success');
+    expect(toast).toHaveBeenLastCalledWith('Archived', 'success', {
+      haptic: false,
+    });
 
     toggleArchived('notice', ['n1'], true);
     expect(useUserDataStore.getState().archived.notice).toEqual(['n2']);

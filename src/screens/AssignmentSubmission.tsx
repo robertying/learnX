@@ -185,7 +185,7 @@ const AssignmentSubmissionContent: React.FC<{
   };
 
   const showUploadError = useEffectEvent(() => {
-    toast(t('assignmentSubmissionFailed'), 'error', 3000);
+    toast(t('assignmentSubmissionFailed'), 'error', { duration: 3000 });
     dismissUploadError();
   });
   useEffect(() => {

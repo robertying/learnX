@@ -48,7 +48,10 @@ const useMainStartup = () => {
   // calendar writes that failed.
   useUpNext();
   useEffect(
-    () => subscribeSurfaceErrors(({ text, type }) => toast(text, type)),
+    () =>
+      subscribeSurfaceErrors(({ text, type }) =>
+        toast(text, type, { haptic: false }),
+      ),
     [],
   );
 
