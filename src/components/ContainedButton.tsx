@@ -1,6 +1,6 @@
 import { Platform, StyleProp, ViewStyle } from 'react-native';
 import { Button } from '@expo/ui';
-import { buttonStyle, controlSize } from '@expo/ui/swift-ui/modifiers';
+import { buttonStyle, controlSize, font } from '@expo/ui/swift-ui/modifiers';
 import DeviceInfo from 'constants/DeviceInfo';
 import ThemedHost from 'components/ThemedHost';
 
@@ -22,9 +22,17 @@ export interface ContainedButtonProps {
 const glass = DeviceInfo.hasLiquidGlass()
   ? [buttonStyle('glassProminent')]
   : [];
+/**
+ * On a Mac, the label's text style would switch to the macOS scale (body
+ * 13 pt), smaller than the text around it and than a TextButton beside it
+ * (components/TextButton), so it keeps the iOS body size React Native `Text`
+ * uses.
+ */
+const macFont = DeviceInfo.isMac() ? [font({ size: 17 })] : [];
+const regular = [...glass, ...macFont];
 const sizes = {
-  regular: glass.length > 0 ? glass : undefined,
-  large: Platform.OS === 'ios' ? [...glass, controlSize('large')] : undefined,
+  regular: regular.length > 0 ? regular : undefined,
+  large: Platform.OS === 'ios' ? [...regular, controlSize('large')] : undefined,
 };
 
 /** The system's filled button, tinted with the theme's primary color. */

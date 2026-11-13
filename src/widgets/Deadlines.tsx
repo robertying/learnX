@@ -9,6 +9,7 @@ import {
   widgetURL,
 } from '@expo/ui/swift-ui/modifiers';
 import { createWidget, type WidgetEnvironment } from 'expo-widgets';
+import type { ReactElement, ReactNode } from 'react';
 import { PlatformColor } from 'react-native';
 import type { DeadlineWidgetProps } from 'widgets/props';
 
@@ -74,49 +75,46 @@ function DeadlinesWidget(
     );
   }
 
-  const count =
-    family === 'systemLarge' || family === 'systemExtraLarge'
-      ? 6
-      : family === 'systemMedium'
-        ? 3
-        : 2;
-  const shown = deadlines.slice(0, count);
-  const more = props.total - shown.length;
-  const showCourse = family !== 'systemSmall';
   const large = family === 'systemLarge' || family === 'systemExtraLarge';
+  const small = family === 'systemSmall';
+  const spacing = large ? 12 : 6;
 
-  return (
-    <VStack
-      alignment="leading"
-      spacing={large ? 12 : 6}
-      modifiers={[
-        frame({ maxWidth: 10000, maxHeight: 10000, alignment: 'topLeading' }),
-        background,
-        ...openUrl(props.url),
-      ]}
-    >
-      <HStack>
+  const header = (more: number) => (
+    <HStack>
+      <Text
+        modifiers={[
+          font({ textStyle: 'caption', weight: 'semibold' }),
+          foregroundStyle(accent),
+        ]}
+      >
+        {props.title}
+      </Text>
+      <Spacer />
+      {more > 0 ? (
         <Text
           modifiers={[
-            font({ textStyle: 'caption', weight: 'semibold' }),
-            foregroundStyle(accent),
+            font({ textStyle: 'caption2' }),
+            foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
           ]}
         >
-          {props.title}
+          {`+${more}`}
         </Text>
-        <Spacer />
-        {more > 0 ? (
-          <Text
-            modifiers={[
-              font({ textStyle: 'caption2' }),
-              foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
-            ]}
-          >
-            {`+${more}`}
-          </Text>
-        ) : null}
-      </HStack>
-      {shown.length === 0 ? (
+      ) : null}
+    </HStack>
+  );
+
+  if (deadlines.length === 0) {
+    return (
+      <VStack
+        alignment="leading"
+        spacing={spacing}
+        modifiers={[
+          frame({ maxWidth: 10000, maxHeight: 10000, alignment: 'topLeading' }),
+          background,
+          ...openUrl(props.url),
+        ]}
+      >
+        {header(0)}
         <Text
           modifiers={[
             font({ textStyle: 'footnote' }),
@@ -125,83 +123,118 @@ function DeadlinesWidget(
         >
           {props.empty}
         </Text>
-      ) : null}
-      {shown.map(item => {
-        const row = (
-          <VStack key={item.id} alignment="leading" spacing={large ? 2 : 1}>
+        <Spacer />
+      </VStack>
+    );
+  }
+
+  const row = (item: (typeof deadlines)[number]) => {
+    const content = (
+      <VStack key={item.id} alignment="leading" spacing={large ? 2 : 1}>
+        <Text
+          modifiers={[
+            font({
+              textStyle: large ? 'headline' : 'subheadline',
+              weight: large ? 'semibold' : 'medium',
+            }),
+            lineLimit(1),
+          ]}
+        >
+          {item.title}
+        </Text>
+        {/*
+          A relative date Text takes all the width it's offered (and breaks
+          the layout with fixedSize), so it goes last: the course name gets
+          its width first and the date follows right after it.
+        */}
+        <HStack spacing={0}>
+          {small ? null : (
             <Text
               modifiers={[
-                font({
-                  textStyle: large ? 'headline' : 'subheadline',
-                  weight: large ? 'semibold' : 'medium',
-                }),
+                font({ textStyle: large ? 'subheadline' : 'caption' }),
+                foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
                 lineLimit(1),
+                layoutPriority(1),
               ]}
             >
-              {item.title}
+              {`${item.courseName} · `}
             </Text>
-            {/*
-              A relative date Text takes all the width it's offered (and
-              breaks the layout with fixedSize), so it goes last: the course
-              name gets its width first and the date follows right after it.
-            */}
-            <HStack spacing={0}>
-              {showCourse ? (
-                <Text
-                  modifiers={[
-                    font({ textStyle: large ? 'subheadline' : 'caption' }),
-                    foregroundStyle({
-                      type: 'hierarchical',
-                      style: 'secondary',
-                    }),
-                    lineLimit(1),
-                    layoutPriority(1),
-                  ]}
-                >
-                  {`${item.courseName} · `}
-                </Text>
-              ) : null}
-              <Text
-                date={new Date(item.deadline)}
-                dateStyle="relative"
-                modifiers={[
-                  font({ textStyle: large ? 'subheadline' : 'caption' }),
-                  dueColor(item),
-                  lineLimit(1),
-                ]}
-              />
-            </HStack>
-            {large ? (
-              <Text
-                modifiers={[
-                  font({ textStyle: 'caption' }),
-                  foregroundStyle({ type: 'hierarchical', style: 'tertiary' }),
-                  lineLimit(1),
-                ]}
-              >
-                {item.due}
-              </Text>
-            ) : null}
-          </VStack>
-        );
-        // A small widget can't have links; its widgetURL opens the list.
-        return family === 'systemSmall' || !item.url ? (
-          row
-        ) : (
-          <Link
-            key={item.id}
-            destination={item.url}
+          )}
+          <Text
+            date={new Date(item.deadline)}
+            dateStyle="relative"
             modifiers={[
-              // Not the link tint: the row keeps its colors.
-              foregroundStyle({ type: 'hierarchical', style: 'primary' }),
+              font({ textStyle: large ? 'subheadline' : 'caption' }),
+              dueColor(item),
+              lineLimit(1),
+            ]}
+          />
+        </HStack>
+        {large ? (
+          <Text
+            modifiers={[
+              font({ textStyle: 'caption' }),
+              foregroundStyle({ type: 'hierarchical', style: 'tertiary' }),
+              lineLimit(1),
             ]}
           >
-            {row}
-          </Link>
-        );
-      })}
-      <Spacer />
-    </VStack>
+            {item.due}
+          </Text>
+        ) : null}
+      </VStack>
+    );
+    // A small widget can't have links; its widgetURL opens the list.
+    return small || !item.url ? (
+      content
+    ) : (
+      <Link
+        key={item.id}
+        destination={item.url}
+        modifiers={[
+          // Not the link tint: the row keeps its colors.
+          foregroundStyle({ type: 'hierarchical', style: 'primary' }),
+        ]}
+      >
+        {content}
+      </Link>
+    );
+  };
+
+  // SwiftUI's ViewThatFits, from our expo-widgets patch (@expo/ui has none):
+  // it shows the first of its children that fits the widget's height. A
+  // widget can't import, so this makes the element itself.
+  const ViewThatFits = (fitProps: {
+    axes: 'vertical';
+    modifiers: unknown[];
+    children: ReactNode;
+  }) =>
+    ({
+      type: 'ViewThatFitsView',
+      key: null,
+      props: fitProps,
+    }) as unknown as ReactElement;
+
+  // The list with as many rows as fit, at the widget's size and text size,
+  // counting the rest: one version per row count, the longest first.
+  const most = Math.min(deadlines.length, large ? 10 : 5);
+  const counts = Array.from({ length: most }, (_, i) => most - i);
+
+  return (
+    <ViewThatFits
+      axes="vertical"
+      modifiers={[
+        frame({ maxWidth: 10000, maxHeight: 10000, alignment: 'topLeading' }),
+        background,
+        ...openUrl(props.url),
+      ]}
+    >
+      {counts.map(count => (
+        <VStack key={count} alignment="leading" spacing={spacing}>
+          {header(props.total - count)}
+          {deadlines.slice(0, count).map(row)}
+        </VStack>
+      ))}
+    </ViewThatFits>
   );
 }
 

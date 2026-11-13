@@ -213,3 +213,54 @@ index 3df9e4a..b2257d0 100644
      // Unsupported Expo UI modifiers are ignored until they have exact Glance semantics.
      else -> null
    } ?: GlanceModifier
+diff --git a/ios/Widgets/ViewRenderer.swift b/ios/Widgets/ViewRenderer.swift
+index 68e376f..a98f903 100644
+--- a/ios/Widgets/ViewRenderer.swift
++++ b/ios/Widgets/ViewRenderer.swift
+@@ -81,6 +81,8 @@ struct WidgetsViewRenderer {
+       return renderWithModifiers(FragmentView.self, FragmentProps.self, updateProps: updateChildren)
+     case "LinkView":
+       return renderWithModifiers(LinkView.self, LinkViewProps.self, updateProps: updateChildren)
++    case "ViewThatFitsView":
++      return renderWithModifiers(ViewThatFitsView.self, ViewThatFitsViewProps.self, updateProps: updateChildren)
+ #if DEBUG
+     case "RedBoxView":
+       return renderWithModifiers(RedBoxView.self, RedBoxViewProps.self) { redBoxProps in
+diff --git a/ios/Widgets/ViewThatFitsView.swift b/ios/Widgets/ViewThatFitsView.swift
+new file mode 100644
+index 0000000..3c9a494
+--- /dev/null
++++ b/ios/Widgets/ViewThatFitsView.swift
+@@ -0,0 +1,32 @@
++import SwiftUI
++import ExpoModulesCore
++import ExpoUI
++
++// learnX: SwiftUI's ViewThatFits for widget layouts, which @expo/ui doesn't
++// have. A layout makes the node itself: { type: 'ViewThatFitsView', props }.
++final class ViewThatFitsViewProps: UIBaseViewProps {
++  // "horizontal", "vertical", or both when unset.
++  @Field var axes: String?
++}
++
++struct ViewThatFitsView: ExpoSwiftUI.View {
++  @ObservedObject var props: ViewThatFitsViewProps
++
++  init(props: ViewThatFitsViewProps) {
++    self.props = props
++  }
++
++  private var axes: Axis.Set {
++    switch props.axes {
++    case "horizontal": return .horizontal
++    case "vertical": return .vertical
++    default: return [.horizontal, .vertical]
++    }
++  }
++
++  var body: some View {
++    ViewThatFits(in: axes) {
++      Children()
++    }
++  }
++}
