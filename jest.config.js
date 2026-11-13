@@ -4,7 +4,8 @@ process.env.TZ = 'Asia/Shanghai';
 /** @type {import('jest').Config} */
 const base = {
   preset: '@react-native/jest-preset',
-  roots: ['<rootDir>/src'],
+  // patches/__tests__ test what the patches in patches/ change.
+  roots: ['<rootDir>/src', '<rootDir>/patches'],
   // Loads Reanimated's and Worklets' web builds instead of the native ones
   resolver: 'react-native-reanimated/jest/resolver',
   setupFiles: ['<rootDir>/jest/setup.ts'],
