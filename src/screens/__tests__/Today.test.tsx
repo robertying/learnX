@@ -230,6 +230,38 @@ it('puts a refresh button in the header on a Mac', async () => {
   expect(JSON.stringify(items)).toContain('refresh');
 });
 
+const headerItem = (
+  navigation: { setOptions: jest.Mock },
+  identifier: string,
+) =>
+  navigation.setOptions.mock.calls
+    .findLast(([o]) => o.unstable_headerRightItems)![0]
+    .unstable_headerRightItems()
+    .find((item: { identifier: string }) => item.identifier === identifier);
+
+it('opens the current class, and leaves a class with no course untappable', async () => {
+  jest.useFakeTimers({ now: dayjs().hour(12).minute(0).toDate() });
+  mockSessions.push(session('a', 'a', -30, 30), session('b', '', 60, 120));
+  const { navigation } = await setup();
+  const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+  await user.press(screen.getAllByText('Course a')[0]);
+  expect(navigation.dispatch).toHaveBeenCalledWith(
+    StackActions.push('CourseDetail', { id: 'a' }),
+  );
+  navigation.dispatch.mockClear();
+  await user.press(screen.getAllByText('Course b')[0]);
+  expect(navigation.dispatch).not.toHaveBeenCalled();
+  jest.useRealTimers();
+});
+
+it('opens Settings and, in debug builds, the debug tools from the header', async () => {
+  const { navigation } = await setup();
+  headerItem(navigation, 'settings').onPress();
+  expect(navigation.push).toHaveBeenCalledWith('Settings');
+  headerItem(navigation, 'debug').onPress();
+  expect(navigation.push).toHaveBeenCalledWith('Debug');
+});
+
 it('opens search from the header', async () => {
   const { navigation } = await setup();
   const options = navigation.setOptions.mock.calls.findLast(

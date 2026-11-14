@@ -58,7 +58,7 @@ module.exports = {
   // The totals in the log, and a browsable report in coverage/index.html
   coverageReporters: ['text-summary', 'html'],
   coverageThreshold: {
-    global: { statements: 98, branches: 94, functions: 96, lines: 98 },
+    global: { statements: 99, branches: 95, functions: 97, lines: 99 },
   },
   projects: [
     {

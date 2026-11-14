@@ -187,6 +187,32 @@ it('shows the answer and what was submitted', async () => {
   expect(screen.getByText(submitted.submittedAttachment!.name)).toBeTruthy();
 });
 
+it('opens what was submitted, the feedback and the answer as files', async () => {
+  const base = find(a => a.submitted && !!a.submittedAttachment);
+  const file = (name: string) => ({
+    id: `id-${name}`,
+    name: `${name}.pdf`,
+    downloadUrl: `https://example.com/${name}`,
+    previewUrl: '',
+    size: '1K',
+  });
+  await renderScreen({
+    ...base,
+    graded: true,
+    gradeContent: undefined,
+    submittedAttachment: file('sent'),
+    gradeAttachment: file('feedback'),
+    answerContent: undefined,
+    answerAttachment: file('answer'),
+  } as Assignment);
+  for (const name of ['sent', 'feedback', 'answer']) {
+    await userEvent.press(screen.getByText(`${name}.pdf`));
+    expect(navigation.push).toHaveBeenLastCalledWith('FileDetail', {
+      attachment: expect.objectContaining({ id: `id-${name}`, title: name }),
+    });
+  }
+});
+
 it('links an unsent draft to the submission page', async () => {
   const open = find(
     a =>
