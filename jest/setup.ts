@@ -45,6 +45,7 @@ jest.mock('expo-haptics', () => require('./mocks/haptics'));
 jest.mock('expo-notifications', () => require('./mocks/notifications'));
 jest.mock('expo-secure-store', () => require('./mocks/secureStore'));
 jest.mock('expo-sqlite/kv-store', () => require('./mocks/sqliteKvStore'));
+jest.mock('expo-updates', () => require('./mocks/expoUpdates'));
 jest.mock('expo-widgets', () => require('./mocks/widgets'));
 jest.mock('../modules/menus', () => require('./mocks/menus'));
 // The system cookie store, empty.

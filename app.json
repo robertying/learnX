@@ -2,5 +2,9 @@
   "name": "learnX",
   "displayName": "learnX",
   "owner": "robertying",
-  "slug": "learnx"
+  "slug": "learnx",
+  "runtimeVersion": "19.0.0",
+  "updates": {
+    "url": "https://ota.example.invalid/manifest"
+  }
 }
