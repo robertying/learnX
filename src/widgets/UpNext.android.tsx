@@ -1,4 +1,4 @@
-import { Column, Spacer, Text } from '@expo/ui/jetpack-compose';
+import { Box, Column, Spacer, Text } from '@expo/ui/jetpack-compose';
 import {
   background,
   cornerRadius,
@@ -111,9 +111,15 @@ function UpNextWidget(
           </Text>
         </Column>
       ) : (
-        <Text color={colors.caption} style={{ fontSize: 13 }}>
-          {noClasses}
-        </Text>
+        // Centered in the space below the title.
+        <Box modifiers={[fillMaxSize()]} contentAlignment="center">
+          <Text
+            color={colors.caption}
+            style={{ fontSize: 13, textAlign: 'center' }}
+          >
+            {noClasses}
+          </Text>
+        </Box>
       )}
       {following.map((c, i) => (
         <Column key={c.key} modifiers={[fillMaxWidth(), ...openUrl(c.url)]}>
