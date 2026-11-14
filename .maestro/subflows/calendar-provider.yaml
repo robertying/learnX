@@ -1,0 +1,12 @@
+# Android: check that the device's calendar has an event whose "title |
+# location" matches MATCH when FOUND is 'true', or doesn't otherwise. The
+# emulator's only calendar app needs a Google account, so this reads the
+# calendar through adb (scripts/e2e-calendar.mjs, started by scripts/e2e.sh).
+appId: ${APP_ID}
+---
+- runScript:
+    file: calendar-provider.js
+    env:
+      MATCH: ${MATCH}
+      FOUND: ${FOUND}
+- assertTrue: ${output.calendarAsExpected}

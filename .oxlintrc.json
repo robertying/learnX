@@ -79,12 +79,17 @@
   "overrides": [
     {
       "files": [".maestro/**/*.js"],
-      // Maestro's runScript globals, and the flow's env values (upgrade/).
+      // Maestro's runScript globals, and the flow's env values (upgrade/,
+      // subflows/calendar-provider.js).
       "globals": {
         "maestro": "readonly",
         "output": "writable",
+        "http": "readonly",
         "PHASE": "readonly",
-        "USERNAME": "readonly"
+        "USERNAME": "readonly",
+        "CALENDAR_URL": "readonly",
+        "MATCH": "readonly",
+        "FOUND": "readonly"
       }
     },
     {
