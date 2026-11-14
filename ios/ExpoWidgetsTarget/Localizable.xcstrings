@@ -18,7 +18,7 @@
         }
       }
     },
-    "Up Next" : {
+    "Next Up" : {
       "extractionState" : "manual",
       "localizations" : {
         "zh-Hans" : {

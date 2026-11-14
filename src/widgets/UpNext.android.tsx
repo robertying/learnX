@@ -47,7 +47,7 @@ function UpNextWidget(
   // in their own runtime without the app's translations.
   /* oxlint-disable learnx/no-han-outside-translations */
   const zh = (environment.locale ?? '').startsWith('zh');
-  const title = props.title || (zh ? '下一节课' : 'Up Next');
+  const title = props.title || (zh ? '下一节课' : 'Next Up');
   const noClasses =
     props.noClasses ||
     (zh ? '打开 learnX 以显示课程' : 'Open learnX to see your classes');

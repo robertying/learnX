@@ -5,7 +5,7 @@ export default {
   assignments: 'Assignments',
   widgetDeadlines: 'Deadlines',
   widgetNoDeadlines: 'Nothing due',
-  widgetUpNext: 'Up Next',
+  widgetUpNext: 'Next Up',
   widgetLater: 'Later Classes',
   widgetStartsIn: 'Starts in',
   widgetEndsIn: 'Ends in',

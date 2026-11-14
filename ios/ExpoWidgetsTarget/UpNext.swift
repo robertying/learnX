@@ -9,7 +9,7 @@ struct UpNext: Widget {
     StaticConfiguration(kind: name, provider: WidgetsTimelineProvider(name: name)) { entry in
       WidgetsEntryView(entry: entry)
     }
-    .configurationDisplayName("Up Next")
+    .configurationDisplayName("Next Up")
     .description("Your class on now or next, and the ones after it.")
     .supportedFamilies([.systemSmall, .systemMedium, .systemLarge, .accessoryRectangular])
   }
