@@ -5,7 +5,7 @@
   "slug": "learnx",
   "runtimeVersion": "19.0.0",
   "updates": {
-    "url": "https://ota.example.invalid/manifest"
+    "url": "https://ota.tsinghua.app/manifest"
   },
   "extra": {
     "eas": {
