@@ -1,7 +1,7 @@
 // The top app bar's filter button with a Material 3 dropdown of options that
 // each turn on or off, in one Compose view, so the menu anchors to the button.
-// The menu stays open as options are toggled; the button turns tonal while
-// they aren't at their defaults.
+// The menu stays open as options are toggled; options that are on are tinted
+// and checked, and the button turns tonal while they aren't at their defaults.
 import { useState } from 'react';
 import {
   DropdownMenu,
@@ -32,6 +32,7 @@ const ToggleMenu: React.FC<ToggleMenuProps> = ({
     selectedContainerColor: theme.colors.secondaryContainer,
     selectedTextColor: theme.colors.onSecondaryContainer,
     selectedLeadingIconColor: theme.colors.onSecondaryContainer,
+    selectedTrailingContentColor: theme.colors.onSecondaryContainer,
   };
 
   const Button = active ? FilledTonalIconButton : IconButton;
@@ -80,6 +81,20 @@ const ToggleMenu: React.FC<ToggleMenuProps> = ({
               <SelectableDropdownMenuItem.Text>
                 <Text>{option.label}</Text>
               </SelectableDropdownMenuItem.Text>
+              {/* Several can be on at once, so a check marks each one that
+                  is, beside the selected tint (as in Google's own apps). */}
+              {option.on ? (
+                <SelectableDropdownMenuItem.TrailingContent>
+                  <RNHostView matchContents>
+                    <SystemIcon
+                      name="checked"
+                      size={24}
+                      color={theme.colors.onSecondaryContainer}
+                      testID={`filter-${option.name}-checked`}
+                    />
+                  </RNHostView>
+                </SelectableDropdownMenuItem.TrailingContent>
+              ) : null}
             </SelectableDropdownMenuItem>
           ))}
         </DropdownMenu.Items>

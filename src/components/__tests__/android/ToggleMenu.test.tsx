@@ -24,6 +24,8 @@ describe('ToggleMenu (Android)', () => {
     const user = userEvent.setup();
     await user.press(screen.getByTestId('filter'));
     expect(screen.getByText('Archived Items')).toBeTruthy();
+    expect(screen.getByTestId('filter-archived-checked')).toBeTruthy();
+    expect(screen.queryByTestId('filter-hidden-checked')).toBeNull();
     await user.press(screen.getByTestId('filter-hidden'));
     expect(onToggle).toHaveBeenCalledWith('hidden');
     expect(screen.getByTestId('filter-archived')).toBeTruthy();
