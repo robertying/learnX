@@ -1,7 +1,7 @@
 {
   "runtimeVersion": "19.0.0",
   "ios": "22d12b3b3c417952b435874aadc3e0a6a07f85f8",
-  "android": "424afc48b4980747977cc87942b8c20175d4611f",
+  "android": "9c0ef784b7ce3f568974bf4ad745ffc3bc569976",
   "sources": {
     "ios": {
       "dir ios": "8a3f316583d801680bd69bd5b6d37fe267ef045d",
@@ -62,7 +62,7 @@
       "package node_modules/unimodules-app-loader/package.json": "c5c0283fd62fe191a27f8c91a80e8be54f1c52d6"
     },
     "android": {
-      "dir android": "4f21acb25d46d928872356b12a9047c148f7518a",
+      "dir android": "bd17116bc79d064f8ad55e9245bc2676cb606d83",
       "dir modules/crashlytics/android": "c197e1f7400e71d52bf820a626fa941218b8e4ae",
       "dir modules/share/android": "28e80bd75f4dfed63ebde2cf73cf550b6b6b49d7",
       "dir patches": "6d2aa6ce6c393c6dc8ce21ab580f1fa405013fe6",
