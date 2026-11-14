@@ -58,6 +58,12 @@ jobs:
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm format --check
 
+      # The over-the-air runtime version changes exactly when native code does
+      # (scripts/check-ota-runtime.mjs); on failure it prints what to record.
+      - name: Runtime version
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: node scripts/check-ota-runtime.mjs
+
       # Catches shell mistakes before a script only runs on main
       - name: Shell scripts
         if: ${{ !cancelled() }}

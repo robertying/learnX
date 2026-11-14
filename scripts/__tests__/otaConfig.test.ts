@@ -38,12 +38,8 @@ const metaData = (name: string) =>
     .exec(manifest)?.[1]
     .replaceAll('&quot;', '"');
 
-test('the runtime version is an app version no newer than this one', () => {
-  const { version } = JSON.parse(read('package.json')) as { version: string };
-  const parts = (v: string) => v.split('.').map(Number);
+test('the runtime version is an app version', () => {
   expect(appJson.runtimeVersion).toMatch(/^\d+\.\d+\.\d+$/);
-  const [a, b] = [parts(appJson.runtimeVersion), parts(version)];
-  expect(a[0] - b[0] || a[1] - b[1] || a[2] - b[2]).toBeLessThanOrEqual(0);
 });
 
 test('the update URL is HTTPS', () => {
