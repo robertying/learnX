@@ -15,7 +15,7 @@ const contents = {
  * "No Notices", "No Files", …, as in iOS's `ContentUnavailableView`.
  */
 const Empty: React.FC<{ type: EmptyType }> = ({ type }) => (
-  <StatusView icon={contents[type].icon} message={contents[type].message()} />
+  <StatusView icon={contents[type].icon} title={contents[type].message()} />
 );
 
 export default Empty;

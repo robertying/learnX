@@ -112,7 +112,9 @@ const FileDetailContent: React.FC<{
         <StatusView
           key="error"
           icon="error"
-          message={t('fileDownloadFailed')}
+          title={t('fileDownloadFailedTitle')}
+          description={t('fileDownloadFailedDescription')}
+          actions={[{ label: t('tryAgain'), onPress: redownload }]}
         />
       ) : !path ? (
         <View key="loading" testID="file-loading" style={styles.centered}>

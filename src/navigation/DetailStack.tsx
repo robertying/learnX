@@ -40,7 +40,7 @@ const DetailNavigator = createNativeStackNavigator<DetailStackParams>();
 // it yet: the empty state's text alone, saying so.
 const EmptyDetail = () => (
   <SafeArea>
-    <StatusView message={t('noSelection')} />
+    <StatusView title={t('noSelection')} />
   </SafeArea>
 );
 

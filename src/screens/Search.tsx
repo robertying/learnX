@@ -345,9 +345,13 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
             style={Styles.flex1}
           >
             {hasResults && !scopeEmpty ? null : noResults ? (
-              <StatusView icon="noResults" message={t('noResults')} />
+              <StatusView
+                icon="noResults"
+                title={t('noResults')}
+                description={t('noResultsDescription')}
+              />
             ) : (
-              <StatusView icon="search" message={t('searchPrompt')} />
+              <StatusView icon="search" title={t('searchPrompt')} />
             )}
           </KeyboardAvoidingView>
         </View>

@@ -1,31 +1,44 @@
 import { StyleSheet, View } from 'react-native';
 import SystemIcon from 'components/SystemIcon';
 import { Text } from 'components/Text';
+import TextButton from 'components/TextButton';
 import type { SystemIconName } from 'helpers/systemIcons';
 import { useTheme } from 'theme';
 
+export interface StatusViewAction {
+  /** A button label, in Title Case ("Try Again"). */
+  label: string;
+  onPress: () => void;
+}
+
 export interface StatusViewProps {
-  /** Left out where there's no content to stand for, like the empty detail
-   * pane, which then shows its message alone, larger. */
+  /**
+   * What's missing or went wrong. Left out where nothing is missing, like the
+   * empty detail pane, which then shows its title alone, dimmed.
+   */
   icon?: SystemIconName;
-  message: string;
-  /** Something to do about it, such as a button, under the message. */
-  action?: React.ReactNode;
+  /** In Title Case: "No Notices", "Couldn't Download File". */
+  title: string;
+  /** A sentence on why, or what to do, under the title. */
+  description?: string;
+  /** Buttons under the text, in order: the likely one first. */
+  actions?: StatusViewAction[];
   testID?: string;
 }
 
 /**
- * A screen or list with nothing to show, and why: a large dimmed icon over a
- * line of text, centered in the space it has, as in iOS's
- * `ContentUnavailableView`. `Empty`, `NotFound`, search with no results and
- * the error boundary's fallback are this view. The empty detail pane is its
- * text alone, as in Mail's "No Message Selected": nothing is missing there,
- * so there's nothing for an icon to stand for.
+ * A screen or list with nothing to show, or that failed, and why: a large
+ * dimmed icon, a title, an optional description and optional buttons,
+ * centered in the space it has, as in iOS's `ContentUnavailableView` and
+ * Material's empty states. Every empty and error state is this view: `Empty`,
+ * `NotFound`, Search's prompt and No Results, a file that couldn't download,
+ * the error boundary's fallback and the empty detail pane.
  */
 const StatusView: React.FC<StatusViewProps> = ({
   icon,
-  message,
-  action,
+  title,
+  description,
+  actions,
   testID,
 }) => {
   const theme = useTheme();
@@ -33,15 +46,42 @@ const StatusView: React.FC<StatusViewProps> = ({
   return (
     <View testID={testID} style={styles.root}>
       {icon ? (
-        <SystemIcon name={icon} color={theme.colors.outline} size={56} />
+        <SystemIcon
+          name={icon}
+          color={theme.colors.outline}
+          size={56}
+          style={styles.icon}
+        />
       ) : null}
       <Text
-        variant={icon ? 'body' : 'title'}
-        style={[styles.message, { color: theme.colors.onSurfaceMedium }]}
+        variant="title"
+        accessibilityRole="header"
+        style={[
+          styles.text,
+          {
+            color: icon ? theme.colors.onSurface : theme.colors.onSurfaceMedium,
+          },
+        ]}
       >
-        {message}
+        {title}
       </Text>
-      {action}
+      {description ? (
+        <Text
+          variant="subheadline"
+          style={[styles.text, { color: theme.colors.onSurfaceMedium }]}
+        >
+          {description}
+        </Text>
+      ) : null}
+      {actions?.length ? (
+        <View style={styles.actions}>
+          {actions.map(action => (
+            <TextButton key={action.label} onPress={action.onPress}>
+              {action.label}
+            </TextButton>
+          ))}
+        </View>
+      ) : null}
     </View>
   );
 };
@@ -51,11 +91,20 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 16,
-    gap: 8,
+    padding: 32,
+    gap: 4,
   },
-  message: {
+  icon: {
+    marginBottom: 12,
+  },
+  text: {
     textAlign: 'center',
+    maxWidth: 480,
+  },
+  actions: {
+    marginTop: 12,
+    alignItems: 'center',
+    gap: 8,
   },
 });
 

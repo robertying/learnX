@@ -35,7 +35,7 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>,
     );
     expect(screen.getByTestId('error-fallback')).toBeTruthy();
-    expect(screen.getByText('Something went wrong')).toBeTruthy();
+    expect(screen.getByText('Something Went Wrong')).toBeTruthy();
     expect(recordError).toHaveBeenCalledTimes(1);
     const [error, log] = (recordError as jest.Mock).mock.calls[0];
     expect(error).toEqual(new Error('render failed'));
