@@ -1,5 +1,5 @@
 appId: ${APP_ID}
-name: Apply an over-the-air update, refuse a badly signed one, roll back
+name: Refuse a badly signed over-the-air update, apply a good one, roll back
 # Run by scripts/e2e-ota.sh, which starts the update server; not part of the
 # normal runs. E2E builds ask it for updates (scripts/ota-config-ios.sh,
 # android/app/build.gradle). The native side checks on each launch and
@@ -13,28 +13,8 @@ name: Apply an over-the-air update, refuse a badly signed one, roll back
       PATH_: /mode/none
 - runFlow: ../subflows/login.yaml
 
-# A new update: downloaded on one launch, running from the next.
-- runScript:
-    file: server.js
-    env:
-      PATH_: /mode/update
-- runScript:
-    file: server.js
-    env:
-      PATH_: /status
-- evalScript: ${output.bundlesBefore = output.ota.bundleDownloads}
-- runFlow: ../subflows/login.yaml
-- runScript:
-    file: server.js
-    env:
-      PATH_: /wait?for=bundle&after=${output.bundlesBefore}
-- assertTrue: ${output.ota.bundleDownloads > output.bundlesBefore}
-- runFlow: ../subflows/login.yaml
-- runFlow: about.yaml
-- assertVisible: '.*\d+\.\d+\.\d+ \(\d+\) · ${output.ota.short}'
-
-# An update the app's certificate doesn't verify is refused: the update it has
-# keeps running and nothing is downloaded.
+# An update the app's certificate doesn't verify is refused: nothing is
+# downloaded and the built-in bundle keeps running.
 - runScript:
     file: server.js
     env:
@@ -48,8 +28,25 @@ name: Apply an over-the-air update, refuse a badly signed one, roll back
       PATH_: /wait?for=manifest&after=${output.manifestsBefore}
 - runFlow: ../subflows/login.yaml
 - runFlow: about.yaml
-- assertVisible: '.*\d+\.\d+\.\d+ \(\d+\) · ${output.ota.short}'
+- assertVisible: '.*\d+\.\d+\.\d+ \(\d+\)'
+- assertNotVisible: '.*· ${output.ota.short}.*'
 - assertTrue: ${output.ota.bundleDownloads == output.bundlesBefore}
+
+# A new update: downloaded on one launch, running from the next.
+- runScript:
+    file: server.js
+    env:
+      PATH_: /mode/update
+- evalScript: ${output.bundlesBefore = output.ota.bundleDownloads}
+- runFlow: ../subflows/login.yaml
+- runScript:
+    file: server.js
+    env:
+      PATH_: /wait?for=bundle&after=${output.bundlesBefore}
+- assertTrue: ${output.ota.bundleDownloads > output.bundlesBefore}
+- runFlow: ../subflows/login.yaml
+- runFlow: about.yaml
+- assertVisible: '.*\d+\.\d+\.\d+ \(\d+\) · ${output.ota.short}'
 
 # Rolling back: the launch after the one that got the directive runs the
 # bundle built into the app again.

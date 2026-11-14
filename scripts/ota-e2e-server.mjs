@@ -10,7 +10,8 @@
 // It exports the app's JS once (`expo export`, as an E2E build bundles it,
 // into build/ota-e2e/<platform>/) and serves it as one update. What it answers
 // is switched over HTTP, so a Maestro flow can drive it:
-//   GET /mode/update    the update (the default)
+//   GET /mode/update    the update (the default); each /mode/… answers with
+//                       /status
 //   GET /mode/rollback  roll back to the bundle built into the app
 //   GET /mode/none      no update
 //   GET /mode/badsig    the update, signed with a key the app doesn't trust
@@ -237,7 +238,7 @@ const main = () => {
       return send(
         200,
         { 'content-type': 'application/json' },
-        JSON.stringify({ mode }),
+        JSON.stringify(currentStatus()),
       );
     }
     const sendStatus = () =>
