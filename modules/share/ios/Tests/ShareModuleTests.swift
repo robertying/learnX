@@ -27,6 +27,19 @@ import UIKit
     module.stopObserving()
   }
 
+  @Test func refusesToSaveWithNoWindowToAskIn() async throws {
+    // The test host's window belongs to no scene, so there is no key window to present the save panel from.
+    #expect(ShareModule.presenter() == nil)
+    let url = FileManager.default.temporaryDirectory.appendingPathComponent("save-test.txt")
+    await #expect(throws: NoWindowError.self) {
+      try await ShareModule.saveFile(url)
+    }
+  }
+
+  @Test func saysWhyItCannotAsk() {
+    #expect(NoWindowError().errorDescription == "No window to ask where to save in")
+  }
+
   @Test(arguments: [("learnx://", true), ("learnx://assignment/1", true), ("https://learn.tsinghua.edu.cn", false)])
   func postsForLearnXLinks(link: String, posts: Bool) throws {
     let posted = Flag()

@@ -1,4 +1,4 @@
-import ExpoModulesCore
+@testable import ExpoModulesCore
 import Testing
 import UIKit
 
@@ -8,6 +8,26 @@ import UIKit
 @Suite struct ToastViewsTests {
   @Test func definesItsViews() {
     _ = ToastModule(appContext: AppContext()).definition()
+  }
+
+  @Test func takesItsPropsFromJS() throws {
+    let appContext = AppContext()
+    let views = ToastModule(appContext: appContext).definition().views
+    let background = ToastBackgroundView(appContext: nil)
+    let backgroundProps = try #require(views["ToastBackgroundView"]).propsDict()
+    try #require(backgroundProps["cornerRadius"]).set(value: 12.0, onView: background, appContext: appContext)
+    try #require(backgroundProps["visible"]).set(value: true, onView: background, appContext: appContext)
+    #expect(background.cornerRadius == 12)
+    #expect(background.visible)
+
+    let symbol = ToastSymbolView(appContext: nil)
+    let symbolProps = try #require(views["ToastSymbolView"]).propsDict()
+    try #require(symbolProps["name"]).set(value: "checkmark", onView: symbol, appContext: appContext)
+    try #require(symbolProps["size"]).set(value: 24.0, onView: symbol, appContext: appContext)
+    try #require(symbolProps["color"]).set(value: "green", onView: symbol, appContext: appContext)
+    #expect(symbol.name == "checkmark")
+    #expect(symbol.size == 24)
+    #expect(symbol.imageView.image != nil)
   }
 
   private func effectView(of view: ToastBackgroundView) -> UIVisualEffectView {
