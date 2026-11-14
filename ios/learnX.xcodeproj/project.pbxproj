@@ -625,26 +625,6 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ExpoWidgetsTarget/Pods-ExpoWidgetsTarget-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		5A0710000000000000000C10 /* Configure updates */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Configure updates";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"$SRCROOT/../scripts/ota-config-ios.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 		5A0710000000000000000C01 /* Check patches */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -663,6 +643,26 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\" \"$SRCROOT/../scripts/check-patches.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		5A0710000000000000000C10 /* Configure updates */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Configure updates";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"$SRCROOT/../scripts/ota-config-ios.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		88E92500F02C21F83190CD41 /* [Expo] Configure project */ = {
