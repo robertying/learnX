@@ -28,7 +28,15 @@ const fingerprint = platform => {
     execFileSync(
       'npx',
       ['expo-updates', 'fingerprint:generate', '--platform', platform],
-      { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] },
+      {
+        cwd: root,
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'ignore'],
+        // It sorts each folder's files with localeCompare, and Node on Linux
+        // takes the locale from the environment (C, the POSIX order, on CI's
+        // runners), so a folder would hash differently there than on a Mac.
+        env: { ...process.env, LANG: 'en_US.UTF-8', LC_ALL: 'en_US.UTF-8' },
+      },
     ),
   );
   return {
