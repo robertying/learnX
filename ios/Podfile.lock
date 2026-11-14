@@ -26,7 +26,12 @@ PODS:
     - Yoga
   - DoubleConversion (1.1.6):
     - ReactNativeDependencies
+  - EASClient (58.0.2):
+    - ExpoModulesCore
   - EXConstants (58.0.15):
+    - ExpoModulesCore
+  - EXJSONUtils (58.0.1)
+  - EXManifests (58.0.1):
     - ExpoModulesCore
   - Expo (58.0.23):
     - ExpoModulesCore
@@ -138,6 +143,38 @@ PODS:
   - ExpoWidgets (58.0.27):
     - ExpoModulesCore
     - ExpoUI
+  - EXStructuredHeaders (58.0.1)
+  - EXUpdates (58.0.22):
+    - EASClient
+    - EXManifests
+    - ExpoModulesCore
+    - EXStructuredHeaders
+    - EXUpdatesInterface
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - ReachabilitySwift
+    - React-bridging
+    - React-Core
+    - React-Core-prebuilt
+    - React-cxxstableapi
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
+  - EXUpdatesInterface (58.0.1):
+    - ExpoModulesCore
   - fast_float (8.0.0):
     - ReactNativeDependencies
   - FBLazyVector (0.88.1):
@@ -272,6 +309,7 @@ PODS:
     - FBLazyVector (= 0.88.1)
     - RCTRequired (= 0.88.1)
     - React-Core (= 0.88.1)
+  - ReachabilitySwift (5.2.4)
   - React (0.88.1):
     - React-Core (= 0.88.1)
     - React-Core/DevSupport (= 0.88.1)
@@ -2509,7 +2547,10 @@ DEPENDENCIES:
   - boost (from `build/rndeps-facades/boost`)
   - "CookieManager (from `../node_modules/@preeternal/react-native-cookie-manager`)"
   - DoubleConversion (from `build/rndeps-facades/DoubleConversion`)
+  - EASClient (from `../node_modules/expo-eas-client/ios`)
   - EXConstants (from `../node_modules/expo-constants/ios`)
+  - EXJSONUtils (from `../node_modules/expo-json-utils/ios`)
+  - EXManifests (from `../node_modules/expo-manifests/ios`)
   - Expo (from `../node_modules/expo`)
   - ExpoApplication (from `../node_modules/expo-application/ios`)
   - ExpoAsset (from `../node_modules/expo-asset/ios`)
@@ -2536,6 +2577,9 @@ DEPENDENCIES:
   - ExpoTaskManager (from `../node_modules/expo-task-manager/ios`)
   - "ExpoUI (from `../node_modules/@expo/ui/ios`)"
   - ExpoWidgets (from `../node_modules/expo-widgets/ios`)
+  - EXStructuredHeaders (from `../node_modules/expo-structured-headers/ios`)
+  - EXUpdates (from `../node_modules/expo-updates/ios`)
+  - EXUpdatesInterface (from `../node_modules/expo-updates-interface/ios`)
   - fast_float (from `build/rndeps-facades/fast_float`)
   - FBLazyVector (from `build/rncore-facades/FBLazyVector`)
   - FirebaseAnalytics/Core
@@ -2665,6 +2709,7 @@ SPEC REPOS:
     - nanopb
     - PromisesObjC
     - PromisesSwift
+    - ReachabilitySwift
     - SwiftUIIntrospect
 
 EXTERNAL SOURCES:
@@ -2674,8 +2719,14 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@preeternal/react-native-cookie-manager"
   DoubleConversion:
     :path: build/rndeps-facades/DoubleConversion
+  EASClient:
+    :path: "../node_modules/expo-eas-client/ios"
   EXConstants:
     :path: "../node_modules/expo-constants/ios"
+  EXJSONUtils:
+    :path: "../node_modules/expo-json-utils/ios"
+  EXManifests:
+    :path: "../node_modules/expo-manifests/ios"
   Expo:
     :path: "../node_modules/expo"
   ExpoApplication:
@@ -2728,6 +2779,12 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@expo/ui/ios"
   ExpoWidgets:
     :path: "../node_modules/expo-widgets/ios"
+  EXStructuredHeaders:
+    :path: "../node_modules/expo-structured-headers/ios"
+  EXUpdates:
+    :path: "../node_modules/expo-updates/ios"
+  EXUpdatesInterface:
+    :path: "../node_modules/expo-updates-interface/ios"
   fast_float:
     :path: build/rndeps-facades/fast_float
   FBLazyVector:
@@ -2940,7 +2997,10 @@ SPEC CHECKSUMS:
   boost: 8502bfdc46e2804408af2e163049ece181009af4
   CookieManager: d1b2d66c3c58bc8fe541c756fd5808167df2610e
   DoubleConversion: 501a575c40c0b50c89685762dd3e415e6bb26fb0
+  EASClient: 672e41a9aa3481e4f4efbea7fc001573d9a7fa85
   EXConstants: c1eb9dab7494834d85aa347165da9718cdfc21a6
+  EXJSONUtils: d59bf6b18639752631a81818559b2675a46f99e2
+  EXManifests: b0b83ad894166f7e080b18814c5e73aed46e366e
   Expo: f1442bfd3a128cb67832bac5fcc38e1900e94fdc
   ExpoApplication: c83355b2f69f996b5d26b64fef39228e7f1e1208
   ExpoAsset: c080026976ef8f00dca12c4958c658b2ebd4d4e0
@@ -2967,6 +3027,9 @@ SPEC CHECKSUMS:
   ExpoTaskManager: a47c4de3446e9754c6f11eef227e0b20141a19cd
   ExpoUI: 31a8539381c30cc0d1efbc111e2b384ed25b21f5
   ExpoWidgets: 9619cce6e8823f15ef23798e751b7250d8d0cb80
+  EXStructuredHeaders: d38b81fb2ff838c15bf28135deb247e76293d2b9
+  EXUpdates: 9537798f596d007126973f4176c18b346b6212cd
+  EXUpdatesInterface: 1c6a522d0eb0485f4de3fa55d0316288763b3f10
   fast_float: 7c925d1cebf8328d4018d061f49377e9f887e3b4
   FBLazyVector: 07cb4c5b92110c132f2bb73b908e87f35cbe0a19
   FirebaseAnalytics: e9f8c369447e453da23f0455a06e4910bad10de0
@@ -2997,6 +3060,7 @@ SPEC CHECKSUMS:
   RCTSwiftUI: 15509267fa8f2c9add320d4f8bca1bf341e2744e
   RCTSwiftUIWrapper: 21b972be3583a766ff6ab26d875e0d65cf517e7f
   RCTTypeSafety: e83720d5a0fc095a2cbd0f431cf16762de30f85f
+  ReachabilitySwift: 32793e867593cfc1177f5d16491e3a197d2fccda
   React: 137135ec8ba49581ff298b915372f8d37cc9ad73
   React-bridging: 0d9708eb8c64332183da46d3fc040fb642ff05ab
   React-callinvoker: f5bb4b85486477625e932ac9aed17c60d97668ed

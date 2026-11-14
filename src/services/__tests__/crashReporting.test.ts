@@ -176,6 +176,8 @@ describe('installGlobalErrorHandler', () => {
 
     installGlobalErrorHandler();
     expect(native.setCustomKey).toHaveBeenCalledWith('js_fatal', 'false');
+    // The built-in bundle: no over-the-air update has been applied.
+    expect(native.setCustomKey).toHaveBeenCalledWith('js_bundle', 'embedded');
 
     const error = new Error('fatal');
     handler(error, true);

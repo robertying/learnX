@@ -307,6 +307,14 @@ end
 # Run before a release build, so a checkout without .env (a fresh worktree
 # has none: it's git-ignored) fails in seconds instead of shipping a build
 # without the mock login.
+# The over-the-air update URL in app.json (the same in Expo.plist and the
+# Android manifest; see AGENTS.md). A build with the placeholder would never
+# get an update.
+def verify_ota_config!
+  url = JSON.parse(File.read(File.join(ROOT, "app.json"))).dig("updates", "url").to_s
+  UI.user_error!("app.json has no real over-the-air update URL (#{url.inspect}); see AGENTS.md") if url.empty? || url.include?("example.invalid")
+end
+
 def verify_release_env!
   # A TEST_LOGIN bundle takes a test login from launch arguments: E2E only.
   UI.user_error!("TEST_LOGIN is set: unset it; it's for E2E builds only") unless ENV["TEST_LOGIN"].to_s.empty?
@@ -362,6 +370,7 @@ end
 def build_apple(platform)
   verify_versions!
   verify_release_env!
+  verify_ota_config!
   map = sourcemap_path(platform)
   FileUtils.mkdir_p(File.dirname(map))
   FileUtils.rm_f(map)
@@ -432,6 +441,7 @@ end
 def build_android
   verify_versions!
   verify_release_env!
+  verify_ota_config!
   # The release config reads LEARNX_RELEASE_* from android/local.properties and
   # signs with android/app/release.keystore.
   gradle(

@@ -73,6 +73,7 @@
     "expo-sqlite": "58.0.15",
     "expo-symbols": "58.0.4",
     "expo-task-manager": "58.0.13",
+    "expo-updates": "58.0.22",
     "expo-widgets": "58.0.27",
     "fuse.js": "7.5.0",
     "he": "2.0.0",
