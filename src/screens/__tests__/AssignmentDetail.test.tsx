@@ -327,6 +327,20 @@ describe('what each state of the assignment shows', () => {
   });
 });
 
+it('gives a deadline over a year away as its date once', async () => {
+  const base = find(a => !a.submitted && !a.graded);
+  const deadline = dayjs('2099-09-30T08:59:00+08:00');
+  await renderScreen({ ...base, deadline: deadline.toISOString() });
+  expect(
+    screen.getByText(deadline.format(t('fullDateTimeFormat'))),
+  ).toBeTruthy();
+  expect(
+    screen.queryByText(
+      t('deadlineOn', { date: deadline.format(t('deadlineDateFormat')) }),
+    ),
+  ).toBeNull();
+});
+
 it('shows the submission state by its icon', async () => {
   const base = find(a => !a.submitted && !a.graded);
   const now = dayjs();

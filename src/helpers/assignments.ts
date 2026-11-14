@@ -5,6 +5,10 @@ import { t, tCount, timeFormat } from './i18n';
 const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;
 
+/** Over a year away: given as its date rather than a countdown. */
+const isFarOff = (deadline: dayjs.Dayjs, now: dayjs.Dayjs) =>
+  deadline.isAfter(now.add(1, 'year'));
+
 /**
  * "due in 3 hours", "due in 2 days" or "closed 2 days ago", in the app's
  * language, relative to `now` (default: the current time). Under a day it
@@ -18,7 +22,7 @@ export const deadlineText = (deadline: string, now?: dayjs.ConfigType) => {
   if (!dl.isAfter(n)) {
     return t('deadlinePassed', { time: n.to(dl) });
   }
-  if (dl.isAfter(n.add(1, 'year'))) {
+  if (isFarOff(dl, n)) {
     return t('deadlineOn', { date: dl.format(t('deadlineDateFormat')) });
   }
   const left = dl.diff(n);
@@ -38,6 +42,19 @@ export const deadlineText = (deadline: string, now?: dayjs.ConfigType) => {
     ? t('deadlineIn', { time: n.to(dl, true) })
     : tCount('deadlineInOneDay', 'deadlineInDays', days);
 };
+
+/**
+ * How far off a deadline is, beside its full date (assignment detail, the
+ * submission screen). Nothing for one over a year away, which `deadlineText`
+ * gives as its date: the full date already says it.
+ */
+export const deadlineTextBesideDate = (
+  deadline: string,
+  now?: dayjs.ConfigType,
+) =>
+  isFarOff(dayjs(deadline), dayjs(now))
+    ? undefined
+    : deadlineText(deadline, now);
 
 /**
  * When an open deadline turns orange (the start of the day before it) and

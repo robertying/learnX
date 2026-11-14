@@ -18,7 +18,7 @@ import dayjs from 'dayjs';
 import { RemoteFile } from '@robertying/thu-learn-lib';
 import { attachmentFile } from 'helpers/attachments';
 import { t } from 'helpers/i18n';
-import { deadlineText } from 'helpers/assignments';
+import { deadlineTextBesideDate } from 'helpers/assignments';
 import { useMinute } from 'hooks/useClock';
 import {
   canSubmit,
@@ -78,13 +78,13 @@ const AssignmentSubmissionContent: React.FC<{
 
   // What is being submitted and until when, as on the assignment's page.
   const now = useMinute();
-  // How far off it is, except for a deadline over a year away, which
-  // deadlineText gives as its date: that's already the first part.
-  const deadlineDate = dayjs(deadline).format(t('fullDateTimeFormat'));
   const deadlineSubtitle = [
-    dayjs(deadline).isAfter(dayjs(now).add(1, 'year'))
-      ? deadlineDate
-      : `${deadlineDate} · ${deadlineText(deadline, now)}`,
+    [
+      dayjs(deadline).format(t('fullDateTimeFormat')),
+      deadlineTextBesideDate(deadline, now),
+    ]
+      .filter(Boolean)
+      .join(' · '),
     lateSubmissionDeadline && !dayjs(now).isBefore(deadline)
       ? `${t('lateSubmission')} ${dayjs(lateSubmissionDeadline).format(t('fullDateTimeFormat'))}`
       : null,

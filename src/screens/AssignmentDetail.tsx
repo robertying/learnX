@@ -23,7 +23,7 @@ import {
   t,
 } from 'helpers/i18n';
 import {
-  deadlineText,
+  deadlineTextBesideDate,
   deadlineTone,
   deadlineUrgency,
 } from 'helpers/assignments';
@@ -198,7 +198,7 @@ const AssignmentDetailContent: React.FC<{
           <FormText
             title={t('deadline')}
             subtitle={dayjs(deadline).format(t('fullDateTimeFormat'))}
-            detail={deadlineText(deadline, now)}
+            detail={deadlineTextBesideDate(deadline, now)}
             detailTint={urgency && deadlineTone[urgency]}
             icon="deadline"
           />
