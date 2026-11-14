@@ -22,14 +22,31 @@ import { join } from 'node:path';
 const root = join(import.meta.dirname, '..');
 const recordPath = join(root, 'ota-fingerprint.json');
 
-const fingerprint = platform =>
-  JSON.parse(
+/** A platform's native fingerprint: its hash and each source's. */
+const fingerprint = platform => {
+  const { hash, sources } = JSON.parse(
     execFileSync(
       'npx',
       ['expo-updates', 'fingerprint:generate', '--platform', platform],
       { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] },
     ),
-  ).hash;
+  );
+  return {
+    hash,
+    sources: Object.fromEntries(
+      sources.map(source => [
+        `${source.type} ${source.filePath ?? source.id}`,
+        source.hash,
+      ]),
+    ),
+  };
+};
+
+/** The sources that differ between two fingerprints. */
+const changedSources = (recorded = {}, current = {}) =>
+  [...new Set([...Object.keys(recorded), ...Object.keys(current)])].filter(
+    key => recorded[key] !== current[key],
+  );
 
 /**
  * What to tell the developer, or null when the record matches. `released`:
@@ -38,19 +55,23 @@ const fingerprint = platform =>
 export const verdict = (recorded, current, released) => {
   const nativeChanged =
     recorded.ios !== current.ios || recorded.android !== current.android;
+  const changes = ['ios', 'android']
+    .filter(p => recorded[p] !== current[p])
+    .map(
+      p =>
+        `${p}: ${changedSources(recorded.sources?.[p], current.sources?.[p]).join(', ') || 'see the fingerprint'}`,
+    )
+    .join('; ');
   const runtimeChanged = recorded.runtimeVersion !== current.runtimeVersion;
   if (!nativeChanged && !runtimeChanged) {
     return null;
   }
   const record = `Record it in ota-fingerprint.json:\n${JSON.stringify(current, null, 2)}`;
   if (nativeChanged && !runtimeChanged) {
-    const platforms = ['ios', 'android'].filter(
-      p => recorded[p] !== current[p],
-    );
     if (!released) {
-      return `Native code changed (${platforms.join(', ')}) before ${current.runtimeVersion} shipped, so the runtime version can stay. ${record}`;
+      return `Native code changed (${changes}) before ${current.runtimeVersion} shipped, so the runtime version can stay. ${record}`;
     }
-    return `Native code changed (${platforms.join(', ')}) but the over-the-air runtime version is still ${current.runtimeVersion}, which has shipped: set runtimeVersion in app.json to the app version of the release this goes in ("Over-the-air updates" in AGENTS.md). ${record}`;
+    return `Native code changed (${changes}) but the over-the-air runtime version is still ${current.runtimeVersion}, which has shipped: set runtimeVersion in app.json to the app version of the release this goes in ("Over-the-air updates" in AGENTS.md). ${record}`;
   }
   if (runtimeChanged && !nativeChanged) {
     return `The over-the-air runtime version changed from ${recorded.runtimeVersion} to ${current.runtimeVersion} with no native change, so older builds would stop getting updates: put it back to ${recorded.runtimeVersion}.`;
@@ -73,10 +94,14 @@ const main = () => {
   const { runtimeVersion } = JSON.parse(
     readFileSync(join(root, 'app.json'), 'utf8'),
   );
+  const ios = fingerprint('ios');
+  const android = fingerprint('android');
   const current = {
     runtimeVersion,
-    ios: fingerprint('ios'),
-    android: fingerprint('android'),
+    ios: ios.hash,
+    android: android.hash,
+    // Which source changed, for the message.
+    sources: { ios: ios.sources, android: android.sources },
   };
   if (process.argv.includes('--write')) {
     writeFileSync(recordPath, `${JSON.stringify(current, null, 2)}\n`);

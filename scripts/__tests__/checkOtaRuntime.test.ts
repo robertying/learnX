@@ -9,6 +9,7 @@ interface State {
   runtimeVersion: string;
   ios: string;
   android: string;
+  sources?: Record<string, Record<string, string>>;
 }
 
 const verdict = (
@@ -37,7 +38,7 @@ test('passes when nothing native changed', () => {
 
 test('asks for a new runtime version when native code changed', () => {
   expect(verdict(recorded, { ...recorded, android: 'c' })).toMatch(
-    /^Native code changed \(android\) but the over-the-air runtime version is still 19\.0\.0, which has shipped/,
+    /^Native code changed \(android: see the fingerprint\) but the over-the-air runtime version is still 19\.0\.0, which has shipped/,
   );
 });
 
@@ -45,9 +46,24 @@ test('only asks to record native changes before the version shipped', () => {
   const current = { ...recorded, ios: 'c' };
   const message = verdict(recorded, current, false);
   expect(message).toMatch(
-    /^Native code changed \(ios\) before 19\.0\.0 shipped/,
+    /^Native code changed \(ios: see the fingerprint\) before 19\.0\.0 shipped/,
   );
   expect(message).toContain(JSON.stringify(current, null, 2));
+});
+
+test('names the native sources that changed', () => {
+  const sources = (pdf: string) => ({
+    ios: { 'dir ios': '1', 'package node_modules/react-native-pdf': pdf },
+    android: {},
+  });
+  expect(
+    verdict(
+      { ...recorded, sources: sources('2') },
+      { ...recorded, ios: 'c', sources: sources('3') },
+    ),
+  ).toMatch(
+    /^Native code changed \(ios: package node_modules\/react-native-pdf\)/,
+  );
 });
 
 test('refuses a new runtime version without a native change', () => {
