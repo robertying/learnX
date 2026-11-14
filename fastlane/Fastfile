@@ -295,24 +295,45 @@ end
 # ---------------------------------------------------------------------------
 # .env secrets
 
-# babel/inline-env.js only inlines the mock login as plain text. Fail the
-# build if a release bundle contains any other .env value as is: a LIVE_* test
-# login, the unmasked courseX token, or anything added later.
-def check_bundle_for_env_secrets!(bundles)
+# The mock login, which every release build inlines from the repo-root .env
+# (babel/inline-env.js) for store reviewers and testers. A build without it
+# still runs, but the mock login goes to the real SSO login.
+RELEASE_ENV_KEYS = %w[DUMMY_USERNAME DUMMY_PASSWORD].freeze
+
+def release_env_file
+  File.join(ROOT, ".env")
+end
+
+# Run before a release build, so a checkout without .env (a fresh worktree
+# has none: it's git-ignored) fails in seconds instead of shipping a build
+# without the mock login.
+def verify_release_env!
   # A TEST_LOGIN bundle takes a test login from launch arguments: E2E only.
   UI.user_error!("TEST_LOGIN is set: unset it; it's for E2E builds only") unless ENV["TEST_LOGIN"].to_s.empty?
+  UI.user_error!("No .env at #{release_env_file}: copy it from the main checkout (a worktree has none). Release builds inline #{RELEASE_ENV_KEYS.join(', ')} from it.") unless File.exist?(release_env_file)
+
+  env = Dotenv.parse(release_env_file)
+  missing = RELEASE_ENV_KEYS.select { |key| env[key].to_s.empty? }
+  UI.user_error!("#{release_env_file} has no value for #{missing.join(', ')}, which release builds inline.") unless missing.empty?
+end
+
+# Fail the build unless each release bundle has the mock login in it, and
+# none of the other .env values as is: babel/inline-env.js only inlines the
+# mock login as plain text, so no other .env value may be there. A bundle without the mock login
+# was built from a cached transform of helpers/env.ts or another .env.
+def check_bundle_env!(bundles)
   UI.user_error!("Found no JS bundle to check for .env values") if bundles.empty?
 
-  env_file = File.join(ROOT, ".env")
-  return unless File.exist?(env_file)
-
-  secrets = Dotenv.parse(env_file).reject { |key, value| key.start_with?("DUMMY_") || value.to_s.length < 4 }
+  env = Dotenv.parse(release_env_file)
+  mock_login = env.slice("DUMMY_USERNAME", "DUMMY_PASSWORD")
+  secrets = env.reject { |key, value| key.start_with?("DUMMY_") || value.to_s.length < 4 }
   bundles.each do |bundle|
     data = File.binread(bundle)
-    leaked = secrets.select { |_, value| data.include?(value.b) }.keys
-    next if leaked.empty?
+    absent = mock_login.reject { |_, value| data.include?(value.b) }.keys
+    UI.user_error!("#{bundle} doesn't contain the .env value of #{absent.join(', ')}: the mock login wasn't inlined; see babel/inline-env.js.") unless absent.empty?
 
-    UI.user_error!("#{bundle} contains the .env value of #{leaked.join(', ')}. Release bundles must not include it; see babel/inline-env.js.")
+    leaked = secrets.select { |_, value| data.include?(value.b) }.keys
+    UI.user_error!("#{bundle} contains the .env value of #{leaked.join(', ')}. Release bundles must not include it; see babel/inline-env.js.") unless leaked.empty?
   end
   UI.success(".env check passed for #{bundles.map { |b| File.basename(b) }.join(', ')}")
 end
@@ -340,6 +361,7 @@ end
 # platform: "ios" or "macos" (Mac Catalyst). Returns the .ipa / .pkg path.
 def build_apple(platform)
   verify_versions!
+  verify_release_env!
   map = sourcemap_path(platform)
   FileUtils.mkdir_p(File.dirname(map))
   FileUtils.rm_f(map)
@@ -362,7 +384,7 @@ def build_apple(platform)
   path = build_app(options)
 
   archive = lane_context[SharedValues::XCODEBUILD_ARCHIVE]
-  check_bundle_for_env_secrets!(Dir[File.join(archive.to_s, "Products/Applications/*.app/**/main.jsbundle")])
+  check_bundle_env!(Dir[File.join(archive.to_s, "Products/Applications/*.app/**/main.jsbundle")])
 
   UI.user_error!("The build wrote no source map to #{map}") unless File.exist?(map)
   UI.success("Source map: #{map}")
@@ -409,6 +431,7 @@ end
 
 def build_android
   verify_versions!
+  verify_release_env!
   # The release config reads LEARNX_RELEASE_* from android/local.properties and
   # signs with android/app/release.keystore.
   gradle(
@@ -416,7 +439,7 @@ def build_android
     tasks: ["app:bundleRelease", "app:assembleRelease", "app:uploadCrashlyticsSymbolFileRelease"],
   )
 
-  check_bundle_for_env_secrets!(Dir[File.join(ANDROID_APP, "build/generated/assets/react/release/index.android.bundle")])
+  check_bundle_env!(Dir[File.join(ANDROID_APP, "build/generated/assets/react/release/index.android.bundle")])
 
   FileUtils.rm_rf(android_out_dir)
   FileUtils.mkdir_p(android_out_dir)
