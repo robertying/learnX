@@ -80,11 +80,14 @@
     {
       "files": [".maestro/**/*.js"],
       // Maestro's runScript globals, and the flow's env values (upgrade/,
-      // subflows/calendar-provider.js).
+      // subflows/calendar-provider.js, ota/).
       "globals": {
+        "http": "readonly",
+        "json": "readonly",
         "maestro": "readonly",
         "output": "writable",
-        "http": "readonly",
+        "OTA_SERVER": "readonly",
+        "PATH_": "readonly",
         "PHASE": "readonly",
         "USERNAME": "readonly",
         "CALENDAR_URL": "readonly",

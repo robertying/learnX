@@ -30,7 +30,7 @@ trap 'rm -rf "$out"' EXIT
 # build (BABEL_ENV, for one, isn't in its cache key).
 for platform in android ios; do
   echo "▸ $platform release bundle"
-  pnpm exec react-native bundle \
+  pnpm exec expo export:embed \
     --platform "$platform" \
     --dev false \
     --reset-cache \

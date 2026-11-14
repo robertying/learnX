@@ -2,6 +2,7 @@
 // them on use jest.replaceProperty and the mocked functions.
 export const isEnabled = false;
 export const updateId: string | null = null;
+export const isEmbeddedLaunch = true;
 export const useUpdates = jest.fn(() => ({
   isUpdateAvailable: false,
   isUpdatePending: false,

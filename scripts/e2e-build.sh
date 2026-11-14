@@ -3,6 +3,9 @@
 # emulator. E2E runs always use Release, never a debug build: it bundles the
 # JS (no Metro), starts faster and is what ships, so the flows run on what R8
 # and Hermes made.
+# It asks the local test server (scripts/ota-e2e-server.mjs) for over-the-air
+# updates, never the real one, so it always runs the JS it was built with
+# (scripts/e2e-ota.sh tests updates against that server).
 # The bundle inlines .env, so its mock login works as in debug builds. It's
 # built with TEST_LOGIN=1, so it takes a test login from launch arguments (the
 # login check flow, scripts/e2e.sh --live) and says why a login failed; no live
@@ -30,6 +33,8 @@ fi
 cd "$(dirname "$0")/.."
 
 export TEST_LOGIN=1
+# The key E2E builds trust for over-the-air updates (scripts/e2e-ota.sh).
+scripts/ota-e2e-cert.sh
 
 case "$platform" in
 ios)
