@@ -1,65 +1,32 @@
 import axios from 'axios';
-import { gql, GraphQLClient } from 'graphql-request';
 import { Course } from 'data/types/state';
 import { getCredentials } from 'data/credentials';
-import { getCourseXRefreshToken } from 'helpers/env';
 import { isMockUser } from 'helpers/mock';
 import { assertServerWritesAllowed } from 'helpers/serverWrites';
 
-const graphQLClient = new GraphQLClient('https://api.tsinghua.app/v1/graphql');
-
 /**
- * Shares the courses with CourseX. Does nothing for the mock account: its
- * made-up courses must never reach the real CourseX.
+ * Shares the courses with courseX. The server decides what it keeps (new
+ * courses, updated schedules), so learnX needs no token. Does nothing for the
+ * mock account: its made-up courses must never reach the real courseX.
  */
 export const uploadCourses = async (courses: Course[]) => {
   if (isMockUser(getCredentials()?.username)) {
     return;
   }
   assertServerWritesAllowed('Course information sharing');
-  const response = await axios.post('https://tsinghua.app/api/auth/session', {
-    refreshToken: getCourseXRefreshToken(),
+
+  await axios.post('https://tsinghua.app/api/learnx/courses', {
+    version: 1,
+    courses: courses.map(c => ({
+      id: c.id,
+      name: c.chineseName,
+      englishName: c.englishName,
+      teacherId: c.teacherNumber,
+      teacherName: c.teacherName,
+      number: c.courseNumber,
+      index: c.courseIndex,
+      semesterId: c.semesterId,
+      timeAndLocation: c.timeAndLocation,
+    })),
   });
-
-  const accessToken = response.data.accessToken;
-
-  if (!accessToken) {
-    return;
-  }
-
-  const coursesToUpload = courses.map(c => ({
-    id: c.id,
-    name: c.chineseName,
-    teacher: {
-      data: { id: c.teacherNumber, name: c.teacherName },
-      on_conflict: { constraint: 'teacher_pkey', update_columns: ['name'] },
-    },
-    time_location: JSON.stringify(c.timeAndLocation),
-    semester_id: c.semesterId,
-    number: c.courseNumber,
-    index: c.courseIndex,
-    englishName: c.englishName,
-  }));
-
-  await graphQLClient.request(
-    gql`
-      mutation AddCourses($objects: [course_insert_input!]!) {
-        insert_course(
-          objects: $objects
-          on_conflict: {
-            constraint: course_pkey
-            update_columns: [time_location, name, englishName]
-          }
-        ) {
-          affected_rows
-        }
-      }
-    `,
-    {
-      objects: coursesToUpload,
-    },
-    {
-      Authorization: 'Bearer ' + accessToken,
-    },
-  );
 };

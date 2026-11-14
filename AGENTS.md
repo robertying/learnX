@@ -28,7 +28,7 @@ learnX is a React Native app (iOS, iPadOS, Mac Catalyst, Android) for Tsinghua U
 - Debug builds load JS from Metro; only native changes need a rebuild.
 - `scripts/test-ios.sh <simulator udid>` runs the native iOS tests (Swift Testing) and prints the line coverage of the app's and the modules' Swift; see `modules/AGENTS.md`.
 - `android/local.properties` (git-ignored, see `android/local.properties.example`) holds the Android release signing values; debug builds don't need it.
-- `.env` (git-ignored, see `.env.example`) is inlined at build time into `helpers/env.ts` by `babel/inline-env.js`, which only passes listed keys: mock logins as is, the courseX token masked, and `LIVE_*` test logins in debug builds only. Add a key there before reading it in the app. The app can be used without a Tsinghua account through the mock login (`src/data/AGENTS.md`).
+- `.env` (git-ignored, see `.env.example`) is inlined at build time into `helpers/env.ts` by `babel/inline-env.js`, which only passes listed keys: mock logins as is and `LIVE_*` test logins in debug builds only. Add a key there before reading it in the app. The app can be used without a Tsinghua account through the mock login (`src/data/AGENTS.md`).
 
 ## File names
 

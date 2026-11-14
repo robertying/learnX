@@ -75,8 +75,6 @@
     "expo-task-manager": "58.0.13",
     "expo-widgets": "58.0.27",
     "fuse.js": "7.5.0",
-    "graphql": "17.1.0",
-    "graphql-request": "7.4.0",
     "he": "2.0.0",
     "jest": "30.5.2",
     "katex": "0.19.1",

@@ -42,7 +42,7 @@ DUMMY_USERNAME=appreview
 DUMMY_PASSWORD=appreview
 ```
 
-These aren't real accounts. Typing them on the login screen loads the built-in mock data instead of talking to learn.tsinghua.edu.cn (see [Testing without a Tsinghua account](#testing-without-a-tsinghua-account)). Leave the other keys empty: without `COURSEX_REFRESH_TOKEN`, course information sharing doesn't work, and nothing else needs it.
+These aren't real accounts. Typing them on the login screen loads the built-in mock data instead of talking to learn.tsinghua.edu.cn (see [Testing without a Tsinghua account](#testing-without-a-tsinghua-account)). Leave the live login keys empty unless you run live tests.
 
 Restart Metro after changing `.env`.
 
