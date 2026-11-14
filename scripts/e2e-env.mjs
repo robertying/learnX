@@ -66,9 +66,10 @@ const both = (listName, id, field = i => i.title) =>
 // and archive.
 const notice = item(zhMock.mockNotices, zhMock.noticeId(1));
 const course = item(zhMock.mockCourses, notice.courseId);
-// Assignment 1 (due tomorrow, with an attachment) and file 1.
+// Assignment 1 (due tomorrow, with an attachment) and file 2, the newest file
+// with a Chinese title (file 1 belongs to the English-taught course).
 const assignment = zhMock.assignmentId(1);
-const file = zhMock.fileId(1);
+const file = zhMock.fileId(2);
 // Search: SEARCH_TERM is ASCII (Maestro can't type CJK on Android) and finds
 // notice 15 and assignment 13 in both languages.
 const searchTerm = 'AutoCAD';
