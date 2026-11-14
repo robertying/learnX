@@ -156,6 +156,19 @@ describe('updateUpNextWidget', () => {
     expect(entries[0].props).not.toHaveProperty('deadlines');
   });
 
+  it("tells iOS to draw the countdowns in Chinese when that's the app's language", () => {
+    jest.replaceProperty(Platform, 'OS', 'ios');
+    jest
+      .spyOn(
+        require('helpers/i18n') as typeof import('helpers/i18n'),
+        'isLocaleChinese',
+      )
+      .mockReturnValue(true);
+    updateUpNextWidget(classes);
+    const [entries] = jest.mocked(iosUpNext.updateTimeline).mock.calls[0];
+    expect(entries[0].props).toMatchObject({ locale: 'zh_Hans' });
+  });
+
   it('gives Android a snapshot, once for the same props', () => {
     jest.replaceProperty(Platform, 'OS', 'android');
     updateUpNextWidget(classes);

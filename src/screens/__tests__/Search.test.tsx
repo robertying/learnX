@@ -8,6 +8,7 @@ import {
 import type { NativeStackHeaderItemMenu } from '@react-navigation/native-stack';
 import type { SearchBarProps } from 'react-native-screens';
 import { Assignment, File, Notice } from 'data/types/state';
+import * as navigationOptions from 'navigation/options';
 import Search from 'screens/Search';
 import { resetUserData, setArchived, setCourseHidden } from 'data/userData';
 import { screenProps } from 'test-utils/screenProps';
@@ -184,6 +185,21 @@ describe('Search', () => {
     expect(screen.queryByRole('header', { name: 'Notices' })).toBeNull();
     await act(() => fireEvent(screen.getByText('All'), 'selectionChange', 3));
     expect(screen.getByText('No Results')).toBeTruthy();
+  });
+
+  it('from iOS 26, lays the results out under floating tabs once their height is known', async () => {
+    jest.replaceProperty(navigationOptions, 'hasGlassHeader', true);
+    const { type } = await setup();
+    await type('midterm');
+    // No list until the tabs' height is known, so it starts below them.
+    expect(screen.queryByText('Midterm room change')).toBeNull();
+    await fireEvent(screen.getByText('All'), 'layout', {
+      nativeEvent: { layout: { height: 52 } },
+    });
+    expect(screen.getByText('Midterm room change')).toBeTruthy();
+    await act(() => fireEvent(screen.getByText('All'), 'selectionChange', 2));
+    expect(screen.queryByText('Midterm room change')).toBeNull();
+    expect(screen.getByText('Midterm review problems')).toBeTruthy();
   });
 
   it('shows the top hits and three of each kind, with See All for the rest', async () => {

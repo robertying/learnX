@@ -185,6 +185,41 @@ it('shows the alert options of the syncs that are on', async () => {
   ).toBeNull();
 });
 
+it('saves the alert times typed in, and hides them once their alert is off', async () => {
+  setSetting('assignmentCalendarSync', true);
+  setSetting('assignmentReminderSync', true);
+  setSetting('alarms', {
+    ...getSettings().alarms,
+    assignmentCalendarAlarm: true,
+    assignmentCalendarSecondAlarm: true,
+    assignmentReminderAlarm: true,
+  });
+  await renderScreen();
+  // The Calendar and Reminders sections may give their alerts the same label:
+  // the Calendar's comes first.
+  const type = (label: string, text: string, last = false) => {
+    const fields = screen.getAllByLabelText(label);
+    return fireEvent.changeText(fields[last ? fields.length - 1 : 0], text);
+  };
+  await type(t('assignmentCalendarAlarmOffset'), '120');
+  await type(t('assignmentCalendarSecondAlarmOffset'), '10');
+  await type(t('assignmentReminderAlarmOffset'), '60', true);
+  expect(getSettings().alarms).toMatchObject({
+    assignmentCalendarAlarmOffset: 120,
+    assignmentCalendarSecondAlarmOffset: 10,
+    assignmentReminderAlarmOffset: 60,
+  });
+
+  await toggle(t('assignmentCalendarAlarm'), false);
+  await toggle(t('assignmentReminderAlarm'), false);
+  expect(getSettings().alarms).toMatchObject({
+    assignmentCalendarAlarm: false,
+    assignmentReminderAlarm: false,
+  });
+  expect(screen.queryByText(t('assignmentCalendarAlarmOffset'))).toBeNull();
+  expect(screen.queryByText(t('assignmentReminderAlarmOffset'))).toBeNull();
+});
+
 it('leaves the Reminders section out on Android', async () => {
   jest.replaceProperty(Platform, 'OS', 'android');
   await renderScreen();
