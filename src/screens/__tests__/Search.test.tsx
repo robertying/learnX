@@ -84,12 +84,15 @@ const setup = async (query?: string, parent?: object) => {
       ([o]) => o.headerSearchBarOptions,
     )[0].headerSearchBarOptions;
   (options().ref as React.RefObject<unknown>).current = searchBar;
-  const type = (text: string) =>
-    act(() =>
+  // Types and waits out the debounce (and No Results' longer one).
+  const type = async (text: string) => {
+    await act(() =>
       options().onChangeText!({
         nativeEvent: { text },
       } as never),
     );
+    await act(() => jest.advanceTimersByTime(600));
+  };
   // The header's filter menu, as iOS and Mac show it.
   const filterMenu = () =>
     navigation.setOptions.mock.calls
@@ -122,6 +125,30 @@ describe('Search', () => {
       screen.getByText('Search Notices, Assignments and Files'),
     ).toBeTruthy();
     expect(screen.queryByText('No Results')).toBeNull();
+  });
+
+  it('waits for typing to pause, and keeps the last matches a while before No Results', async () => {
+    const { options } = await setup();
+    const change = (text: string) =>
+      act(() => options().onChangeText!({ nativeEvent: { text } } as never));
+    await change('midterm');
+    expect(screen.queryByText('Midterm room change')).toBeNull();
+    await act(() => jest.advanceTimersByTime(250));
+    expect(screen.getByText('Midterm room change')).toBeTruthy();
+    await act(() => jest.advanceTimersByTime(350));
+    // Nothing matches yet: the last results stay up a while
+    await change('midterm qq');
+    await act(() => jest.advanceTimersByTime(250));
+    expect(screen.getByText('Midterm room change')).toBeTruthy();
+    expect(screen.queryByText('No Results')).toBeNull();
+    await act(() => jest.advanceTimersByTime(350));
+    expect(screen.queryByText('Midterm room change')).toBeNull();
+    expect(screen.getByText('No Results')).toBeTruthy();
+    // Clearing resets at once
+    await change('');
+    expect(
+      screen.getByText('Search Notices, Assignments and Files'),
+    ).toBeTruthy();
   });
 
   it('says when nothing matches', async () => {
