@@ -8,7 +8,7 @@ import { SettingsStackParams } from 'navigation/types';
 type Props = NativeStackScreenProps<SettingsStackParams, 'SwipeActions'>;
 
 const choices: { choice: SwipeChoice; label: () => string }[] = [
-  { choice: 'archive', label: () => t('archive') },
+  { choice: 'archive', label: () => t('swipeArchive') },
   { choice: 'fav', label: () => t('favorite') },
   { choice: 'none', label: () => t('swipeNone') },
 ];

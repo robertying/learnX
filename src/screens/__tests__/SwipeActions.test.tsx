@@ -13,6 +13,7 @@ it('checks the choice for each direction: Archive right and Favorite left at fir
   expect(screen.getByText(t('swipeRight'))).toBeTruthy();
   expect(screen.getByText(t('swipeLeft'))).toBeTruthy();
   expect(screen.getByText(t('swipeActionsFooter'))).toBeTruthy();
+  expect(screen.getAllByText(t('swipeArchive'))).toHaveLength(2);
   expect(screen.getAllByTestId('icon-checkmark')).toHaveLength(2);
 });
 
