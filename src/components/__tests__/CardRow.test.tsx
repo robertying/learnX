@@ -1,7 +1,7 @@
 import { PlatformColor, StyleSheet } from 'react-native';
 import type * as ReactNative from 'react-native';
 import { render, screen } from '@testing-library/react-native';
-import { cardAccessibilityLabel, CardPill } from 'components/CardRow';
+import CardRow, { cardAccessibilityLabel, CardPill } from 'components/CardRow';
 import { BrandLightTheme, brandColors } from 'theme';
 
 const RN: typeof ReactNative = require('react-native');
@@ -35,5 +35,21 @@ describe('cardAccessibilityLabel', () => {
     expect(
       cardAccessibilityLabel({ title: 'Notice', overline: 'Calculus' }),
     ).toBe('Notice, Calculus');
+  });
+});
+
+describe('CardRow highlight', () => {
+  it('emphasizes the search words in the title and preview', async () => {
+    await render(
+      <CardRow
+        title="Midterm review"
+        preview="The midterm is in Room 101"
+        highlight={['midterm', '101']}
+      />,
+    );
+    expect(screen.getByText('Midterm')).toBeTruthy();
+    expect(screen.getByText('midterm')).toBeTruthy();
+    expect(screen.getByText('101')).toBeTruthy();
+    expect(screen.getByText('Midterm review')).toBeTruthy();
   });
 });

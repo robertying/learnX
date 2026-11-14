@@ -127,6 +127,8 @@ export const systemIcons = {
   upload: { ios: 'arrow.up.circle', android: 'upload_file' },
   select: { ios: 'checklist', android: 'checklist' },
   checkAll: { ios: 'checkmark.circle.fill', android: 'done_all' },
+  // An option that's on in a menu of toggles
+  checked: { ios: 'checkmark', android: 'check' },
   preview: { ios: 'eye', android: 'visibility' },
   reorder: { ios: 'arrow.up.and.down', android: 'swap_vert' },
   // Debug rows
@@ -168,6 +170,7 @@ export const materialCodepoints: Record<SystemIconAndroidName, number> = {
   build: 0xe869,
   calendar_month: 0xebcc,
   cancel: 0xe5c9,
+  check: 0xe5ca,
   check_circle: 0xe86c,
   checklist: 0xe6b1,
   close: 0xe5cd,

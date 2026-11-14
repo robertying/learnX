@@ -1,4 +1,7 @@
 import {
+  matchRanges,
+  snippet,
+  searchHits,
   hasHan,
   normalize,
   queryWords,
@@ -189,5 +192,46 @@ describe('searchItems', () => {
     searchItems(list, 'x', counted, 0);
     searchItems(list, 'xy', counted, 0);
     expect(get).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('searchHits', () => {
+  it('gives each result its score, best first', () => {
+    const hits = searchHits(items, '数据结构', spec, 0);
+    expect(hits.map(hit => hit.item.id)).toEqual(['ds-hw', 'ds-notice']);
+    expect(hits[0].score).toBe(hits[1].score);
+    expect(hits[0].score).toBeGreaterThan(0);
+  });
+});
+
+describe('matchRanges', () => {
+  it('finds every place a word appears, ignoring case, merged', () => {
+    expect(matchRanges('Lab 1 and lab 2', ['lab'])).toEqual([
+      [0, 3],
+      [10, 13],
+    ]);
+    expect(matchRanges('abcd', ['abc', 'bcd'])).toEqual([[0, 4]]);
+  });
+
+  it('finds a Han word the text holds only in pieces, longest first', () => {
+    // 数据结构作业 as 数据结构 and 作业
+    expect(matchRanges('数据结构第五次作业', ['数据结构作业'])).toEqual([
+      [0, 4],
+      [7, 9],
+    ]);
+    expect(matchRanges('没有', ['数据'])).toEqual([]);
+  });
+});
+
+describe('snippet', () => {
+  const text = `${'很长的开头'.repeat(10)}期中考试在三教`;
+
+  it('starts a little before a match the preview would cut off', () => {
+    expect(snippet(text, ['三教'])).toBe('…很长的开头期中考试在三教');
+  });
+
+  it('keeps text whose first match is near its start, or that has none', () => {
+    expect(snippet(text, ['很长'])).toBe(text);
+    expect(snippet(text, ['物理'])).toBe(text);
   });
 });

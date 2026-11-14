@@ -1,6 +1,7 @@
 import { displayFileSize } from 'helpers/filename';
 import { File } from 'data/types/state';
 import { removeTags } from 'helpers/text';
+import { snippet } from 'helpers/search';
 import { listTime } from 'helpers/listTime';
 import { useToday } from 'hooks/useClock';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
@@ -14,6 +15,11 @@ export interface FileCardProps extends CardWrapperProps {
    * among the rest (a course's lists), where they can't be favorited.
    */
   markArchived?: boolean;
+  /**
+   * Search words: the title and preview emphasize them, and the preview
+   * starts near the first one when it's further in than the preview shows.
+   */
+  highlight?: readonly string[];
 }
 
 const FileCard: React.FC<FileCardProps> = ({
@@ -30,6 +36,7 @@ const FileCard: React.FC<FileCardProps> = ({
   },
   hideCourseName,
   markArchived,
+  highlight,
   ...restProps
 }) => {
   // Re-renders the row at midnight, past the list's row memoization.
@@ -41,7 +48,10 @@ const FileCard: React.FC<FileCardProps> = ({
   ]
     .filter(Boolean)
     .join(' · ');
-  const strippedDescription = removeTags(description);
+  const stripped = removeTags(description);
+  const strippedDescription = highlight
+    ? snippet(stripped, highlight)
+    : stripped;
   const overline = hideCourseName ? undefined : courseName;
   const preview = strippedDescription
     ? `${details}\n${strippedDescription}`
@@ -72,6 +82,7 @@ const FileCard: React.FC<FileCardProps> = ({
         unread={!!isNew}
         title={title}
         preview={preview}
+        highlight={highlight}
         flags={flags}
         trailing={time}
       />

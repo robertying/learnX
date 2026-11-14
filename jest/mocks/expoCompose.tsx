@@ -357,6 +357,23 @@ export const SegmentedButton = Object.assign(
   { Label: slot() },
 );
 
+export const FilterChip = Object.assign(
+  ({
+    onClick,
+    selected,
+    children,
+  }: BoxProps & { onClick?: () => void; selected: boolean }) => (
+    <Pressable
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked: selected }}
+      onPress={onClick}
+    >
+      {children}
+    </Pressable>
+  ),
+  { Label: slot(), LeadingIcon: slot(), TrailingIcon: slot() },
+);
+
 /**
  * Material's range picker: Save picks the initial range as it was handed in
  * (UTC-midnight ISO days), Cancel dismisses.

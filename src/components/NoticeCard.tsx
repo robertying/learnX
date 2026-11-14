@@ -1,5 +1,6 @@
 import { Notice } from 'data/types/state';
 import { removeTags } from 'helpers/text';
+import { snippet } from 'helpers/search';
 import { listTime } from 'helpers/listTime';
 import { useToday } from 'hooks/useClock';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
@@ -13,6 +14,11 @@ export interface NoticeCardProps extends CardWrapperProps {
    * among the rest (a course's lists), where they can't be favorited.
    */
   markArchived?: boolean;
+  /**
+   * Search words: the title and preview emphasize them, and the preview
+   * starts near the first one when it's further in than the preview shows.
+   */
+  highlight?: readonly string[];
 }
 
 const NoticeCard: React.FC<NoticeCardProps> = ({
@@ -28,12 +34,14 @@ const NoticeCard: React.FC<NoticeCardProps> = ({
   },
   hideCourseName,
   markArchived,
+  highlight,
   ...restProps
 }) => {
   // Re-renders the row at midnight, past the list's row memoization.
   const today = useToday();
   const overline = hideCourseName ? publisher : courseName;
-  const preview = removeTags(content);
+  const body = removeTags(content);
+  const preview = highlight ? snippet(body, highlight) : body;
   const time = listTime(publishTime, today);
 
   const flags = [
@@ -61,6 +69,7 @@ const NoticeCard: React.FC<NoticeCardProps> = ({
         unread={!hasRead}
         title={title}
         preview={preview}
+        highlight={highlight}
         flags={flags}
         trailing={time}
       />

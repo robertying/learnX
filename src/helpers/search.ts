@@ -196,21 +196,28 @@ const piecesScore = (word: string, fields: PreparedField[]) => {
   return score && score !== Infinity ? score - 1 : 0;
 };
 
+export interface SearchHit<T> {
+  item: T;
+  /** Higher is better; comparable across specs with the same tiers. */
+  score: number;
+}
+
 /**
- * The items matching every word of `query`, best first; items that rank the
- * same keep their order in `items`. An empty query matches nothing.
+ * The items matching every word of `query` with their scores, best first;
+ * items that rank the same keep their order in `items`. An empty query
+ * matches nothing.
  */
-export const searchItems = <T extends object>(
+export const searchHits = <T extends object>(
   items: readonly T[],
   query: string,
   spec: SearchSpec<T>,
   now: number,
-): T[] => {
+): SearchHit<T>[] => {
   const words = queryWords(query);
   if (!words.length) {
     return [];
   }
-  const scored: { item: T; score: number; attention: boolean }[] = [];
+  const scored: (SearchHit<T> & { attention: boolean })[] = [];
   for (const item of items) {
     const fields = prepare(item, spec);
     let score = 0;
@@ -230,5 +237,77 @@ export const searchItems = <T extends object>(
     .sort(
       (a, b) => b.score - a.score || Number(b.attention) - Number(a.attention),
     )
-    .map(({ item }) => item);
+    .map(({ item, score }) => ({ item, score }));
+};
+
+/** `searchHits` without the scores. */
+export const searchItems = <T extends object>(
+  items: readonly T[],
+  query: string,
+  spec: SearchSpec<T>,
+  now: number,
+): T[] => searchHits(items, query, spec, now).map(({ item }) => item);
+
+/**
+ * Where `words` (from `queryWords`) appear in `text`, as sorted, merged
+ * `[start, end)` ranges. A Han word that the text doesn't hold whole is
+ * looked for in pieces of two or more characters, longest first, as
+ * `searchItems` matches it.
+ */
+export const matchRanges = (text: string, words: readonly string[]) => {
+  const lower = text.toLowerCase();
+  const ranges: [number, number][] = [];
+  const addAll = (part: string) => {
+    let found = false;
+    for (
+      let at = lower.indexOf(part);
+      at >= 0;
+      at = lower.indexOf(part, at + 1)
+    ) {
+      ranges.push([at, at + part.length]);
+      found = true;
+    }
+    return found;
+  };
+  for (const word of words) {
+    if (addAll(word) || !hanOnly.test(word)) {
+      continue;
+    }
+    for (let start = 0; start < word.length - 1;) {
+      let end = word.length;
+      while (end - start >= 2 && !addAll(word.slice(start, end))) {
+        end--;
+      }
+      start = end - start >= 2 ? end : start + 1;
+    }
+  }
+  ranges.sort((a, b) => a[0] - b[0]);
+  const merged: [number, number][] = [];
+  for (const [start, end] of ranges) {
+    const last = merged[merged.length - 1];
+    if (last && start <= last[1]) {
+      last[1] = Math.max(last[1], end);
+    } else {
+      merged.push([start, end]);
+    }
+  }
+  return merged;
+};
+
+/**
+ * `text` cut to start a little before the first match of `words`, after an
+ * ellipsis, when the match is past the first `shown` characters (about what
+ * a card's two-line preview shows), so the card shows why it matched.
+ */
+export const snippet = (
+  text: string,
+  words: readonly string[],
+  shown = 40,
+  lead = 10,
+) => {
+  const first = matchRanges(text, words)[0];
+  if (!first || first[0] < shown) {
+    return text;
+  }
+  return `…${text.slice(first[0] - lead).trimStart()}`;
 };

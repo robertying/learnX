@@ -229,3 +229,15 @@ it('puts a refresh button in the header on a Mac', async () => {
   const items = options.unstable_headerRightItems?.() ?? options.headerRight;
   expect(JSON.stringify(items)).toContain('refresh');
 });
+
+it('opens search from the header', async () => {
+  const { navigation } = await setup();
+  const options = navigation.setOptions.mock.calls.findLast(
+    ([o]) => o.unstable_headerRightItems,
+  )![0];
+  const search = options
+    .unstable_headerRightItems()
+    .find((item: { identifier: string }) => item.identifier === 'search');
+  search.onPress();
+  expect(navigation.navigate).toHaveBeenCalledWith('SearchStack');
+});
