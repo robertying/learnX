@@ -187,6 +187,27 @@ describe('Search', () => {
     expect(screen.getByText('No Results')).toBeTruthy();
   });
 
+  it('keeps the tabs and the chosen one while a query matches nothing', async () => {
+    const { type, options } = await setup();
+    await type('midterm');
+    await act(() => fireEvent(screen.getByText('All'), 'selectionChange', 1));
+    // Typing on past what matches, before and after the debounce
+    await act(() =>
+      options().onChangeText!({ nativeEvent: { text: 'midterm q' } } as never),
+    );
+    expect(screen.getByText('All')).toBeTruthy();
+    await type('midterm qq');
+    expect(screen.getByText('No Results')).toBeTruthy();
+    expect(screen.getByText('All')).toBeTruthy();
+    // Matching again shows the chosen tab's kind only
+    await type('midterm');
+    expect(screen.getByText('Midterm room change')).toBeTruthy();
+    expect(screen.queryByText('Midterm review problems')).toBeNull();
+    // A cleared field brings back the prompt alone
+    await type('');
+    expect(screen.queryByText('All')).toBeNull();
+  });
+
   it('from iOS 26, lays the results out under floating tabs once their height is known', async () => {
     jest.replaceProperty(navigationOptions, 'hasGlassHeader', true);
     const { type } = await setup();
