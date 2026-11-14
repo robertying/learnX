@@ -14,7 +14,10 @@ import {
   newContentToggles,
   notificationToggles,
 } from 'helpers/notificationToggles';
-import { useAssignmentSync } from 'hooks/useCalendarSync';
+import {
+  useAssignmentSync,
+  useCourseScheduleSync,
+} from 'hooks/useCalendarSync';
 import useNotificationPermission from 'hooks/useNotificationPermission';
 import { RootStackParams } from 'navigation/types';
 
@@ -23,8 +26,9 @@ type Props = NativeStackScreenProps<RootStackParams, 'Setup'>;
 /**
  * The page after the first login, where people choose what to turn on:
  * notifications of new content (in the tabs' order), class and deadline
- * reminders and grades, all on here to start with, and calendar sync and, on
- * Apple platforms, Reminders sync, off unless an earlier version synced them.
+ * reminders and grades, all on here to start with, and syncing the timetable
+ * and assignments to the calendar and, on Apple platforms, assignments to
+ * Reminders, off unless an earlier version synced them.
  * (Settings has them all off until chosen.) Done saves the choices and asks
  * for the permissions they need; notifications chosen stay on if that's
  * denied, and start working once they're allowed. Opened by `useLaunchSheet`,
@@ -39,8 +43,10 @@ const Setup: React.FC<Props> = ({ navigation, route }) => {
   const remindersSynced = useSettings(
     settings => settings.assignmentReminderSync,
   );
+  const scheduleSynced = useSettings(settings => settings.courseCalendarSync);
   const { request } = useNotificationPermission();
   const { setSyncEnabled } = useAssignmentSync();
+  const { setSyncEnabled: setScheduleSyncEnabled } = useCourseScheduleSync();
 
   const [choices, setChoices] = useState({
     notices: true,
@@ -49,6 +55,7 @@ const Setup: React.FC<Props> = ({ navigation, route }) => {
     classReminders: true,
     deadlineReminders: true,
     grades: true,
+    schedule: scheduleSynced,
     calendar: calendarSynced,
     reminders: remindersSynced,
   });
@@ -68,7 +75,7 @@ const Setup: React.FC<Props> = ({ navigation, route }) => {
     setChoices(current => ({ ...current, [key]: value }));
 
   const toggle = (
-    key: Exclude<keyof typeof choices, 'calendar' | 'reminders'>,
+    key: Exclude<keyof typeof choices, 'schedule' | 'calendar' | 'reminders'>,
   ) => (
     <FormToggle
       key={key}
@@ -84,7 +91,7 @@ const Setup: React.FC<Props> = ({ navigation, route }) => {
 
   const handleDone = async () => {
     setSaving(true);
-    const { calendar, reminders, ...chosen } = choices;
+    const { schedule, calendar, reminders, ...chosen } = choices;
     if (Object.values(chosen).some(Boolean)) {
       // Kept even if the permission is denied, so they start working once
       // notifications are allowed in the system settings.
@@ -99,6 +106,9 @@ const Setup: React.FC<Props> = ({ navigation, route }) => {
       if (!(await request())) {
         toast(t('notificationPermissionDenied'), 'error');
       }
+    }
+    if (schedule && !scheduleSynced) {
+      await setScheduleSyncEnabled(true);
     }
     if (calendar && !calendarSynced) {
       await setSyncEnabled('calendar', true);
@@ -131,8 +141,15 @@ const Setup: React.FC<Props> = ({ navigation, route }) => {
           {toggle('deadlineReminders')}
           {toggle('grades')}
         </FormSection>
-        {/* Reminders sync is only on iOS, iPadOS and Mac. */}
+        {/* Reminders sync is only on iOS, iPadOS and Mac. Classes before
+            assignments, as in Settings › Calendar. */}
         <FormSection title={calendarSettingsTitle()} footer={t('setupCaption')}>
+          <FormToggle
+            icon="calendar"
+            title={t('setupCourseCalendar')}
+            value={choices.schedule}
+            onValueChange={choose('schedule')}
+          />
           <FormToggle
             icon="assignmentCalendar"
             title={t('setupCalendar')}

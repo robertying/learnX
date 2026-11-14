@@ -9,7 +9,10 @@ import { toast } from 'components/Toast';
 import { useAppStateStore } from 'data/appState';
 import { getSettings, resetSettings, setSetting } from 'data/settings';
 import { t } from 'helpers/i18n';
-import { useAssignmentSync } from 'hooks/useCalendarSync';
+import {
+  useAssignmentSync,
+  useCourseScheduleSync,
+} from 'hooks/useCalendarSync';
 import useNotificationPermission from 'hooks/useNotificationPermission';
 import Setup from 'screens/Setup';
 import packageJson from '../../../package.json';
@@ -17,10 +20,14 @@ import { screenProps } from 'test-utils/screenProps';
 
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
 jest.mock('hooks/useNotificationPermission', () => jest.fn());
-jest.mock('hooks/useCalendarSync', () => ({ useAssignmentSync: jest.fn() }));
+jest.mock('hooks/useCalendarSync', () => ({
+  useAssignmentSync: jest.fn(),
+  useCourseScheduleSync: jest.fn(),
+}));
 
 const request = jest.fn(async () => true);
 const setSyncEnabled = jest.fn(async () => {});
+const setScheduleSyncEnabled = jest.fn(async () => {});
 const navigation = { goBack: jest.fn() };
 
 const renderScreen = (params?: { update?: boolean }) =>
@@ -32,6 +39,9 @@ beforeEach(() => {
   useAppStateStore.setState({ setupSeen: false, whatsNewSeenVersion: null });
   jest.mocked(useNotificationPermission).mockReturnValue({ request } as never);
   jest.mocked(useAssignmentSync).mockReturnValue({ setSyncEnabled } as never);
+  jest.mocked(useCourseScheduleSync).mockReturnValue({
+    setSyncEnabled: setScheduleSyncEnabled,
+  } as never);
 });
 
 it("marks itself and this version's What's New seen once shown", async () => {
@@ -62,6 +72,7 @@ it("groups new content in the tabs' order, then classes, assignments and calenda
     t('notifyClassReminders'),
     t('notifyDeadlineReminders'),
     t('notifyGrades'),
+    t('setupCourseCalendar'),
     t('setupCalendar'),
     t('setupReminders'),
   ]);
@@ -80,6 +91,9 @@ it('offers only calendar sync on Android, which has no Reminders', async () => {
   jest.replaceProperty(Platform, 'OS', 'android');
   await renderScreen();
   expect(screen.getByText(t('setupCalendarSection'))).toBeTruthy();
+  expect(
+    screen.getByRole('switch', { name: t('setupCourseCalendar') }),
+  ).toBeTruthy();
   expect(screen.queryByText(t('setupReminders'))).toBeNull();
 });
 
@@ -100,6 +114,7 @@ it('turns on the chosen notifications once allowed, and closes', async () => {
     deadlineReminders: true,
   });
   expect(setSyncEnabled).not.toHaveBeenCalled();
+  expect(setScheduleSyncEnabled).not.toHaveBeenCalled();
   expect(navigation.goBack).toHaveBeenCalled();
 });
 
@@ -115,7 +130,7 @@ it('keeps the chosen notifications on when the permission is denied', async () =
   expect(navigation.goBack).toHaveBeenCalled();
 });
 
-it("doesn't ask with every notification off, and turns calendar and Reminders sync on", async () => {
+it("doesn't ask with every notification off, and turns timetable, calendar and Reminders sync on", async () => {
   await renderScreen();
   for (const label of [
     'notifyNewNotices',
@@ -127,10 +142,12 @@ it("doesn't ask with every notification off, and turns calendar and Reminders sy
   ] as const) {
     await toggle(t(label), false);
   }
+  await toggle(t('setupCourseCalendar'), true);
   await toggle(t('setupCalendar'), true);
   await toggle(t('setupReminders'), true);
   await userEvent.press(screen.getByTestId('setup-done'));
   expect(request).not.toHaveBeenCalled();
+  expect(setScheduleSyncEnabled).toHaveBeenCalledWith(true);
   expect(setSyncEnabled).toHaveBeenCalledWith('calendar', true);
   expect(setSyncEnabled).toHaveBeenCalledWith('reminder', true);
 });
@@ -138,7 +155,11 @@ it("doesn't ask with every notification off, and turns calendar and Reminders sy
 it('keeps sync an earlier version turned on, without syncing again', async () => {
   setSetting('assignmentCalendarSync', true);
   setSetting('assignmentReminderSync', true);
+  setSetting('courseCalendarSync', true);
   await renderScreen({ update: true });
+  expect(
+    screen.getByRole('switch', { name: t('setupCourseCalendar') }),
+  ).toBeChecked();
   expect(
     screen.getByRole('switch', { name: t('setupCalendar') }),
   ).toBeChecked();
@@ -147,6 +168,7 @@ it('keeps sync an earlier version turned on, without syncing again', async () =>
   ).toBeChecked();
   await userEvent.press(screen.getByTestId('setup-done'));
   expect(setSyncEnabled).not.toHaveBeenCalled();
+  expect(setScheduleSyncEnabled).not.toHaveBeenCalled();
 });
 
 it('closes without changes on Not Now, on either platform', async () => {
