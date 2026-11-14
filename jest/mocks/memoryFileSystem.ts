@@ -100,6 +100,19 @@ export class File extends Entry {
     }
     __fs.write(target.uri, await this.text());
   }
+  /** Into a folder, the file keeps its name. */
+  moveSync(to: File | Directory, { overwrite = false } = {}) {
+    const target = to instanceof Directory ? new File(to, this.name) : to;
+    if (target.exists && !overwrite) {
+      throw new Error(`${target.uri} exists`);
+    }
+    if (!nodes.has(parentOf(target.uri))) {
+      throw new Error(`${parentOf(target.uri)} doesn't exist`);
+    }
+    __fs.write(target.uri, this.textSync());
+    nodes.delete(this.uri);
+    this.uri = target.uri;
+  }
 }
 
 export class Directory extends Entry {

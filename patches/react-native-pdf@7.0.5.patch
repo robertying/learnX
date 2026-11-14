@@ -110,7 +110,7 @@ index 0000000000000000000000000000000000000000..9baf55a7fcd7d3f53bd912f02ea600be
 +    }
 +}
 diff --git a/android/src/main/java/org/wonday/pdf/PdfView.java b/android/src/main/java/org/wonday/pdf/PdfView.java
-index c3d32451689234c3036e5ebb9340f0e49b359f8e..f9922125c3a11c2075757e6db15118ae9a735493 100644
+index c3d32451689234c3036e5ebb9340f0e49b359f8e..21845824251883cc100f68df2a174393e3cdd784 100644
 --- a/android/src/main/java/org/wonday/pdf/PdfView.java
 +++ b/android/src/main/java/org/wonday/pdf/PdfView.java
 @@ -34,6 +34,7 @@ import io.legere.pdfiumandroid.DefaultLogger;
@@ -130,7 +130,22 @@ index c3d32451689234c3036e5ebb9340f0e49b359f8e..f9922125c3a11c2075757e6db15118ae
          SizeF pageSize = getPageSize(0);
          float width = pageSize.getWidth();
          float height = pageSize.getHeight();
-@@ -314,6 +317,13 @@ public class PdfView extends PDFView implements OnPageChangeListener,OnLoadCompl
+@@ -209,10 +212,12 @@ public class PdfView extends PDFView implements OnPageChangeListener,OnLoadCompl
+     @Override
+     public void onError(Throwable t){
+         WritableMap event = Arguments.createMap();
+-        if (t.getMessage().contains("Password required or incorrect password")) {
++        // Pdfium can throw without a message; reading it must not crash the app.
++        String message = t.getMessage() != null ? t.getMessage() : t.toString();
++        if (message.contains("Password required or incorrect password")) {
+             event.putString("message", "error|Password required or incorrect password.");
+         } else {
+-            event.putString("message", "error|"+t.getMessage());
++            event.putString("message", "error|"+message);
+         }
+ 
+         ThemedReactContext context = (ThemedReactContext) getContext();
+@@ -314,6 +319,13 @@ public class PdfView extends PDFView implements OnPageChangeListener,OnLoadCompl
              this.drawPdf();
      }
  

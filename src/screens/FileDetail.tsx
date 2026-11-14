@@ -79,6 +79,16 @@ const FileDetailContent: React.FC<{
   }, [path, courseFileId]);
 
   const [showInfo, setShowInfo] = useState(false);
+  // The PDF viewer couldn't read the file (damaged, or not a PDF after all).
+  const [previewFailed, setPreviewFailed] = useState(false);
+
+  const handlePreviewError = () => setPreviewFailed(true);
+
+  // Handed to the header from an effect, so it keeps its identity.
+  const handleRedownload = useCallback(() => {
+    setPreviewFailed(false);
+    redownload();
+  }, [redownload]);
 
   const canRender = !!path && canPreviewInline(file.fileType);
 
@@ -93,7 +103,7 @@ const FileDetailContent: React.FC<{
     error,
     canRender,
     showInfo,
-    onRefresh: redownload,
+    onRefresh: handleRedownload,
     onShare: share,
     onSave: save,
     onOpen: open,
@@ -114,15 +124,28 @@ const FileDetailContent: React.FC<{
           icon="error"
           title={t('fileDownloadFailedTitle')}
           description={t('fileDownloadFailedDescription')}
-          actions={[{ label: t('tryAgain'), onPress: redownload }]}
+          actions={[{ label: t('tryAgain'), onPress: handleRedownload }]}
         />
       ) : !path ? (
         <View key="loading" testID="file-loading" style={styles.centered}>
           <Spinner progress={progress} />
         </View>
+      ) : !showInfo && canRender && previewFailed ? (
+        <StatusView
+          key="preview-failed"
+          icon="error"
+          title={t('previewFailedTitle')}
+          description={t('previewFailedDescription')}
+          actions={[{ label: t('downloadAgain'), onPress: handleRedownload }]}
+        />
       ) : !showInfo && canRender ? (
         file.fileType === 'pdf' ? (
-          <Pdf style={Styles.flex1} source={{ uri: path }} fitPolicy={0} />
+          <Pdf
+            style={Styles.flex1}
+            source={{ uri: path }}
+            fitPolicy={0}
+            onError={handlePreviewError}
+          />
         ) : (
           <WebView
             style={{
