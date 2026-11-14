@@ -215,6 +215,10 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
     file: 'files',
   } as const;
   const hasResults = kinds.some(kind => byKind[kind].length > 0);
+  // A kind's tab with none of the results: No Results under the tabs, as
+  // when nothing matches at all.
+  const scopeEmpty = scope !== 'all' && byKind[scope].length === 0;
+  const noResults = scopeEmpty || (!hasResults && !!settledQuery.trim());
 
   // The overview: the top hits, when some kind has more than it shows, then
   // the first few of each kind not among them, each with See All.
@@ -296,9 +300,6 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
       // Starts at the top of its inset, as a course's lists do.
       contentOffset={{ x: 0, y: -topInset }}
       scrollIndicatorInsets={{ top: topInset }}
-      ListEmptyComponent={
-        <Paragraph style={styles.empty}>{t('noResults')}</Paragraph>
-      }
       sections={sections.filter(section => section.data.length)}
       keyExtractor={({ kind, item }) => `${kind}-${item.id}`}
       renderItem={({ item, index, section: { data } }) =>
@@ -343,7 +344,7 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={Styles.flex1}
           >
-            {hasResults ? null : settledQuery.trim() ? (
+            {hasResults && !scopeEmpty ? null : noResults ? (
               <StatusView icon="noResults" message={t('noResults')} />
             ) : (
               <StatusView icon="search" message={t('searchPrompt')} />
@@ -456,10 +457,6 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-  },
-  empty: {
-    textAlign: 'center',
-    paddingVertical: 32,
   },
 });
 

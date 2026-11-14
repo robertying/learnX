@@ -5,7 +5,9 @@ import type { SystemIconName } from 'helpers/systemIcons';
 import { useTheme } from 'theme';
 
 export interface StatusViewProps {
-  icon: SystemIconName;
+  /** Left out where there's no content to stand for, like the empty detail
+   * pane, which then shows its message alone, larger. */
+  icon?: SystemIconName;
   message: string;
   /** Something to do about it, such as a button, under the message. */
   action?: React.ReactNode;
@@ -14,9 +16,11 @@ export interface StatusViewProps {
 
 /**
  * A screen or list with nothing to show, and why: a large dimmed icon over a
- * line of text, centered in the space it has. `Empty`, `NotFound`, search
- * with no results, the empty detail pane and the error boundary's fallback
- * are this view.
+ * line of text, centered in the space it has, as in iOS's
+ * `ContentUnavailableView`. `Empty`, `NotFound`, search with no results and
+ * the error boundary's fallback are this view. The empty detail pane is its
+ * text alone, as in Mail's "No Message Selected": nothing is missing there,
+ * so there's nothing for an icon to stand for.
  */
 const StatusView: React.FC<StatusViewProps> = ({
   icon,
@@ -28,8 +32,15 @@ const StatusView: React.FC<StatusViewProps> = ({
 
   return (
     <View testID={testID} style={styles.root}>
-      <SystemIcon name={icon} color={theme.colors.outline} size={56} />
-      <Text style={{ color: theme.colors.onSurfaceMedium }}>{message}</Text>
+      {icon ? (
+        <SystemIcon name={icon} color={theme.colors.outline} size={56} />
+      ) : null}
+      <Text
+        variant={icon ? 'body' : 'title'}
+        style={[styles.message, { color: theme.colors.onSurfaceMedium }]}
+      >
+        {message}
+      </Text>
       {action}
     </View>
   );
@@ -42,6 +53,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 16,
     gap: 8,
+  },
+  message: {
+    textAlign: 'center',
   },
 });
 

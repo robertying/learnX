@@ -37,10 +37,10 @@ import {
 const DetailNavigator = createNativeStackNavigator<DetailStackParams>();
 
 // The detail column extends underneath the primary one. Nothing is open in
-// it yet: an empty state like the app's others, saying so.
+// it yet: the empty state's text alone, saying so.
 const EmptyDetail = () => (
   <SafeArea>
-    <StatusView icon="noSelection" message={t('noSelection')} />
+    <StatusView message={t('noSelection')} />
   </SafeArea>
 );
 
