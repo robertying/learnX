@@ -32,9 +32,17 @@ import Testing
   }
 
   @Test func indexesInTheDevicesIndex() async throws {
-    try await SpotlightModule.replaceItems(domain: "learnx-tests", items: [spotlightItem(id: "1")])
-    try await SpotlightModule.updateItems(domain: "learnx-tests", items: [spotlightItem(id: "2")], removedIds: ["1"])
-    try await SpotlightModule.removeAllItems()
+    try await SpotlightModule.replaceItems(domain: "learnx-tests", items: [spotlightItem(id: "1")], state: "a1")
+    #expect(try await SpotlightModule.indexState() == "a1")
+    try await SpotlightModule.updateItems(
+      domain: "learnx-tests",
+      items: [spotlightItem(id: "2")],
+      removedIds: ["1"],
+      state: "b2"
+    )
+    #expect(try await SpotlightModule.indexState() == "b2")
+    try await SpotlightModule.removeAllItems(state: "c3")
+    #expect(try await SpotlightModule.indexState() == "c3")
   }
 
   @Test func savesTheUpcomingDeadlines() {

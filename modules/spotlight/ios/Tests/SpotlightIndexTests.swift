@@ -6,6 +6,8 @@ import Testing
 /// Records what the module asks of the index.
 final class FakeIndex: SearchableIndex, @unchecked Sendable {
   enum Call: Equatable {
+    case begin
+    case end(String)
     case deleteDomains([String])
     case deleteIdentifiers([String])
     case deleteAll
@@ -14,6 +16,20 @@ final class FakeIndex: SearchableIndex, @unchecked Sendable {
 
   var calls: [Call] = []
   var indexedItems: [CSSearchableItem] = []
+  var clientState: Data?
+
+  func beginBatch() {
+    calls.append(.begin)
+  }
+
+  func endBatch(withClientState clientState: Data) async throws {
+    calls.append(.end(String(decoding: clientState, as: UTF8.self)))
+    self.clientState = clientState
+  }
+
+  func lastClientState() async throws -> Data? {
+    clientState
+  }
 
   func deleteSearchableItems(withDomainIdentifiers domainIdentifiers: [String]) async throws {
     calls.append(.deleteDomains(domainIdentifiers))
@@ -81,19 +97,20 @@ func spotlightItem(
 }
 
 @Suite struct SpotlightIndexTests {
-  @Test func replacesADomain() async throws {
+  @Test func replacesADomainInABatch() async throws {
     let fake = FakeIndex()
     try await SpotlightIndex(index: fake).replaceItems(
       domain: "notice",
-      items: [spotlightItem(id: "1"), spotlightItem(id: "2")]
+      items: [spotlightItem(id: "1"), spotlightItem(id: "2")],
+      state: "a1"
     )
-    #expect(fake.calls == [.deleteDomains(["notice"]), .index(["notice:1", "notice:2"])])
+    #expect(fake.calls == [.deleteDomains(["notice"]), .begin, .index(["notice:1", "notice:2"]), .end("a1")])
   }
 
   @Test func replacingWithNothingOnlyClears() async throws {
     let fake = FakeIndex()
-    try await SpotlightIndex(index: fake).replaceItems(domain: "notice", items: [])
-    #expect(fake.calls == [.deleteDomains(["notice"])])
+    try await SpotlightIndex(index: fake).replaceItems(domain: "notice", items: [], state: "a1")
+    #expect(fake.calls == [.deleteDomains(["notice"]), .begin, .end("a1")])
   }
 
   @Test func updatesChangedAndRemovedItems() async throws {
@@ -101,25 +118,42 @@ func spotlightItem(
     try await SpotlightIndex(index: fake).updateItems(
       domain: "assignment",
       items: [spotlightItem(id: "3")],
-      removedIds: ["1", "2"]
+      removedIds: ["1", "2"],
+      state: "b2"
     )
-    #expect(fake.calls == [.deleteIdentifiers(["assignment:1", "assignment:2"]), .index(["assignment:3"])])
+    #expect(
+      fake.calls == [
+        .begin, .deleteIdentifiers(["assignment:1", "assignment:2"]), .index(["assignment:3"]), .end("b2"),
+      ]
+    )
   }
 
-  @Test func updatingWithNothingDoesNothing() async throws {
+  @Test func updatingWithNothingOnlyStoresTheState() async throws {
     let fake = FakeIndex()
-    try await SpotlightIndex(index: fake).updateItems(domain: "assignment", items: [], removedIds: [])
-    #expect(fake.calls.isEmpty)
+    try await SpotlightIndex(index: fake).updateItems(domain: "assignment", items: [], removedIds: [], state: "b2")
+    #expect(fake.calls == [.begin, .end("b2")])
   }
 
-  @Test func removesEverything() async throws {
+  @Test func removesEverythingAlsoFromTheLegacyIndex() async throws {
     let fake = FakeIndex()
-    try await SpotlightIndex(index: fake).removeAllItems()
-    #expect(fake.calls == [.deleteAll])
+    let legacy = FakeIndex()
+    try await SpotlightIndex(index: fake, legacyIndex: legacy).removeAllItems(state: "c3")
+    #expect(legacy.calls == [.deleteAll])
+    #expect(fake.calls == [.deleteAll, .begin, .end("c3")])
   }
 
-  @Test func usesTheDevicesIndex() {
+  @Test func readsTheStoredState() async throws {
+    let fake = FakeIndex()
+    let index = SpotlightIndex(index: fake)
+    #expect(try await index.state() == nil)
+    try await index.replaceItems(domain: "file", items: [], state: "d4")
+    #expect(try await index.state() == "d4")
+  }
+
+  @Test func usesANamedIndexOnTheDevice() throws {
     // The simulator can index.
-    #expect(SpotlightIndex.system?.index is CSSearchableIndex)
+    let system = try #require(SpotlightIndex.system)
+    #expect(system.index is CSSearchableIndex)
+    #expect(system.legacyIndex is CSSearchableIndex)
   }
 }

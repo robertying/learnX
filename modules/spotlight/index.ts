@@ -43,19 +43,32 @@ type SpotlightEvents = {
 };
 
 declare class SpotlightModule extends NativeModule<SpotlightEvents> {
-  /** Replaces the domain's items in the Spotlight index with these. */
-  replaceItems(domain: SpotlightDomain, items: SpotlightItem[]): Promise<void>;
+  /**
+   * The `state` the last change stored in the index, or null if the index has
+   * none (it was never written, or the system emptied it).
+   */
+  indexState(): Promise<string | null>;
+  /**
+   * Replaces the domain's items in the Spotlight index with these, and stores
+   * `state` with them.
+   */
+  replaceItems(
+    domain: SpotlightDomain,
+    items: SpotlightItem[],
+    state: string,
+  ): Promise<void>;
   /**
    * Indexes `items` (new or changed) and removes the items with `removedIds`
-   * from the domain.
+   * from the domain, and stores `state` with them.
    */
   updateItems(
     domain: SpotlightDomain,
     items: SpotlightItem[],
     removedIds: string[],
+    state: string,
   ): Promise<void>;
-  /** Removes everything the app indexed. */
-  removeAllItems(): Promise<void>;
+  /** Removes everything the app indexed, and stores `state`. */
+  removeAllItems(state: string): Promise<void>;
   /**
    * The item of a search result tapped before anything listened for
    * `onOpenItem`, e.g. the one that launched the app. Returned once.

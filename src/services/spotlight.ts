@@ -4,6 +4,7 @@ import Spotlight, { SpotlightDomain, SpotlightItem } from 'modules/spotlight';
 import { Assignment, File, Notice } from 'data/types/state';
 import Storage from 'expo-sqlite/kv-store';
 import { hash, removeTags } from 'helpers/text';
+import { recordError } from 'services/crashReporting';
 
 /** Spotlight shows two or three lines; the rest is only searched. */
 const MAX_DETAILS_LENGTH = 500;
@@ -59,6 +60,12 @@ type Indexed = Partial<Record<SpotlightDomain, Record<string, string>>>;
 
 export const SPOTLIGHT_INDEXED_KEY = 'spotlightIndexed';
 
+/**
+ * What the index stores with each change, so a new JS runtime can tell
+ * whether it still holds what was saved.
+ */
+const stateOf = (indexed: Indexed) => hash(JSON.stringify(indexed));
+
 const readSaved = (): Indexed => {
   try {
     const saved = Storage.getItemSync(SPOTLIGHT_INDEXED_KEY);
@@ -73,26 +80,11 @@ const readSaved = (): Indexed => {
  * finished, saved so a new JS runtime (an app launch, the background task)
  * sends only what changed instead of indexing everything again.
  */
-let saved: Indexed | undefined;
+let saved: Indexed = {};
 /** What the queued writes will make it: compared with the next update. */
-let indexed: Indexed | undefined;
+let indexed: Indexed = {};
 
-const getIndexed = () => {
-  saved ??= readSaved();
-  indexed ??= { ...saved };
-  return indexed;
-};
-
-const save = (
-  domain: SpotlightDomain,
-  items: Record<string, string> | undefined,
-) => {
-  const next = { ...(saved ??= readSaved()) };
-  if (items) {
-    next[domain] = items;
-  } else {
-    delete next[domain];
-  }
+const save = (next: Indexed) => {
   saved = next;
   try {
     Storage.setItemSync(SPOTLIGHT_INDEXED_KEY, JSON.stringify(next));
@@ -115,12 +107,42 @@ const enqueue = (work: () => Promise<void>) => {
     if (__DEV__) {
       console.warn('Failed to update Spotlight', error);
     }
+    recordError(error, 'Updating Spotlight');
   });
 };
 
+const removeAll = () => {
+  indexed = {};
+  enqueue(async () => {
+    // After the writes queued before it, which saved what they indexed.
+    forgetSaved();
+    await Spotlight!.removeAllItems(stateOf({}));
+  });
+};
+
+/**
+ * Reads what was saved, once in each JS runtime, and starts over if the index
+ * no longer holds it: iOS empties it on a restore or a move to another
+ * device, when Show Content in Search is turned off and on, or when it
+ * rebuilds Spotlight. Older versions wrote no state, so their items go too.
+ */
+const load = async () => {
+  const stored = readSaved();
+  const state = await Spotlight!.indexState().catch(() => null);
+  if (state === stateOf(stored)) {
+    saved = stored;
+    indexed = { ...stored };
+  } else {
+    removeAll();
+  }
+};
+
+let loaded: Promise<void> | undefined;
+
+const whenLoaded = () => (loaded ??= load());
+
 const replaceItems = (domain: SpotlightDomain, items: SpotlightItem[]) => {
-  const all = getIndexed();
-  const before = all[domain];
+  const before = indexed[domain];
   const after = Object.fromEntries(
     items.map(item => [item.id, hash(JSON.stringify(item))]),
   );
@@ -131,19 +153,24 @@ const replaceItems = (domain: SpotlightDomain, items: SpotlightItem[]) => {
   if (before && changed.length === 0 && removed.length === 0) {
     return;
   }
-  all[domain] = after;
+  indexed[domain] = after;
   enqueue(async () => {
+    const next = { ...saved, [domain]: after };
+    const state = stateOf(next);
     try {
       await (before
-        ? Spotlight!.updateItems(domain, changed, removed)
-        : Spotlight!.replaceItems(domain, items));
-      save(domain, after);
+        ? Spotlight!.updateItems(domain, changed, removed, state)
+        : Spotlight!.replaceItems(domain, items, state));
     } catch (error) {
-      // The next change replaces the whole domain.
-      delete getIndexed()[domain];
-      save(domain, undefined);
+      // The next change replaces the whole domain, and as the index's state
+      // no longer matches, the next launch replaces everything.
+      delete indexed[domain];
+      const rest = { ...saved };
+      delete rest[domain];
+      save(rest);
       throw error;
     }
+    save(next);
   });
 };
 
@@ -163,6 +190,7 @@ export async function updateSpotlight(
   if (!Spotlight) {
     return;
   }
+  await whenLoaded();
   const hidden = new Set(hiddenCourses);
   const shown = <T extends { courseId: string }>(items: T[]) =>
     items.filter(item => !hidden.has(item.courseId));
@@ -184,10 +212,6 @@ export function clearSpotlight() {
   if (!Spotlight) {
     return;
   }
-  indexed = {};
-  enqueue(async () => {
-    // After the writes queued before it, which saved what they indexed.
-    forgetSaved();
-    await Spotlight!.removeAllItems();
-  });
+  // After the updates that started before it.
+  loaded = whenLoaded().then(removeAll);
 }
