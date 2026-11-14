@@ -42,11 +42,12 @@ const SemesterSelection: React.FC<Props> = () => {
 
   return (
     <FormScreen>
-      <Form onRefresh={handleRefresh}>
+      <Form testID="semester-selection" onRefresh={handleRefresh}>
         <FormSection>
           {choices.map(semester => (
             <FormButton
               key={semester}
+              testID={`semester-${semester}`}
               title={getSemesterTextFromId(semester)}
               selected={currentSemesterId === semester}
               onPress={() => setCurrentSemester(semester)}

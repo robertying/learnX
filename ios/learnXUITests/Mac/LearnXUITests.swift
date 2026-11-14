@@ -14,7 +14,7 @@ final class LearnXUITests: LearnXUITestCase {
     try open(tab: "tab-assignments")
     try waitFor(containing: "大作业1")
     try open(tab: "tab-files")
-    try waitFor(containing: "深度学习框架")
+    try waitFor(containing: "Deep Learning Frameworks")
     try open(tab: "tab-courses")
     try waitFor(containing: "量子与统计")
     try open(tab: "tab-settings")
@@ -34,7 +34,7 @@ final class LearnXUITests: LearnXUITestCase {
     try waitFor(containing: "附件1")
 
     try open(tab: "tab-files")
-    try waitFor(containing: "深度学习框架").click()
+    try waitFor(containing: "Deep Learning Frameworks").click()
     try waitFor(id: "file-detail")
   }
 
@@ -115,7 +115,7 @@ final class LearnXUITests: LearnXUITestCase {
     try open(tab: "tab-assignments")
     try waitFor(containing: "大作业1")
     try open(tab: "tab-files")
-    try waitFor(containing: "深度学习框架")
+    try waitFor(containing: "Deep Learning Frameworks")
     try open(tab: "tab-notices")
     try waitFor(containing: "请按照助教的安排交作业")
   }

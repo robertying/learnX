@@ -10,6 +10,75 @@ name: Search and open a result
       TERM: ${MOCK_SEARCH_TERM}
       RESULT: '.*(${MOCK_SEARCH_NOTICE}).*'
 - assertVisible: '.*(${MOCK_SEARCH_ASSIGNMENT}).*'
+
+# A tab per kind shows only that kind. Checked by the results' text: on
+# Android the list the search opened over stays in the hierarchy.
+- tapOn:
+    text: '${T_assignments}'
+    childOf:
+      id: search-tabs
+- extendedWaitUntil:
+    notVisible: '.*(${MOCK_SEARCH_NOTICE}).*'
+    timeout: 5000
+- assertVisible: '.*(${MOCK_SEARCH_ASSIGNMENT}).*'
+# Android's chips scroll sideways, with Files past the end on a phone.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - swipe:
+          from:
+            text: '${T_assignments}'
+            childOf:
+              id: search-tabs
+          direction: LEFT
+- tapOn:
+    text: '${T_files}'
+    childOf:
+      id: search-tabs
+- extendedWaitUntil:
+    notVisible: '.*(${MOCK_SEARCH_ASSIGNMENT}).*'
+    timeout: 5000
+- assertVisible:
+    id: file-card
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - swipe:
+          from:
+            text: '${T_files}'
+            childOf:
+              id: search-tabs
+          direction: RIGHT
+- tapOn:
+    text: '${T_all}'
+    childOf:
+      id: search-tabs
+- extendedWaitUntil:
+    visible: '.*(${MOCK_SEARCH_NOTICE}).*'
+    timeout: 5000
+
+# The filter menu leaves archived items out and takes them back.
+- runFlow: subflows/search-filter.yaml
+- tapOn: '(${T_archived})(, .*)?'
+# Android's menu stays open for more choices.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- waitForAnimationToEnd
+- assertVisible: '.*(${MOCK_SEARCH_NOTICE}).*'
+- runFlow: subflows/search-filter.yaml
+- tapOn: '(${T_archived})(, .*)?'
+# Android's menu stays open for more choices.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- waitForAnimationToEnd
 # While the search field has focus, the results list may spend the first tap
 # on blurring it, so tap again if needed.
 - tapOn: '.*(${MOCK_SEARCH_NOTICE}).*'

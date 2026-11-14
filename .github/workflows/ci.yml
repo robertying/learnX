@@ -219,11 +219,17 @@ jobs:
     # Android, after each main push and in manual runs. The first flow logs in
     # through the real SSO login, so it needs id.tsinghua.edu.cn reachable from
     # the runner. The flows are kept passing here, as on the local devices
-    # (.maestro/AGENTS.md). No iOS E2E in CI.
-    name: Android E2E tests
+    # (.maestro/AGENTS.md). No iOS E2E in CI. Runs once in English and once
+    # in Chinese, the emulator's system language (a per-app language doesn't
+    # survive the flows' clearState).
+    name: Android E2E tests (${{ matrix.locale }})
     needs: android
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        locale: [en-US, zh-CN]
     timeout-minutes: 60
     env:
       MAESTRO_VERSION: 2.12.1
@@ -267,12 +273,21 @@ jobs:
           arch: x86_64
           profile: pixel_7
           disable-animations: true
+          # The action's default options, and the system language
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -change-locale ${{ matrix.locale }}
           # About a minute after boot, the emulator sometimes drops its adb
           # connection for a moment ("device offline"), which fails whichever
           # flow is running. A throwaway reset first starts Maestro's driver
           # and gets past that window, so the flows below start on a settled
           # device; its result doesn't count.
+          # -change-locale restarts Android's framework once it has booted,
+          # which breaks an install made meanwhile: wait for the language to
+          # be set and the package service to answer, then a little more. In
+          # Chinese, Gboard would compose the flows' ASCII search terms as
+          # Pinyin, so it's turned off: Maestro's text goes in as key presses.
           script: |
+            for i in $(seq 60); do [ "$(adb shell getprop persist.sys.locale | tr -d '\r')" = "${{ matrix.locale }}" ] && adb shell pm path android > /dev/null 2>&1 && break; sleep 5; done; sleep 30; adb shell getprop persist.sys.locale
+            if [ "${{ matrix.locale }}" = zh-CN ]; then adb shell ime disable com.google.android.inputmethod.latin/com.android.inputmethod.latin.LatinIME; fi
             adb install -r build/app-x86_64-release.apk
             scripts/e2e.sh android .maestro/subflows/reset.yaml || echo "Warm-up run failed; running the flows anyway"
             mkdir -p build/maestro; scripts/e2e.sh android --format junit --output build/maestro/report.xml --test-output-dir build/maestro; status=$?; adb logcat -d > build/maestro/logcat.txt; exit $status
@@ -281,6 +296,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: e2e-android
+          name: e2e-android-${{ matrix.locale }}
           path: build/maestro
           if-no-files-found: ignore

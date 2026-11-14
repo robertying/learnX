@@ -109,7 +109,7 @@ const CalendarSettings: React.FC<Props> = () => {
 
   return (
     <FormScreen>
-      <Form>
+      <Form testID="calendar-settings">
         {(calendarBlocked || remindersBlocked) && (
           <FormSection
             footer={
@@ -157,12 +157,14 @@ const CalendarSettings: React.FC<Props> = () => {
             icon="calendar"
             title={t('setupCourseCalendar')}
             value={courseCalendarSync}
+            testID="calendar-course-sync"
             onValueChange={handleCourseSync}
             loading={courseSyncEnabling}
           />
           {courseCalendarSync && (
             <FormToggle
               icon="reminder"
+              testID="calendar-classAlarm"
               title={t('classAlarm')}
               value={alarms.courseAlarm}
               onValueChange={value => setAlarm('courseAlarm', value)}
@@ -180,6 +182,7 @@ const CalendarSettings: React.FC<Props> = () => {
           {courseCalendarSync && (
             <FormToggle
               icon="noLocation"
+              testID="calendar-courseEventOmitLocation"
               title={t('courseEventOmitLocation')}
               value={courseEventOmitLocation}
               onValueChange={value =>
@@ -213,6 +216,7 @@ const CalendarSettings: React.FC<Props> = () => {
         >
           <FormToggle
             icon="assignmentCalendar"
+            testID="calendar-assignment-sync"
             title={t('setupCalendar')}
             value={assignmentCalendarSync}
             onValueChange={enabled => handleAssignmentSync('calendar', enabled)}
@@ -230,6 +234,7 @@ const CalendarSettings: React.FC<Props> = () => {
           {assignmentCalendarSync && (
             <FormToggle
               icon="reminder"
+              testID="calendar-assignmentCalendarAlarm"
               title={t('assignmentCalendarAlarm')}
               value={alarms.assignmentCalendarAlarm}
               onValueChange={value =>
@@ -252,6 +257,7 @@ const CalendarSettings: React.FC<Props> = () => {
           {assignmentCalendarSync && alarms.assignmentCalendarAlarm && (
             <FormToggle
               icon="reminder"
+              testID="calendar-assignmentCalendarSecondAlarm"
               title={t('assignmentCalendarSecondAlarm')}
               value={alarms.assignmentCalendarSecondAlarm}
               onValueChange={value =>
@@ -276,6 +282,7 @@ const CalendarSettings: React.FC<Props> = () => {
           {assignmentCalendarSync && alarms.assignmentCalendarAlarm && (
             <FormToggle
               icon="done"
+              testID="calendar-assignmentCalendarNoAlarmIfComplete"
               title={t('assignmentCalendarNoAlarmIfComplete')}
               value={alarms.assignmentCalendarNoAlarmIfComplete}
               onValueChange={value =>
@@ -302,6 +309,7 @@ const CalendarSettings: React.FC<Props> = () => {
           >
             <FormToggle
               icon="reminders"
+              testID="reminders-assignment-sync"
               title={t('setupReminders')}
               value={assignmentReminderSync}
               onValueChange={enabled =>
@@ -312,6 +320,7 @@ const CalendarSettings: React.FC<Props> = () => {
             {assignmentReminderSync && (
               <FormToggle
                 icon="reminder"
+                testID="calendar-assignmentReminderAlarm"
                 title={t('assignmentReminderAlarm')}
                 value={alarms.assignmentReminderAlarm}
                 onValueChange={value =>
@@ -361,6 +370,7 @@ const CalendarSettings: React.FC<Props> = () => {
         {/* Not red: the confirmation that follows is. */}
         <FormSection>
           <FormButton
+            testID="calendar-delete"
             icon="delete"
             title={
               Platform.OS === 'ios'

@@ -1,0 +1,22 @@
+# iOS: search the system Calendar app for QUERY and check that an event
+# matching MATCH is listed when FOUND is 'true', or isn't otherwise. Leaves
+# Calendar in front.
+appId: com.apple.mobilecal
+---
+- launchApp:
+    stopApp: true
+- tapOn:
+    id: searchbar-button
+- inputText: ${QUERY}
+- runFlow:
+    when:
+      true: ${FOUND == 'true'}
+    commands:
+      - extendedWaitUntil:
+          visible: ${MATCH}
+          timeout: 10000
+- runFlow:
+    when:
+      true: ${FOUND != 'true'}
+    commands:
+      - assertNotVisible: ${MATCH}

@@ -1,0 +1,19 @@
+# Swipe the list with id LIST down until the element with id ID shows, then
+# once more: iOS keeps rows that scrolled under the navigation bar in its
+# snapshot, where a tap lands on the bar.
+appId: ${APP_ID}
+---
+- repeat:
+    times: 8
+    while:
+      notVisible:
+        id: ${ID}
+    commands:
+      - swipe:
+          from:
+            id: ${LIST}
+          direction: DOWN
+- swipe:
+    from:
+      id: ${LIST}
+    direction: DOWN

@@ -1,0 +1,18 @@
+# Open search's filter menu: in the header on iOS, beside the chips on Android
+# (where the list search opened over keeps its own Filter button).
+appId: ${APP_ID}
+---
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: '${T_filter}'
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn:
+          text: '${T_filter}'
+          childOf:
+            id: search-tabs
+- waitForAnimationToEnd

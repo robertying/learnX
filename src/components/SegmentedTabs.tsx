@@ -18,11 +18,14 @@ const SegmentedTabs: React.FC<SegmentedTabsProps> = ({
   onSelect,
   accessibilityLabel,
   floating,
+  testID,
 }) => {
   const theme = useTheme();
 
   return (
     <View
+      testID={testID}
+      collapsable={false}
       style={[
         styles.bar,
         floating ? null : { backgroundColor: theme.colors.surface },

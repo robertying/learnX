@@ -116,7 +116,7 @@ const Downloads: React.FC<Props> = () => {
 
   return (
     <FormScreen>
-      <Form>
+      <Form testID="downloads">
         {Platform.OS === 'android' && (
           <FormSection>
             <FormToggle
@@ -141,6 +141,7 @@ const Downloads: React.FC<Props> = () => {
             {courses.map(course => (
               <FormChoiceButton
                 key={course.courseId}
+                testID={`downloads-course-${course.courseId}`}
                 icon="folder"
                 title={course.courseName}
                 detail={summary(course)}
@@ -176,6 +177,7 @@ const Downloads: React.FC<Props> = () => {
         )}
         <FormSection footer={t('downloadsExportCaption')}>
           <FormButton
+            testID="downloads-export"
             icon="export"
             title={t('downloadsExport')}
             loading={exporting}

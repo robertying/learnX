@@ -15,7 +15,7 @@ type Props = NativeStackScreenProps<SettingsStackParams, 'Maintainer'>;
 
 const Maintainer: React.FC<Props> = () => (
   <FormScreen>
-    <Form>
+    <Form testID="maintainer">
       <FormSection>
         <FormParagraph text={t('maintainerDescription')} />
         <FormButton

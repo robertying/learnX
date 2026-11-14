@@ -1,0 +1,17 @@
+# From Settings, open the row with id ROW, wait for its page (id PAGE) and go
+# back. The pages are opened from the top of the list down, so it only ever
+# scrolls down to the row.
+appId: ${APP_ID}
+---
+- runFlow:
+    file: scroll-to-id.yaml
+    env:
+      LIST: settings-list
+      ID: ${ROW}
+- tapOn:
+    id: ${ROW}
+- extendedWaitUntil:
+    visible:
+      id: ${PAGE}
+    timeout: 10000
+- runFlow: back-to-settings.yaml

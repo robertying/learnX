@@ -80,7 +80,7 @@ const NotificationSettings: React.FC<Props> = () => {
 
   return (
     <FormScreen>
-      <Form>
+      <Form testID="notification-settings">
         {blocked && (
           <FormSection footer={t('notificationsOffCaption')}>
             <FormButton

@@ -1,0 +1,22 @@
+# Back from a Settings page to Settings, unless the page opened beside it
+# (iPad, unfolded Android).
+appId: ${APP_ID}
+---
+- runFlow:
+    when:
+      platform: Android
+      notVisible:
+        id: settings-list
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+      notVisible:
+        id: settings-list
+    commands:
+      - swipe:
+          start: 1%, 50%
+          end: 80%, 50%
+          duration: 400
+- waitForAnimationToEnd

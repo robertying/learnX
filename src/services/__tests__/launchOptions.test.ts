@@ -52,10 +52,23 @@ it('reads the latency from the initial props on Android', () => {
   expect(getMockNetworkConfig().latency).toBe('slow');
 });
 
+it('reads how the emulated server fails', () => {
+  jest.replaceProperty(Platform, 'OS', 'android');
+  applyLaunchOptions({ mockFailure: 'offline' });
+  expect(getMockNetworkConfig().failure).toBe('offline');
+
+  jest.replaceProperty(Platform, 'OS', 'ios');
+  mockSettingsGet.mockImplementation(key =>
+    key === 'mockFailure' ? 'serverError' : undefined,
+  );
+  applyLaunchOptions();
+  expect(getMockNetworkConfig().failure).toBe('serverError');
+});
+
 it('ignores missing and unknown values', () => {
   jest.replaceProperty(Platform, 'OS', 'android');
   applyLaunchOptions();
-  applyLaunchOptions({ mockLatency: 'instant' });
+  applyLaunchOptions({ mockLatency: 'instant', mockFailure: 'sometimes' });
   jest.replaceProperty(Platform, 'OS', 'ios');
   mockSettingsGet.mockReturnValue(undefined);
   applyLaunchOptions();
