@@ -2,7 +2,6 @@ import { HStack, Link, Spacer, Text, VStack } from '@expo/ui/swift-ui';
 import {
   font,
   foregroundStyle,
-  frame,
   layoutPriority,
   lineLimit,
   widgetURL,
@@ -83,24 +82,15 @@ function DeadlinesWidget(
   );
 
   if (deadlines.length === 0) {
-    return (
-      <VStack
-        alignment="leading"
-        spacing={spacing}
-        modifiers={[
-          frame({ maxWidth: 10000, maxHeight: 10000, alignment: 'topLeading' }),
-          kit.background,
-          ...kit.language(props.locale),
-          ...openUrl(props.url),
-        ]}
-      >
-        {header(0)}
-        <Text modifiers={[font({ textStyle: 'footnote' }), kit.secondary]}>
-          {props.empty}
-        </Text>
-        <Spacer />
-      </VStack>
-    );
+    return kit.empty({
+      header: header(0),
+      text: props.empty,
+      modifiers: [
+        kit.background,
+        ...kit.language(props.locale),
+        ...openUrl(props.url),
+      ],
+    });
   }
 
   const titleFont = [
