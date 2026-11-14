@@ -15,6 +15,12 @@ import { fileDownloadCheckUrl } from 'helpers/fileDownloadCheck';
 export const DOWNLOADS_DIR = 'downloads';
 /** Where files shared into the app are copied, under Caches. */
 export const SHARED_DIR = 'learnX Shared';
+/**
+ * Where a download is written until it finishes, under Caches. Only a whole
+ * file is moved into `downloads`, so one cut short (the app killed, Android
+ * writing straight into its target) never passes for a downloaded file.
+ */
+export const PARTIAL_DOWNLOADS_DIR = 'downloads-partial';
 /** Where versions up to 18.x kept downloads, under Caches or Documents. */
 export const LEGACY_DOWNLOADS_DIR = 'learnX Files';
 /** The course a `<course id>` folder holds files of (`CourseInfo`). */
@@ -29,6 +35,40 @@ const COURSE_INFO_FILE = 'course.json';
  */
 export const getDownloadsDirectory = () =>
   new Directory(Paths.cache, DOWNLOADS_DIR);
+
+const getPartialDownloadsDirectory = () =>
+  new Directory(Paths.cache, PARTIAL_DOWNLOADS_DIR);
+
+let partialDownloadsSwept = false;
+
+/**
+ * Deletes what downloads cut short by the app being killed left behind. Runs
+ * once, before this run of the app starts its first download, so it never
+ * deletes one under way.
+ */
+const sweepPartialDownloads = () => {
+  if (partialDownloadsSwept) {
+    return;
+  }
+  partialDownloadsSwept = true;
+  try {
+    const dir = getPartialDownloadsDirectory();
+    if (dir.exists) {
+      dir.delete();
+    }
+  } catch {}
+};
+
+/** A new file to download into, named so no two downloads share it. */
+const newPartialFile = () => {
+  sweepPartialDownloads();
+  const dir = getPartialDownloadsDirectory();
+  dir.create({ intermediates: true, idempotent: true });
+  return new File(
+    dir,
+    `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`,
+  );
+};
 
 /**
  * The server answers an expired session with a tiny HTML page that redirects
@@ -48,11 +88,10 @@ const deleteQuietly = (file: File) => {
 const isEmpty = (dir: Directory) => dir.list().length === 0;
 
 /**
- * Deletes a failed or cancelled download's file, then its `<id>` and course
- * folders if that left them empty, so Downloads doesn't count them.
+ * Deletes a download's `<id>` and course folders if they are empty, so
+ * Downloads doesn't count them after a download that couldn't be saved.
  */
-const discardDownload = (file: File) => {
-  deleteQuietly(file);
+const removeEmptyFolders = (file: File) => {
   for (
     let dir = file.parentDirectory, depth = 0;
     depth < 2;
@@ -175,8 +214,6 @@ export const downloadFile = async (
 
   url = addCSRF(url);
 
-  target.parentDirectory.create({ intermediates: true, idempotent: true });
-
   // iOS sends the login cookies from the shared cookie store by itself;
   // Android's download client has no cookie jar, so they go in a header, and
   // only to Web Learning.
@@ -191,7 +228,8 @@ export const downloadFile = async (
     };
   }
 
-  const task = new DownloadTask(url, target, {
+  const partial = newPartialFile();
+  const task = new DownloadTask(url, partial, {
     headers,
     // A background session would not share the app's cookies reliably and
     // outlives the screen that shows the progress.
@@ -210,27 +248,37 @@ export const downloadFile = async (
     },
   });
 
-  let downloaded: File | null;
+  let downloaded: File | null = null;
   try {
     downloaded = await task.downloadAsync();
   } catch {
-    discardDownload(target);
-    throw new Error('File download failed');
+    // Handled below, as a download that saved nothing.
   } finally {
     task.release();
   }
 
-  if (
-    !downloaded?.exists ||
-    downloaded.size === 0 ||
-    (await isLoginRedirect(downloaded))
-  ) {
-    discardDownload(target);
+  const complete =
+    !!downloaded?.exists &&
+    downloaded.size > 0 &&
+    !(await isLoginRedirect(downloaded));
+  if (!complete) {
+    deleteQuietly(partial);
+    throw new Error('File download failed');
+  }
+
+  // A rename within Caches: the file at `target` is either the old copy or
+  // the whole new one.
+  try {
+    target.parentDirectory.create({ intermediates: true, idempotent: true });
+    partial.moveSync(target, { overwrite: true });
+  } catch {
+    deleteQuietly(partial);
+    removeEmptyFolders(target);
     throw new Error('File download failed');
   }
 
   saveCourseInfo(target.parentDirectory.parentDirectory, file);
-  return downloaded.uri;
+  return target.uri;
 };
 
 const toDirectory = (path: string) =>
@@ -247,6 +295,7 @@ export const removeFileDir = async () => {
   const failed: string[] = [];
   for (const dir of [
     getDownloadsDirectory(),
+    getPartialDownloadsDirectory(),
     new Directory(Paths.cache, SHARED_DIR),
   ]) {
     try {

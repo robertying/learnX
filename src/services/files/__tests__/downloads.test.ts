@@ -3,7 +3,7 @@ import Share from '../../../../modules/share';
 import CookieManager from '@preeternal/react-native-cookie-manager';
 import { dataSource, ensureSession } from 'data/source';
 import { getCachedCourses } from 'data/queries';
-import { Directory } from 'expo-file-system';
+import { Directory, File as FileSystemFile } from 'expo-file-system';
 import {
   courseNameOf,
   downloadFile,
@@ -34,6 +34,7 @@ jest.mock('data/source', () => ({
 const DOCUMENTS = 'file:///app/Documents';
 const CACHES = 'file:///app/Caches';
 const FILES = `${CACHES}/downloads`;
+const PARTIAL = `${CACHES}/downloads-partial`;
 const LEGACY = 'learnX Files';
 
 const fetchMock = jest.fn(() => Promise.resolve(new Response()));
@@ -148,6 +149,21 @@ describe('downloadFile', () => {
     expect(CookieManager.get).toHaveBeenCalledTimes(1);
   });
 
+  it('downloads into downloads-partial, then moves the whole file into place', async () => {
+    let during: string[] = [];
+    __fs.download = async task => {
+      __fs.write(task.target.uri, 'body');
+      during = __fs.files(CACHES);
+      return task.target;
+    };
+    await expect(downloadFile(file)).resolves.toBe(target);
+    expect(during).toEqual([
+      expect.stringMatching(/^downloads-partial\/[\w-]+$/),
+    ]);
+    expect(__fs.files(PARTIAL)).toEqual([]);
+    expect(__fs.read(target)).toBe('body');
+  });
+
   it.each([
     ['fails', () => Promise.reject(new Error('offline'))],
     ['returns nothing', () => Promise.resolve(null)],
@@ -165,14 +181,27 @@ describe('downloadFile', () => {
         return task.target;
       },
     ],
-  ])('throws and deletes the partial file when it %s', async (_, download) => {
-    __fs.download = download as typeof __fs.download;
-    __fs.write(target, 'partial');
-    await expect(downloadFile(file, { refresh: true })).rejects.toThrow(
-      'File download failed',
-    );
+  ])(
+    'throws, deletes the partial file and keeps the old copy when it %s',
+    async (_, download) => {
+      __fs.download = download as typeof __fs.download;
+      __fs.write(target, 'old');
+      await expect(downloadFile(file, { refresh: true })).rejects.toThrow(
+        'File download failed',
+      );
+      expect(__fs.files(CACHES)).toEqual(['downloads/c1/f1/Lecture 1.pdf']);
+      expect(__fs.read(target)).toBe('old');
+    },
+  );
+
+  it('makes no folders for a download that failed', async () => {
+    __fs.download = (task: { target: { uri: string } }) => {
+      // Android writes into the file as it downloads.
+      __fs.write(task.target.uri, 'part');
+      return Promise.reject(new Error('offline'));
+    };
+    await expect(downloadFile(file)).rejects.toThrow('File download failed');
     expect(__fs.files(CACHES)).toEqual([]);
-    // The emptied <id> and course folders go too.
     expect(listDownloads()).toEqual([]);
     expect(__fs.dirs(FILES)).toEqual([]);
   });
@@ -184,8 +213,23 @@ describe('downloadFile', () => {
     expect(__fs.dirs(FILES)).toEqual(['c1', 'c1/f2']);
   });
 
+  it('deletes the partial file and the emptied folders when it cannot be moved', async () => {
+    __fs.write(`${FILES}/c1/f2/b.pdf`, '56');
+    const move = jest
+      .spyOn(FileSystemFile.prototype, 'moveSync')
+      .mockImplementation(() => {
+        throw new Error('full');
+      });
+    await expect(downloadFile(file)).rejects.toThrow('File download failed');
+    move.mockRestore();
+    expect(__fs.files(CACHES)).toEqual(['downloads/c1/f2/b.pdf']);
+    expect(__fs.dirs(FILES)).toEqual(['c1', 'c1/f2']);
+  });
+
   it('keeps the folders when they cannot be deleted', async () => {
-    __fs.download = () => Promise.reject(new Error('offline'));
+    jest.spyOn(FileSystemFile.prototype, 'moveSync').mockImplementation(() => {
+      throw new Error('full');
+    });
     const remove = jest
       .spyOn(Directory.prototype, 'delete')
       .mockImplementation(() => {
@@ -205,6 +249,55 @@ describe('downloadFile', () => {
     expect(__fs.tasks[0].options.signal).toBe(controller.signal);
     expect(__fs.files(CACHES)).toEqual([]);
     expect(__fs.dirs(FILES)).toEqual([]);
+  });
+});
+
+describe('downloads cut short', () => {
+  /** A fresh downloads module, as at launch, with its own file system. */
+  const freshModules = () => {
+    let modules!: {
+      downloads: typeof import('services/files/downloads');
+      fs: typeof import('test-utils/mocks/memoryFileSystem');
+    };
+    jest.isolateModules(() => {
+      modules = {
+        downloads: require('services/files/downloads'),
+        fs: jest.requireMock('expo-file-system'),
+      };
+    });
+    return modules;
+  };
+
+  it("are deleted before this run's first download, and only then", async () => {
+    const {
+      downloads,
+      fs: { __fs: fs },
+    } = freshModules();
+    fs.write(`${PARTIAL}/killed`, 'part');
+    let during: string[] = [];
+    fs.download = async task => {
+      fs.write(task.target.uri, 'body');
+      during = fs.files(PARTIAL);
+      return task.target;
+    };
+
+    await downloads.downloadFile(file);
+    expect(during).toHaveLength(1);
+    expect(during).not.toContain('killed');
+
+    // A download under way when the next one starts is left alone.
+    fs.write(`${PARTIAL}/running`, 'part');
+    await downloads.downloadFile({ ...file, id: 'f2' });
+    expect(fs.files(PARTIAL)).toEqual(['running']);
+  });
+
+  it("are left alone when they can't be deleted", async () => {
+    const { downloads, fs } = freshModules();
+    fs.__fs.write(`${PARTIAL}/killed`, 'part');
+    jest.spyOn(fs.Directory.prototype, 'delete').mockImplementationOnce(() => {
+      throw new Error('busy');
+    });
+    await expect(downloads.downloadFile(file)).resolves.toBe(target);
   });
 });
 
@@ -291,6 +384,7 @@ describe('removeFileDir', () => {
       .mockReturnValueOnce('file:///group/Shared');
     __fs.write(`${FILES}/c1/f1/a.pdf`, '1');
     __fs.write(`${CACHES}/learnX Shared/c.pdf`, '3');
+    __fs.write(`${PARTIAL}/x`, '6');
     __fs.write('file:///group/Shared/d.pdf', '4');
     __fs.write(`${CACHES}/other.txt`, '5');
 

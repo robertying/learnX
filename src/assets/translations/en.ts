@@ -166,6 +166,9 @@ export default {
   fileDownloadFailedDescription: 'Check your connection and try again.',
   openFileFailed:
     "Couldn't open the file. Download it again, or install an app that can open this type of file.",
+  previewFailedTitle: "Couldn't Show File",
+  previewFailedDescription: 'It may be damaged.',
+  downloadAgain: 'Download Again',
   share: 'Share',
   open: 'Open',
   missingUsername: 'Enter your username or student ID',

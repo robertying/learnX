@@ -39,7 +39,12 @@ jest.mock('react-native-webview', () => {
 });
 jest.mock('react-native-pdf', () => {
   const { View } = require('react-native');
-  return { __esModule: true, default: () => <View testID="pdf" /> };
+  return {
+    __esModule: true,
+    default: (props: { onError?: (error: Error) => void }) => (
+      <View testID="pdf" {...{ onError: props.onError }} />
+    ),
+  };
 });
 
 const download = {
@@ -86,6 +91,22 @@ it('shows progress while downloading, then the PDF, marking it seen', async () =
   await renderScreen({ id: pdf.id });
   expect(screen.getByTestId('pdf')).toBeTruthy();
   expect(markFileSeen).toHaveBeenCalledWith(pdf.id);
+});
+
+it("offers to download again when the PDF can't be read", async () => {
+  const user = userEvent.setup();
+  downloaded({ path: 'file:///a.pdf' });
+  await renderScreen({ id: pdf.id });
+  await act(async () => {
+    screen.getByTestId('pdf').props.onError(new Error('Load pdf failed'));
+  });
+  expect(screen.queryByTestId('pdf')).toBeNull();
+  expect(screen.getByText(t('previewFailedTitle'))).toBeTruthy();
+  expect(screen.getByText(t('previewFailedDescription'))).toBeTruthy();
+
+  await user.press(screen.getByText(t('downloadAgain')));
+  expect(download.redownload).toHaveBeenCalledTimes(1);
+  expect(screen.getByTestId('pdf')).toBeTruthy();
 });
 
 it('says when the download failed, with a button to try again', async () => {
