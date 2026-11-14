@@ -1,15 +1,14 @@
 import com.android.build.api.variant.FilterConfiguration
 import groovy.json.JsonSlurper
 
-// Over-the-air updates: the URL and Expo project id from the repo-root .env
-// (OTA_UPDATE_URL, EXPO_PROJECT_ID; git-ignored, so the server isn't in the
-// repo), the runtime version from app.json and the certificate from
-// certs/ota-certificate.pem, as string resources the manifest's
-// expo.modules.updates meta-data reads. Without OTA_UPDATE_URL updates are off
-// (forks, CI). iOS does the same in scripts/ota-config-ios.sh. E2E builds
-// (-PciRelease) get the local test server (scripts/ota-e2e-server.mjs, through
-// `adb reverse`), runtime version "e2e" and the test certificate from
-// scripts/ota-e2e-cert.sh, so they never load a published update.
+// Over-the-air updates: the URL and runtime version from app.json, the
+// certificate from certs/ota-certificate.pem and the Expo project id from the
+// repo-root .env (EXPO_PROJECT_ID; the update server asks for it), as string
+// resources the manifest's expo.modules.updates meta-data reads. iOS does the
+// same in scripts/ota-config-ios.sh. E2E builds (-PciRelease) get the local
+// test server (scripts/ota-e2e-server.mjs, through `adb reverse`), runtime
+// version "e2e" and the test certificate from scripts/ota-e2e-cert.sh, so they
+// never load a published update.
 def otaConfig(boolean e2e) {
     def root = rootProject.file("..")
     def env = [:]
@@ -20,7 +19,8 @@ def otaConfig(boolean e2e) {
             if (match) env[match[0][1]] = match[0][2]
         }
     }
-    def url = e2e ? "http://localhost:8199/manifest" : (env.OTA_UPDATE_URL ?: "")
+    def appJson = new JsonSlurper().parse(new File(root, "app.json"))
+    def url = e2e ? "http://localhost:8199/manifest" : appJson.updates.url
     def headers = ["expo-channel-name": "production"]
     if (!e2e && env.EXPO_PROJECT_ID) {
         headers["expo-app-id"] = env.EXPO_PROJECT_ID
@@ -30,11 +30,9 @@ def otaConfig(boolean e2e) {
         throw new GradleException("${certificate} is missing; for an E2E build, run scripts/ota-e2e-cert.sh first.")
     }
     return [
-        enabled: url ? "true" : "false",
         strings: [
-            // Never read while updates are off.
-            expo_updates_url: url ?: "https://updates.invalid/manifest",
-            expo_runtime_version: e2e ? "e2e" : new JsonSlurper().parse(new File(root, "app.json")).runtimeVersion,
+            expo_updates_url: url,
+            expo_runtime_version: e2e ? "e2e" : appJson.runtimeVersion,
             // A string resource keeps quotes and line breaks only escaped.
             expo_updates_request_headers: groovy.json.JsonOutput.toJson(headers).replace('"', '\\"'),
             expo_updates_certificate: certificate.text.trim().replace("\n", "\\n"),
@@ -44,7 +42,6 @@ def otaConfig(boolean e2e) {
 
 def applyOtaConfig(variant, boolean e2e) {
     def config = otaConfig(e2e)
-    variant.manifestPlaceholders.put("otaEnabled", config.enabled)
     config.strings.each { name, value -> variant.resValue "string", name, value }
 }
 

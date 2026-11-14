@@ -1,6 +1,6 @@
-// The over-the-air update settings: the URL and Expo project id in .env (not
-// in the repo), the runtime version in app.json and the code-signing
-// certificate in certs/ota-certificate.pem. scripts/ota-config-ios.sh writes
+// The over-the-air update settings: the URL and runtime version in app.json,
+// the code-signing certificate in certs/ota-certificate.pem and the Expo
+// project id in .env. scripts/ota-config-ios.sh writes
 // them into Expo.plist and android/app/build.gradle into resources the
 // manifest reads; the rest is in Expo.plist and the build.gradle. A mismatch
 // shows up only as updates that never arrive, so keep them in step.
@@ -13,7 +13,7 @@ const read = (path: string) =>
 
 const appJson = JSON.parse(read('app.json')) as {
   runtimeVersion: string;
-  updates?: unknown;
+  updates: { url: string };
 };
 
 const plist = read('ios/learnX/Expo.plist');
@@ -42,9 +42,8 @@ test('the runtime version is an app version', () => {
   expect(appJson.runtimeVersion).toMatch(/^\d+\.\d+\.\d+$/);
 });
 
-test('the update server stays out of the repo', () => {
-  expect(appJson.updates).toBeUndefined();
-  expect(read('.env.example')).toMatch(/^OTA_UPDATE_URL=$/m);
+test('the update URL is HTTPS', () => {
+  expect(appJson.updates.url).toMatch(/^https:\/\/[^/]+\/manifest$/);
   expect(read('.env.example')).toMatch(/^EXPO_PROJECT_ID=$/m);
 });
 
@@ -57,7 +56,7 @@ test('the build writes the URL, runtime version, headers and certificate', () =>
   expect(plist).not.toMatch(
     /EXUpdatesURL|EXUpdatesRuntimeVersion|EXUpdatesCodeSigningCertificate/,
   );
-  expect(metaData('ENABLED')).toBe('${otaEnabled}');
+  expect(metaData('ENABLED')).toBe('true');
   expect(metaData('EXPO_UPDATE_URL')).toBe('@string/expo_updates_url');
   expect(metaData('EXPO_RUNTIME_VERSION')).toBe('@string/expo_runtime_version');
   expect(metaData('UPDATES_CONFIGURATION_REQUEST_HEADERS_KEY')).toBe(
@@ -72,7 +71,7 @@ test('the build writes the URL, runtime version, headers and certificate', () =>
   ]) {
     const text = read(file);
     expect(text).toContain('certs/ota-certificate.pem');
-    expect(text).toContain('OTA_UPDATE_URL');
+    expect(text).toContain('updates.url');
     expect(text).toContain('EXPO_PROJECT_ID');
   }
 });

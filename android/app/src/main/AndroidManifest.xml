@@ -34,11 +34,11 @@
             android:name="expo.modules.notifications.default_notification_color"
             android:resource="@color/seed" />
 
-        <!-- Whether updates are on, the URL, runtime version, headers and
-             certificate come from android/app/build.gradle. -->
+        <!-- The URL, runtime version, headers and certificate come from
+             android/app/build.gradle. -->
         <meta-data
             android:name="expo.modules.updates.ENABLED"
-            android:value="${otaEnabled}" />
+            android:value="true" />
         <meta-data
             android:name="expo.modules.updates.EXPO_UPDATE_URL"
             android:value="@string/expo_updates_url" />

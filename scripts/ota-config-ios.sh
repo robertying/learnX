@@ -1,11 +1,9 @@
 #!/bin/bash
 # Xcode build phase of the learnX target ("Configure updates"): writes the
-# over-the-air update settings into the app's copy of Expo.plist. The URL and
-# Expo project id come from the repo-root .env (OTA_UPDATE_URL,
-# EXPO_PROJECT_ID; git-ignored, so the server isn't in the repo), the runtime
-# version from app.json and the certificate from certs/ota-certificate.pem.
-# Without OTA_UPDATE_URL the build has updates turned off (forks, CI); the
-# release lanes refuse to build without it. Android does the same in
+# over-the-air update settings into the app's copy of Expo.plist: the URL and
+# runtime version from app.json, the certificate from certs/ota-certificate.pem
+# and the Expo project id from the repo-root .env (EXPO_PROJECT_ID; the update
+# server asks for it). Android does the same in
 # android/app/build.gradle. E2E builds (TEST_LOGIN=1, scripts/e2e-build.sh)
 # get the local test server (scripts/ota-e2e-server.mjs), runtime version
 # "e2e" and the test certificate from scripts/ota-e2e-cert.sh instead, so they
@@ -28,16 +26,10 @@ if [ "${TEST_LOGIN:-}" = 1 ]; then
   certificate="$root/build/ota-e2e/certificate.pem"
   [ -f "$certificate" ] || "$root/scripts/ota-e2e-cert.sh"
 else
-  url="$(env_value OTA_UPDATE_URL)"
+  url="$(plutil -extract updates.url raw "$root/app.json")"
   project_id="$(env_value EXPO_PROJECT_ID)"
   runtime="$(plutil -extract runtimeVersion raw "$root/app.json")"
   certificate="$root/certs/ota-certificate.pem"
-fi
-
-if [ -z "$url" ]; then
-  plutil -replace EXUpdatesEnabled -bool NO "$plist"
-  echo "Updates: off (no OTA_UPDATE_URL in .env)"
-  exit 0
 fi
 
 plutil -replace EXUpdatesURL -string "$url" "$plist"

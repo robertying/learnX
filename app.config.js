@@ -1,6 +1,5 @@
-// app.json plus the over-the-air update settings from the repo-root .env
-// (OTA_UPDATE_URL, EXPO_PROJECT_ID), which `eoas publish` reads: the server
-// isn't in the repo. The builds read the same keys (scripts/ota-config-ios.sh,
+// app.json plus the Expo project id from the repo-root .env (EXPO_PROJECT_ID),
+// which `eoas publish` reads. The builds read it too (scripts/ota-config-ios.sh,
 // android/app/build.gradle).
 const fs = require('fs');
 const path = require('path');
@@ -14,7 +13,6 @@ const env = fs.existsSync(envFile)
 /** @param {{ config: Record<string, unknown> }} context */
 module.exports = ({ config }) => ({
   ...config,
-  ...(env.OTA_UPDATE_URL && { updates: { url: env.OTA_UPDATE_URL } }),
   ...(env.EXPO_PROJECT_ID && {
     extra: { eas: { projectId: env.EXPO_PROJECT_ID } },
   }),
