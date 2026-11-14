@@ -6,7 +6,7 @@ export default {
   widgetDeadlines: 'Deadlines',
   widgetNoDeadlines: 'Nothing due',
   widgetUpNext: 'Up Next',
-  widgetLater: 'Later',
+  widgetLater: 'Later Classes',
   widgetStartsIn: 'Starts in',
   widgetEndsIn: 'Ends in',
   widgetTomorrow: 'Tomorrow',
