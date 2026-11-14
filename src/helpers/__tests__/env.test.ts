@@ -18,8 +18,8 @@ const path: { join: (...parts: string[]) => string } = require('path');
 
 const dotenv = {
   DUMMY_USERNAME: 'mock-user',
-  COURSEX_REFRESH_TOKEN: 'token-✓',
   LIVE_USERNAME: 'live',
+  COURSEX_REFRESH_TOKEN: 'no longer listed',
   SECRET: 'not listed',
 };
 
@@ -83,17 +83,9 @@ it('marks an E2E build without adding any live value', () => {
   }
 });
 
-it('masks the courseX token in the bundle and unmasks it on use', () => {
-  const { code, env } = build('production');
-  expect(code).not.toContain('token-');
-  expect(env.getCourseXRefreshToken()).toBe('token-✓');
-});
-
-it('has no token without one in .env', () => {
+it('is empty without a .env', () => {
   jest.mocked(fs.existsSync).mockReturnValue(false);
-  const { env } = build('production');
-  expect(env.default).toEqual({});
-  expect(env.getCourseXRefreshToken()).toBeUndefined();
+  expect(build('production').env.default).toEqual({});
 });
 
 it("loads as Jest builds it, with this checkout's .env or none", () => {
@@ -101,7 +93,4 @@ it("loads as Jest builds it, with this checkout's .env or none", () => {
   const actual =
     jest.requireActual<typeof import('helpers/env')>('helpers/env');
   expect(typeof actual.default).toBe('object');
-  expect(['string', 'undefined']).toContain(
-    typeof actual.getCourseXRefreshToken(),
-  );
 });
