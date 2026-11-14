@@ -155,6 +155,9 @@ describe('Search', () => {
     const { type } = await setup();
     await type('zzzzzz');
     expect(screen.getByText('No Results')).toBeTruthy();
+    expect(
+      screen.getByText('Check the spelling or try a new search.'),
+    ).toBeTruthy();
   });
 
   it('groups matches by kind under section headers', async () => {

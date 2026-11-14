@@ -2,7 +2,6 @@ import { Component } from 'react';
 import type { ErrorInfo } from 'react';
 import { View } from 'react-native';
 import { reloadAppAsync } from 'expo';
-import TextButton from 'components/TextButton';
 import StatusView from 'components/StatusView';
 import Styles from 'constants/Styles';
 import { recordError } from 'services/crashReporting';
@@ -17,17 +16,14 @@ const ErrorFallback: React.FC<{ onRetry?: () => void }> = ({ onRetry }) => {
       <StatusView
         testID="error-fallback"
         icon="error"
-        message={t('somethingWentWrong')}
-        action={
-          <>
-            {onRetry ? (
-              <TextButton onPress={onRetry}>{t('tryAgain')}</TextButton>
-            ) : null}
-            <TextButton onPress={() => reloadAppAsync('Error boundary')}>
-              {t('reloadApp')}
-            </TextButton>
-          </>
-        }
+        title={t('somethingWentWrong')}
+        actions={[
+          ...(onRetry ? [{ label: t('tryAgain'), onPress: onRetry }] : []),
+          {
+            label: t('reloadApp'),
+            onPress: () => reloadAppAsync('Error boundary'),
+          },
+        ]}
       />
     </View>
   );

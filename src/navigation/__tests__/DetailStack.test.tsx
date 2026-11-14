@@ -80,7 +80,8 @@ it('says nothing is selected in the empty detail pane', async () => {
   const Empty = lastNavigatorScreens()[0].component as React.FC;
   await render(<Empty />);
   expect(screen.getByText(t('noSelection'))).toBeTruthy();
-  expect(screen.getByTestId('symbol-hand.tap')).toBeTruthy();
+  // Its text alone: nothing is missing, so no icon stands for it.
+  expect(screen.queryByTestId(/^symbol-/)).toBeNull();
 });
 
 it('opens a screen without animation when asked', async () => {

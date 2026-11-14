@@ -37,8 +37,6 @@ export const systemIcons = {
   noResults: { ios: 'magnifyingglass', android: 'search_off' },
   // An item that's gone, e.g. a link to something deleted.
   notFound: { ios: 'doc.questionmark', android: 'unknown_document' },
-  // The empty detail pane of a split view: pick something in the list.
-  noSelection: { ios: 'hand.tap', android: 'touch_app' },
   // Card actions and filters
   favorite: { ios: 'heart', android: 'favorite' },
   unfavorite: { ios: 'heart.slash', android: 'heart_minus' },
@@ -236,7 +234,6 @@ export const materialCodepoints: Record<SystemIconAndroidName, number> = {
   swipe: 0xe9ec,
   sync: 0xe627,
   system_update: 0xe62a,
-  touch_app: 0xe913,
   unarchive: 0xe169,
   undo: 0xe166,
   unknown_document: 0xf804,

@@ -88,10 +88,13 @@ it('shows progress while downloading, then the PDF, marking it seen', async () =
   expect(markFileSeen).toHaveBeenCalledWith(pdf.id);
 });
 
-it('says when the download failed', async () => {
+it('says when the download failed, with a button to try again', async () => {
   downloaded({ error: true });
   await renderScreen({ id: pdf.id });
-  expect(screen.getByText(t('fileDownloadFailed'))).toBeTruthy();
+  expect(screen.getByText(t('fileDownloadFailedTitle'))).toBeTruthy();
+  expect(screen.getByText(t('fileDownloadFailedDescription'))).toBeTruthy();
+  await userEvent.press(screen.getByText(t('tryAgain')));
+  expect(download.redownload).toHaveBeenCalledTimes(1);
 });
 
 it("previews other kinds in a web view and an attachment isn't marked seen", async () => {
