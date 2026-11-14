@@ -79,8 +79,8 @@ describe('on iOS and Mac', () => {
     const { dark } = theme.brandColors;
     // A filled button's label and a switch's knob, as Apple's system colors
     expect(contrast('#FFFFFF', dark)).toBeGreaterThanOrEqual(3.5);
-    // Text and links on black, on a grouped row, and on Android's surfaces
-    for (const background of ['#000000', '#1C1C1E', '#171216', '#231E23']) {
+    // Text and links on black and on a grouped row
+    for (const background of ['#000000', '#1C1C1E']) {
       expect(contrast(dark, background)).toBeGreaterThanOrEqual(4.5);
     }
   });

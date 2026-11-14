@@ -12,17 +12,22 @@ import {
 
 /**
  * The brand color: Tsinghua purple, and the lighter tone of it used in dark
- * mode. The iOS `ThemeColor` asset, Android's `colors.xml`, `brandColor` and
- * the widgets use these same two values (checked by `brand.test.ts`).
- *
- * The dark tone serves both as text on dark backgrounds and as a fill under
- * white (filled buttons, switches, selected days), as Apple's system colors
- * do: it is about as light as dark mode's systemPurple. White on it is 3.6:1,
- * and as text it is 4.8:1 on a grouped row and 5.9:1 on black
- * (`__tests__/index.test.ts`). Material's own dark primary (tone 80) is
- * lighter and needs a dark label, which iOS controls don't use.
+ * mode. Each platform's color system picks its own dark tone:
+ * - `dark` (iOS, iPadOS, Mac, and the iOS widgets): one tint for text and for
+ *   fills under white (filled buttons, switches, selected days), as Apple's
+ *   system colors do. It is about as light as dark mode's systemPurple: white
+ *   on it is 3.6:1, and as text it is 5.9:1 on black and 4.8:1 on a grouped
+ *   row (`__tests__/index.test.ts`).
+ * - `materialDark` (Android): Material's dark primary (tone 80), which carries
+ *   the dark on-primary label in Material's controls.
+ * The iOS `ThemeColor` asset, Android's `colors.xml`, `brandColor` and the
+ * widgets keep copies of these values (checked by `brand.test.ts`).
  */
-export const brandColors = { light: '#660874', dark: '#C55CD6' } as const;
+export const brandColors = {
+  light: '#660874',
+  dark: '#C55CD6',
+  materialDark: '#F4ABFF',
+} as const;
 
 /**
  * The brand color for the system appearance, for static styles and options
@@ -31,13 +36,15 @@ export const brandColors = { light: '#660874', dark: '#C55CD6' } as const;
  */
 export const brandColor =
   Platform.OS === 'ios'
-    ? (DynamicColorIOS(brandColors) as unknown as string)
+    ? (DynamicColorIOS({
+        light: brandColors.light,
+        dark: brandColors.dark,
+      }) as unknown as string)
     : brandColors.light;
 
 // Material 3 tokens from `@material/material-color-utilities`
 // (`SchemeTonalSpot`, seed #660874), with the primary roles set to the brand
-// colors above (and white on the dark one, which is darker than Material's).
-// Android uses them as they are, in React Native views and as
+// colors above. Android uses them as they are, in React Native views and as
 // every Compose Host's palette (`useComposeColorOverrides`).
 const materialLight = {
   primary: 'rgb(102, 8, 116)',
@@ -61,11 +68,11 @@ const materialLight = {
   surfaceContainer: 'rgb(246, 235, 242)',
   outline: 'rgb(127, 116, 124)',
   outlineVariant: 'rgb(208, 195, 204)',
-  inversePrimary: 'rgb(197, 92, 214)',
+  inversePrimary: 'rgb(244, 171, 255)',
 };
 const materialDark: typeof materialLight = {
-  primary: 'rgb(197, 92, 214)',
-  onPrimary: 'rgb(255, 255, 255)',
+  primary: 'rgb(244, 171, 255)',
+  onPrimary: 'rgb(88, 0, 101)',
   primaryContainer: 'rgb(117, 29, 130)',
   onPrimaryContainer: 'rgb(255, 214, 253)',
   secondary: 'rgb(216, 191, 213)',
@@ -368,7 +375,11 @@ export const webContentColors = (dark: boolean) => ({
     Platform.OS === 'ios'
       ? 'CanvasText'
       : (dark ? materialDark : materialLight).onSurface,
-  linkColor: dark ? brandColors.dark : brandColors.light,
+  linkColor: dark
+    ? Platform.OS === 'ios'
+      ? brandColors.dark
+      : brandColors.materialDark
+    : brandColors.light,
 });
 
 /**
