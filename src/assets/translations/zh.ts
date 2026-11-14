@@ -189,8 +189,6 @@ const zh: typeof en = {
   topHits: '最佳匹配',
   seeAll: '查看全部',
   searchInclude: '在结果中显示',
-  searchShowArchived: '已归档的项目',
-  searchShowHidden: '已屏蔽的课程',
   noSelection: '未选择内容',
   removeFromFav: '已从收藏移除',
   addToFav: '已添加到收藏',

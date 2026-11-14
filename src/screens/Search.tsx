@@ -13,6 +13,7 @@ import {
 import type { ParamListBase } from '@react-navigation/native';
 import type { SearchBarCommands } from 'react-native-screens';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-screens/experimental';
 import type { NativeStackHeaderItem } from '@react-navigation/native-stack';
 import useSearch, {
   type SearchKind,
@@ -22,6 +23,7 @@ import useSearch, {
 import Styles from 'constants/Styles';
 import { useAssignments, useNotices, useFiles } from 'data/content';
 import { useUserData } from 'data/userData';
+import { getSettings, setSetting, useSettings } from 'data/settings';
 import NoticeCard from 'components/NoticeCard';
 import AssignmentCard from 'components/AssignmentCard';
 import FileCard from 'components/FileCard';
@@ -32,6 +34,7 @@ import TextButton from 'components/TextButton';
 import ToggleMenu from 'components/ToggleMenu';
 import { systemIcons } from 'helpers/systemIcons';
 import { headerButtons } from 'navigation/headerButtons';
+import { hasGlassHeader } from 'navigation/options';
 import { t } from 'helpers/i18n';
 import { SearchStackParams } from 'navigation/types';
 import { Paragraph } from 'components/Text';
@@ -45,9 +48,10 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
   const safeAreaInsets = useSafeAreaInsets();
 
   // Archived items are found and hidden courses' items aren't, unless the
-  // filter menu says otherwise.
-  const [includeArchived, setIncludeArchived] = useState(true);
-  const [includeHidden, setIncludeHidden] = useState(false);
+  // filter menu (saved with the settings) says otherwise.
+  const { archived: includeArchived, hidden: includeHidden } = useSettings(
+    settings => settings.searchIncludes,
+  );
   const hiddenCourses = new Set(useUserData(data => data.hiddenCourses));
   const archived = useUserData(data => data.archived);
   const archivedIds = {
@@ -100,23 +104,24 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
     });
   }, [navigation, theme.colors.primary]);
 
-  const toggleFilter = (name: string) =>
-    name === 'archived'
-      ? setIncludeArchived(on => !on)
-      : setIncludeHidden(on => !on);
+  const toggleFilter = (name: string) => {
+    const includes = getSettings().searchIncludes;
+    const key = name === 'archived' ? 'archived' : 'hidden';
+    setSetting('searchIncludes', { ...includes, [key]: !includes[key] });
+  };
   // The filter menu sits across from Close: a native menu of toggles on iOS
   // and Mac, a Compose dropdown on Android.
   useLayoutEffect(() => {
     const filterOptions = [
       {
         name: 'archived',
-        label: t('searchShowArchived'),
+        label: t('archived'),
         icon: 'archived',
         on: includeArchived,
       },
       {
         name: 'hidden',
-        label: t('searchShowHidden'),
+        label: t('hidden'),
         icon: 'hide',
         on: includeHidden,
       },
@@ -144,7 +149,6 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
                 label: option.label,
                 icon: { type: 'sfSymbol', name: systemIcons[option.icon].ios },
                 state: option.on ? 'on' : 'off',
-                keepsMenuPresented: true,
                 onPress: () => toggleFilter(option.name),
               })),
             },
@@ -253,8 +257,10 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
 
   const tabs = ['all', ...kinds] as const;
   const tabTitles = tabs.map(tab =>
-    tab === 'all' ? t('all') : `${t(titles[tab])} ${byKind[tab].length}`,
+    tab === 'all' ? t('all') : t(titles[tab]),
   );
+  // The floating tabs' height, which the results scroll clear of.
+  const [tabsHeight, setTabsHeight] = useState(0);
 
   const renderResult = ({ kind, item }: TopHit, last: boolean) => {
     const common = {
@@ -285,6 +291,53 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
     );
   };
 
+  const renderList = (topInset: number) => (
+    <SectionList<TopHit, (typeof sections)[number]>
+      // Starts over at the top for another tab or tab height.
+      key={`${scope}-${topInset}`}
+      contentInsetAdjustmentBehavior="automatic"
+      keyboardDismissMode="on-drag"
+      contentContainerStyle={{ paddingBottom: safeAreaInsets.bottom }}
+      contentInset={{ top: topInset }}
+      // Starts at the top of its inset, as a course's lists do.
+      contentOffset={{ x: 0, y: -topInset }}
+      scrollIndicatorInsets={{ top: topInset }}
+      ListEmptyComponent={
+        <Paragraph style={styles.empty}>{t('noResults')}</Paragraph>
+      }
+      sections={sections.filter(section => section.data.length)}
+      keyExtractor={({ kind, item }) => `${kind}-${item.id}`}
+      renderItem={({ item, index, section: { data } }) =>
+        renderResult(item, index === data.length - 1)
+      }
+      renderSectionHeader={({ section: { key, title, more } }) =>
+        scope === 'all' ? (
+          <View
+            style={[
+              styles.header,
+              { backgroundColor: theme.colors.background },
+            ]}
+          >
+            <Paragraph
+              accessibilityRole="header"
+              style={[
+                styles.headerTitle,
+                { color: theme.colors.onSurfaceMedium },
+              ]}
+            >
+              {title}
+            </Paragraph>
+            {more && key !== 'top' ? (
+              <TextButton size="small" onPress={() => setScope(key)}>
+                {t('seeAll')}
+              </TextButton>
+            ) : null}
+          </View>
+        ) : null
+      }
+    />
+  );
+
   return (
     <SafeArea>
       <View style={Styles.flex1}>
@@ -303,54 +356,39 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
             )}
           </KeyboardAvoidingView>
         </View>
-        {hasResults ? (
-          <SectionList<TopHit, (typeof sections)[number]>
-            contentInsetAdjustmentBehavior="automatic"
-            keyboardDismissMode="on-drag"
-            contentContainerStyle={{ paddingBottom: safeAreaInsets.bottom }}
-            ListHeaderComponent={
-              <SegmentedTabs
-                titles={tabTitles}
-                selectedIndex={tabs.indexOf(scope)}
-                onSelect={i => setScope(tabs[i])}
-                accessibilityLabel={t('search')}
-              />
-            }
-            ListEmptyComponent={
-              <Paragraph style={styles.empty}>{t('noResults')}</Paragraph>
-            }
-            sections={sections.filter(section => section.data.length)}
-            keyExtractor={({ kind, item }) => `${kind}-${item.id}`}
-            renderItem={({ item, index, section: { data } }) =>
-              renderResult(item, index === data.length - 1)
-            }
-            renderSectionHeader={({ section: { key, title, more } }) =>
-              scope === 'all' ? (
-                <View
-                  style={[
-                    styles.header,
-                    { backgroundColor: theme.colors.background },
-                  ]}
-                >
-                  <Paragraph
-                    accessibilityRole="header"
-                    style={[
-                      styles.headerTitle,
-                      { color: theme.colors.onSurfaceMedium },
-                    ]}
-                  >
-                    {title}
-                  </Paragraph>
-                  {more && key !== 'top' ? (
-                    <TextButton size="small" onPress={() => setScope(key)}>
-                      {t('seeAll')}
-                    </TextButton>
-                  ) : null}
-                </View>
-              ) : null
-            }
-          />
-        ) : null}
+        {!hasResults ? null : hasGlassHeader ? (
+          // iPhone and iPad from iOS 26: the tabs float in glass under the
+          // header, as in a course's detail, and the results scroll under
+          // them once their height is known.
+          <>
+            {tabsHeight ? renderList(tabsHeight) : null}
+            <SafeAreaView
+              edges={{ top: true }}
+              style={styles.floatingTabs}
+              pointerEvents="box-none"
+            >
+              <View onLayout={e => setTabsHeight(e.nativeEvent.layout.height)}>
+                <SegmentedTabs
+                  titles={tabTitles}
+                  selectedIndex={tabs.indexOf(scope)}
+                  onSelect={i => setScope(tabs[i])}
+                  accessibilityLabel={t('search')}
+                  floating
+                />
+              </View>
+            </SafeAreaView>
+          </>
+        ) : (
+          <View style={Styles.flex1}>
+            <SegmentedTabs
+              titles={tabTitles}
+              selectedIndex={tabs.indexOf(scope)}
+              onSelect={i => setScope(tabs[i])}
+              accessibilityLabel={t('search')}
+            />
+            {renderList(0)}
+          </View>
+        )}
       </View>
     </SafeArea>
   );
@@ -366,6 +404,14 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     flex: 1,
+  },
+  floatingTabs: {
+    position: 'absolute',
+    // Its own height, not the screen's (SafeAreaView flexes by default).
+    flex: 0,
+    top: 0,
+    left: 0,
+    right: 0,
   },
   empty: {
     textAlign: 'center',

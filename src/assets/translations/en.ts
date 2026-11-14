@@ -198,8 +198,6 @@ export default {
   topHits: 'Top Hits',
   seeAll: 'See All',
   searchInclude: 'Include in Results',
-  searchShowArchived: 'Archived Items',
-  searchShowHidden: 'Hidden Courses',
   noSelection: 'No Selection',
   removeFromFav: 'Removed from Favorites',
   addToFav: 'Added to Favorites',

@@ -9,6 +9,7 @@ import type { NativeStackHeaderItemMenu } from '@react-navigation/native-stack';
 import type { SearchBarProps } from 'react-native-screens';
 import { Assignment, File, Notice } from 'data/types/state';
 import Search from 'screens/Search';
+import { getSettings, resetSettings } from 'data/settings';
 import { resetUserData, setArchived, setCourseHidden } from 'data/userData';
 import { screenProps } from 'test-utils/screenProps';
 
@@ -112,6 +113,7 @@ beforeEach(() => {
 afterEach(async () => {
   jest.useRealTimers();
   await act(() => resetUserData());
+  await act(() => resetSettings());
 });
 
 describe('Search', () => {
@@ -138,19 +140,16 @@ describe('Search', () => {
     expect(screen.getByRole('header', { name: 'Assignments' })).toBeTruthy();
     expect(screen.getByText('Midterm review problems')).toBeTruthy();
     // No file matches, so no Files header
-    expect(screen.queryByText('Files')).toBeNull();
+    expect(screen.queryByRole('header', { name: 'Files' })).toBeNull();
     expect(screen.queryByText('Lecture 5 slides')).toBeNull();
     // Each section's only row is its last, with no separator under it.
     expect(screen.queryByTestId('card-separator')).toBeNull();
   });
 
-  it('shows a tab for each kind with its count, and one kind in each', async () => {
+  it('shows a tab for each kind, and one kind in each', async () => {
     const { type } = await setup();
     await type('midterm');
     expect(screen.getByText('All')).toBeTruthy();
-    expect(screen.getByText('Notices 1')).toBeTruthy();
-    expect(screen.getByText('Assignments 1')).toBeTruthy();
-    expect(screen.getByText('Files 0')).toBeTruthy();
     await act(() => fireEvent(screen.getByText('All'), 'selectionChange', 1));
     expect(screen.getByText('Midterm room change')).toBeTruthy();
     expect(screen.queryByText('Midterm review problems')).toBeNull();
@@ -202,8 +201,21 @@ describe('Search', () => {
     expect(
       filterMenu().menu.items.map(i => i.type === 'action' && i.state),
     ).toEqual(['on', 'off']);
+    expect(filterMenu().icon).toEqual({
+      type: 'sfSymbol',
+      name: 'line.3.horizontal.decrease.circle',
+    });
     await toggle(0);
     expect(screen.queryByText('Midterm room change')).toBeNull();
+    // Shown as on while off its defaults, and kept for the next search
+    expect(filterMenu().icon).toEqual({
+      type: 'sfSymbol',
+      name: 'line.3.horizontal.decrease.circle.fill',
+    });
+    expect(getSettings().searchIncludes).toEqual({
+      archived: false,
+      hidden: false,
+    });
     expect(
       filterMenu().menu.items.map(i => i.type === 'action' && i.state),
     ).toEqual(['off', 'off']);
