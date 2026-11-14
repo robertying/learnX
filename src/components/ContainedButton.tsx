@@ -1,6 +1,12 @@
 import { Button } from '@expo/ui';
 import { Text } from '@expo/ui/swift-ui';
-import { buttonStyle, controlSize, font } from '@expo/ui/swift-ui/modifiers';
+import {
+  buttonStyle,
+  controlSize,
+  font,
+  tint,
+} from '@expo/ui/swift-ui/modifiers';
+import { useTheme } from 'theme';
 import DeviceInfo from 'constants/DeviceInfo';
 import ThemedHost from 'components/ThemedHost';
 import type { ContainedButtonProps } from './ContainedButton.shared';
@@ -25,7 +31,7 @@ const sizes = {
  */
 const macLabelFont = [font({ size: 17 })];
 
-/** The system's filled button, tinted with the theme's primary color. */
+/** The system's filled button, in the brand color (`primaryFill` on iOS). */
 const ContainedButton: React.FC<ContainedButtonProps> = ({
   label,
   disabled,
@@ -35,6 +41,8 @@ const ContainedButton: React.FC<ContainedButtonProps> = ({
   testID,
 }) => {
   const mac = DeviceInfo.isMac();
+  const theme = useTheme();
+  const modifiers = [...(sizes[size] ?? []), tint(theme.colors.primaryFill)];
   return (
     <ThemedHost matchContents style={style}>
       <Button
@@ -42,7 +50,7 @@ const ContainedButton: React.FC<ContainedButtonProps> = ({
         label={mac ? undefined : label}
         disabled={disabled}
         onPress={onPress}
-        modifiers={sizes[size]}
+        modifiers={modifiers}
       >
         {mac ? <Text modifiers={macLabelFont}>{label}</Text> : undefined}
       </Button>

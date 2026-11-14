@@ -18,6 +18,17 @@ import {
 export const brandColors = { light: '#660874', dark: '#F4ABFF' } as const;
 
 /**
+ * The brand color behind white, in the iOS and Mac controls that fill with
+ * the tint: filled buttons and switches. The dark tone above is Material's
+ * primary for dark mode, which expects a dark label on it; under the system's
+ * white label or switch knob it is 1.7:1. This one keeps the brand hue at a
+ * mid lightness: white on it is 4.7:1, and it is 3.6:1 against a grouped row
+ * in dark mode. Android's Material controls use the primary role and its dark
+ * on-primary label instead.
+ */
+export const brandFillColors = { light: '#660874', dark: '#AC4ABC' } as const;
+
+/**
  * The brand color for the system appearance, for static styles and options
  * that take one color (a dynamic color on iOS, the light one on Android).
  * Inside components, prefer `useTheme().colors.primary`.
@@ -180,6 +191,7 @@ const buildMaterialColors = (dark: boolean) => {
   });
   return {
     primary: m.primary,
+    primaryFill: m.primary,
     onPrimary: m.onPrimary,
     primaryContainer: m.primaryContainer,
     onPrimaryContainer: m.onPrimaryContainer,
@@ -284,6 +296,7 @@ const buildAppleColors = (dark: boolean): ColorRoles => {
   };
   return {
     primary: brand,
+    primaryFill: dark ? brandFillColors.dark : brandFillColors.light,
     onPrimary: 'white',
     primaryContainer: system('tertiarySystemFill'),
     onPrimaryContainer: brand,
