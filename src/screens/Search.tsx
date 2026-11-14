@@ -28,9 +28,11 @@ import AssignmentCard from 'components/AssignmentCard';
 import FileCard from 'components/FileCard';
 import StatusView from 'components/StatusView';
 import SafeArea from 'components/SafeArea';
+import ScopeChips from 'components/ScopeChips';
 import SegmentedTabs from 'components/SegmentedTabs';
 import TextButton from 'components/TextButton';
 import ToggleMenu from 'components/ToggleMenu';
+import type { ToggleMenuOption } from 'components/ToggleMenu.shared';
 import { systemIcons } from 'helpers/systemIcons';
 import { headerButtons } from 'navigation/headerButtons';
 import { hasGlassHeader } from 'navigation/options';
@@ -106,24 +108,15 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
     name === 'archived'
       ? setIncludeArchived(on => !on)
       : setIncludeHidden(on => !on);
-  // The filter menu sits across from Close: a native menu of toggles on iOS
-  // and Mac, a Compose dropdown on Android.
+  const filterOptions = searchFilterOptions(includeArchived, includeHidden);
+  const filtered = !includeArchived || includeHidden;
+  // iOS and Mac: a native menu of toggles across from Close. Android's open
+  // search bar takes the whole toolbar, so its menu sits beside the tabs.
   useLayoutEffect(() => {
-    const filterOptions = [
-      {
-        name: 'archived',
-        label: t('archived'),
-        icon: 'archived',
-        on: includeArchived,
-      },
-      {
-        name: 'hidden',
-        label: t('hidden'),
-        icon: 'hide',
-        on: includeHidden,
-      },
-    ] as const;
-    const filtered = !includeArchived || includeHidden;
+    if (Platform.OS === 'android') {
+      return;
+    }
+    const options = searchFilterOptions(includeArchived, includeHidden);
     navigation.setOptions(
       headerButtons('right', [
         {
@@ -134,14 +127,15 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
             label: t('filter'),
             icon: {
               type: 'sfSymbol',
-              name: filtered
-                ? 'line.3.horizontal.decrease.circle.fill'
-                : 'line.3.horizontal.decrease.circle',
+              name:
+                !includeArchived || includeHidden
+                  ? 'line.3.horizontal.decrease.circle.fill'
+                  : 'line.3.horizontal.decrease.circle',
             },
             menu: {
               title: t('searchInclude'),
               multiselectable: true,
-              items: filterOptions.map(option => ({
+              items: options.map(option => ({
                 type: 'action',
                 label: option.label,
                 icon: { type: 'sfSymbol', name: systemIcons[option.icon].ios },
@@ -150,14 +144,6 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
               })),
             },
           } satisfies NativeStackHeaderItem,
-          element: (
-            <ToggleMenu
-              label={t('filter')}
-              options={[...filterOptions]}
-              active={filtered}
-              onToggle={toggleFilter}
-            />
-          ),
         },
       ]),
     );
@@ -353,7 +339,29 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
             )}
           </KeyboardAvoidingView>
         </View>
-        {!hasResults ? null : hasGlassHeader ? (
+        {Platform.OS === 'android' ? (
+          // Chips for the kinds and the filter menu, once there's a query,
+          // so the menu can bring back what it leaves out even when nothing
+          // matches.
+          searchQuery.trim() ? (
+            <View style={Styles.flex1}>
+              <View style={styles.androidBar}>
+                <ScopeChips
+                  titles={tabTitles}
+                  selectedIndex={tabs.indexOf(scope)}
+                  onSelect={i => setScope(tabs[i])}
+                />
+                <ToggleMenu
+                  label={t('filter')}
+                  options={filterOptions}
+                  active={filtered}
+                  onToggle={toggleFilter}
+                />
+              </View>
+              {hasResults ? renderList(0) : null}
+            </View>
+          ) : null
+        ) : !hasResults ? null : hasGlassHeader ? (
           // iPhone and iPad from iOS 26: the tabs float in glass under the
           // header, as in a course's detail, and the results scroll under
           // them once their height is known.
@@ -391,6 +399,26 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
   );
 };
 
+/** The filter menu's toggles. */
+const searchFilterOptions = (
+  includeArchived: boolean,
+  includeHidden: boolean,
+) =>
+  [
+    {
+      name: 'archived',
+      label: t('archived'),
+      icon: 'archived',
+      on: includeArchived,
+    },
+    {
+      name: 'hidden',
+      label: t('hidden'),
+      icon: 'hide',
+      on: includeHidden,
+    },
+  ] satisfies ToggleMenuOption[];
+
 const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
@@ -401,6 +429,14 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     flex: 1,
+  },
+  androidBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingStart: 16,
+    paddingEnd: 8,
+    paddingVertical: 4,
   },
   floatingTabs: {
     position: 'absolute',

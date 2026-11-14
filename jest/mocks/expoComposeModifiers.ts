@@ -45,6 +45,7 @@ export const background = layout;
 export const clip = layout;
 export const fillMaxSize = layout;
 export const fillMaxWidth = layout;
+export const horizontalScroll = layout;
 export const imePadding = layout;
 export const padding = layout;
 export const weight = layout;
