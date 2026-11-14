@@ -15,5 +15,19 @@ module.exports = {
     'PackageJsonScriptsAll',
     'GitIgnore',
   ],
-  ignorePaths: ['ios/learnX/Expo.plist'],
+  // Git-ignored files a local build or setup leaves behind, so a local check
+  // matches CI's clean checkout.
+  ignorePaths: [
+    'ios/learnX/Expo.plist',
+    'ios/.xcode.env.local',
+    'ios/build/**/*',
+    'ios/Pods/**/*',
+    'android/local.properties',
+    'android/.gradle/**/*',
+    'android/.kotlin/**/*',
+    'android/build/**/*',
+    'android/app/build/**/*',
+    'android/app/.cxx/**/*',
+    'android/app/release.keystore',
+  ],
 };
