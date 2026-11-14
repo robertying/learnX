@@ -307,6 +307,15 @@ end
 # Run before a release build, so a checkout without .env (a fresh worktree
 # has none: it's git-ignored) fails in seconds instead of shipping a build
 # without the mock login.
+# The over-the-air update settings in .env (scripts/ota-config-ios.sh and
+# android/app/build.gradle build them in). A build without them would never
+# get an update.
+def verify_ota_config!
+  env = Dotenv.parse(release_env_file)
+  UI.user_error!("#{release_env_file} has no https OTA_UPDATE_URL; release builds need it for over-the-air updates (AGENTS.md)") unless env["OTA_UPDATE_URL"].to_s.start_with?("https://")
+  UI.user_error!("#{release_env_file} has no EXPO_PROJECT_ID; the update server needs it (AGENTS.md)") if env["EXPO_PROJECT_ID"].to_s.empty?
+end
+
 def verify_release_env!
   # A TEST_LOGIN bundle takes a test login from launch arguments: E2E only.
   UI.user_error!("TEST_LOGIN is set: unset it; it's for E2E builds only") unless ENV["TEST_LOGIN"].to_s.empty?
@@ -362,6 +371,7 @@ end
 def build_apple(platform)
   verify_versions!
   verify_release_env!
+  verify_ota_config!
   map = sourcemap_path(platform)
   FileUtils.mkdir_p(File.dirname(map))
   FileUtils.rm_f(map)
@@ -432,6 +442,7 @@ end
 def build_android
   verify_versions!
   verify_release_env!
+  verify_ota_config!
   # The release config reads LEARNX_RELEASE_* from android/local.properties and
   # signs with android/app/release.keystore.
   gradle(

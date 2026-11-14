@@ -1,4 +1,5 @@
 import type { NavigationState, PartialState } from '@react-navigation/native';
+import * as Updates from 'expo-updates';
 import Crashlytics, { type StackFrame } from 'modules/crashlytics';
 import { getCredentials } from 'data/credentials';
 import { isMockUser } from 'helpers/mock';
@@ -120,6 +121,9 @@ export function installGlobalErrorHandler() {
 
   const defaultHandler = ErrorUtils.getGlobalHandler();
   setCustomKey('js_fatal', 'false');
+  // Which JS bundle is running: an over-the-air update's id, whose source map
+  // decodes the report's frames, or the one built into the app.
+  setCustomKey('js_bundle', Updates.updateId ?? 'embedded');
   ErrorUtils.setGlobalHandler((error, isFatal) => {
     if (isFatal) {
       setCustomKey('js_fatal', 'true');
