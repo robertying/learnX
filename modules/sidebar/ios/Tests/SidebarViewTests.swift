@@ -1,4 +1,4 @@
-import ExpoModulesCore
+@testable import ExpoModulesCore
 import Testing
 import UIKit
 
@@ -45,6 +45,26 @@ extension SidebarView {
 @Suite struct SidebarViewTests {
   @Test func definesItsView() {
     _ = SidebarModule(appContext: AppContext()).definition()
+  }
+
+  @Test func takesItsPropsFromJS() throws {
+    let appContext = AppContext()
+    let definition = SidebarModule(appContext: appContext).definition()
+    let props = try #require(definition.views.values.first).propsDict()
+    let (view, window) = makeSidebar()
+    defer { window.isHidden = true }
+
+    let items: [[String: Any]] = [
+      ["key": "a", "title": "A", "systemImage": "tray", "badge": false, "testID": "tab-a"],
+      ["key": "b", "title": "B", "systemImage": "tray", "badge": true, "testID": "tab-b"],
+    ]
+    try #require(props["items"]).set(value: items, onView: view, appContext: appContext)
+    try #require(props["selectedKey"]).set(value: "b", onView: view, appContext: appContext)
+    try #require(props["accentColor"]).set(value: "red", onView: view, appContext: appContext)
+
+    #expect(view.list.numberOfItems(inSection: 0) == 2)
+    #expect(view.selectedRows == [1])
+    #expect(view.list.tintColor != nil)
   }
 
   @Test func comparesItems() {
