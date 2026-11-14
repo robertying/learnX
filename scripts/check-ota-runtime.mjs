@@ -22,12 +22,26 @@ import { join } from 'node:path';
 const root = join(import.meta.dirname, '..');
 const recordPath = join(root, 'ota-fingerprint.json');
 
+/** The files under a fingerprint source's debug info, with their hashes. */
+const flatten = info =>
+  info?.children
+    ? info.children.flatMap(flatten)
+    : info
+      ? [`${info.path} ${info.hash}`]
+      : [];
+
 /** A platform's native fingerprint: its hash and each source's. */
 const fingerprint = platform => {
   const { hash, sources } = JSON.parse(
     execFileSync(
       'npx',
-      ['expo-updates', 'fingerprint:generate', '--platform', platform],
+      [
+        'expo-updates',
+        'fingerprint:generate',
+        '--platform',
+        platform,
+        '--debug',
+      ],
       {
         cwd: root,
         encoding: 'utf8',
@@ -41,6 +55,13 @@ const fingerprint = platform => {
   );
   return {
     hash,
+    // Each file's hash in a source, to tell what differs from the record.
+    files: Object.fromEntries(
+      sources.map(source => [
+        `${source.type} ${source.filePath ?? source.id}`,
+        flatten(source.debugInfo),
+      ]),
+    ),
     sources: Object.fromEntries(
       sources.map(source => [
         `${source.type} ${source.filePath ?? source.id}`,
@@ -124,6 +145,17 @@ const main = () => {
   );
   if (message) {
     console.error(message);
+    const prints = { ios, android };
+    for (const platform of /** @type {const} */ (['ios', 'android'])) {
+      for (const key of changedSources(
+        recorded.sources?.[platform],
+        current.sources[platform],
+      )) {
+        console.error(
+          `\n${platform} ${key}:\n${(prints[platform].files[key] ?? []).join('\n')}`,
+        );
+      }
+    }
     process.exit(1);
   }
   console.log(
