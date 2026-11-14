@@ -15,10 +15,16 @@ module.exports = {
     'PackageJsonScriptsAll',
     'GitIgnore',
   ],
-  // Git-ignored files a local build or setup leaves behind, so a local check
-  // matches CI's clean checkout.
   ignorePaths: [
     'ios/learnX/Expo.plist',
+    // Native tests don't ship.
+    'ios/learnXTests/**/*',
+    'ios/learnXUITests/**/*',
+    'modules/*/ios/Tests/**/*',
+    'modules/*/android/src/test/**/*',
+    'android/patch-tests/**/*',
+    // Git-ignored files a local build or setup leaves behind, so a local check
+    // matches CI's clean checkout.
     'ios/.xcode.env.local',
     'ios/build/**/*',
     'ios/Pods/**/*',
