@@ -153,6 +153,20 @@ function UpNextWidget(
   const large = family === 'systemLarge' || family === 'systemExtraLarge';
   const spacing = large ? 10 : 4;
 
+  // With no class ahead, the widget's name and the message under it.
+  if (!featured) {
+    return kit.empty({
+      header: (
+        <HStack>
+          {kit.label(props.title, accent)}
+          <Spacer />
+        </HStack>
+      ),
+      text: props.noClasses,
+      modifiers: [kit.background, ...kit.language(props.locale), ...openToday],
+    });
+  }
+
   // The class on now or next. A small widget gives its name and its time two
   // lines each and its place a line of its own, unless it's `compact` to make
   // room for the classes after it, with the start alone.
@@ -160,66 +174,52 @@ function UpNextWidget(
     font({ textStyle: small ? 'caption' : 'subheadline' }),
     kit.secondary,
   ];
-  const featuredClass = (withCountdown: boolean, compact = false) =>
-    featured ? (
-      <VStack
-        key={`${withCountdown}-${compact}`}
-        alignment="leading"
-        spacing={1}
+  const featuredClass = (withCountdown: boolean, compact = false) => (
+    <VStack key={`${withCountdown}-${compact}`} alignment="leading" spacing={1}>
+      <Text
+        modifiers={[
+          font({ textStyle: 'headline', weight: 'semibold' }),
+          lineLimit(small && !compact ? 2 : 1),
+        ]}
       >
-        <Text
-          modifiers={[
-            font({ textStyle: 'headline', weight: 'semibold' }),
-            lineLimit(small && !compact ? 2 : 1),
-          ]}
-        >
-          {featured.courseName}
-        </Text>
-        {small && !compact ? (
-          // Its time in up to two lines, then its place.
-          <VStack alignment="leading" spacing={0}>
-            <Text modifiers={[...detail, lineLimit(2)]}>{when(featured)}</Text>
-            {featured.location ? (
-              <Text modifiers={[...detail, lineLimit(1), place]}>
-                {featured.location}
-              </Text>
-            ) : null}
-          </VStack>
-        ) : (
-          // Its time and place in a line, where the place shortens first.
-          <HStack spacing={0}>
-            <Text modifiers={[...detail, lineLimit(1), layoutPriority(1)]}>
-              {when(featured, compact)}
+        {featured.courseName}
+      </Text>
+      {small && !compact ? (
+        // Its time in up to two lines, then its place.
+        <VStack alignment="leading" spacing={0}>
+          <Text modifiers={[...detail, lineLimit(2)]}>{when(featured)}</Text>
+          {featured.location ? (
+            <Text modifiers={[...detail, lineLimit(1), place]}>
+              {featured.location}
             </Text>
-            {featured.location ? (
-              <Text modifiers={[...detail, lineLimit(1), place]}>
-                {` · ${featured.location}`}
-              </Text>
-            ) : null}
-            <Spacer />
-          </HStack>
-        )}
-        {withCountdown ? countdown(small ? 'caption' : 'footnote') : null}
-      </VStack>
-    ) : null;
+          ) : null}
+        </VStack>
+      ) : (
+        // Its time and place in a line, where the place shortens first.
+        <HStack spacing={0}>
+          <Text modifiers={[...detail, lineLimit(1), layoutPriority(1)]}>
+            {when(featured, compact)}
+          </Text>
+          {featured.location ? (
+            <Text modifiers={[...detail, lineLimit(1), place]}>
+              {` · ${featured.location}`}
+            </Text>
+          ) : null}
+          <Spacer />
+        </HStack>
+      )}
+      {withCountdown ? countdown(small ? 'caption' : 'footnote') : null}
+    </VStack>
+  );
 
-  // The label (now, next, or the widget's name) and the class on now or next.
-  const topWith = (featuredView: ReactElement | null) => (
+  // The label (now or next) and the class on now or next.
+  const topWith = (featuredView: ReactElement) => (
     <VStack key="top" alignment="leading" spacing={spacing}>
       <HStack>
-        {kit.label(
-          featured ? (current ? props.now : props.next) : props.title,
-          accent,
-        )}
+        {kit.label(current ? props.now : props.next, accent)}
         <Spacer />
       </HStack>
-      {featured ? (
-        featuredView
-      ) : (
-        <Text modifiers={[font({ textStyle: 'footnote' }), kit.secondary]}>
-          {props.noClasses}
-        </Text>
-      )}
+      {featuredView}
     </VStack>
   );
 
@@ -278,31 +278,25 @@ function UpNextWidget(
       cut: false,
     });
     return kit.fitted({
-      versions: featured
-        ? [
-            ...after.map((_, i) => {
-              const count = after.length - i;
-              return {
-                key: String(count),
-                top: topWith(featuredClass(true, true)),
-                rows: after.slice(0, count).map(laterRow),
-                cut: count < classes.length - 1,
-              };
-            }),
-            fullTop(true),
-            fullTop(false),
-          ]
-        : [fullTop(false)],
+      versions: [
+        ...after.map((_, i) => {
+          const count = after.length - i;
+          return {
+            key: String(count),
+            top: topWith(featuredClass(true, true)),
+            rows: after.slice(0, count).map(laterRow),
+            cut: count < classes.length - 1,
+          };
+        }),
+        fullTop(true),
+        fullTop(false),
+      ],
       spacing,
       modifiers: [kit.background, ...kit.language(props.locale), ...openToday],
     });
   }
 
-  const top = topWith(
-    featured
-      ? linked(featured, 'featured', featuredClass(true) as ReactElement)
-      : null,
-  );
+  const top = topWith(linked(featured, 'featured', featuredClass(true)));
 
   // The classes after this one, as many as fit; a large widget names them
   // above the first.

@@ -1,4 +1,4 @@
-import { Column, Row, Spacer, Text } from '@expo/ui/jetpack-compose';
+import { Box, Column, Row, Spacer, Text } from '@expo/ui/jetpack-compose';
 import {
   background,
   cornerRadius,
@@ -107,9 +107,15 @@ function DeadlinesWidget(
       </Row>
       <Spacer modifiers={[height(6)]} />
       {deadlines.length === 0 ? (
-        <Text color={colors.caption} style={{ fontSize: 13 }}>
-          {empty}
-        </Text>
+        // Centered in the space below the title.
+        <Box modifiers={[fillMaxSize()]} contentAlignment="center">
+          <Text
+            color={colors.caption}
+            style={{ fontSize: 13, textAlign: 'center' }}
+          >
+            {empty}
+          </Text>
+        </Box>
       ) : null}
       {deadlines.map(item => (
         <Column

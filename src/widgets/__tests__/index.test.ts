@@ -137,7 +137,8 @@ describe('updateUpNextWidget', () => {
     ]);
     expect(new Set(entries.map(e => e.props)).size).toBe(1);
     expect(entries[0].props).toMatchObject({
-      title: 'Up Next',
+      title: 'Next Up',
+      next: 'Next Up',
       url: 'learnx://today',
       locale: 'en',
       classes: [

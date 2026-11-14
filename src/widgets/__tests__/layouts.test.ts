@@ -790,11 +790,11 @@ describe('Up Next on Android', () => {
       url: '',
     } as never;
     expect(texts(layout(initial, {}))).toEqual([
-      'Up Next',
+      'Next Up',
       'Open learnX to see your classes',
     ]);
     expect(texts(layout(initial, { locale: 'zh-Hans' }))).toEqual([
-      '接下来',
+      '下一节课',
       '打开 learnX 以显示课程',
     ]);
   });

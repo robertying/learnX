@@ -1,4 +1,4 @@
-import { Column, Spacer, Text } from '@expo/ui/jetpack-compose';
+import { Box, Column, Spacer, Text } from '@expo/ui/jetpack-compose';
 import {
   background,
   cornerRadius,
@@ -47,7 +47,7 @@ function UpNextWidget(
   // in their own runtime without the app's translations.
   /* oxlint-disable learnx/no-han-outside-translations */
   const zh = (environment.locale ?? '').startsWith('zh');
-  const title = props.title || (zh ? '接下来' : 'Up Next');
+  const title = props.title || (zh ? '下一节课' : 'Next Up');
   const noClasses =
     props.noClasses ||
     (zh ? '打开 learnX 以显示课程' : 'Open learnX to see your classes');
@@ -111,9 +111,15 @@ function UpNextWidget(
           </Text>
         </Column>
       ) : (
-        <Text color={colors.caption} style={{ fontSize: 13 }}>
-          {noClasses}
-        </Text>
+        // Centered in the space below the title.
+        <Box modifiers={[fillMaxSize()]} contentAlignment="center">
+          <Text
+            color={colors.caption}
+            style={{ fontSize: 13, textAlign: 'center' }}
+          >
+            {noClasses}
+          </Text>
+        </Box>
       )}
       {following.map((c, i) => (
         <Column key={c.key} modifiers={[fillMaxWidth(), ...openUrl(c.url)]}>

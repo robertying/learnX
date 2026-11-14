@@ -18,19 +18,19 @@
         }
       }
     },
-    "Up Next" : {
+    "Next Up" : {
       "extractionState" : "manual",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "接下来"
+            "value" : "下一节课"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "接下来"
+            "value" : "下一节课"
           }
         }
       }

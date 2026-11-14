@@ -7,6 +7,7 @@ import {
   frame,
   layoutPriority,
   lineLimit,
+  multilineTextAlignment,
 } from '@expo/ui/swift-ui/modifiers';
 import type { WidgetEnvironment } from 'expo-widgets';
 import type { ReactElement, ReactNode } from 'react';
@@ -165,6 +166,43 @@ export function widgetKit() {
           ]}
         />
       </HStack>
+    ),
+
+    /**
+     * A widget with nothing to list: its header at the top and the message
+     * centered in the space below it.
+     */
+    empty: ({
+      header,
+      text,
+      modifiers,
+    }: {
+      header: ReactNode;
+      text: string;
+      modifiers: ReturnType<typeof frame>[];
+    }) => (
+      <VStack
+        alignment="leading"
+        spacing={0}
+        modifiers={[
+          frame({ maxWidth: 10000, maxHeight: 10000, alignment: 'topLeading' }),
+          ...modifiers,
+        ]}
+      >
+        {header}
+        <Spacer />
+        <Text
+          modifiers={[
+            font({ textStyle: 'footnote' }),
+            secondary,
+            multilineTextAlignment('center'),
+            frame({ maxWidth: 10000 }),
+          ]}
+        >
+          {text}
+        </Text>
+        <Spacer />
+      </VStack>
     ),
 
     /**
