@@ -1,0 +1,76 @@
+appId: ${APP_ID}
+name: Download a file, then delete it
+---
+# The mock file downloads from its real URL, so the device needs the network.
+- runFlow: subflows/login.yaml
+- runFlow:
+    file: subflows/tab.yaml
+    env:
+      TAB: 'tab-files|folder\.fill'
+- runFlow:
+    file: subflows/open.yaml
+    env:
+      CARD: '.*(${MOCK_FILE}).*'
+      CARD_ID: file-card
+      DETAIL: file-detail
+- extendedWaitUntil:
+    notVisible:
+      id: file-loading
+    timeout: 60000
+- assertNotVisible:
+    id: 'file-error|file-preview-failed'
+- runFlow:
+    file: subflows/back.yaml
+    env:
+      LIST: '${T_filter}'
+
+# Settings › Downloads lists its course; Export asks where (cancelled here),
+# and Delete removes the course's files.
+- runFlow: subflows/settings.yaml
+- runFlow:
+    file: subflows/scroll-to-id.yaml
+    env:
+      LIST: settings-list
+      ID: settings-downloads
+- tapOn:
+    id: settings-downloads
+- extendedWaitUntil:
+    visible:
+      id: 'downloads-course-.*'
+    timeout: 10000
+- tapOn:
+    id: downloads-export
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible: 'Cancel|取消'
+          timeout: 10000
+      - tapOn: 'Cancel|取消'
+# Android's folder picker goes up a folder on each back before it closes.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: 'com.google.android.documentsui:id/.*'
+          timeout: 10000
+      - repeat:
+          times: 5
+          while:
+            notVisible:
+              id: 'downloads-course-.*'
+          commands:
+            - back
+- waitForAnimationToEnd
+- tapOn:
+    id: 'downloads-course-.*'
+- tapOn: '${T_deleteEllipsis}'
+- tapOn: '${T_delete}'
+- extendedWaitUntil:
+    notVisible:
+      id: 'downloads-course-.*'
+    timeout: 10000
+- runFlow: subflows/back-to-settings.yaml

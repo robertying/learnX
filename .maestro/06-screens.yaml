@@ -1,0 +1,135 @@
+appId: ${APP_ID}
+name: Open every other screen
+# Mock content only: the assignment it opens must take online submissions.
+---
+# The screens the other flows don't reach: the timetable, an assignment's
+# submission sheet, a course's courseX page and every Settings page apart from
+# Changelog and About (05-settings-logout). Each is checked by its id.
+- runFlow: subflows/login.yaml
+
+# Today › Schedule
+- runFlow:
+    file: subflows/tab.yaml
+    env:
+      TAB: 'tab-today|(sunrise|sun\.max|sunset|moon\.stars)\.fill'
+- tapOn:
+    id: today-schedule
+- extendedWaitUntil:
+    visible:
+      id: schedule
+    timeout: 10000
+- runFlow:
+    file: subflows/back.yaml
+    env:
+      LIST: '.*(${T_todayDueSoon}).*'
+
+# An open assignment's submission sheet, closed without sending
+- runFlow:
+    file: subflows/tab.yaml
+    env:
+      TAB: 'tab-assignments|list\.bullet\.clipboard\.fill'
+- runFlow:
+    file: subflows/open.yaml
+    env:
+      CARD: '.*(${MOCK_ASSIGNMENT}).*'
+      DETAIL: assignment-detail
+- tapOn: '${T_submit}'
+- extendedWaitUntil:
+    visible:
+      id: assignmentSubmission
+    timeout: 10000
+- assertVisible:
+    id: pickAttachment
+- runFlow: subflows/close.yaml
+- extendedWaitUntil:
+    notVisible:
+      id: assignmentSubmission
+    timeout: 10000
+- runFlow:
+    file: subflows/back.yaml
+    env:
+      LIST: '${T_filter}'
+
+# A course's information, on courseX (a mock course isn't there, so the page
+# says Not Found)
+- runFlow:
+    file: subflows/tab.yaml
+    env:
+      TAB: 'tab-courses|books\.vertical\.fill'
+- runFlow:
+    file: subflows/open.yaml
+    env:
+      CARD: '.*(${MOCK_COURSE}).*'
+      DETAIL: course-detail
+- tapOn: '${T_courseInformation}'
+- extendedWaitUntil:
+    visible:
+      id: courseXReload
+    timeout: 10000
+# It opens as a sheet.
+- runFlow: subflows/close.yaml
+- extendedWaitUntil:
+    notVisible:
+      id: courseXReload
+    timeout: 10000
+- runFlow:
+    file: subflows/back.yaml
+    env:
+      LIST: '${T_filter}'
+
+# Every Settings page, from the top of the list down
+- runFlow: subflows/settings.yaml
+- runFlow:
+    file: subflows/settings-page.yaml
+    env:
+      ROW: settings-semester
+      PAGE: semester-selection
+- runFlow:
+    file: subflows/settings-page.yaml
+    env:
+      ROW: settings-notifications
+      PAGE: notification-settings
+- runFlow:
+    file: subflows/settings-page.yaml
+    env:
+      ROW: settings-calendar
+      PAGE: calendar-settings
+- runFlow:
+    file: subflows/settings-page.yaml
+    env:
+      ROW: settings-downloads
+      PAGE: downloads
+# Swipe actions are set on iOS and Android, not on Mac.
+- runFlow:
+    file: subflows/settings-page.yaml
+    env:
+      ROW: settings-swipe-actions
+      PAGE: swipe-actions
+- runFlow:
+    file: subflows/settings-page.yaml
+    env:
+      ROW: settings-course-sharing
+      PAGE: course-information-sharing
+- runFlow:
+    file: subflows/settings-page.yaml
+    env:
+      ROW: settings-maintainer
+      PAGE: maintainer
+- runFlow:
+    file: subflows/settings-page.yaml
+    env:
+      ROW: settings-help
+      PAGE: help
+# What's New opens as a sheet over Settings; Continue closes it.
+- tapOn:
+    id: settings-whats-new
+- extendedWaitUntil:
+    visible:
+      id: whats-new
+    timeout: 10000
+- tapOn:
+    id: whats-new-continue
+- extendedWaitUntil:
+    visible:
+      id: settings-list
+    timeout: 10000

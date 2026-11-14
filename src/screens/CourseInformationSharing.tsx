@@ -55,7 +55,7 @@ const CourseInformationSharing: React.FC<Props> = () => {
 
   return (
     <FormScreen>
-      <Form>
+      <Form testID="course-information-sharing">
         <FormSection
           footer={
             courseInformationSharing
@@ -65,6 +65,7 @@ const CourseInformationSharing: React.FC<Props> = () => {
         >
           <FormToggle
             icon="info"
+            testID="course-sharing-toggle"
             title={t('courseInformationSharing')}
             value={courseInformationSharing}
             onValueChange={handleEnable}

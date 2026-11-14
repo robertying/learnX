@@ -1,0 +1,54 @@
+# Flip the switch of the settings row with id ID and check that it is then on
+# when ON is 'true', off otherwise. On iOS a tap must land on the switch
+# itself, which reads as 1 or 0; on Android the whole row toggles. CONFIRM, if
+# set, is the button that confirms the alert the switch asks first.
+appId: ${APP_ID}
+---
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          text: '0|1'
+          childOf:
+            id: ${ID}
+      - runFlow:
+          when:
+            true: ${!!CONFIRM}
+          commands:
+            - tapOn: ${CONFIRM}
+      - extendedWaitUntil:
+          visible:
+            text: "${ON == 'true' ? '1' : '0'}"
+            childOf:
+              id: ${ID}
+          timeout: 10000
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn:
+          id: ${ID}
+      - runFlow:
+          when:
+            true: ${!!CONFIRM}
+          commands:
+            - tapOn: ${CONFIRM}
+      - runFlow:
+          when:
+            true: ${ON == 'true'}
+          commands:
+            - extendedWaitUntil:
+                visible:
+                  id: ${ID}
+                  checked: true
+                timeout: 10000
+      - runFlow:
+          when:
+            true: ${ON != 'true'}
+          commands:
+            - extendedWaitUntil:
+                visible:
+                  id: ${ID}
+                  checked: false
+                timeout: 10000

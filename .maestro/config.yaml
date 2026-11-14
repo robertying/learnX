@@ -20,4 +20,9 @@ executionOrder:
     - Log in and visit every tab
     - Favorite and archive a notice
     - Search and open a result
+    - Open every other screen
+    - Change every setting
+    # Deletes the file 02 downloaded, which the next one needs gone.
+    - Download a file, then delete it
+    - Show no results and failures
     - Open settings pages and log out

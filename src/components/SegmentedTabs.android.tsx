@@ -20,11 +20,16 @@ const SegmentedTabs: React.FC<SegmentedTabsProps> = ({
   titles,
   selectedIndex,
   onSelect,
+  testID,
 }) => {
   const theme = useMaterialTheme();
 
   return (
-    <View style={[styles.bar, { backgroundColor: theme.colors.surface }]}>
+    <View
+      testID={testID}
+      collapsable={false}
+      style={[styles.bar, { backgroundColor: theme.colors.surface }]}
+    >
       <ThemedHost matchContents={{ vertical: true }} style={styles.host}>
         <SingleChoiceSegmentedButtonRow modifiers={[fillMaxWidth()]}>
           {titles.map((title, i) => (

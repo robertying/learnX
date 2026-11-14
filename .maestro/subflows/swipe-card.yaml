@@ -1,0 +1,26 @@
+# Swipe the card matching CARD in DIRECTION (LEFT or RIGHT) and tap the action
+# it shows, by its id ACTION (card-fav, card-archive). Maestro's swipe stops
+# short of the full swipe that would run the action by itself.
+appId: ${APP_ID}
+---
+- runFlow:
+    when:
+      true: ${DIRECTION == 'LEFT'}
+    commands:
+      - swipe:
+          from:
+            text: ${CARD}
+          direction: LEFT
+          duration: 300
+- runFlow:
+    when:
+      true: ${DIRECTION == 'RIGHT'}
+    commands:
+      - swipe:
+          from:
+            text: ${CARD}
+          direction: RIGHT
+          duration: 300
+- tapOn:
+    id: ${ACTION}
+- waitForAnimationToEnd

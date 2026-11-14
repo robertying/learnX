@@ -1,0 +1,22 @@
+# Check that the choice row with id ID is the chosen one: iOS reads it as
+# selected, Android as checked.
+appId: ${APP_ID}
+---
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: ${ID}
+            selected: true
+          timeout: 5000
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: ${ID}
+            checked: true
+          timeout: 5000

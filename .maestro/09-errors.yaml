@@ -1,0 +1,63 @@
+appId: ${APP_ID}
+name: Show no results and failures
+---
+- runFlow: subflows/login.yaml
+
+# Nothing found: a search for text no item has
+- runFlow:
+    file: subflows/search.yaml
+    env:
+      TERM: zzzqqq
+      RESULT: '${T_noResults}'
+- assertVisible: '${T_noResultsDescription}'
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
+- runFlow: subflows/close.yaml
+
+# Offline: the mockFailure launch argument makes the emulated server fail
+# every request. The lists keep what they had and say they're offline.
+- launchApp:
+    stopApp: true
+    arguments:
+      mockLatency: none
+      mockFailure: offline
+- extendedWaitUntil:
+    visible: '.*(${T_syncStatusOffline}).*'
+    timeout: 30000
+# A file that isn't on the device can't download (08 deleted file 1's).
+- runFlow:
+    file: subflows/tab.yaml
+    env:
+      TAB: 'tab-files|folder\.fill'
+- runFlow:
+    file: subflows/open.yaml
+    env:
+      CARD: '.*(${MOCK_FILE}).*'
+      DETAIL: file-detail
+- extendedWaitUntil:
+    visible:
+      id: file-error
+    timeout: 30000
+- tapOn: '${T_tryAgain}'
+- extendedWaitUntil:
+    visible:
+      id: file-error
+    timeout: 30000
+- runFlow:
+    file: subflows/back.yaml
+    env:
+      LIST: '${T_filter}'
+
+# Back online for the flows after this one
+- launchApp:
+    stopApp: true
+    arguments:
+      mockLatency: none
+      mockFailure: none
+- extendedWaitUntil:
+    visible:
+      id: 'tab-notices|bell\.fill'
+    timeout: 30000

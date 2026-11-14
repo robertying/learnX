@@ -1,6 +1,10 @@
 import { type ComponentType, createElement } from 'react';
 import { Platform, Settings } from 'react-native';
-import { type MockLatency, setMockNetworkConfig } from 'data/mockSource';
+import {
+  type MockFailure,
+  type MockLatency,
+  setMockNetworkConfig,
+} from 'data/mockSource';
 import env from 'helpers/env';
 
 /**
@@ -13,6 +17,11 @@ import env from 'helpers/env';
 export interface LaunchOptions {
   /** The emulated server's latency for a mock account. */
   mockLatency?: unknown;
+  /**
+   * How the emulated server fails for a mock account (`offline`,
+   * `serverError`, `timeout`), so flows can reach the error states.
+   */
+  mockFailure?: unknown;
   /**
    * `true` shows what the app keeps as JSON in place of the app, for the
    * upgrade test (`screens/StoreReport`, mock account only).
@@ -44,6 +53,15 @@ const latencies = new Set<unknown>(['none', 'normal', 'slow']);
 const isLatency = (value: unknown): value is MockLatency =>
   latencies.has(value);
 
+const failures = new Set<unknown>([
+  'none',
+  'offline',
+  'serverError',
+  'timeout',
+]);
+
+const isFailure = (value: unknown): value is MockFailure => failures.has(value);
+
 const read = (key: keyof LaunchOptions, initialProps?: LaunchOptions) =>
   Platform.OS === 'ios' ? (Settings.get(key) as unknown) : initialProps?.[key];
 
@@ -55,6 +73,10 @@ export const applyLaunchOptions = (initialProps?: LaunchOptions) => {
   const mockLatency = read('mockLatency', initialProps);
   if (isLatency(mockLatency)) {
     setMockNetworkConfig({ latency: mockLatency });
+  }
+  const mockFailure = read('mockFailure', initialProps);
+  if (isFailure(mockFailure)) {
+    setMockNetworkConfig({ failure: mockFailure });
   }
 
   if (__DEV__ || env.TEST_LOGIN) {

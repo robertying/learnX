@@ -54,3 +54,64 @@ name: Favorite and archive a notice
     env:
       LABEL: '(${T_all})(, .*)?'
 - assertVisible: '.*(${MOCK_NOTICE}).*'
+
+# The same from the card's swipe actions: to the left Favorite, to the right
+# Archive (the defaults, data/settings.ts); each again undoes it.
+# iOS only: Maestro's swipe on Android stops short of the half-card full swipe
+# that runs the action there (Android shows no button to tap); Jest covers it
+# (components/__tests__/android/CardWrapper.test.tsx).
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - runFlow:
+          file: subflows/swipe-card.yaml
+          env:
+            CARD: '.*(${MOCK_NOTICE}).*'
+            DIRECTION: LEFT
+            ACTION: card-fav
+      - runFlow:
+          file: subflows/filter.yaml
+          env:
+            LABEL: '(${T_fav})(, .*)?'
+      - assertVisible: '.*(${MOCK_NOTICE}).*'
+      - runFlow:
+          file: subflows/swipe-card.yaml
+          env:
+            CARD: '.*(${MOCK_NOTICE}).*'
+            DIRECTION: LEFT
+            ACTION: card-fav
+      - extendedWaitUntil:
+          notVisible: '.*(${MOCK_NOTICE}).*'
+          timeout: 5000
+      - runFlow:
+          file: subflows/filter.yaml
+          env:
+            LABEL: '(${T_all})(, .*)?'
+      - runFlow:
+          file: subflows/swipe-card.yaml
+          env:
+            CARD: '.*(${MOCK_NOTICE}).*'
+            DIRECTION: RIGHT
+            ACTION: card-archive
+      - extendedWaitUntil:
+          notVisible: '.*(${MOCK_NOTICE}).*'
+          timeout: 5000
+      - runFlow:
+          file: subflows/filter.yaml
+          env:
+            LABEL: '(${T_archived})(, .*)?'
+      - runFlow:
+          file: subflows/swipe-card.yaml
+          env:
+            CARD: '.*(${MOCK_NOTICE}).*'
+            DIRECTION: RIGHT
+            ACTION: card-archive
+      - extendedWaitUntil:
+          notVisible: '.*(${MOCK_NOTICE}).*'
+          timeout: 5000
+      - runFlow:
+          file: subflows/filter.yaml
+          env:
+            LABEL: '(${T_all})(, .*)?'
+      - assertVisible: '.*(${MOCK_NOTICE}).*'

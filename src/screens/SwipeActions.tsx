@@ -40,7 +40,7 @@ const SwipeActions: React.FC<Props> = () => {
 
   return (
     <FormScreen>
-      <Form>
+      <Form testID="swipe-actions">
         {section('right', false)}
         {section('left', true)}
       </Form>
