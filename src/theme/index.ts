@@ -12,10 +12,22 @@ import {
 
 /**
  * The brand color: Tsinghua purple, and the lighter tone of it used in dark
- * mode. The iOS `ThemeColor` asset, Android's `colors.xml`, `brandColor` and
- * the widgets use these same two values (checked by `brand.test.ts`).
+ * mode. Each platform's color system picks its own dark tone:
+ * - `dark` (iOS, iPadOS, Mac, and the iOS widgets): one tint for text and for
+ *   fills under white (filled buttons, switches, selected days), as Apple's
+ *   system colors do. It is about as light as dark mode's systemPurple: white
+ *   on it is 3.6:1, and as text it is 5.9:1 on black and 4.8:1 on a grouped
+ *   row (`__tests__/index.test.ts`).
+ * - `materialDark` (Android): Material's dark primary (tone 80), which carries
+ *   the dark on-primary label in Material's controls.
+ * The iOS `ThemeColor` asset, Android's `colors.xml`, `brandColor` and the
+ * widgets keep copies of these values (checked by `brand.test.ts`).
  */
-export const brandColors = { light: '#660874', dark: '#F4ABFF' } as const;
+export const brandColors = {
+  light: '#660874',
+  dark: '#C55CD6',
+  materialDark: '#F4ABFF',
+} as const;
 
 /**
  * The brand color for the system appearance, for static styles and options
@@ -24,7 +36,10 @@ export const brandColors = { light: '#660874', dark: '#F4ABFF' } as const;
  */
 export const brandColor =
   Platform.OS === 'ios'
-    ? (DynamicColorIOS(brandColors) as unknown as string)
+    ? (DynamicColorIOS({
+        light: brandColors.light,
+        dark: brandColors.dark,
+      }) as unknown as string)
     : brandColors.light;
 
 // Material 3 tokens from `@material/material-color-utilities`
@@ -360,7 +375,11 @@ export const webContentColors = (dark: boolean) => ({
     Platform.OS === 'ios'
       ? 'CanvasText'
       : (dark ? materialDark : materialLight).onSurface,
-  linkColor: dark ? brandColors.dark : brandColors.light,
+  linkColor: dark
+    ? Platform.OS === 'ios'
+      ? brandColors.dark
+      : brandColors.materialDark
+    : brandColors.light,
 });
 
 /**

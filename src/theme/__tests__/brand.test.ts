@@ -41,15 +41,22 @@ describe('brand color', () => {
     const dark = 'android/app/src/main/res/values-night/colors.xml';
     expect(androidColor(light, 'seed')).toBe(brandColors.light);
     expect(androidColor(light, 'md_theme_primary')).toBe(brandColors.light);
-    expect(androidColor(dark, 'md_theme_primary')).toBe(brandColors.dark);
+    expect(androidColor(dark, 'md_theme_primary')).toBe(
+      brandColors.materialDark,
+    );
   });
 
   it('is what the widgets use', () => {
     // The iOS layouts take it from their kit.
-    for (const widget of ['kit', 'Deadlines.android', 'UpNext.android']) {
+    const darkTones = {
+      kit: brandColors.dark,
+      'Deadlines.android': brandColors.materialDark,
+      'UpNext.android': brandColors.materialDark,
+    };
+    for (const [widget, dark] of Object.entries(darkTones)) {
       const source = read(`src/widgets/${widget}.tsx`);
       expect(source).toContain(`'${brandColors.light}'`);
-      expect(source).toContain(`'${brandColors.dark}'`);
+      expect(source).toContain(`'${dark}'`);
     }
   });
 });

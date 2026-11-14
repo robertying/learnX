@@ -92,7 +92,7 @@ export function widgetKit() {
       locale ? [environment('locale', locale)] : [],
     /** The brand color (brandColors in src/theme), which a widget can't import. */
     accent: (widgetEnvironment: WidgetEnvironment) =>
-      widgetEnvironment.colorScheme === 'dark' ? '#F4ABFF' : '#660874',
+      widgetEnvironment.colorScheme === 'dark' ? '#C55CD6' : '#660874',
 
     /**
      * A deadline's color by the app's rule (deadlineUrgency in

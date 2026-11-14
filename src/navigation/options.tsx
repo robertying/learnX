@@ -67,8 +67,10 @@ export const hasGlassHeader =
  * - The header is transparent, so every screen is laid out under it and its
  *   content scrolls under the glass, as in the system apps. A scroll view
  *   keeps clear of the header by itself (`contentInsetAdjustmentBehavior`
- *   "automatic": our `FlatList` and `ScrollView`, `Form`, the web views and
- *   the PDF view). An opaque header would instead have react-native-screens
+ *   "automatic": our `FlatList` and `ScrollView`, `Form` and the web views).
+ *   A previewed file keeps clear of the bars altogether, since its white
+ *   pages would leave the title white on white in dark mode (File detail's
+ *   `SafeArea`). An opaque header would instead have react-native-screens
  *   push the content below it, onto a plain bar. Content over the top of a
  *   screen keeps clear of the header with react-native-screens'
  *   `SafeAreaView` and its top edge (`PageProgressBar`, Course detail's

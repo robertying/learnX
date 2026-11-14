@@ -91,6 +91,14 @@ it('shows progress while downloading, then the PDF, marking it seen', async () =
   await renderScreen({ id: pdf.id });
   expect(screen.getByTestId('pdf')).toBeTruthy();
   expect(markFileSeen).toHaveBeenCalledWith(pdf.id);
+  // White pages stay clear of the header and tab bar, whose text follows the
+  // app's dark mode
+  expect(screen.getByTestId('file-detail').props.edges).toEqual({
+    left: true,
+    right: true,
+    top: true,
+    bottom: true,
+  });
 });
 
 it("offers to download again when the PDF can't be read", async () => {

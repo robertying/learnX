@@ -38,7 +38,7 @@ const tones: StatusTone[] = [
 
 describe.each([
   ['light', BrandLightTheme, brandColors.light],
-  ['dark', BrandDarkTheme, brandColors.dark],
+  ['dark', BrandDarkTheme, brandColors.materialDark],
 ])('%s theme', (_, theme, brand) => {
   const colors = theme.colors as MaterialColors;
 

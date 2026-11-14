@@ -7,6 +7,21 @@ import * as theme from 'theme';
 
 const RN: typeof ReactNative = require('react-native');
 
+/** WCAG contrast of two `#RRGGBB` colors. */
+const channels = (hex: string) =>
+  [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
+const luminance = (hex: string) => {
+  const [r, g, b] = channels(hex).map(c => {
+    const v = c / 255;
+    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+const contrast = (a: string, b: string) => {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+};
+
 const scheme = (value: 'light' | 'dark') =>
   jest.spyOn(RN, 'useColorScheme').mockReturnValue(value);
 
@@ -60,6 +75,16 @@ describe('on iOS and Mac', () => {
     ]);
   });
 
+  it('keeps the dark brand tone readable as text and under white', () => {
+    const { dark } = theme.brandColors;
+    // A filled button's label and a switch's knob, as Apple's system colors
+    expect(contrast('#FFFFFF', dark)).toBeGreaterThanOrEqual(3.5);
+    // Text and links on black and on a grouped row
+    for (const background of ['#000000', '#1C1C1E']) {
+      expect(contrast(dark, background)).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
   it('gives web content CSS colors: WebKit text and the brand links', () => {
     expect(theme.webContentColors(true)).toEqual({
       textColor: 'CanvasText',
@@ -77,8 +102,6 @@ describe('on iOS and Mac', () => {
       blue: ['#007AFF', '#0A84FF'],
       grey: ['#8E8E93', '#8E8E93'],
     };
-    const channels = (hex: string) =>
-      [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
     // `color` at `alpha` over `under`, as the pill's tint draws.
     const over = (color: string, under: string, alpha: number) =>
       `#${channels(color)
@@ -88,17 +111,6 @@ describe('on iOS and Mac', () => {
             .padStart(2, '0'),
         )
         .join('')}`;
-    const luminance = (hex: string) => {
-      const [r, g, b] = channels(hex).map(c => {
-        const v = c / 255;
-        return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
-      });
-      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-    };
-    const contrast = (a: string, b: string) => {
-      const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
-      return (hi + 0.05) / (lo + 0.05);
-    };
     const tones = Object.keys(system) as theme.StatusTone[];
     const tint = theme.statusContainerOpacity;
 
