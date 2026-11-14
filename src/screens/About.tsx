@@ -29,7 +29,7 @@ const openGitHub = (path: string) =>
 
 const About: React.FC<Props> = () => (
   <FormScreen>
-    <Form>
+    <Form testID="about">
       <FormSection footer={copyright}>
         <FormText
           icon="info"

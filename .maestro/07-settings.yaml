@@ -1,0 +1,436 @@
+appId: ${APP_ID}
+name: Change every setting
+---
+# Turns each setting on (or to another choice) and back, so the run ends as it
+# started. The notification and calendar settings start off (data/settings.ts).
+# Their permissions are given at launch.
+- launchApp:
+    permissions:
+      notifications: allow
+      calendar: allow
+      reminders: allow
+    arguments:
+      mockLatency: none
+- runFlow: subflows/login.yaml
+- runFlow: subflows/settings.yaml
+
+# Graduate timetable
+- runFlow:
+    file: subflows/toggle.yaml
+    env:
+      ID: settings-graduate
+      ON: 'true'
+- runFlow:
+    file: subflows/toggle.yaml
+    env:
+      ID: settings-graduate
+      ON: 'false'
+
+# Semester: another one, then the one it showed again
+- tapOn:
+    id: settings-semester
+- extendedWaitUntil:
+    visible:
+      id: semester-selection
+    timeout: 10000
+# The chosen row reads as selected on iOS and as checked on Android, whose
+# rows hold their title as a child.
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - copyTextFrom:
+          id: 'semester-\d.*'
+          selected: true
+      - evalScript: ${output.semester = maestro.copiedText}
+      - tapOn:
+          id: 'semester-\d.*'
+          selected: false
+      - assertNotVisible:
+          text: ${output.semester}
+          selected: true
+      - tapOn: ${output.semester}
+      - assertVisible:
+          text: ${output.semester}
+          selected: true
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - copyTextFrom:
+          text: '.+'
+          childOf:
+            id: 'semester-\d.*'
+            checked: true
+      - evalScript: ${output.semester = maestro.copiedText}
+      - tapOn:
+          id: 'semester-\d.*'
+          checked: false
+      - assertNotVisible:
+          text: ${output.semester}
+          childOf:
+            id: 'semester-\d.*'
+            checked: true
+      - tapOn: ${output.semester}
+      - assertVisible:
+          text: ${output.semester}
+          childOf:
+            id: 'semester-\d.*'
+            checked: true
+- runFlow: subflows/back-to-settings.yaml
+
+# Notifications: each on, then each off. Android only: on iOS, Maestro holds
+# the notification permission alert back until some later tap, which it then
+# spends on the alert, so which tap is lost isn't known. The page itself is
+# opened on iOS by 06-screens.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn:
+          id: settings-notifications
+      - extendedWaitUntil:
+          visible:
+            id: notification-settings
+          timeout: 10000
+      - runFlow:
+          file: subflows/toggle.yaml
+          env:
+            ID: notifications-notices
+            ON: 'true'
+      - runFlow:
+          file: subflows/toggle.yaml
+          env:
+            ID: notifications-assignments
+            ON: 'true'
+      - runFlow:
+          file: subflows/toggle.yaml
+          env:
+            ID: notifications-files
+            ON: 'true'
+      - runFlow:
+          file: subflows/toggle.yaml
+          env:
+            ID: notifications-classReminders
+            ON: 'true'
+      - assertVisible: '.*(${T_classReminderOffset}).*'
+      - runFlow:
+          file: subflows/toggle.yaml
+          env:
+            ID: notifications-deadlineReminders
+            ON: 'true'
+      - assertVisible: '.*(${T_deadlineReminderOffset}).*'
+      - runFlow:
+          file: subflows/scroll-to-id.yaml
+          env:
+            LIST: notification-settings
+            ID: notifications-groupSubmissions
+      - runFlow:
+          file: subflows/toggle.yaml
+          env:
+            ID: notifications-grades
+            ON: 'true'
+      - runFlow:
+          file: subflows/toggle.yaml
+          env:
+            ID: notifications-deadlineChanges
+            ON: 'true'
+      - runFlow:
+          file: subflows/toggle.yaml
+          env:
+            ID: notifications-groupSubmissions
+            ON: 'true'
+      # And off again, from the bottom up
+      - runFlow:
+          file: subflows/toggle.yaml
+          env:
+            ID: notifications-groupSubmissions
+            ON: 'false'
+      - runFlow:
+          file: subflows/toggle.yaml
+          env:
+            ID: notifications-deadlineChanges
+            ON: 'false'
+      - runFlow:
+          file: subflows/toggle.yaml
+          env:
+            ID: notifications-grades
+            ON: 'false'
+      - runFlow:
+          file: subflows/toggle.yaml
+          env:
+            ID: notifications-deadlineReminders
+            ON: 'false'
+      - runFlow:
+          file: subflows/scroll-to-top.yaml
+          env:
+            LIST: notification-settings
+            ID: notifications-notices
+      - runFlow:
+          file: subflows/toggle.yaml
+          env:
+            ID: notifications-classReminders
+            ON: 'false'
+      - runFlow:
+          file: subflows/toggle.yaml
+          env:
+            ID: notifications-files
+            ON: 'false'
+      - runFlow:
+          file: subflows/toggle.yaml
+          env:
+            ID: notifications-assignments
+            ON: 'false'
+      - runFlow:
+          file: subflows/toggle.yaml
+          env:
+            ID: notifications-notices
+            ON: 'false'
+      - runFlow: subflows/back-to-settings.yaml
+
+# Calendars & Reminders: each sync on with its options on and off, then a
+# look in the system Calendar and Reminders apps (iOS) for what it wrote: this
+# week's classes of the mock course (found by their room, which is the same in
+# both languages) and the mock assignment (found by "OFDM", in its title in
+# both). Then the syncs go off, which keeps what they wrote, and Delete
+# removes it.
+- tapOn:
+    id: settings-calendar
+- extendedWaitUntil:
+    visible:
+      id: calendar-settings
+    timeout: 10000
+- runFlow:
+    file: subflows/toggle.yaml
+    env:
+      ID: calendar-course-sync
+      ON: 'true'
+- runFlow:
+    file: subflows/toggle.yaml
+    env:
+      ID: calendar-classAlarm
+      ON: 'true'
+- assertVisible: '.*(${T_classAlarmBefore}).*'
+- runFlow:
+    file: subflows/toggle.yaml
+    env:
+      ID: calendar-courseEventOmitLocation
+      ON: 'true'
+- runFlow:
+    file: subflows/toggle.yaml
+    env:
+      ID: calendar-courseEventOmitLocation
+      ON: 'false'
+- runFlow:
+    file: subflows/toggle.yaml
+    env:
+      ID: calendar-classAlarm
+      ON: 'false'
+- runFlow:
+    file: subflows/toggle.yaml
+    env:
+      ID: calendar-assignment-sync
+      ON: 'true'
+- runFlow:
+    file: subflows/toggle.yaml
+    env:
+      ID: calendar-assignmentCalendarAlarm
+      ON: 'true'
+- runFlow:
+    file: subflows/scroll-to-id.yaml
+    env:
+      LIST: calendar-settings
+      ID: calendar-assignmentCalendarNoAlarmIfComplete
+- runFlow:
+    file: subflows/toggle.yaml
+    env:
+      ID: calendar-assignmentCalendarSecondAlarm
+      ON: 'true'
+- assertVisible: '.*(${T_assignmentCalendarSecondAlarmOffset}).*'
+- runFlow:
+    file: subflows/toggle.yaml
+    env:
+      ID: calendar-assignmentCalendarNoAlarmIfComplete
+      ON: 'true'
+- runFlow:
+    file: subflows/toggle.yaml
+    env:
+      ID: calendar-assignmentCalendarNoAlarmIfComplete
+      ON: 'false'
+- runFlow:
+    file: subflows/toggle.yaml
+    env:
+      ID: calendar-assignmentCalendarSecondAlarm
+      ON: 'false'
+- runFlow:
+    file: subflows/scroll-to-top.yaml
+    env:
+      LIST: calendar-settings
+      ID: calendar-assignment-sync
+- runFlow:
+    file: subflows/toggle.yaml
+    env:
+      ID: calendar-assignmentCalendarAlarm
+      ON: 'false'
+# Reminders are on Apple platforms only.
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - runFlow:
+          file: subflows/scroll-to-id.yaml
+          env:
+            LIST: calendar-settings
+            ID: reminders-assignment-sync
+      - runFlow:
+          file: subflows/toggle.yaml
+          env:
+            ID: reminders-assignment-sync
+            ON: 'true'
+      - runFlow:
+          file: subflows/scroll-to-id.yaml
+          env:
+            LIST: calendar-settings
+            ID: calendar-assignmentReminderAlarm
+      - runFlow:
+          file: subflows/toggle.yaml
+          env:
+            ID: calendar-assignmentReminderAlarm
+            ON: 'true'
+      - runFlow:
+          file: subflows/toggle.yaml
+          env:
+            ID: calendar-assignmentReminderAlarm
+            ON: 'false'
+      # What the syncs wrote
+      - runFlow:
+          file: subflows/calendar-app.yaml
+          env:
+            QUERY: 6A118
+            MATCH: '.*(${MOCK_COURSE}).*'
+            FOUND: 'true'
+      - runFlow:
+          file: subflows/calendar-app.yaml
+          env:
+            QUERY: OFDM
+            MATCH: '.*(${MOCK_ASSIGNMENT}).*'
+            FOUND: 'true'
+      - runFlow:
+          file: subflows/reminders-app.yaml
+          env:
+            MATCH: '.*(${MOCK_ASSIGNMENT}).*'
+            FOUND: 'true'
+      # Back to learnX as it was
+      - launchApp:
+          stopApp: false
+      - extendedWaitUntil:
+          visible:
+            id: calendar-settings
+          timeout: 10000
+      - runFlow:
+          file: subflows/toggle.yaml
+          env:
+            ID: reminders-assignment-sync
+            ON: 'false'
+- runFlow:
+    file: subflows/scroll-to-top.yaml
+    env:
+      LIST: calendar-settings
+      ID: calendar-course-sync
+- runFlow:
+    file: subflows/toggle.yaml
+    env:
+      ID: calendar-course-sync
+      ON: 'false'
+- runFlow:
+    file: subflows/scroll-to-id.yaml
+    env:
+      LIST: calendar-settings
+      ID: calendar-assignment-sync
+- runFlow:
+    file: subflows/toggle.yaml
+    env:
+      ID: calendar-assignment-sync
+      ON: 'false'
+# Delete what the syncs wrote; the alert's button has the label alone.
+- runFlow:
+    file: subflows/scroll-to-id.yaml
+    env:
+      LIST: calendar-settings
+      ID: calendar-delete
+- tapOn:
+    id: calendar-delete
+- tapOn: '${T_delete}'
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - runFlow:
+          file: subflows/calendar-app.yaml
+          env:
+            QUERY: OFDM
+            MATCH: '.*(${MOCK_ASSIGNMENT}).*'
+            FOUND: 'false'
+      - runFlow:
+          file: subflows/reminders-app.yaml
+          env:
+            MATCH: '.*(${MOCK_ASSIGNMENT}).*'
+            FOUND: 'false'
+      - launchApp:
+          stopApp: false
+      - extendedWaitUntil:
+          visible:
+            id: calendar-settings
+          timeout: 10000
+- runFlow: subflows/back-to-settings.yaml
+
+# Swipe actions: Favorite on a right swipe, then Archive again (the default)
+- runFlow:
+    file: subflows/scroll-to-id.yaml
+    env:
+      LIST: settings-list
+      ID: settings-swipe-actions
+- tapOn:
+    id: settings-swipe-actions
+- extendedWaitUntil:
+    visible:
+      id: swipe-actions
+    timeout: 10000
+- tapOn:
+    id: swipe-right-fav
+- runFlow:
+    file: subflows/assert-chosen.yaml
+    env:
+      ID: swipe-right-fav
+- tapOn:
+    id: swipe-right-archive
+- runFlow:
+    file: subflows/assert-chosen.yaml
+    env:
+      ID: swipe-right-archive
+- runFlow: subflows/back-to-settings.yaml
+
+# Course information sharing: on and off (a mock account never uploads)
+- runFlow:
+    file: subflows/scroll-to-id.yaml
+    env:
+      LIST: settings-list
+      ID: settings-course-sharing
+- tapOn:
+    id: settings-course-sharing
+- extendedWaitUntil:
+    visible:
+      id: course-information-sharing
+    timeout: 10000
+- runFlow:
+    file: subflows/toggle.yaml
+    env:
+      ID: course-sharing-toggle
+      ON: 'true'
+      CONFIRM: '${T_join}'
+- runFlow:
+    file: subflows/toggle.yaml
+    env:
+      ID: course-sharing-toggle
+      ON: 'false'
+- runFlow: subflows/back-to-settings.yaml

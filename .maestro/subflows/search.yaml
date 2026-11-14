@@ -4,6 +4,13 @@ appId: ${APP_ID}
 ---
 - tapOn: '${T_search}'
 - inputText: ${TERM}
+# In Chinese, Android's keyboard takes the letters as Pinyin and holds them
+# until return commits them as typed.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - pressKey: Enter
 # Maestro can drop a CJK character while typing: retype until the field
 # holds all of TERM.
 - repeat:
@@ -13,6 +20,11 @@ appId: ${APP_ID}
     commands:
       - eraseText
       - inputText: ${TERM}
+      - runFlow:
+          when:
+            platform: Android
+          commands:
+            - pressKey: Enter
 - extendedWaitUntil:
     visible: ${RESULT}
     timeout: 5000

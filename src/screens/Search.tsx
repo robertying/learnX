@@ -364,7 +364,11 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
           // matches.
           showTabs ? (
             <View style={Styles.flex1}>
-              <View style={styles.androidBar}>
+              <View
+                testID="search-tabs"
+                collapsable={false}
+                style={styles.androidBar}
+              >
                 <ScopeChips
                   titles={tabTitles}
                   selectedIndex={tabs.indexOf(scope)}
@@ -398,6 +402,7 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
                   onSelect={i => setScope(tabs[i])}
                   accessibilityLabel={t('search')}
                   floating
+                  testID="search-tabs"
                 />
               </View>
             </SafeAreaView>
@@ -409,6 +414,7 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
               selectedIndex={tabs.indexOf(scope)}
               onSelect={i => setScope(tabs[i])}
               accessibilityLabel={t('search')}
+              testID="search-tabs"
             />
             {hasResults ? renderList(0) : null}
           </View>

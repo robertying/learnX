@@ -83,6 +83,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
           {/* Which timetable Today, Schedule and the calendar show. */}
           <FormToggle
             icon="graduate"
+            testID="settings-graduate"
             title={t('graduate')}
             value={graduate}
             onValueChange={value => setSetting('graduate', value)}
@@ -97,6 +98,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
         <FormSection>
           <FormLink
             icon="semester"
+            testID="settings-semester"
             title={t('semesterSelection')}
             onPress={() => show('SemesterSelection')}
           />
@@ -108,11 +110,13 @@ const Settings: React.FC<Props> = ({ navigation }) => {
           />
           <FormLink
             icon="calendar"
+            testID="settings-calendar"
             title={calendarSettingsTitle()}
             onPress={() => show('CalendarSettings')}
           />
           <FormLink
             icon="download"
+            testID="settings-downloads"
             title={t('downloads')}
             onPress={() => show('Downloads')}
           />
@@ -130,6 +134,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
           <FormLink
             icon="info"
             badge={!courseSharingSeen}
+            testID="settings-course-sharing"
             title={t('courseInformationSharing')}
             onPress={() => show('CourseInformationSharing')}
           />
@@ -150,6 +155,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
           )}
           <FormLink
             icon="changelog"
+            testID="settings-changelog"
             title={t('changelog')}
             onPress={() => show('Changelog')}
           />
@@ -163,16 +169,19 @@ const Settings: React.FC<Props> = ({ navigation }) => {
           )}
           <FormLink
             icon="maintainer"
+            testID="settings-maintainer"
             title={t('becomeMaintainer')}
             onPress={() => show('Maintainer')}
           />
           <FormLink
             icon="help"
+            testID="settings-help"
             title={t('helpAndFeedback')}
             onPress={() => show('Help')}
           />
           <FormLink
             icon="about"
+            testID="settings-about"
             title={t('about')}
             onPress={() => show('About')}
           />

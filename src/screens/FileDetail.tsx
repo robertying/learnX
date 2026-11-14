@@ -121,6 +121,7 @@ const FileDetailContent: React.FC<{
         // error and the loading state below.
         <StatusView
           key="error"
+          testID="file-error"
           icon="error"
           title={t('fileDownloadFailedTitle')}
           description={t('fileDownloadFailedDescription')}
@@ -133,6 +134,7 @@ const FileDetailContent: React.FC<{
       ) : !showInfo && canRender && previewFailed ? (
         <StatusView
           key="preview-failed"
+          testID="file-preview-failed"
           icon="error"
           title={t('previewFailedTitle')}
           description={t('previewFailedDescription')}

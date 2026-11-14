@@ -23,7 +23,7 @@ const issueTemplate = () =>
 
 const Help: React.FC<Props> = () => (
   <FormScreen>
-    <Form>
+    <Form testID="help">
       <FormSection title={t('githubRecommended')}>
         <FormButton
           icon="feedback"

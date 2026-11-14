@@ -33,6 +33,11 @@ if pgrep -f '/learnX\.app/Contents/MacOS/learnX$' >/dev/null; then
   exit 1
 fi
 
+# As every E2E build (scripts/e2e-build.sh): takes a test login from launch
+# arguments and puts a failed login's reason first in its toast, for the login
+# server check (LoginServerUITests).
+export TEST_LOGIN=1
+
 derived="${DERIVED_DATA:-$HOME/Library/Developer/Xcode/DerivedData/learnX-e2e-mac}"
 result="build/e2e/mac.xcresult"
 rm -rf "$result"

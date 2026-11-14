@@ -1,0 +1,15 @@
+# Close what opened as a sheet (search, submission, courseX): its Close button
+# on iOS, the system back on Android (hide a keyboard that's up first).
+appId: ${APP_ID}
+---
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: '${T_close}'
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- waitForAnimationToEnd

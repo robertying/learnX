@@ -1,0 +1,22 @@
+# iOS: open the system Reminders app's All list and check that a reminder
+# matching MATCH is in it when FOUND is 'true', or isn't otherwise. Goes back
+# to the lists, where Reminders opens next time, and leaves it in front.
+appId: com.apple.reminders
+---
+- launchApp:
+    stopApp: true
+- tapOn: '(All|全部), .*'
+- runFlow:
+    when:
+      true: ${FOUND == 'true'}
+    commands:
+      - extendedWaitUntil:
+          visible: ${MATCH}
+          timeout: 10000
+- runFlow:
+    when:
+      true: ${FOUND != 'true'}
+    commands:
+      - assertNotVisible: ${MATCH}
+- tapOn:
+    id: BackButton

@@ -8,4 +8,5 @@ export interface SegmentedTabsProps {
    * tabs that float over the content scrolling under them.
    */
   floating?: boolean;
+  testID?: string;
 }
