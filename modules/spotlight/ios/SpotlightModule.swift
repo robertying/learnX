@@ -59,45 +59,87 @@ struct UpcomingClassRecord: Record {
 
 /// The parts of `CSSearchableIndex` the module uses, so tests can index into a fake.
 protocol SearchableIndex {
+  func beginBatch()
+  func endBatch(withClientState clientState: Data) async throws
+  func lastClientState() async throws -> Data?
   func deleteSearchableItems(withDomainIdentifiers domainIdentifiers: [String]) async throws
   func deleteSearchableItems(withIdentifiers identifiers: [String]) async throws
   func deleteAllSearchableItems() async throws
   func indexSearchableItems(_ items: [CSSearchableItem]) async throws
 }
 
-extension CSSearchableIndex: SearchableIndex {}
+extension CSSearchableIndex: SearchableIndex {
+  func lastClientState() async throws -> Data? {
+    try await withCheckedThrowingContinuation { continuation in
+      fetchLastClientState { state, error in
+        if let error {
+          continuation.resume(throwing: error)
+        } else {
+          continuation.resume(returning: state)
+        }
+      }
+    }
+  }
+}
 
-/// The app's items in a Spotlight index, one domain per type.
+/// The app's items in a Spotlight index, one domain per type. Each change is a batch that ends by storing a state
+/// string in the index itself, so the app can tell when the index no longer holds what it last wrote: iOS empties
+/// it on a restore or a move to another device, when Show Content in Search is turned off, or when it rebuilds
+/// Spotlight.
 struct SpotlightIndex {
   let index: SearchableIndex
+  /// The default index, which held the items before they were written in batches (it doesn't support them).
+  var legacyIndex: SearchableIndex?
 
-  /// The device's index, or nil where it can't index.
+  /// The app's index on this device, or nil where it can't index.
   static var system: SpotlightIndex? {
-    CSSearchableIndex.isIndexingAvailable() ? SpotlightIndex(index: CSSearchableIndex.default()) : nil
+    CSSearchableIndex.isIndexingAvailable()
+      ? SpotlightIndex(index: CSSearchableIndex(name: "learnX"), legacyIndex: CSSearchableIndex.default())
+      : nil
+  }
+
+  /// The state stored with the last change, or nil if there is none.
+  func state() async throws -> String? {
+    try await index.lastClientState().flatMap { String(data: $0, encoding: .utf8) }
   }
 
   /// Replaces the domain's items with these.
-  func replaceItems(domain: String, items: [SpotlightItem]) async throws {
+  func replaceItems(domain: String, items: [SpotlightItem], state: String) async throws {
+    // Batches take only item writes and deletes by identifier.
     try await index.deleteSearchableItems(withDomainIdentifiers: [domain])
-    if !items.isEmpty {
-      try await index.indexSearchableItems(items.map { $0.searchableItem(domain: domain) })
+    try await batch(state: state) {
+      if !items.isEmpty {
+        try await index.indexSearchableItems(items.map { $0.searchableItem(domain: domain) })
+      }
     }
   }
 
   /// Indexes new and changed items and removes the ones with `removedIds`, leaving the rest of the domain alone.
-  func updateItems(domain: String, items: [SpotlightItem], removedIds: [String]) async throws {
-    if !removedIds.isEmpty {
-      try await index.deleteSearchableItems(
-        withIdentifiers: removedIds.map { SpotlightIdentifier(domain: domain, id: $0).rawValue }
-      )
-    }
-    if !items.isEmpty {
-      try await index.indexSearchableItems(items.map { $0.searchableItem(domain: domain) })
+  func updateItems(domain: String, items: [SpotlightItem], removedIds: [String], state: String) async throws {
+    try await batch(state: state) {
+      if !removedIds.isEmpty {
+        try await index.deleteSearchableItems(
+          withIdentifiers: removedIds.map { SpotlightIdentifier(domain: domain, id: $0).rawValue }
+        )
+      }
+      if !items.isEmpty {
+        try await index.indexSearchableItems(items.map { $0.searchableItem(domain: domain) })
+      }
     }
   }
 
-  func removeAllItems() async throws {
+  /// Removes everything the app indexed, also what older versions put in the default index.
+  func removeAllItems(state: String) async throws {
+    try await legacyIndex?.deleteAllSearchableItems()
+    // Also resets the state.
     try await index.deleteAllSearchableItems()
+    try await batch(state: state) {}
+  }
+
+  private func batch(state: String, _ changes: () async throws -> Void) async throws {
+    index.beginBatch()
+    try await changes()
+    try await index.endBatch(withClientState: Data(state.utf8))
   }
 }
 
@@ -113,14 +155,17 @@ public final class SpotlightModule: Module {
     OnStopObserving(nil, Self.stopObserving)
 
     Function("takeOpenedItem", Self.takeOpenedItem)
-    AsyncFunction("replaceItems") { (domain: String, items: [SpotlightItem]) in
-      try await Self.replaceItems(domain: domain, items: items)
+    AsyncFunction("indexState") {
+      try await Self.indexState()
     }
-    AsyncFunction("updateItems") { (domain: String, items: [SpotlightItem], removedIds: [String]) in
-      try await Self.updateItems(domain: domain, items: items, removedIds: removedIds)
+    AsyncFunction("replaceItems") { (domain: String, items: [SpotlightItem], state: String) in
+      try await Self.replaceItems(domain: domain, items: items, state: state)
     }
-    AsyncFunction("removeAllItems") {
-      try await Self.removeAllItems()
+    AsyncFunction("updateItems") { (domain: String, items: [SpotlightItem], removedIds: [String], state: String) in
+      try await Self.updateItems(domain: domain, items: items, removedIds: removedIds, state: state)
+    }
+    AsyncFunction("removeAllItems") { (state: String) in
+      try await Self.removeAllItems(state: state)
     }
     Function("setUpcomingDeadlines", Self.setUpcomingDeadlines)
     Function("setUpcomingClasses", Self.setUpcomingClasses)
@@ -141,16 +186,20 @@ public final class SpotlightModule: Module {
     SpotlightTaps.shared.takePending()?.payload
   }
 
-  static func replaceItems(domain: String, items: [SpotlightItem]) async throws {
-    try await SpotlightIndex.system?.replaceItems(domain: domain, items: items)
+  static func indexState() async throws -> String? {
+    try await SpotlightIndex.system?.state()
   }
 
-  static func updateItems(domain: String, items: [SpotlightItem], removedIds: [String]) async throws {
-    try await SpotlightIndex.system?.updateItems(domain: domain, items: items, removedIds: removedIds)
+  static func replaceItems(domain: String, items: [SpotlightItem], state: String) async throws {
+    try await SpotlightIndex.system?.replaceItems(domain: domain, items: items, state: state)
   }
 
-  static func removeAllItems() async throws {
-    try await SpotlightIndex.system?.removeAllItems()
+  static func updateItems(domain: String, items: [SpotlightItem], removedIds: [String], state: String) async throws {
+    try await SpotlightIndex.system?.updateItems(domain: domain, items: items, removedIds: removedIds, state: state)
+  }
+
+  static func removeAllItems(state: String) async throws {
+    try await SpotlightIndex.system?.removeAllItems(state: state)
   }
 
   static func setUpcomingDeadlines(_ deadlines: [UpcomingDeadlineRecord]) {

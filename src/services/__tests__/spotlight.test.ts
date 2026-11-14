@@ -1,25 +1,43 @@
 import Storage from 'expo-sqlite/kv-store';
 import { mockAssignments, mockFiles, mockNotices } from 'data/mock';
 import { Notice } from 'data/types/state';
+import { recordError } from 'services/crashReporting';
 import {
   SPOTLIGHT_INDEXED_KEY,
   clearSpotlight,
   updateSpotlight,
 } from 'services/spotlight';
 
-jest.mock('modules/spotlight', () => ({
-  __esModule: true,
-  default: {
-    replaceItems: jest.fn(async () => {}),
-    updateItems: jest.fn(async () => {}),
-    removeAllItems: jest.fn(async () => {}),
-  },
-}));
+jest.mock('modules/spotlight', () => {
+  // Keeps the state of the last write, as the index does.
+  const index = { state: null as string | null };
+  const write =
+    (stateArg: number) =>
+    async (...args: unknown[]) => {
+      index.state = args[stateArg] as string;
+    };
+  return {
+    __esModule: true,
+    index,
+    default: {
+      indexState: jest.fn(async () => index.state),
+      replaceItems: jest.fn(write(2)),
+      updateItems: jest.fn(write(3)),
+      removeAllItems: jest.fn(write(0)),
+    },
+  };
+});
 
-const Spotlight = jest.requireMock('modules/spotlight').default as {
-  replaceItems: jest.Mock;
-  updateItems: jest.Mock;
-  removeAllItems: jest.Mock;
+jest.mock('services/crashReporting', () => ({ recordError: jest.fn() }));
+
+const { index, default: Spotlight } = jest.requireMock('modules/spotlight') as {
+  index: { state: string | null };
+  default: {
+    indexState: jest.Mock;
+    replaceItems: jest.Mock;
+    updateItems: jest.Mock;
+    removeAllItems: jest.Mock;
+  };
 };
 
 const notices = mockNotices.slice(0, 3).map((n, i) => ({
@@ -58,6 +76,7 @@ it('then sends only what changed or went, and nothing when unchanged', async () 
     'notice',
     [expect.objectContaining({ id: 'n0', title: 'Renamed' })],
     ['n1'],
+    expect.any(String),
   );
 });
 
@@ -75,9 +94,11 @@ it('keeps assignments in their own domain', async () => {
     { assignments: mockAssignments.slice(0, 1) },
     { hiddenCourses: [] },
   );
-  expect(Spotlight.replaceItems).toHaveBeenCalledWith('assignment', [
-    expect.objectContaining({ id: mockAssignments[0].id }),
-  ]);
+  expect(Spotlight.replaceItems).toHaveBeenCalledWith(
+    'assignment',
+    [expect.objectContaining({ id: mockAssignments[0].id })],
+    expect.any(String),
+  );
 });
 
 it('indexes files with their course, type and size', async () => {
@@ -97,31 +118,111 @@ it('removes everything on logout', async () => {
   expect(Spotlight.removeAllItems).toHaveBeenCalled();
 });
 
+/** A new JS runtime: fresh modules, the same saved hashes and index. */
+const restart = async (
+  run: (
+    spotlight: typeof import('services/spotlight'),
+    native: typeof Spotlight,
+  ) => Promise<void>,
+) => {
+  const saved = Storage.getItemSync(SPOTLIGHT_INDEXED_KEY);
+  const state = index.state;
+  jest.clearAllMocks();
+  await jest.isolateModulesAsync(async () => {
+    const kv = (
+      jest.requireMock('expo-sqlite/kv-store') as {
+        default: {
+          setItemSync: (key: string, value: string) => void;
+          removeItemSync: (key: string) => void;
+        };
+      }
+    ).default;
+    if (saved) {
+      kv.setItemSync(SPOTLIGHT_INDEXED_KEY, saved);
+    } else {
+      kv.removeItemSync(SPOTLIGHT_INDEXED_KEY);
+    }
+    const mock = jest.requireMock('modules/spotlight') as {
+      index: { state: string | null };
+      default: typeof Spotlight;
+    };
+    mock.index.state = state;
+    await run(
+      require('services/spotlight') as typeof import('services/spotlight'),
+      mock.default,
+    );
+  });
+};
+
 it('sends only what changed after the app starts again', async () => {
   await updateSpotlight({ notices }, options);
-  const indexed = Storage.getItemSync(SPOTLIGHT_INDEXED_KEY);
-  expect(indexed).toBeTruthy();
+  expect(Storage.getItemSync(SPOTLIGHT_INDEXED_KEY)).toBeTruthy();
 
-  jest.clearAllMocks();
-  // A new JS runtime: fresh modules, the same saved index.
-  await jest.isolateModulesAsync(async () => {
-    (
-      jest.requireMock('expo-sqlite/kv-store') as {
-        default: { setItemSync: (key: string, value: string) => void };
-      }
-    ).default.setItemSync(SPOTLIGHT_INDEXED_KEY, indexed!);
-    const spotlight =
-      require('services/spotlight') as typeof import('services/spotlight');
-    const native = jest.requireMock('modules/spotlight').default as {
-      replaceItems: jest.Mock;
-      updateItems: jest.Mock;
-    };
+  await restart(async (spotlight, native) => {
     await spotlight.updateSpotlight({ notices }, options);
+    expect(native.removeAllItems).not.toHaveBeenCalled();
     expect(native.replaceItems).not.toHaveBeenCalled();
     expect(native.updateItems).not.toHaveBeenCalled();
 
     await spotlight.updateSpotlight({ notices: notices.slice(1) }, options);
-    expect(native.updateItems).toHaveBeenCalledWith('notice', [], ['n0']);
+    expect(native.updateItems).toHaveBeenCalledWith(
+      'notice',
+      [],
+      ['n0'],
+      expect.any(String),
+    );
+  });
+});
+
+it('indexes everything again when the index lost what was saved', async () => {
+  await updateSpotlight({ notices }, options);
+  // iOS emptied the index, e.g. after a restore to another phone.
+  index.state = null;
+
+  await restart(async (spotlight, native) => {
+    await spotlight.updateSpotlight({ notices }, options);
+    expect(native.removeAllItems).toHaveBeenCalledTimes(1);
+    expect(native.replaceItems).toHaveBeenCalledWith(
+      'notice',
+      [
+        expect.objectContaining({ id: 'n0' }),
+        expect.objectContaining({ id: 'n1' }),
+      ],
+      expect.any(String),
+    );
+  });
+
+  // And the next start trusts the index again.
+  await restart(async (spotlight, native) => {
+    await spotlight.updateSpotlight({ notices }, options);
+    expect(native.removeAllItems).not.toHaveBeenCalled();
+    expect(native.replaceItems).not.toHaveBeenCalled();
+  });
+});
+
+it('indexes everything again when the index state cannot be read', async () => {
+  await updateSpotlight({ notices }, options);
+
+  await restart(async (spotlight, native) => {
+    native.indexState.mockRejectedValueOnce(new Error('Unavailable'));
+    await spotlight.updateSpotlight({ notices }, options);
+    expect(native.removeAllItems).toHaveBeenCalledTimes(1);
+    expect(native.replaceItems).toHaveBeenCalledTimes(1);
+  });
+});
+
+it('reports a failed write and indexes everything on the next start', async () => {
+  await updateSpotlight({ notices }, options);
+  const error = new Error('Quota exceeded');
+  Spotlight.updateItems.mockRejectedValueOnce(error);
+  jest.spyOn(console, 'warn').mockImplementationOnce(() => {});
+  await updateSpotlight({ notices: notices.slice(1) }, options);
+  expect(recordError).toHaveBeenCalledWith(error, 'Updating Spotlight');
+
+  await restart(async (spotlight, native) => {
+    await spotlight.updateSpotlight({ notices }, options);
+    expect(native.removeAllItems).toHaveBeenCalledTimes(1);
+    expect(native.replaceItems).toHaveBeenCalledTimes(1);
   });
 });
 
