@@ -9,7 +9,6 @@ import type { NativeStackHeaderItemMenu } from '@react-navigation/native-stack';
 import type { SearchBarProps } from 'react-native-screens';
 import { Assignment, File, Notice } from 'data/types/state';
 import Search from 'screens/Search';
-import { getSettings, resetSettings } from 'data/settings';
 import { resetUserData, setArchived, setCourseHidden } from 'data/userData';
 import { screenProps } from 'test-utils/screenProps';
 
@@ -113,7 +112,6 @@ beforeEach(() => {
 afterEach(async () => {
   jest.useRealTimers();
   await act(() => resetUserData());
-  await act(() => resetSettings());
 });
 
 describe('Search', () => {
@@ -207,14 +205,10 @@ describe('Search', () => {
     });
     await toggle(0);
     expect(screen.queryByText('Midterm room change')).toBeNull();
-    // Shown as on while off its defaults, and kept for the next search
+    // Shown as on while off its defaults
     expect(filterMenu().icon).toEqual({
       type: 'sfSymbol',
       name: 'line.3.horizontal.decrease.circle.fill',
-    });
-    expect(getSettings().searchIncludes).toEqual({
-      archived: false,
-      hidden: false,
     });
     expect(
       filterMenu().menu.items.map(i => i.type === 'action' && i.state),

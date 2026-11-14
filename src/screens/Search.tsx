@@ -23,7 +23,6 @@ import useSearch, {
 import Styles from 'constants/Styles';
 import { useAssignments, useNotices, useFiles } from 'data/content';
 import { useUserData } from 'data/userData';
-import { getSettings, setSetting, useSettings } from 'data/settings';
 import NoticeCard from 'components/NoticeCard';
 import AssignmentCard from 'components/AssignmentCard';
 import FileCard from 'components/FileCard';
@@ -48,10 +47,9 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
   const safeAreaInsets = useSafeAreaInsets();
 
   // Archived items are found and hidden courses' items aren't, unless the
-  // filter menu (saved with the settings) says otherwise.
-  const { archived: includeArchived, hidden: includeHidden } = useSettings(
-    settings => settings.searchIncludes,
-  );
+  // filter menu says otherwise, for this search only.
+  const [includeArchived, setIncludeArchived] = useState(true);
+  const [includeHidden, setIncludeHidden] = useState(false);
   const hiddenCourses = new Set(useUserData(data => data.hiddenCourses));
   const archived = useUserData(data => data.archived);
   const archivedIds = {
@@ -104,11 +102,10 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
     });
   }, [navigation, theme.colors.primary]);
 
-  const toggleFilter = (name: string) => {
-    const includes = getSettings().searchIncludes;
-    const key = name === 'archived' ? 'archived' : 'hidden';
-    setSetting('searchIncludes', { ...includes, [key]: !includes[key] });
-  };
+  const toggleFilter = (name: string) =>
+    name === 'archived'
+      ? setIncludeArchived(on => !on)
+      : setIncludeHidden(on => !on);
   // The filter menu sits across from Close: a native menu of toggles on iOS
   // and Mac, a Compose dropdown on Android.
   useLayoutEffect(() => {

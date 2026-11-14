@@ -17,7 +17,6 @@ export const defaultSettings: SettingsState = {
     file: 'all',
     course: 'all',
   },
-  searchIncludes: { archived: true, hidden: false },
   alarms: {
     assignmentCalendarSecondAlarm: false,
     assignmentCalendarAlarm: false,
@@ -57,7 +56,6 @@ export const mergeSettings = (
     ...current.tabFilterSelections,
     ...saved.tabFilterSelections,
   },
-  searchIncludes: { ...current.searchIncludes, ...saved.searchIncludes },
   alarms: { ...current.alarms, ...saved.alarms },
   notifications: { ...current.notifications, ...saved.notifications },
   swipeActions: { ...current.swipeActions, ...saved.swipeActions },

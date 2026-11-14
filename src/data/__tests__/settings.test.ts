@@ -49,10 +49,6 @@ describe('settings', () => {
          "notices": false,
        },
        "openFileAfterDownload": false,
-       "searchIncludes": {
-         "archived": true,
-         "hidden": false,
-       },
        "swipeActions": {
          "left": "fav",
          "right": "archive",

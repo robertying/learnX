@@ -53,8 +53,6 @@ export interface SettingsState {
   tabFilterSelections: {
     [tab in Tab]?: FilterSelection;
   };
-  /** What search results include, from its filter menu. */
-  searchIncludes: { archived: boolean; hidden: boolean };
   alarms: AlarmSettings;
   notifications: NotificationSettings;
   graduate: boolean;
