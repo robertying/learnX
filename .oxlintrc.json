@@ -79,10 +79,14 @@
   "overrides": [
     {
       "files": [".maestro/**/*.js"],
-      // Maestro's runScript globals, and the flow's env values (upgrade/).
+      // Maestro's runScript globals, and the flow's env values (upgrade/, ota/).
       "globals": {
+        "http": "readonly",
+        "json": "readonly",
         "maestro": "readonly",
         "output": "writable",
+        "OTA_SERVER": "readonly",
+        "PATH_": "readonly",
         "PHASE": "readonly",
         "USERNAME": "readonly"
       }

@@ -1,0 +1,18 @@
+# Open Settings › About, where the version row ends in the running update's id
+# when one runs (screens/About.tsx).
+appId: ${APP_ID}
+---
+- runFlow: ../subflows/settings.yaml
+- runFlow:
+    file: ../subflows/scroll-list.yaml
+    env:
+      LIST: settings-list
+      TARGET: '.*(${T_about}).*'
+      DIRECTION: UP
+# About can first show under the floating tab bar (05-settings-logout).
+- swipe:
+    from:
+      id: settings-list
+    direction: UP
+- tapOn: '.*(${T_about}).*'
+- assertVisible: '.*© \d+ Rui Ying.*'

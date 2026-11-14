@@ -194,6 +194,8 @@ jobs:
           steps.ccache.outcome == 'success'
         run: |
           printf 'DUMMY_USERNAME=e2e\nDUMMY_PASSWORD=e2e\n' > .env
+          # The key E2E builds trust for over-the-air updates.
+          scripts/ota-e2e-cert.sh
           cd android
           ./gradlew app:assembleRelease -PciRelease -PreactNativeArchitectures=x86_64 --build-cache
         env:
@@ -212,6 +214,15 @@ jobs:
         with:
           name: apk
           path: android/app/build/outputs/apk/release/app-x86_64-release.apk
+          retention-days: 1
+
+      # The update server in the E2E job signs with the key this APK trusts.
+      - name: Upload update signing key for E2E
+        if: env.FULL_RUN == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: ota-e2e-key
+          path: build/ota-e2e/*.pem
           retention-days: 1
 
   android-e2e:
@@ -238,6 +249,12 @@ jobs:
         with:
           name: apk
           path: build
+
+      - name: Download update signing key
+        uses: actions/download-artifact@v8
+        with:
+          name: ota-e2e-key
+          path: build/ota-e2e
 
       # scripts/e2e.sh reads the flows' labels and mock texts from the
       # translations and mock data (scripts/e2e-env.mjs), which import packages.
@@ -275,7 +292,7 @@ jobs:
           script: |
             adb install -r build/app-x86_64-release.apk
             scripts/e2e.sh android .maestro/subflows/reset.yaml || echo "Warm-up run failed; running the flows anyway"
-            mkdir -p build/maestro; scripts/e2e.sh android --format junit --output build/maestro/report.xml --test-output-dir build/maestro; status=$?; adb logcat -d > build/maestro/logcat.txt; exit $status
+            mkdir -p build/maestro; scripts/e2e.sh android --format junit --output build/maestro/report.xml --test-output-dir build/maestro; status=$?; scripts/e2e-ota.sh android || status=1; cp build/ota-e2e/server-android.log build/maestro/ || true; adb logcat -d > build/maestro/logcat.txt; exit $status
 
       - name: Upload results
         if: always()
