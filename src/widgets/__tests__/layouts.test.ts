@@ -794,7 +794,7 @@ describe('Up Next on Android', () => {
       'Open learnX to see your classes',
     ]);
     expect(texts(layout(initial, { locale: 'zh-Hans' }))).toEqual([
-      '接下来的课程',
+      '下一节课',
       '打开 learnX 以显示课程',
     ]);
   });

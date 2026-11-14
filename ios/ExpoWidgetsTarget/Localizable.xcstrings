@@ -24,13 +24,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "接下来的课程"
+            "value" : "下一节课"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "接下来的课程"
+            "value" : "下一节课"
           }
         }
       }
