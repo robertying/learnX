@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useSearch from 'hooks/useSearch';
 import Styles from 'constants/Styles';
 import { useAssignments, useNotices, useFiles } from 'data/content';
+import { useUserData } from 'data/userData';
 import { Notice, Assignment, File } from 'data/types/state';
 import NoticeCard from 'components/NoticeCard';
 import AssignmentCard from 'components/AssignmentCard';
@@ -34,9 +35,13 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
 
   const safeAreaInsets = useSafeAreaInsets();
 
-  const { notices } = useNotices();
-  const { assignments } = useAssignments();
-  const { files } = useFiles();
+  // Hidden courses' items are left out; archived ones are found.
+  const hiddenCourses = new Set(useUserData(data => data.hiddenCourses));
+  const shown = <T extends { courseId: string }>(items: T[]) =>
+    items.filter(item => !hiddenCourses.has(item.courseId));
+  const notices = shown(useNotices().notices);
+  const assignments = shown(useAssignments().assignments);
+  const files = shown(useFiles().files);
 
   const initialQuery = route.params?.query ?? '';
   const [searchQuery, setSearchQuery] = useState(initialQuery);
