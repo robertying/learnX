@@ -1,17 +1,17 @@
 {
   "runtimeVersion": "19.0.0",
-  "ios": "853d89d1861983a47680c58cd343587ea4c66487",
-  "android": "b9470ea9bfaec4072c4490fce0cb2c29304d8abe",
+  "ios": "22d12b3b3c417952b435874aadc3e0a6a07f85f8",
+  "android": "424afc48b4980747977cc87942b8c20175d4611f",
   "sources": {
     "ios": {
-      "dir ios": "8c6736d4e710a40dd04f36389609d157e412069d",
+      "dir ios": "8a3f316583d801680bd69bd5b6d37fe267ef045d",
       "dir modules/crashlytics/ios": "7031808858c863712e9bc24605a2a74ef5926983",
       "dir modules/menus/ios": "c19c55b022a1c80ed1ef33e930494b6fda2d06bd",
-      "dir modules/share/ios": "c78614d342566560e2a0883cd6aa4bba7068f682",
+      "dir modules/share/ios": "2a94070ea43a25cc9fa52be05e6476219924fe98",
       "dir modules/sidebar/ios": "f7299ecb67e58f9f185bc116b2fb5a6080baf236",
       "dir modules/spotlight/ios": "cb4104fd4cbf8a97f0bc116ad6d87cc4a0aab85e",
       "dir modules/toast/ios": "b8e55255835b975b642f9f81064dd9b03cfd2ff0",
-      "dir patches": "cd4b3c43add410ea9b31c8a45593ffcbcd89f3d4",
+      "dir patches": "6d2aa6ce6c393c6dc8ce21ab580f1fa405013fe6",
       "contents expoAutolinkingConfig:ios": "32ce8184a43f03a7bf843e7042cdf353f4b5a404",
       "contents rncoreAutolinkingConfig:ios": "8a2eb393ff5b4155abd1e29e9247f545a2a7a638",
       "package node_modules/@expo/log-box/package.json": "7a829699d9363b31a6e475706b30fe66b2076279",
@@ -62,10 +62,10 @@
       "package node_modules/unimodules-app-loader/package.json": "c5c0283fd62fe191a27f8c91a80e8be54f1c52d6"
     },
     "android": {
-      "dir android": "dcbba471b3b6443f06cb86a9360c23ebee616390",
+      "dir android": "4f21acb25d46d928872356b12a9047c148f7518a",
       "dir modules/crashlytics/android": "c197e1f7400e71d52bf820a626fa941218b8e4ae",
       "dir modules/share/android": "28e80bd75f4dfed63ebde2cf73cf550b6b6b49d7",
-      "dir patches": "cd4b3c43add410ea9b31c8a45593ffcbcd89f3d4",
+      "dir patches": "6d2aa6ce6c393c6dc8ce21ab580f1fa405013fe6",
       "contents expoAutolinkingConfig:android": "1ecb82753ff6f07ac5e2ad556e29d4065d33f41e",
       "contents rncoreAutolinkingConfig:android": "d40be427cc3c3ac490e297933ea55327245bd0ce",
       "package node_modules/@expo/log-box/package.json": "7a829699d9363b31a6e475706b30fe66b2076279",

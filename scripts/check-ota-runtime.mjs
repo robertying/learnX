@@ -34,23 +34,24 @@ const flatten = info =>
 const fingerprint = platform => {
   const { hash, sources } = JSON.parse(
     execFileSync(
-      'npx',
+      process.execPath,
       [
+        '-e',
+        // It sorts each folder's files with localeCompare, whose order
+        // depends on the machine's ICU and locale (a folder hashed differently
+        // on CI's Linux runners than on a Mac), so compare code points instead.
+        `String.prototype.localeCompare = function (other) {
+          const self = String(this);
+          return self < other ? -1 : self > other ? 1 : 0;
+        };
+        require(require.resolve('expo-updates/bin/cli.js'));`,
         'expo-updates',
         'fingerprint:generate',
         '--platform',
         platform,
         '--debug',
       ],
-      {
-        cwd: root,
-        encoding: 'utf8',
-        stdio: ['ignore', 'pipe', 'ignore'],
-        // It sorts each folder's files with localeCompare, and Node on Linux
-        // takes the locale from the environment (C, the POSIX order, on CI's
-        // runners), so a folder would hash differently there than on a Mac.
-        env: { ...process.env, LANG: 'en_US.UTF-8', LC_ALL: 'en_US.UTF-8' },
-      },
+      { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] },
     ),
   );
   return {
