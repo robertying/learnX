@@ -260,7 +260,9 @@ const zh: typeof en = {
   swipeRight: '向右滑动',
   swipeLeft: '向左滑动',
   swipeNone: '无',
-  swipeActionsFooter: '在课程列表中，归档即屏蔽或取消屏蔽该课程。',
+  swipeArchive: '归档 / 屏蔽',
+  swipeActionsFooter:
+    '屏蔽仅适用于课程：在课程列表中，该操作会屏蔽或取消屏蔽课程。',
   reorder: '排序',
   select: '选择',
   checkAll: '全选',

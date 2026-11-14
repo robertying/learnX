@@ -272,8 +272,9 @@ export default {
   swipeRight: 'Swipe Right',
   swipeLeft: 'Swipe Left',
   swipeNone: 'None',
+  swipeArchive: 'Archive / Hide',
   swipeActionsFooter:
-    'In the Courses list, Archive hides or unhides the course.',
+    'Hide applies to courses: in the Courses list, this action hides or unhides the course.',
   reorder: 'Reorder',
   select: 'Select',
   checkAll: 'Select All',
