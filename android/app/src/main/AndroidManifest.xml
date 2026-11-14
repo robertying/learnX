@@ -34,11 +34,11 @@
             android:name="expo.modules.notifications.default_notification_color"
             android:resource="@color/seed" />
 
-        <!-- The URL, runtime version and certificate come from app.json and
-             certs/ota-certificate.pem (android/app/build.gradle). -->
+        <!-- Whether updates are on, the URL, runtime version, headers and
+             certificate come from android/app/build.gradle. -->
         <meta-data
             android:name="expo.modules.updates.ENABLED"
-            android:value="true" />
+            android:value="${otaEnabled}" />
         <meta-data
             android:name="expo.modules.updates.EXPO_UPDATE_URL"
             android:value="@string/expo_updates_url" />
@@ -53,7 +53,7 @@
             android:value="0" />
         <meta-data
             android:name="expo.modules.updates.UPDATES_CONFIGURATION_REQUEST_HEADERS_KEY"
-            android:value="{&quot;expo-channel-name&quot;:&quot;production&quot;}" />
+            android:value="@string/expo_updates_request_headers" />
         <meta-data
             android:name="expo.modules.updates.CODE_SIGNING_CERTIFICATE"
             android:value="@string/expo_updates_certificate" />

@@ -1,26 +1,51 @@
 import com.android.build.api.variant.FilterConfiguration
 import groovy.json.JsonSlurper
 
-// Over-the-air updates: the URL and runtime version in app.json and the
-// code-signing certificate in certs/ota-certificate.pem, as string resources the
-// manifest's expo.modules.updates meta-data reads (iOS writes the same into
-// Expo.plist with scripts/ota-config-ios.sh). E2E builds (-PciRelease) get the
-// local test server (scripts/ota-e2e-server.mjs, through `adb reverse`), runtime
-// version "e2e" and the test certificate from scripts/ota-e2e-cert.sh, so they
-// never load a published update.
-def otaResources(boolean e2e) {
+// Over-the-air updates: the URL and Expo project id from the repo-root .env
+// (OTA_UPDATE_URL, EXPO_PROJECT_ID; git-ignored, so the server isn't in the
+// repo), the runtime version from app.json and the certificate from
+// certs/ota-certificate.pem, as string resources the manifest's
+// expo.modules.updates meta-data reads. Without OTA_UPDATE_URL updates are off
+// (forks, CI). iOS does the same in scripts/ota-config-ios.sh. E2E builds
+// (-PciRelease) get the local test server (scripts/ota-e2e-server.mjs, through
+// `adb reverse`), runtime version "e2e" and the test certificate from
+// scripts/ota-e2e-cert.sh, so they never load a published update.
+def otaConfig(boolean e2e) {
     def root = rootProject.file("..")
-    def appJson = new JsonSlurper().parse(new File(root, "app.json"))
+    def env = [:]
+    def envFile = new File(root, ".env")
+    if (envFile.exists()) {
+        envFile.eachLine { line ->
+            def match = line =~ /^([A-Z0-9_]+)=["']?(.*?)["']?$/
+            if (match) env[match[0][1]] = match[0][2]
+        }
+    }
+    def url = e2e ? "http://localhost:8199/manifest" : (env.OTA_UPDATE_URL ?: "")
+    def headers = ["expo-channel-name": "production"]
+    if (!e2e && env.EXPO_PROJECT_ID) {
+        headers["expo-app-id"] = env.EXPO_PROJECT_ID
+    }
     def certificate = e2e ? new File(root, "build/ota-e2e/certificate.pem") : new File(root, "certs/ota-certificate.pem")
     if (!certificate.exists()) {
         throw new GradleException("${certificate} is missing; for an E2E build, run scripts/ota-e2e-cert.sh first.")
     }
     return [
-        expo_updates_url: e2e ? "http://localhost:8199/manifest" : appJson.updates.url,
-        expo_runtime_version: e2e ? "e2e" : appJson.runtimeVersion,
-        // A string resource keeps its line breaks only as \n escapes.
-        expo_updates_certificate: certificate.text.trim().replace("\n", "\\n"),
+        enabled: url ? "true" : "false",
+        strings: [
+            // Never read while updates are off.
+            expo_updates_url: url ?: "https://updates.invalid/manifest",
+            expo_runtime_version: e2e ? "e2e" : new JsonSlurper().parse(new File(root, "app.json")).runtimeVersion,
+            // A string resource keeps quotes and line breaks only escaped.
+            expo_updates_request_headers: groovy.json.JsonOutput.toJson(headers).replace('"', '\\"'),
+            expo_updates_certificate: certificate.text.trim().replace("\n", "\\n"),
+        ],
     ]
+}
+
+def applyOtaConfig(variant, boolean e2e) {
+    def config = otaConfig(e2e)
+    variant.manifestPlaceholders.put("otaEnabled", config.enabled)
+    config.strings.each { name, value -> variant.resValue "string", name, value }
 }
 
 plugins {
@@ -58,7 +83,7 @@ android {
         targetSdk = rootProject.ext.targetSdkVersion
         versionCode = 9204544
         versionName = "19.0.0"
-        otaResources(false).each { name, value -> resValue "string", name, value }
+        applyOtaConfig(delegate, false)
     }
 
     androidResources {
@@ -113,7 +138,7 @@ android {
             // nothing uploaded to Crashlytics.
             def ciRelease = project.hasProperty("ciRelease")
             if (ciRelease) {
-                otaResources(true).each { name, value -> resValue "string", name, value }
+                applyOtaConfig(delegate, true)
             }
             signingConfig = ciRelease ? signingConfigs.debug : signingConfigs.release
             // Only E2E builds take test launch arguments: in a store build,
