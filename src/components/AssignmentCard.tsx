@@ -1,5 +1,6 @@
 import { Assignment } from 'data/types/state';
 import { removeTags } from 'helpers/text';
+import { snippet } from 'helpers/search';
 import {
   deadlineText,
   deadlineTone,
@@ -18,6 +19,11 @@ export interface AssignmentCardProps extends CardWrapperProps {
    * among the rest (a course's lists), where they can't be favorited.
    */
   markArchived?: boolean;
+  /**
+   * Search words: the title and preview emphasize them, and the preview
+   * starts near the first one when it's further in than the preview shows.
+   */
+  highlight?: readonly string[];
 }
 
 const AssignmentCard: React.FC<AssignmentCardProps> = ({
@@ -38,6 +44,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
   },
   hideCourseName,
   markArchived,
+  highlight,
   ...restProps
 }) => {
   const now = useMinute();
@@ -52,7 +59,8 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
   const submittedText = isLateSubmission ? t('submittedLate') : t('submitted');
   const statusText = graded ? gradeText : submitted ? submittedText : dueText;
   const overline = hideCourseName ? courseTeacherName : courseName;
-  const preview = removeTags(description);
+  const body = removeTags(description);
+  const preview = highlight ? snippet(body, highlight) : body;
   const hasAnswer = !!(answerContent || answerAttachment);
 
   const status = graded ? (
@@ -94,6 +102,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
         overline={overline}
         title={title}
         preview={preview}
+        highlight={highlight}
         flags={flags}
         trailing={status}
       />

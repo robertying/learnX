@@ -13,16 +13,25 @@ import {
 import type { ParamListBase } from '@react-navigation/native';
 import type { SearchBarCommands } from 'react-native-screens';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import useSearch from 'hooks/useSearch';
+import type { NativeStackHeaderItem } from '@react-navigation/native-stack';
+import useSearch, {
+  type SearchKind,
+  type TopHit,
+  topHitCount,
+} from 'hooks/useSearch';
 import Styles from 'constants/Styles';
 import { useAssignments, useNotices, useFiles } from 'data/content';
 import { useUserData } from 'data/userData';
-import { Notice, Assignment, File } from 'data/types/state';
 import NoticeCard from 'components/NoticeCard';
 import AssignmentCard from 'components/AssignmentCard';
 import FileCard from 'components/FileCard';
 import StatusView from 'components/StatusView';
 import SafeArea from 'components/SafeArea';
+import SegmentedTabs from 'components/SegmentedTabs';
+import TextButton from 'components/TextButton';
+import ToggleMenu from 'components/ToggleMenu';
+import { systemIcons } from 'helpers/systemIcons';
+import { headerButtons } from 'navigation/headerButtons';
 import { t } from 'helpers/i18n';
 import { SearchStackParams } from 'navigation/types';
 import { Paragraph } from 'components/Text';
@@ -35,13 +44,32 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
 
   const safeAreaInsets = useSafeAreaInsets();
 
-  // Hidden courses' items are left out; archived ones are found.
+  // Archived items are found and hidden courses' items aren't, unless the
+  // filter menu says otherwise.
+  const [includeArchived, setIncludeArchived] = useState(true);
+  const [includeHidden, setIncludeHidden] = useState(false);
   const hiddenCourses = new Set(useUserData(data => data.hiddenCourses));
-  const shown = <T extends { courseId: string }>(items: T[]) =>
-    items.filter(item => !hiddenCourses.has(item.courseId));
-  const notices = shown(useNotices().notices);
-  const assignments = shown(useAssignments().assignments);
-  const files = shown(useFiles().files);
+  const archived = useUserData(data => data.archived);
+  const archivedIds = {
+    notice: new Set(archived.notice),
+    assignment: new Set(archived.assignment),
+    file: new Set(archived.file),
+  };
+  const shown = <T extends { id: string; courseId: string }>(
+    kind: SearchKind,
+    items: T[],
+  ) =>
+    items.filter(
+      item =>
+        (includeHidden || !hiddenCourses.has(item.courseId)) &&
+        (includeArchived || !archivedIds[kind].has(item.id)),
+    );
+  const notices = shown('notice', useNotices().notices);
+  const assignments = shown('assignment', useAssignments().assignments);
+  const files = shown('file', useFiles().files);
+
+  // All shows the best few of each kind; a kind's tab shows all of it.
+  const [scope, setScope] = useState<SearchKind | 'all'>('all');
 
   const initialQuery = route.params?.query ?? '';
   const [searchQuery, setSearchQuery] = useState(initialQuery);
@@ -71,6 +99,68 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
       },
     });
   }, [navigation, theme.colors.primary]);
+
+  const toggleFilter = (name: string) =>
+    name === 'archived'
+      ? setIncludeArchived(on => !on)
+      : setIncludeHidden(on => !on);
+  // The filter menu sits across from Close: a native menu of toggles on iOS
+  // and Mac, a Compose dropdown on Android.
+  useLayoutEffect(() => {
+    const filterOptions = [
+      {
+        name: 'archived',
+        label: t('searchShowArchived'),
+        icon: 'archived',
+        on: includeArchived,
+      },
+      {
+        name: 'hidden',
+        label: t('searchShowHidden'),
+        icon: 'hide',
+        on: includeHidden,
+      },
+    ] as const;
+    const filtered = !includeArchived || includeHidden;
+    navigation.setOptions(
+      headerButtons('right', [
+        {
+          id: 'filter',
+          item: {
+            type: 'menu',
+            identifier: 'filter',
+            label: t('filter'),
+            icon: {
+              type: 'sfSymbol',
+              name: filtered
+                ? 'line.3.horizontal.decrease.circle.fill'
+                : 'line.3.horizontal.decrease.circle',
+            },
+            menu: {
+              title: t('searchInclude'),
+              multiselectable: true,
+              items: filterOptions.map(option => ({
+                type: 'action',
+                label: option.label,
+                icon: { type: 'sfSymbol', name: systemIcons[option.icon].ios },
+                state: option.on ? 'on' : 'off',
+                keepsMenuPresented: true,
+                onPress: () => toggleFilter(option.name),
+              })),
+            },
+          } satisfies NativeStackHeaderItem,
+          element: (
+            <ToggleMenu
+              label={t('filter')}
+              options={[...filterOptions]}
+              active={filtered}
+              onToggle={toggleFilter}
+            />
+          ),
+        },
+      ]),
+    );
+  }, [navigation, includeArchived, includeHidden]);
 
   // Android focuses through autoFocus. On iOS the header search bar is
   // attached some time after the screen mounts (once the search modal is
@@ -112,15 +202,88 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
     };
   }, [navigation, initialQuery]);
 
-  const {
-    notices: noticeResult,
-    assignments: assignmentResult,
-    files: fileResult,
-  } = useSearch(notices, assignments, files, searchQuery);
-  const hasResults =
-    noticeResult.length > 0 ||
-    assignmentResult.length > 0 ||
-    fileResult.length > 0;
+  const results = useSearch(notices, assignments, files, searchQuery);
+  const byKind = {
+    notice: results.notices.map(item => ({ kind: 'notice', item }) as TopHit),
+    assignment: results.assignments.map(
+      item => ({ kind: 'assignment', item }) as TopHit,
+    ),
+    file: results.files.map(item => ({ kind: 'file', item }) as TopHit),
+  };
+  const kinds = ['notice', 'assignment', 'file'] as const;
+  const titles = {
+    notice: 'notices',
+    assignment: 'assignments',
+    file: 'files',
+  } as const;
+  const hasResults = kinds.some(kind => byKind[kind].length > 0);
+
+  // The overview: the top hits, when some kind has more than it shows, then
+  // the first few of each kind not among them, each with See All.
+  const overflows = kinds.some(kind => byKind[kind].length > topHitCount);
+  const topHits = overflows ? results.topHits : [];
+  const isTop = new Set(topHits.map(hit => hit.item.id));
+  const sections =
+    scope === 'all'
+      ? [
+          {
+            key: 'top' as const,
+            title: t('topHits'),
+            data: topHits,
+            more: false,
+          },
+          ...kinds.map(kind => {
+            const rest = byKind[kind].filter(hit => !isTop.has(hit.item.id));
+            return {
+              key: kind,
+              title: t(titles[kind]),
+              data: rest.slice(0, topHitCount),
+              more: byKind[kind].length > topHitCount,
+            };
+          }),
+        ]
+      : [
+          {
+            key: scope,
+            title: t(titles[scope]),
+            data: byKind[scope],
+            more: false,
+          },
+        ];
+
+  const tabs = ['all', ...kinds] as const;
+  const tabTitles = tabs.map(tab =>
+    tab === 'all' ? t('all') : `${t(titles[tab])} ${byKind[tab].length}`,
+  );
+
+  const renderResult = ({ kind, item }: TopHit, last: boolean) => {
+    const common = {
+      last,
+      actionsDisabled: true,
+      highlight: results.words,
+      archived: archivedIds[kind].has(item.id),
+      markArchived: true,
+    };
+    return kind === 'notice' ? (
+      <NoticeCard
+        {...common}
+        data={item}
+        onPress={() => navigation.push('NoticeDetail', { id: item.id })}
+      />
+    ) : kind === 'assignment' ? (
+      <AssignmentCard
+        {...common}
+        data={item}
+        onPress={() => navigation.push('AssignmentDetail', { id: item.id })}
+      />
+    ) : (
+      <FileCard
+        {...common}
+        data={item}
+        onPress={() => navigation.push('FileDetail', { id: item.id })}
+      />
+    );
+  };
 
   return (
     <SafeArea>
@@ -141,62 +304,49 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
           </KeyboardAvoidingView>
         </View>
         {hasResults ? (
-          <SectionList<Notice | Assignment | File>
+          <SectionList<TopHit, (typeof sections)[number]>
             contentInsetAdjustmentBehavior="automatic"
             keyboardDismissMode="on-drag"
             contentContainerStyle={{ paddingBottom: safeAreaInsets.bottom }}
-            sections={[
-              { key: 'notice', title: t('notices'), data: noticeResult },
-              {
-                key: 'assignment',
-                title: t('assignments'),
-                data: assignmentResult,
-              },
-              { key: 'file', title: t('files'), data: fileResult },
-            ]}
-            keyExtractor={item => item.id}
-            renderItem={({ item, index, section: { key, data } }) =>
-              key === 'notice' ? (
-                <NoticeCard
-                  data={item as Notice}
-                  last={index === data.length - 1}
-                  actionsDisabled
-                  onPress={() =>
-                    navigation.push('NoticeDetail', { id: item.id })
-                  }
-                />
-              ) : key === 'assignment' ? (
-                <AssignmentCard
-                  data={item as Assignment}
-                  last={index === data.length - 1}
-                  actionsDisabled
-                  onPress={() =>
-                    navigation.push('AssignmentDetail', { id: item.id })
-                  }
-                />
-              ) : (
-                <FileCard
-                  data={item as File}
-                  last={index === data.length - 1}
-                  actionsDisabled
-                  onPress={() => navigation.push('FileDetail', { id: item.id })}
-                />
-              )
+            ListHeaderComponent={
+              <SegmentedTabs
+                titles={tabTitles}
+                selectedIndex={tabs.indexOf(scope)}
+                onSelect={i => setScope(tabs[i])}
+                accessibilityLabel={t('search')}
+              />
             }
-            renderSectionHeader={({ section: { title, data } }) =>
-              data.length ? (
-                <Paragraph
-                  accessibilityRole="header"
+            ListEmptyComponent={
+              <Paragraph style={styles.empty}>{t('noResults')}</Paragraph>
+            }
+            sections={sections.filter(section => section.data.length)}
+            keyExtractor={({ kind, item }) => `${kind}-${item.id}`}
+            renderItem={({ item, index, section: { data } }) =>
+              renderResult(item, index === data.length - 1)
+            }
+            renderSectionHeader={({ section: { key, title, more } }) =>
+              scope === 'all' ? (
+                <View
                   style={[
                     styles.header,
-                    {
-                      color: theme.colors.onSurfaceMedium,
-                      backgroundColor: theme.colors.background,
-                    },
+                    { backgroundColor: theme.colors.background },
                   ]}
                 >
-                  {title}
-                </Paragraph>
+                  <Paragraph
+                    accessibilityRole="header"
+                    style={[
+                      styles.headerTitle,
+                      { color: theme.colors.onSurfaceMedium },
+                    ]}
+                  >
+                    {title}
+                  </Paragraph>
+                  {more && key !== 'top' ? (
+                    <TextButton size="small" onPress={() => setScope(key)}>
+                      {t('seeAll')}
+                    </TextButton>
+                  ) : null}
+                </View>
               ) : null
             }
           />
@@ -208,9 +358,18 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
 
 const styles = StyleSheet.create({
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
     marginVertical: 1,
+  },
+  headerTitle: {
+    flex: 1,
+  },
+  empty: {
+    textAlign: 'center',
+    paddingVertical: 32,
   },
 });
 

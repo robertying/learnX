@@ -1,8 +1,15 @@
 import { ReactNode } from 'react';
-import { Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
+import {
+  Platform,
+  StyleSheet,
+  Text as NativeText,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import SystemIcon from 'components/SystemIcon';
 import { Caption, Headline, Paragraph, Text } from 'components/Text';
 import { t } from 'helpers/i18n';
+import { matchRanges } from 'helpers/search';
 import { StatusTone, statusContainerOpacity, useTheme } from 'theme';
 
 const isAndroid = Platform.OS === 'android';
@@ -28,7 +35,40 @@ export interface CardRowProps {
   title: string;
   /** Up to two lines under the title. */
   preview?: string;
+  /** Search words to emphasize where they appear in the title and preview. */
+  highlight?: readonly string[];
 }
+
+/**
+ * `text` with the parts matching `words` in the primary text color and
+ * semibold, as search results show why they matched.
+ */
+const Highlighted: React.FC<{ text: string; words?: readonly string[] }> = ({
+  text,
+  words,
+}) => {
+  const theme = useTheme();
+  const ranges = words?.length ? matchRanges(text, words) : [];
+  if (!ranges.length) {
+    return text;
+  }
+  const parts: ReactNode[] = [];
+  let at = 0;
+  for (const [start, end] of ranges) {
+    parts.push(text.slice(at, start));
+    parts.push(
+      <NativeText
+        key={start}
+        style={[styles.match, { color: theme.colors.onSurfaceHigh }]}
+      >
+        {text.slice(start, end)}
+      </NativeText>,
+    );
+    at = end;
+  }
+  parts.push(text.slice(at));
+  return parts;
+};
 
 /**
  * A list item laid out like Mail on iOS and Mac and like a Material 3
@@ -46,6 +86,7 @@ const CardRow: React.FC<CardRowProps> = ({
   trailing,
   title,
   preview,
+  highlight,
 }) => {
   const titleLines = useTitleLines();
 
@@ -85,11 +126,15 @@ const CardRow: React.FC<CardRowProps> = ({
             numberOfLines={titleLines}
             style={[styles.title, !(isAndroid && unread) && styles.regular]}
           >
-            {title}
+            <Highlighted text={title} words={highlight} />
           </Headline>
           {overline ? null : meta}
         </View>
-        {preview ? <Paragraph numberOfLines={2}>{preview}</Paragraph> : null}
+        {preview ? (
+          <Paragraph numberOfLines={2}>
+            <Highlighted text={preview} words={highlight} />
+          </Paragraph>
+        ) : null}
       </View>
     </View>
   );
@@ -266,6 +311,9 @@ const styles = StyleSheet.create({
   },
   title: {
     flex: 1,
+  },
+  match: {
+    fontWeight: '600',
   },
   regular: {
     fontWeight: '400',

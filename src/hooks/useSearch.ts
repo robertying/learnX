@@ -5,9 +5,10 @@ import { Assignment, File, Notice } from 'data/types/state';
 import {
   hasHan,
   queryWords,
+  SearchHit,
   SearchSpec,
   SearchTier,
-  searchItems,
+  searchHits,
 } from 'helpers/search';
 import { removeTags } from 'helpers/text';
 import { useMinute } from 'hooks/useClock';
@@ -89,18 +90,44 @@ const fuzzyOptions = <T>(spec: SearchSpec<T>): IFuseOptions<T> => ({
 const fuzzyQuery = (query: string) =>
   !hasHan(query) && queryWords(query).some(word => word.length >= 4);
 
+export type SearchKind = 'notice' | 'assignment' | 'file';
+
+/** A result of any kind, as the overview's top hits list them. */
+export type TopHit =
+  | { kind: 'notice'; item: Notice }
+  | { kind: 'assignment'; item: Assignment }
+  | { kind: 'file'; item: File };
+
 export interface SearchResults {
+  /** The query's words, for showing where results matched. */
+  words: string[];
   notices: Notice[];
   assignments: Assignment[];
   files: File[];
+  /**
+   * The best results of every kind, at most `topHitCount`: those where every
+   * word matched a title or a course name. Empty for a fuzzy match.
+   */
+  topHits: TopHit[];
 }
 
-const noResults: SearchResults = { notices: [], assignments: [], files: [] };
+export const topHitCount = 3;
+
+const noResults: SearchResults = {
+  words: [],
+  notices: [],
+  assignments: [],
+  files: [],
+  topHits: [],
+};
+
+const items = <T>(hits: SearchHit<T>[]) => hits.map(({ item }) => item);
 
 /**
  * The notices, assignments and files that match `query`, best first (see
- * `helpers/search`). The search follows typing at a lower priority
- * (`useDeferredValue`), so a keystroke shows before the search finishes.
+ * `helpers/search`), and the best of them all. The search follows typing at
+ * a lower priority (`useDeferredValue`), so a keystroke shows before the
+ * search finishes.
  */
 export default function useSearch(
   notices: Notice[],
@@ -110,26 +137,48 @@ export default function useSearch(
 ): SearchResults {
   const deferredQuery = useDeferredValue(query);
   const now = useMinute();
-  if (!deferredQuery.trim()) {
+  const words = queryWords(deferredQuery);
+  if (!words.length) {
     return noResults;
   }
-  const results = {
-    notices: searchItems(notices, deferredQuery, noticeSpec, now),
-    assignments: searchItems(assignments, deferredQuery, assignmentSpec, now),
-    files: searchItems(files, deferredQuery, fileSpec, now),
+  const hits = {
+    notice: searchHits(notices, deferredQuery, noticeSpec, now),
+    assignment: searchHits(assignments, deferredQuery, assignmentSpec, now),
+    file: searchHits(files, deferredQuery, fileSpec, now),
   };
-  const found =
-    results.notices.length + results.assignments.length + results.files.length;
-  if (found || !fuzzyQuery(deferredQuery)) {
-    return results;
+  const found = hits.notice.length + hits.assignment.length + hits.file.length;
+  if (found) {
+    // Every word in a title or course name (an abbreviation of one counts).
+    const topScore = words.length * SearchTier.Course * 10;
+    const topHits = (['assignment', 'notice', 'file'] as const)
+      .flatMap(kind =>
+        hits[kind]
+          .filter(hit => hit.score >= topScore)
+          .map(hit => ({ ...hit, kind })),
+      )
+      .sort((a, b) => b.score - a.score)
+      .slice(0, topHitCount)
+      .map(({ kind, item }) => ({ kind, item }) as TopHit);
+    return {
+      words,
+      notices: items(hits.notice),
+      assignments: items(hits.assignment),
+      files: items(hits.file),
+      topHits,
+    };
   }
-  const fuzzy = <T>(items: T[], spec: SearchSpec<T>) =>
-    new Fuse(items, fuzzyOptions(spec))
+  if (!fuzzyQuery(deferredQuery)) {
+    return { ...noResults, words };
+  }
+  const fuzzy = <T>(list: T[], spec: SearchSpec<T>) =>
+    new Fuse(list, fuzzyOptions(spec))
       .search(deferredQuery)
       .map(result => result.item);
   return {
+    words,
     notices: fuzzy(notices, noticeSpec),
     assignments: fuzzy(assignments, assignmentSpec),
     files: fuzzy(files, fileSpec),
+    topHits: [],
   };
 }

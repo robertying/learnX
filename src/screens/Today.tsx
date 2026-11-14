@@ -146,6 +146,13 @@ const Today: React.FC<Props> = ({ navigation }) => {
       testID: 'today-debug',
       ownGroup: true,
     },
+    {
+      id: 'search',
+      label: t('search'),
+      icon: 'search',
+      onPress: () => navigation.navigate('SearchStack'),
+      testID: 'today-search',
+    },
     showSettings && {
       id: 'settings',
       label: t('settings'),

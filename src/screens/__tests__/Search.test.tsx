@@ -1,8 +1,15 @@
-import { act, render, screen, userEvent } from '@testing-library/react-native';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  userEvent,
+} from '@testing-library/react-native';
+import type { NativeStackHeaderItemMenu } from '@react-navigation/native-stack';
 import type { SearchBarProps } from 'react-native-screens';
 import { Assignment, File, Notice } from 'data/types/state';
 import Search from 'screens/Search';
-import { resetUserData, setCourseHidden } from 'data/userData';
+import { resetUserData, setArchived, setCourseHidden } from 'data/userData';
 import { screenProps } from 'test-utils/screenProps';
 
 const mockNotices: Notice[] = [
@@ -73,7 +80,9 @@ const setup = async (query?: string, parent?: object) => {
     />,
   );
   const options = (): SearchBarProps =>
-    navigation.setOptions.mock.lastCall[0].headerSearchBarOptions;
+    navigation.setOptions.mock.calls.findLast(
+      ([o]) => o.headerSearchBarOptions,
+    )[0].headerSearchBarOptions;
   (options().ref as React.RefObject<unknown>).current = searchBar;
   const type = (text: string) =>
     act(() =>
@@ -81,7 +90,19 @@ const setup = async (query?: string, parent?: object) => {
         nativeEvent: { text },
       } as never),
     );
-  return { navigation, searchBar, options, type };
+  // The header's filter menu, as iOS and Mac show it.
+  const filterMenu = () =>
+    navigation.setOptions.mock.calls
+      .findLast(([o]) => o.unstable_headerRightItems)[0]
+      .unstable_headerRightItems()[0] as NativeStackHeaderItemMenu;
+  const toggle = (index: number) =>
+    act(() => {
+      const item = filterMenu().menu.items[index];
+      if (item.type === 'action') {
+        item.onPress();
+      }
+    });
+  return { navigation, searchBar, options, type, filterMenu, toggle };
 };
 
 beforeEach(() => {
@@ -121,6 +142,80 @@ describe('Search', () => {
     expect(screen.queryByText('Lecture 5 slides')).toBeNull();
     // Each section's only row is its last, with no separator under it.
     expect(screen.queryByTestId('card-separator')).toBeNull();
+  });
+
+  it('shows a tab for each kind with its count, and one kind in each', async () => {
+    const { type } = await setup();
+    await type('midterm');
+    expect(screen.getByText('All')).toBeTruthy();
+    expect(screen.getByText('Notices 1')).toBeTruthy();
+    expect(screen.getByText('Assignments 1')).toBeTruthy();
+    expect(screen.getByText('Files 0')).toBeTruthy();
+    await act(() => fireEvent(screen.getByText('All'), 'selectionChange', 1));
+    expect(screen.getByText('Midterm room change')).toBeTruthy();
+    expect(screen.queryByText('Midterm review problems')).toBeNull();
+    expect(screen.queryByRole('header', { name: 'Notices' })).toBeNull();
+    await act(() => fireEvent(screen.getByText('All'), 'selectionChange', 3));
+    expect(screen.getByText('No Results')).toBeTruthy();
+  });
+
+  it('shows the top hits and three of each kind, with See All for the rest', async () => {
+    const extra = [2, 3, 4, 5].map(
+      n =>
+        ({
+          ...mockNotices[0],
+          id: `n${n}`,
+          title: `Week ${n} notes`,
+          content: `Also about the midterm, part ${n}`,
+        }) as Notice,
+    );
+    mockNotices.push(...extra);
+    try {
+      const { type } = await setup();
+      await type('midterm');
+      expect(screen.getByRole('header', { name: 'Top Hits' })).toBeTruthy();
+      // The title matches are the top hits; three body matches follow.
+      expect(screen.getByText('Midterm room change')).toBeTruthy();
+      expect(screen.getByText('Midterm review problems')).toBeTruthy();
+      expect(screen.getAllByText(/^Week \d notes$/)).toHaveLength(3);
+      await userEvent
+        .setup({ advanceTimers: jest.advanceTimersByTime })
+        .press(screen.getByText('See All'));
+      expect(screen.getAllByText(/^Week \d notes$/)).toHaveLength(4);
+      expect(screen.queryByText('Midterm review problems')).toBeNull();
+    } finally {
+      mockNotices.splice(1);
+    }
+  });
+
+  it('shows where a result matched', async () => {
+    const { type } = await setup();
+    await type('101');
+    expect(screen.getByText('101')).toBeTruthy();
+  });
+
+  it('marks archived items and leaves them out from the filter menu', async () => {
+    await act(() => setArchived('notice', ['n1'], true));
+    const { type, filterMenu, toggle } = await setup();
+    await type('midterm');
+    expect(screen.getByLabelText(/Midterm room change.*Archived/)).toBeTruthy();
+    expect(
+      filterMenu().menu.items.map(i => i.type === 'action' && i.state),
+    ).toEqual(['on', 'off']);
+    await toggle(0);
+    expect(screen.queryByText('Midterm room change')).toBeNull();
+    expect(
+      filterMenu().menu.items.map(i => i.type === 'action' && i.state),
+    ).toEqual(['off', 'off']);
+  });
+
+  it("finds hidden courses' items from the filter menu", async () => {
+    await act(() => setCourseHidden('c2', true));
+    const { type, toggle } = await setup();
+    await type('midterm');
+    expect(screen.queryByText('Midterm review problems')).toBeNull();
+    await toggle(1);
+    expect(screen.getByText('Midterm review problems')).toBeTruthy();
   });
 
   it("leaves out hidden courses' items", async () => {
