@@ -26,8 +26,13 @@ jest.mock('data/content', () => ({
   useFiles: () => ({ files: [] }),
 }));
 
+beforeEach(() => {
+  jest.useFakeTimers();
+});
+
 afterEach(async () => {
   await act(() => resetUserData());
+  jest.useRealTimers();
 });
 
 const setup = async () => {
@@ -49,8 +54,12 @@ const setup = async () => {
     navigation.setOptions.mock.calls.findLast(
       ([o]) => o.headerSearchBarOptions,
     )[0].headerSearchBarOptions;
-  const type = (text: string) =>
-    act(() => options().onChangeText!({ nativeEvent: { text } } as never));
+  const type = async (text: string) => {
+    await act(() =>
+      options().onChangeText!({ nativeEvent: { text } } as never),
+    );
+    await act(() => jest.advanceTimersByTime(600));
+  };
   return { navigation, type };
 };
 
@@ -65,7 +74,7 @@ describe('Search (Android)', () => {
       navigation.setOptions.mock.calls.some(([o]) => 'headerRight' in o),
     ).toBe(false);
     expect(screen.getByText('Midterm room change')).toBeTruthy();
-    const user = userEvent.setup();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     await user.press(screen.getByTestId('filter'));
     await user.press(screen.getByTestId('filter-archived'));
     expect(screen.queryByText('Midterm room change')).toBeNull();

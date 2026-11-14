@@ -15,6 +15,7 @@ import type { SearchBarCommands } from 'react-native-screens';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SafeAreaView } from 'react-native-screens/experimental';
 import type { NativeStackHeaderItem } from '@react-navigation/native-stack';
+import useDebouncedQuery from 'hooks/useDebouncedQuery';
 import useSearch, {
   type SearchKind,
   type TopHit,
@@ -189,7 +190,17 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
     };
   }, [navigation, initialQuery]);
 
-  const results = useSearch(notices, assignments, files, searchQuery);
+  // Results follow typing once it pauses, so the list doesn't reshape on
+  // every key, and keep the last ones that matched a little longer before
+  // No Results replaces them: a query being composed (pinyin letters before
+  // they become characters) usually matches nothing for a moment.
+  const typedQuery = useDebouncedQuery(searchQuery, 250);
+  const settledQuery = useDebouncedQuery(searchQuery, 600);
+  const typed = useSearch(notices, assignments, files, typedQuery);
+  const settled = useSearch(notices, assignments, files, settledQuery);
+  const found = (r: typeof typed) =>
+    r.notices.length + r.assignments.length + r.files.length > 0;
+  const results = found(typed) ? typed : settled;
   const byKind = {
     notice: results.notices.map(item => ({ kind: 'notice', item }) as TopHit),
     assignment: results.assignments.map(
@@ -332,7 +343,7 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={Styles.flex1}
           >
-            {hasResults ? null : searchQuery.trim() ? (
+            {hasResults ? null : settledQuery.trim() ? (
               <StatusView icon="noResults" message={t('noResults')} />
             ) : (
               <StatusView icon="search" message={t('searchPrompt')} />
