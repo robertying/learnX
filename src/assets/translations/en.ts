@@ -501,7 +501,7 @@ export default {
   setupNewContent: 'New Content',
   setupCalendarSection: 'Calendar',
   setupCalendar: 'Add Assignments to Calendar',
-  setupCourseCalendar: 'Add Schedule to Calendar',
+  setupCourseCalendar: 'Add Course Schedule to Calendar',
   setupReminders: 'Add Assignments to Reminders',
   assignmentsInCalendarSection: 'Assignments in Calendar',
   assignmentsInRemindersSection: 'Assignments in Reminders',
