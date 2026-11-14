@@ -18,8 +18,8 @@ import {
  * The mock account in English, for when the app asks the emulated server for
  * English. Each text replaces its Chinese counterpart in `data/mock.ts` by item
  * id, so both languages show the same items in the same states. Texts the mock
- * already has in English (a few notices and assignments of the machine
- * learning course) are not repeated here. The made-up people keep their
+ * already has in English (everything of the machine learning course, which is
+ * taught in English) are not repeated here. The made-up people keep their
  * Chinese names in pinyin.
  */
 
@@ -187,9 +187,6 @@ const notices: Record<number, Overlay> = {
   19: intro(
     'There are 6 labs in total, done in Verilog on an FPGA board. You collect the board in the first lab session and return it at the end of the term.',
   ),
-  20: intro(
-    'Grading: homework 40%, course project 40%, participation 20%. Homework is done in Python; reports can be written in Chinese or English.',
-  ),
   21: intro(
     'Grading: two projects at 30% each, and an open-book final exam at 40%.',
   ),
@@ -315,10 +312,6 @@ const excellentTitle = 'Homework 5';
 const excellentLabel = 'Excellent Homework';
 
 const files: Record<number, Overlay> = {
-  1: {
-    title: 'Lecture 9: Deep Learning Frameworks',
-    description: 'The code shown in class is on the last two slides.',
-  },
   2: { title: 'The Human Visual System' },
   3: { title: 'Lab 4 Reference Timing Diagram' },
   4: {
@@ -343,7 +336,6 @@ const files: Record<number, Overlay> = {
   11: { title: 'Lecture 5: Source Information Measures (corrected)' },
   12: { title: 'Project 1 Simulation Parameters' },
   13: { title: 'Project 1 Handout' },
-  14: { title: 'Lecture 8: Support Vector Machines' },
   15: { title: 'AutoCAD Lab Guide' },
   16: { title: 'Verilog Syntax Cheat Sheet' },
   17: { title: 'Final Exam Review Outline' },

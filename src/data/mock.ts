@@ -511,11 +511,17 @@ export const mockNotices: Notice[] = [
     digitalSystem,
     '本课程共 6 次实验，使用 Verilog 和 FPGA 开发板完成。开发板在第一次实验课时领取，期末归还。',
   ),
-  introNotice(
-    20,
-    machineLearning,
-    '成绩构成：作业 40%，课程项目 40%，课堂参与 20%。作业使用 Python 完成，可以用中文或英文写报告。',
-  ),
+  notice(20, machineLearning, {
+    // The course is taught in English, so its texts are English in both
+    // languages.
+    title: 'Course Introduction and Grading',
+    publisher: machineLearning.teacherName,
+    hasRead: true,
+    markedImportant: false,
+    publishTime: dateTime(-7 * 8, 10, 5),
+    content:
+      '<p>Hello everyone, and welcome to the course!</p><p>Grading: homework 40%, course project 40%, participation 20%. Homework is done in Python; reports can be written in Chinese or English.</p><p>Office hours are every Thursday from 4:00 to 5:30 p.m.; the location is in the syllabus. You can also leave a message in the course discussion forum.</p>',
+  }),
   introNotice(
     21,
     audioVisual,
@@ -921,14 +927,14 @@ export const mockFiles: File[] = [
     machineLearning,
     'slidesPptx',
     {
-      title: '第 9 讲 深度学习框架',
+      title: 'Lecture 9: Deep Learning Frameworks',
       uploadTime: hoursAgo(20),
       isNew: true,
       markedImportant: true,
       size: '8.6M',
-      description: '课上演示的代码在最后两页。',
+      description: 'The code shown in class is on the last two slides.',
     },
-    '课件',
+    'Slides',
   ),
   file(
     2,
@@ -1055,11 +1061,11 @@ export const mockFiles: File[] = [
     machineLearning,
     'slidesPptx',
     {
-      title: '第 8 讲 支持向量机',
+      title: 'Lecture 8: Support Vector Machines',
       uploadTime: dateTime(-7, 9, 50),
       size: '6.9M',
     },
-    '课件',
+    'Slides',
   ),
   file(15, engineeringGraphics, 'handoutPdf', {
     title: 'AutoCAD 上机指导书',
