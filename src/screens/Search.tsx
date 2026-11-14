@@ -257,6 +257,10 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
   const tabTitles = tabs.map(tab =>
     tab === 'all' ? t('all') : t(titles[tab]),
   );
+  // The tabs (Android: chips and the filter menu) stay up while there's a
+  // query, whether or not it matches yet, so they don't come and go as
+  // typing pauses on a partial query.
+  const showTabs = !!searchQuery.trim();
   // The floating tabs' height, which the results scroll clear of.
   const [tabsHeight, setTabsHeight] = useState(0);
 
@@ -356,10 +360,9 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
           </KeyboardAvoidingView>
         </View>
         {Platform.OS === 'android' ? (
-          // Chips for the kinds and the filter menu, once there's a query,
-          // so the menu can bring back what it leaves out even when nothing
+          // The menu also brings back what it leaves out when nothing
           // matches.
-          searchQuery.trim() ? (
+          showTabs ? (
             <View style={Styles.flex1}>
               <View style={styles.androidBar}>
                 <ScopeChips
@@ -377,12 +380,12 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
               {hasResults ? renderList(0) : null}
             </View>
           ) : null
-        ) : !hasResults ? null : hasGlassHeader ? (
+        ) : !showTabs ? null : hasGlassHeader ? (
           // iPhone and iPad from iOS 26: the tabs float in glass under the
           // header, as in a course's detail, and the results scroll under
           // them once their height is known.
           <>
-            {tabsHeight ? renderList(tabsHeight) : null}
+            {tabsHeight && hasResults ? renderList(tabsHeight) : null}
             <SafeAreaView
               edges={{ top: true }}
               style={styles.floatingTabs}
@@ -407,7 +410,7 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
               onSelect={i => setScope(tabs[i])}
               accessibilityLabel={t('search')}
             />
-            {renderList(0)}
+            {hasResults ? renderList(0) : null}
           </View>
         )}
       </View>
