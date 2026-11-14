@@ -7,6 +7,21 @@ import * as theme from 'theme';
 
 const RN: typeof ReactNative = require('react-native');
 
+/** WCAG contrast of two `#RRGGBB` colors. */
+const channels = (hex: string) =>
+  [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
+const luminance = (hex: string) => {
+  const [r, g, b] = channels(hex).map(c => {
+    const v = c / 255;
+    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+const contrast = (a: string, b: string) => {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+};
+
 const scheme = (value: 'light' | 'dark') =>
   jest.spyOn(RN, 'useColorScheme').mockReturnValue(value);
 
@@ -53,11 +68,28 @@ describe('on iOS and Mac', () => {
     );
     expect(strings).toEqual([
       ['primary', theme.brandColors.light],
+      ['primaryFill', theme.brandFillColors.light],
       ['onPrimary', 'white'],
       ['onPrimaryContainer', theme.brandColors.light],
       ['onError', 'white'],
       ['notification', 'red'],
     ]);
+  });
+
+  it('fills buttons and switches with a brand shade white reads on', () => {
+    expect(theme.BrandDarkTheme.colors.primaryFill).toBe(
+      theme.brandFillColors.dark,
+    );
+    for (const fill of Object.values(theme.brandFillColors)) {
+      // The system's white label on a filled button, and a switch's knob
+      expect(contrast('#FFFFFF', fill)).toBeGreaterThanOrEqual(4.5);
+    }
+    // A switch that is on stands out from a grouped row in dark mode
+    expect(
+      contrast(theme.brandFillColors.dark, '#1C1C1E'),
+    ).toBeGreaterThanOrEqual(3);
+    // Only the dark tone differs: the light brand color already takes white
+    expect(theme.brandFillColors.light).toBe(theme.brandColors.light);
   });
 
   it('gives web content CSS colors: WebKit text and the brand links', () => {
@@ -77,8 +109,6 @@ describe('on iOS and Mac', () => {
       blue: ['#007AFF', '#0A84FF'],
       grey: ['#8E8E93', '#8E8E93'],
     };
-    const channels = (hex: string) =>
-      [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
     // `color` at `alpha` over `under`, as the pill's tint draws.
     const over = (color: string, under: string, alpha: number) =>
       `#${channels(color)
@@ -88,17 +118,6 @@ describe('on iOS and Mac', () => {
             .padStart(2, '0'),
         )
         .join('')}`;
-    const luminance = (hex: string) => {
-      const [r, g, b] = channels(hex).map(c => {
-        const v = c / 255;
-        return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
-      });
-      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-    };
-    const contrast = (a: string, b: string) => {
-      const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
-      return (hi + 0.05) / (lo + 0.05);
-    };
     const tones = Object.keys(system) as theme.StatusTone[];
     const tint = theme.statusContainerOpacity;
 

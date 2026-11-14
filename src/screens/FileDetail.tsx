@@ -1,6 +1,6 @@
 import { displayFileSize } from 'helpers/filename';
 import { useCallback, useEffect, useState } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View, ViewProps } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import WebView from 'react-native-webview';
 import Pdf from 'react-native-pdf';
@@ -112,7 +112,7 @@ const FileDetailContent: React.FC<{
 
   // The details are a Form, which keeps to the safe area itself.
   const showsDetails = !error && !!path && (showInfo || !canRender);
-  const Root = showsDetails ? FormScreen : SafeArea;
+  const Root = showsDetails ? FormScreen : PreviewRoot;
 
   return (
     <Root testID="file-detail" collapsable={false}>
@@ -170,6 +170,15 @@ const FileDetailContent: React.FC<{
     </Root>
   );
 };
+
+/**
+ * The file, or its download's progress or error. Its pages stay white in dark
+ * mode, so it keeps clear of the header and tab bar rather than scrolling
+ * under them.
+ */
+const PreviewRoot: React.FC<ViewProps> = props => (
+  <SafeArea clearOfBars {...props} />
+);
 
 /** The file's details, and what to do with it, when it isn't previewed. */
 const FileInfo: React.FC<{

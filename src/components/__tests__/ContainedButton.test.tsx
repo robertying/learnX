@@ -1,6 +1,9 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
 import ContainedButton from 'components/ContainedButton';
 import DeviceInfo from 'constants/DeviceInfo';
+import { brandFillColors } from 'theme';
+
+const RN: typeof import('react-native') = require('react-native');
 
 type WithModifiers = { props: { modifiers?: unknown[] } };
 
@@ -24,6 +27,14 @@ describe('ContainedButton (iOS)', () => {
     expect(modifiers(screen.getByText('Continue'))).toEqual([]);
     await userEvent.setup().press(button);
     expect(onPress).toHaveBeenCalled();
+  });
+
+  it('fills with the brand shade white reads on, also in dark mode', async () => {
+    jest.spyOn(RN, 'useColorScheme').mockReturnValue('dark');
+    await render(<ContainedButton label="Continue" />);
+    expect(
+      modifiers(screen.getByRole('button', { name: 'Continue' })),
+    ).toContainEqual({ modifier: 'tint', args: [brandFillColors.dark] });
   });
 
   it('sets its label in the iOS body size on a Mac', async () => {
