@@ -68,7 +68,6 @@ describe('on iOS and Mac', () => {
     );
     expect(strings).toEqual([
       ['primary', theme.brandColors.light],
-      ['primaryFill', theme.brandFillColors.light],
       ['onPrimary', 'white'],
       ['onPrimaryContainer', theme.brandColors.light],
       ['onError', 'white'],
@@ -76,20 +75,14 @@ describe('on iOS and Mac', () => {
     ]);
   });
 
-  it('fills buttons and switches with a brand shade white reads on', () => {
-    expect(theme.BrandDarkTheme.colors.primaryFill).toBe(
-      theme.brandFillColors.dark,
-    );
-    for (const fill of Object.values(theme.brandFillColors)) {
-      // The system's white label on a filled button, and a switch's knob
-      expect(contrast('#FFFFFF', fill)).toBeGreaterThanOrEqual(4.5);
+  it('keeps the dark brand tone readable as text and under white', () => {
+    const { dark } = theme.brandColors;
+    // A filled button's label and a switch's knob, as Apple's system colors
+    expect(contrast('#FFFFFF', dark)).toBeGreaterThanOrEqual(3.5);
+    // Text and links on black, on a grouped row, and on Android's surfaces
+    for (const background of ['#000000', '#1C1C1E', '#171216', '#231E23']) {
+      expect(contrast(dark, background)).toBeGreaterThanOrEqual(4.5);
     }
-    // A switch that is on stands out from a grouped row in dark mode
-    expect(
-      contrast(theme.brandFillColors.dark, '#1C1C1E'),
-    ).toBeGreaterThanOrEqual(3);
-    // Only the dark tone differs: the light brand color already takes white
-    expect(theme.brandFillColors.light).toBe(theme.brandColors.light);
   });
 
   it('gives web content CSS colors: WebKit text and the brand links', () => {

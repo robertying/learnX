@@ -62,7 +62,6 @@ import {
   strikethrough,
   textInputAutocapitalization,
   autocorrectionDisabled,
-  tint as tintModifier,
   toggleStyle,
 } from '@expo/ui/swift-ui/modifiers';
 import { BADGE_COLOR, DOT_SIZE } from 'components/Badge';
@@ -757,27 +756,21 @@ export const FormToggle: React.FC<FormToggleProps> = ({
   onValueChange,
   disabled: isDisabled,
   loading,
-}) => {
-  const theme = useTheme();
-  if (loading) {
-    return (
-      <LabeledContent label={<RowLabel title={title} icon={icon} plain />}>
-        <ProgressView />
-      </LabeledContent>
-    );
-  }
-  const modifiers = [switchStyle, tintModifier(theme.colors.primaryFill)];
-  return (
+}) =>
+  loading ? (
+    <LabeledContent label={<RowLabel title={title} icon={icon} plain />}>
+      <ProgressView />
+    </LabeledContent>
+  ) : (
     <Toggle
       isOn={value}
       onIsOnChange={onValueChange}
       label={title}
       systemImage={icon ? systemIcons[icon].ios : undefined}
       testID={testID}
-      modifiers={isDisabled ? [...modifiers, disabled(true)] : modifiers}
+      modifiers={isDisabled ? [switchStyle, disabled(true)] : [switchStyle]}
     />
   );
-};
 
 /** A number typed in at the end of the row. */
 export const FormNumberField: React.FC<FormNumberFieldProps> = ({

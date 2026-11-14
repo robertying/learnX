@@ -40,7 +40,7 @@ function DeadlinesWidget(
         background: '#171216',
         title: '#EBDFE6',
         caption: '#D0C3CC',
-        accent: '#F4ABFF',
+        accent: '#C55CD6',
         // The error role and the orange custom color.
         red: '#FFB4AB',
         orange: '#FFB68E',

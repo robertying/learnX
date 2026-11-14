@@ -1,7 +1,6 @@
 import { Platform, StyleProp, ViewStyle } from 'react-native';
 import { Switch as NativeSwitch } from '@expo/ui';
-import { labelsHidden, tint } from '@expo/ui/swift-ui/modifiers';
-import { useTheme } from 'theme';
+import { labelsHidden } from '@expo/ui/swift-ui/modifiers';
 import ThemedHost from 'components/ThemedHost';
 
 export interface SwitchProps {
@@ -14,15 +13,15 @@ export interface SwitchProps {
   style?: StyleProp<ViewStyle>;
 }
 
-/** The system switch (SwiftUI `Toggle`, Material 3 `Switch`), in the brand color (`primaryFill` on iOS). */
+// SwiftUI reads a hidden label to VoiceOver (a checkbox on Mac Catalyst).
+const iosModifiers = [labelsHidden()];
+
+/** The system switch (SwiftUI `Toggle`, Material 3 `Switch`), tinted with the primary color. */
 const Switch: React.FC<SwitchProps> = ({
   style,
   accessibilityLabel,
   ...props
 }) => {
-  const theme = useTheme();
-  // SwiftUI reads a hidden label to VoiceOver (a checkbox on Mac Catalyst).
-  const iosModifiers = [labelsHidden(), tint(theme.colors.primaryFill)];
   return (
     <ThemedHost
       matchContents

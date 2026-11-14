@@ -35,7 +35,7 @@ function UpNextWidget(
         background: '#171216',
         title: '#EBDFE6',
         caption: '#D0C3CC',
-        accent: '#F4ABFF',
+        accent: '#C55CD6',
       }
     : {
         background: '#FFF7FA',
