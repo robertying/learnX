@@ -2,6 +2,7 @@ import { act, render, screen, userEvent } from '@testing-library/react-native';
 import type { SearchBarProps } from 'react-native-screens';
 import { Assignment, File, Notice } from 'data/types/state';
 import Search from 'screens/Search';
+import { resetUserData, setCourseHidden } from 'data/userData';
 import { screenProps } from 'test-utils/screenProps';
 
 const mockNotices: Notice[] = [
@@ -87,8 +88,9 @@ beforeEach(() => {
   jest.useFakeTimers({ now: new Date('2026-03-10T12:00:00+08:00') });
 });
 
-afterEach(() => {
+afterEach(async () => {
   jest.useRealTimers();
+  await act(() => resetUserData());
 });
 
 describe('Search', () => {
@@ -119,6 +121,14 @@ describe('Search', () => {
     expect(screen.queryByText('Lecture 5 slides')).toBeNull();
     // Each section's only row is its last, with no separator under it.
     expect(screen.queryByTestId('card-separator')).toBeNull();
+  });
+
+  it("leaves out hidden courses' items", async () => {
+    await act(() => setCourseHidden('c2', true));
+    const { type } = await setup();
+    await type('midterm');
+    expect(screen.getByText('Midterm room change')).toBeTruthy();
+    expect(screen.queryByText('Midterm review problems')).toBeNull();
   });
 
   it('opens a result in the search stack', async () => {

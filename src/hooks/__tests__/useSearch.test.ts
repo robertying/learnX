@@ -84,6 +84,33 @@ describe('useSearch', () => {
     expect((await search('课件')).files).toEqual(['f1']);
   });
 
+  it('finds words split by markup, typed without the space', async () => {
+    expect((await search('手写草稿')).assignments).toEqual(['a1']);
+  });
+
+  it('ranks a title match over a body match', async () => {
+    expect((await search('作业')).notices).toEqual(['n3']);
+    expect((await search('课程')).notices).toEqual(['n1', 'n2', 'n3']);
+  });
+
+  it('fixes an English typo in titles and names when nothing matches exactly', async () => {
+    expect((await search('lectre')).notices).toEqual(['n2']);
+    expect((await search('sylabus')).notices).toEqual(['n3']);
+  });
+
+  it('keeps typos out of bodies and Chinese', async () => {
+    expect((await search('chaptr')).notices).toEqual([]);
+    expect((await search('期终考试')).notices).toEqual([]);
+  });
+
+  it('skips the fuzzy pass when something matches exactly', async () => {
+    expect(await search('lecture')).toEqual({
+      notices: ['n2'],
+      assignments: [],
+      files: [],
+    });
+  });
+
   it('returns nothing for an empty query', async () => {
     expect(await search('')).toEqual({
       notices: [],
