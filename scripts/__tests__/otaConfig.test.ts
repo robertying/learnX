@@ -1,6 +1,5 @@
-// The over-the-air update settings: the URL and runtime version in app.json,
-// the code-signing certificate in certs/ota-certificate.pem and the Expo
-// project id in .env. scripts/ota-config-ios.sh writes
+// The over-the-air update settings: the URL, runtime version and Expo project
+// id in app.json and the code-signing certificate in certs/ota-certificate.pem. scripts/ota-config-ios.sh writes
 // them into Expo.plist and android/app/build.gradle into resources the
 // manifest reads; the rest is in Expo.plist and the build.gradle. A mismatch
 // shows up only as updates that never arrive, so keep them in step.
@@ -14,6 +13,7 @@ const read = (path: string) =>
 const appJson = JSON.parse(read('app.json')) as {
   runtimeVersion: string;
   updates: { url: string };
+  extra: { eas: { projectId: string } };
 };
 
 const plist = read('ios/learnX/Expo.plist');
@@ -44,7 +44,7 @@ test('the runtime version is an app version', () => {
 
 test('the update URL is HTTPS', () => {
   expect(appJson.updates.url).toMatch(/^https:\/\/[^/]+\/manifest$/);
-  expect(read('.env.example')).toMatch(/^EXPO_PROJECT_ID=$/m);
+  expect(appJson.extra.eas.projectId).toMatch(/^[0-9a-f-]{36}$/);
 });
 
 test('the certificate can sign code', () => {
@@ -72,7 +72,7 @@ test('the build writes the URL, runtime version, headers and certificate', () =>
     const text = read(file);
     expect(text).toContain('certs/ota-certificate.pem');
     expect(text).toContain('updates.url');
-    expect(text).toContain('EXPO_PROJECT_ID');
+    expect(text).toContain('projectId');
   }
 });
 

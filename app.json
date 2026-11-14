@@ -6,5 +6,10 @@
   "runtimeVersion": "19.0.0",
   "updates": {
     "url": "https://ota.example.invalid/manifest"
+  },
+  "extra": {
+    "eas": {
+      "projectId": "64d16d7c-9ef6-4e0c-a83c-68b7015df371"
+    }
   }
 }

@@ -1,9 +1,9 @@
 import com.android.build.api.variant.FilterConfiguration
 import groovy.json.JsonSlurper
 
-// Over-the-air updates: the URL and runtime version from app.json, the
-// certificate from certs/ota-certificate.pem and the Expo project id from the
-// repo-root .env (EXPO_PROJECT_ID; the update server asks for it), as string
+// Over-the-air updates: the URL, runtime version and Expo project id (the update
+// server asks for it) from app.json and the certificate from
+// certs/ota-certificate.pem, as string
 // resources the manifest's expo.modules.updates meta-data reads. iOS does the
 // same in scripts/ota-config-ios.sh. E2E builds (-PciRelease) get the local
 // test server (scripts/ota-e2e-server.mjs, through `adb reverse`), runtime
@@ -11,19 +11,11 @@ import groovy.json.JsonSlurper
 // never load a published update.
 def otaConfig(boolean e2e) {
     def root = rootProject.file("..")
-    def env = [:]
-    def envFile = new File(root, ".env")
-    if (envFile.exists()) {
-        envFile.eachLine { line ->
-            def match = line =~ /^([A-Z0-9_]+)=["']?(.*?)["']?$/
-            if (match) env[match[0][1]] = match[0][2]
-        }
-    }
     def appJson = new JsonSlurper().parse(new File(root, "app.json"))
     def url = e2e ? "http://localhost:8199/manifest" : appJson.updates.url
     def headers = ["expo-channel-name": "production"]
-    if (!e2e && env.EXPO_PROJECT_ID) {
-        headers["expo-app-id"] = env.EXPO_PROJECT_ID
+    if (!e2e) {
+        headers["expo-app-id"] = appJson.extra.eas.projectId
     }
     def certificate = e2e ? new File(root, "build/ota-e2e/certificate.pem") : new File(root, "certs/ota-certificate.pem")
     if (!certificate.exists()) {
