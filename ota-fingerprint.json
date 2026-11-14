@@ -1,16 +1,16 @@
 {
   "runtimeVersion": "19.0.0",
-  "ios": "af6269083b75ed6b7f4f1995a4ec9504afa5f5ff",
-  "android": "1eda8a45098c94c93584d423718dea518bbf7ea3",
+  "ios": "853d89d1861983a47680c58cd343587ea4c66487",
+  "android": "b9470ea9bfaec4072c4490fce0cb2c29304d8abe",
   "sources": {
     "ios": {
-      "dir ios": "ecba7a6c47654d93fe07c8a8f743157a0f981b27",
-      "dir modules/crashlytics/ios": "86bc06824eae16cd9f0ea2cf47229e80d6ac5238",
-      "dir modules/menus/ios": "98c20bb4b0fd08e81d374c741482489a993f0e39",
-      "dir modules/share/ios": "0c79efc372a51162fa10ab7c7c1b80c9684c71a6",
-      "dir modules/sidebar/ios": "7fcb27a7a70406918e9651c1039f1620d2e47699",
-      "dir modules/spotlight/ios": "988effc513e6086391fc8a6e3435522ac5a1f730",
-      "dir modules/toast/ios": "ca855ee0dbf8428b8824b677d045cabc89374814",
+      "dir ios": "8c6736d4e710a40dd04f36389609d157e412069d",
+      "dir modules/crashlytics/ios": "7031808858c863712e9bc24605a2a74ef5926983",
+      "dir modules/menus/ios": "c19c55b022a1c80ed1ef33e930494b6fda2d06bd",
+      "dir modules/share/ios": "c78614d342566560e2a0883cd6aa4bba7068f682",
+      "dir modules/sidebar/ios": "f7299ecb67e58f9f185bc116b2fb5a6080baf236",
+      "dir modules/spotlight/ios": "cb4104fd4cbf8a97f0bc116ad6d87cc4a0aab85e",
+      "dir modules/toast/ios": "b8e55255835b975b642f9f81064dd9b03cfd2ff0",
       "dir patches": "cd4b3c43add410ea9b31c8a45593ffcbcd89f3d4",
       "contents expoAutolinkingConfig:ios": "32ce8184a43f03a7bf843e7042cdf353f4b5a404",
       "contents rncoreAutolinkingConfig:ios": "8a2eb393ff5b4155abd1e29e9247f545a2a7a638",
@@ -62,9 +62,9 @@
       "package node_modules/unimodules-app-loader/package.json": "c5c0283fd62fe191a27f8c91a80e8be54f1c52d6"
     },
     "android": {
-      "dir android": "9e2397344bd1c38097e6be1c823716692b0c2399",
-      "dir modules/crashlytics/android": "7b65d4ec8843100a08edc9a946eca7cfddf0748a",
-      "dir modules/share/android": "8dc3c7b399864ddcc06a9823e4c1d94b221438af",
+      "dir android": "dcbba471b3b6443f06cb86a9360c23ebee616390",
+      "dir modules/crashlytics/android": "c197e1f7400e71d52bf820a626fa941218b8e4ae",
+      "dir modules/share/android": "28e80bd75f4dfed63ebde2cf73cf550b6b6b49d7",
       "dir patches": "cd4b3c43add410ea9b31c8a45593ffcbcd89f3d4",
       "contents expoAutolinkingConfig:android": "1ecb82753ff6f07ac5e2ad556e29d4065d33f41e",
       "contents rncoreAutolinkingConfig:android": "d40be427cc3c3ac490e297933ea55327245bd0ce",
