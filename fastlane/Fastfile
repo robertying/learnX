@@ -307,12 +307,13 @@ end
 # Run before a release build, so a checkout without .env (a fresh worktree
 # has none: it's git-ignored) fails in seconds instead of shipping a build
 # without the mock login.
-# The over-the-air update URL in app.json (the same in Expo.plist and the
-# Android manifest; see AGENTS.md). A build with the placeholder would never
+# The over-the-air update settings in .env (scripts/ota-config-ios.sh and
+# android/app/build.gradle build them in). A build without them would never
 # get an update.
 def verify_ota_config!
-  url = JSON.parse(File.read(File.join(ROOT, "app.json"))).dig("updates", "url").to_s
-  UI.user_error!("app.json has no real over-the-air update URL (#{url.inspect}); see AGENTS.md") if url.empty? || url.include?("example.invalid")
+  env = Dotenv.parse(release_env_file)
+  UI.user_error!("#{release_env_file} has no https OTA_UPDATE_URL; release builds need it for over-the-air updates (AGENTS.md)") unless env["OTA_UPDATE_URL"].to_s.start_with?("https://")
+  UI.user_error!("#{release_env_file} has no EXPO_PROJECT_ID; the update server needs it (AGENTS.md)") if env["EXPO_PROJECT_ID"].to_s.empty?
 end
 
 def verify_release_env!
