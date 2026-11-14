@@ -138,6 +138,16 @@ if [ "$has_flow" = false ] && [ "$ui_only" = false ]; then
   set -- "$@" .maestro
 fi
 
+# Android: scripts/e2e-calendar.mjs reads the device's calendar for
+# 07-settings (subflows/calendar-provider.yaml), at CALENDAR_URL.
+calendar_url=
+if [ "$platform" = android ] && [ "$ui_only" = false ]; then
+  serial="${MAESTRO_DEVICE:-$(adb devices | awk 'NR > 1 && $2 == "device" { print $1; exit }')}"
+  calendar_port="${E2E_CALENDAR_PORT:-$((17000 + $$ % 1000))}"
+  node scripts/e2e-calendar.mjs "$serial" "$calendar_port" $$ &
+  calendar_url="http://127.0.0.1:$calendar_port/events"
+fi
+
 test_args=(
   -e APP_ID="$app_id"
   -e ACCOUNT="$account"
@@ -148,6 +158,7 @@ test_args=(
   -e APP_LANGUAGE="${E2E_LANGUAGE:-}"
   -e STATE_CLEARED="${E2E_STATE_CLEARED:-}"
   -e IPAD="$ipad"
+  -e CALENDAR_URL="$calendar_url"
   "${env_args[@]}"
 )
 # The simulator the UI tests run on: MAESTRO_DEVICE, else the one booted.

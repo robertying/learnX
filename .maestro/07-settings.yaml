@@ -189,7 +189,8 @@ name: Change every setting
       - runFlow: subflows/back-to-settings.yaml
 
 # Calendars & Reminders: each sync on with its options on and off, then a
-# look in the system Calendar and Reminders apps (iOS) for what it wrote: this
+# look for what it wrote, in the system Calendar and Reminders apps on iOS and
+# in the device's calendar on Android (subflows/calendar-provider.yaml): this
 # week's classes of the mock course (found by their room, which is the same in
 # both languages) and the mock assignment (found by "OFDM", in its title in
 # both). Then the syncs go off, which keeps what they wrote, and Delete
@@ -332,6 +333,21 @@ name: Change every setting
           env:
             ID: reminders-assignment-sync
             ON: 'false'
+# What the syncs wrote, on Android
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - runFlow:
+          file: subflows/calendar-provider.yaml
+          env:
+            MATCH: '.*(${MOCK_COURSE}).* \| .*6A118.*'
+            FOUND: 'true'
+      - runFlow:
+          file: subflows/calendar-provider.yaml
+          env:
+            MATCH: '.*(${MOCK_ASSIGNMENT}).* \| .*'
+            FOUND: 'true'
 - runFlow:
     file: subflows/scroll-to-top.yaml
     env:
@@ -361,6 +377,20 @@ name: Change every setting
 - tapOn:
     id: calendar-delete
 - tapOn: '${T_delete}'
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - runFlow:
+          file: subflows/calendar-provider.yaml
+          env:
+            MATCH: '.*(${MOCK_ASSIGNMENT}).* \| .*'
+            FOUND: 'false'
+      - runFlow:
+          file: subflows/calendar-provider.yaml
+          env:
+            MATCH: '.*(${MOCK_COURSE}).* \| .*'
+            FOUND: 'false'
 - runFlow:
     when:
       platform: iOS
