@@ -12,13 +12,20 @@ const DAY = 24 * HOUR;
  * always means tomorrow. A deadline more than a year away (some teachers set
  * one decades ahead) shows its date instead.
  */
+/**
+ * A deadline over a year away, which `deadlineText` gives as its date: a
+ * screen that already shows the full date leaves that text out.
+ */
+export const isFarOffDeadline = (deadline: string, now?: dayjs.ConfigType) =>
+  dayjs(deadline).isAfter(dayjs(now).add(1, 'year'));
+
 export const deadlineText = (deadline: string, now?: dayjs.ConfigType) => {
   const n = dayjs(now);
   const dl = dayjs(deadline);
   if (!dl.isAfter(n)) {
     return t('deadlinePassed', { time: n.to(dl) });
   }
-  if (dl.isAfter(n.add(1, 'year'))) {
+  if (isFarOffDeadline(deadline, n)) {
     return t('deadlineOn', { date: dl.format(t('deadlineDateFormat')) });
   }
   const left = dl.diff(n);

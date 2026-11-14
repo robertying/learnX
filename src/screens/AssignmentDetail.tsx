@@ -24,6 +24,7 @@ import {
 } from 'helpers/i18n';
 import {
   deadlineText,
+  isFarOffDeadline,
   deadlineTone,
   deadlineUrgency,
 } from 'helpers/assignments';
@@ -198,7 +199,12 @@ const AssignmentDetailContent: React.FC<{
           <FormText
             title={t('deadline')}
             subtitle={dayjs(deadline).format(t('fullDateTimeFormat'))}
-            detail={deadlineText(deadline, now)}
+            // The full date is already above it
+            detail={
+              isFarOffDeadline(deadline, now)
+                ? undefined
+                : deadlineText(deadline, now)
+            }
             detailTint={urgency && deadlineTone[urgency]}
             icon="deadline"
           />

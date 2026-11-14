@@ -4,6 +4,7 @@ import {
   deadlineDayTime,
   deadlineText,
   deadlineUrgency,
+  isFarOffDeadline,
   sortAssignments,
 } from 'helpers/assignments';
 
@@ -158,5 +159,13 @@ describe('deadlineDayTime', () => {
     expect(deadlineDayTime('2026-03-18T08:00:00+08:00', now)).toBe(
       'due Mar 18 08:00',
     );
+  });
+});
+
+describe('isFarOffDeadline', () => {
+  it('is a deadline more than a year after now', () => {
+    const now = '2026-03-15T12:00:00Z';
+    expect(isFarOffDeadline('2027-03-15T12:01:00Z', now)).toBe(true);
+    expect(isFarOffDeadline('2027-03-15T12:00:00Z', now)).toBe(false);
   });
 });
