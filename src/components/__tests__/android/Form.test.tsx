@@ -187,7 +187,10 @@ describe('Form (Android)', () => {
         <FormText title="Grade" detail="A" detailTint="accent" />
       </FormSection>,
     );
-    expect(screen.getByRole('header', { name: 'Problem set 3' })).toBeTruthy();
+    // The title's row is the heading, read with its subtitle as one node.
+    expect(
+      screen.getByRole('header', { name: 'Problem set 3 Calculus' }),
+    ).toBeTruthy();
     expect(screen.getByText('Calculus')).toBeTruthy();
     expect(screen.getByText('Grade')).toBeTruthy();
     expect(screen.getByText('A')).toBeTruthy();

@@ -98,16 +98,28 @@ const withTestID = (testID?: string) =>
   testID ? [testIDModifier(testID)] : [];
 
 /** A row of a section: a list item in the section's color and corners. */
+// Section titles and a detail page's title are headings, as SwiftUI makes a
+// section's header: TalkBack says so, and its reading controls jump between
+// them.
+const headingModifiers = [semantics({ heading: true })];
+
 const SectionItem: React.FC<{
   position?: FormRowPosition;
   testID?: string;
+  /** A heading (a page's title): the row is one TalkBack node. */
+  heading?: boolean;
   children: ReactNode;
-}> = ({ position, testID, children }) => {
+}> = ({ position, testID, heading, children }) => {
   const colors = useMaterialColors();
   return (
     <ListItem
       colors={{ containerColor: colors.surfaceContainer }}
-      modifiers={[fillMaxWidth(), rowShape(position), ...withTestID(testID)]}
+      modifiers={[
+        fillMaxWidth(),
+        rowShape(position),
+        ...(heading ? headingModifiers : []),
+        ...withTestID(testID),
+      ]}
     >
       {children}
     </ListItem>
@@ -205,10 +217,6 @@ const Caption: React.FC<{ children: string; modifiers: ModifierConfig[] }> = ({
   );
 };
 
-// Section titles and a detail page's title are headings, as SwiftUI makes a
-// section's header: TalkBack says so, and its reading controls jump between
-// them.
-const headingModifiers = [semantics({ heading: true })];
 const sectionTitleModifiers = [padding(16, 0, 16, 8), ...headingModifiers];
 
 export const FormSection: React.FC<FormSectionProps> = ({
@@ -663,14 +671,11 @@ export const FormTitle: React.FC<FormTitleProps> = ({
 }) => {
   const colors = useMaterialColors();
   return (
-    <SectionItem position={position} testID={testID}>
+    // The heading goes on the row, which TalkBack reads as one node with the
+    // subtitle.
+    <SectionItem position={position} testID={testID} heading>
       <ListItem.HeadlineContent>
-        <Text
-          style={{ typography: 'headlineSmall' }}
-          modifiers={headingModifiers}
-        >
-          {title}
-        </Text>
+        <Text style={{ typography: 'headlineSmall' }}>{title}</Text>
       </ListItem.HeadlineContent>
       {subtitle ? (
         <ListItem.SupportingContent>

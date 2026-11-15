@@ -49,11 +49,18 @@ const fromModifiers = (modifiers: Modifier[] = []) =>
   Object.assign({}, ...modifiers.filter(Boolean)) as NonNullable<Modifier>;
 
 const Box = ({ children, modifiers, testID }: BoxProps) => {
-  const { onPress, role, checked, selected, disabled, ...rest } =
-    fromModifiers(modifiers);
+  const { onPress, role, checked, selected, disabled, heading, ...rest } =
+    fromModifiers(modifiers) as NonNullable<Modifier> & { heading?: boolean };
   const id = rest.testID ?? testID;
   if (!onPress) {
-    return <View testID={id}>{children}</View>;
+    // A heading row is one node, read as a header with all its text.
+    return heading ? (
+      <View testID={id} accessible accessibilityRole="header">
+        {children}
+      </View>
+    ) : (
+      <View testID={id}>{children}</View>
+    );
   }
   return (
     <Pressable
