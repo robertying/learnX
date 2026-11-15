@@ -49,13 +49,13 @@ function UpNextWidget(
   // its time: the range, or where that doesn't fit, the start.
   const when = (c: UpNextWidgetProps['classes'][number], start?: boolean) => {
     const days = daysAway(c.start);
-    const time = start ? c.startTime || c.time : c.time;
+    const time = start ? c.startTime : c.time;
     return days === 0
       ? time
       : days === 1
         ? `${props.tomorrow} ${time}`
         : days < 7
-          ? `${c.weekday || c.day} ${time}`
+          ? `${c.weekday} ${time}`
           : `${c.day} ${time}`;
   };
   // Rooms can be long ("建华/经管新楼 A101"): cut in the middle to keep the

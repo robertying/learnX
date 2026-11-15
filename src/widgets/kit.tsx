@@ -86,7 +86,8 @@ export function widgetKit() {
     ),
     /**
      * The app's language for what the system draws (the countdowns), which
-     * otherwise follows the system's. Props from before it have none.
+     * otherwise follows the system's. None until the app has sent its first
+     * props.
      */
     language: (locale: string | undefined) =>
       locale ? [environment('locale', locale)] : [],
