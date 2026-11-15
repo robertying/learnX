@@ -63,3 +63,9 @@ it('shows logins as rejected while a count of them is left', async () => {
     screen.getByRole('switch', { name: 'Reject Login (Bad Credential)' }),
   ).toBeChecked();
 });
+
+it('expires the session, so the next request logs in again', async () => {
+  await render(<MockNetwork />);
+  await userEvent.press(screen.getByTestId('mock-network-expire-session'));
+  expect(getMockNetworkConfig().sessionExpired).toBe(true);
+});

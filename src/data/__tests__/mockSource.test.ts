@@ -3,7 +3,6 @@ import {
   defaultMockNetworkConfig,
   getMockNetworkConfig,
   MOCK_TIMEOUT_MS,
-  mockDownloadFile,
   mockSource,
   mockSubmitAssignment,
   setMockNetworkConfig,
@@ -189,10 +188,34 @@ describe('mockSource', () => {
     );
   });
 
-  it('runs a request sent outside it once, the session never expiring', async () => {
-    const send = jest.fn(() => Promise.resolve('sent'));
-    await expect(mockSource.withSession(send)).resolves.toBe('sent');
-    expect(send).toHaveBeenCalledTimes(1);
+  describe('session expiry', () => {
+    it('renews a session that ran out after a login, with one login first', async () => {
+      setMockNetworkConfig({ sessionExpiry: 'renews' });
+      await mockSource.login();
+      expect(getMockNetworkConfig()).toMatchObject({
+        sessionExpired: true,
+        sessionExpiry: 'none',
+      });
+      await expect(mockSource.getSemesterIdList()).resolves.toEqual(
+        mockSemesters,
+      );
+      expect(getMockNetworkConfig().sessionExpired).toBe(false);
+    });
+
+    it('rejects every request, and later logins, after a password change', async () => {
+      setMockNetworkConfig({ sessionExpiry: 'passwordChanged' });
+      await mockSource.login();
+      for (const call of [
+        () => mockSource.getSemesterIdList(),
+        () => mockSource.getSemesterIdList(),
+        () => mockSource.login(),
+      ]) {
+        await expect(call()).rejects.toEqual({
+          reason: FailReason.BAD_CREDENTIAL,
+        });
+      }
+      expect(getMockNetworkConfig().sessionExpired).toBe(true);
+    });
   });
 
   it('rejects only the next so many logins when given a count', async () => {
@@ -215,16 +238,26 @@ describe('mockSource', () => {
     expect(progress).toEqual([0.25, 0.5, 0.75, 1]);
   });
 
-  it('applies the emulation to file downloads', async () => {
-    await expect(mockDownloadFile()).resolves.toBeUndefined();
+  it('applies the emulation to file downloads, then lets the client send them as they are', async () => {
+    const file = { status: 200, size: 4, text: async () => 'file' };
+    const transport = jest.fn(() => Promise.resolve(file));
+    await expect(mockSource.download('https://x/a', transport)).resolves.toBe(
+      file,
+    );
+    expect(transport).toHaveBeenCalledWith({ url: 'https://x/a', headers: {} });
     setMockNetworkConfig({ failure: 'offline' });
-    await expect(mockDownloadFile()).rejects.toMatchObject({
+    await expect(
+      mockSource.download('https://x/a', transport),
+    ).rejects.toMatchObject({
       reason: FailReason.NETWORK_ERROR,
     });
     setMockNetworkConfig({ failure: 'serverError' });
-    await expect(mockDownloadFile()).rejects.toEqual({
-      reason: FailReason.UNEXPECTED_STATUS,
-    });
+    await expect(mockSource.download('https://x/a', transport)).rejects.toEqual(
+      {
+        reason: FailReason.UNEXPECTED_STATUS,
+      },
+    );
+    expect(transport).toHaveBeenCalledTimes(1);
   });
 
   describe('favorites', () => {
@@ -290,9 +323,8 @@ describe('mockSource', () => {
     }
   });
 
-  it('marks notices read and prepares downloads with a round trip', async () => {
+  it('marks notices read with a round trip', async () => {
     await expect(mockSource.markNoticeRead('n')).resolves.toBeUndefined();
-    await expect(mockSource.prepareFileDownload()).resolves.toBeUndefined();
     const onProgress = jest.fn();
     await mockSource.submitAssignment('a', { onProgress } as never);
     expect(onProgress).toHaveBeenCalled();

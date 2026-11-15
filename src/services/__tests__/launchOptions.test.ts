@@ -88,6 +88,14 @@ it('reads whether the emulated server rejects logins, and how many', () => {
   }
 });
 
+it('reads what happens to the emulated session after the launch login', () => {
+  jest.replaceProperty(Platform, 'OS', 'android');
+  applyLaunchOptions({ mockSessionExpiry: 'passwordChanged' });
+  expect(getMockNetworkConfig().sessionExpiry).toBe('passwordChanged');
+  applyLaunchOptions({ mockSessionExpiry: 'sometimes' });
+  expect(getMockNetworkConfig().sessionExpiry).toBe('passwordChanged');
+});
+
 it('ignores missing and unknown values', () => {
   jest.replaceProperty(Platform, 'OS', 'android');
   applyLaunchOptions();

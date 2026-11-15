@@ -1,20 +1,16 @@
-import { Platform } from 'react-native';
 import {
   type ApiError,
+  type DownloadRequest,
+  type DownloadResponse,
   FailReason,
-  isExpiredSessionPage,
 } from '@robertying/thu-learn-lib';
 import { Directory, DownloadTask, File, Paths } from 'expo-file-system';
 import Share from 'modules/share';
-import CookieManager from '@preeternal/react-native-cookie-manager';
-import { addCSRF, dataSource } from 'data/source';
+import { dataSource } from 'data/source';
 import { getCachedCourses } from 'data/queries';
 import { localizedCourseName } from 'data/courseNames';
 import { Course, DownloadableFile } from 'data/types/state';
-import Urls from 'constants/Urls';
 import { fileNameOf, sanitizeFileName } from 'helpers/filename';
-import { isLearnUrl } from 'helpers/learnUrl';
-import { fileDownloadCheckUrl } from 'helpers/fileDownloadCheck';
 
 /** The folder downloads live in, under Caches. */
 export const DOWNLOADS_DIR = 'downloads';
@@ -74,18 +70,6 @@ const newPartialFile = () => {
     `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`,
   );
 };
-
-/** Longer files are never the login or redirect page of an expired session. */
-const MAX_SESSION_PAGE_SIZE = 4096;
-
-/**
- * Whether the server answered with the login or redirect page of an expired
- * session (a 200 page) instead of the file.
- */
-const isExpiredSessionFile = async (file: File) =>
-  file.size < MAX_SESSION_PAGE_SIZE && isExpiredSessionPage(await file.text());
-
-const expiredSession: ApiError = { reason: FailReason.NOT_LOGGED_IN };
 
 const deleteQuietly = (file: File) => {
   try {
@@ -185,78 +169,75 @@ export interface DownloadOptions {
 }
 
 /**
- * Downloads `url` once into a new partial file and returns it, or deletes it
- * and throws: `NOT_LOGGED_IN` for the login redirect an expired session gets
- * (so `withSession` logs in again and calls it once more), or an error for a
- * download that saved nothing.
+ * The status a download client rejected for: expo-file-system fails a
+ * download that got a status other than 2xx ("Unable to download a file:
+ * server returned HTTP 403" on iOS, "…: HTTP 403" on Android) instead of
+ * saving it.
  */
-const attemptDownload = async (
-  url: string,
-  { onProgress, signal }: Pick<DownloadOptions, 'onProgress' | 'signal'>,
-): Promise<File> => {
-  // Only a real download is emulated (mock account); a file already on the
-  // device is not.
-  await dataSource.prepareFileDownload();
+const httpStatusOf = (error: unknown) => {
+  const match = /^Unable to download a file:.*\bHTTP (\d{3})\b/.exec(
+    error instanceof Error ? error.message : '',
+  );
+  return match ? Number(match[1]) : undefined;
+};
 
-  // Web Learning calls this check before every course file download; the
-  // whole download then marks the file seen on the server.
-  const checkUrl = fileDownloadCheckUrl(url);
-  if (checkUrl) {
-    await fetch(addCSRF(checkUrl)).catch(() => {});
-  }
+interface PartialDownload extends DownloadResponse {
+  partial: File;
+}
 
-  // iOS sends the login cookies from the shared cookie store by itself;
-  // Android's download client has no cookie jar, so they go in a header, and
-  // only to Web Learning.
-  let headers: Record<string, string> | undefined;
-  if (Platform.OS === 'android' && isLearnUrl(url)) {
-    const cookies = await CookieManager.get(Urls.learn);
-    headers = {
-      Cookie: Object.values(cookies).reduce(
-        (acc, { name, value }) => `${acc}${name}=${value}; `,
-        '',
-      ),
-    };
-  }
-
-  const partial = newPartialFile();
-  const task = new DownloadTask(addCSRF(url), partial, {
-    headers,
-    // A background session would not share the app's cookies reliably and
-    // outlives the screen that shows the progress.
-    sessionType: 'foreground',
-    signal,
-    onProgress: event => {
-      // iOS reports the byte counts as BigInt, which can't be divided by a
-      // number or formatted with toFixed.
-      const bytesWritten = Number(event.bytesWritten);
-      const totalBytes = Number(event.totalBytes);
-      if (totalBytes > 0) {
-        // Rounded to whole percents, so a screen showing it re-renders at
-        // most 100 times.
-        onProgress?.(Math.round((bytesWritten / totalBytes) * 100) / 100);
+/**
+ * Sends the download request thu-learn-lib hands it into a new partial file,
+ * and reports what came back; thu-learn-lib tells the file from an expired
+ * session's answer and from an error status, and discards what it won't use.
+ */
+const partialDownload =
+  ({ onProgress, signal }: Pick<DownloadOptions, 'onProgress' | 'signal'>) =>
+  async ({ url, headers }: DownloadRequest): Promise<PartialDownload> => {
+    const partial = newPartialFile();
+    const task = new DownloadTask(url, partial, {
+      headers,
+      // A background session would not share the app's cookies reliably and
+      // outlives the screen that shows the progress.
+      sessionType: 'foreground',
+      signal,
+      onProgress: event => {
+        // iOS reports the byte counts as BigInt, which can't be divided by a
+        // number or formatted with toFixed.
+        const bytesWritten = Number(event.bytesWritten);
+        const totalBytes = Number(event.totalBytes);
+        if (totalBytes > 0) {
+          // Rounded to whole percents, so a screen showing it re-renders at
+          // most 100 times.
+          onProgress?.(Math.round((bytesWritten / totalBytes) * 100) / 100);
+        }
+      },
+    });
+    const discard = () => deleteQuietly(partial);
+    try {
+      await task.downloadAsync();
+    } catch (error) {
+      discard();
+      const status = httpStatusOf(error);
+      if (status === undefined) {
+        throw error;
       }
-    },
-  });
+      return { status, size: 0, text: async () => '', discard, partial };
+    } finally {
+      task.release();
+    }
+    return {
+      status: 200,
+      size: partial.exists ? partial.size : 0,
+      text: async () => (partial.exists ? partial.text() : ''),
+      discard,
+      partial,
+    };
+  };
 
-  let downloaded: File | null = null;
-  try {
-    downloaded = await task.downloadAsync();
-  } catch {
-    // Handled below, as a download that saved nothing.
-  } finally {
-    task.release();
-  }
-
-  if (!downloaded?.exists || downloaded.size === 0) {
-    deleteQuietly(partial);
-    throw new Error('File download failed');
-  }
-  if (await isExpiredSessionFile(downloaded)) {
-    deleteQuietly(partial);
-    throw expiredSession;
-  }
-  return partial;
+/** What a download that saved nothing rejects with. */
+const emptyDownload: ApiError = {
+  reason: FailReason.INVALID_RESPONSE,
+  extra: 'empty file',
 };
 
 /**
@@ -281,11 +262,17 @@ export const downloadFile = async (
     throw new Error('Invalid file url');
   }
 
-  // thu-learn-lib's session handling, as for its own requests: an expired
-  // session logs in again and the download runs once more.
-  const partial = await dataSource.withSession(() =>
-    attemptDownload(url, { onProgress, signal }),
+  // thu-learn-lib does what every Web Learning request needs (the CSRF token,
+  // the session, the course file check, errors); the download client only
+  // sends it.
+  const { partial } = await dataSource.download(
+    url,
+    partialDownload({ onProgress, signal }),
   );
+  if (partial.size === 0) {
+    deleteQuietly(partial);
+    throw emptyDownload;
+  }
 
   // A rename within Caches: the file at `target` is either the old copy or
   // the whole new one.

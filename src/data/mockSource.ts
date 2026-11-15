@@ -46,12 +46,26 @@ export interface MockNetworkConfig {
    * or the next so many for a number (E2E flows reject a few, then log in).
    */
   loginFails: boolean | number;
+  /**
+   * What happens to the session after the next login that goes through, as
+   * the real server's session runs out: `renews` (the next request finds it
+   * expired and logs in again, which goes through) or `passwordChanged` (the
+   * same, but the login is rejected from then on, as after a password change
+   * on the website while the app is open).
+   */
+  sessionExpiry: MockSessionExpiry;
+  /** The session has run out: the next request logs in again first. */
+  sessionExpired: boolean;
 }
+
+export type MockSessionExpiry = 'none' | 'renews' | 'passwordChanged';
 
 export const defaultMockNetworkConfig: MockNetworkConfig = {
   latency: 'normal',
   failure: 'none',
   loginFails: false,
+  sessionExpiry: 'none',
+  sessionExpired: false,
 };
 
 /** Ranges in ms; a request takes a random time in its range. */
@@ -119,11 +133,23 @@ const roundTrip = async ({ isLogin = false } = {}) => {
     case 'none':
       await wait(randomLatency());
   }
-  if (isLogin && config.loginFails) {
-    if (typeof config.loginFails === 'number') {
-      setMockNetworkConfig({ loginFails: config.loginFails - 1 });
+  if (isLogin) {
+    if (config.loginFails) {
+      if (typeof config.loginFails === 'number') {
+        setMockNetworkConfig({ loginFails: config.loginFails - 1 });
+      }
+      throw apiError(FailReason.BAD_CREDENTIAL);
     }
-    throw apiError(FailReason.BAD_CREDENTIAL);
+    const expiry = config.sessionExpiry;
+    setMockNetworkConfig({
+      sessionExpired: expiry !== 'none',
+      sessionExpiry: 'none',
+      loginFails: expiry === 'passwordChanged' || config.loginFails,
+    });
+  } else if (config.sessionExpired) {
+    // As thu-learn-lib does: log in again, then send the request; a rejected
+    // login fails the request and leaves the session expired.
+    await roundTrip({ isLogin: true });
   }
 };
 
@@ -297,8 +323,13 @@ const withFavorite = <T extends { id: string }>(item: T) => ({
  */
 export const mockSource: AppSource = {
   login: () => roundTrip({ isLogin: true }),
-  // The emulated session never expires: the request runs once.
-  withSession: send => send(),
+  // The emulated server's round trip before a download starts (latency,
+  // failures, session expiry); the bytes still come from the mock file's
+  // real URL, so the file can be shown.
+  download: async (url, transport) => {
+    await roundTrip();
+    return transport({ url, headers: {} });
+  },
   // The emulated session never expires: one request either way.
   ensureSession: () => roundTrip(),
   // Not awaited by callers; never fails.
@@ -410,16 +441,7 @@ export const mockSource: AppSource = {
   // The requests the app sends itself.
   markNoticeRead: () => mockMarkNoticeRead(),
   submitAssignment: (_id, { onProgress }) => mockSubmitAssignment(onProgress),
-  prepareFileDownload: () => mockDownloadFile(),
 };
-
-/**
- * Emulates the file server's round trip before a download starts: waits like
- * the time to the first byte, then fails if a failure is switched on. The
- * bytes still come from the mock file's real URL afterwards, so the file can
- * be shown.
- */
-export const mockDownloadFile = () => roundTrip();
 
 /** Emulates loading a notice's page, which marks it read. */
 export const mockMarkNoticeRead = () => roundTrip();

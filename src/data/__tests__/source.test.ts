@@ -1,12 +1,10 @@
 import { Platform } from 'react-native';
-import axios from 'axios';
 import CookieManager from '@preeternal/react-native-cookie-manager';
 import { FailReason } from '@robertying/thu-learn-lib';
 import { getAuth, initialAuth, useAuthStore } from 'data/auth';
 import { useCredentialsStore } from 'data/credentials';
 import { mockSource } from 'data/mockSource';
 import {
-  addCSRF,
   clearSessionCookies,
   dataSource,
   endSession,
@@ -16,7 +14,6 @@ import {
 } from 'data/source';
 import { setServerWritesAllowed } from 'helpers/serverWrites';
 
-jest.mock('axios', () => ({ post: jest.fn() }));
 jest.mock('@preeternal/react-native-cookie-manager', () => ({
   get: jest.fn(() => Promise.resolve({})),
   clearByName: jest.fn(),
@@ -34,28 +31,12 @@ const mockMarkNotificationRead = jest.fn<Promise<void>, [unknown]>(() =>
 type HelperConfig = {
   provider: () => unknown;
   clearLoginCookies: () => Promise<void>;
+  cookieHeader: (url: string) => Promise<string | undefined> | undefined;
 };
-const mockGetSubmitRequest = jest.fn(
-  async (
-    id: string,
-    {
-      content,
-      attachment,
-      removeAttachment: remove,
-    }: {
-      content?: string;
-      attachment?: { filename: string };
-      removeAttachment?: boolean;
-    } = {},
-  ) => {
-    const body = new FormData();
-    body.append('xszyid', id);
-    body.append('zynr', content ?? '');
-    body.append('fileupload', attachment ? attachment.filename : 'undefined');
-    body.append('isDeleted', remove ? '1' : '0');
-    return { url: 'https://learn.tsinghua.edu.cn/submit?_csrf=token', body };
-  },
-);
+const mockSubmitHomework = jest.fn<
+  Promise<void>,
+  [string, { onProgress?: (progress: number) => void }]
+>(() => Promise.resolve());
 jest.mock('@robertying/thu-learn-lib', () => ({
   ...jest.requireActual('@robertying/thu-learn-lib'),
   Learn2018Helper: class Helper {
@@ -68,24 +49,14 @@ jest.mock('@robertying/thu-learn-lib', () => ({
     getCSRFToken = () => 'token';
     login = (credential?: unknown) => mockLogin(credential);
     ensureSession = () => mockEnsureSession();
-    // thu-learn-lib's: sends once more after NOT_LOGGED_IN.
-    withSession = (send: () => Promise<unknown>) =>
-      send().catch((error: { reason?: unknown }) => {
-        if (error?.reason !== 'not logged in or login timeout') {
-          throw error;
-        }
-        return send();
-      });
+    // These call this file's consts only once a test runs.
     markNotificationRead = (notification: unknown) =>
       mockMarkNotificationRead(notification);
-    // These call this file's consts only once a test runs.
-    getHomeworkSubmitRequest = (
-      ...args: Parameters<typeof mockGetSubmitRequest>
-    ) => mockGetSubmitRequest(...args);
+    submitHomework = (...args: Parameters<typeof mockSubmitHomework>) =>
+      mockSubmitHomework(...args);
   },
 }));
 
-const post = jest.mocked(axios.post);
 const helperConfig = () =>
   jest.requireMock<{ Learn2018Helper: { config: HelperConfig } }>(
     '@robertying/thu-learn-lib',
@@ -101,85 +72,62 @@ describe('submitAssignment', () => {
   it('is blocked in debug builds until server writes are allowed', async () => {
     setServerWritesAllowed(false);
     await expect(submit()).rejects.toThrow('Allow Server Writes');
-    expect(post).not.toHaveBeenCalled();
+    expect(mockSubmitHomework).not.toHaveBeenCalled();
   });
 
-  it("sends thu-learn-lib's request, with the file as React Native uploads it", async () => {
-    post.mockResolvedValueOnce({ status: 200, data: '{"result":"success"}' });
+  it('submits through thu-learn-lib, with the file as React Native uploads it', async () => {
     await dataSource.submitAssignment('homework-id', {
       content: '<p>answer</p>',
       attachment: { uri: 'file:///tmp/answer.pdf', name: 'Answer.pdf' },
+      remove: true,
     });
-    expect(mockGetSubmitRequest).toHaveBeenLastCalledWith('homework-id', {
+    expect(mockSubmitHomework).toHaveBeenCalledWith('homework-id', {
       content: '<p>answer</p>',
       attachment: {
         filename: 'Answer.pdf',
         content: { uri: 'file:///tmp/answer.pdf', type: 'application/pdf' },
       },
-      removeAttachment: false,
+      removeAttachment: true,
+      onProgress: undefined,
     });
-    expect(post.mock.calls[0][1]).toBe(
-      (await mockGetSubmitRequest.mock.results[0].value).body,
+  });
+
+  it('sends a file of unknown type as bytes, and nothing without one', async () => {
+    await dataSource.submitAssignment('homework-id', {
+      attachment: { uri: 'file:///tmp/answer', name: 'answer' },
+    });
+    await submit();
+    expect(mockSubmitHomework.mock.calls.map(([, options]) => options)).toEqual(
+      [
+        expect.objectContaining({
+          attachment: {
+            filename: 'answer',
+            content: {
+              uri: 'file:///tmp/answer',
+              type: 'application/octet-stream',
+            },
+          },
+          removeAttachment: false,
+        }),
+        expect.objectContaining({ attachment: undefined }),
+      ],
     );
   });
 
-  it('resolves when the server says it succeeded', async () => {
-    post.mockResolvedValueOnce({ status: 200, data: '{"result":"success"}' });
-    await expect(submit()).resolves.toBeUndefined();
-    expect(post).toHaveBeenCalledWith(
-      expect.stringContaining('_csrf=token'),
-      expect.any(FormData),
-      expect.anything(),
-    );
+  it('passes on what thu-learn-lib rejects with', async () => {
+    const failure = { reason: FailReason.OPERATION_FAILED };
+    mockSubmitHomework.mockRejectedValueOnce(failure);
+    await expect(submit()).rejects.toBe(failure);
   });
 
-  const loginPage = {
-    status: 200,
-    data: '<html><body><p>您未登录或登录失效</p></body></html>',
-  };
-
-  it('sends again, with a new request, once thu-learn-lib renews an expired session', async () => {
-    post
-      .mockResolvedValueOnce(loginPage)
-      .mockResolvedValueOnce({ status: 200, data: '{"result":"success"}' });
-    await expect(submit()).resolves.toBeUndefined();
-    expect(mockGetSubmitRequest).toHaveBeenCalledTimes(2);
-    expect(post).toHaveBeenCalledTimes(2);
-  });
-
-  it('fails when the renewed session gets the login page too', async () => {
-    post.mockResolvedValueOnce(loginPage).mockResolvedValueOnce(loginPage);
-    await expect(submit()).rejects.toMatchObject({
-      reason: FailReason.NOT_LOGGED_IN,
-    });
-    expect(post).toHaveBeenCalledTimes(2);
-  });
-
-  it('fails with the server message on an error result', async () => {
-    post.mockResolvedValueOnce({
-      status: 200,
-      data: '{"result":"error","msg":"deadline passed"}',
-    });
-    await expect(submit()).rejects.toMatchObject({
-      reason: FailReason.OPERATION_FAILED,
-    });
-  });
-
-  it('reports upload progress rounded, keeping the response text as is', async () => {
-    post.mockResolvedValueOnce({ status: 200, data: '{"result":"success"}' });
+  it('reports upload progress rounded to two decimals', async () => {
     const onProgress = jest.fn();
     await dataSource.submitAssignment('homework-id', {
       content: 'a',
       onProgress,
     });
-    const config = post.mock.calls[0][2] as {
-      onUploadProgress: (e: { loaded: number; total?: number }) => void;
-      transformResponse: (data: string) => string;
-    };
-    config.onUploadProgress({ loaded: 1, total: 3 });
-    config.onUploadProgress({ loaded: 5 });
-    expect(onProgress.mock.calls).toEqual([[0.33], [0]]);
-    expect(config.transformResponse('{"a":1}')).toBe('{"a":1}');
+    mockSubmitHomework.mock.calls[0][1].onProgress?.(1 / 3);
+    expect(onProgress).toHaveBeenCalledWith(0.33);
   });
 });
 
@@ -339,13 +287,22 @@ describe('picking the server', () => {
     });
   });
 
-  it('adds the CSRF token to Web Learning links only', () => {
-    expect(
-      addCSRF(
-        'https://learn.tsinghua.edu.cn/b/wlxt/kj/wlkc_kjxxb/student/downloadFile?sfgk=0&wjid=1',
-      ),
-    ).toContain('_csrf=token');
-    expect(addCSRF('https://example.com/a')).toBe('https://example.com/a');
+  it('gives downloads the Web Learning cookies on Android only', async () => {
+    jest.replaceProperty(Platform, 'OS', 'ios');
+    expect(helperConfig().cookieHeader('https://learn.tsinghua.edu.cn/a')).toBe(
+      undefined,
+    );
+    jest.replaceProperty(Platform, 'OS', 'android');
+    jest.mocked(CookieManager.get).mockResolvedValueOnce({
+      a: { name: 'JSESSIONID', value: 'session' },
+      b: { name: 'XSRF-TOKEN', value: 'token' },
+    } as never);
+    await expect(
+      helperConfig().cookieHeader('https://learn.tsinghua.edu.cn/a'),
+    ).resolves.toBe('JSESSIONID=session; XSRF-TOKEN=token');
+    expect(CookieManager.get).toHaveBeenCalledWith(
+      'https://learn.tsinghua.edu.cn',
+    );
   });
 });
 

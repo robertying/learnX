@@ -1,10 +1,21 @@
 import { FailReason } from '@robertying/thu-learn-lib';
 import {
+  apiReason,
   errorReason,
   isBadCredential,
   isNetworkError,
   isServerRejection,
 } from 'helpers/errors';
+
+describe('apiReason', () => {
+  it('reads the reason of an ApiError only', () => {
+    expect(apiReason({ reason: FailReason.NETWORK_ERROR })).toBe(
+      FailReason.NETWORK_ERROR,
+    );
+    expect(apiReason(new Error('boom'))).toBeUndefined();
+    expect(apiReason(null)).toBeUndefined();
+  });
+});
 
 describe('errorReason', () => {
   it('reads the reason of an ApiError without changing it', () => {

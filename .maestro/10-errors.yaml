@@ -95,6 +95,22 @@ name: Show no results and failures
     visible: '.*(${T_syncStatusReconnecting}).*'
     timeout: 45000
 
+# A password changed on the website while the app is open: the session runs
+# out after the launch login (mockSessionExpiry), and the login the next
+# request starts is turned down, so the lists say the login failed and offer
+# to log in again, whichever request found it.
+- launchApp:
+    stopApp: true
+    arguments:
+      mockLatency: none
+      mockFailure: none
+      mockSessionExpiry: passwordChanged
+- extendedWaitUntil:
+    visible:
+      id: sync-status-relogin
+    timeout: 30000
+- assertVisible: '.*(${T_syncStatusLoginFailed}).*'
+
 # A saved login the server turns down, as after a password change: the
 # launch login and the next one are rejected (mockLoginFails), the third
 # goes through. Back online for the flows after this one.

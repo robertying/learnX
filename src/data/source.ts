@@ -1,17 +1,12 @@
 import { Platform } from 'react-native';
-import {
-  Learn2018Helper,
-  checkHomeworkSubmitResponse,
-  type Credential,
-} from '@robertying/thu-learn-lib';
+import { Learn2018Helper, type Credential } from '@robertying/thu-learn-lib';
 import mime from 'mime';
-import axios from 'axios';
 import CookieManager from '@preeternal/react-native-cookie-manager';
 import { noteRequestError } from 'data/auth';
 import { getCredentials, loadCredentials } from 'data/credentials';
 import { mockSource } from 'data/mockSource';
 import Urls from 'constants/Urls';
-import { addCSRFTokenToLearnUrl, isLearnUrl } from 'helpers/learnUrl';
+import { isLearnUrl } from 'helpers/learnUrl';
 import { isMockUser } from 'helpers/mock';
 import {
   assertServerWritesAllowed,
@@ -37,7 +32,7 @@ export type DataSource = Pick<
   | 'getCalendar'
   | 'addToFavorites'
   | 'removeFromFavorites'
-  | 'withSession'
+  | 'download'
 >;
 
 /** What an assignment submission sends. */
@@ -52,8 +47,10 @@ export interface Submission {
 
 /**
  * Everything the app asks of the school's server: thu-learn-lib's calls, and
- * the few requests the app sends itself, which go through thu-learn-lib's
- * `withSession` so an expired session is handled as for its own requests.
+ * the few requests the app wraps. Every request to Web Learning goes through
+ * thu-learn-lib, file downloads included (`download`, which a download client
+ * only sends), so the session, the CSRF token and errors are handled in one
+ * place.
  */
 export interface AppSource extends DataSource {
   /**
@@ -63,15 +60,12 @@ export interface AppSource extends DataSource {
   markNoticeRead: (url: string) => Promise<void>;
   /**
    * Submits an assignment: `content` is the whole answer as HTML, which
-   * replaces the submitted one; `remove` deletes the attachment. Sent with
-   * axios, which reports upload progress (thu-learn-lib's fetch can't).
+   * replaces the submitted one; `remove` deletes the attachment.
    */
   submitAssignment: (
     studentHomeworkId: string,
     submission: Submission,
   ) => Promise<void>;
-  /** Runs before a file is downloaded from the server. */
-  prepareFileDownload: () => Promise<void>;
 }
 
 /**
@@ -108,43 +102,22 @@ const realRequests: Omit<AppSource, keyof DataSource> = {
   ) => {
     assertServerWritesAllowed('Assignment submission');
 
-    // thu-learn-lib's session handling, as for its own requests: the login
-    // page of a session that expired meanwhile (NOT_LOGGED_IN from
-    // checkHomeworkSubmitResponse) logs in again and sends it once more, with
-    // the new session's CSRF token.
-    await helper.withSession(async () => {
-      const { url, body } = await helper.getHomeworkSubmitRequest(
-        studentHomeworkId,
-        {
-          content,
-          attachment: attachment && {
-            filename: attachment.name,
-            content: {
-              uri: attachment.uri,
-              type: mime.getType(attachment.uri) || 'application/octet-stream',
-            },
-          },
-          removeAttachment: remove,
+    // thu-learn-lib sends it as every request (an expired session logs in
+    // again and it goes once more), with XMLHttpRequest for the progress.
+    await helper.submitHomework(studentHomeworkId, {
+      content,
+      attachment: attachment && {
+        filename: attachment.name,
+        content: {
+          uri: attachment.uri,
+          type: mime.getType(attachment.uri) || 'application/octet-stream',
         },
-      );
-      const res = await axios.post<string>(url, body, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        // Read as text: an expired session answers with the login page.
-        responseType: 'text',
-        transformResponse: data => data,
-        onUploadProgress: e => {
-          // Two decimals are plenty for a progress bar.
-          onProgress?.(
-            Math.round((e.total ? e.loaded / e.total : 0) * 100) / 100,
-          );
-        },
-      });
-      checkHomeworkSubmitResponse(res.data);
+      },
+      removeAttachment: remove,
+      // Two decimals are plenty for a progress bar.
+      onProgress: onProgress && (p => onProgress(Math.round(p * 100) / 100)),
     });
   },
-  prepareFileDownload: async () => {},
 };
 
 /** learn.tsinghua.edu.cn, through thu-learn-lib and the requests above. */
@@ -274,6 +247,10 @@ export const ensureSession = async () => {
  */
 const helper = new Learn2018Helper({
   clearLoginCookies: () => clearLoginCookies(),
+  // Android's download client has no cookie jar, so downloads carry the
+  // Web Learning cookies in a header; iOS sends them from the shared store.
+  cookieHeader: () =>
+    Platform.OS === 'android' ? learnCookieHeader() : undefined,
   provider: () => {
     const credentials = getCredentials();
     return {
@@ -286,5 +263,10 @@ const helper = new Learn2018Helper({
   },
 });
 
-export const addCSRF = (url: string) =>
-  addCSRFTokenToLearnUrl(url, dataSource.getCSRFToken());
+/** The Web Learning cookies as a `Cookie` header. */
+const learnCookieHeader = async () => {
+  const cookies = await CookieManager.get(Urls.learn);
+  return Object.values(cookies)
+    .map(({ name, value }) => `${name}=${value}`)
+    .join('; ');
+};

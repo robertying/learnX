@@ -3,6 +3,7 @@ import { Platform, Settings } from 'react-native';
 import {
   type MockFailure,
   type MockLatency,
+  type MockSessionExpiry,
   setMockNetworkConfig,
 } from 'data/mockSource';
 import env from 'helpers/env';
@@ -28,6 +29,11 @@ export interface LaunchOptions {
    * many (`2`: the launch login and one more).
    */
   mockLoginFails?: unknown;
+  /**
+   * What happens to the emulated session after the launch login (`renews`,
+   * `passwordChanged`; see `MockNetworkConfig.sessionExpiry`).
+   */
+  mockSessionExpiry?: unknown;
   /**
    * `true` shows what the app keeps as JSON in place of the app, for the
    * upgrade test (`screens/StoreReport`, mock account only).
@@ -68,6 +74,11 @@ const failures = new Set<unknown>([
 
 const isFailure = (value: unknown): value is MockFailure => failures.has(value);
 
+const expiries = new Set<unknown>(['none', 'renews', 'passwordChanged']);
+
+const isExpiry = (value: unknown): value is MockSessionExpiry =>
+  expiries.has(value);
+
 /**
  * `true`, `false` or a whole count, as a value or a string (NSUserDefaults
  * reads `-mockLoginFails 2` as "2"; Android passes strings only).
@@ -105,6 +116,10 @@ export const applyLaunchOptions = (initialProps?: LaunchOptions) => {
   const loginFails = readLoginFails(read('mockLoginFails', initialProps));
   if (loginFails !== undefined) {
     setMockNetworkConfig({ loginFails });
+  }
+  const sessionExpiry = read('mockSessionExpiry', initialProps);
+  if (isExpiry(sessionExpiry)) {
+    setMockNetworkConfig({ sessionExpiry });
   }
 
   if (__DEV__ || env.TEST_LOGIN) {

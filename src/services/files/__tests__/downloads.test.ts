@@ -1,6 +1,5 @@
 import { Platform } from 'react-native';
 import Share from 'modules/share';
-import CookieManager from '@preeternal/react-native-cookie-manager';
 import { FailReason } from '@robertying/thu-learn-lib';
 import { dataSource } from 'data/source';
 import { getCachedCourses } from 'data/queries';
@@ -26,21 +25,23 @@ const { __fs } =
 
 jest.mock('data/queries', () => ({ getCachedCourses: jest.fn(() => []) }));
 
-jest.mock('data/source', () => ({
-  addCSRF: (url: string) => `${url}&csrf=token`,
-  dataSource: {
-    prepareFileDownload: jest.fn(() => Promise.resolve()),
-    // thu-learn-lib's: runs the request again once after NOT_LOGGED_IN.
-    withSession: jest.fn((send: () => Promise<unknown>) =>
-      send().catch((error: { reason?: string }) => {
-        if (error?.reason !== 'not logged in or login timeout') {
-          throw error;
-        }
-        return send();
-      }),
-    ),
-  },
-}));
+// The real thu-learn-lib helper, logged in with a token and without a login
+// of its own (an expired session then fails with NOT_LOGGED_IN; thu-learn-lib's
+// tests cover logging in again), sending the check with the fetch below.
+jest.mock('data/source', () => {
+  const { Learn2018Helper } = jest.requireActual<
+    typeof import('@robertying/thu-learn-lib')
+  >('@robertying/thu-learn-lib');
+  const helper = new Learn2018Helper({
+    cookieHeader: () => 'JSESSIONID=session',
+  });
+  helper.setCSRFToken('token');
+  return {
+    dataSource: {
+      download: jest.fn(helper.download.bind(helper)),
+    },
+  };
+});
 
 const DOCUMENTS = 'file:///app/Documents';
 const CACHES = 'file:///app/Caches';
@@ -48,7 +49,9 @@ const FILES = `${CACHES}/downloads`;
 const PARTIAL = `${CACHES}/downloads-partial`;
 const LEGACY = 'learnX Files';
 
-const fetchMock = jest.fn(() => Promise.resolve(new Response()));
+const fetchMock = jest.fn<Promise<Response>, Parameters<typeof fetch>>(() =>
+  Promise.resolve(new Response()),
+);
 globalThis.fetch = fetchMock as typeof fetch;
 
 const file = {
@@ -106,7 +109,7 @@ describe('downloadFile', () => {
     expect(__fs.tasks).toHaveLength(0);
 
     await expect(downloadFile(file, { refresh: true })).resolves.toBe(target);
-    expect(dataSource.withSession).toHaveBeenCalledTimes(1);
+    expect(dataSource.download).toHaveBeenCalledTimes(1);
     expect(__fs.tasks).toHaveLength(1);
   });
 
@@ -116,7 +119,7 @@ describe('downloadFile', () => {
     ).rejects.toThrow('Invalid file url');
   });
 
-  it('runs the server check, then downloads with the CSRF token', async () => {
+  it('downloads what thu-learn-lib hands it: the check first, then the file with the token and cookies', async () => {
     const onProgress = jest.fn();
     __fs.download = async task => {
       task.options.onProgress?.({ bytesWritten: 1n, totalBytes: 3n });
@@ -131,33 +134,15 @@ describe('downloadFile', () => {
       name: 'Calculus',
     });
 
-    expect(dataSource.prepareFileDownload).toHaveBeenCalled();
-    expect(fetchMock).toHaveBeenCalledWith(
-      'https://learn.tsinghua.edu.cn/b/wlxt/kj/wlkc_kjxxb/student/downloadFileBefore?wjid=f1&csrf=token',
+    expect(fetchMock.mock.calls[0][0]).toBe(
+      'https://learn.tsinghua.edu.cn/b/wlxt/kj/wlkc_kjxxb/student/downloadFileBefore?wjid=f1&_csrf=token',
     );
     const [task] = __fs.tasks;
-    expect(task.url).toBe(`${file.downloadUrl}&csrf=token`);
-    // iOS sends cookies from the shared store by itself.
-    expect(task.options.headers).toBeUndefined();
+    expect(task.url).toBe(`${file.downloadUrl}&_csrf=token`);
+    expect(task.options.headers).toEqual({ Cookie: 'JSESSIONID=session' });
     expect(task.release).toHaveBeenCalled();
     // BigInt byte counts work; an unknown total reports nothing.
     expect(onProgress.mock.calls).toEqual([[0.33]]);
-  });
-
-  it('sends the login cookies on Android, only to Web Learning', async () => {
-    jest.replaceProperty(Platform, 'OS', 'android');
-    jest.mocked(CookieManager.get).mockResolvedValue({
-      a: { name: 'JSESSIONID', value: 'session' },
-      b: { name: 'XSRF-TOKEN', value: 'token' },
-    } as never);
-    await downloadFile(file);
-    expect(__fs.tasks[0].options.headers).toEqual({
-      Cookie: 'JSESSIONID=session; XSRF-TOKEN=token; ',
-    });
-
-    await downloadFile({ ...file, id: 'f2', downloadUrl: 'https://cdn/x' });
-    expect(__fs.tasks[1].options.headers).toBeUndefined();
-    expect(CookieManager.get).toHaveBeenCalledTimes(1);
   });
 
   it('downloads into downloads-partial, then moves the whole file into place', async () => {
@@ -175,63 +160,71 @@ describe('downloadFile', () => {
     expect(__fs.read(target)).toBe('body');
   });
 
+  const REDIRECT = '<script>location.href="/f/login_timeout";</script>';
+  const httpError = (status: number) =>
+    new Error(`Unable to download a file: server returned HTTP ${status}`);
+
   it.each([
-    ['fails', () => Promise.reject(new Error('offline'))],
-    ['returns nothing', () => Promise.resolve(null)],
+    [
+      'gets no answer',
+      () => Promise.reject(new Error('offline')),
+      { reason: FailReason.NETWORK_ERROR },
+    ],
     [
       'saves an empty file',
       async (task: { target: { uri: string } }) => {
         __fs.write(task.target.uri, '');
         return task.target;
       },
+      { reason: FailReason.INVALID_RESPONSE },
+    ],
+    [
+      'saves nothing',
+      () => Promise.resolve(null),
+      { reason: FailReason.INVALID_RESPONSE },
+    ],
+    [
+      'gets an error status (iOS)',
+      () => Promise.reject(httpError(500)),
+      { reason: FailReason.UNEXPECTED_STATUS, extra: { code: 500 } },
+    ],
+    [
+      'gets an error status (Android)',
+      () => Promise.reject(new Error('Unable to download a file: HTTP 502')),
+      { reason: FailReason.UNEXPECTED_STATUS, extra: { code: 502 } },
+    ],
+    [
+      "gets an expired session's 403",
+      () => Promise.reject(httpError(403)),
+      { reason: FailReason.NOT_LOGGED_IN },
+    ],
+    [
+      "saves an expired session's redirect page",
+      async (task: { target: { uri: string } }) => {
+        __fs.write(task.target.uri, REDIRECT);
+        return task.target;
+      },
+      { reason: FailReason.NOT_LOGGED_IN },
     ],
   ])(
-    'throws, deletes the partial file and keeps the old copy when it %s',
-    async (_, download) => {
+    'rejects as thu-learn-lib does, deletes the partial file and keeps the old copy when it %s',
+    async (_, download, error) => {
       __fs.download = download as typeof __fs.download;
       __fs.write(target, 'old');
-      await expect(downloadFile(file, { refresh: true })).rejects.toThrow(
-        'File download failed',
+      await expect(downloadFile(file, { refresh: true })).rejects.toMatchObject(
+        error,
       );
       expect(__fs.files(CACHES)).toEqual(['downloads/c1/f1/Lecture 1.pdf']);
       expect(__fs.read(target)).toBe('old');
     },
   );
 
-  describe('after the session ran out', () => {
-    const REDIRECT = '<script>location.href="/";</script>';
-    const answer = (...bodies: string[]) => {
-      __fs.download = async task => {
-        __fs.write(task.target.uri, bodies.shift() ?? 'body');
-        return task.target;
-      };
+  it('takes a large file that mentions a redirect for the file', async () => {
+    __fs.download = async task => {
+      __fs.write(task.target.uri, REDIRECT + 'x'.repeat(5000));
+      return task.target;
     };
-
-    it('downloads once more in the session thu-learn-lib renews', async () => {
-      answer(REDIRECT, 'body');
-      await expect(downloadFile(file)).resolves.toBe(target);
-      expect(dataSource.withSession).toHaveBeenCalledTimes(1);
-      expect(__fs.tasks).toHaveLength(2);
-      expect(__fs.read(target)).toBe('body');
-      expect(__fs.files(PARTIAL)).toEqual([]);
-    });
-
-    it('fails with NOT_LOGGED_IN, keeping the old copy, when the new session gets the redirect too', async () => {
-      answer(REDIRECT, REDIRECT);
-      __fs.write(target, 'old');
-      await expect(downloadFile(file, { refresh: true })).rejects.toEqual({
-        reason: FailReason.NOT_LOGGED_IN,
-      });
-      expect(__fs.tasks).toHaveLength(2);
-      expect(__fs.files(PARTIAL)).toEqual([]);
-      expect(__fs.read(target)).toBe('old');
-    });
-
-    it('takes a large file for the file, without reading it', async () => {
-      answer(`location.href=${'x'.repeat(5000)}`);
-      await expect(downloadFile(file)).resolves.toBe(target);
-      expect(__fs.tasks).toHaveLength(1);
-    });
+    await expect(downloadFile(file)).resolves.toBe(target);
   });
 
   it('makes no folders for a download that failed', async () => {
@@ -240,7 +233,9 @@ describe('downloadFile', () => {
       __fs.write(task.target.uri, 'part');
       return Promise.reject(new Error('offline'));
     };
-    await expect(downloadFile(file)).rejects.toThrow('File download failed');
+    await expect(downloadFile(file)).rejects.toMatchObject({
+      reason: FailReason.NETWORK_ERROR,
+    });
     expect(__fs.files(CACHES)).toEqual([]);
     expect(listDownloads()).toEqual([]);
     expect(__fs.dirs(FILES)).toEqual([]);
@@ -249,7 +244,9 @@ describe('downloadFile', () => {
   it('keeps the course folder when it holds other downloads', async () => {
     __fs.write(`${FILES}/c1/f2/b.pdf`, '56');
     __fs.download = () => Promise.reject(new Error('offline'));
-    await expect(downloadFile(file)).rejects.toThrow('File download failed');
+    await expect(downloadFile(file)).rejects.toMatchObject({
+      reason: FailReason.NETWORK_ERROR,
+    });
     expect(__fs.dirs(FILES)).toEqual(['c1', 'c1/f2']);
   });
 
@@ -285,7 +282,7 @@ describe('downloadFile', () => {
     controller.abort();
     await expect(
       downloadFile(file, { signal: controller.signal }),
-    ).rejects.toThrow('File download failed');
+    ).rejects.toHaveProperty('name', 'AbortError');
     expect(__fs.tasks[0].options.signal).toBe(controller.signal);
     expect(__fs.files(CACHES)).toEqual([]);
     expect(__fs.dirs(FILES)).toEqual([]);
