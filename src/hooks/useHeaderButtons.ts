@@ -1,6 +1,7 @@
-import { useLayoutEffect, useRef } from 'react';
+import { useLayoutEffect } from 'react';
 import type { NavigationProp, ParamListBase } from '@react-navigation/native';
 import { type HeaderButton, headerButtons } from 'navigation/headerButtons';
+import useLatest from 'hooks/useLatest';
 
 /**
  * Shows `buttons` on one side of the screen's header, set before the screen
@@ -15,12 +16,7 @@ const useHeaderButtons = (
   buttons: (HeaderButton | false | null | undefined)[],
 ) => {
   const shown = buttons.filter(button => !!button);
-  const handlers = useRef(new Map<string, () => void>());
-  useLayoutEffect(() => {
-    handlers.current = new Map(
-      shown.map(button => [button.id, button.onPress]),
-    );
-  });
+  const latest = useLatest(shown);
 
   // What the buttons show, without their handlers.
   const look = JSON.stringify(shown, (key, value) =>
@@ -33,11 +29,12 @@ const useHeaderButtons = (
         side,
         described.map(button => ({
           ...button,
-          onPress: () => handlers.current.get(button.id)?.(),
+          onPress: () =>
+            latest.current.find(({ id }) => id === button.id)?.onPress(),
         })),
       ),
     );
-  }, [navigation, side, look]);
+  }, [navigation, side, look, latest]);
 };
 
 export default useHeaderButtons;

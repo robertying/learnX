@@ -1,5 +1,3 @@
-import { displayFileSize } from 'helpers/filename';
-import { useCallback } from 'react';
 import dayjs from 'dayjs';
 import {
   ExcellentHomework,
@@ -16,6 +14,7 @@ import useDetailNavigator from 'hooks/useDetailNavigator';
 import useHeaderButtons from 'hooks/useHeaderButtons';
 import { useMinute } from 'hooks/useClock';
 import { removeTags } from 'helpers/text';
+import { displayFileSize } from 'helpers/filename';
 import { attachmentFile } from 'helpers/attachments';
 import {
   formatLiteral,
@@ -143,7 +142,7 @@ const AssignmentDetailContent: React.FC<{
     }
   };
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = () => {
     if (detailNavigator) {
       detailNavigator.push('AssignmentSubmission', { id });
     } else {
@@ -152,7 +151,7 @@ const AssignmentDetailContent: React.FC<{
         params: { id },
       });
     }
-  }, [detailNavigator, id, navigation]);
+  };
 
   useHeaderButtons(navigation, 'right', [
     submissionType !== HomeworkSubmissionType.OFFLINE && {
