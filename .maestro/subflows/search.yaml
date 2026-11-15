@@ -28,3 +28,7 @@ appId: ${APP_ID}
 - extendedWaitUntil:
     visible: ${RESULT}
     timeout: 5000
+- runFlow:
+    file: shot.yaml
+    env:
+      NAME: search

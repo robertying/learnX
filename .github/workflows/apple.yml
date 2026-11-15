@@ -279,6 +279,8 @@ jobs:
           MAESTRO_DEVICE: ${{ env.SIMULATOR }}
           E2E_LANGUAGE: zh-Hans
           E2E_UI_TESTS: '0'
+          # Saved with the results, to look through.
+          E2E_SCREENSHOTS: build/maestro/screenshots
 
       - name: Upload results
         if: always()

@@ -48,6 +48,9 @@
 # (scripts/maestro/build.sh: it finds an app outside the full screen and folds
 # the Duo with setFoldPosture): put its bin folder first on PATH.
 #
+# E2E_SCREENSHOTS=1 saves each profile's screenshots (scripts/e2e.sh) to
+# its results' screenshots/ folder.
+#
 # Results, with Maestro's output and a JUnit report:
 # build/e2e/devices/<run start time>/<profile>/. A run keeps the earlier ones'
 # results (failure screenshots included); only the latest $E2E_KEEP_RUNS
@@ -88,6 +91,14 @@ installed=""
 ios_app=""
 # The UDID or serial of the device the current profile runs on.
 device=""
+
+# The screenshots folder for results folder $1, when E2E_SCREENSHOTS is on.
+shots() {
+  case "${E2E_SCREENSHOTS:-}" in
+  "" | 0) ;;
+  *) echo "$PWD/$1/screenshots" ;;
+  esac
+}
 
 log() { printf '\n==> %s\n' "$*"; }
 
@@ -232,6 +243,7 @@ app_running() {
 run_ios_suite() {
   local udid="$1" orientation="$2" out="$3" ui="${4:-0}"
   MAESTRO_DEVICE="$udid" E2E_ORIENTATION="$orientation" E2E_UI_TESTS="$ui" \
+    E2E_SCREENSHOTS="$(shots "$out")" \
     E2E_UI_RESULT="$out/ui.xcresult" scripts/e2e.sh ios \
     --format junit --output "$out/report.xml" --test-output-dir "$out"
 }
@@ -340,7 +352,7 @@ run_android_suite() {
     adb -s "$serial" emu "$state" >/dev/null || return 1
     sleep 3
   fi
-  MAESTRO_DEVICE="$serial" scripts/e2e.sh android \
+  MAESTRO_DEVICE="$serial" E2E_SCREENSHOTS="$(shots "$out")" scripts/e2e.sh android \
     --format junit --output "$out/report.xml" --test-output-dir "$out"
 }
 

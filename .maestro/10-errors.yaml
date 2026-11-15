@@ -11,6 +11,10 @@ name: Show no results and failures
       RESULT: '${T_noResults}'
 - assertVisible: '${T_noResultsDescription}'
 - runFlow:
+    file: subflows/shot.yaml
+    env:
+      NAME: no-results
+- runFlow:
     when:
       platform: Android
     commands:
@@ -27,6 +31,10 @@ name: Show no results and failures
 - extendedWaitUntil:
     visible: '.*(${T_syncStatusOffline}).*'
     timeout: 30000
+- runFlow:
+    file: subflows/shot.yaml
+    env:
+      NAME: offline
 # A file that isn't on the device can't download (08 deleted file 1's).
 - runFlow:
     file: subflows/tab.yaml
@@ -41,6 +49,10 @@ name: Show no results and failures
     visible:
       id: file-error
     timeout: 30000
+- runFlow:
+    file: subflows/shot.yaml
+    env:
+      NAME: file-error
 - tapOn: '${T_tryAgain}'
 - extendedWaitUntil:
     visible:
