@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { persistStorage } from 'data/storage';
+import storeVersions from 'data/storeVersions.json';
 
 export const CALENDAR_SYNC_KEY = 'calendarSync';
 
@@ -49,7 +50,7 @@ export const emptyCalendarSync = (): CalendarSyncState => ({
 export const useCalendarSyncStore = create<CalendarSyncState>()(
   persist(emptyCalendarSync, {
     name: CALENDAR_SYNC_KEY,
-    version: 1,
+    version: storeVersions[CALENDAR_SYNC_KEY],
     storage: persistStorage,
   }),
 );

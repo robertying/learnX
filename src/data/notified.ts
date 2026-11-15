@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { persistStorage } from 'data/storage';
+import storeVersions from 'data/storeVersions.json';
 
 export const NOTIFIED_KEY = 'notified';
 
@@ -15,7 +16,7 @@ const MAX_KEYS = 3000;
 export const useNotifiedStore = create<{ keys: string[] }>()(
   persist(() => ({ keys: [] as string[] }), {
     name: NOTIFIED_KEY,
-    version: 1,
+    version: storeVersions[NOTIFIED_KEY],
     storage: persistStorage,
   }),
 );
