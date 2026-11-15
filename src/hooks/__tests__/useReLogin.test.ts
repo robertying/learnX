@@ -1,5 +1,6 @@
 import { AppState } from 'react-native';
 import { act, renderHook } from '@testing-library/react-native';
+import * as Updates from 'expo-updates';
 import { initialAuth, useAuthStore } from 'data/auth';
 import { saveCredentials, clearCredentials } from 'data/credentials';
 import { login } from 'data/login';
@@ -120,6 +121,39 @@ describe('useReLogin', () => {
     await leaveAndComeBack(11);
     expect(login).toHaveBeenCalledWith({ resume: true });
     expect(refetch).toHaveBeenCalled();
+  });
+
+  it('starts a downloaded update after an hour away, and leaves the session to it', async () => {
+    jest.replaceProperty(Updates, 'isEnabled', true);
+    jest.mocked(Updates.useUpdates).mockReturnValue({
+      isUpdatePending: true,
+    } as ReturnType<typeof Updates.useUpdates>);
+    const refetch = jest.spyOn(queryClient, 'refetchQueries');
+    await launch();
+    await act(() => useAuthStore.setState({ loggedIn: true }));
+    refetch.mockClear();
+
+    await leaveAndComeBack(60);
+
+    expect(Updates.reloadAsync).toHaveBeenCalledTimes(1);
+    expect(login).not.toHaveBeenCalled();
+    expect(flushServerActionsWithin).not.toHaveBeenCalled();
+    expect(refetch).not.toHaveBeenCalled();
+  });
+
+  it('checks the session as usual when no update is waiting', async () => {
+    jest.replaceProperty(Updates, 'isEnabled', true);
+    jest.mocked(Updates.useUpdates).mockReturnValue({
+      isUpdatePending: false,
+    } as ReturnType<typeof Updates.useUpdates>);
+    await launch();
+    await act(() => useAuthStore.setState({ loggedIn: true }));
+
+    await leaveAndComeBack(60);
+
+    expect(Updates.reloadAsync).not.toHaveBeenCalled();
+    expect(Updates.checkForUpdateAsync).toHaveBeenCalledTimes(1);
+    expect(login).toHaveBeenCalledWith({ resume: true });
   });
 
   it('sends the waiting actions after the session check and before the refetch', async () => {
