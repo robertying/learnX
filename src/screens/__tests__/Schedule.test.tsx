@@ -68,7 +68,6 @@ beforeEach(() => {
     delete mockSources[key];
   }
 });
-afterEach(() => jest.useRealTimers());
 
 it("lists the next seven days' classes by day, from both weeks", async () => {
   mockWeeks['2026-11-09'] = [

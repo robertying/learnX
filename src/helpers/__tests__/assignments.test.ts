@@ -18,10 +18,6 @@ describe('sortAssignments', () => {
     jest.useFakeTimers({ now: new Date('2026-03-15T12:00:00Z') });
   });
 
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
   it('puts upcoming assignments first, earliest deadline first', () => {
     const sorted = sortAssignments([
       assignment('c', '2026-03-20T00:00:00Z'),

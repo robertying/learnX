@@ -11,6 +11,7 @@ import { Assignment, File, Notice } from 'data/types/state';
 import * as navigationOptions from 'navigation/options';
 import Search from 'screens/Search';
 import { resetUserData, setArchived, setCourseHidden } from 'data/userData';
+import { fireLayout } from 'test-utils/layout';
 import { screenProps } from 'test-utils/screenProps';
 
 const mockNotices: Notice[] = [
@@ -114,7 +115,6 @@ beforeEach(() => {
 });
 
 afterEach(async () => {
-  jest.useRealTimers();
   await act(() => resetUserData());
 });
 
@@ -214,9 +214,7 @@ describe('Search', () => {
     await type('midterm');
     // No list until the tabs' height is known, so it starts below them.
     expect(screen.queryByText('Midterm room change')).toBeNull();
-    await fireEvent(screen.getByText('All'), 'layout', {
-      nativeEvent: { layout: { height: 52 } },
-    });
+    await fireLayout(screen.getByText('All'), { height: 52 });
     expect(screen.getByText('Midterm room change')).toBeTruthy();
     await act(() => fireEvent(screen.getByText('All'), 'selectionChange', 2));
     expect(screen.queryByText('Midterm room change')).toBeNull();

@@ -2,10 +2,6 @@ import { getSemesterTextFromId } from 'helpers/semester';
 import { mockLocale } from 'test-utils/locale';
 
 describe('getSemesterTextFromId', () => {
-  afterEach(() => {
-    mockLocale.current = 'en-US';
-  });
-
   describe('in English', () => {
     beforeEach(() => {
       mockLocale.current = 'en-US';

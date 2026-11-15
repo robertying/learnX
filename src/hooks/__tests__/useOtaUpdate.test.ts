@@ -8,10 +8,6 @@ beforeEach(() => {
   jest.replaceProperty(Updates, 'isEnabled', true);
 });
 
-afterEach(() => {
-  jest.useRealTimers();
-});
-
 const pending = (isUpdatePending: boolean) =>
   jest
     .mocked(Updates.useUpdates)
