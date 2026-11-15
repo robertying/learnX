@@ -75,6 +75,12 @@ fi
 
 out=build/ota/dist
 rm -rf "$out"
+# Uploads go through the tunnel too (scripts/ota-publish-tunnel.cjs).
+url="$(node -p "require('./app.json').updates.url")"
+OTA_PUBLIC_ORIGIN="$(node -p "new URL(process.argv[1]).origin" "$url")" \
+OTA_LOCAL_ORIGIN="http://localhost:$PORT" \
+OTA_APP_ID="$(node -p "require('./app.json').updates.requestHeaders['expo-app-id']")" \
+NODE_OPTIONS="${NODE_OPTIONS:-} --require $PWD/scripts/ota-publish-tunnel.cjs" \
 npx --yes "$EOAS" publish --branch production --serverUrl "http://localhost:$PORT" \
   --nonInteractive --emitMetadata --outputDir "$out" "${args[@]+"${args[@]}"}"
 
