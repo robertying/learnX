@@ -28,7 +28,7 @@ describe('AssignmentCard', () => {
     expect(screen.getByText('Calculus')).toBeTruthy();
     expect(screen.getByText('Problem set 3')).toBeTruthy();
     expect(screen.getByText('Chapters 4 & 5')).toBeTruthy();
-    expect(screen.getByText('due in 3 days')).toBeTruthy();
+    expect(screen.getByText('Due in 3 days')).toBeTruthy();
     expect(screen.queryByTestId('due-soon')).toBeNull();
   });
 
@@ -47,7 +47,7 @@ describe('AssignmentCard', () => {
       />,
     );
     expect(screen.getByTestId('due-soon')).toBeTruthy();
-    expect(pillColor('due in 5 hours')).toEqual(statusText.red);
+    expect(pillColor('Due in 5 hours')).toEqual(statusText.red);
   });
 
   it('marks a deadline later tomorrow in orange, as Today does', async () => {
@@ -58,7 +58,7 @@ describe('AssignmentCard', () => {
         } as Partial<Assignment>)}
       />,
     );
-    expect(pillColor('due in 1 day')).toEqual(statusText.orange);
+    expect(pillColor('Due in 1 day')).toEqual(statusText.orange);
   });
 
   it('leaves a deadline after tomorrow and a submitted one unmarked', async () => {
@@ -69,7 +69,7 @@ describe('AssignmentCard', () => {
         } as Partial<Assignment>)}
       />,
     );
-    expect(screen.getByText('due in 2 days')).toBeTruthy();
+    expect(screen.getByText('Due in 2 days')).toBeTruthy();
     expect(screen.queryByTestId('due-soon')).toBeNull();
 
     await view.rerender(
@@ -89,7 +89,7 @@ describe('AssignmentCard', () => {
         data={assignment({ deadline: daysFromNow(-2) } as Partial<Assignment>)}
       />,
     );
-    expect(screen.getByText('closed 2 days ago')).toBeTruthy();
+    expect(screen.getByText('Closed 2 days ago')).toBeTruthy();
   });
 
   it('words the deadline in Chinese', async () => {
@@ -111,7 +111,7 @@ describe('AssignmentCard', () => {
       <AssignmentCard data={assignment({ submitted: true })} />,
     );
     expect(screen.getByText('Submitted')).toBeTruthy();
-    expect(screen.queryByText('due in 3 days')).toBeNull();
+    expect(screen.queryByText('Due in 3 days')).toBeNull();
 
     await view.rerender(
       <AssignmentCard

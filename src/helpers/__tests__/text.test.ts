@@ -1,4 +1,4 @@
-import { capitalize, hash, removeTags, truncate } from 'helpers/text';
+import { hash, removeTags, truncate } from 'helpers/text';
 
 describe('removeTags', () => {
   it('drops tags and decodes entities', () => {
@@ -52,14 +52,6 @@ describe('truncate', () => {
     expect(truncate('short', 10)).toBe('short');
     expect(truncate('exactly 10', 10)).toBe('exactly 10');
     expect(truncate('one two three', 8)).toBe('one two…');
-  });
-});
-
-describe('capitalize', () => {
-  it('uppercases the first letter only', () => {
-    expect(capitalize('due today at 9:00')).toBe('Due today at 9:00');
-    expect(capitalize('今天截止')).toBe('今天截止');
-    expect(capitalize('')).toBe('');
   });
 });
 

@@ -83,7 +83,7 @@ it('makes a deadline reminder an hour ahead', () => {
 it('makes the late submission reminders', () => {
   const assignment = { id: 'a1', title: 'Essay', courseName: 'Writing' };
   expect(sampleReminder(assignment as never, now, 'lateOpen').body).toBe(
-    'Deadline passed · late submission until Nov 13 12:00',
+    'Deadline passed · Late submission until Nov 13 12:00',
   );
   expect(sampleReminder(assignment as never, now, 'lateDue').body).toBe(
     'Late submission closes today at 13:00',

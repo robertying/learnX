@@ -98,13 +98,13 @@ it('shows the current and next class, and opens a course', async () => {
   });
   const { navigation } = await setup();
 
-  expect(screen.getByText(/^Now · ends in \d+ minutes$/)).toBeOnTheScreen();
-  expect(screen.getByText('Next Class · starts in an hour')).toBeOnTheScreen();
+  expect(screen.getByText(/^Now · Ends in \d+ minutes$/)).toBeOnTheScreen();
+  expect(screen.getByText('Next Class · Starts in an hour')).toBeOnTheScreen();
   expect(screen.getByText('Homework')).toBeOnTheScreen();
   expect(screen.getByText('1 unread notice')).toBeOnTheScreen();
   expect(
     screen.getByText(
-      'Worked out from course times. Holidays and moved classes may be missing.',
+      'Based on course times. Holidays and rescheduled classes may not be reflected.',
     ),
   ).toBeOnTheScreen();
 
@@ -176,7 +176,7 @@ it('says when the calendar failed, and leaves out a week before term', async () 
 it('has no note for a calendar that loaded, and counts the week', async () => {
   Object.assign(mockSchedule, { source: 'calendar', failed: false });
   await setup();
-  expect(screen.queryByText(/Worked out from course times/)).toBeNull();
+  expect(screen.queryByText(/Based on course times/)).toBeNull();
   expect(jest.mocked(getTitleOptions).mock.lastCall![1]).toMatch(/Week 9$/);
 });
 

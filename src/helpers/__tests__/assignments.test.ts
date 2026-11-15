@@ -78,20 +78,20 @@ describe('deadlineText', () => {
   const now = '2026-03-15T12:00:00Z';
 
   it('counts down to an upcoming deadline', () => {
-    expect(deadlineText('2026-03-18T12:00:00Z', now)).toBe('due in 3 days');
+    expect(deadlineText('2026-03-18T12:00:00Z', now)).toBe('Due in 3 days');
   });
 
   it('says how long ago a past deadline closed', () => {
     expect(deadlineText('2026-03-15T10:00:00Z', now)).toBe(
-      'closed 2 hours ago',
+      'Closed 2 hours ago',
     );
   });
 
   it('follows the time it is given, so a later minute updates the text', () => {
     const deadline = '2026-03-15T12:30:00Z';
-    expect(deadlineText(deadline, now)).toBe('due in 30 minutes');
+    expect(deadlineText(deadline, now)).toBe('Due in 30 minutes');
     expect(deadlineText(deadline, '2026-03-15T12:45:00Z')).toBe(
-      'closed 15 minutes ago',
+      'Closed 15 minutes ago',
     );
   });
 });
@@ -110,13 +110,13 @@ describe('deadlineText and deadlineUrgency', () => {
   const at = (time: string) => `2026-03-15T${time}+08:00`;
 
   it('counts hours under a day left, and colors it red', () => {
-    expect(deadlineText(at('23:59'), at('00:30'))).toBe('due in 23 hours');
+    expect(deadlineText(at('23:59'), at('00:30'))).toBe('Due in 23 hours');
     expect(deadlineUrgency(at('23:59'), at('00:30'))).toBe('urgent');
-    expect(deadlineText(at('13:00'), at('12:00'))).toBe('due in 1 hour');
-    expect(deadlineText(at('12:01'), at('12:00'))).toBe('due in 1 minute');
+    expect(deadlineText(at('13:00'), at('12:00'))).toBe('Due in 1 hour');
+    expect(deadlineText(at('12:01'), at('12:00'))).toBe('Due in 1 minute');
     // Past midnight is still under a day, so hours and red.
     expect(deadlineText('2026-03-16T00:30:00+08:00', at('23:00'))).toBe(
-      'due in 1 hour',
+      'Due in 1 hour',
     );
     expect(deadlineUrgency('2026-03-16T00:30:00+08:00', at('23:00'))).toBe(
       'urgent',
@@ -126,14 +126,14 @@ describe('deadlineText and deadlineUrgency', () => {
   it('says 1 day only for tomorrow, and colors tomorrow orange', () => {
     // 47.5 hours away is tomorrow: 1 day, not dayjs's rounded "2 days".
     expect(deadlineText('2026-03-16T23:59:00+08:00', at('00:30'))).toBe(
-      'due in 1 day',
+      'Due in 1 day',
     );
     expect(deadlineUrgency('2026-03-16T23:59:00+08:00', at('00:30'))).toBe(
       'soon',
     );
     // 26 hours away is the day after tomorrow: 2 days, not "1 day".
     expect(deadlineText('2026-03-17T01:00:00+08:00', at('23:00'))).toBe(
-      'due in 2 days',
+      'Due in 2 days',
     );
     expect(
       deadlineUrgency('2026-03-17T01:00:00+08:00', at('23:00')),
@@ -151,13 +151,13 @@ describe('deadlineDayTime', () => {
 
   it('names today and tomorrow, and the date after that', () => {
     expect(deadlineDayTime('2026-03-15T23:59:00+08:00', now)).toBe(
-      'due today at 23:59',
+      'Due today at 23:59',
     );
     expect(deadlineDayTime('2026-03-16T08:00:00+08:00', now)).toBe(
-      'due tomorrow at 08:00',
+      'Due tomorrow at 08:00',
     );
     expect(deadlineDayTime('2026-03-18T08:00:00+08:00', now)).toBe(
-      'due Mar 18 08:00',
+      'Due Mar 18 08:00',
     );
   });
 });

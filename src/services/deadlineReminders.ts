@@ -15,7 +15,6 @@ import {
   reconcileScheduled,
 } from 'services/scheduledNotifications';
 import { isShownBy } from 'helpers/shown';
-import { capitalize } from 'helpers/text';
 import { upcomingDeadlines, WidgetDeadline } from 'helpers/widgetDeadlines';
 
 /** iOS keeps at most 64 pending notifications per app; leave some room. */
@@ -202,13 +201,13 @@ const reminderBodies: Record<
   ReminderKind,
   (deadline: number, showsAt: number) => string
 > = {
-  due: (deadline, showsAt) => capitalize(deadlineDayTime(deadline, showsAt)),
+  due: (deadline, showsAt) => deadlineDayTime(deadline, showsAt),
   lateOpen: deadline =>
     t('notifyLateOpen', {
       date: dayjs(deadline).format(t('shortDateTimeFormat')),
     }),
   lateDue: (deadline, showsAt) =>
-    capitalize(deadlineDayTime(deadline, showsAt, 'lateCloses')),
+    deadlineDayTime(deadline, showsAt, 'lateCloses'),
 };
 
 /**

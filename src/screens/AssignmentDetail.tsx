@@ -193,7 +193,7 @@ const AssignmentDetailContent: React.FC<{
         <FormSection>
           <FormText
             title={t('deadline')}
-            subtitle={dayjs(deadline).format(t('fullDateTimeFormat'))}
+            subtitle={dayjs(deadline).format(t('dateTimeFormat'))}
             detail={deadlineTextBesideDate(deadline, now)}
             detailTint={urgency && deadlineTone[urgency]}
             icon="deadline"
@@ -202,7 +202,7 @@ const AssignmentDetailContent: React.FC<{
             <FormText
               title={t('lateSubmission')}
               subtitle={dayjs(lateSubmissionDeadline).format(
-                t('fullDateTimeFormat'),
+                t('dateTimeFormat'),
               )}
               icon="lateSubmission"
             />

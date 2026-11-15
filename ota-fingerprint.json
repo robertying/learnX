@@ -1,11 +1,11 @@
 {
   "runtimeVersion": "19.0.0",
-  "ios": "fab71c1b30c375d84a6ef0f0b5da7c365ca31aae",
-  "android": "3761c8db91f98aa754a28a92727a9b41b5d5e308",
+  "ios": "8baa1ca1ef037e9bf2530d665945344dae6305dc",
+  "android": "7abb58fe0f8b14bfb590062578b44a887724d09c",
   "sources": {
     "ios": {
       "file src/data/storeVersions.json": "46529c4a96147c7b238c1fb8a460668086e2e2d6",
-      "dir ios": "2bad44852f5414e0d289ef3d41ef28a1a2890719",
+      "dir ios": "ad1bd07112323f492352cb76b630257758be04dc",
       "dir modules/crashlytics/ios": "e1f7e29111e231cd015ba44f6484e6b9aeafc6c2",
       "dir modules/menus/ios": "f5f2bf4d076a7db2629822f42b6154f1c129afb2",
       "dir modules/share/ios": "2a94070ea43a25cc9fa52be05e6476219924fe98",
@@ -65,7 +65,7 @@
     },
     "android": {
       "file src/data/storeVersions.json": "46529c4a96147c7b238c1fb8a460668086e2e2d6",
-      "dir android": "ac167b15e53458a60eba6834f540cedba9f276de",
+      "dir android": "4e1f25641d1642d4cfafadd4a8b2bfcc71241257",
       "dir modules/crashlytics/android": "c197e1f7400e71d52bf820a626fa941218b8e4ae",
       "dir modules/share/android": "69760341fd85cb091ac06c209f12d905b601c4d9",
       "dir patches": "a5bac4ad91181becf909dc08b21c0c2ff5fe90f2",

@@ -37,13 +37,6 @@ export const removeTags = (html?: string) => {
 export const truncate = (text: string, length: number) =>
   text.length > length ? `${text.slice(0, length).trimEnd()}…` : text;
 
-/**
- * Starts a sentence with a phrase meant for the middle of one, such as "due
- * today at …"; Chinese has no case, so it's unchanged.
- */
-export const capitalize = (text: string) =>
-  text.charAt(0).toUpperCase() + text.slice(1);
-
 /** djb2, as hex: a short, stable stand-in for a text, e.g. in a key or uid. */
 export const hash = (text: string) => {
   let result = 5381;

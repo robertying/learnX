@@ -60,14 +60,14 @@ describe('times of day', () => {
     mockClock.uses24hourClock = false;
     mockLocale.current = 'zh-CN';
     expect(evening.locale('zh-cn').format(t('shortDateTimeFormat'))).toBe(
-      '11 月 12 日 下午9:30',
+      '11月12日 下午9:30',
     );
   });
 
   it('keep other placeholders of a format', () => {
     expect(
       evening.format(t('gradedByAtFormat', { grader: formatLiteral('Li') })),
-    ).toBe('Graded by Li, Nov 12, 2026 21:30');
+    ).toBe('Graded by Li, Thu, Nov 12, 2026 21:30');
   });
 });
 

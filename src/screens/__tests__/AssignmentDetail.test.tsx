@@ -317,7 +317,9 @@ describe('what each state of the assignment shows', () => {
         submitTime: '2026-10-01T10:00:00+08:00',
       }),
     );
-    expect(screen.getByText(/Submitted late Oct 1, 2026 10:00/)).toBeTruthy();
+    expect(
+      screen.getByText(/Submitted late Thu, Oct 1, 2026 10:00/),
+    ).toBeTruthy();
     // Nothing submitted to show besides the status row
     expect(screen.queryByText(t('yourSubmission'))).toBeNull();
   });
@@ -333,7 +335,7 @@ describe('what each state of the assignment shows', () => {
       }),
     );
     expect(screen.getByText('x = 2')).toBeTruthy();
-    expect(screen.getByText(/Submitted Oct 1, 2026 10:00/)).toBeTruthy();
+    expect(screen.getByText(/Submitted Thu, Oct 1, 2026 10:00/)).toBeTruthy();
   });
 
   it('names an excellent homework by its title without an attachment', async () => {
@@ -354,9 +356,7 @@ it('gives a deadline over a year away as its date once', async () => {
   const base = find(a => !a.submitted && !a.graded);
   const deadline = dayjs('2099-09-30T08:59:00+08:00');
   await renderScreen({ ...base, deadline: deadline.toISOString() });
-  expect(
-    screen.getByText(deadline.format(t('fullDateTimeFormat'))),
-  ).toBeTruthy();
+  expect(screen.getByText(deadline.format(t('dateTimeFormat')))).toBeTruthy();
   expect(
     screen.queryByText(
       t('deadlineOn', { date: deadline.format(t('deadlineDateFormat')) }),
