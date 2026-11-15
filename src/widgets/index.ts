@@ -53,7 +53,7 @@ const toProps = ({
   locale: widgetLocale(),
 });
 
-/** Deadlines in the Android widget's props; it shows the first four. */
+/** Deadlines in the Android widget's props; it shows as many as fit. */
 const ANDROID_DEADLINES = 10;
 
 /**

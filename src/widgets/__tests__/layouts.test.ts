@@ -706,6 +706,39 @@ describe('Deadlines on Android', () => {
     expect(color('plain')).toBe('#4D444C');
   });
 
+  it('lists as many as fit its height at the text size', () => {
+    // A title and "+N", then three texts a row.
+    const rows = (environment: object) =>
+      (texts(layout(deadlineProps, environment)).length - 2) / 3;
+    // 2 × 2 cells: two rows, and the rest counted.
+    const short = layout(deadlineProps, { height: 140 });
+    expect(texts(short).slice(0, 2)).toEqual(['Deadlines', '  +7']);
+    expect(openUrls(short)).toEqual([
+      'learnx://assignment',
+      'learnx://assignment/d1',
+      'learnx://assignment/d2',
+    ]);
+    // Taller: all seven in the props (two more than they hold are counted).
+    expect(rows({ height: 400 })).toBe(7);
+    expect(rows({ height: 300 })).toBe(6);
+    // Larger text: fewer rows.
+    expect(rows({ height: 300, fontScale: 1.5 })).toBe(4);
+    // Always at least one.
+    expect(rows({ height: 60 })).toBe(1);
+  });
+
+  it("is the launcher's widget background", () => {
+    const widget = layout(deadlineProps, { cornerRadius: 28 });
+    expect(modifier(widget, 'cornerRadius')).toBe(28);
+    expect(
+      (widget.props.modifiers as { $type?: string }[]).some(
+        m => m?.$type === 'appWidgetBackground',
+      ),
+    ).toBe(true);
+    // Before Android 12
+    expect(modifier(layout(deadlineProps, {}), 'cornerRadius')).toBe(16);
+  });
+
   it('asks to open the app before it has sent anything, in the system language', () => {
     const initial = {
       deadlines: [],
@@ -760,6 +793,20 @@ describe('Up Next on Android', () => {
       'learnx://course/later',
       'learnx://course/c3',
     ]);
+  });
+
+  it('lists as many later classes as fit its height', () => {
+    // The label and the featured class, then one text a class.
+    const later = (environment: object) =>
+      texts(layout(upNextProps, environment)).length - 3;
+    // 2 × 2 cells
+    expect(later({ height: 130 })).toBe(2);
+    expect(later({ height: 160 })).toBe(3);
+    // All five after the featured one.
+    expect(later({ height: 400 })).toBe(5);
+    // Larger text: fewer.
+    expect(later({ height: 200, fontScale: 1.3 })).toBe(4);
+    expect(later({ height: 160, fontScale: 1.3 })).toBe(2);
   });
 
   it("dates a class after tomorrow, and leaves out what's missing", () => {

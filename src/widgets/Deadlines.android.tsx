@@ -1,23 +1,27 @@
 import { Box, Column, Row, Spacer, Text } from '@expo/ui/jetpack-compose';
 import {
-  background,
-  cornerRadius,
   fillMaxSize,
   fillMaxWidth,
   height,
   paddingAll,
 } from '@expo/ui/jetpack-compose/modifiers';
-import { createWidget, type WidgetEnvironment } from 'expo-widgets';
+import { createWidget } from 'expo-widgets';
+import {
+  withWidgetKit,
+  type AndroidWidgetEnvironment,
+  type WidgetKit,
+} from 'widgets/kit.android';
 import type { DeadlineWidgetProps } from 'widgets/props';
 
 /**
  * Runs in the widget runtime, not the app: the `widget` directive turns it
  * into a string at build time. It can't use hooks, imports or anything outside
- * the function; only its props, `environment` and the @expo/ui components
- * Glance supports (Column, Row, Text, Spacer, ...). Android widgets have no
- * self-updating dates, so it shows the due time the app formatted, and it
- * leaves out the deadlines that have passed by the time it's drawn (it's
- * redrawn every half hour, see res/xml/deadlines_info.xml).
+ * the function; only its props, `environment`, the kit (`widgets/kit.android`)
+ * and the @expo/ui components Glance supports (Column, Row, Text, Spacer, ...).
+ * Android widgets have no self-updating dates, so it shows the due time the
+ * app formatted, and it leaves out the deadlines that have passed by the time
+ * it's drawn (it's redrawn every half hour, see res/xml/deadlines_info.xml).
+ * It lists as many as fit the widget's height and counts the rest.
  *
  * The build embeds this layout with `initialProps` (see
  * android/app/src/main/expo-widgets-layout-registry.config.json), so a widget
@@ -29,34 +33,15 @@ import type { DeadlineWidgetProps } from 'widgets/props';
  */
 function DeadlinesWidget(
   props: DeadlineWidgetProps,
-  // `locale` is added by our expo-widgets patch.
-  environment: WidgetEnvironment & { locale?: string },
+  environment: AndroidWidgetEnvironment,
+  kit: WidgetKit,
 ) {
   'widget';
-  const dark = environment.colorScheme === 'dark';
-  // The surface and brand colors from src/theme; a widget can't import them.
-  const colors = dark
-    ? {
-        background: '#171216',
-        title: '#EBDFE6',
-        caption: '#D0C3CC',
-        accent: '#F4ABFF',
-        // The error role and the orange custom color.
-        red: '#FFB4AB',
-        orange: '#FFB68E',
-      }
-    : {
-        background: '#FFF7FA',
-        title: '#1F1A1F',
-        caption: '#4D444C',
-        accent: '#660874',
-        red: '#BA1A1A',
-        orange: '#9A4605',
-      };
+  const colors = kit.colors(environment);
   // Fallbacks for before the app first sends its strings. Widget layouts run
   // in their own runtime without the app's translations.
   /* oxlint-disable learnx/no-han-outside-translations */
-  const zh = (environment.locale ?? '').startsWith('zh');
+  const zh = kit.chinese(environment);
   const title = props.title || (zh ? '作业截止' : 'Deadlines');
   const empty =
     props.empty ||
@@ -74,23 +59,20 @@ function DeadlinesWidget(
         : undefined;
   const all = props.deadlines ?? [];
   const ahead = all.filter(d => d.deadline > now);
-  const deadlines = ahead.slice(0, 4);
+  // The title and the space below it, then rows of a title and a due line
+  // with 2 dp of padding around them.
+  const fit = kit.rowsThatFit(
+    environment,
+    2 * kit.padding + kit.line(environment, 13) + 6,
+    4 + kit.line(environment, 14) + kit.line(environment, 12),
+    environment.height ? ahead.length : 4,
+  );
+  const deadlines = ahead.slice(0, fit);
   const more =
     (props.total ?? 0) - (all.length - ahead.length) - deadlines.length;
-  // Handled by patches/expo-widgets@58.0.27.patch; other platforms ignore it.
-  const openUrl = (url: string | undefined) =>
-    url ? [{ $type: 'openUrl', url }] : [];
 
   return (
-    <Column
-      modifiers={[
-        fillMaxSize(),
-        background(colors.background),
-        cornerRadius(16),
-        paddingAll(12),
-        ...openUrl(props.url),
-      ]}
-    >
+    <Column modifiers={kit.root(environment, props.url)}>
       <Row modifiers={[fillMaxWidth()]}>
         <Text
           color={colors.accent}
@@ -120,7 +102,7 @@ function DeadlinesWidget(
       {deadlines.map(item => (
         <Column
           key={item.id}
-          modifiers={[fillMaxWidth(), paddingAll(2), ...openUrl(item.url)]}
+          modifiers={[fillMaxWidth(), paddingAll(2), ...kit.openUrl(item.url)]}
         >
           <Text
             color={colors.title}
@@ -158,6 +140,6 @@ const initialProps: DeadlineWidgetProps = {
 
 export default createWidget<DeadlineWidgetProps>(
   'Deadlines',
-  DeadlinesWidget,
+  withWidgetKit(DeadlinesWidget),
   initialProps,
 );

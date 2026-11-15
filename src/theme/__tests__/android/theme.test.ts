@@ -78,7 +78,7 @@ describe.each([
     // The roles the app's own views use; the secondary, tertiary and inverse
     // ones only reach native views.
     const shared = Object.keys(native).filter(role => role in js);
-    expect(shared).toHaveLength(16);
+    expect(shared).toHaveLength(18);
     for (const role of shared) {
       expect([role, native[role]]).toEqual([role, js[role]]);
     }
@@ -132,12 +132,16 @@ describe('Compose hosts', () => {
 });
 
 describe('Android widget colors', () => {
-  // The widgets run without the app's modules, so they keep their own copies.
+  // The widgets run without the app's modules, so their kit keeps its own
+  // copies.
   const { readFileSync } = require('fs') as {
     readFileSync: (path: string, encoding: 'utf8') => string;
   };
-  const palettes = (widget: string) => {
-    const source = readFileSync(`src/widgets/${widget}.tsx`, 'utf8');
+  const read = (file: string) =>
+    readFileSync(`src/widgets/${file}.tsx`, 'utf8');
+
+  it('are the Material roles, in the kit', () => {
+    const source = read('kit.android');
     // The colors in the object literal that starts at `from`.
     const palette = (from: number) =>
       Object.fromEntries(
@@ -147,36 +151,28 @@ describe('Android widget colors', () => {
             .matchAll(/(\w+): '(#[0-9A-F]{6})'/gi),
         ].map(([, key, hex]) => [key, toRgb(hex)]),
       );
-    return {
+    const kit = {
       dark: palette(source.indexOf('? {')),
       light: palette(source.indexOf(': {')),
     };
-  };
-
-  const roles = (colors: MaterialColors) => ({
-    background: colors.surface,
-    title: colors.onSurface,
-    caption: colors.onSurfaceVariant,
-    accent: colors.primary,
-  });
-
-  it.each([
-    // Deadlines also colors due times.
-    [
-      'Deadlines.android',
-      (colors: MaterialColors) => ({
-        ...roles(colors),
+    for (const theme of [BrandLightTheme, BrandDarkTheme]) {
+      const colors = theme.colors as MaterialColors;
+      expect(kit[theme.dark ? 'dark' : 'light']).toEqual({
+        background: colors.surface,
+        title: colors.onSurface,
+        caption: colors.onSurfaceVariant,
+        accent: colors.primary,
+        // due times
         red: colors.status.red,
         orange: colors.status.orange,
-      }),
-    ],
-    ['UpNext.android', roles],
-  ])('%s uses the Material roles', (widget, expected) => {
-    const widgetColors = palettes(widget);
-    for (const theme of [BrandLightTheme, BrandDarkTheme]) {
-      expect(widgetColors[theme.dark ? 'dark' : 'light']).toEqual(
-        expected(theme.colors as MaterialColors),
-      );
+      });
     }
   });
+
+  it.each(['Deadlines.android', 'UpNext.android'])(
+    '%s takes its colors from the kit',
+    widget => {
+      expect(read(widget)).not.toMatch(/'#[0-9A-F]{6}'/i);
+    },
+  );
 });
