@@ -12,6 +12,7 @@
 		5E191CFA541A0D10472C77C2 /* Pods_learnXTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C3928D6036512F98EC224CA /* Pods_learnXTests.framework */; };
 		66752A57317AE195AB987FFB /* Pods_learnX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DE528F5AED26E2F21053210 /* Pods_learnX.framework */; };
 		ACD6CAE1A3BCBB6D60C0DB06 /* Pods_ExpoWidgetsTarget.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB4D63C3C52ABD0CD33328A2 /* Pods_ExpoWidgetsTarget.framework */; };
+		D403DD372BCA2CB600E5295C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D403DD362BCA2BCF00E5295C /* PrivacyInfo.xcprivacy */; };
 		D40B9F792B248C8E004BC08C /* ShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D40B9F6F2B248C8E004BC08C /* ShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D4D9200E2CA8507900790DF6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D4D9200D2CA8507900790DF6 /* GoogleService-Info.plist */; };
 		E4448879A303800D4A9C107F /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B49240B8E355F5F2633D0A34 /* ExpoModulesProvider.swift */; };
@@ -80,6 +81,7 @@
 		A06F308A48D477954EECD356 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-learnX/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		B25B8E5805D23FD4E922A767 /* Pods-learnXTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-learnXTests.debug.xcconfig"; path = "Target Support Files/Pods-learnXTests/Pods-learnXTests.debug.xcconfig"; sourceTree = "<group>"; };
 		B49240B8E355F5F2633D0A34 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-learnXTests/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		D403DD362BCA2BCF00E5295C /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = learnX/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		D40B9F6F2B248C8E004BC08C /* ShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4D9200D2CA8507900790DF6 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		DB4D63C3C52ABD0CD33328A2 /* Pods_ExpoWidgetsTarget.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ExpoWidgetsTarget.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -92,6 +94,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				PrivacyInfo.xcprivacy,
 			);
 			target = 13B07F861A680F5B00A75B9A /* learnX */;
 		};
@@ -206,6 +209,7 @@
 			children = (
 				5A0710000000000000000A01 /* learnX */,
 				D4D9200D2CA8507900790DF6 /* GoogleService-Info.plist */,
+				D403DD362BCA2BCF00E5295C /* PrivacyInfo.xcprivacy */,
 				5A0710000000000000000A02 /* ShareExtension */,
 				5A0710000000000000000D01 /* SharedFileInbox.swift */,
 				5A0710000000000000000A03 /* ExpoWidgetsTarget */,
@@ -461,6 +465,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D4D9200E2CA8507900790DF6 /* GoogleService-Info.plist in Resources */,
+				D403DD372BCA2CB600E5295C /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
