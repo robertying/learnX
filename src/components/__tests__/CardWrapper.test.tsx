@@ -74,7 +74,7 @@ describe('CardWrapper', () => {
     await press();
     expect(onPress).toHaveBeenCalledTimes(1);
     expect(onCheck).not.toHaveBeenCalled();
-    expect(screen.queryByTestId('icon-circle')).toBeNull();
+    expect(screen.queryByTestId('icon-unselected')).toBeNull();
   });
 
   it('puts the actions in the context menu, which a long press opens', async () => {
@@ -204,14 +204,14 @@ describe('CardWrapper', () => {
       const view = await render(
         card({ selectionMode: true, checked: false, onPress, onCheck }),
       );
-      expect(screen.getByTestId('icon-circle')).toBeTruthy();
+      expect(screen.getByTestId('icon-unselected')).toBeTruthy();
       await press();
       expect(onCheck).toHaveBeenLastCalledWith(true);
 
       await view.rerender(
         card({ selectionMode: true, checked: true, onPress, onCheck }),
       );
-      expect(screen.getByTestId('icon-checkmark.circle.fill')).toBeTruthy();
+      expect(screen.getByTestId('icon-selected')).toBeTruthy();
       await press();
       expect(onCheck).toHaveBeenLastCalledWith(false);
       expect(onPress).not.toHaveBeenCalled();

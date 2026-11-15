@@ -333,7 +333,10 @@ const MenuItem = ({
     {children}
   </Pressable>
 );
-export const DropdownMenuItem = Object.assign(MenuItem, { Text: slot() });
+export const DropdownMenuItem = Object.assign(MenuItem, {
+  LeadingIcon: slot(),
+  Text: slot(),
+});
 export const SelectableDropdownMenuItem = Object.assign(MenuItem, {
   LeadingIcon: slot(),
   Text: slot(),

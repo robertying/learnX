@@ -125,6 +125,9 @@ export const systemIcons = {
   upload: { ios: 'arrow.up.circle', android: 'upload_file' },
   select: { ios: 'checklist', android: 'checklist' },
   checkAll: { ios: 'checkmark.circle.fill', android: 'done_all' },
+  // A card's mark in selection mode (iOS and Mac; Android draws a checkbox).
+  selected: { ios: 'checkmark.circle.fill', android: 'check_circle' },
+  unselected: { ios: 'circle', android: 'radio_button_unchecked' },
   // An option that's on in a menu of toggles
   checked: { ios: 'checkmark', android: 'check' },
   preview: { ios: 'eye', android: 'visibility' },

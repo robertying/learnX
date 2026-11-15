@@ -27,6 +27,9 @@ describe('CardMenu (Android)', () => {
         onDismiss={jest.fn()}
       />,
     );
+    // Each action has its icon, as the filter menu's items do.
+    expect(screen.getByTestId('icon-favorite')).toBeTruthy();
+    expect(screen.getByTestId('icon-archive')).toBeTruthy();
     await userEvent.setup().press(screen.getByTestId('card-archive'));
     expect(onAction).toHaveBeenCalledWith(
       expect.objectContaining({ key: 'archive' }),

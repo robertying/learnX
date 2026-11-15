@@ -186,6 +186,8 @@ describe('gradeLabel', () => {
     expect(gradeLabel({ grade: 0 })).toBe('0');
     expect(gradeLabel({ grade: 92.5, gradeLevel: undefined })).toBe('92.5');
     expect(gradeLabel({})).toBeUndefined();
+  });
+});
 
 describe('upcomingAssignments', () => {
   it('keeps assignments due after now', () => {
