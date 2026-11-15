@@ -41,6 +41,7 @@ import {
 } from 'services/deadlineReminders';
 import { startOfWeek } from 'helpers/schedule';
 import { beijingDate } from 'helpers/serverTime';
+import { uses24HourClock } from 'helpers/i18n';
 import {
   clearShortcuts,
   saveUpcomingClasses,
@@ -67,6 +68,11 @@ interface Inputs {
   resumes: number;
   /** The saved timetable weeks the course calendar follows. */
   classWeeks: unknown[];
+  /**
+   * Whether the device shows 24-hour times, which the widgets write their
+   * times in; read again each time the app comes back (`helpers/i18n`).
+   */
+  hour24: boolean;
 }
 
 let resumes = 0;
@@ -109,6 +115,7 @@ const readInputs = (): Inputs => {
           ),
     resumes,
     classWeeks: syncedClassWeeks(),
+    hour24: uses24HourClock(),
   };
 };
 
@@ -198,7 +205,7 @@ interface Surface {
 const surfaces: Surface[] = [
   {
     name: 'Deadlines widget',
-    deps: i => [i.assignments, i.hiddenCourses, i.archived],
+    deps: i => [i.assignments, i.hiddenCourses, i.archived, i.hour24],
     // Until the assignments are loaded, the widget keeps what it had.
     update: ({ assignments, hiddenCourses, archived }) => {
       if (assignments) {
@@ -271,7 +278,7 @@ const surfaces: Surface[] = [
   },
   {
     name: 'Up Next widget',
-    deps: i => [i.classes],
+    deps: i => [i.classes, i.hour24],
     // Until this week's classes are known, it keeps what it had.
     update: ({ classes }) => {
       if (classes) {
