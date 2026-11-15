@@ -57,4 +57,6 @@
 
 - TODO: full iPhone Duo support open and half open: taps and typing on the inner display, so every flow runs there. Inside the simulator each display has its own touchscreen HID service, and CoreDevice's private UniversalHID digitizer (`dtuhidd`) can send touches to the inner one, but neither `devicectl` nor idb exposes it yet. It needs a Maestro driver that sends touches that way, or a public tool that does; recheck with each new Xcode.
 
+- TODO: first runs of `iphone-min` and `android-min` (`scripts/e2e-devices.sh`): install the iOS 17.5 simulator runtime (`xcodebuild -downloadPlatform iOS -buildVersion 17.5`) and an API 28 phone AVD, run both profiles, and fix what fails. In a one-off CI run on an API 28 emulator, `01-login-check` failed with the username field left empty after typing (the other flows were broken then by an unrelated screenshot bug), so check whether Maestro's typing works there.
+
 - TODO: `11-links` on iOS: tap the "Open in “learnX”?" prompt (SpringBoard's, not in Maestro's hierarchy while learnX is in front) by position on each iOS profile, as `subflows/open-on-inner.yaml` does on the closed Duo, and drop the flow's Android-only condition.
