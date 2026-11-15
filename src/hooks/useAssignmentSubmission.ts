@@ -10,11 +10,11 @@ import {
   usePendingAssignmentData,
 } from 'data/pendingAssignment';
 import { Assignment } from 'data/types/state';
+import type { PickedAttachment } from 'data/submissionDrafts';
 import { getUserData } from 'data/userData';
 import { groupSubmittedKey } from 'helpers/contentNotifications';
 import { isLocaleChinese, t } from 'helpers/i18n';
 import {
-  PickedAttachment,
   defaultAttachmentName,
   sendSubmission,
   uploadAttachment,
