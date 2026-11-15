@@ -8,6 +8,13 @@ env:
   # account can be locked out. The fingerprint is made up too: the login never
   # gets far enough to add a device.
   NOBODY: learnx-e2e-nobody
+# Airplane mode never outlasts the flow, also when it fails.
+onFlowComplete:
+  - runFlow:
+      when:
+        platform: Android
+      commands:
+        - setAirplaneMode: disabled
 ---
 # Logs in from the shipped JS with a made-up account and expects the server's
 # answer to a wrong password. Getting it means the release build sent the whole
@@ -44,4 +51,20 @@ env:
 - extendedWaitUntil:
     visible: 'bad credential(.|\n)*'
     timeout: 30000
+# Without a connection (Android: Maestro has no airplane mode on iOS), React
+# Native's own fetch error has to come out as thu-learn-lib's NETWORK_ERROR,
+# which the app tells apart from a turned-down login: it means offline, and
+# the login is tried again later.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - setAirplaneMode: enabled
+      - tapOn:
+          id: login-password
+      - pressKey: Enter
+      - extendedWaitUntil:
+          visible: 'network error(.|\n)*'
+          timeout: 30000
+      - setAirplaneMode: disabled
 - stopApp

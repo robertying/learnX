@@ -1,4 +1,4 @@
-import { FailReason } from '@robertying/thu-learn-lib';
+import { isServerRejection } from 'helpers/errors';
 import { getAuth } from 'data/auth';
 import { markNoticeRead, showFavorite } from 'data/content';
 import {
@@ -66,20 +66,6 @@ const handlers: { [K in ServerActionKind]: Handler<K> } = {
 const send = (action: ServerAction) =>
   (handlers[action.kind] as Handler<ServerActionKind>).send(action as never);
 
-/**
- * Whether the server turned the action down, as opposed to not being reached
- * or the session failing. Those wait for the next flush without counting:
- * an id the server doesn't know answers HTTP 500, like a server that's down,
- * so only these count towards dropping the action.
- */
-const isRejection = (error: unknown) => {
-  const reason = (error as { reason?: unknown } | null)?.reason;
-  return (
-    reason === FailReason.UNEXPECTED_STATUS ||
-    reason === FailReason.OPERATION_FAILED
-  );
-};
-
 /** Shows a dropped action's item as the server has it again. */
 const revert = (action: ServerAction) => {
   if (action.kind === 'favorite') {
@@ -91,7 +77,7 @@ const sendOne = async (action: PendingAction) => {
   try {
     await send(action);
   } catch (error) {
-    if (isRejection(error) && failAction(action)) {
+    if (isServerRejection(error) && failAction(action)) {
       revert(action);
     }
     return;
