@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { persistStorage } from 'data/storage';
+import storeVersions from 'data/storeVersions.json';
 import {
   actionKey,
   MAX_TRIES,
@@ -91,7 +92,7 @@ export const useUserDataStore = create<UserData>()(
     name: USER_DATA_KEY,
     // Version 1 only ran in development builds; 18.0.x's user data comes in
     // through `data/legacy`.
-    version: 2,
+    version: storeVersions[USER_DATA_KEY],
     storage: persistStorage,
     merge: (saved, current) =>
       mergeUserData(current, (saved ?? {}) as Partial<UserData>),

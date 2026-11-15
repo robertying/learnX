@@ -1,9 +1,8 @@
-import { useEffect, useEffectEvent, useLayoutEffect, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import useHeaderButtons from 'hooks/useHeaderButtons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Alert, Platform } from 'react-native';
+import { Alert, Keyboard, Platform } from 'react-native';
 import { showChoices } from 'components/choiceSheet';
-import { toast } from 'components/Toast';
 import {
   Form,
   FormButton,
@@ -108,8 +107,6 @@ const AssignmentSubmissionContent: React.FC<{
   const {
     picked: attachmentResult,
     isShared,
-    openMenu: handlePickerMenuOpen,
-    closeMenu: handlePickerMenuClose,
     pickDocument: handleDocumentPick,
     pickPhoto: handlePhotoPick,
     removePicked: handlePickedAttachmentRemove,
@@ -126,13 +123,7 @@ const AssignmentSubmissionContent: React.FC<{
     initialContent,
   );
 
-  const {
-    uploading,
-    uploadError,
-    dismissUploadError,
-    progress,
-    confirmSubmit,
-  } = useSubmitAssignment(
+  const { uploading, progress, confirmSubmit } = useSubmitAssignment(
     assignment,
     {
       content,
@@ -182,7 +173,7 @@ const AssignmentSubmissionContent: React.FC<{
   };
 
   const handlePickerOpen = () => {
-    handlePickerMenuOpen();
+    Keyboard.dismiss();
     showChoices({
       title: t('pickAttachment'),
       choices: [
@@ -199,19 +190,8 @@ const AssignmentSubmissionContent: React.FC<{
           },
         },
       ],
-      onCancel: handlePickerMenuClose,
     });
   };
-
-  const showUploadError = useEffectEvent(() => {
-    toast(t('assignmentSubmissionFailed'), 'error', { duration: 3000 });
-    dismissUploadError();
-  });
-  useEffect(() => {
-    if (uploadError) {
-      showUploadError();
-    }
-  }, [uploadError]);
 
   const handleUploadedAttachmentRemove = () => {
     setRemoveAttachment(!removeAttachment);

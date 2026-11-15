@@ -1,4 +1,3 @@
-import { Linking } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   Form,
@@ -9,6 +8,7 @@ import {
 } from 'components/Form';
 import Urls, { supportEmail } from 'constants/Urls';
 import { t } from 'helpers/i18n';
+import { openLink } from 'helpers/openLink';
 import { SettingsStackParams } from 'navigation/types';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'Help'>;
@@ -28,14 +28,14 @@ const Help: React.FC<Props> = () => (
         <FormButton
           icon="feedback"
           title={t('createNewGitHubIssue')}
-          onPress={() => Linking.openURL(`${Urls.repo}/issues/new/choose`)}
+          onPress={() => openLink(`${Urls.repo}/issues/new/choose`)}
         />
       </FormSection>
       <FormSection title={t('emailNotRecommended')}>
         <FormButton
           icon="email"
           title={supportEmail}
-          onPress={() => Linking.openURL(`mailto:${supportEmail}`)}
+          onPress={() => openLink(`mailto:${supportEmail}`)}
         />
       </FormSection>
       <FormSection

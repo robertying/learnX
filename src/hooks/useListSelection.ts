@@ -1,5 +1,6 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { checkedIds, toggleAllSelection } from 'helpers/filters';
+import useLatest from 'hooks/useLatest';
 
 /**
  * Multi-select state for a list: whether selection mode is on, which items are
@@ -11,10 +12,7 @@ const useListSelection = (items: { id: string }[]) => {
   const [selection, setSelection] = useState<Record<string, boolean>>({});
 
   const checked = checkedIds(selection, items);
-  const checkedIdsRef = useRef(checked);
-  useLayoutEffect(() => {
-    checkedIdsRef.current = checked;
-  }, [checked]);
+  const checkedIdsRef = useLatest(checked);
 
   /** Turns selection mode on, or off and clears the selection */
   const toggleSelectionMode = () => {

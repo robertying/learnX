@@ -120,7 +120,6 @@ export const TabSplit: React.FC<React.PropsWithChildren> = ({ children }) => {
 
   return (
     <NativeSplitViewProvider
-      enabled
       detailNavigationContainerRef={detailNavigationContainerRef}
     >
       {children}

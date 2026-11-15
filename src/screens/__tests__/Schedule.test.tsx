@@ -9,6 +9,8 @@ jest.mock('data/login', () => ({ login: jest.fn() }));
 
 const mockWeeks: Record<string, ClassSession[]> = {};
 const mockSources: Record<string, string> = {};
+/** When each week's failed update last succeeded. */
+const mockFailed: Record<string, number> = {};
 jest.mock('data/schedule', () => ({
   useWeekSchedule: (date: dayjs.Dayjs) => {
     const { startOfWeek } = jest.requireActual('helpers/schedule');
@@ -17,9 +19,9 @@ jest.mock('data/schedule', () => ({
       sessions: mockWeeks[week] ?? [],
       source: mockSources[week] ?? 'calendar',
       week: 9,
-      updatedAt: 0,
+      updatedAt: mockFailed[week] ?? 0,
       fetching: false,
-      failed: false,
+      failed: week in mockFailed,
       refetch: jest.fn(() => Promise.resolve({ isError: false })),
     };
   },
@@ -66,6 +68,9 @@ beforeEach(() => {
   }
   for (const key of Object.keys(mockSources)) {
     delete mockSources[key];
+  }
+  for (const key of Object.keys(mockFailed)) {
+    delete mockFailed[key];
   }
 });
 
@@ -127,4 +132,23 @@ it('says when no classes are coming up', async () => {
   await setup();
   expect(screen.getByText('Today · Sat, Nov 14')).toBeOnTheScreen();
   expect(screen.getByText('No classes in the next 7 days')).toBeOnTheScreen();
+});
+
+it("says when the timetable couldn't update, from the oldest week kept", async () => {
+  mockFailed['2026-11-09'] = NOW.valueOf() - 2 * 60 * 60 * 1000;
+  mockFailed['2026-11-16'] = NOW.valueOf() - 3 * 60 * 60 * 1000;
+  await setup();
+  expect(
+    screen.getByText(
+      "Couldn't update the schedule; showing the one from 3 hours ago.",
+    ),
+  ).toBeOnTheScreen();
+});
+
+it('prefers the note on classes worked out from courses', async () => {
+  mockFailed['2026-11-09'] = NOW.valueOf() - 2 * 60 * 60 * 1000;
+  mockSources['2026-11-16'] = 'courses';
+  await setup();
+  expect(screen.queryByText(/Couldn't update/)).toBeNull();
+  expect(screen.getByText(/Worked out from course times/)).toBeOnTheScreen();
 });
