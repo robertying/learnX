@@ -139,7 +139,7 @@ if [ "$has_flow" = false ] && [ "$ui_only" = false ]; then
 fi
 
 # Android: scripts/e2e-calendar.mjs reads the device's calendar for
-# 07-settings (subflows/calendar-provider.yaml), at CALENDAR_URL.
+# 08-settings (subflows/calendar-provider.yaml), at CALENDAR_URL.
 calendar_url=
 if [ "$platform" = android ] && [ "$ui_only" = false ]; then
   serial="${MAESTRO_DEVICE:-$(adb devices | awk 'NR > 1 && $2 == "device" { print $1; exit }')}"
