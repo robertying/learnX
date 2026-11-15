@@ -55,6 +55,11 @@ function UpNextWidget(
   // Handled by patches/expo-widgets@58.0.27.patch; other platforms ignore it.
   const openUrl = (url: string | undefined) =>
     url ? [{ $type: 'openUrl', url }] : [];
+  // What TalkBack reads for a class, as one sentence without the dots (also
+  // our patch).
+  const spoken = (...parts: string[]) => [
+    { $type: 'contentDescription', text: parts.filter(Boolean).join(', ') },
+  ];
 
   const now = Date.now();
   const classes = (props.classes ?? []).filter(c => c.end > now);
@@ -96,7 +101,13 @@ function UpNextWidget(
       </Text>
       <Spacer modifiers={[height(4)]} />
       {featured ? (
-        <Column modifiers={[fillMaxWidth(), ...openUrl(featured.url)]}>
+        <Column
+          modifiers={[
+            fillMaxWidth(),
+            ...openUrl(featured.url),
+            ...spoken(featured.courseName, when(featured), featured.location),
+          ]}
+        >
           <Text
             color={colors.title}
             style={{ fontSize: 16, fontWeight: 'bold' }}
@@ -122,7 +133,14 @@ function UpNextWidget(
         </Box>
       )}
       {following.map((c, i) => (
-        <Column key={c.key} modifiers={[fillMaxWidth(), ...openUrl(c.url)]}>
+        <Column
+          key={c.key}
+          modifiers={[
+            fillMaxWidth(),
+            ...openUrl(c.url),
+            ...spoken(i === 0 ? props.later : '', c.courseName, when(c)),
+          ]}
+        >
           <Spacer modifiers={[height(i === 0 ? 6 : 2)]} />
           <Text color={colors.caption} style={{ fontSize: 12 }} maxLines={1}>
             {i === 0

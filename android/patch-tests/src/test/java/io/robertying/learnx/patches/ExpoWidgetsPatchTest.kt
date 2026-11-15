@@ -13,6 +13,8 @@ import androidx.glance.action.ActionModifier
 import androidx.glance.appwidget.AppWidgetId
 import androidx.glance.appwidget.action.StartActivityIntentAction
 import androidx.glance.layout.EmittableBox
+import androidx.glance.semantics.SemanticsModifier
+import androidx.glance.semantics.SemanticsProperties
 import com.facebook.react.bridge.DynamicFromObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -25,8 +27,8 @@ import org.robolectric.annotation.Config
 
 /**
  * What patches/expo-widgets@58.0.27.patch changes on Android: tapping a widget opens the app, an `openUrl` modifier
- * opens a link in the app, and layouts get the locale. The library keeps all three internal, so they're reached by
- * reflection.
+ * opens a link in the app, a `contentDescription` modifier sets what TalkBack reads, and layouts get the locale. The
+ * library keeps them internal, so they're reached by reflection.
  */
 @RunWith(RobolectricTestRunner::class)
 class ExpoWidgetsPatchTest {
@@ -71,8 +73,8 @@ class ExpoWidgetsPatchTest {
     assertEquals(1, (root as EmittableBox).children.size)
   }
 
-  @Test
-  fun openUrlModifierOpensTheLinkInTheApp() {
+  /** The Glance modifier the patched library makes for one layout modifier. */
+  private fun peekModifier(vararg fields: Pair<String, String>): GlanceModifier {
     val tree = Class.forName("expo.modules.widgets.ExpoWidgetEmittableTreeKt")
     val converterContextClass = Class.forName("expo.modules.widgets.WidgetConverterContext")
     // Its size is a DpSize (a Long); Kotlin adds a synthetic constructor beside it.
@@ -83,16 +85,32 @@ class ExpoWidgetsPatchTest {
     val toPeekModifier = tree.declaredMethods
       .single { it.name == "toPeekModifier" && it.parameterTypes.first() == Map::class.java }
       .apply { isAccessible = true }
-
-    val modifier = toPeekModifier.invoke(
+    return toPeekModifier.invoke(
       null,
-      mapOf("\$type" to DynamicFromObject("openUrl"), "url" to DynamicFromObject("learnx://assignment/1")),
+      fields.associate { (key, value) -> key to DynamicFromObject(value) },
       converterContext,
     ) as GlanceModifier
+  }
+
+  @Test
+  fun openUrlModifierOpensTheLinkInTheApp() {
+    val modifier = peekModifier("\$type" to "openUrl", "url" to "learnx://assignment/1")
 
     val intent = checkNotNull(action(modifier)).intent
     assertEquals(Intent.ACTION_VIEW, intent.action)
     assertEquals(Uri.parse("learnx://assignment/1"), intent.data)
     assertEquals(context.packageName, intent.`package`)
+  }
+
+  @Test
+  fun contentDescriptionModifierSetsWhatTalkBackReads() {
+    val modifier = peekModifier("\$type" to "contentDescription", "text" to "Assignment, 3 PM, Course")
+    val semantics = checkNotNull(
+      modifier.foldIn<SemanticsModifier?>(null) { found, element -> found ?: element as? SemanticsModifier },
+    )
+    assertEquals(
+      listOf("Assignment, 3 PM, Course"),
+      semantics.configuration.getOrNull(SemanticsProperties.ContentDescription),
+    )
   }
 }

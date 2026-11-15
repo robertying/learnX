@@ -1,5 +1,7 @@
 import { HStack, Link, Spacer, Text, VStack } from '@expo/ui/swift-ui';
 import {
+  accessibilityElement,
+  accessibilityLabel,
   font,
   foregroundStyle,
   layoutPriority,
@@ -124,6 +126,7 @@ function UpNextWidget(
           kit.background,
           ...kit.language(props.locale),
           ...(featured?.url ? [widgetURL(featured.url)] : openToday),
+          accessibilityElement('combine'),
         ]}
       >
         <Text modifiers={[font({ textStyle: 'headline' }), lineLimit(1)]}>
@@ -133,7 +136,13 @@ function UpNextWidget(
             largest unit; the place gets a line of its own. */}
         {featured ? (
           <HStack spacing={0}>
-            <Text modifiers={[lineLimit(1), layoutPriority(1)]}>
+            <Text
+              modifiers={[
+                lineLimit(1),
+                layoutPriority(1),
+                accessibilityLabel(when(featured, true)),
+              ]}
+            >
               {today ? `${when(featured, true)} · ` : when(featured, true)}
             </Text>
             {today ? (
@@ -179,7 +188,14 @@ function UpNextWidget(
     kit.secondary,
   ];
   const featuredClass = (withCountdown: boolean, compact = false) => (
-    <VStack key={`${withCountdown}-${compact}`} alignment="leading" spacing={1}>
+    <VStack
+      key={`${withCountdown}-${compact}`}
+      alignment="leading"
+      spacing={1}
+      // VoiceOver reads the class as one element: course, time, place and
+      // the countdown.
+      modifiers={[accessibilityElement('combine')]}
+    >
       <Text
         modifiers={[
           font({ textStyle: 'headline', weight: 'semibold' }),
@@ -205,7 +221,14 @@ function UpNextWidget(
             {when(featured, compact)}
           </Text>
           {featured.location ? (
-            <Text modifiers={[...detail, lineLimit(1), place]}>
+            <Text
+              modifiers={[
+                ...detail,
+                lineLimit(1),
+                place,
+                accessibilityLabel(featured.location),
+              ]}
+            >
               {` · ${featured.location}`}
             </Text>
           ) : null}
@@ -232,7 +255,12 @@ function UpNextWidget(
   // widget, which is too narrow for both, the start under the course.
   const laterRow = (c: UpNextWidgetProps['classes'][number]) =>
     small ? (
-      <VStack key={c.key} alignment="leading" spacing={0}>
+      <VStack
+        key={c.key}
+        alignment="leading"
+        spacing={0}
+        modifiers={[accessibilityElement('combine')]}
+      >
         <Text modifiers={[font({ textStyle: 'caption' }), lineLimit(1)]}>
           {c.courseName}
         </Text>
@@ -250,7 +278,11 @@ function UpNextWidget(
       linked(
         c,
         c.key,
-        <HStack key={c.key} spacing={8}>
+        <HStack
+          key={c.key}
+          spacing={8}
+          modifiers={[accessibilityElement('combine')]}
+        >
           <Text modifiers={[font({ textStyle: 'caption' }), lineLimit(1)]}>
             {c.courseName}
           </Text>
