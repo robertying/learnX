@@ -33,30 +33,6 @@ struct SpotlightItem: Record {
   }
 }
 
-struct UpcomingDeadlineRecord: Record {
-  @Field var id: String = ""
-  @Field var title: String = ""
-  @Field var courseName: String = ""
-  /// Milliseconds since the epoch.
-  @Field var deadline: Double = 0
-
-  var upcomingDeadline: UpcomingDeadline {
-    UpcomingDeadline(id: id, title: title, courseName: courseName, deadline: Date(milliseconds: deadline))
-  }
-}
-
-struct UpcomingClassRecord: Record {
-  @Field var courseName: String = ""
-  @Field var location: String = ""
-  /// Milliseconds since the epoch.
-  @Field var start: Double = 0
-  @Field var end: Double = 0
-
-  var upcomingClass: UpcomingClass {
-    UpcomingClass(courseName: courseName, location: location, start: Date(milliseconds: start), end: Date(milliseconds: end))
-  }
-}
-
 /// The parts of `CSSearchableIndex` the module uses, so tests can index into a fake.
 protocol SearchableIndex {
   func beginBatch()
@@ -143,8 +119,7 @@ struct SpotlightIndex {
   }
 }
 
-/// Indexes the app's items in Spotlight, hands the item of a tapped search result to JS, and keeps the upcoming
-/// deadlines and classes for the "Next Deadline" and "Next Class" App Intents.
+/// Indexes the app's items in Spotlight, and hands the item of a tapped search result to JS.
 public final class SpotlightModule: Module {
   public func definition() -> ModuleDefinition {
     Name("Spotlight")
@@ -167,8 +142,6 @@ public final class SpotlightModule: Module {
     AsyncFunction("removeAllItems") { (state: String) in
       try await Self.removeAllItems(state: state)
     }
-    Function("setUpcomingDeadlines", Self.setUpcomingDeadlines)
-    Function("setUpcomingClasses", Self.setUpcomingClasses)
   }
 
   func startObserving() {
@@ -200,14 +173,6 @@ public final class SpotlightModule: Module {
 
   static func removeAllItems(state: String) async throws {
     try await SpotlightIndex.system?.removeAllItems(state: state)
-  }
-
-  static func setUpcomingDeadlines(_ deadlines: [UpcomingDeadlineRecord]) {
-    UpcomingDeadlines.save(deadlines.map(\.upcomingDeadline))
-  }
-
-  static func setUpcomingClasses(_ classes: [UpcomingClassRecord]) {
-    UpcomingClasses.save(classes.map(\.upcomingClass))
   }
 }
 

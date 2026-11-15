@@ -1,7 +1,7 @@
 import AppIntents
 import Foundation
 // ExpoModulesProvider imports it as `internal`, and Swift rejects mixed implicit levels.
-internal import LearnXSpotlight
+internal import LearnXShortcuts
 
 /// Says which class is on now and which one is next, and when and where, from the timetable the app last loaded, so
 /// it answers right away and offline. The app saves this week's and next week's classes.

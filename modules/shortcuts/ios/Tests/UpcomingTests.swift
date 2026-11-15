@@ -1,7 +1,7 @@
 import Foundation
 import Testing
 
-@testable import LearnXSpotlight
+@testable import LearnXShortcuts
 
 /// A user defaults suite of its own, emptied first.
 func testDefaults(_ name: String = #function) -> UserDefaults {
@@ -35,13 +35,13 @@ func testDefaults(_ name: String = #function) -> UserDefaults {
     let defaults = testDefaults()
     UpcomingDeadlines.save([UpcomingDeadline(id: "1", title: "A", courseName: "B", deadline: now + 1)], to: defaults)
     UpcomingDeadlines.save([], to: defaults)
-    #expect(defaults.object(forKey: UpcomingDeadlines.key) == nil)
+    #expect(defaults.object(forKey: UpcomingDeadlines.list.key) == nil)
     #expect(UpcomingDeadlines.load(after: now, from: defaults).isEmpty)
   }
 
   @Test func ignoresUnreadableData() {
     let defaults = testDefaults()
-    defaults.set(Data("not json".utf8), forKey: UpcomingDeadlines.key)
+    defaults.set(Data("not json".utf8), forKey: UpcomingDeadlines.list.key)
     #expect(UpcomingDeadlines.load(after: now, from: defaults).isEmpty)
   }
 
@@ -75,12 +75,12 @@ func testDefaults(_ name: String = #function) -> UserDefaults {
     let defaults = testDefaults()
     UpcomingClasses.save([UpcomingClass(courseName: "A", location: "", start: now, end: now + 1)], to: defaults)
     UpcomingClasses.save([], to: defaults)
-    #expect(defaults.object(forKey: UpcomingClasses.key) == nil)
+    #expect(defaults.object(forKey: UpcomingClasses.list.key) == nil)
   }
 
   @Test func ignoresUnreadableData() {
     let defaults = testDefaults()
-    defaults.set(Data("not json".utf8), forKey: UpcomingClasses.key)
+    defaults.set(Data("not json".utf8), forKey: UpcomingClasses.list.key)
     #expect(UpcomingClasses.load(at: now, from: defaults).isEmpty)
   }
 

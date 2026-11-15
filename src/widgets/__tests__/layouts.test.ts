@@ -53,6 +53,17 @@ const layoutOf = <P>(load: () => unknown): Layout<P> => {
   return new Function('scope', `with (scope) { return (${source}); }`)(scope);
 };
 
+/** The props a widget is registered with, which the build embeds with it. */
+const initialPropsOf = <P>(load: () => unknown): P => {
+  let props: P | undefined;
+  jest.isolateModules(() => {
+    const { createWidget } = require('expo-widgets');
+    load();
+    props = jest.mocked(createWidget).mock.calls.at(-1)![2];
+  });
+  return props!;
+};
+
 const childrenOf = (node: Node): Node[] =>
   [node.props.children]
     .flat(Infinity)
@@ -477,6 +488,30 @@ describe('Up Next on iOS', () => {
     const bare = layout({ ...upNextProps, classes: undefined } as never, {});
     expect(texts(bare)[0]).toBe('Up Next');
   });
+
+  it('asks to open the app before it has sent anything, in the system language', () => {
+    const initial = initialPropsOf<UpNextWidgetProps>(() =>
+      require('widgets/UpNext'),
+    );
+    expect(initial.classes).toEqual([]);
+    const english = layout(initial, { locale: 'en_US', date: new Date(now) });
+    expect(texts(english)).toEqual([
+      'Next Up',
+      'Open learnX to see your classes',
+    ]);
+    expect(modifier(english, 'widgetURL')).toBeUndefined();
+    expect(
+      texts(layout(initial, { locale: 'zh-Hans_CN', date: new Date(now) })),
+    ).toEqual(['下一节课', '打开 learnX 以显示课程']);
+    expect(
+      texts(
+        layout(initial, {
+          widgetFamily: 'accessoryRectangular',
+          date: new Date(now),
+        }),
+      ),
+    ).toEqual(['Open learnX to see your classes']);
+  });
 });
 
 describe('Deadlines on iOS', () => {
@@ -648,6 +683,30 @@ describe('Deadlines on iOS', () => {
         'environment',
       ),
     ).toEqual(['locale', 'en']);
+  });
+
+  it('asks to open the app before it has sent anything, in the system language', () => {
+    const initial = initialPropsOf<DeadlineWidgetProps>(() =>
+      require('widgets/Deadlines'),
+    );
+    expect(initial.deadlines).toEqual([]);
+    const english = layout(initial, { locale: 'en_US', date: new Date(now) });
+    expect(texts(english)).toEqual([
+      'Deadlines',
+      'Open learnX to see deadlines',
+    ]);
+    expect(modifier(english, 'widgetURL')).toBeUndefined();
+    expect(
+      texts(layout(initial, { locale: 'zh-Hans_CN', date: new Date(now) })),
+    ).toEqual(['作业截止', '打开 learnX 以显示作业']);
+    expect(
+      texts(
+        layout(initial, {
+          widgetFamily: 'accessoryRectangular',
+          date: new Date(now),
+        }),
+      ),
+    ).toEqual(['Open learnX to see deadlines']);
   });
 });
 

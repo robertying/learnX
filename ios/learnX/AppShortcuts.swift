@@ -3,7 +3,7 @@ import Foundation
 
 /// Every App Shortcut learnX offers to Siri, Spotlight and Shortcuts. Their Chinese phrases are in
 /// `AppShortcuts.xcstrings`.
-struct LearnXShortcuts: AppShortcutsProvider {
+struct LearnXAppShortcuts: AppShortcutsProvider {
   static var appShortcuts: [AppShortcut] {
     AppShortcut(
       intent: NextDeadlineIntent(),
