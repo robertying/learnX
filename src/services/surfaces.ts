@@ -349,6 +349,26 @@ const isMissing = async (surface: Surface, inputs: Inputs) => {
   }
 };
 
+/**
+ * How often the outputs the user can change outside learnX are checked when
+ * nothing they depend on changed: each check lists a calendar, and refreshes
+ * come with every change to the lists (an item marked read).
+ */
+export const MISSING_CHECK_MS = 60 * 1000;
+
+/** When the missing checks last ran (ms), and at which foreground count. */
+let missingChecked: { at: number; resumes: number } | null = null;
+
+/**
+ * Whether this refresh checks for lost entries: the first in a JS runtime,
+ * the first after coming back to the app (the user may have been in Calendar
+ * or Reminders), and otherwise once a minute at most.
+ */
+const shouldCheckMissing = ({ resumes: count }: Inputs) =>
+  !missingChecked ||
+  missingChecked.resumes !== count ||
+  Date.now() - missingChecked.at >= MISSING_CHECK_MS;
+
 let running: Promise<void> = Promise.resolve();
 
 /**
@@ -360,11 +380,15 @@ let running: Promise<void> = Promise.resolve();
 export const refreshSurfaces = () => {
   running = running.then(async () => {
     const inputs = readInputs();
+    const checkMissing = shouldCheckMissing(inputs);
+    if (checkMissing) {
+      missingChecked = { at: Date.now(), resumes: inputs.resumes };
+    }
     for (const surface of surfaces) {
       const deps = surface.deps(inputs);
       if (
         !changed(lastDeps.get(surface.name), deps) &&
-        !(await isMissing(surface, inputs))
+        !(checkMissing && (await isMissing(surface, inputs)))
       ) {
         continue;
       }
@@ -391,6 +415,7 @@ export const clearSurfaces = () => {
   // never schedules reminders that this then cancels.
   running = running.then(async () => {
     lastDeps = new Map();
+    missingChecked = null;
     updateDeadlineWidget([], { hiddenCourses: [], archived: [] });
     updateUpNextWidget();
     clearSpotlight();
@@ -461,7 +486,17 @@ export const watchSurfaces = () => {
       schedule();
     }
   });
-  useUserDataStore.subscribe(() => schedule());
+  // Only what the surfaces read: the waiting server actions change with every
+  // favorite and opened notice.
+  useUserDataStore.subscribe((data, before) => {
+    if (
+      data.currentSemester !== before.currentSemester ||
+      data.hiddenCourses !== before.hiddenCourses ||
+      data.archived !== before.archived
+    ) {
+      schedule();
+    }
+  });
   useSettingsStore.subscribe(() => schedule(SETTINGS_SETTLE_MS));
   AppState.addEventListener('change', state => {
     if (state === 'active') {

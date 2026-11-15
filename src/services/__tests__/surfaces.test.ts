@@ -4,7 +4,12 @@ import { mockAssignments, mockNotices } from 'data/mock';
 import { clearQueryCache, queryClient } from 'data/queryClient';
 import { getCachedWeekSessions } from 'data/schedule';
 import { resetSettings, setSetting } from 'data/settings';
-import { resetUserData, setArchived, setCurrentSemester } from 'data/userData';
+import {
+  queueAction,
+  resetUserData,
+  setArchived,
+  setCurrentSemester,
+} from 'data/userData';
 import {
   cancelClassReminders,
   syncClassReminders,
@@ -17,6 +22,7 @@ import { recordError } from 'services/crashReporting';
 import {
   clearSurfaces,
   refreshSurfaces,
+  MISSING_CHECK_MS,
   SETTINGS_SETTLE_MS,
   subscribeSurfaceErrors,
   watchSurfaces,
@@ -86,6 +92,12 @@ const assignments = mockAssignments.slice(0, 3).map(a => ({
 
 const cacheAssignments = (list = assignments) =>
   queryClient.setQueryData(assignmentsQuery(semester).queryKey, list as never);
+
+/** Moves the clock past the wait between two missing checks. */
+const aMinuteLater = () => {
+  const now = Date.now();
+  jest.spyOn(Date, 'now').mockReturnValue(now + MISSING_CHECK_MS);
+};
 
 beforeEach(async () => {
   clearQueryCache();
@@ -207,6 +219,7 @@ it('writes the calendar and Reminders again when their entries went missing', as
   expect(syncAssignments).toHaveBeenCalledTimes(1);
 
   // Nothing changed and nothing is missing: only the check runs.
+  aMinuteLater();
   await refreshSurfaces();
   expect(assignmentEntriesMissing).toHaveBeenLastCalledWith(
     'calendar',
@@ -216,6 +229,7 @@ it('writes the calendar and Reminders again when their entries went missing', as
 
   // The user deleted events in Calendar.
   jest.mocked(assignmentEntriesMissing).mockResolvedValueOnce(true);
+  aMinuteLater();
   await refreshSurfaces();
   expect(syncAssignments).toHaveBeenCalledTimes(2);
   expect(syncAssignments).toHaveBeenLastCalledWith(
@@ -233,12 +247,32 @@ it("doesn't check the calendar or Reminders while their sync is off", async () =
   expect(assignmentEntriesMissing).not.toHaveBeenCalled();
 });
 
+it('checks for lost entries at most once a minute', async () => {
+  cacheAssignments();
+  setSetting('assignmentCalendarSync', true);
+  // Everything is written on the first run, so nothing is checked.
+  await refreshSurfaces();
+  expect(syncedClassesMissing).not.toHaveBeenCalled();
+
+  // An item marked read a moment later refreshes without listing calendars.
+  await refreshSurfaces();
+  expect(syncedClassesMissing).not.toHaveBeenCalled();
+  expect(assignmentEntriesMissing).not.toHaveBeenCalled();
+
+  aMinuteLater();
+  await refreshSurfaces();
+  expect(syncedClassesMissing).toHaveBeenCalledTimes(1);
+  expect(assignmentEntriesMissing).toHaveBeenCalledTimes(1);
+});
+
 it('writes the classes again when their events went missing', async () => {
   await refreshSurfaces();
   expect(updateSyncedClasses).toHaveBeenCalledTimes(1);
+  aMinuteLater();
   await refreshSurfaces();
   expect(updateSyncedClasses).toHaveBeenCalledTimes(1);
   jest.mocked(syncedClassesMissing).mockResolvedValueOnce(true);
+  aMinuteLater();
   await refreshSurfaces();
   expect(updateSyncedClasses).toHaveBeenCalledTimes(2);
 });
@@ -248,6 +282,7 @@ it('records a failed check and leaves the output as it is', async () => {
   jest
     .mocked(syncedClassesMissing)
     .mockRejectedValueOnce(new Error('no calendar'));
+  aMinuteLater();
   await refreshSurfaces();
   expect(recordError).toHaveBeenCalledWith(
     new Error('no calendar'),
@@ -413,6 +448,31 @@ describe('watchSurfaces', () => {
     onChange('active');
     await settle();
     expect(syncDeadlineReminders).toHaveBeenCalledTimes(2);
+  });
+
+  it('checks for lost entries again when the app comes back', async () => {
+    await refreshSurfaces();
+    await refreshSurfaces();
+    expect(syncedClassesMissing).not.toHaveBeenCalled();
+
+    onChange('active');
+    await settle();
+    expect(syncedClassesMissing).toHaveBeenCalledTimes(1);
+  });
+
+  it("doesn't refresh for user data the surfaces don't read", async () => {
+    // Past the refresh beforeEach's settings reset scheduled.
+    await new Promise(resolve => setTimeout(resolve, SETTINGS_SETTLE_MS));
+    await settle();
+    // Each refresh reads this and next week's classes.
+    jest.mocked(getCachedWeekSessions).mockClear();
+    queueAction({ kind: 'noticeRead', id: 'n1', url: 'https://example.com' });
+    await settle();
+    expect(getCachedWeekSessions).toHaveBeenCalledTimes(2);
+
+    setCurrentSemester('another');
+    await settle();
+    expect(getCachedWeekSessions).toHaveBeenCalledTimes(6);
   });
 });
 
