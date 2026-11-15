@@ -60,6 +60,7 @@ const shared = {
   compilerRuntime: require('react/compiler-runtime'),
   reactNative: require('react-native'),
   navigator: require('test-utils/mocks/navigator'),
+  deviceInfo: require('constants/DeviceInfo'),
 };
 const loadMainTab = (layout: typeof mockLayout) => {
   mockLayout = layout;
@@ -69,6 +70,7 @@ const loadMainTab = (layout: typeof mockLayout) => {
     jest.doMock('react/compiler-runtime', () => shared.compilerRuntime);
     jest.doMock('react-native', () => shared.reactNative);
     jest.doMock('test-utils/mocks/navigator', () => shared.navigator);
+    jest.doMock('constants/DeviceInfo', () => shared.deviceInfo);
     MainTab = require('navigation/MainTab').default;
   });
   return MainTab;
@@ -150,6 +152,23 @@ it('wraps each tab in a split of its own, with filled SF Symbols', async () => {
     { sfSymbol: 'folder.fill' },
     { sfSymbol: 'books.vertical.fill' },
   ]);
+});
+
+it('draws the outline on iPad, whose tab bar turns into a sidebar', async () => {
+  at('2026-03-15T14:00:00');
+  jest.spyOn(shared.deviceInfo.default, 'isIPad').mockReturnValue(true);
+  const MainTab = loadMainTab(iPhone);
+  await render(<MainTab />);
+  expect(config().sidebarAdaptable).toBe(true);
+  expect([0, 1, 2, 3, 4].map(i => tabBarIcon(i, i === 1))).toEqual(
+    [
+      'sun.max',
+      'bell',
+      'list.bullet.clipboard',
+      'folder',
+      'books.vertical',
+    ].map(sfSymbol => ({ sfSymbol })),
+  );
 });
 
 it.each([
