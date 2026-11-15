@@ -30,3 +30,7 @@ appId: ${APP_ID}
             - tapOn: 'Next Page|下一页'
 - tapOn:
     id: ${TAB}
+- runFlow:
+    file: shot.yaml
+    env:
+      NAME: ${TAB.split('|')[0]}

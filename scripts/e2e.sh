@@ -31,6 +31,10 @@
 # E2E_ORIENTATION (PORTRAIT, LANDSCAPE_LEFT, ...) sets the orientation each
 # flow starts in. scripts/e2e-devices.sh runs the flows on every device setup.
 # E2E_LANGUAGE (e.g. zh-Hans) launches the iOS app in that language.
+# E2E_SCREENSHOTS=1 saves a screenshot of each tab, detail and settings page
+# the flows reach, and of search results and failures (.maestro/subflows/
+# shot.yaml), numbered in order, to build/e2e/screenshots/<run start time>/;
+# E2E_SCREENSHOTS=<folder> saves them there instead.
 # E2E_STATE_CLEARED=1 skips the reset (subflows/reset.yaml), for a caller that
 # cleared the app's data itself (scripts/store-screenshots.sh on Android).
 set -euo pipefail
@@ -148,6 +152,58 @@ if [ "$platform" = android ] && [ "$ui_only" = false ]; then
   calendar_url="http://127.0.0.1:$calendar_port/events"
 fi
 
+# Screenshots (E2E_SCREENSHOTS). Never on live runs, whose screens show the
+# real account. Maestro only saves takeScreenshot's files inside the run's
+# output folder (--test-output-dir: the caller's, else one in the screenshots
+# folder), from which number_shots moves them.
+shots_dir=
+if [ "$live" = false ]; then
+  case "${E2E_SCREENSHOTS:-}" in
+  "" | 0) ;;
+  1) shots_dir="build/e2e/screenshots/$(date +%Y-%m-%d_%H%M%S)" ;;
+  *) shots_dir="$E2E_SCREENSHOTS" ;;
+  esac
+fi
+test_out=
+shots_test_out=
+if [ -n "$shots_dir" ]; then
+  mkdir -p "$shots_dir"
+  previous=
+  for arg in "$@"; do
+    if [ "$previous" = --test-output-dir ]; then
+      test_out="$arg"
+    fi
+    previous="$arg"
+  done
+  if [ -z "$test_out" ]; then
+    test_out="$shots_dir/.maestro"
+    shots_test_out="$test_out"
+    set -- --test-output-dir "$test_out" "$@"
+  fi
+fi
+
+# shot.yaml names each file <milliseconds>-<screen>; move them to the
+# screenshots folder, numbered in order after any an earlier run saved there.
+number_shots() {
+  local name file n
+  [ -n "$shots_dir" ] || return 0
+  n="$(find "$shots_dir" -maxdepth 1 -name '[0-9][0-9][0-9]-*.png' | grep -c . || true)"
+  while IFS=$'\t' read -r name file; do
+    n=$((n + 1))
+    mv "$file" "$shots_dir/$(printf '%03d' "$n")-${name#*-}"
+  done < <(find "$test_out" -path '*takeScreenshot*' -name '*.png' |
+    while IFS= read -r file; do
+      name="$(basename "$file")"
+      if [[ "$name" =~ ^[0-9]{13}- ]]; then
+        printf '%s\t%s\n' "$name" "$file"
+      fi
+    done | sort)
+  if [ -n "$shots_test_out" ]; then
+    rm -rf "$shots_test_out"
+  fi
+  echo "Screenshots: $shots_dir" >&2
+}
+
 test_args=(
   -e APP_ID="$app_id"
   -e ACCOUNT="$account"
@@ -159,6 +215,7 @@ test_args=(
   -e STATE_CLEARED="${E2E_STATE_CLEARED:-}"
   -e IPAD="$ipad"
   -e CALENDAR_URL="$calendar_url"
+  -e SHOTS_DIR="${shots_dir:+shots}"
   "${env_args[@]}"
 )
 # The simulator the UI tests run on: MAESTRO_DEVICE, else the one booted.
@@ -208,6 +265,7 @@ if [ "$live" = false ]; then
   status=0
   maestro "${device_args[@]+"${device_args[@]}"}" --platform "$platform" test \
     "${test_args[@]}" "$@" || status=$?
+  number_shots
   if [ "$platform" = ios ] && [ "$has_flow" = false ] && [ "${E2E_UI_TESTS:-1}" != 0 ]; then
     run_ui_tests || status=$?
   fi

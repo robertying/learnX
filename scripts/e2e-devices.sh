@@ -16,6 +16,13 @@
 #   fold-folded     every flow on the Android foldable, folded
 #   fold-unfolded   every flow on the Android foldable, unfolded (the tablet
 #                   layout: split views and a side rail)
+#   iphone-min      every flow on an iPhone on the oldest iOS the app
+#                   supports (IPHONEOS_DEPLOYMENT_TARGET; the closest
+#                   simulator is iOS 17.5, which scripts/e2e-build.sh
+#                   builds for), in Chinese
+#   android-min     every flow on a phone emulator on the oldest Android the
+#                   app supports (minSdkVersion, API 28), in Chinese
+# The -min profiles aren't in the default run: name them. They're local only.
 #
 # The flows run on the Release app (what ships: bundled JS, Hermes, R8).
 # Install it with scripts/e2e-build.sh first, or set E2E_BUILD=1 to have this
@@ -33,9 +40,14 @@
 #                      Gestures > Windowed Apps (ipad-windowed)
 #   E2E_DUO            an iPhone Duo (duo-*)
 #   E2E_AVD            a foldable emulator, such as a Pixel Fold (fold-*)
+#   E2E_IPHONE_MIN     an iPhone on the iOS 17.5 runtime (iphone-min)
+#   E2E_AVD_MIN        a phone emulator on API 28 (android-min)
 # The ipad-windowed and iPhone Duo profiles need the patched Maestro
 # (scripts/maestro/build.sh: it finds an app outside the full screen and folds
 # the Duo with setFoldPosture): put its bin folder first on PATH.
+#
+# E2E_SCREENSHOTS=1 saves each profile's screenshots (scripts/e2e.sh) to
+# its results' screenshots/ folder.
 #
 # Results, with Maestro's output and a JUnit report:
 # build/e2e/devices/<run start time>/<profile>/. A run keeps the earlier ones'
@@ -53,6 +65,8 @@ ipad="${E2E_IPAD:-}"
 ipad_windowed="${E2E_IPAD_WINDOWED:-}"
 duo="${E2E_DUO:-}"
 avd="${E2E_AVD:-}"
+iphone_min="${E2E_IPHONE_MIN:-}"
+avd_min="${E2E_AVD_MIN:-}"
 build="${E2E_BUILD:-0}"
 max_booted="${E2E_MAX_BOOTED:-3}"
 ios_app_id="io.robertying.learnX"
@@ -75,6 +89,14 @@ installed=""
 ios_app=""
 # The UDID or serial of the device the current profile runs on.
 device=""
+
+# The screenshots folder for results folder $1, when E2E_SCREENSHOTS is on.
+shots() {
+  case "${E2E_SCREENSHOTS:-}" in
+  "" | 0) ;;
+  *) echo "$PWD/$1/screenshots" ;;
+  esac
+}
 
 log() { printf '\n==> %s\n' "$*"; }
 
@@ -219,6 +241,7 @@ app_running() {
 run_ios_suite() {
   local udid="$1" orientation="$2" out="$3" ui="${4:-0}"
   MAESTRO_DEVICE="$udid" E2E_ORIENTATION="$orientation" E2E_UI_TESTS="$ui" \
+    E2E_SCREENSHOTS="$(shots "$out")" \
     E2E_UI_RESULT="$out/ui.xcresult" scripts/e2e.sh ios \
     --format junit --output "$out/report.xml" --test-output-dir "$out"
 }
@@ -276,11 +299,12 @@ emulator_serial() {
   done
 }
 
-# Boot the AVD named $1 if needed and set $device to its serial.
+# Boot the AVD named $1 (from variable $2) if needed and set $device to its
+# serial.
 use_emulator() {
   local serial waited=0
   if [ -z "$1" ]; then
-    echo "set E2E_AVD to the foldable emulator's AVD name" >&2
+    echo "set $2 to the emulator's AVD name" >&2
     return 1
   fi
   serial="$(emulator_serial "$1")"
@@ -317,12 +341,16 @@ use_emulator() {
   fi
 }
 
+# Every flow on emulator $1, first folded or unfolded as $2 says (fold,
+# unfold; empty for a phone).
 run_android_suite() {
   local serial="$1" state="$2" out="$3"
-  log "Posture: $state"
-  adb -s "$serial" emu "$state" >/dev/null || return 1
-  sleep 3
-  MAESTRO_DEVICE="$serial" scripts/e2e.sh android \
+  if [ -n "$state" ]; then
+    log "Posture: $state"
+    adb -s "$serial" emu "$state" >/dev/null || return 1
+    sleep 3
+  fi
+  MAESTRO_DEVICE="$serial" E2E_SCREENSHOTS="$(shots "$out")" scripts/e2e.sh android \
     --format junit --output "$out/report.xml" --test-output-dir "$out"
 }
 
@@ -364,15 +392,24 @@ run_profile() {
     run_duo_postures "$device" flat "$out"
     ;;
   fold-folded)
-    use_emulator "$avd" || return 1
+    use_emulator "$avd" E2E_AVD || return 1
     run_android_suite "$device" fold "$out"
     ;;
   fold-unfolded)
-    use_emulator "$avd" || return 1
+    use_emulator "$avd" E2E_AVD || return 1
     run_android_suite "$device" unfold "$out"
     ;;
+  iphone-min)
+    use_sim "$iphone_min" E2E_IPHONE_MIN || return 1
+    E2E_LANGUAGE=zh-Hans run_ios_suite "$device" PORTRAIT "$out"
+    ;;
+  android-min)
+    use_emulator "$avd_min" E2E_AVD_MIN || return 1
+    MAESTRO_DEVICE="$device" scripts/android-locale.sh zh-CN || return 1
+    run_android_suite "$device" "" "$out"
+    ;;
   *)
-    echo "unknown profile \"$profile\" (one of: $all_profiles)" >&2
+    echo "unknown profile \"$profile\" (one of: $all_profiles iphone-min android-min)" >&2
     return 2
     ;;
   esac

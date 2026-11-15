@@ -20,3 +20,7 @@ appId: ${APP_ID}
     visible:
       id: ${DETAIL}
     timeout: 10000
+- runFlow:
+    file: shot.yaml
+    env:
+      NAME: ${DETAIL}

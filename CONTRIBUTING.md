@@ -166,7 +166,7 @@ End-to-end flows use [Maestro](https://docs.maestro.dev) against a Release build
 Other CI jobs (none of them build a signed app or run on a device, so still build and try the app yourself on each platform your change touches, and say in the pull request what you checked):
 
 - `CI / Android` (required) runs `scripts/test-android.sh` and builds a release APK (R8 and the JS bundle included, debug-signed) when a pull request touches Android paths; otherwise it skips its steps and passes.
-- `CI / Android E2E tests` runs the Maestro flows in an emulator on that APK after every push to `main`. To run it on a branch: Actions › CI › Run workflow.
+- `CI / Android E2E tests` runs the Maestro flows in an emulator on that APK after every push to `main`, and saves a screenshot of each screen they reach with the results. To run it on a branch: Actions › CI › Run workflow.
 - `Apple / Apple (iOS)` builds the app and runs the native iOS tests (`scripts/test-ios.sh`), by hand only: Actions › Apple › Run workflow, on `main` (which also refreshes its compilation cache) or on a branch. Tick "Mac: build" to also build Mac Catalyst (`Apple / Apple (Mac)`).
 
 ## Pull requests

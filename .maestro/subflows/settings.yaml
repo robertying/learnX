@@ -10,3 +10,7 @@ appId: ${APP_ID}
 # With the "new" badge, Maestro reads the iOS button as the badge's value,
 # UIKit's own text, not the label; Android reads the badge after the label.
 - tapOn: '(${T_settings})(, .*)?|New items?|新项目'
+- runFlow:
+    file: shot.yaml
+    env:
+      NAME: settings

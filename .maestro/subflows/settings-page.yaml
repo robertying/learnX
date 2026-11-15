@@ -14,4 +14,8 @@ appId: ${APP_ID}
     visible:
       id: ${PAGE}
     timeout: 10000
+- runFlow:
+    file: shot.yaml
+    env:
+      NAME: ${PAGE}
 - runFlow: back-to-settings.yaml

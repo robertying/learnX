@@ -18,7 +18,11 @@
 # ~/Library/Developer/Xcode/DerivedData/learnX-e2e); the build is for that
 # simulator's architecture and makes no dSYM, so nothing goes to Crashlytics.
 # One build serves every simulator of that architecture (iPhone, iPad, Duo):
-# install it on another with `xcrun simctl install <udid> <app>`.
+# install it on another with `xcrun simctl install <udid> <app>`. A simulator
+# older than the deployment target (17.6, which has no simulator: the oldest
+# is 17.5) gets a build that targets its version, so the flows can run on the
+# oldest iOS the app supports (scripts/e2e-devices.sh iphone-min); install that
+# build only on simulators as old.
 # Android: -PciRelease (R8, signed with the debug key, no Crashlytics uploads),
 # for the ABI of $ANDROID_ABI (default arm64-v8a, as on Apple silicon).
 set -euo pipefail
@@ -39,11 +43,30 @@ scripts/ota-e2e-cert.sh
 case "$platform" in
 ios)
   derived="${DERIVED_DATA:-$HOME/Library/Developer/Xcode/DerivedData/learnX-e2e}"
+  # The simulator's iOS version, from its runtime.
+  runtime_version="$(xcrun simctl list devices runtimes --json |
+    node -e 'let s = ""; process.stdin.on("data", (d) => (s += d)).on("end", () => {
+      const { devices, runtimes } = JSON.parse(s);
+      for (const [id, list] of Object.entries(devices))
+        if (list.some((d) => d.udid === process.argv[1]))
+          console.log(runtimes.find((r) => r.identifier === id)?.version ?? "");
+    })' "$device")"
+  target="$(grep -m 1 -oE 'IPHONEOS_DEPLOYMENT_TARGET = [0-9.]+' ios/learnX.xcodeproj/project.pbxproj | grep -oE '[0-9.]+$')"
+  destination=(-destination "id=$device")
+  if [ -n "$runtime_version" ] &&
+    [ "$(printf '%s\n%s\n' "$runtime_version" "$target" | sort -V | head -n 1)" != "$target" ]; then
+    # xcodebuild won't build for a simulator older than the deployment target,
+    # even with the target lowered here, so build for any simulator of this
+    # Mac's architecture.
+    echo "iOS $runtime_version is older than the deployment target ($target): building for it"
+    destination=(-destination "generic/platform=iOS Simulator" ARCHS="$(uname -m)"
+      IPHONEOS_DEPLOYMENT_TARGET="$runtime_version")
+  fi
   xcodebuild build \
     -workspace ios/learnX.xcworkspace \
     -scheme learnX \
     -configuration Release \
-    -destination "id=$device" \
+    "${destination[@]}" \
     -derivedDataPath "$derived" \
     -quiet \
     DEBUG_INFORMATION_FORMAT=dwarf \
