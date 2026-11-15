@@ -1,0 +1,98 @@
+diff --git a/build/swift-ui/Button/index.js b/build/swift-ui/Button/index.js
+index b81f0e2f91e3638a3d2a40f4a05a853a1580e093..917593c6eea621ec84fcc06f170da6ad0d905227 100644
+--- a/build/swift-ui/Button/index.js
++++ b/build/swift-ui/Button/index.js
+@@ -23,9 +23,12 @@ const ButtonNativeView = requireNativeView('ExpoUI', 'Button');
+  * />
+  * ```
+  */ export function Button(props) {
+-    const { label, children, onPress, modifiers, ...restProps } = props;
++    const { label, children, onPress, modifiers, role, ...restProps } = props;
++    // learnX patch: sent as `buttonRole`, since React Native reads a host view's
++    // `role` prop as its accessibility role and logs "Unsupported Role value".
+     const baseProps = {
+         ...restProps,
++        buttonRole: role,
+         modifiers,
+         ...modifiers ? createViewModifierEventListener(modifiers) : undefined,
+         onButtonPress: onPress
+diff --git a/ios/Button/Button.swift b/ios/Button/Button.swift
+index 337bf4b91ca3f16de5ad3d264af3fe86c16584fe..8984aa1b816d564951c893181558f7135066b1f6 100644
+--- a/ios/Button/Button.swift
++++ b/ios/Button/Button.swift
+@@ -13,11 +13,11 @@ public struct Button: ExpoSwiftUI.View {
+   public var body: some View {
+     if let label = props.label {
+       if let systemImage = props.systemImage {
+-        SwiftUI.Button(label, systemImage: systemImage, role: props.role?.toNativeRole()) {
++        SwiftUI.Button(label, systemImage: systemImage, role: props.nativeRole) {
+           props.onButtonPress()
+         }
+       } else {
+-        SwiftUI.Button(label, role: props.role?.toNativeRole()) {
++        SwiftUI.Button(label, role: props.nativeRole) {
+           props.onButtonPress()
+         }
+       }
+@@ -30,12 +30,12 @@ public struct Button: ExpoSwiftUI.View {
+   private var labelLessButton: some View {
+     if #available(iOS 26.0, tvOS 26.0, macOS 26.0, *),
+       props.children?.isEmpty ?? true,
+-      let role = props.role?.toNativeRole() {
++      let role = props.nativeRole {
+       SwiftUI.Button(role: role) {
+         props.onButtonPress()
+       }
+     } else {
+-      SwiftUI.Button(role: props.role?.toNativeRole(), action: {
++      SwiftUI.Button(role: props.nativeRole, action: {
+         props.onButtonPress()
+       }) {
+         Children()
+diff --git a/ios/Button/ButtonProps.swift b/ios/Button/ButtonProps.swift
+index 23a980a2a1cb9deb335d6e26f5ffbaf67b8afe2a..9e9bbcec03fa2df06d3204f30a0fa7f0863fbf87 100644
+--- a/ios/Button/ButtonProps.swift
++++ b/ios/Button/ButtonProps.swift
+@@ -30,5 +30,12 @@ open class ButtonProps: UIBaseViewProps, Observable {
+   @Field public var label: String?
+   @Field public var systemImage: String?
+   @Field public var role: ButtonRole?
++  // learnX patch: the role a `Button` view gets from JS, which sends it as `buttonRole` because React Native reads a
++  // host view's `role` prop as its accessibility role. `role` still works where it is sent (widget layouts).
++  @Field public var buttonRole: ButtonRole?
++
++  public var nativeRole: SwiftUI.ButtonRole? {
++    (buttonRole ?? role)?.toNativeRole()
++  }
+   var onButtonPress = EventDispatcher()
+ }
+diff --git a/src/swift-ui/Button/index.tsx b/src/swift-ui/Button/index.tsx
+index 41df9325424c31c0c0eb728796bd835c4db2ba09..ad3c3db83913e39bc1d4ef75107005b1fa3393e7 100644
+--- a/src/swift-ui/Button/index.tsx
++++ b/src/swift-ui/Button/index.tsx
+@@ -44,7 +44,9 @@ export interface ButtonProps extends CommonViewModifierProps {
+   target?: string;
+ }
+ 
+-type NativeButtonProps = Omit<ButtonProps, 'onPress'> & ViewEvent<'onButtonPress', void>;
++type NativeButtonProps = Omit<ButtonProps, 'onPress' | 'role'> & {
++  buttonRole?: ButtonRole;
++} & ViewEvent<'onButtonPress', void>;
+ 
+ const ButtonNativeView: React.ComponentType<NativeButtonProps> = requireNativeView(
+   'ExpoUI',
+@@ -73,10 +75,13 @@ const ButtonNativeView: React.ComponentType<NativeButtonProps> = requireNativeVi
+  * ```
+  */
+ export function Button(props: ButtonProps) {
+-  const { label, children, onPress, modifiers, ...restProps } = props;
++  const { label, children, onPress, modifiers, role, ...restProps } = props;
+ 
++  // learnX patch: sent as `buttonRole`, since React Native reads a host view's
++  // `role` prop as its accessibility role and logs "Unsupported Role value".
+   const baseProps = {
+     ...restProps,
++    buttonRole: role,
+     modifiers,
+     ...(modifiers ? createViewModifierEventListener(modifiers) : undefined),
+     onButtonPress: onPress,
