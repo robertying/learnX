@@ -231,8 +231,8 @@ importers:
         specifier: 7.21.0
         version: 7.21.0(patch_hash=0aeab62ce16a183300736465505b6b5a576ebb6747192e24e3a7f22493d4d13f)(31253fa0884468b665d6ae6de6ba153b)
       '@robertying/thu-learn-lib':
-        specifier: 8.0.0
-        version: 8.0.0
+        specifier: 9.0.0
+        version: 9.0.0
       '@shopify/flash-list':
         specifier: 2.3.3
         version: 2.3.3(@babel/runtime@7.29.13)(react-native@0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1)
@@ -1863,8 +1863,8 @@ packages:
   '@react-navigation/routers@7.6.5':
     resolution: {integrity: sha512-hpvpVFt6wu3U014F/0Qy45VZCErlUvIV8kN1L6HovN5P9OpbXAzFTaRQmG7VW6czg2tSkUL5S3dZA0HIu5QirQ==}
 
-  '@robertying/thu-learn-lib@8.0.0':
-    resolution: {integrity: sha512-QuvDBKYTvMhLe1fhJtI8CAeVFEqxzfX8c6jsHjbSBwV3y09TG+xthF5h68SBPoQFPMhI4VcVjwlRpxtYLQJWbA==}
+  '@robertying/thu-learn-lib@9.0.0':
+    resolution: {integrity: sha512-VDTui5lVHUEoTY7XOki/IgoqM/nNOp9sAXr2mMoiMh+LotzamUUknnAAkTRItAHDMl+w21zPHvRYnVtoSwAoMg==}
     engines: {node: '>=22'}
 
   '@shopify/flash-list@2.3.3':
@@ -6962,7 +6962,7 @@ snapshots:
     dependencies:
       nanoid: 3.3.20
 
-  '@robertying/thu-learn-lib@8.0.0':
+  '@robertying/thu-learn-lib@9.0.0':
     dependencies:
       cheerio: 1.2.0
       entities: 9.0.0
