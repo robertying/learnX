@@ -9,6 +9,7 @@ import {
 import { useLoggedIn } from 'data/auth';
 import { setCurrentSemester, useCurrentSemester } from 'data/userData';
 import { getSemesterTextFromId } from 'helpers/semester';
+import usePullToRefresh from 'hooks/usePullToRefresh';
 import { SettingsStackParams } from 'navigation/types';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'SemesterSelection'>;
@@ -29,10 +30,13 @@ const SemesterSelection: React.FC<Props> = () => {
   const latestSemester = latestResult.data;
 
   const handleRefresh = async () => {
-    if (loggedIn) {
-      await Promise.all([semestersResult.refetch(), latestResult.refetch()]);
-    }
+    const results = await Promise.all([
+      semestersResult.refetch(),
+      latestResult.refetch(),
+    ]);
+    return { isError: results.some(result => result.isError) };
   };
+  const pullToRefresh = usePullToRefresh(handleRefresh);
 
   // The latest semester can be missing from the list before it starts.
   const choices =
@@ -42,7 +46,7 @@ const SemesterSelection: React.FC<Props> = () => {
 
   return (
     <FormScreen>
-      <Form testID="semester-selection" onRefresh={handleRefresh}>
+      <Form testID="semester-selection" onRefresh={pullToRefresh.onRefresh}>
         <FormSection>
           {choices.map(semester => (
             <FormButton

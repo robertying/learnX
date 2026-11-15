@@ -7,7 +7,6 @@ const today = new Date('2026-03-10T09:30:00+08:00');
 const at = (iso: string) => `${iso}+08:00`;
 
 afterEach(() => {
-  mockLocale.current = 'en-US';
   dayjs.locale('en');
 });
 

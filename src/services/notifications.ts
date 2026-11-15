@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { t } from 'helpers/i18n';
 import { isItemType, ItemTarget, OpenTarget } from 'helpers/openTarget';
+import { immediateTrigger } from 'services/scheduledNotifications';
 
 /**
  * Action buttons a notification shows, by what it is about. Identifiers
@@ -195,7 +196,7 @@ export const postNotification = (
           ? notificationCategories.items
           : undefined,
     },
-    trigger: Platform.OS === 'android' ? { channelId } : null,
+    trigger: immediateTrigger(channelId),
   });
 
 /** What one of our notifications carries. */

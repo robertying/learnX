@@ -1,6 +1,6 @@
 import { dataSource } from 'data/source';
+import type { PickedAttachment } from 'data/submissionDrafts';
 import {
-  PickedAttachment,
   canSubmit,
   defaultAttachmentName,
   initialSubmissionContent,

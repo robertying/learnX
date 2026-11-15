@@ -34,10 +34,6 @@ beforeEach(() => {
   jest.useFakeTimers({ now: 1000 });
 });
 
-afterEach(() => {
-  jest.useRealTimers();
-});
-
 describe('actionKey', () => {
   it('lets a later favorite of an item replace an earlier one', () => {
     expect(actionKey(favorite('n1', true))).toBe(

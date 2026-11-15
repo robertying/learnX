@@ -8,11 +8,6 @@ import useContentList, { type ContentListQuery } from 'hooks/useContentList';
 import { noticeLists } from 'hooks/useFilteredData';
 import usePendingTarget from 'hooks/usePendingTarget';
 
-jest.mock('@react-navigation/native', () => ({
-  StackActions: {
-    push: (name: string, params: object) => ({ type: 'PUSH', name, params }),
-  },
-}));
 jest.mock('data/queries', () => ({ useCourseIds: jest.fn(() => []) }));
 const mockShow = jest.fn();
 jest.mock('hooks/useDetailNavigator', () => ({ useShowDetail: jest.fn() }));
@@ -96,16 +91,10 @@ it('opens a tapped item in the detail view', async () => {
   expect(mockShow).toHaveBeenCalledWith('NoticeDetail', { id: 'n1' });
 });
 
-it('opens an item tapped outside the app, in the detail pane or pushed', async () => {
+it('opens an item tapped outside the app as a tap on it would', async () => {
   await render();
   const open = jest.mocked(usePendingTarget).mock.calls[0];
   expect(open[0]).toBe('notice');
-  open[1]('n1', true);
+  open[1]('n1');
   expect(mockShow).toHaveBeenCalledWith('NoticeDetail', { id: 'n1' });
-  open[1]('n2', false);
-  expect(navigation.dispatch).toHaveBeenCalledWith({
-    type: 'PUSH',
-    name: 'NoticeDetail',
-    params: { id: 'n2' },
-  });
 });

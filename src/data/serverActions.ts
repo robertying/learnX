@@ -20,6 +20,7 @@ import {
   getServerWritesAllowed,
   subscribeServerWrites,
 } from 'helpers/serverWrites';
+import { waitAtMost } from 'helpers/waitAtMost';
 import {
   type BookmarkType,
   failAction,
@@ -160,14 +161,7 @@ export const flushServerActionsWithin = async (
   ms: number,
   options?: Parameters<typeof flushServerActions>[0],
 ) => {
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  await Promise.race([
-    flushServerActions(options),
-    new Promise<void>(resolve => {
-      timer = setTimeout(resolve, ms);
-    }),
-  ]);
-  clearTimeout(timer);
+  await waitAtMost(flushServerActions(options), ms);
 };
 
 // Favorites changed while a debug build held them are sent once they're

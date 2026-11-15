@@ -1,8 +1,9 @@
 #!/bin/bash
 # Run the local modules' Android unit tests (modules/*/android/src/test, JUnit
-# with Robolectric and MockK) and print their line coverage. Also runs
-# the tests of what the patches in patches/ change (android/patch-tests),
-# which test libraries' code, so they have no coverage of their own.
+# with Robolectric and MockK) and print their line coverage, failing below the
+# minimum set at the end. Also runs the tests of what the patches in patches/
+# change (android/patch-tests), which test libraries' code, so they have no
+# coverage of their own.
 #
 #   scripts/test-android.sh [gradle option...]
 #
@@ -29,4 +30,6 @@ reports=()
 for project in "${projects[@]}"; do
   reports+=("modules/$project/android/build/reports/coverage/test/debug/report.xml")
 done
-node scripts/android-coverage.mjs "${reports[@]}"
+# Fails below this line coverage of the modules' Kotlin. Keep it just under
+# the current total; raise it as coverage grows.
+node scripts/android-coverage.mjs --min=96 "${reports[@]}"

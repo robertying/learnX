@@ -10,6 +10,7 @@ import { userQuery } from 'data/queries';
 import { queryClient } from 'data/queryClient';
 import { defaultSettings, getSettings, setSetting } from 'data/settings';
 import { getUserData, setArchived } from 'data/userData';
+import storeVersions from 'data/storeVersions.json';
 import { removeFileDir } from 'services/files/downloads';
 import { clearSurfaces } from 'services/surfaces';
 
@@ -55,6 +56,20 @@ it('lists every persisted store, so logging out empties it', () => {
   const keys = persistedKeys();
   expect(keys.length).toBeGreaterThan(0);
   expect(Object.keys(accountStores).sort()).toEqual(keys.sort());
+});
+
+it("takes every persisted store's version from storeVersions.json", () => {
+  // src/data, the folder above this test's.
+  const dir = path.dirname(path.dirname(expect.getState().testPath!));
+  const versions = readdirSync(dir)
+    .filter(file => file.endsWith('.ts'))
+    .map(file => readFileSync(path.join(dir, file), 'utf8'))
+    .filter(source => source.includes('persist('))
+    .map(source => /^ {4}version: (.+),$/m.exec(source)?.[1]);
+  expect(versions).toEqual(
+    versions.map(() => expect.stringMatching(/^storeVersions\[\w+_KEY\]$/)),
+  );
+  expect(Object.keys(storeVersions).sort()).toEqual(persistedKeys().sort());
 });
 
 describe('clearAccountData', () => {

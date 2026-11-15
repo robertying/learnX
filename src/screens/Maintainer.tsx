@@ -1,4 +1,3 @@
-import { Linking } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   Form,
@@ -9,6 +8,7 @@ import {
 } from 'components/Form';
 import { supportEmail } from 'constants/Urls';
 import { t } from 'helpers/i18n';
+import { openLink } from 'helpers/openLink';
 import { SettingsStackParams } from 'navigation/types';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'Maintainer'>;
@@ -21,7 +21,7 @@ const Maintainer: React.FC<Props> = () => (
         <FormButton
           icon="email"
           title={supportEmail}
-          onPress={() => Linking.openURL(`mailto:${supportEmail}`)}
+          onPress={() => openLink(`mailto:${supportEmail}`)}
         />
       </FormSection>
     </Form>

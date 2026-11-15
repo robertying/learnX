@@ -85,20 +85,20 @@ it('saves the next classes with only the fields the intent reads', () => {
   ]);
 });
 
-it('tries again after the native module throws', () => {
-  const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+it('throws when the native module does, and tries again next time', () => {
   deadlinesAre('A');
   Spotlight.setUpcomingDeadlines.mockImplementationOnce(() => {
     throw new Error('UserDefaults');
   });
-  saveUpcomingDeadlines(assignments, filters);
+  expect(() => saveUpcomingDeadlines(assignments, filters)).toThrow(
+    'UserDefaults',
+  );
   saveUpcomingDeadlines(assignments, filters);
 
   expect(Spotlight.setUpcomingDeadlines).toHaveBeenLastCalledWith([
     deadline('A'),
   ]);
   expect(Spotlight.setUpcomingDeadlines).toHaveBeenCalledTimes(2);
-  expect(warn).toHaveBeenCalledTimes(1);
 });
 
 it('empties both intents', () => {
