@@ -138,17 +138,13 @@ const klass = (
   url: `learnx://course/${key}`,
 });
 
-const deadline = (
-  id: string,
-  ms: number,
-  url = `learnx://assignment/${id}`,
-) => ({
+const deadline = (id: string, ms: number) => ({
   id,
   title: `Assignment ${id}`,
   courseName: `Course of ${id}`,
   deadline: ms,
   due: `${id}-due`,
-  url,
+  url: `learnx://assignment/${id}`,
   // Uncolored until it's due; coloredDeadlines sets its own.
   soonFrom: ms,
   urgentFrom: ms,
@@ -483,7 +479,7 @@ describe('Up Next on iOS', () => {
   });
 
   it('says when no classes are left, and works without props or a date', () => {
-    const empty = { ...upNextProps, classes: [], deadlines: [], url: '' };
+    const empty = { ...upNextProps, classes: [], url: '' };
     const widget = render(undefined, empty);
     expect(texts(widget)).toEqual(['Up Next', 'No more classes']);
     expect(modifier(widget, 'widgetURL')).toBeUndefined();
@@ -658,7 +654,7 @@ describe('Deadlines on iOS', () => {
     expect(childrenOf(many)).toHaveLength(10);
   });
 
-  it('says when nothing is due, and leaves rows from before links unlinked', () => {
+  it('says when nothing is due', () => {
     const empty = render('systemMedium', {
       ...deadlineProps,
       deadlines: undefined,
@@ -667,14 +663,6 @@ describe('Deadlines on iOS', () => {
     } as never);
     expect(texts(empty)).toEqual(['Deadlines', 'Nothing due']);
     expect(modifier(empty, 'widgetURL')).toBeUndefined();
-
-    const old = render('systemMedium', {
-      ...deadlineProps,
-      deadlines: [deadline('old', at('23:59'), '')],
-      total: 1,
-    });
-    expect(links(old)).toEqual([]);
-    expect(texts(old)).toContain('Assignment old');
   });
 
   it("draws countdowns in the app's language", () => {
@@ -825,7 +813,6 @@ describe('Up Next on Android', () => {
     const props = {
       ...upNextProps,
       classes: [klass('c3', at('08:00') + 2 * DAY, at('09:35') + 2 * DAY, '')],
-      deadlines: [],
     };
     expect(texts(layout(props, {}))).toEqual([
       'Next',
@@ -843,7 +830,6 @@ describe('Up Next on Android', () => {
     const initial = {
       ...upNextProps,
       classes: undefined,
-      deadlines: undefined,
       title: '',
       noClasses: '',
       url: '',

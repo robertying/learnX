@@ -37,7 +37,7 @@ function DeadlinesWidget(
   const empty = props.empty || firstRun.noDeadlines;
   const deadlines = props.deadlines ?? [];
   const now = (environment.date ?? new Date()).getTime();
-  // Props sent before widget rows had links have no URLs.
+  // No link until the app has sent its first props.
   const openUrl = (url: string | undefined) => (url ? [widgetURL(url)] : []);
 
   if (family === 'accessoryRectangular') {
@@ -155,7 +155,7 @@ function DeadlinesWidget(
       </VStack>
     );
     // A small widget can't have links; its widgetURL opens the list.
-    return small || !item.url ? (
+    return small ? (
       content
     ) : (
       <Link

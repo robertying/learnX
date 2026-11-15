@@ -15,6 +15,9 @@
 		5A071000000000000000000C /* AppShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A071000000000000000000B /* AppShortcuts.swift */; };
 		5A071000000000000000000E /* ScrollEdgeEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A071000000000000000000D /* ScrollEdgeEffect.swift */; };
 		5A0710000000000000000D02 /* SharedFileInbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000000D01 /* SharedFileInbox.swift */; };
+		5A0710000000000000001002 /* CrashReporting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000001001 /* CrashReporting.swift */; };
+		5A0710000000000000001004 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 5A0710000000000000001003 /* FirebaseCrashlytics */; };
+		5A0710000000000000001006 /* FirebaseAnalyticsCore in Frameworks */ = {isa = PBXBuildFile; productRef = 5A0710000000000000001005 /* FirebaseAnalyticsCore */; };
 		5E191CFA541A0D10472C77C2 /* Pods_learnXTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C3928D6036512F98EC224CA /* Pods_learnXTests.framework */; };
 		66752A57317AE195AB987FFB /* Pods_learnX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DE528F5AED26E2F21053210 /* Pods_learnX.framework */; };
 		7687BF1E4C754BCD9B7E27BB /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75600012A61A4062AECAF1A7 /* SceneDelegate.swift */; };
@@ -103,6 +106,7 @@
 		5A0710000000000000000D01 /* SharedFileInbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SharedFileInbox.swift; path = ../modules/share/ios/SharedFileInbox.swift; sourceTree = SOURCE_ROOT; };
 		5A0710000000000000000E01 /* learnXTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = learnXTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A0710000000000000000F01 /* learnXUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = learnXUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5A0710000000000000001001 /* CrashReporting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CrashReporting.swift; path = learnX/CrashReporting.swift; sourceTree = "<group>"; };
 		75600012A61A4062AECAF1A7 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SceneDelegate.swift; path = learnX/SceneDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = learnX/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		98A6289E98CCDFCA5DBBFDA4 /* Pods-ExpoWidgetsTarget.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ExpoWidgetsTarget.release.xcconfig"; path = "Target Support Files/Pods-ExpoWidgetsTarget/Pods-ExpoWidgetsTarget.release.xcconfig"; sourceTree = "<group>"; };
@@ -151,6 +155,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				66752A57317AE195AB987FFB /* Pods_learnX.framework in Frameworks */,
+				5A0710000000000000001004 /* FirebaseCrashlytics in Frameworks */,
+				5A0710000000000000001006 /* FirebaseAnalyticsCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -192,6 +198,7 @@
 			children = (
 				D49236392D408A2A00F625A8 /* AppDelegate.swift */,
 				75600012A61A4062AECAF1A7 /* SceneDelegate.swift */,
+				5A0710000000000000001001 /* CrashReporting.swift */,
 				5A0710000000000000000001 /* NextDeadlineIntent.swift */,
 				5A0710000000000000000009 /* NextClassIntent.swift */,
 				5A071000000000000000000B /* AppShortcuts.swift */,
@@ -350,6 +357,10 @@
 				E7D600000000000000000004 /* PBXTargetDependency */,
 			);
 			name = learnX;
+			packageProductDependencies = (
+				5A0710000000000000001003 /* FirebaseCrashlytics */,
+				5A0710000000000000001005 /* FirebaseAnalyticsCore */,
+			);
 			productName = learnX;
 			productReference = 13B07F961A680F5B00A75B9A /* learnX.app */;
 			productType = "com.apple.product-type.application";
@@ -475,6 +486,9 @@
 				"zh-Hant",
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
+			packageReferences = (
+				5A0710000000000000001000 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
@@ -755,7 +769,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Debug builds make no dSYM to upload.\nif [ \"${DEBUG_INFORMATION_FORMAT}\" != \"dwarf-with-dsym\" ]; then\n  exit 0\nfi\n\"${PODS_ROOT}/FirebaseCrashlytics/run\"\n";
+			shellScript = "# Debug builds make no dSYM to upload.\nif [ \"${DEBUG_INFORMATION_FORMAT}\" != \"dwarf-with-dsym\" ]; then\n  exit 0\nfi\n# Firebase is a Swift package, checked out next to the build folder.\n\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
 		};
 		E0034376B1851C8CB53E8191 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -832,6 +846,7 @@
 			files = (
 				D492363A2D408A2A00F625A8 /* AppDelegate.swift in Sources */,
 				7687BF1E4C754BCD9B7E27BB /* SceneDelegate.swift in Sources */,
+				5A0710000000000000001002 /* CrashReporting.swift in Sources */,
 				5A0710000000000000000002 /* NextDeadlineIntent.swift in Sources */,
 				5A071000000000000000000A /* NextClassIntent.swift in Sources */,
 				5A071000000000000000000C /* AppShortcuts.swift in Sources */,
@@ -1687,6 +1702,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		5A0710000000000000001000 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 13.2.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		5A0710000000000000001003 /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5A0710000000000000001000 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
+		5A0710000000000000001005 /* FirebaseAnalyticsCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5A0710000000000000001000 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsCore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 83CBB9F71A601CBA00E9B192 /* Project object */;
 }
