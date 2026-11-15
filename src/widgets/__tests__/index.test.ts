@@ -209,13 +209,14 @@ describe('a widget that is missing or fails', () => {
     }
   });
 
-  it("doesn't break the caller, and sends again next time", () => {
+  it('throws for the caller to report, and sends again next time', () => {
     jest.replaceProperty(Platform, 'OS', 'android');
-    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
     jest.mocked(androidWidget.updateSnapshot).mockImplementationOnce(() => {
       throw new Error('no widget host');
     });
-    expect(() => updateDeadlineWidget(assignments, options)).not.toThrow();
+    expect(() => updateDeadlineWidget(assignments, options)).toThrow(
+      'no widget host',
+    );
 
     jest.mocked(androidUpNext.updateSnapshot).mockImplementationOnce(() => {
       throw new Error('no widget host');
@@ -223,9 +224,8 @@ describe('a widget that is missing or fails', () => {
     const classes = [
       { key: 'a', courseName: 'A', location: '', start: 1, end: 2 },
     ];
-    expect(() => updateUpNextWidget(classes)).not.toThrow();
+    expect(() => updateUpNextWidget(classes)).toThrow('no widget host');
     updateUpNextWidget(classes);
     expect(androidUpNext.updateSnapshot).toHaveBeenCalledTimes(2);
-    expect(warn).toHaveBeenCalledTimes(2);
   });
 });

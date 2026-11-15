@@ -9,7 +9,11 @@ import {
   syncClassReminders,
 } from 'services/classReminders';
 import { syncDeadlineReminders } from 'services/deadlineReminders';
-import { saveUpcomingClasses, saveUpcomingDeadlines } from 'services/shortcuts';
+import {
+  clearShortcuts,
+  saveUpcomingClasses,
+  saveUpcomingDeadlines,
+} from 'services/shortcuts';
 import { updateSpotlight } from 'services/spotlight';
 import { AppState, type AppStateStatus } from 'react-native';
 import { recordError } from 'services/crashReporting';
@@ -309,6 +313,34 @@ it('runs again after being cleared', async () => {
   await clearSurfaces();
   await refreshSurfaces();
   expect(syncDeadlineReminders).toHaveBeenCalledTimes(2);
+});
+
+it('records a widget that failed to update and tries it again', async () => {
+  cacheAssignments();
+  jest.mocked(updateDeadlineWidget).mockImplementationOnce(() => {
+    throw new Error('no widget host');
+  });
+  await refreshSurfaces();
+  expect(recordError).toHaveBeenCalledWith(
+    new Error('no widget host'),
+    'Updating Deadlines widget',
+  );
+
+  await refreshSurfaces();
+  expect(updateDeadlineWidget).toHaveBeenCalledTimes(2);
+});
+
+it('clears the other outputs when one fails to clear', async () => {
+  jest.mocked(updateUpNextWidget).mockImplementationOnce(() => {
+    throw new Error('no widget host');
+  });
+  await clearSurfaces();
+  expect(recordError).toHaveBeenCalledWith(
+    new Error('no widget host'),
+    'Clearing Up Next widget',
+  );
+  expect(clearShortcuts).toHaveBeenCalled();
+  expect(cancelClassReminders).toHaveBeenCalled();
 });
 
 it('records a failed output and tries it again on the next refresh', async () => {
