@@ -1,16 +1,20 @@
-import axios from 'axios';
 import { useCredentialsStore } from 'data/credentials';
 import type { Course } from 'data/types/state';
 import { uploadCourses } from 'services/coursex';
 import { setServerWritesAllowed } from 'helpers/serverWrites';
 
-jest.mock('axios', () => ({ post: jest.fn() }));
 jest.mock('helpers/env', () => ({
   __esModule: true,
   default: { DUMMY_USERNAME: 'mock-user' },
 }));
 
-const post = jest.mocked(axios.post);
+const post = jest.fn<Promise<Response>, [RequestInfo, RequestInit]>(
+  async () => new Response('{}'),
+);
+beforeAll(() => {
+  globalThis.fetch = post as unknown as typeof fetch;
+});
+const sentBody = () => JSON.parse(post.mock.calls[0][1].body as string);
 
 const course: Course = {
   id: 'c1',
@@ -50,13 +54,19 @@ it('is blocked in debug builds until server writes are allowed', async () => {
 });
 
 it('uploads the courses to the courseX route, with no token', async () => {
-  post.mockResolvedValueOnce({ data: { courses: 1, skipped: 0 } });
   await uploadCourses([
     course,
     { ...course, id: 'c2', timeAndLocation: undefined },
   ]);
   expect(post).toHaveBeenCalledTimes(1);
-  expect(post).toHaveBeenCalledWith('https://tsinghua.app/api/learnx/courses', {
+  expect(post).toHaveBeenCalledWith(
+    'https://tsinghua.app/api/learnx/courses',
+    expect.objectContaining({
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    }),
+  );
+  expect(sentBody()).toEqual({
     version: 1,
     courses: [
       {
@@ -70,12 +80,15 @@ it('uploads the courses to the courseX route, with no token', async () => {
         semesterId: '2026-2027-1',
         timeAndLocation: ['星期一第2节(全周)，六教6A414'],
       },
-      expect.objectContaining({ id: 'c2', timeAndLocation: undefined }),
+      // JSON leaves out an undefined field.
+      expect.not.objectContaining({ timeAndLocation: expect.anything() }),
     ],
   });
 });
 
 it('passes a failed upload on to the caller', async () => {
-  post.mockRejectedValueOnce(new Error('Request failed with status code 429'));
+  post.mockResolvedValueOnce(new Response('', { status: 429 }));
   await expect(uploadCourses([course])).rejects.toThrow('429');
+  post.mockRejectedValueOnce(new TypeError('Network request failed'));
+  await expect(uploadCourses([course])).rejects.toThrow('Network');
 });
