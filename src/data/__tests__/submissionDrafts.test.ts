@@ -6,7 +6,7 @@ import {
   keepDraftFile,
   saveSubmissionDraft,
 } from 'data/submissionDrafts';
-import type { PickedAttachment } from 'services/submission';
+import type { PickedAttachment } from 'data/submissionDrafts';
 
 /** Paths of the files that exist, as URIs. */
 const mockFiles = new Set<string>();
