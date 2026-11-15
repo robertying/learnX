@@ -5,6 +5,7 @@ Every user-visible string is a key in `en.ts` and `zh.ts`, with the same keys in
 ## English
 
 - Title Case for titles, rows, buttons and menu items; sentence case for messages, captions, footers and toasts.
+- A string shown on its own starts with a capital letter, also after a " · " ("Fri, Nov 20 · Due in 3 hours"), so no code capitalizes a translated string. Only a piece filled into another string (`graduateSchedule`) starts lowercase.
 - Only a button, row or menu item that asks to confirm a destructive action ends with an ellipsis, "…" in both languages ("Log Out…", "Delete…", "Discard Draft…"). Nothing else does: not other confirmations (Submit), pickers, share sheets or menus. Alert titles and buttons never do, so a label used both ways has an `…Ellipsis` key for the one that asks (`logout` / `logoutEllipsis`).
 - Errors start with "Couldn't …". Success toasts are short ("Deleted").
 - Use the platform's own words: Log In / Log Out, OK, Full Screen, Show in Finder (Mac), Photo Library, Choose File, and "System Settings" for the OS settings app. Android never mentions Reminders.
@@ -18,6 +19,7 @@ Every user-visible string is a key in `en.ts` and `zh.ts`, with the same keys in
 - Use the Web Learning site's terms for its content: 公告 for notices (the system's notifications stay 通知), 已批改 for the graded status, 评语 for a grader's comment, 批阅 only in grader and graded-time lines. Say 截止时间 or 作业截止, not 截止日期. The app says 未读 where the site says 未浏览.
 - Use the system's terms for system things: 筛选, 文稿, 访达, 照片图库, 系统设置.
 - Address the user as 你, never 您, and call the app "learnX", not "App".
+- An error says what failed with 失败 (登录失败, 作业同步失败：…), the pair of 成功 on success; 无法 is only for what learnX can't do (如果 learnX 无法发送通知…).
 - Full-width punctuation (，。：) in Chinese text. A message ends with 。 when its English ends with a period.
-- Put a space between Chinese and Latin letters or numbers (`{count} 条未读公告`).
+- Put a space between Chinese and Latin letters or numbers (`{count} 条未读公告`), except inside a date, which is written the system's way without spaces (`YYYY年M月D日`, `M月D日`).
 - Times of day follow the device's 12/24-hour setting. A date format (a key ending in `Format`) writes `{time}` where the time goes, and `t()` fills it with `timeFormat()` from `helpers/i18n`; code formatting a time alone uses `timeFormat()`, never `HH:mm`.

@@ -96,7 +96,7 @@ it("lists the next seven days' classes by day, from both weeks", async () => {
   expect(screen.getByText('Course c')).toBeOnTheScreen();
   expect(
     screen.getByText(
-      'Worked out from course times. Holidays and moved classes may be missing.',
+      'Based on course times. Holidays and rescheduled classes may not be reflected.',
     ),
   ).toBeOnTheScreen();
 
@@ -140,7 +140,7 @@ it("says when the timetable couldn't update, from the oldest week kept", async (
   await setup();
   expect(
     screen.getByText(
-      "Couldn't update the schedule; showing the one from 3 hours ago.",
+      "Couldn't update the schedule. Showing the one from 3 hours ago.",
     ),
   ).toBeOnTheScreen();
 });
@@ -150,5 +150,5 @@ it('prefers the note on classes worked out from courses', async () => {
   mockSources['2026-11-16'] = 'courses';
   await setup();
   expect(screen.queryByText(/Couldn't update/)).toBeNull();
-  expect(screen.getByText(/Worked out from course times/)).toBeOnTheScreen();
+  expect(screen.getByText(/Based on course times/)).toBeOnTheScreen();
 });

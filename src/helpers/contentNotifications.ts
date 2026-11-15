@@ -5,7 +5,7 @@ import { NotificationSettings } from 'data/types/state';
 import { deadlineDayTime, gradeLabel } from 'helpers/assignments';
 import { t } from 'helpers/i18n';
 import { ItemTarget } from 'helpers/openTarget';
-import { capitalize, hash, removeTags, truncate } from 'helpers/text';
+import { hash, removeTags, truncate } from 'helpers/text';
 
 /** Items older than this aren't news, e.g. when an old course comes back. */
 const RECENT_DAYS = 7;
@@ -186,7 +186,7 @@ export const pickContentItems = (
     // Assignments have no publish time; one still open is news.
     for (const a of diff.assignments.added) {
       if (!a.submitted && upcoming(a.deadline)) {
-        const due = capitalize(deadlineDayTime(a.deadline, now));
+        const due = deadlineDayTime(a.deadline, now);
         add({
           ...base('assignments', a),
           key: `assignment:${a.id}`,

@@ -79,13 +79,13 @@ const AssignmentSubmissionContent: React.FC<{
   const now = useMinute();
   const deadlineSubtitle = [
     [
-      dayjs(deadline).format(t('fullDateTimeFormat')),
+      dayjs(deadline).format(t('dateTimeFormat')),
       deadlineTextBesideDate(deadline, now),
     ]
       .filter(Boolean)
       .join(' · '),
     lateSubmissionDeadline && !dayjs(now).isBefore(deadline)
-      ? `${t('lateSubmission')} ${dayjs(lateSubmissionDeadline).format(t('fullDateTimeFormat'))}`
+      ? `${t('lateSubmission')} ${dayjs(lateSubmissionDeadline).format(t('dateTimeFormat'))}`
       : null,
   ]
     .filter(Boolean)

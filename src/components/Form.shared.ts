@@ -64,7 +64,7 @@ export type FormRowPosition = 'only' | 'first' | 'middle' | 'last';
 export interface FormItemRowProps extends FormRowProps {
   /**
    * A short line above the title in the accent color, saying where the item
-   * stands: "Now · ends in an hour". Material's overline; on iOS and Mac a
+   * stands: "Now · Ends in an hour". Material's overline; on iOS and Mac a
    * caption, as above the headline of a widget or an App Store card.
    */
   overline?: string;

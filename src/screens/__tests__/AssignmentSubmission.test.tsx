@@ -108,7 +108,7 @@ it('names the assignment and its deadline at the top', async () => {
   });
   expect(screen.getByText(unsubmitted.title)).toBeTruthy();
   expect(
-    screen.getByText(deadline.format(t('fullDateTimeFormat')), {
+    screen.getByText(deadline.format(t('dateTimeFormat')), {
       exact: false,
     }),
   ).toBeTruthy();
@@ -122,9 +122,7 @@ it('gives a deadline over a year away as its date once', async () => {
     deadline: deadline.toISOString(),
     lateSubmissionDeadline: undefined,
   });
-  expect(
-    screen.getByText(deadline.format(t('fullDateTimeFormat'))),
-  ).toBeTruthy();
+  expect(screen.getByText(deadline.format(t('dateTimeFormat')))).toBeTruthy();
 });
 
 it('keeps the Draft Saved footer in place, hidden, until there is a draft', async () => {
@@ -155,7 +153,7 @@ it('adds the late deadline once the deadline has passed', async () => {
   });
   expect(
     screen.getByText(
-      `${t('lateSubmission')} ${late.format(t('fullDateTimeFormat'))}`,
+      `${t('lateSubmission')} ${late.format(t('dateTimeFormat'))}`,
       { exact: false },
     ),
   ).toBeTruthy();

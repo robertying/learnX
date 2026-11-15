@@ -508,7 +508,7 @@ describe('Form (iOS details)', () => {
       <Form>
         <FormSection>
           <FormText
-            overline="Now · ends in an hour"
+            overline="Now · Ends in an hour"
             title="Linear Algebra"
             subtitle="09:50–11:25"
             progress={0.5}
@@ -517,7 +517,7 @@ describe('Form (iOS details)', () => {
         </FormSection>
       </Form>,
     );
-    expect(screen.getByText('Now · ends in an hour')).toBeOnTheScreen();
+    expect(screen.getByText('Now · Ends in an hour')).toBeOnTheScreen();
     expect(screen.getByText('Linear Algebra')).toBeOnTheScreen();
     expect(screen.getByText('09:50–11:25')).toBeOnTheScreen();
     expect(screen.getByText('Next')).toBeOnTheScreen();

@@ -168,13 +168,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "告诉你下一个要交的作业。"
+            "value" : "告诉你下一项要交的作业。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "告诉你下一个要交的作业。"
+            "value" : "告诉你下一项要交的作业。"
           }
         }
       }
@@ -185,13 +185,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "本周和下周没有课了。"
+            "value" : "本周和下周没有课。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "本周和下周没有课了。"
+            "value" : "本周和下周没有课。"
           }
         }
       }
