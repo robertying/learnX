@@ -1,4 +1,38 @@
 import com.android.build.api.variant.FilterConfiguration
+import groovy.json.JsonSlurper
+
+// Over-the-air updates: the URL, request headers (channel and Expo project id)
+// and runtime version from app.json and the certificate from
+// certs/ota-certificate.pem, as string
+// resources the manifest's expo.modules.updates meta-data reads. iOS does the
+// same in scripts/ota-config-ios.sh. E2E builds (-PciRelease) get the local
+// test server (scripts/ota-e2e-server.mjs, through `adb reverse`), runtime
+// version "e2e" and the test certificate from scripts/ota-e2e-cert.sh, so they
+// never load a published update.
+def otaConfig(boolean e2e) {
+    def root = rootProject.file("..")
+    def appJson = new JsonSlurper().parse(new File(root, "app.json"))
+    def url = e2e ? "http://localhost:8199/manifest" : appJson.updates.url
+    def headers = e2e ? ["expo-channel-name": "production"] : appJson.updates.requestHeaders
+    def certificate = e2e ? new File(root, "build/ota-e2e/certificate.pem") : new File(root, "certs/ota-certificate.pem")
+    if (!certificate.exists()) {
+        throw new GradleException("${certificate} is missing; for an E2E build, run scripts/ota-e2e-cert.sh first.")
+    }
+    return [
+        strings: [
+            expo_updates_url: url,
+            expo_runtime_version: e2e ? "e2e" : appJson.runtimeVersion,
+            // A string resource keeps quotes and line breaks only escaped.
+            expo_updates_request_headers: groovy.json.JsonOutput.toJson(headers).replace('"', '\\"'),
+            expo_updates_certificate: certificate.text.trim().replace("\n", "\\n"),
+        ],
+    ]
+}
+
+def applyOtaConfig(variant, boolean e2e) {
+    def config = otaConfig(e2e)
+    config.strings.each { name, value -> variant.resValue "string", name, value }
+}
 
 plugins {
     id "com.android.application"
@@ -10,6 +44,10 @@ plugins {
 
 react {
     autolinkLibrariesWithApp()
+    // Bundles with `expo export:embed`, as over-the-air updates are made with
+    // `expo export`.
+    cliFile = new File(["node", "--print", "require.resolve('@expo/cli', { paths: [require.resolve('expo/package.json')] })"].execute(null, rootDir).text.trim())
+    bundleCommand = "export:embed"
 }
 
 java {
@@ -31,6 +69,7 @@ android {
         targetSdk = rootProject.ext.targetSdkVersion
         versionCode = 9204544
         versionName = "19.0.0"
+        applyOtaConfig(delegate, false)
     }
 
     androidResources {
@@ -84,6 +123,9 @@ android {
             // release build (R8, bundled JS) signed with the debug key, and
             // nothing uploaded to Crashlytics.
             def ciRelease = project.hasProperty("ciRelease")
+            if (ciRelease) {
+                applyOtaConfig(delegate, true)
+            }
             signingConfig = ciRelease ? signingConfigs.debug : signingConfigs.release
             // Only E2E builds take test launch arguments: in a store build,
             // any app could start learnX with them.

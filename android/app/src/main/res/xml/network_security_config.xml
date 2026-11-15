@@ -4,4 +4,9 @@
         <domain includeSubdomains="false">learn.tsinghua.edu.cn</domain>
         <domain includeSubdomains="false">zhjw.cic.tsinghua.edu.cn</domain>
     </domain-config>
+    <!-- The E2E builds' over-the-air update server (scripts/ota-e2e-server.mjs,
+         through adb reverse). Traffic to localhost never leaves the device. -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">localhost</domain>
+    </domain-config>
 </network-security-config>

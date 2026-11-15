@@ -43,6 +43,15 @@ subprojects { subproject ->
                         version = rootProject.ext.cmakeVersion
                     }
                 }
+                // CMake 4 rejects a cmake_minimum_required below 3.5, which
+                // expo-updates still declares (3.4.1).
+                defaultConfig {
+                    externalNativeBuild {
+                        cmake {
+                            arguments "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
+                        }
+                    }
+                }
                 compileOptions {
                     sourceCompatibility = rootProject.ext.javaVersion
                     targetCompatibility = rootProject.ext.javaVersion

@@ -1,5 +1,6 @@
 import { Linking } from 'react-native';
 import { render, screen, userEvent } from '@testing-library/react-native';
+import * as Updates from 'expo-updates';
 import DeviceInfo from 'constants/DeviceInfo';
 import { t } from 'helpers/i18n';
 import About from 'screens/About';
@@ -15,6 +16,21 @@ it('shows the version with its build, and every dependency', async () => {
   for (const name of Object.keys(packageJson.dependencies)) {
     expect(screen.getByText(name)).toBeTruthy();
   }
+});
+
+it('adds the over-the-air update it runs to the version', async () => {
+  jest.replaceProperty(
+    Updates,
+    'updateId',
+    '0f3c9a12-5b7e-4c1d-9e2f-1234567890ab',
+  );
+  jest.replaceProperty(Updates, 'isEmbeddedLaunch', false);
+  await render(<About {...screenProps()} />);
+  expect(
+    screen.getByText(
+      `${packageJson.version} (${DeviceInfo.buildNo()}) · 0f3c9a12`,
+    ),
+  ).toBeTruthy();
 });
 
 it('opens the source, contributors, thanks and filing pages', async () => {

@@ -1,5 +1,6 @@
 import { Linking } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import * as Updates from 'expo-updates';
 import DeviceInfo from 'constants/DeviceInfo';
 import {
   Form,
@@ -24,6 +25,15 @@ const contributors = [
 // This year's, so it never goes stale.
 const copyright = `© ${new Date().getFullYear()} Rui Ying`;
 
+// The build, then the over-the-air update running, if any (the start of its
+// id, which the update's server and crash reports name it by).
+const version = () => {
+  const build = `${packageJson.version} (${DeviceInfo.buildNo()})`;
+  return Updates.updateId && !Updates.isEmbeddedLaunch
+    ? `${build} · ${Updates.updateId.slice(0, 8)}`
+    : build;
+};
+
 const openGitHub = (path: string) =>
   Linking.openURL(`https://github.com/${path}`);
 
@@ -34,7 +44,7 @@ const About: React.FC<Props> = () => (
         <FormText
           icon="info"
           title={t('versionInformation')}
-          detail={`${packageJson.version} (${DeviceInfo.buildNo()})`}
+          detail={version()}
         />
         <FormButton
           icon="code"

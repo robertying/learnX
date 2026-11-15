@@ -1,7 +1,9 @@
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
-const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+// Expo's config, which `expo export` (over-the-air updates) and `expo
+// export:embed` (the bundle in release builds) need.
+const { getDefaultConfig } = require('expo/metro-config');
 const {
   wrapWithReanimatedMetroConfig,
 } = require('react-native-reanimated/metro-config');
@@ -29,13 +31,15 @@ const inlinedInputsHash = () => {
   return hash.digest('hex').slice(0, 16);
 };
 
-/**
- * @type {import('metro-config').MetroConfig}
- */
+/** @type {ReturnType<typeof getDefaultConfig>} */
 const config = {
+  ...getDefaultConfig(__dirname),
   cacheVersion: inlinedInputsHash(),
 };
 
 module.exports = wrapWithReanimatedMetroConfig(
-  mergeConfig(getDefaultConfig(__dirname), config),
+  // @ts-expect-error -- Expo types the config with its own copy of Metro's
+  // types (@expo/metro), Reanimated with metro-config's; they differ only in
+  // readonly-ness.
+  config,
 );
