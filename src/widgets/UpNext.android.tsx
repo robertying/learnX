@@ -9,7 +9,7 @@ import {
   withWidgetKit,
   type AndroidWidgetEnvironment,
   type WidgetKit,
-} from 'widgets/kit.android';
+} from './kit.android';
 import type { UpNextWidgetProps } from 'widgets/props';
 
 /**
