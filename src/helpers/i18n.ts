@@ -4,7 +4,6 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/en';
 import zhCn from 'dayjs/locale/zh-cn';
-import { HomeworkGradeLevel } from '@robertying/thu-learn-lib';
 import en from 'assets/translations/en';
 import zh from 'assets/translations/zh';
 
@@ -139,25 +138,3 @@ export const tCount = (
 /** Escapes text for a dayjs format string, so it is printed as is. */
 export const formatLiteral = (text: string) =>
   `[${text.replace(/[[\]]/g, '')}]`;
-
-const assignmentGradeLevelDescriptionMap: Partial<{
-  [key in HomeworkGradeLevel]: TranslationKey;
-}> = {
-  [HomeworkGradeLevel.CHECKED]: 'reviewed',
-  [HomeworkGradeLevel.DISTINCTION]: 'good',
-  [HomeworkGradeLevel.EXEMPTED_COURSE]: 'exemptedCourse',
-  [HomeworkGradeLevel.EXEMPTION]: 'exempted',
-  [HomeworkGradeLevel.PASS]: 'pass',
-  [HomeworkGradeLevel.FAILURE]: 'fail',
-  [HomeworkGradeLevel.INCOMPLETE]: 'incomplete',
-};
-
-export const getAssignmentGradeLevelDescription = (
-  gradeLevel: HomeworkGradeLevel,
-) => {
-  const translationKey = assignmentGradeLevelDescriptionMap[gradeLevel];
-  if (!translationKey) {
-    return gradeLevel;
-  }
-  return t(translationKey);
-};

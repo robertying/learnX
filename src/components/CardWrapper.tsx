@@ -4,7 +4,6 @@ import {
   View,
   StyleSheet,
   Platform,
-  PlatformColor,
 } from 'react-native';
 import { SharedValue, useSharedValue } from 'react-native-reanimated';
 import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
@@ -17,7 +16,7 @@ import useBackSwipeEdge, { backSwipeEdgeWidth } from 'hooks/useBackSwipeEdge';
 import useCardSwipe from 'hooks/useCardSwipe';
 import CardMenu from './CardMenu';
 import CardSwipeAction, { SwipeSide } from './CardSwipeAction';
-import Touchable from './Touchable';
+import Touchable, { rowHighlight } from './Touchable';
 import SelectionMark from './SelectionMark';
 import SystemIcon from './SystemIcon';
 import { useTheme } from 'theme';
@@ -72,13 +71,6 @@ export interface CardWrapperProps {
    */
   last?: boolean;
 }
-
-// UITableViewCell's selected background, as a pressed row shows it
-// (`Touchable`); Material's selected list item.
-const openedBackground = (theme: ReturnType<typeof useTheme>) =>
-  Platform.OS === 'ios'
-    ? PlatformColor('systemGray4')
-    : theme.colors.secondaryContainer;
 
 const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
   fav,
@@ -277,8 +269,10 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
     <Touchable
       type="highlight"
       style={{
+        // Selected as a pressed row on iOS and Mac; Material's selected list
+        // item on Android.
         backgroundColor: opened
-          ? openedBackground(theme)
+          ? (rowHighlight ?? theme.colors.secondaryContainer)
           : theme.colors.surface,
       }}
       onPress={

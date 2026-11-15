@@ -140,7 +140,7 @@ const AutoHeightWebView: React.FC<AutoHeightWebViewProps> = ({
       }
       // The page still loads with the Cookie header below if these fail.
       await Promise.all(
-        Object.entries(cookies).map(([, value]) =>
+        Object.values(cookies).map(value =>
           CookieManager.set(
             Urls.learn,
             value.sameSite === 'none' ? { ...value, secure: true } : value,
@@ -197,6 +197,9 @@ const AutoHeightWebView: React.FC<AutoHeightWebViewProps> = ({
         {
           height,
           backgroundColor: 'transparent',
+          // Android: a web view in a scrolling parent crashes the app as it
+          // scrolls unless it is drawn in its own layer, which an opacity
+          // under 1 gives it.
           opacity: Platform.OS === 'android' ? 0.99 : 1,
           minHeight: 1,
         },

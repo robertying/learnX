@@ -10,10 +10,13 @@ import {
   size as sizeModifier,
   testID as testIDModifier,
 } from '@expo/ui/jetpack-compose/modifiers';
-import { t } from 'helpers/i18n';
 import { iconDrawables } from 'assets/icons';
 import { systemIcons } from 'helpers/systemIcons';
-import { PADDING, type IconButtonProps } from './IconButton.shared';
+import {
+  PADDING,
+  spokenLabel,
+  type IconButtonProps,
+} from './IconButton.shared';
 import ThemedHost from 'components/ThemedHost';
 
 export type { IconButtonIcon, IconButtonProps } from './IconButton.shared';
@@ -40,11 +43,7 @@ const IconButton: React.FC<IconButtonProps> = ({
     <Icon
       source={iconDrawables[systemIcons[icon].android]}
       size={size}
-      contentDescription={
-        badge && accessibilityLabel
-          ? `${accessibilityLabel}, ${t('a11yNewBadge')}`
-          : accessibilityLabel
-      }
+      contentDescription={spokenLabel({ accessibilityLabel, badge })}
     />
   );
 

@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { RefreshControl, View } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase, useIsFocused } from '@react-navigation/native';
-import { runOnJS } from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
 import ReorderableList, {
   ReorderableListReorderEvent,
 } from 'react-native-reorderable-list';
@@ -168,12 +168,12 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
 
   const handleDragStart = () => {
     'worklet';
-    runOnJS(playHaptic)('dragStart');
+    scheduleOnRN(playHaptic, 'dragStart');
   };
 
   const handleDragChange = () => {
     'worklet';
-    runOnJS(playHaptic)('dragTick');
+    scheduleOnRN(playHaptic, 'dragTick');
   };
 
   const handleSelect = () => {

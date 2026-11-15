@@ -33,6 +33,10 @@ export const removeTags = (html?: string) => {
   }
 };
 
+/** `text` cut to `length` characters, ending in an ellipsis when it was longer. */
+export const truncate = (text: string, length: number) =>
+  text.length > length ? `${text.slice(0, length).trimEnd()}…` : text;
+
 /**
  * Starts a sentence with a phrase meant for the middle of one, such as "due
  * today at …"; Chinese has no case, so it's unchanged.

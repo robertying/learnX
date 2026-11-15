@@ -112,7 +112,7 @@ const play = (haptic: Haptic): Promise<void> | undefined => {
 
 /**
  * Plays a haptic. Fire and forget: a device without haptics, or one that
- * can't play this one, stays silent. Safe to call through `runOnJS`.
+ * can't play this one, stays silent. Safe to call from a worklet through `scheduleOnRN`.
  */
 export const playHaptic = (haptic: Haptic) => {
   play(haptic)?.catch(() => {});

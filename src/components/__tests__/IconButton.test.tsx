@@ -44,6 +44,7 @@ describe('IconButton (iOS)', () => {
     await render(<IconButton icon="settings" size={16} badge />);
     expect(buttonStyle).toHaveBeenCalledWith('borderless');
     expect(frame).toHaveBeenCalledWith({ width: 44, height: 44 });
-    expect(screen.getByText(', New')).toBeTruthy();
+    // Without a label there's nothing for the badge's word to follow.
+    expect(screen.queryByText(', New')).toBeNull();
   });
 });

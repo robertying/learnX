@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { itemRow } from 'components/ItemRow';
+import ItemRow from 'components/ItemRow';
 import { Form, FormScreen, FormSection, FormText } from 'components/Form';
 import { useWeekSchedule } from 'data/schedule';
 import { t } from 'helpers/i18n';
@@ -84,20 +84,22 @@ const Schedule: React.FC<Props> = ({ navigation }) => {
                 }
               />
             ) : (
-              day.classes.map(session =>
-                itemRow({
-                  key: session.key,
-                  title: session.courseName,
-                  subtitle: classDetails(session),
-                  done: session.end <= now,
-                  onPress: session.courseId
-                    ? () =>
-                        navigation.push('CourseDetail', {
-                          id: session.courseId!,
-                        })
-                    : undefined,
-                }),
-              )
+              day.classes.map(session => (
+                <ItemRow
+                  key={session.key}
+                  title={session.courseName}
+                  subtitle={classDetails(session)}
+                  done={session.end <= now}
+                  onPress={
+                    session.courseId
+                      ? () =>
+                          navigation.push('CourseDetail', {
+                            id: session.courseId!,
+                          })
+                      : undefined
+                  }
+                />
+              ))
             )}
           </FormSection>
         ))}

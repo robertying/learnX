@@ -49,6 +49,7 @@ import { useFieldText } from 'hooks/useFieldText';
 import {
   parseNumberInput,
   positionRows,
+  stackedDetail,
   type FormButtonProps,
   type FormChoiceButtonProps,
   type FormFileProps,
@@ -278,19 +279,16 @@ const FormRow: React.FC<
 }) => {
   const colors = useMaterialColors();
   const theme = useMaterialTheme();
-  // At large font sizes the detail goes under the subtitle instead of at the
-  // end, which would squeeze the title into a narrow column.
-  const { fontScale } = useWindowDimensions();
-  const stackDetail = !!detail && fontScale >= 1.5;
-  const supporting = stackDetail
-    ? [subtitle, detail].filter(Boolean).join('\n')
-    : subtitle;
+  const { subtitle: supporting, detail: endDetail } = stackedDetail(
+    { subtitle, detail },
+    useWindowDimensions().fontScale,
+  );
   // Over: the text in the secondary color, read out as over.
   const contentColor = done ? colors.outline : titleColor;
   // What the row shows only by its look (dimmed, crossed out, a badge).
   const state = done ? t('a11yDone') : struck ? t('a11yStruck') : spokenState;
   const ends = [
-    detail && !stackDetail ? (
+    endDetail ? (
       <Text
         key="detail"
         color={
@@ -310,7 +308,7 @@ const FormRow: React.FC<
               : undefined
         }
       >
-        {detail}
+        {endDetail}
       </Text>
     ) : null,
     trailing ? <Fragment key="trailing">{trailing}</Fragment> : null,

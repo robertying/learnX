@@ -267,6 +267,22 @@ export const positionRows = (children: ReactNode) => {
   );
 };
 
+/**
+ * A row's subtitle and detail for the text size: at accessibility sizes the
+ * detail goes under the subtitle instead of at the end of the row, which
+ * would squeeze the title into a narrow column.
+ */
+export const stackedDetail = (
+  { subtitle, detail }: { subtitle?: string; detail?: string },
+  fontScale: number,
+) =>
+  detail && fontScale >= 1.5
+    ? {
+        subtitle: [subtitle, detail].filter(Boolean).join('\n'),
+        detail: undefined,
+      }
+    : { subtitle, detail };
+
 /** Calls `apply` with positive whole numbers typed, and ignores the rest. */
 export const parseNumberInput =
   (apply: (value: number) => void) => (text: string) => {
