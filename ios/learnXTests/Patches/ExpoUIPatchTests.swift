@@ -3,7 +3,7 @@ internal import ExpoUI
 import SwiftUI
 import Testing
 
-/// What patches/@expo__ui@58.0.27.patch changes on iOS: a `Button` takes its role from `buttonRole`, which JS sends
+/// What patches/@expo__ui@58.0.28.patch changes on iOS: a `Button` takes its role from `buttonRole`, which JS sends
 /// because React Native reads a host view's `role` prop as an accessibility role and logs "Unsupported Role value" for
 /// SwiftUI's roles. `role` still works for widget layouts, which send it as is.
 @MainActor

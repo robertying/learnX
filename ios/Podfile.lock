@@ -28,12 +28,12 @@ PODS:
     - ReactNativeDependencies
   - EASClient (58.0.2):
     - ExpoModulesCore
-  - EXConstants (58.0.15):
+  - EXConstants (58.0.16):
     - ExpoModulesCore
   - EXJSONUtils (58.0.1)
   - EXManifests (58.0.1):
     - ExpoModulesCore
-  - Expo (58.0.23):
+  - Expo (58.0.25):
     - ExpoModulesCore
     - ExpoModulesJSI
     - hermes-engine
@@ -62,34 +62,34 @@ PODS:
     - Yoga
   - ExpoApplication (58.1.2):
     - ExpoModulesCore
-  - ExpoAsset (58.0.20):
+  - ExpoAsset (58.0.21):
     - ExpoModulesCore
-  - ExpoBackgroundTask (58.0.12):
+  - ExpoBackgroundTask (58.0.13):
     - ExpoModulesCore
     - ExpoTaskManager
-  - ExpoCalendar (58.0.6):
+  - ExpoCalendar (58.0.7):
     - ExpoModulesCore
-  - ExpoCrypto (58.0.7):
+  - ExpoCrypto (58.0.8):
     - ExpoModulesCore
   - ExpoDevice (58.0.5):
     - ExpoModulesCore
-  - ExpoDocumentPicker (58.0.4):
+  - ExpoDocumentPicker (58.0.5):
     - ExpoModulesCore
   - ExpoFileSystem (58.0.13):
     - ExpoModulesCore
-  - ExpoFont (58.0.11):
+  - ExpoFont (58.0.12):
     - ExpoModulesCore
-  - ExpoHaptics (58.0.7):
+  - ExpoHaptics (58.0.8):
     - ExpoModulesCore
   - ExpoImagePicker (58.0.10):
     - ExpoModulesCore
-  - ExpoKeepAwake (58.0.3):
+  - ExpoKeepAwake (58.0.4):
     - ExpoModulesCore
   - ExpoLocalization (58.0.5):
     - ExpoModulesCore
   - ExpoLogBox (58.0.15):
     - React-Core
-  - ExpoModulesCore (58.0.30):
+  - ExpoModulesCore (58.1.0):
     - ExpoModulesJSI
     - hermes-engine
     - RCTRequired
@@ -114,33 +114,33 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - ExpoModulesJSI (58.0.22):
+  - ExpoModulesJSI (58.0.23):
     - React-Core
     - ReactCommon
-  - ExpoModulesWorklets (58.0.30):
+  - ExpoModulesWorklets (58.1.0):
     - ExpoModulesCore
     - ExpoModulesJSI
-  - ExpoModulesWorkletsAdapter (58.0.30):
+  - ExpoModulesWorkletsAdapter (58.1.0):
     - ExpoModulesCore
     - ExpoModulesJSI
     - ExpoModulesWorklets
     - RNWorklets
-  - ExpoNotifications (58.1.8):
+  - ExpoNotifications (58.1.9):
     - ExpoModulesCore
-  - ExpoSecureStore (58.0.2):
+  - ExpoSecureStore (58.0.3):
     - ExpoModulesCore
-  - ExpoSQLite (58.0.15):
+  - ExpoSQLite (58.0.17):
     - ExpoModulesCore
-  - ExpoSymbols (58.0.4):
+  - ExpoSymbols (58.0.5):
     - ExpoModulesCore
-  - ExpoTaskManager (58.0.13):
+  - ExpoTaskManager (58.0.14):
     - ExpoModulesCore
     - UMAppLoader
-  - ExpoUI (58.0.27):
+  - ExpoUI (58.0.28):
     - ExpoModulesCore
     - ExpoModulesWorklets
     - React-RCTFabric
-  - ExpoWidgets (58.0.27):
+  - ExpoWidgets (58.0.28):
     - ExpoModulesCore
     - ExpoUI
   - EXStructuredHeaders (58.0.1)
@@ -1618,7 +1618,7 @@ PODS:
     - ReactNativeDependencies
     - SwiftUIIntrospect (~> 1.0)
     - Yoga
-  - react-native-pager-view (10.0.0):
+  - react-native-pager-view (10.0.2):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2903,35 +2903,35 @@ SPEC CHECKSUMS:
   CookieManager: d1b2d66c3c58bc8fe541c756fd5808167df2610e
   DoubleConversion: 501a575c40c0b50c89685762dd3e415e6bb26fb0
   EASClient: 672e41a9aa3481e4f4efbea7fc001573d9a7fa85
-  EXConstants: c1eb9dab7494834d85aa347165da9718cdfc21a6
+  EXConstants: aeda76f4be923fc719522ae162dd0b8c6483f9cc
   EXJSONUtils: d59bf6b18639752631a81818559b2675a46f99e2
   EXManifests: b0b83ad894166f7e080b18814c5e73aed46e366e
-  Expo: f1442bfd3a128cb67832bac5fcc38e1900e94fdc
+  Expo: 0f5943dd94c874be78ad7c5a3fa1ecfb5573ab73
   ExpoApplication: c83355b2f69f996b5d26b64fef39228e7f1e1208
-  ExpoAsset: c080026976ef8f00dca12c4958c658b2ebd4d4e0
-  ExpoBackgroundTask: 5884fc3eeabd6c50e1e518c1890110092608147b
-  ExpoCalendar: 47dcd767c17ecec01f449ee57140d8a29ae9eef7
-  ExpoCrypto: 33ede543a3747abbef071c3bd747135ccc4e4fd5
+  ExpoAsset: eda9e4844b55b78d4e71a0e2de767a038f3a0806
+  ExpoBackgroundTask: 8ab6b111235fa6df99f07ea644ac4d19780005cb
+  ExpoCalendar: 60c61f468a227513d734f243e11565a5f7455727
+  ExpoCrypto: f9eb48ae9cda6a90357a693b44cc0bda89f6af4a
   ExpoDevice: 77a9816436a09a0bfc00f5ace649c6ccb219b96d
-  ExpoDocumentPicker: af0917aa6f1b54ab3a0f47977935a1e20ffb1537
+  ExpoDocumentPicker: 3e8fdb323db3ad2f7c8bbd21fdad3b982f1cf178
   ExpoFileSystem: b619d80b490c53117a9a9c976021a4ce5a9da440
-  ExpoFont: 77eaad26c6a7ef6be8d431963358def09d8e3a73
-  ExpoHaptics: c95d1e2162895e710b68dd912eec619900ebdf33
+  ExpoFont: daea737a2e3742f9a946f2884518e70dd37011f3
+  ExpoHaptics: d3a61f836a88c0061644473761a6ca499a14b19a
   ExpoImagePicker: a466134ec92fed0b38bbf9062c7eb5f3c8c49d94
-  ExpoKeepAwake: fd18a5d233329013c578030ad399d8e10b252b5f
+  ExpoKeepAwake: 3dc7cce59bdc13796f772ac54d3af1ca6b6954cd
   ExpoLocalization: ed930f5d68e7b3c2073a04787358839e1a8e1680
   ExpoLogBox: 9bfba7bb99c806b678703e6c62323f3c4785e706
-  ExpoModulesCore: 2a627184d5c82a38e71624ebd7f242138be0136f
-  ExpoModulesJSI: 68a068c5214c88982f236bb26dd44fa004f10f35
-  ExpoModulesWorklets: 25684e76e7b886dd31bf4538c3fd657bf07a694b
-  ExpoModulesWorkletsAdapter: 39a95a62785e53476830a21d21444404ebb74659
-  ExpoNotifications: d0621bf548676831247952ec23d280098391ea3c
-  ExpoSecureStore: 64e1fe78b5b0a1edb61beff044bb2cad03084f9c
-  ExpoSQLite: 580284867126f45f25a5a70a06a84df9664d3786
-  ExpoSymbols: 1260e741b35b6fd105942779895418db306645c8
-  ExpoTaskManager: a47c4de3446e9754c6f11eef227e0b20141a19cd
-  ExpoUI: 31a8539381c30cc0d1efbc111e2b384ed25b21f5
-  ExpoWidgets: 9619cce6e8823f15ef23798e751b7250d8d0cb80
+  ExpoModulesCore: 330969c46aeb5a89ebd916e70bf2e8cec7a2d77d
+  ExpoModulesJSI: 038febce313f317add1a7354a4fb97953662a12b
+  ExpoModulesWorklets: 03d171c0296cdffc054e9570e9393a7655ef360d
+  ExpoModulesWorkletsAdapter: da13d3bb33f427fe5735362bcfff3fb2ba9efec6
+  ExpoNotifications: fa890b1d743fd72ca15c52ac9f9f23c76860e228
+  ExpoSecureStore: 76bccb307911bd866852e6161dda9b1e8e281b99
+  ExpoSQLite: afd9a672ba4aef96495e077ded35423bb8a7b2d4
+  ExpoSymbols: 43a42871f937948a752814aaf3b0f9f0957a71c6
+  ExpoTaskManager: 0eeb489a4bcaf2d6d997b4f8e38f6d04a488244e
+  ExpoUI: 9a96576076acd2bc5ac11b8f9ea8bbb7945d95ad
+  ExpoWidgets: 3afadbb94780cce723833b2a0b2267f78fa10109
   EXStructuredHeaders: d38b81fb2ff838c15bf28135deb247e76293d2b9
   EXUpdates: 9537798f596d007126973f4176c18b346b6212cd
   EXUpdatesInterface: 1c6a522d0eb0485f4de3fa55d0316288763b3f10
@@ -2989,7 +2989,7 @@ SPEC CHECKSUMS:
   React-mutationobservernativemodule: b85faf3c54644c0ef2c758cd8c4e6ce16fb1f8ae
   react-native-blob-util: c14f542c2965a8d33a8feac2bed2d29e11be4971
   react-native-bottom-tabs: 9a566c85396bd965466ab5f5470ba3f6dccb32c4
-  react-native-pager-view: 9c89177feb43b6ea80e9cca7bc4680fda15902d7
+  react-native-pager-view: 0c240f9ac28c9035176f58171875d23fac6d4b7e
   react-native-pdf: 6b234f68a08fe3256c3bd1b61262943537766173
   react-native-safe-area-context: f54c903d3a8c8ddd602e85d4e5bcfe9944de85bc
   react-native-webview: 0350e63d9eff606d9923619409987b6cd1ac58f5

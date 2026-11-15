@@ -8,12 +8,12 @@ buildscript {
         cmakeVersion = "4.1.2"
         javaVersion = JavaVersion.VERSION_17
         kotlinVersion = "2.4.20"
-        kspVersion = "2.3.13"
+        kspVersion = "2.3.14"
         // The app and modules/crashlytics link the same Firebase.
-        firebaseBomVersion = "35.1.0"
+        firebaseBomVersion = "35.2.0"
         // Unit tests of the local modules (modules/*/android/src/test).
         junitVersion = "4.13.2"
-        robolectricVersion = "4.17"
+        robolectricVersion = "4.18"
         mockkVersion = "1.14.12"
     }
     dependencies {
@@ -24,7 +24,7 @@ buildscript {
 plugins {
     id "com.facebook.react.rootproject" apply false
     id "expo-root-project" apply false
-    id "com.google.gms.google-services" version "4.5.0" apply false
+    id "com.google.gms.google-services" version "4.6.0" apply false
     id "com.google.firebase.crashlytics" version "3.0.8" apply false
     id 'com.android.application' version '9.5.1' apply false
 }

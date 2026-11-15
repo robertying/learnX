@@ -21,7 +21,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 
 /**
- * What patches/@expo__ui@58.0.27.patch changes on Android: the `semantics` modifier takes `heading`, which marks the
+ * What patches/@expo__ui@58.0.28.patch changes on Android: the `semantics` modifier takes `heading`, which marks the
  * element as a heading for TalkBack.
  */
 @RunWith(RobolectricTestRunner::class)
