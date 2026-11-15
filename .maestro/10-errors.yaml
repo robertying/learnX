@@ -91,9 +91,11 @@ name: Show no results and failures
 - extendedWaitUntil:
     visible: '.*(${T_syncStatusOffline}).*'
     timeout: 40000
+# Maestro counts this timeout from the launch, not from the wait above: the
+# app retries 30 s after going offline (20 s timeout), about 50 s in.
 - extendedWaitUntil:
     visible: '.*(${T_syncStatusReconnecting}).*'
-    timeout: 45000
+    timeout: 75000
 
 # A password changed on the website while the app is open: the session runs
 # out after the launch login (mockSessionExpiry), and the login the next
