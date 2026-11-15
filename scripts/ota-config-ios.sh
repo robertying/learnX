@@ -3,11 +3,10 @@
 # over-the-air update settings into the app's copy of Expo.plist: the URL,
 # request headers (channel and Expo project id) and runtime version from
 # app.json and the certificate from certs/ota-certificate.pem. Android does the
-# same in
-# android/app/build.gradle. E2E builds (TEST_LOGIN=1, scripts/e2e-build.sh)
-# get the local test server (scripts/ota-e2e-server.mjs), runtime version
-# "e2e" and the test certificate from scripts/ota-e2e-cert.sh instead, so they
-# never load a published update.
+# same in android/app/build.gradle. E2E builds (TEST_LOGIN=1,
+# scripts/e2e-build.sh) get the local test server (scripts/ota-e2e-server.mjs),
+# runtime version "e2e" and the test certificate from scripts/ota-e2e-cert.sh
+# instead, so they never load a published update.
 set -euo pipefail
 
 root="$SRCROOT/.."

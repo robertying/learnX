@@ -14,7 +14,7 @@ set -euo pipefail
 # Android sources and what they build from: native code, patches, the JS
 # dependencies, app config and the Node version; the scripts and workflow that
 # build and test them, and the shared JS setup.
-pattern='^(android/|modules/([^/]+/(android/|expo-module\.config\.json$)|unit-tests\.gradle$)|patches/|package\.json$|pnpm-(lock|workspace)\.yaml$|app\.json$|\.node-version$|scripts/(changed-files\.sh|test-android\.sh|android-coverage\.mjs)$|\.github/(workflows/ci\.yml|actions/setup-js/))'
+pattern='^(android/|modules/([^/]+/(android/|expo-module\.config\.json$)|unit-tests\.gradle$)|patches/|package\.json$|pnpm-(lock|workspace)\.yaml$|app\.json$|\.node-version$|scripts/(changed-files\.sh|test-android\.sh|android-coverage\.mjs|ota-e2e-cert\.sh)$|\.github/(workflows/ci\.yml|actions/setup-js/))'
 
 if [ "${GITHUB_EVENT_NAME:-}" != pull_request ]; then
   echo "changed=true"
