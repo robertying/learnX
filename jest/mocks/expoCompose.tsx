@@ -124,7 +124,10 @@ export const BadgedBox = Object.assign(
 );
 export const Badge = () => <View testID="badge" />;
 
-/** Its color and line-through as React Native styles, its typography by name. */
+/**
+ * Its color and line-through as React Native styles, its typography by name,
+ * and a `semantics` heading as the header role.
+ */
 export const Text = ({
   children,
   color,
@@ -132,7 +135,7 @@ export const Text = ({
   modifiers,
 }: {
   children?: ReactNode;
-  modifiers?: { accessibilityLabel?: string }[];
+  modifiers?: { accessibilityLabel?: string; heading?: boolean }[];
   color?: string;
   style?: {
     typography?: string;
@@ -151,6 +154,7 @@ export const Text = ({
     accessibilityLabel={
       modifiers?.find(m => m?.accessibilityLabel)?.accessibilityLabel
     }
+    accessibilityRole={modifiers?.some(m => m?.heading) ? 'header' : undefined}
   >
     {children}
   </RNText>

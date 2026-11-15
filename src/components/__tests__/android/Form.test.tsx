@@ -60,7 +60,8 @@ describe('Form (Android)', () => {
         </FormSection>
       </Form>,
     );
-    expect(screen.getByText('Content')).toBeTruthy();
+    // TalkBack reads a section's title as a heading.
+    expect(screen.getByRole('header', { name: 'Content' })).toBeTruthy();
     expect(screen.getByText('Pick the semester to show')).toBeTruthy();
     expect(screen.getByTestId('icon-calendar')).toBeTruthy();
     expect(screen.getByTestId('badge')).toBeTruthy();
@@ -186,7 +187,7 @@ describe('Form (Android)', () => {
         <FormText title="Grade" detail="A" detailTint="accent" />
       </FormSection>,
     );
-    expect(screen.getByText('Problem set 3')).toBeTruthy();
+    expect(screen.getByRole('header', { name: 'Problem set 3' })).toBeTruthy();
     expect(screen.getByText('Calculus')).toBeTruthy();
     expect(screen.getByText('Grade')).toBeTruthy();
     expect(screen.getByText('A')).toBeTruthy();

@@ -205,6 +205,12 @@ const Caption: React.FC<{ children: string; modifiers: ModifierConfig[] }> = ({
   );
 };
 
+// Section titles and a detail page's title are headings, as SwiftUI makes a
+// section's header: TalkBack says so, and its reading controls jump between
+// them.
+const headingModifiers = [semantics({ heading: true })];
+const sectionTitleModifiers = [padding(16, 0, 16, 8), ...headingModifiers];
+
 export const FormSection: React.FC<FormSectionProps> = ({
   children,
   title,
@@ -219,7 +225,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
         <Text
           color={colors.primary}
           style={{ typography: 'titleSmall' }}
-          modifiers={[padding(16, 0, 16, 8)]}
+          modifiers={sectionTitleModifiers}
         >
           {title}
         </Text>
@@ -659,7 +665,12 @@ export const FormTitle: React.FC<FormTitleProps> = ({
   return (
     <SectionItem position={position} testID={testID}>
       <ListItem.HeadlineContent>
-        <Text style={{ typography: 'headlineSmall' }}>{title}</Text>
+        <Text
+          style={{ typography: 'headlineSmall' }}
+          modifiers={headingModifiers}
+        >
+          {title}
+        </Text>
       </ListItem.HeadlineContent>
       {subtitle ? (
         <ListItem.SupportingContent>
