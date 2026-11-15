@@ -7,11 +7,9 @@ import {
   widgetURL,
 } from '@expo/ui/swift-ui/modifiers';
 import { createWidget } from 'expo-widgets';
-import {
-  withWidgetKit,
-  type KitEnvironment,
-  type WidgetKit,
-} from 'widgets/kit';
+// Relative, not `widgets/kit`: the build's layout registry bundle turns every
+// bare import but expo-widgets into an empty module, and runs withWidgetKit.
+import { withWidgetKit, type KitEnvironment, type WidgetKit } from './kit';
 import type { DeadlineWidgetProps } from 'widgets/props';
 
 /**
