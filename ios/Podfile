@@ -153,6 +153,16 @@ target 'learnX' do
       config.build_settings['COMPILATION_CACHE_ENABLE_CACHING'] = 'YES' if config.name == 'Debug'
     end
 
+    # A script phase that declares no outputs runs on every build anyway (such
+    # as CocoaPods' "Create Symlinks to Header Folders" and EXConstants'
+    # "Generate app.config"). Saying so stops Xcode warning about each one.
+    installer.pods_project.targets.each do |target|
+      target.shell_script_build_phases.each do |phase|
+        next unless phase.output_paths.to_a.empty? && phase.output_file_list_paths.to_a.empty?
+        phase.always_out_of_date = '1'
+      end
+    end
+
     # React Native's prebuilt Mac Catalyst frameworks ship without the
     # versioned macOS bundle layout, which the Catalyst build needs to embed
     # and sign them. Fix them now, and again whenever a pod's build phase swaps
