@@ -13,7 +13,7 @@ import {
   getDownloadsDirectory,
   readCourseInfo,
   subdirectories,
-} from './downloads';
+} from 'services/files/downloads';
 
 /** The folder Export makes in the folder people pick. */
 export const EXPORT_DIR = 'learnX';

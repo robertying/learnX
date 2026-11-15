@@ -19,6 +19,7 @@ import { t } from 'helpers/i18n';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import * as options from 'navigation/options';
 import CourseDetail from 'screens/CourseDetail';
+import { fireLayout } from 'test-utils/layout';
 import { screenProps } from 'test-utils/screenProps';
 
 const mockPush = jest.fn();
@@ -227,9 +228,7 @@ describe('from iOS 26', () => {
     await renderScreen();
     // No list until the tabs' height is known, so it starts below them.
     expect(screen.queryByText(of(mockNotices)[0].title)).toBeNull();
-    await fireEvent(screen.getByText(t('files')), 'layout', {
-      nativeEvent: { layout: { height: 52 } },
-    });
+    await fireLayout(screen.getByText(t('files')), { height: 52 });
     expect(screen.getByText(of(mockNotices)[0].title)).toBeTruthy();
 
     await selectTab(2);
@@ -239,18 +238,14 @@ describe('from iOS 26', () => {
 
   it('swipes the cards', async () => {
     await renderScreen();
-    await fireEvent(screen.getByText(t('files')), 'layout', {
-      nativeEvent: { layout: { height: 52 } },
-    });
+    await fireLayout(screen.getByText(t('files')), { height: 52 });
     expect(swipeEnabled()).toBe(true);
   });
 
   it("starts the list over at its top inset when the tabs' height changes", async () => {
     await renderScreen();
     const layout = (height: number) =>
-      fireEvent(screen.getByText(t('files')), 'layout', {
-        nativeEvent: { layout: { height } },
-      });
+      fireLayout(screen.getByText(t('files')), { height });
     const list = () => {
       let node = screen.getByText(of(mockNotices)[0].title);
       while (node.type !== 'RCTScrollView') {

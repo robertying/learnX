@@ -1,5 +1,8 @@
 // Prints the line coverage per source file from JaCoCo XML reports (the
-// paths given). Used by scripts/test-android.sh.
+// paths given), and names learnX's own Kotlin (the app's and the local
+// modules') that no report has. Run from the repo root by
+// scripts/test-android.sh.
+import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { coverageTable } from './lib/coverage-table.mjs';
 
@@ -24,4 +27,13 @@ for (const path of process.argv.slice(2)) {
     }
   }
 }
-console.log(coverageTable(files).join('\n'));
+// A report names a file by its package path (io/robertying/learnx/X.kt).
+const untested = execFileSync(
+  'git',
+  ['ls-files', 'modules/*/android/src/main/*.kt', 'android/app/src/main/*.kt'],
+  { encoding: 'utf8' },
+)
+  .split('\n')
+  .filter(path => path && !files.some(file => path.endsWith(`/${file.path}`)));
+
+console.log(coverageTable(files, untested).join('\n'));

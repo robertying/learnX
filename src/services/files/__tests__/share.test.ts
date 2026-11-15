@@ -1,7 +1,7 @@
 import * as IntentLauncher from 'expo-intent-launcher';
 import Share from 'react-native-share';
 import DeviceInfo from 'constants/DeviceInfo';
-import ShareModule from '../../../../modules/share';
+import ShareModule from 'modules/share';
 import {
   copyFileToCache,
   exportTextFile,

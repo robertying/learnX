@@ -9,6 +9,7 @@ import {
   deadlineTextBesideDate,
   gradeLabel,
   sortAssignments,
+  upcomingAssignments,
 } from 'helpers/assignments';
 
 const assignment = (id: string, deadline: string) =>
@@ -19,10 +20,6 @@ const ids = (assignments: Assignment[]) => assignments.map(a => a.id);
 describe('sortAssignments', () => {
   beforeEach(() => {
     jest.useFakeTimers({ now: new Date('2026-03-15T12:00:00Z') });
-  });
-
-  afterEach(() => {
-    jest.useRealTimers();
   });
 
   it('puts upcoming assignments first, earliest deadline first', () => {
@@ -189,5 +186,24 @@ describe('gradeLabel', () => {
     expect(gradeLabel({ grade: 0 })).toBe('0');
     expect(gradeLabel({ grade: 92.5, gradeLevel: undefined })).toBe('92.5');
     expect(gradeLabel({})).toBeUndefined();
+
+describe('upcomingAssignments', () => {
+  it('keeps assignments due after now', () => {
+    const now = dayjs('2026-03-15T12:00:00Z');
+    const assignments = [
+      assignment('past', '2026-03-15T11:59:00Z'),
+      assignment('due', '2026-03-15T12:01:00Z'),
+    ];
+    expect(ids(upcomingAssignments(assignments, now))).toEqual(['due']);
+  });
+
+  it('compares with the current time by default', () => {
+    jest.useFakeTimers({ now: new Date('2026-03-15T12:00:00Z') });
+    const assignments = [
+      assignment('past', '2026-03-15T11:59:00Z'),
+      assignment('due', '2026-03-15T12:01:00Z'),
+    ];
+    expect(ids(upcomingAssignments(assignments))).toEqual(['due']);
+    jest.useRealTimers();
   });
 });

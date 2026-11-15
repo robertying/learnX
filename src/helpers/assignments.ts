@@ -6,6 +6,17 @@ import { t, tCount, timeFormat, type TranslationKey } from './i18n';
 const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;
 
+/** Assignments whose deadline is still ahead of `now`. */
+export const upcomingAssignments = (
+  assignments: Assignment[],
+  now?: dayjs.ConfigType,
+) => {
+  const at = dayjs(now);
+  return assignments.filter(assignment =>
+    dayjs(assignment.deadline).isAfter(at),
+  );
+};
+
 /** Over a year away: given as its date rather than a countdown. */
 const isFarOff = (deadline: dayjs.Dayjs, now: dayjs.Dayjs) =>
   deadline.isAfter(now.add(1, 'year'));

@@ -161,6 +161,5 @@ describe('restoring the cache after the language changed', () => {
     queryClient.clear();
     await queryPersister.restoreQueries(queryClient);
     expect(name()).toBe('Signals and Systems');
-    jest.useRealTimers();
   });
 });

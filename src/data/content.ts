@@ -25,6 +25,7 @@ import { getUserData, useCurrentSemester, useUserData } from 'data/userData';
 import { localChanges } from 'data/pendingActions';
 import { sortAssignments } from 'helpers/assignments';
 import { createLimiter } from 'helpers/limiter';
+import { waitAtMost } from 'helpers/waitAtMost';
 import { sameServerTime } from 'helpers/serverTime';
 
 /**
@@ -172,18 +173,10 @@ const createContent = <T extends { id: string; courseId: string }>({
         }
       }, priority),
     );
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    await Promise.race([
-      Promise.all(runs),
-      ...(deadline === undefined
-        ? []
-        : [
-            new Promise<void>(resolve => {
-              timer = setTimeout(resolve, Math.max(0, deadline - Date.now()));
-            }),
-          ]),
-    ]);
-    clearTimeout(timer);
+    const all = Promise.all(runs);
+    await (deadline === undefined
+      ? all
+      : waitAtMost(all, deadline - Date.now()));
     done = true;
     return {
       fetched,

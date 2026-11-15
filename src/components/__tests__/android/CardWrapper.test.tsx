@@ -20,9 +20,6 @@ const card = (props: CardWrapperProps = {}) => (
 beforeEach(() => {
   jest.useFakeTimers();
 });
-afterEach(() => {
-  jest.useRealTimers();
-});
 
 const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 // The ripple of a userEvent press needs the native view; the card's own

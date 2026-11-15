@@ -15,10 +15,6 @@ import { mockClock, mockLocale } from 'test-utils/locale';
 // A runtime that never loads App.tsx (the background task) still formats in
 // the app's language once helpers/i18n is loaded.
 describe('dayjs setup in helpers/i18n', () => {
-  afterEach(() => {
-    mockLocale.current = 'en-US';
-  });
-
   it('sets the locale and relative times on load', () => {
     mockLocale.current = 'zh-CN';
     jest.isolateModules(() => {
@@ -48,11 +44,6 @@ describe('formatLiteral', () => {
 
 describe('times of day', () => {
   const evening = dayjs('2026-11-12T21:30:00');
-
-  afterEach(() => {
-    mockClock.uses24hourClock = true;
-    mockLocale.current = 'en-US';
-  });
 
   it('follow a 24-hour clock', () => {
     expect(evening.format(timeFormat())).toBe('21:30');
@@ -84,8 +75,6 @@ describe('timeRange', () => {
   const at = (time: string) => dayjs(`2026-11-12T${time}:00`);
 
   afterEach(() => {
-    mockClock.uses24hourClock = true;
-    mockLocale.current = 'en-US';
     dayjs.locale('en');
   });
 
