@@ -79,6 +79,10 @@ import UIKit
   @Test func environmentHasTheLocale() {
     var environment = EnvironmentValues()
     environment.locale = Locale(identifier: "zh-Hans_CN")
-    #expect(getWidgetEnvironment(environment: environment)["locale"] as? String == "zh-Hans_CN")
+    // Foundation may canonicalize the identifier (iOS 27 gives "zh_CN"); the
+    // layouts only look at the language prefix.
+    let locale = getWidgetEnvironment(environment: environment)["locale"] as? String
+    #expect(locale == environment.locale.identifier)
+    #expect(locale?.hasPrefix("zh") == true)
   }
 }
