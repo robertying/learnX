@@ -30,7 +30,9 @@ const CourseX: React.FC<Props> = ({ route }) => {
     <ScreenWebView
       ref={webViewRef}
       source={{
-        uri: 'https://tsinghua.app/courses' + (courseId ? `/${courseId}` : ''),
+        uri:
+          'https://tsinghua.app/courses' +
+          (courseId ? `/${encodeURIComponent(courseId)}` : ''),
       }}
       originWhitelist={['https://']}
       // The iOS toolbar floats over the page, so the page scrolls clear of

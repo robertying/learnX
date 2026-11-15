@@ -10,10 +10,18 @@ import {
 import CookieManager from '@preeternal/react-native-cookie-manager';
 import { recordError } from 'services/crashReporting';
 import Urls from 'constants/Urls';
+import { getTappedLink } from 'helpers/webContent';
 
 /** Whether a load is the web view's own page: HTML at Web Learning's root. */
 const isOwnPage = (url: string) =>
   url.startsWith('about:') || url.replace(/\/?(#.*)?$/, '') === Urls.learn;
+
+/** Opens a tapped link outside the app: only web and mail links, since course content is written by teachers. */
+const openLink = (url: string) => {
+  if (/^(https?|mailto):/i.test(url)) {
+    Linking.openURL(url).catch(() => {});
+  }
+};
 
 /**
  * Posts the content's height to React Native whenever it changes.
@@ -99,6 +107,11 @@ const AutoHeightWebView: React.FC<AutoHeightWebViewProps> = ({
   };
 
   const onMessage = (e: WebViewMessageEvent) => {
+    const link = getTappedLink(e.nativeEvent.data);
+    if (link !== undefined) {
+      openLink(link);
+      return;
+    }
     const measuredHeight = parseInt(e.nativeEvent.data, 10);
     if (isNaN(measuredHeight) || measuredHeight < 1) {
       return;
@@ -108,24 +121,22 @@ const AutoHeightWebView: React.FC<AutoHeightWebViewProps> = ({
   };
 
   // A tapped link opens outside the app instead of replacing the content, and
-  // nothing else replaces it either. iOS asks about every load, the page's own
-  // too, and says which came from a tap; Android asks only about loads the
-  // page starts, so all of those are links (and never reports
-  // `navigationType`, which `onNavigationStateChange` relied on).
+  // nothing else replaces it or opens anything: a redirect, form or refresh in
+  // the content. iOS asks about every load, the page's own too, and says which
+  // came from a tap. Android asks only about loads the page starts and never
+  // says which were taps, so there the page's own script reports taps as
+  // messages (`preval/linkTaps.js`, read in `onMessage`) and every load it
+  // asks about is refused.
   const onShouldStartLoadWithRequest = (request: ShouldStartLoadRequest) => {
     if (request.isTopFrame === false) {
       return true;
     }
-    if (Platform.OS === 'ios' && request.navigationType !== 'click') {
-      // The HTML loads at its base URL; a redirect, form or refresh in the
-      // content must not take its place.
-      return isOwnPage(request.url);
+    if (Platform.OS === 'ios' && request.navigationType === 'click') {
+      openLink(request.url);
+      return false;
     }
-    // Course content is written by teachers; only open web and mail links.
-    if (/^(https?|mailto):/i.test(request.url)) {
-      Linking.openURL(request.url).catch(() => {});
-    }
-    return false;
+    // The HTML loads at its base URL.
+    return isOwnPage(request.url);
   };
 
   useEffect(() => {
