@@ -1,5 +1,5 @@
 diff --git a/ios/PagerGestureObserver.swift b/ios/PagerGestureObserver.swift
-index 78361b7..e94a5a4 100644
+index 8ebe0e2ff595002a6d0e39280bb0b2409ab35357..2d660f0c862f0d2126a30f90be37a90a84d5d970 100644
 --- a/ios/PagerGestureObserver.swift
 +++ b/ios/PagerGestureObserver.swift
 @@ -145,6 +145,12 @@ private extension PagerGestureObserver {

@@ -1,4 +1,4 @@
-// What patches/@expo__ui@58.0.27.patch changes in the SwiftUI `Button`: its role
+// What patches/@expo__ui@58.0.28.patch changes in the SwiftUI `Button`: its role
 // reaches the native view as `buttonRole`. React Native reads a host view's
 // `role` prop as an accessibility role, and logs "Unsupported Role value" for
 // SwiftUI's roles (destructive, cancel).

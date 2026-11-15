@@ -27,7 +27,7 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
 /**
- * What patches/expo-widgets@58.0.27.patch changes on Android: tapping a widget opens the app, an `openUrl` modifier
+ * What patches/expo-widgets@58.0.28.patch changes on Android: tapping a widget opens the app, an `openUrl` modifier
  * opens a link in the app, an `appWidgetBackground` modifier marks the background, a `contentDescription` modifier
  * sets what TalkBack reads, and layouts get the locale, the text size setting, the launcher's widget corner radius
  * and their size. The library keeps these internal, so they're reached by reflection. (The size is passed only with a

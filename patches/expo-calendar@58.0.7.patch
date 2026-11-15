@@ -1,21 +1,5 @@
-diff --git a/android/src/main/java/expo/modules/calendar/next/domain/repositories/calendar/CalendarRepository.kt b/android/src/main/java/expo/modules/calendar/next/domain/repositories/calendar/CalendarRepository.kt
-index 9ae054bc..0163f14d 100644
---- a/android/src/main/java/expo/modules/calendar/next/domain/repositories/calendar/CalendarRepository.kt
-+++ b/android/src/main/java/expo/modules/calendar/next/domain/repositories/calendar/CalendarRepository.kt
-@@ -130,7 +130,10 @@ class CalendarRepository(private val contentResolver: ContentResolver) {
-       CalendarContract.Calendars.CALENDAR_COLOR,
-       CalendarContract.Calendars.CALENDAR_DISPLAY_NAME,
-       CalendarContract.Calendars.CALENDAR_TIME_ZONE,
--      CalendarContract.Calendars.IS_PRIMARY,
-+      // IS_PRIMARY is intentionally omitted from the projection: it is a
-+      // synthetic column that some providers (e.g. HarmonyOS / Huawei) do not
-+      // expose in their projection map, which makes the query itself throw
-+      // IllegalArgumentException. `toCalendarEntity` reads it defensively.
-       CalendarContract.Calendars.NAME,
-       CalendarContract.Calendars.OWNER_ACCOUNT,
-       CalendarContract.Calendars.SYNC_EVENTS,
 diff --git a/android/src/main/java/expo/modules/calendar/next/domain/repositories/CursorExtensions.kt b/android/src/main/java/expo/modules/calendar/next/domain/repositories/CursorExtensions.kt
-index c570e729..869a6148 100644
+index c570e729391407101bffad047ab629351217106c..869a6148a1b202c4caaa884aba164fde3df23475 100644
 --- a/android/src/main/java/expo/modules/calendar/next/domain/repositories/CursorExtensions.kt
 +++ b/android/src/main/java/expo/modules/calendar/next/domain/repositories/CursorExtensions.kt
 @@ -16,7 +16,13 @@ internal fun Cursor.getOptionalLong(columnName: String): Long? {
@@ -33,13 +17,30 @@ index c570e729..869a6148 100644
    // getInt() returns 0 for null columns, but 0 is also the int value of AttendeeRole.NONE.
    // isNull() lets us distinguish "not set in DB" from "explicitly set to NONE".
    if (isNull(index)) {
+diff --git a/android/src/main/java/expo/modules/calendar/next/domain/repositories/calendar/CalendarRepository.kt b/android/src/main/java/expo/modules/calendar/next/domain/repositories/calendar/CalendarRepository.kt
+index 9ae054bc8b22d2bbead91d256f755d1e9041d383..0163f14dfb978ea62b11ecb3c88a9428228e3be4 100644
+--- a/android/src/main/java/expo/modules/calendar/next/domain/repositories/calendar/CalendarRepository.kt
++++ b/android/src/main/java/expo/modules/calendar/next/domain/repositories/calendar/CalendarRepository.kt
+@@ -130,7 +130,10 @@ class CalendarRepository(private val contentResolver: ContentResolver) {
+       CalendarContract.Calendars.CALENDAR_COLOR,
+       CalendarContract.Calendars.CALENDAR_DISPLAY_NAME,
+       CalendarContract.Calendars.CALENDAR_TIME_ZONE,
+-      CalendarContract.Calendars.IS_PRIMARY,
++      // IS_PRIMARY is intentionally omitted from the projection: it is a
++      // synthetic column that some providers (e.g. HarmonyOS / Huawei) do not
++      // expose in their projection map, which makes the query itself throw
++      // IllegalArgumentException. `toCalendarEntity` reads it defensively.
+       CalendarContract.Calendars.NAME,
+       CalendarContract.Calendars.OWNER_ACCOUNT,
+       CalendarContract.Calendars.SYNC_EVENTS,
 diff --git a/ios/CalendarUtils.swift b/ios/CalendarUtils.swift
+index b146011f7f87134cf2d439121f0ecc9ce88056c5..cf1527786da71e2a160ec72f359951783807de87 100644
 --- a/ios/CalendarUtils.swift
 +++ b/ios/CalendarUtils.swift
-@@ -142,16 +142,24 @@
+@@ -142,16 +142,24 @@ func createCalendarEventAlarm(alarm: Alarm) -> EKAlarm? {
    return calendarEventAlarm
  }
-
+ 
 -func createDateComponents(for date: Date, allDay: Bool = false) -> DateComponents {
 -  let currentCalendar = Calendar.current
 +func createDateComponents(for date: Date, allDay: Bool = false, timeZone: TimeZone? = nil) -> DateComponents {
@@ -50,7 +51,7 @@ diff --git a/ios/CalendarUtils.swift b/ios/CalendarUtils.swift
    let dateComponents: Set<Calendar.Component> = allDay
      ? [.year, .month, .day]
      : [.year, .month, .day, .hour, .minute, .second]
-
+ 
 -  return currentCalendar.dateComponents(
 +  var components = calendar.dateComponents(
      dateComponents,
@@ -62,15 +63,16 @@ diff --git a/ios/CalendarUtils.swift b/ios/CalendarUtils.swift
 +  }
 +  return components
  }
-
+ 
  func getAvailability(availability: String) -> EKEventAvailability {
 diff --git a/ios/Next/ExpoCalendarReminder.swift b/ios/Next/ExpoCalendarReminder.swift
+index 9b8c493d6d5bc28ecf9af40f0fe506f11f388c80..00c3fc7a49d4f939632d3c3d2ec21b91ebcabf26 100644
 --- a/ios/Next/ExpoCalendarReminder.swift
 +++ b/ios/Next/ExpoCalendarReminder.swift
-@@ -78,10 +78,14 @@
+@@ -78,10 +78,14 @@ internal final class ExpoCalendarReminder: ExpoCalendarItem {
      let dueDate = parse(date: reminderRecord.dueDate)
      let completionDate = parse(date: reminderRecord.completionDate)
-
+ 
 +    // EKReminder.timeZone can stay nil until its date components have been set.
 +    var resolvedTimeZone = reminder.timeZone
      if nullableSet.contains("timeZone") {
@@ -82,19 +84,19 @@ diff --git a/ios/Next/ExpoCalendarReminder.swift b/ios/Next/ExpoCalendarReminder
          reminder.timeZone = eventTimeZone
        } else {
          throw InvalidTimeZoneException(timeZone)
-@@ -116,13 +120,13 @@
+@@ -116,13 +120,13 @@ internal final class ExpoCalendarReminder: ExpoCalendarItem {
      if nullableSet.contains("startDate") {
        reminder.startDateComponents = nil
      } else if let startDate {
 -      reminder.startDateComponents = createDateComponents(for: startDate, allDay: isAllDay)
 +      reminder.startDateComponents = createDateComponents(for: startDate, allDay: isAllDay, timeZone: resolvedTimeZone)
      }
-
+ 
      if nullableSet.contains("dueDate") {
        reminder.dueDateComponents = nil
      } else if let dueDate {
 -      reminder.dueDateComponents = createDateComponents(for: dueDate, allDay: isAllDay)
 +      reminder.dueDateComponents = createDateComponents(for: dueDate, allDay: isAllDay, timeZone: resolvedTimeZone)
      }
-
+ 
      if nullableSet.contains("completionDate") {
