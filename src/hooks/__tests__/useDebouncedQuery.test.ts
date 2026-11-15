@@ -5,10 +5,6 @@ beforeEach(() => {
   jest.useFakeTimers();
 });
 
-afterEach(() => {
-  jest.useRealTimers();
-});
-
 describe('useDebouncedQuery', () => {
   it('follows a query once it has stayed the same for the delay', async () => {
     const { result, rerender } = await renderHook(

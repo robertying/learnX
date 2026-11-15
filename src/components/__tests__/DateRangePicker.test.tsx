@@ -59,7 +59,6 @@ it('starts from today, ending the same day, without dates', async () => {
   const p = props({ startDate: undefined, endDate: undefined });
   await render(<DateRangePicker {...p} />);
   expect(screen.getAllByText('2026-11-10')).toHaveLength(2);
-  jest.useRealTimers();
 });
 
 it('dismisses on Cancel and on a swipe down, not once closed', async () => {

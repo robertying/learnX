@@ -102,7 +102,6 @@ describe('useLaunchSheet', () => {
     useAppStateStore.setState({ setupSeen: false, whatsNewSeenVersion: null });
   });
   afterEach(() => {
-    jest.useRealTimers();
     mockSplitLaidOut = true;
   });
 

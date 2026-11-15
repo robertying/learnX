@@ -120,7 +120,6 @@ it('shows the current and next class, and opens a course', async () => {
   expect(navigation.dispatch).toHaveBeenCalledWith(
     StackActions.push('AssignmentDetail', { id: 'x' }),
   );
-  jest.useRealTimers();
 });
 
 it("counts the day's classes and opens the schedule", async () => {
@@ -133,7 +132,6 @@ it("counts the day's classes and opens the schedule", async () => {
   expect(navigation.dispatch).toHaveBeenCalledWith(
     StackActions.push('Schedule'),
   );
-  jest.useRealTimers();
 });
 
 it('says the class times are Beijing time on a phone elsewhere', async () => {
@@ -146,7 +144,6 @@ it('says the class times are Beijing time on a phone elsewhere', async () => {
   jest.spyOn(Date.prototype, 'getTimezoneOffset').mockReturnValue(480);
   await setup();
   expect(screen.getByText('Classes · Beijing Time')).toBeOnTheScreen();
-  jest.useRealTimers();
 });
 
 it('says when there are no classes or deadlines', async () => {
@@ -161,7 +158,6 @@ it("says when the day's classes are over", async () => {
   await setup();
   expect(screen.getByText('No more classes today')).toBeOnTheScreen();
   expect(screen.queryByText('Course a')).toBeNull();
-  jest.useRealTimers();
 });
 
 it('says when the calendar failed, and leaves out a week before term', async () => {
@@ -251,7 +247,6 @@ it('opens the current class, and leaves a class with no course untappable', asyn
   navigation.dispatch.mockClear();
   await user.press(screen.getAllByText('Course b')[0]);
   expect(navigation.dispatch).not.toHaveBeenCalled();
-  jest.useRealTimers();
 });
 
 it('opens Settings and, in debug builds, the debug tools from the header', async () => {

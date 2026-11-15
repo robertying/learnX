@@ -30,7 +30,6 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
-  jest.useRealTimers();
   await clearCredentials();
 });
 

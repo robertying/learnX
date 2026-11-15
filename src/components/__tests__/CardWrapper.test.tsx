@@ -63,7 +63,6 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.useRealTimers();
   setSetting('swipeActions', defaultSettings.swipeActions);
 });
 

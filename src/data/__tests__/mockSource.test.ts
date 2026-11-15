@@ -22,10 +22,6 @@ beforeEach(() => {
   setMockNetworkConfig({ ...defaultMockNetworkConfig, latency: 'none' });
 });
 
-afterEach(() => {
-  jest.useRealTimers();
-});
-
 describe('mockSource', () => {
   it('answers with the mock data, minus the fields the app adds', async () => {
     const all = (

@@ -3,12 +3,20 @@
 // that expects one spies on it: jest.spyOn(console, 'error').mockImplementation().
 const logged: string[] = [];
 
-for (const level of ['error', 'warn'] as const) {
-  const log = console[level];
-  console[level] = (...args: unknown[]) => {
-    logged.push(`console.${level}: ${args.map(String).join(' ')}`);
-    log(...args);
-  };
+// Testing Library logs its own warnings (an event fired where it doesn't
+// bubble, or that nothing handles) through Node's console, which Jest's global
+// console doesn't see, so its logger is watched too.
+const testingLibraryConsole: Pick<Console, 'error' | 'warn'> =
+  require('@testing-library/react-native/dist/helpers/logger')._console;
+
+for (const target of [console, testingLibraryConsole]) {
+  for (const level of ['error', 'warn'] as const) {
+    const log = target[level];
+    target[level] = (...args: unknown[]) => {
+      logged.push(`console.${level}: ${args.map(String).join(' ')}`);
+      log(...args);
+    };
+  }
 }
 
 afterEach(() => {
@@ -31,5 +39,18 @@ notifyManager.setNotifyFunction((notify: () => void) => {
     act(notify);
   } else {
     notify();
+  }
+});
+
+// Every test starts on real timers, in English (en-US) with a 24-hour clock,
+// whatever the test before it switched to.
+const { mockClock, mockLocale } = require('./locale');
+afterEach(() => {
+  jest.useRealTimers();
+  if (mockLocale.current !== 'en-US') {
+    mockLocale.current = 'en-US';
+  }
+  if (!mockClock.uses24hourClock) {
+    mockClock.uses24hourClock = true;
   }
 });

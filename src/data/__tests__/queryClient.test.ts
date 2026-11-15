@@ -34,7 +34,6 @@ beforeEach(() => {
   jest.useFakeTimers();
   clearQueryCache();
 });
-afterEach(() => jest.useRealTimers());
 
 it('saves a list changed in place a moment later', async () => {
   queryClient.setQueryData(key, ['read']);
