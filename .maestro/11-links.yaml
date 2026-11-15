@@ -5,9 +5,8 @@ name: Open items from links
 ---
 # The learnx:// links that widget rows, notifications and Spotlight results
 # open (helpers/openTarget, hooks/useLinkTaps), on the Release build. Android
-# only for now: iOS may first ask "Open in “learnX”?", whose button Maestro
-# can only tap by position (subflows/open-on-inner.yaml does so on the closed
-# iPhone Duo), and that isn't set up for the other iOS devices yet.
+# only: iOS may first ask "Open in “learnX”?", whose button Maestro can only
+# tap by position.
 - runFlow:
     when:
       platform: Android

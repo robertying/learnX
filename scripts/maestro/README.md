@@ -28,9 +28,10 @@ Until a Maestro release includes all three, build
 it from source and put it first on `PATH`:
 
 ```sh
-bin="$(scripts/maestro/build.sh | tail -n 1)"
+bin="$(scripts/maestro/build.sh <folder>/Maestro | tail -n 1)"
 PATH="$bin:$PATH" scripts/e2e.sh ios
 ```
 
-`build.sh` needs Xcode and JDK 17 and clones Maestro to `~/repos/Maestro`.
-Pass another folder named `Maestro` as its first argument to use that one.
+`build.sh` needs Xcode and JDK 17. It takes the Maestro checkout as its
+argument (or `MAESTRO_DIR`), a folder named `Maestro`, and clones Maestro
+there if it doesn't exist.

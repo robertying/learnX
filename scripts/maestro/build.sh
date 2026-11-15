@@ -11,16 +11,27 @@
 #                               tree is too deep for one snapshot (only the
 #                               status bar came back)
 #
-#   scripts/maestro/build.sh [maestro checkout]   (default: ~/repos/Maestro)
+#   scripts/maestro/build.sh <maestro checkout>
+#
+# The checkout is the argument, or MAESTRO_DIR when there is none; one of them
+# is required. It is cloned there if it doesn't exist, and its folder must be
+# named Maestro (the driver's build script insists on it).
 #
 # Needs Xcode and JDK 17. Resets the checkout to the patched commits unless
 # MAESTRO_KEEP=1. Prints the folder to put first on PATH:
-#   PATH="$(scripts/maestro/build.sh | tail -n 1):$PATH" scripts/e2e.sh ios
+#   PATH="$(scripts/maestro/build.sh <checkout> | tail -n 1):$PATH" scripts/e2e.sh ios
 set -euo pipefail
 
 here="$(cd "$(dirname "$0")" && pwd)"
-# Maestro's driver build script insists on a folder named "Maestro".
-dir="${1:-$HOME/repos/Maestro}"
+dir="${1:-${MAESTRO_DIR:-}}"
+if [ -z "$dir" ]; then
+  echo "Usage: scripts/maestro/build.sh <maestro checkout> (or set MAESTRO_DIR)" >&2
+  exit 2
+fi
+if [ "$(basename "$dir")" != Maestro ]; then
+  echo "The checkout's folder must be named Maestro: $dir" >&2
+  exit 2
+fi
 # The upstream commit the patch was written against.
 base="${MAESTRO_BASE:-aaa248d}"
 
