@@ -1,16 +1,14 @@
 // Replaces the `__LEARNX_ENV__` placeholder in src/helpers/env.ts with values
 // from the repo-root .env, at build time. Only listed keys reach the bundle:
-// - PUBLIC_KEYS: shipped as plain strings (the mock login).
-// - `LIVE_*`: debug and test builds only (live test logins). Release bundles
-//   are transformed with Babel env "production" and never get them; the
-//   fastlane build lanes also fail if a release bundle contains a .env value
-//   that shouldn't be there.
+// - PUBLIC_KEYS: shipped as plain strings (the mock login). The fastlane
+//   build lanes fail if a release bundle contains any other .env value.
 // - TEST_LOGIN=1 in the build's environment (set by scripts/e2e-build.sh for
 //   every E2E build) adds `TEST_LOGIN: true`, no .env value: that build takes a
 //   test login from launch arguments (services/launchOptions.ts) and says why a
 //   login failed, so E2E runs need no secret in any bundle. The fastlane build
 //   lanes refuse to run with it set.
-// Every other key in .env is left out.
+// Every other key in .env is left out, including the live test login
+// (`LIVE_*`), which scripts/e2e.sh passes as launch arguments instead.
 const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
@@ -18,30 +16,21 @@ const dotenv = require('dotenv');
 const ENV_FILE = path.join(__dirname, '..', '.env');
 const PLACEHOLDER = '__LEARNX_ENV__';
 const PUBLIC_KEYS = ['DUMMY_USERNAME', 'DUMMY_PASSWORD'];
-const DEV_KEY = /^LIVE_[A-Z0-9_]+$/;
-const DEV_ENVS = new Set(['development', 'test']);
 
 const readEnv = () =>
   fs.existsSync(ENV_FILE) ? dotenv.parse(fs.readFileSync(ENV_FILE)) : {};
 
-const buildEnv = (includeDev, testLogin = false) => {
+const buildEnv = (testLogin = false) => {
   const parsed = readEnv();
   const env = {};
   for (const key of PUBLIC_KEYS) {
     if (parsed[key]) env[key] = parsed[key];
-  }
-  if (includeDev) {
-    for (const [key, value] of Object.entries(parsed)) {
-      if (DEV_KEY.test(key) && value) env[key] = value;
-    }
   }
   if (testLogin) env.TEST_LOGIN = true;
   return env;
 };
 
 function inlineEnv(api) {
-  // Also makes Babel cache this plugin's config per env name.
-  const includeDev = DEV_ENVS.has(api.env());
   const testLogin = api.cache.using(() => process.env.TEST_LOGIN === '1');
   const t = api.types;
 
@@ -50,7 +39,7 @@ function inlineEnv(api) {
     visitor: {
       Identifier(p) {
         if (p.node.name !== PLACEHOLDER || !p.isReferencedIdentifier()) return;
-        p.replaceWith(t.valueToNode(buildEnv(includeDev, testLogin)));
+        p.replaceWith(t.valueToNode(buildEnv(testLogin)));
       },
     },
   };

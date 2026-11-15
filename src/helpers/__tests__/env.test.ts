@@ -64,10 +64,9 @@ it('ships the mock login, and only the listed keys', () => {
   expect(env.default).toEqual({ DUMMY_USERNAME: 'mock-user' });
 });
 
-it('keeps live test logins out of release builds', () => {
+it('keeps the live test login out of debug builds too', () => {
   expect(build('development').env.default).toEqual({
     DUMMY_USERNAME: 'mock-user',
-    LIVE_USERNAME: 'live',
   });
 });
 

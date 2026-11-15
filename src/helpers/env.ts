@@ -10,9 +10,6 @@ type InlinedEnv = {
    * shipped build.
    */
   TEST_LOGIN?: boolean;
-} & {
-  /** Live test logins. Debug builds only; always undefined in release. */
-  [key: `LIVE_${string}`]: string | undefined;
 };
 
 declare const __LEARNX_ENV__: InlinedEnv;
