@@ -39,11 +39,6 @@ target 'learnX' do
     hermes_enabled: true
   )
 
-  # Analytics without the advertising identifier (Firebase 12 dropped the
-  # WithoutAdIdSupport subspec; Core is the same set without IdentitySupport).
-  pod 'FirebaseAnalytics/Core'
-  pod 'FirebaseCrashlytics'
-
   # The app's own tests (learnXTests), hosted in the app.
   target 'learnXTests' do
     inherit! :search_paths

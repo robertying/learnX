@@ -1,5 +1,4 @@
 internal import Expo
-import FirebaseCore
 internal import LearnXMenus
 import ObjectiveC
 import React
@@ -19,7 +18,7 @@ class AppDelegate: ExpoAppDelegate, @MainActor ExpoReactNativeFactoryProvider {
     didFinishLaunchingWithOptions launchOptions: [UIApplication
       .LaunchOptionsKey: Any]? = nil
   ) -> Bool {
-    FirebaseApp.configure()
+    CrashReporting.start()
     UIScrollView.preferSoftTopEdgeEffect()
     TextInputRecycling.disable()
 
