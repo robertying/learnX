@@ -237,12 +237,18 @@ jobs:
     # the runner. The flows are kept passing here, as on the local devices
     # (.maestro/AGENTS.md). No iOS E2E in CI. The emulator runs in Chinese
     # (its system language: a per-app language doesn't survive the flows'
-    # clearState); the local devices cover English.
-    name: Android E2E tests
+    # clearState); the local devices cover English. Two phones: a recent
+    # Android, and the oldest the app supports (minSdkVersion in
+    # android/build.gradle).
+    name: Android E2E tests (API ${{ matrix.api }})
     needs: android
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        api: [36, 28]
     env:
       MAESTRO_VERSION: 2.12.1
       MAESTRO_CLI_NO_ANALYTICS: 'true'
@@ -286,7 +292,7 @@ jobs:
       - name: Run flows
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
         with:
-          api-level: 36
+          api-level: ${{ matrix.api }}
           target: google_apis
           arch: x86_64
           profile: pixel_7
@@ -305,6 +311,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: e2e-android
+          name: e2e-android-${{ matrix.api }}
           path: build/maestro
           if-no-files-found: ignore

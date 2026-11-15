@@ -18,7 +18,10 @@
 # ~/Library/Developer/Xcode/DerivedData/learnX-e2e); the build is for that
 # simulator's architecture and makes no dSYM, so nothing goes to Crashlytics.
 # One build serves every simulator of that architecture (iPhone, iPad, Duo):
-# install it on another with `xcrun simctl install <udid> <app>`.
+# install it on another with `xcrun simctl install <udid> <app>`. More build
+# settings go in $XCODEBUILD_ARGS, split on spaces: the oldest iOS simulator
+# (17.5) is older than the deployment target (17.6), so a build for it takes
+# IPHONEOS_DEPLOYMENT_TARGET=17.5.
 # Android: -PciRelease (R8, signed with the debug key, no Crashlytics uploads),
 # for the ABI of $ANDROID_ABI (default arm64-v8a, as on Apple silicon).
 set -euo pipefail
@@ -39,6 +42,7 @@ scripts/ota-e2e-cert.sh
 case "$platform" in
 ios)
   derived="${DERIVED_DATA:-$HOME/Library/Developer/Xcode/DerivedData/learnX-e2e}"
+  read -ra extra_args <<<"${XCODEBUILD_ARGS:-}"
   xcodebuild build \
     -workspace ios/learnX.xcworkspace \
     -scheme learnX \
@@ -47,7 +51,8 @@ ios)
     -derivedDataPath "$derived" \
     -quiet \
     DEBUG_INFORMATION_FORMAT=dwarf \
-    COMPILER_INDEX_STORE_ENABLE=NO
+    COMPILER_INDEX_STORE_ENABLE=NO \
+    "${extra_args[@]+"${extra_args[@]}"}"
   app="$derived/Build/Products/Release-iphonesimulator/learnX.app"
   xcrun simctl install "$device" "$app"
   echo "Installed $app"
