@@ -51,12 +51,9 @@ const Insets = ({ name }: { name: string }) => {
 };
 
 const ref = { current: null };
-const renderSplit = (
-  props: { enabled?: boolean; sidebar?: React.ReactNode } = {},
-) =>
+const renderSplit = (props: { sidebar?: React.ReactNode } = {}) =>
   render(
     <NativeSplitViewProvider
-      enabled={props.enabled ?? true}
       detailNavigationContainerRef={ref}
       sidebar={props.sidebar}
     >
@@ -69,19 +66,6 @@ const displayMode = (nextDisplayMode: string) =>
   act(() =>
     mockHost.onDisplayModeWillChange({ nativeEvent: { nextDisplayMode } }),
   );
-
-it('shows only the master pane without the split', async () => {
-  await renderSplit({ enabled: false });
-  expect(screen.queryByTestId('split-host')).toBeNull();
-  expect(screen.getByText('master')).toBeTruthy();
-  expect(screen.queryByText('detail')).toBeNull();
-  expect(context()).toMatchObject({
-    detailNavigationContainerRef: null,
-    showDetail: false,
-    laidOut: true,
-    masterWidth: SplitSizes.masterWidth,
-  });
-});
 
 it('lays the panes side by side until UIKit collapses them', async () => {
   await renderSplit();
@@ -176,7 +160,7 @@ it('gives each column the safe area it reports on screen, and splits not yet lai
   await render(
     <>
       <LaidOut />
-      <NativeSplitViewProvider enabled detailNavigationContainerRef={ref}>
+      <NativeSplitViewProvider detailNavigationContainerRef={ref}>
         <Insets name="master-insets" />
         <Insets name="detail-insets" />
       </NativeSplitViewProvider>

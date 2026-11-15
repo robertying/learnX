@@ -168,7 +168,6 @@ function SidebarSplitNavigator({
   return (
     <NavigationContent>
       <NativeSplitViewProvider
-        enabled
         detailNavigationContainerRef={getDetailRef(selectedKey)}
         sidebar={
           <Sidebar

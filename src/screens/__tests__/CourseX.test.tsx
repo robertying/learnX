@@ -81,3 +81,10 @@ it('keeps the page clear of the floating toolbar', async () => {
   await renderScreen();
   expect(mockProps.contentInset).toEqual({ bottom: 0 });
 });
+
+it("opens the course's page in the browser before the page says where it is", async () => {
+  const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue();
+  await renderScreen({ id: 'c1' });
+  await userEvent.press(screen.getByTestId('courseXOpen'));
+  expect(openURL).toHaveBeenCalledWith('https://tsinghua.app/courses/c1');
+});

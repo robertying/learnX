@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useEffectEvent,
-  useRef,
-  useState,
-} from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { Platform } from 'react-native';
 import { toast } from 'components/Toast';
 import { useSettings } from 'data/settings';
@@ -44,49 +38,46 @@ const useFileDownload = (file: DownloadableFile) => {
   // closes.
   const downloadRef = useRef<AbortController | null>(null);
 
-  const download = useCallback(
-    (refresh: boolean) => {
-      downloadRef.current?.abort();
-      const controller = new AbortController();
-      downloadRef.current = controller;
-      return downloadFile(downloadable, {
-        refresh,
-        onProgress: setProgress,
-        signal: controller.signal,
-      }).then(
-        downloadedPath => {
-          setPath(downloadedPath);
-          setProgress(0);
-        },
-        () => {
-          if (controller.signal.aborted) {
-            return;
-          }
-          setProgress(0);
-          setError(true);
-          toast(t('fileDownloadFailed'), 'error');
-        },
-      );
-    },
-    [downloadable],
-  );
+  const download = (refresh: boolean) => {
+    downloadRef.current?.abort();
+    const controller = new AbortController();
+    downloadRef.current = controller;
+    return downloadFile(downloadable, {
+      refresh,
+      onProgress: setProgress,
+      signal: controller.signal,
+    }).then(
+      downloadedPath => {
+        setPath(downloadedPath);
+        setProgress(0);
+      },
+      () => {
+        if (controller.signal.aborted) {
+          return;
+        }
+        setProgress(0);
+        setError(true);
+        toast(t('fileDownloadFailed'), 'error');
+      },
+    );
+  };
 
   /** Downloads again, past the cache */
-  const redownload = useCallback(() => {
+  const redownload = () => {
     setPath('');
     setError(false);
     void download(true);
-  }, [download]);
+  };
 
-  const share = useCallback(async () => {
+  const share = async () => {
     try {
       await shareFile(downloadable);
     } catch {
       toast(t('fileDownloadFailed'), 'error');
     }
-  }, [downloadable]);
+  };
 
-  const save = useCallback(async () => {
+  const save = async () => {
     try {
       if (await saveFileOnMac(downloadable, path)) {
         toast(
@@ -97,16 +88,16 @@ const useFileDownload = (file: DownloadableFile) => {
     } catch {
       toast(t('saveFileFailed'), 'error');
     }
-  }, [path, downloadable]);
+  };
 
   /** Opens the file in another app (Android only: Apple platforms share it). */
-  const open = useCallback(async () => {
+  const open = async () => {
     try {
       await openFile(path, downloadable.fileType);
     } catch {
       toast(t('openFileFailed'), 'error');
     }
-  }, [downloadable.fileType, path]);
+  };
 
   const downloadOnMount = useEffectEvent(() => {
     void download(false);

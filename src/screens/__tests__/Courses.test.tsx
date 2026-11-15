@@ -1,4 +1,3 @@
-import { StackActions } from '@react-navigation/native';
 import { act, render } from '@testing-library/react-native';
 import dayjs from 'dayjs';
 import { initialAuth, useAuthStore } from 'data/auth';
@@ -143,9 +142,7 @@ it('refetches on a pull only with a session and a semester', async () => {
 it('opens the course a class event links to', async () => {
   await renderScreen();
   await act(() => setPendingTarget({ type: 'course', id: 'calc' }));
-  expect(navigation.dispatch).toHaveBeenCalledWith(
-    StackActions.push('CourseDetail', { id: 'calc' }),
-  );
+  expect(mockShow).toHaveBeenCalledWith('CourseDetail', { id: 'calc' });
 });
 
 it('opens a course in the detail view', async () => {

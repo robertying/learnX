@@ -1,4 +1,3 @@
-import { Linking } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as Updates from 'expo-updates';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -10,6 +9,7 @@ import {
   FormText,
 } from 'components/Form';
 import { t } from 'helpers/i18n';
+import { openLink } from 'helpers/openLink';
 import { SettingsStackParams } from 'navigation/types';
 import packageJson from '../../package.json';
 
@@ -34,8 +34,7 @@ const version = () => {
     : build;
 };
 
-const openGitHub = (path: string) =>
-  Linking.openURL(`https://github.com/${path}`);
+const openGitHub = (path: string) => openLink(`https://github.com/${path}`);
 
 const About: React.FC<Props> = () => (
   <FormScreen>
@@ -56,7 +55,7 @@ const About: React.FC<Props> = () => (
           icon="license"
           // oxlint-disable-next-line learnx/no-han-outside-translations -- ICP filing number, shown as filed
           title="浙ICP备20024838号-2A"
-          onPress={() => Linking.openURL('https://beian.miit.gov.cn/')}
+          onPress={() => openLink('https://beian.miit.gov.cn/')}
         />
       </FormSection>
       <FormSection title={t('contributors')}>
