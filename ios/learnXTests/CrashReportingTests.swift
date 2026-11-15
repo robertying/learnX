@@ -1,4 +1,4 @@
-import LearnXCrashlytics
+internal import LearnXCrashlytics
 import Testing
 
 @testable import learnX
