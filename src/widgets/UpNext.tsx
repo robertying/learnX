@@ -9,9 +9,13 @@ import {
   truncationMode,
   widgetURL,
 } from '@expo/ui/swift-ui/modifiers';
-import { createWidget, type WidgetEnvironment } from 'expo-widgets';
+import { createWidget } from 'expo-widgets';
 import type { ReactElement } from 'react';
-import { withWidgetKit, type WidgetKit } from 'widgets/kit';
+import {
+  withWidgetKit,
+  type KitEnvironment,
+  type WidgetKit,
+} from 'widgets/kit';
 import type { UpNextWidgetProps } from 'widgets/props';
 
 /**
@@ -27,12 +31,14 @@ import type { UpNextWidgetProps } from 'widgets/props';
  */
 function UpNextWidget(
   props: UpNextWidgetProps,
-  environment: WidgetEnvironment,
+  environment: KitEnvironment,
   kit: WidgetKit,
 ) {
   'widget';
   const family = environment.widgetFamily ?? 'systemMedium';
   const accent = kit.accent(environment);
+  const firstRun = kit.firstRun(environment.locale);
+  const noClasses = props.noClasses || firstRun.noClasses;
   const openToday = props.url ? [widgetURL(props.url)] : [];
 
   const date = environment.date ?? new Date();
@@ -123,7 +129,7 @@ function UpNextWidget(
         ]}
       >
         <Text modifiers={[font({ textStyle: 'headline' }), lineLimit(1)]}>
-          {featured ? featured.courseName : props.noClasses}
+          {featured ? featured.courseName : noClasses}
         </Text>
         {/* Its day and start, then for a class today the countdown in its
             largest unit; the place gets a line of its own. */}
@@ -158,11 +164,11 @@ function UpNextWidget(
     return kit.empty({
       header: (
         <HStack>
-          {kit.label(props.title, accent)}
+          {kit.label(props.title || firstRun.upNext, accent)}
           <Spacer />
         </HStack>
       ),
-      text: props.noClasses,
+      text: noClasses,
       modifiers: [kit.background, ...kit.language(props.locale), ...openToday],
     });
   }
@@ -327,7 +333,22 @@ function UpNextWidget(
   });
 }
 
+/** What the widget shows until the app sends its first timeline. */
+const initialProps: UpNextWidgetProps = {
+  classes: [],
+  title: '',
+  now: '',
+  next: '',
+  later: '',
+  startsIn: '',
+  endsIn: '',
+  tomorrow: '',
+  noClasses: '',
+  url: '',
+};
+
 export default createWidget<UpNextWidgetProps>(
   'UpNext',
   withWidgetKit(UpNextWidget),
+  initialProps,
 );
