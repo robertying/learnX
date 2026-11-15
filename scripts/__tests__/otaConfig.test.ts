@@ -1,5 +1,6 @@
-// The over-the-air update settings: the URL, runtime version and Expo project
-// id in app.json and the code-signing certificate in certs/ota-certificate.pem. scripts/ota-config-ios.sh writes
+// The over-the-air update settings: the URL, request headers and runtime
+// version in app.json (`eoas publish` reads them too) and the code-signing
+// certificate in certs/ota-certificate.pem. scripts/ota-config-ios.sh writes
 // them into Expo.plist and android/app/build.gradle into resources the
 // manifest reads; the rest is in Expo.plist and the build.gradle. A mismatch
 // shows up only as updates that never arrive, so keep them in step.
@@ -12,8 +13,7 @@ const read = (path: string) =>
 
 const appJson = JSON.parse(read('app.json')) as {
   runtimeVersion: string;
-  updates: { url: string };
-  extra: { eas: { projectId: string } };
+  updates: { url: string; requestHeaders: Record<string, string> };
 };
 
 const plist = read('ios/learnX/Expo.plist');
@@ -44,7 +44,12 @@ test('the runtime version is an app version', () => {
 
 test('the update URL is HTTPS', () => {
   expect(appJson.updates.url).toMatch(/^https:\/\/[^/]+\/manifest$/);
-  expect(appJson.extra.eas.projectId).toMatch(/^[0-9a-f-]{36}$/);
+  // The channel builds take updates from, and the Expo project the update
+  // server serves (stateless xprem serves one).
+  expect(appJson.updates.requestHeaders).toEqual({
+    'expo-channel-name': 'production',
+    'expo-app-id': expect.stringMatching(/^[0-9a-f-]{36}$/),
+  });
 });
 
 test('the certificate can sign code', () => {
@@ -72,17 +77,12 @@ test('the build writes the URL, runtime version, headers and certificate', () =>
     const text = read(file);
     expect(text).toContain('certs/ota-certificate.pem');
     expect(text).toContain('updates.url');
-    expect(text).toContain('projectId');
+    expect(text).toContain('requestHeaders');
   }
 });
 
-test('both platforms ask for the production channel and sign alike', () => {
-  expect(plistDict('EXUpdatesRequestHeaders')).toEqual({
-    'expo-channel-name': 'production',
-  });
-  expect(read('android/app/build.gradle')).toContain(
-    '["expo-channel-name": "production"]',
-  );
+test('both platforms sign alike', () => {
+  expect(plist).not.toContain('EXUpdatesRequestHeaders');
   expect(JSON.parse(metaData('CODE_SIGNING_METADATA')!)).toEqual(
     plistDict('EXUpdatesCodeSigningMetadata'),
   );
