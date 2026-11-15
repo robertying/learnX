@@ -620,6 +620,20 @@ lane :release do |options|
   publish_github(notes)
 end
 
+desc "Decode the JS frames of a Crashlytics report with the source map of the bundle that crashed (scripts/symbolicate.mjs)."
+desc "bundle: the report's js_bundle key (an update id, or embedded); a built-in bundle needs the report's version and build"
+desc "(Android: its version code). Store maps come from build/release, or the version's GitHub release; update maps from build/ota/updates."
+desc "Usage: bundle exec fastlane symbolicate platform:ios|macos|android stack:/path/to/stack.txt [bundle:<js_bundle>] [version:19.0.0 build:190] [map:/path/to/file.map]"
+lane :symbolicate do |options|
+  UI.user_error!("stack: is required, a file with the report's stack") unless options[:stack]
+  args = %i[platform bundle version build map].flat_map do |key|
+    options[key] ? ["--#{key}", options[key].to_s] : []
+  end
+  # Its output is the decoded stack, so it goes to the terminal as is.
+  ok = system("node", File.join(ROOT, "scripts/symbolicate.mjs"), *args, File.expand_path(options[:stack].to_s))
+  UI.user_error!("Symbolicating failed") unless ok
+end
+
 desc "Create a draft GitHub release with the APKs, latest.json and source maps from `android build`."
 desc "Usage: bundle exec fastlane github_release [notes:/path/to/notes.md]"
 lane :github_release do |options|
