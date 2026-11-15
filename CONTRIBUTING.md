@@ -68,7 +68,7 @@ bundle exec pod install
 cd ..
 ```
 
-Run `pod install` again whenever `ios/Podfile`, `ios/Podfile.lock`, a native package or a patch changes.
+Run `pod install` again whenever `ios/Podfile`, `ios/Podfile.lock`, a native package or a patch changes. Firebase isn't a pod: it's a Swift package of the Xcode project, which Xcode downloads on the first build (about 1 GB, in the build folder's `SourcePackages`).
 
 ### Signing: use your own team and bundle IDs
 
