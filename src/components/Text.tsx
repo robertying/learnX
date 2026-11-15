@@ -153,6 +153,13 @@ const getFontScale = () => Dimensions.get('window').fontScale;
 const useFontScale = () =>
   useSyncExternalStore(subscribeToDimensions, getFontScale);
 
+/**
+ * The size of an icon drawn beside text, grown with the text size (Dynamic
+ * Type, Android font scale) up to twice its size, as a symbol in text is.
+ */
+export const useTextIconSize = (size: number) =>
+  Math.round(size * Math.min(Math.max(useFontScale(), 1), 2));
+
 const StyledText = ({ color, variant, style, ...rest }: StyledTextProps) => {
   const theme = useTheme();
   const fontScale = useFontScale();

@@ -4,7 +4,7 @@ import { tCount, type TranslationKey } from 'helpers/i18n';
 import { CardGutter } from './CardRow';
 import SystemIcon from './SystemIcon';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
-import { Caption, Headline } from 'components/Text';
+import { Caption, Headline, useTextIconSize } from 'components/Text';
 import { useTheme } from 'theme';
 
 export interface CourseCardProps extends CardWrapperProps {
@@ -23,12 +23,13 @@ const Count: React.FC<{ icon: CountIcon; count: number }> = ({
   count,
 }) => {
   const theme = useTheme();
+  const iconSize = useTextIconSize(15);
   if (!count) {
     return null;
   }
   return (
     <View style={styles.count}>
-      <SystemIcon name={icon} size={15} color={theme.colors.primary} />
+      <SystemIcon name={icon} size={iconSize} color={theme.colors.primary} />
       <Caption
         variant="subheadline"
         style={[styles.countText, { color: theme.colors.primary }]}
