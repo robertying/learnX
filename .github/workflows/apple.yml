@@ -7,10 +7,6 @@ name: Apple
 # - iOS, build + native tests (~47 min cold): run it on main to refresh the
 #   compilation cache, or on a branch to check it.
 # - Mac, build (~35 min, uncached).
-# - iOS E2E on the oldest iOS the app supports: the Maestro flows on an iPhone
-#   simulator on iOS 17.5 (the deployment target, 17.6, has no simulator, so
-#   the app is built for 17.5), in Chinese. The runner has only current
-#   simulators, so the job downloads the 17.5 runtime first (about 7 GB).
 # Android builds and E2E are in ci.yml.
 on:
   workflow_dispatch:
@@ -21,10 +17,6 @@ on:
         default: true
       mac:
         description: 'Mac: build'
-        type: boolean
-        default: false
-      ios_e2e:
-        description: 'iOS E2E on iOS 17.5 (the oldest supported)'
         type: boolean
         default: false
 
@@ -177,115 +169,4 @@ jobs:
           path: |
             build/xcodebuild.log
             build/DerivedData/results/*.xcresult
-          if-no-files-found: ignore
-
-  ios-e2e-min:
-    # The Maestro flows (scripts/e2e.sh) on the Release E2E build
-    # (scripts/e2e-build.sh), as the Android E2E job in ci.yml runs them, then
-    # the over-the-air update flow (scripts/e2e-ota.sh). Without the iOS UI
-    # tests, which build the app again.
-    name: iOS E2E (iOS 17.5)
-    if: inputs.ios_e2e
-    runs-on: macos-26
-    timeout-minutes: 150
-    env:
-      RUNTIME_VERSION: '17.5'
-      MAESTRO_VERSION: 2.12.1
-      MAESTRO_CLI_NO_ANALYTICS: 'true'
-      MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED: 'true'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - name: Set up JS
-        uses: ./.github/actions/setup-js
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1.338.0
-        with:
-          bundler-cache: true
-
-      # Only read: the apple job saves these.
-      - name: Restore Pods
-        uses: actions/cache/restore@v6
-        with:
-          path: |
-            ios/Pods
-            ~/Library/Caches/CocoaPods
-          key: pods-${{ runner.os }}-${{ hashFiles('ios/Podfile.lock', 'patches/**') }}
-          restore-keys: pods-${{ runner.os }}-
-
-      - name: Install pods
-        working-directory: ios
-        run: bundle exec pod install
-        env:
-          LANG: en_US.UTF-8
-
-      - name: Restore Swift packages
-        uses: actions/cache/restore@v6
-        with:
-          path: build/DerivedData/SourcePackages
-          key: spm-${{ runner.os }}-${{ hashFiles('ios/learnX.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
-          restore-keys: spm-${{ runner.os }}-
-
-      - name: Download the iOS ${{ env.RUNTIME_VERSION }} simulator
-        run: xcodebuild -downloadPlatform iOS -buildVersion "$RUNTIME_VERSION"
-
-      # An iPhone 15 (which iOS 17 runs on) in Chinese: the system language
-      # too, so the system's own alerts match the app's.
-      - name: Create the simulator
-        run: |
-          runtime="$(xcrun simctl list runtimes --json |
-            jq -r --arg v "$RUNTIME_VERSION" '.runtimes[] | select(.platform == "iOS" and .version == $v and .isAvailable) | .identifier' | head -n 1)"
-          if [ -z "$runtime" ]; then
-            xcrun simctl list runtimes
-            exit 1
-          fi
-          udid="$(xcrun simctl create "learnX iPhone min" com.apple.CoreSimulator.SimDeviceType.iPhone-15 "$runtime")"
-          xcrun simctl boot "$udid"
-          xcrun simctl bootstatus "$udid" >/dev/null
-          xcrun simctl spawn "$udid" defaults write -g AppleLanguages '("zh-Hans")'
-          xcrun simctl spawn "$udid" defaults write -g AppleLocale zh_CN
-          xcrun simctl shutdown "$udid"
-          xcrun simctl boot "$udid"
-          xcrun simctl bootstatus "$udid" >/dev/null
-          echo "SIMULATOR=$udid" >> "$GITHUB_ENV"
-
-      # The mock login E2E logs in with; any non-empty values work.
-      - name: Write .env
-        run: printf 'DUMMY_USERNAME=e2e\nDUMMY_PASSWORD=e2e\n' > .env
-
-      - name: Build and install
-        run: scripts/e2e-build.sh ios "$SIMULATOR"
-        env:
-          DERIVED_DATA: build/DerivedData
-          # 17.6 has no simulator; nothing the app uses is new in 17.6.
-          XCODEBUILD_ARGS: IPHONEOS_DEPLOYMENT_TARGET=${{ env.RUNTIME_VERSION }}
-
-      - name: Install Maestro
-        run: |
-          curl -fsSL https://get.maestro.mobile.dev | bash
-          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
-
-      - name: Run flows
-        run: |
-          mkdir -p build/maestro
-          status=0
-          scripts/e2e.sh ios --format junit --output build/maestro/report.xml --test-output-dir build/maestro || status=1
-          scripts/e2e-ota.sh ios || status=1
-          cp build/ota-e2e/server-ios.log build/maestro/ || true
-          exit $status
-        env:
-          MAESTRO_DEVICE: ${{ env.SIMULATOR }}
-          E2E_LANGUAGE: zh-Hans
-          E2E_UI_TESTS: '0'
-          # Saved with the results, to look through.
-          E2E_SCREENSHOTS: build/maestro/screenshots
-
-      - name: Upload results
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: e2e-ios-${{ env.RUNTIME_VERSION }}
-          path: build/maestro
           if-no-files-found: ignore

@@ -18,13 +18,11 @@
 #                   layout: split views and a side rail)
 #   iphone-min      every flow on an iPhone on the oldest iOS the app
 #                   supports (IPHONEOS_DEPLOYMENT_TARGET; the closest
-#                   simulator is iOS 17.5: with E2E_BUILD=1, build with
-#                   XCODEBUILD_ARGS=IPHONEOS_DEPLOYMENT_TARGET=17.5), in
-#                   Chinese
+#                   simulator is iOS 17.5, which scripts/e2e-build.sh
+#                   builds for), in Chinese
 #   android-min     every flow on a phone emulator on the oldest Android the
 #                   app supports (minSdkVersion, API 28), in Chinese
-# The -min profiles aren't in the default run: name them. Apple's and CI's
-# workflows run the same checks (.github/workflows/apple.yml, ci.yml).
+# The -min profiles aren't in the default run: name them. They're local only.
 #
 # The flows run on the Release app (what ships: bundled JS, Hermes, R8).
 # Install it with scripts/e2e-build.sh first, or set E2E_BUILD=1 to have this
