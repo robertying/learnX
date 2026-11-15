@@ -2,10 +2,10 @@
 <!-- Sample assignments and classes in the widget pickers' previews (layout/widget_preview_*). -->
 <resources>
     <string name="widget_preview_assignment">Homework 6</string>
-    <string name="widget_preview_assignment_due">Nov 21, 23:59 · Introduction to Machine Learning</string>
+    <string name="widget_preview_assignment_due">Nov 21, 11:59 PM · Introduction to Machine Learning</string>
     <string name="widget_preview_assignment_2">Course Project Proposal</string>
-    <string name="widget_preview_assignment_2_due">Nov 24, 12:00 · Linear Algebra</string>
+    <string name="widget_preview_assignment_2_due">Nov 24, 12:00 PM · Linear Algebra</string>
     <string name="widget_preview_course">Introduction to Machine Learning</string>
-    <string name="widget_preview_class_time">08:00–09:35 · 6A414</string>
-    <string name="widget_preview_later_class">Later Classes: Linear Algebra · Tomorrow 13:30–15:05</string>
+    <string name="widget_preview_class_time">8:00–9:35 AM · 6A414</string>
+    <string name="widget_preview_later_class">Later Classes: Linear Algebra · Tomorrow 1:30–3:05 PM</string>
 </resources>
