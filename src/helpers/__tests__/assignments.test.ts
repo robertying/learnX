@@ -6,6 +6,7 @@ import {
   deadlineUrgency,
   deadlineTextBesideDate,
   sortAssignments,
+  upcomingAssignments,
 } from 'helpers/assignments';
 
 const assignment = (id: string, deadline: string) =>
@@ -173,5 +174,26 @@ describe('deadlineTextBesideDate', () => {
 
   it('says nothing for one over a year away, whose date is beside it', () => {
     expect(deadlineTextBesideDate('2027-03-15T12:01:00Z', now)).toBeUndefined();
+  });
+});
+
+describe('upcomingAssignments', () => {
+  it('keeps assignments due after now', () => {
+    const now = dayjs('2026-03-15T12:00:00Z');
+    const assignments = [
+      assignment('past', '2026-03-15T11:59:00Z'),
+      assignment('due', '2026-03-15T12:01:00Z'),
+    ];
+    expect(ids(upcomingAssignments(assignments, now))).toEqual(['due']);
+  });
+
+  it('compares with the current time by default', () => {
+    jest.useFakeTimers({ now: new Date('2026-03-15T12:00:00Z') });
+    const assignments = [
+      assignment('past', '2026-03-15T11:59:00Z'),
+      assignment('due', '2026-03-15T12:01:00Z'),
+    ];
+    expect(ids(upcomingAssignments(assignments))).toEqual(['due']);
+    jest.useRealTimers();
   });
 });
