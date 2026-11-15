@@ -41,6 +41,7 @@ import { upcomingAssignments } from 'helpers/assignments';
 import { startOfWeek } from 'helpers/schedule';
 import { isShownBy } from 'helpers/shown';
 import { beijingDate } from 'helpers/serverTime';
+import { uses24HourClock } from 'helpers/i18n';
 import {
   clearShortcuts,
   saveUpcomingClasses,
@@ -67,6 +68,11 @@ interface Inputs {
   resumes: number;
   /** The saved timetable weeks the course calendar follows. */
   classWeeks: unknown[];
+  /**
+   * Whether the device shows 24-hour times, which the widgets write their
+   * times in; read again each time the app comes back (`helpers/i18n`).
+   */
+  hour24: boolean;
 }
 
 let resumes = 0;
@@ -109,6 +115,7 @@ const readInputs = (): Inputs => {
           ),
     resumes,
     classWeeks: syncedClassWeeks(),
+    hour24: uses24HourClock(),
   };
 };
 
@@ -194,7 +201,7 @@ interface Surface {
 const surfaces: Surface[] = [
   {
     name: 'Deadlines widget',
-    deps: i => [i.assignments, i.hiddenCourses, i.archived],
+    deps: i => [i.assignments, i.hiddenCourses, i.archived, i.hour24],
     // Until the assignments are loaded, the widget keeps what it had.
     update: ({ assignments, hiddenCourses, archived }) => {
       if (assignments) {
@@ -256,16 +263,23 @@ const surfaces: Surface[] = [
     },
   },
   {
-    name: 'Up Next',
+    name: 'Next Class intent',
     deps: i => [i.classes],
-    // Until this week's classes are known, both keep what they had.
-    update: ({ classes: json }) => {
-      if (!json) {
-        return;
+    // Until this week's classes are known, it keeps what it had.
+    update: ({ classes }) => {
+      if (classes) {
+        saveUpcomingClasses(JSON.parse(classes) as UpcomingClass[]);
       }
-      const classes = JSON.parse(json) as UpcomingClass[];
-      saveUpcomingClasses(classes);
-      updateUpNextWidget(classes);
+    },
+  },
+  {
+    name: 'Up Next widget',
+    deps: i => [i.classes, i.hour24],
+    // Until this week's classes are known, it keeps what it had.
+    update: ({ classes }) => {
+      if (classes) {
+        updateUpNextWidget(JSON.parse(classes) as UpcomingClass[]);
+      }
     },
   },
   {
@@ -381,6 +395,15 @@ export const refreshSurfaces = () => {
   return running;
 };
 
+/** Runs one output's clearing, reporting a failure instead of stopping the rest. */
+const clearing = (name: string, clear: () => void) => {
+  try {
+    clear();
+  } catch (error) {
+    recordError(error, `Clearing ${name}`);
+  }
+};
+
 /**
  * Empties the widgets, Spotlight, the App Intents and the reminders, e.g. on
  * logout. Calendar and Reminders entries stay (Settings › Calendar deletes
@@ -391,10 +414,12 @@ export const clearSurfaces = () => {
   // never schedules reminders that this then cancels.
   running = running.then(async () => {
     lastDeps = new Map();
-    updateDeadlineWidget([], { hiddenCourses: [], archived: [] });
-    updateUpNextWidget();
-    clearSpotlight();
-    clearShortcuts();
+    clearing('Deadlines widget', () =>
+      updateDeadlineWidget([], { hiddenCourses: [], archived: [] }),
+    );
+    clearing('Up Next widget', () => updateUpNextWidget());
+    clearing('Spotlight', clearSpotlight);
+    clearing('App Intents', clearShortcuts);
     await Promise.all([
       cancelDeadlineReminders().catch(() => {}),
       cancelClassReminders().catch(() => {}),

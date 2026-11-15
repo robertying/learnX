@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import { Directory, File, Paths } from 'expo-file-system';
 import mime from 'mime';
 import { persistStorage } from 'data/storage';
+import storeVersions from 'data/storeVersions.json';
 import { getExtension } from 'helpers/filename';
 import type { PickedAttachment } from 'services/submission';
 
@@ -52,7 +53,7 @@ const useSubmissionDraftStore = create<{
 }>()(
   persist(() => ({ drafts: {} as Record<string, SubmissionDraft> }), {
     name: SUBMISSION_DRAFTS_KEY,
-    version: 1,
+    version: storeVersions[SUBMISSION_DRAFTS_KEY],
     storage: persistStorage,
   }),
 );
