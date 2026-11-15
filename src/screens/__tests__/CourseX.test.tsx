@@ -42,6 +42,8 @@ it("opens CourseX at the course's page, or its list without one", async () => {
   expect(mockProps.source.uri).toBe('https://tsinghua.app/courses/c1');
   await renderScreen();
   expect(mockProps.source.uri).toBe('https://tsinghua.app/courses');
+  await renderScreen({ id: '../a?b' });
+  expect(mockProps.source.uri).toBe('https://tsinghua.app/courses/..%2Fa%3Fb');
 });
 
 it('goes back and forward only where the page can', async () => {

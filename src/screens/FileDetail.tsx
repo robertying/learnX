@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Platform, StyleSheet, View, ViewProps } from 'react-native';
+import { Linking, Platform, StyleSheet, View, ViewProps } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import WebView from 'react-native-webview';
 import Pdf from 'react-native-pdf';
 import dayjs from 'dayjs';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
-import { canPreviewInline, needWhiteBackground } from 'helpers/filePreview';
+import {
+  canPreviewInline,
+  isPreviewLoad,
+  needWhiteBackground,
+} from 'helpers/filePreview';
 import { t } from 'helpers/i18n';
 import { displayFileSize } from 'helpers/filename';
 import Spinner from 'components/Spinner';
@@ -159,6 +163,21 @@ const FileDetailContent: React.FC<{
             // .svg file don't run.
             javaScriptEnabled={false}
             originWhitelist={['*']}
+            // The preview stays on the file: a web page in its place would
+            // look like part of learnX. A tapped web or mail link opens
+            // outside the app.
+            onShouldStartLoadWithRequest={request => {
+              if (isPreviewLoad(request.url)) {
+                return true;
+              }
+              if (
+                request.navigationType === 'click' &&
+                /^(https?|mailto):/i.test(request.url)
+              ) {
+                Linking.openURL(request.url).catch(() => {});
+              }
+              return false;
+            }}
             decelerationRate={Platform.OS === 'ios' ? 'normal' : undefined}
             contentInsetAdjustmentBehavior="automatic"
           />
