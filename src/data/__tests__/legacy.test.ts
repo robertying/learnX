@@ -295,6 +295,19 @@ describe('importing user data saved by 18.0.x', () => {
     });
   });
 
+  it('keeps the defaults when a whole saved key is unreadable', async () => {
+    const m = await launch({
+      asyncStorage: {
+        'persist:settings': '{not json',
+        'persist:root': '["not", "an", "object"]',
+      },
+    });
+    await m.legacy.importLegacyUserData();
+    expect(m.settings.getSettings()).toEqual(m.settings.defaultSettings);
+    expect(m.userData.getUserData()).toEqual(m.userData.emptyUserData());
+    expect(m.kv.get(m.legacy.LEGACY_IMPORTED_KEY)).toBe('1');
+  });
+
   it('is cleared with the rest on logout', async () => {
     const m = await launch({ asyncStorage: upgraded });
     // The import failed, so the legacy settings are still there.

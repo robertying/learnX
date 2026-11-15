@@ -1,7 +1,7 @@
 #if targetEnvironment(macCatalyst)
 import XCTest
 
-/// The Mac's `.maestro/00-login-check.yaml`: the mock account never touches the network, so this logs in through the
+/// The Mac's `.maestro/01-login-check.yaml`: the mock account never touches the network, so this logs in through the
 /// real SSO login with an account that doesn't exist and waits for the server's wrong-password answer. It catches a
 /// release build whose login can't reach or read id.tsinghua.edu.cn. The made-up username and fingerprint go in as
 /// the test login's launch arguments (E2E builds only, `services/launchOptions.ts`), so the login never adds a device.

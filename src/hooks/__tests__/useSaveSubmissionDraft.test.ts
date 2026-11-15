@@ -5,7 +5,7 @@ import {
   RestoredSubmissionDraft,
   saveSubmissionDraft,
 } from 'data/submissionDrafts';
-import { PickedAttachment } from 'services/submission';
+import type { PickedAttachment } from 'data/submissionDrafts';
 import useSaveSubmissionDraft from 'hooks/useSaveSubmissionDraft';
 
 jest.mock('data/submissionDrafts', () => ({

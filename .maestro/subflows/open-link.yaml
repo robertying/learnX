@@ -1,0 +1,9 @@
+# Open LINK (a learnx:// link) in the running app and wait for the screen
+# with id ID. Run by 11-links.yaml.
+appId: ${APP_ID}
+---
+- openLink: ${LINK}
+- extendedWaitUntil:
+    visible:
+      id: ${ID}
+    timeout: 15000

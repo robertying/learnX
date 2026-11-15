@@ -2,7 +2,6 @@ import { act, render, screen } from '@testing-library/react-native';
 import type * as ReactNative from 'react-native';
 import { StyleSheet } from 'react-native';
 import dayjs from 'dayjs';
-import { mockLocale } from 'test-utils/locale';
 import { NOW, notice } from 'test-utils/fixtures/cards';
 import NoticeCard from 'components/NoticeCard';
 import type { Notice } from 'data/types/state';
@@ -14,8 +13,6 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.useRealTimers();
-  mockLocale.current = 'en-US';
   dayjs.locale('en');
 });
 

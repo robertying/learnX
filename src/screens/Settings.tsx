@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Alert, Linking } from 'react-native';
+import { Alert } from 'react-native';
 import {
   Form,
   FormButton,
@@ -20,6 +20,7 @@ import { useCredentialsStore } from 'data/credentials';
 import { useShowDetail } from 'hooks/useDetailNavigator';
 import { calendarSettingsTitle } from 'helpers/calendar/details';
 import { t } from 'helpers/i18n';
+import { openLink } from 'helpers/openLink';
 import { findWhatsNew, releases, whatsNewContext } from 'helpers/whatsNew';
 import { MainStackScreenProps, SettingsStackParams } from 'navigation/types';
 
@@ -164,7 +165,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
               icon="update"
               badge
               title={t('foundNewVersion', { version: update.version })}
-              onPress={() => Linking.openURL(update.url)}
+              onPress={() => openLink(update.url)}
             />
           )}
           <FormLink

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { persistStorage } from 'data/storage';
+import storeVersions from 'data/storeVersions.json';
 import semverGt from 'semver/functions/gt';
 
 export const APP_STATE_KEY = 'appState';
@@ -34,7 +35,7 @@ export const useAppStateStore = create<AppState>()(
   persist(initialAppState, {
     name: APP_STATE_KEY,
     // Version 1 only ran in development builds.
-    version: 2,
+    version: storeVersions[APP_STATE_KEY],
     storage: persistStorage,
   }),
 );

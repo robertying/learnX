@@ -9,7 +9,7 @@ appId: ${APP_ID}
       LIST: settings-list
       TARGET: '.*(${T_about}).*'
       DIRECTION: UP
-# About can first show under the floating tab bar (05-settings-logout).
+# About can first show under the floating tab bar (12-settings-logout).
 - swipe:
     from:
       id: settings-list

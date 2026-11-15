@@ -4,7 +4,7 @@ name: Open every other screen
 ---
 # The screens the other flows don't reach: the timetable, an assignment's
 # submission sheet, a course's courseX page and every Settings page apart from
-# Changelog and About (05-settings-logout). Each is checked by its id.
+# Changelog and About (12-settings-logout). Each is checked by its id.
 - runFlow: subflows/login.yaml
 
 # Today › Schedule

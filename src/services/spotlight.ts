@@ -1,8 +1,8 @@
-import { displayFileSize } from 'helpers/filename';
 import dayjs from 'dayjs';
 import Spotlight, { SpotlightDomain, SpotlightItem } from 'modules/spotlight';
 import { Assignment, File, Notice } from 'data/types/state';
 import Storage from 'expo-sqlite/kv-store';
+import { displayFileSize } from 'helpers/filename';
 import { hash, removeTags } from 'helpers/text';
 import { recordError } from 'services/crashReporting';
 
