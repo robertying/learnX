@@ -24,7 +24,7 @@ const verdict = (
         '--input-type=module',
         '-e',
         `const { verdict } = await import(${JSON.stringify(script)});
-process.stdout.write(JSON.stringify(verdict(${JSON.stringify(recorded)}, ${JSON.stringify(current)}, ${released})));`,
+process.stdout.write(JSON.stringify(verdict(${JSON.stringify(recorded)}, ${JSON.stringify(current)}, () => ${released})));`,
       ],
       { encoding: 'utf8' },
     ),
@@ -34,6 +34,26 @@ const recorded = { runtimeVersion: '19.0.0', ios: 'a', android: 'b' };
 
 test('passes when nothing native changed', () => {
   expect(verdict(recorded, recorded)).toBeNull();
+});
+
+test("doesn't ask origin whether it shipped unless native code changed", () => {
+  // Asking throws here, as it would offline.
+  const offline = (current: State) =>
+    execFileSync(
+      'node',
+      [
+        '--input-type=module',
+        '-e',
+        `const { verdict } = await import(${JSON.stringify(script)});
+verdict(${JSON.stringify(recorded)}, ${JSON.stringify(current)}, () => { throw new Error('offline'); });`,
+      ],
+      { stdio: 'pipe' },
+    );
+  expect(() => offline(recorded)).not.toThrow();
+  expect(() =>
+    offline({ ...recorded, runtimeVersion: '19.1.0' }),
+  ).not.toThrow();
+  expect(() => offline({ ...recorded, ios: 'c' })).toThrow(/offline/);
 });
 
 test('asks for a new runtime version when native code changed', () => {
