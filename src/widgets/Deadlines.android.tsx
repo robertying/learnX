@@ -80,6 +80,11 @@ function DeadlinesWidget(
   // Handled by patches/expo-widgets@58.0.27.patch; other platforms ignore it.
   const openUrl = (url: string | undefined) =>
     url ? [{ $type: 'openUrl', url }] : [];
+  // What TalkBack reads for a row, as one sentence without the dots (also
+  // our patch).
+  const spoken = (...parts: string[]) => [
+    { $type: 'contentDescription', text: parts.filter(Boolean).join(', ') },
+  ];
 
   return (
     <Column
@@ -120,7 +125,12 @@ function DeadlinesWidget(
       {deadlines.map(item => (
         <Column
           key={item.id}
-          modifiers={[fillMaxWidth(), paddingAll(2), ...openUrl(item.url)]}
+          modifiers={[
+            fillMaxWidth(),
+            paddingAll(2),
+            ...openUrl(item.url),
+            ...spoken(item.title, item.due, item.courseName),
+          ]}
         >
           <Text
             color={colors.title}
