@@ -3,7 +3,7 @@ package io.robertying.learnx.share
 import android.content.ContentResolver
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
+import androidx.core.content.IntentCompat
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 
@@ -40,7 +40,7 @@ class ShareModule : Module() {
       }
       // Only content URIs, which the sending app grants access to. A file URI would be read with learnX's own
       // access, so another app could have learnX attach the app's private files to a submission.
-      val uri = intent.stream()?.takeIf { it.scheme == ContentResolver.SCHEME_CONTENT }
+      val uri = IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, Uri::class.java)?.takeIf { it.scheme == ContentResolver.SCHEME_CONTENT }
       val hasText = intent.hasExtra(Intent.EXTRA_TEXT)
       intent.removeExtra(Intent.EXTRA_STREAM)
       intent.removeExtra(Intent.EXTRA_TEXT)
@@ -55,13 +55,5 @@ class ShareModule : Module() {
         else -> null
       }
     }
-
-    @Suppress("DEPRECATION")
-    private fun Intent.stream(): Uri? =
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
-      } else {
-        getParcelableExtra(Intent.EXTRA_STREAM)
-      }
   }
 }

@@ -55,6 +55,35 @@ describe.each([
     expect(colors.primary).toBe(toRgb(brand));
   });
 
+  it("is the native theme's palette (colors.xml)", () => {
+    // AppTheme (res/values/styles.xml) colors the splash screen and native
+    // views such as alert dialogs with these copies.
+    const { readFileSync } = require('fs') as {
+      readFileSync: (path: string, encoding: 'utf8') => string;
+    };
+    const xml = readFileSync(
+      `android/app/src/main/res/values${theme.dark ? '-night' : ''}/colors.xml`,
+      'utf8',
+    );
+    const native = Object.fromEntries(
+      [...xml.matchAll(/name="md_theme_(\w+)">(#[0-9A-F]{6})</gi)].map(
+        ([, role, hex]) => [role, toRgb(hex)],
+      ),
+    );
+    const js: Record<string, unknown> = {
+      ...colors,
+      errorContainer: colors.statusContainer.red,
+      onErrorContainer: colors.onStatusContainer.red,
+    };
+    // The roles the app's own views use; the secondary, tertiary and inverse
+    // ones only reach native views.
+    const shared = Object.keys(native).filter(role => role in js);
+    expect(shared).toHaveLength(16);
+    for (const role of shared) {
+      expect([role, native[role]]).toEqual([role, js[role]]);
+    }
+  });
+
   it.each(tones)('keeps %s readable', tone => {
     // flags and warnings on the surface
     expect(
