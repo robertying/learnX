@@ -18,14 +18,25 @@ const supportsNativeSubtitle = DeviceInfo.hasLiquidGlass();
 
 /**
  * A screen's title and subtitle: in the header itself from iOS 26, and in
- * our own HeaderTitle before that and on Android.
+ * our own HeaderTitle before that and on Android. An item's name (`item`)
+ * is shortened in the middle when it doesn't fit, a screen's name at the end.
  */
-export const getTitleOptions = (title: string, subtitle?: string) =>
+export const getTitleOptions = (
+  title: string,
+  subtitle?: string,
+  { item = false }: { item?: boolean } = {},
+) =>
   supportsNativeSubtitle
     ? { title, headerSubtitle: subtitle }
     : {
         title,
-        headerTitle: () => <HeaderTitle title={title} subtitle={subtitle} />,
+        headerTitle: () => (
+          <HeaderTitle
+            title={title}
+            subtitle={subtitle}
+            ellipsizeMode={item ? 'middle' : 'tail'}
+          />
+        ),
       };
 
 /** Options for the first screen of a modal stack: a close button and a title. */
@@ -94,7 +105,7 @@ export const stackScreenOptions: NativeStackNavigationOptions = hasGlassHeader
 export const getDetailScreenOptions = (title = '', subtitle?: string) =>
   function ({ theme }: { theme: Theme }): NativeStackNavigationOptions {
     return {
-      ...getTitleOptions(title, subtitle),
+      ...getTitleOptions(title, subtitle, { item: true }),
       headerTintColor: Platform.OS === 'ios' ? brandColor : undefined,
       // A native title would otherwise take the tint color.
       headerTitleStyle: supportsNativeSubtitle

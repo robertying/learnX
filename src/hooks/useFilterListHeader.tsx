@@ -5,6 +5,7 @@ import type {
 } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
 import FilterMenu from 'components/FilterMenu';
+import OverflowMenu from 'components/OverflowMenu';
 import { getTitleOptions } from 'navigation/options';
 import DeviceInfo from 'constants/DeviceInfo';
 import {
@@ -174,25 +175,28 @@ const useFilterListHeader = ({
       onPress: onCourseX,
     };
 
+    const moreActions = [reorder, courseX];
+
     navigation.setOptions({
       ...headerButtons(
         'left',
         isCourse
           ? [
-              { ...reorder, nativeItem: false },
               filter,
-              { ...courseX, nativeItem: false },
-              // A third native button leaves the title no room beside a
-              // sidebar of the default width, so the rest go in a menu.
+              // Beside a third button the title has no room: next to a
+              // sidebar of the default width (iOS and Mac), or at a large
+              // font scale in a narrow pane (Android). So the less used
+              // actions go in a menu: a native More menu, or Material's
+              // overflow menu.
               {
                 id: 'more',
                 item: {
                   type: 'menu',
                   identifier: 'more',
                   label: t('more'),
-                  icon: { type: 'sfSymbol', name: 'ellipsis.circle' },
+                  icon: { type: 'sfSymbol', name: systemIcons.more.ios },
                   menu: {
-                    items: [reorder, courseX].map(button => ({
+                    items: moreActions.map(button => ({
                       type: 'action',
                       label: button.label,
                       icon: {
@@ -203,6 +207,13 @@ const useFilterListHeader = ({
                     })),
                   },
                 },
+                element: (
+                  <OverflowMenu
+                    label={t('more')}
+                    items={moreActions}
+                    testID="more"
+                  />
+                ),
               },
             ]
           : [select, filter],
