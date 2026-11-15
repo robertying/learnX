@@ -2,12 +2,20 @@
 // paths given), and names learnX's own Kotlin (the app's and the local
 // modules') that no report has. Run from the repo root by
 // scripts/test-android.sh.
+//
+//   node scripts/android-coverage.mjs [--min=<percent>] <report.xml>...
+//
+// With --min, it fails when the total line coverage is below that percent.
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { coverageTable } from './lib/coverage-table.mjs';
 
+const args = process.argv.slice(2);
+const minArg = args.find(arg => arg.startsWith('--min='));
+const min = minArg ? Number(minArg.slice('--min='.length)) : 0;
+
 const files = [];
-for (const path of process.argv.slice(2)) {
+for (const path of args.filter(arg => arg !== minArg)) {
   const xml = readFileSync(path, 'utf8');
   for (const pkg of xml.matchAll(
     /<package name="([^"]*)">([\s\S]*?)<\/package>/g,
@@ -37,3 +45,13 @@ const untested = execFileSync(
   .filter(path => path && !files.some(file => path.endsWith(`/${file.path}`)));
 
 console.log(coverageTable(files, untested).join('\n'));
+
+const covered = files.reduce((sum, file) => sum + file.covered, 0);
+const executable = files.reduce((sum, file) => sum + file.executable, 0);
+const percent = executable ? (100 * covered) / executable : 100;
+if (percent < min) {
+  console.error(
+    `Line coverage ${percent.toFixed(1)}% is below the minimum, ${min}%.`,
+  );
+  process.exitCode = 1;
+}
