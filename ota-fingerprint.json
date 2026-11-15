@@ -1,7 +1,7 @@
 {
   "runtimeVersion": "19.0.0",
-  "ios": "defa87ef1689f14714d0d83e80c5e2aec3bcd031",
-  "android": "fb27ff3243c30ad900adac11b4dd9c43f03ff80e",
+  "ios": "aad01a46c9b77a0c3815432badee8173726ac61d",
+  "android": "0486afcfc6627cbcfd1b8d1f83e639455a9adf0c",
   "sources": {
     "ios": {
       "file src/data/storeVersions.json": "46529c4a96147c7b238c1fb8a460668086e2e2d6",
@@ -13,7 +13,7 @@
       "dir modules/sidebar/ios": "fccb11ed85e5c41d7b26c2a0c6986681585888b9",
       "dir modules/spotlight/ios": "0c556f33bb595592925a631602f7e4289090cff0",
       "dir modules/toast/ios": "b8e55255835b975b642f9f81064dd9b03cfd2ff0",
-      "dir patches": "d21c08e45dee472baedaccb34c081ee73e6303b8",
+      "dir patches": "15205cd2abdb8c484d421cb265251b0e1ac306e4",
       "contents expoAutolinkingConfig:ios": "693731fafd695b4e6e9fe21de47f77ae8b0e08b4",
       "contents rncoreAutolinkingConfig:ios": "8a2eb393ff5b4155abd1e29e9247f545a2a7a638",
       "package node_modules/@expo/log-box/package.json": "7a829699d9363b31a6e475706b30fe66b2076279",
@@ -68,7 +68,7 @@
       "dir android": "0898134dcd80667871508162669f068c939755e6",
       "dir modules/crashlytics/android": "c197e1f7400e71d52bf820a626fa941218b8e4ae",
       "dir modules/share/android": "69760341fd85cb091ac06c209f12d905b601c4d9",
-      "dir patches": "d21c08e45dee472baedaccb34c081ee73e6303b8",
+      "dir patches": "15205cd2abdb8c484d421cb265251b0e1ac306e4",
       "contents expoAutolinkingConfig:android": "fd7378a3b77e3661aca636e88e38c949afd92282",
       "contents rncoreAutolinkingConfig:android": "d40be427cc3c3ac490e297933ea55327245bd0ce",
       "package node_modules/@expo/log-box/package.json": "7a829699d9363b31a6e475706b30fe66b2076279",

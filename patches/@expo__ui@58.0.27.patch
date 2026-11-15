@@ -1,3 +1,83 @@
+diff --git a/android/src/main/java/expo/modules/ui/HostView.kt b/android/src/main/java/expo/modules/ui/HostView.kt
+index 2a4ce000d3ac0d08d57eab9a8bd1490758b68e27..9037d4da9155ca8275d5c01f997fde681dfe4fd6 100644
+--- a/android/src/main/java/expo/modules/ui/HostView.kt
++++ b/android/src/main/java/expo/modules/ui/HostView.kt
+@@ -124,6 +124,9 @@ internal class HostView(context: Context, appContext: AppContext) :
+   private val onLayoutContent by EventDispatcher<LayoutContentEvent>()
+   private var lastDispatchedContentSize: IntSize? = null
+ 
++  // learnX patch: the pending check that the last matchContents size reached the layout.
++  private var styleSizeCheck: Runnable? = null
++
+   // The size a child fraction was resolved against, in dp.
+   // matchContents would otherwise publish the percentage result and the next pass divides it again.
+   private var percentageBaseWidthDp: Double? = null
+@@ -348,6 +351,7 @@ internal class HostView(context: Context, appContext: AppContext) :
+       return
+     }
+     lastDispatchedContentSize = size
++    cancelStyleSizeCheck()
+ 
+     val matchContentsHorizontal = this.props.matchContentsHorizontal.value
+     val matchContentsVertical = this.props.matchContentsVertical.value
+@@ -368,6 +372,7 @@ internal class HostView(context: Context, appContext: AppContext) :
+           null
+         }
+         shadowNodeProxy.setStyleSize(styleWidth, styleHeight)
++        scheduleStyleSizeCheck(size, styleWidth, styleHeight, attempt = 0)
+       }
+ 
+       // `onSizeChanged` runs inside the Compose measure pass. Emitting the event here reaches
+@@ -380,6 +385,39 @@ internal class HostView(context: Context, appContext: AppContext) :
+     }
+   }
+ 
++  // learnX patch: the size sent above is a state update that can be dropped (ShadowNodeProxy and
++  // NativeStatePropsGetter skip it when the view's state wrapper is null or already destroyed).
++  // It was only sent again when the content size changed, so a dropped one left the host 0x0 for
++  // good, with its content drawn outside it (What's New's buttons on CI). Until the layout gives
++  // this view a frame on each axis that has a size, send the same size again, with backoff.
++  private fun scheduleStyleSizeCheck(size: IntSize, styleWidth: Double?, styleHeight: Double?, attempt: Int) {
++    if (attempt >= STYLE_SIZE_CHECK_DELAYS_MS.size) {
++      return
++    }
++    val check = Runnable {
++      styleSizeCheck = null
++      if (!isAttachedToWindow || lastDispatchedContentSize != size) {
++        return@Runnable
++      }
++      if ((styleWidth != null && width == 0) || (styleHeight != null && height == 0)) {
++        shadowNodeProxy.setStyleSize(styleWidth, styleHeight)
++        scheduleStyleSizeCheck(size, styleWidth, styleHeight, attempt + 1)
++      }
++    }
++    styleSizeCheck = check
++    postDelayed(check, STYLE_SIZE_CHECK_DELAYS_MS[attempt])
++  }
++
++  private fun cancelStyleSizeCheck() {
++    styleSizeCheck?.let(::removeCallbacks)
++    styleSizeCheck = null
++  }
++
++  override fun onDetachedFromWindow() {
++    super.onDetachedFromWindow()
++    cancelStyleSizeCheck()
++  }
++
+   override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+     val matchContentsHorizontal = props.matchContentsHorizontal.value
+     val matchContentsVertical = props.matchContentsVertical.value
+@@ -431,6 +469,9 @@ internal class HostView(context: Context, appContext: AppContext) :
+   }
+ }
+ 
++// learnX patch: when HostView checks that its matchContents size reached the layout.
++private val STYLE_SIZE_CHECK_DELAYS_MS = longArrayOf(50, 100, 200, 400, 800)
++
+ @OptimizedRecord
+ internal data class LayoutContentEvent(
+   @Field
 diff --git a/android/src/main/java/expo/modules/ui/ModifierRegistry.kt b/android/src/main/java/expo/modules/ui/ModifierRegistry.kt
 index b1431d5c60665f8ea1708d1cde2e7d703e8efe97..52d81330d9300ddff0c14d015b09d4858e03a4c5 100644
 --- a/android/src/main/java/expo/modules/ui/ModifierRegistry.kt
