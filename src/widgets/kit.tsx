@@ -15,6 +15,12 @@ import { PlatformColor } from 'react-native';
 
 type TextStyle = 'caption' | 'footnote' | 'subheadline';
 
+/**
+ * What a layout gets about where it's drawn. `locale` (the system's, as the
+ * widget extension runs in it) is added by our expo-widgets patch.
+ */
+export type KitEnvironment = WidgetEnvironment & { locale?: string };
+
 /** A deadline's due time, and from when it shows orange and red. */
 interface Due {
   deadline: number;
@@ -91,6 +97,30 @@ export function widgetKit() {
      */
     language: (locale: string | undefined) =>
       locale ? [environment('locale', locale)] : [],
+    /**
+     * The text a widget shows before the app has sent its first props: the
+     * build embeds each layout with empty strings (see
+     * ios/ExpoWidgetsTarget/ExpoWidgetsLayoutRegistry.config.json), so a widget
+     * added before learnX has run, and its preview in the widget gallery, ask
+     * to open the app. The widget runtime has no translations, so it follows
+     * the system language, as on Android.
+     */
+    firstRun: (locale: string | undefined) =>
+      /* oxlint-disable learnx/no-han-outside-translations */
+      (locale ?? '').startsWith('zh')
+        ? {
+            deadlines: '作业截止',
+            noDeadlines: '打开 learnX 以显示作业',
+            upNext: '下一节课',
+            noClasses: '打开 learnX 以显示课程',
+          }
+        : {
+            deadlines: 'Deadlines',
+            noDeadlines: 'Open learnX to see deadlines',
+            upNext: 'Next Up',
+            noClasses: 'Open learnX to see your classes',
+          },
+    /* oxlint-enable learnx/no-han-outside-translations */
     /** The brand color (brandColors in src/theme), which a widget can't import. */
     accent: (widgetEnvironment: WidgetEnvironment) =>
       widgetEnvironment.colorScheme === 'dark' ? '#C55CD6' : '#660874',
@@ -253,7 +283,7 @@ export function widgetKit() {
 
 export type WidgetKit = ReturnType<typeof widgetKit>;
 
-type Layout<P> = (props: P, environment: WidgetEnvironment) => ReactElement;
+type Layout<P> = (props: P, environment: KitEnvironment) => ReactElement;
 
 /**
  * Gives a widget layout the kit as its third argument. Both are source text
@@ -264,7 +294,7 @@ type Layout<P> = (props: P, environment: WidgetEnvironment) => ReactElement;
 export const withWidgetKit = <P,>(
   layout: (
     props: P,
-    environment: WidgetEnvironment,
+    environment: KitEnvironment,
     kit: WidgetKit,
   ) => ReactElement,
 ): Layout<P> =>
