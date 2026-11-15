@@ -405,6 +405,57 @@ describe('fetching course by course', () => {
     expect(failed.size).toBe(0);
     expect(fetched.size).toBe(ids.length - 1);
   });
+
+  it('leaves out courses that answer after the deadline', async () => {
+    const [late, lateFailing] = [...courseIds];
+    let answer = () => {};
+    let fail = () => {};
+    jest.spyOn(mockSource, 'getFileList').mockImplementation(
+      ((id: string) =>
+        new Promise((resolve, reject) => {
+          if (id === late) {
+            answer = () => resolve([]);
+          } else if (id === lateFailing) {
+            fail = () => reject(new Error('server error'));
+          }
+        })) as typeof mockSource.getFileList,
+    );
+
+    const { fetched, failed } = await contentLists.files.fetchCourses(
+      semesterId,
+      [late, lateFailing],
+      { deadline: Date.now() + 50 },
+    );
+    answer();
+    fail();
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    expect(fetched.size).toBe(0);
+    expect(failed.size).toBe(0);
+  });
+});
+
+describe('a list not cached yet', () => {
+  it('starts it with a refreshed course', async () => {
+    const courseId = [...courseIds][0];
+    await refreshCourseNotices(semesterId, courseId);
+    const notices = queryClient.getQueryData(
+      noticesQuery(semesterId).queryKey,
+    )!;
+    expect(notices.length).toBeGreaterThan(0);
+    expect(notices.every(n => n.courseId === courseId)).toBe(true);
+  });
+
+  it('keeps it due for a fetch when only some courses came back', async () => {
+    const courseId = [...courseIds][0];
+    await contentLists.files.putCourses(semesterId, new Map([[courseId, []]]), {
+      complete: false,
+      startedAt: Date.now(),
+    });
+    expect(
+      queryClient.getQueryState(filesQuery(semesterId).queryKey)?.dataUpdatedAt,
+    ).toBe(0);
+  });
 });
 
 describe('files', () => {

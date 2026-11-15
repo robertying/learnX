@@ -98,3 +98,16 @@ it("doesn't write back a response that arrives as the cache is cleared", async (
   await jest.advanceTimersByTimeAsync(0);
   expect(await saved()).toEqual(['new']);
 });
+
+it('deletes a saved response too old to show', async () => {
+  await queryClient.fetchQuery({ queryKey: key, queryFn: () => ['old'] });
+  await jest.advanceTimersByTimeAsync(0);
+  const now = Date.now();
+
+  jest.setSystemTime(now + 31 * 24 * 60 * 60 * 1000);
+  expect(await saved()).toBeUndefined();
+
+  // Gone from storage, not just skipped.
+  jest.setSystemTime(now);
+  expect(await saved()).toBeUndefined();
+});
