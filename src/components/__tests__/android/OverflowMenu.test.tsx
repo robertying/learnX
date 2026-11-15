@@ -30,4 +30,17 @@ describe('OverflowMenu (Android)', () => {
     // The menu closes after an action.
     expect(screen.queryByText('Reorder')).toBeNull();
   });
+
+  it('closes when tapped outside, and works without a test id', async () => {
+    await render(
+      <OverflowMenu
+        label="More"
+        items={[{ id: 'a', label: 'Action', icon: 'info', onPress: jest.fn() }]}
+      />,
+    );
+    await userEvent.setup().press(screen.getByLabelText('More'));
+    expect(screen.getByText('Action')).toBeTruthy();
+    await userEvent.setup().press(screen.getByTestId('dropdown-dismiss'));
+    expect(screen.queryByText('Action')).toBeNull();
+  });
 });

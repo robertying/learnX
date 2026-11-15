@@ -317,13 +317,25 @@ export const OutlinedTextField = Object.assign(
 const Trigger = slot();
 const Items = slot();
 export const DropdownMenu = Object.assign(
-  ({ expanded, children }: { expanded: boolean; children?: ReactNode }) => (
+  ({
+    expanded,
+    onDismissRequest,
+    children,
+  }: {
+    expanded: boolean;
+    onDismissRequest?: () => void;
+    children?: ReactNode;
+  }) => (
     <View>
       {Children.map(children, child =>
         isValidElement(child) && child.type === Items && !expanded
           ? null
           : child,
       )}
+      {/* A tap outside the open menu, which dismisses it. */}
+      {expanded && onDismissRequest ? (
+        <Pressable testID="dropdown-dismiss" onPress={onDismissRequest} />
+      ) : null}
     </View>
   ),
   { Trigger, Items },
