@@ -23,6 +23,12 @@ export interface LaunchOptions {
    */
   mockFailure?: unknown;
   /**
+   * Whether the emulated server rejects logins for a mock account, as if the
+   * password had changed: `true` for every one, or a count for the next so
+   * many (`2`: the launch login and one more).
+   */
+  mockLoginFails?: unknown;
+  /**
    * `true` shows what the app keeps as JSON in place of the app, for the
    * upgrade test (`screens/StoreReport`, mock account only).
    */
@@ -62,6 +68,24 @@ const failures = new Set<unknown>([
 
 const isFailure = (value: unknown): value is MockFailure => failures.has(value);
 
+/**
+ * `true`, `false` or a whole count, as a value or a string (NSUserDefaults
+ * reads `-mockLoginFails 2` as "2"; Android passes strings only).
+ */
+const readLoginFails = (value: unknown): boolean | number | undefined => {
+  if (value === true || value === 'true') {
+    return true;
+  }
+  if (value === false || value === 'false') {
+    return false;
+  }
+  const count =
+    typeof value === 'string' && /^\d+$/.test(value) ? Number(value) : value;
+  return typeof count === 'number' && Number.isInteger(count) && count >= 0
+    ? count
+    : undefined;
+};
+
 const read = (key: keyof LaunchOptions, initialProps?: LaunchOptions) =>
   Platform.OS === 'ios' ? (Settings.get(key) as unknown) : initialProps?.[key];
 
@@ -77,6 +101,10 @@ export const applyLaunchOptions = (initialProps?: LaunchOptions) => {
   const mockFailure = read('mockFailure', initialProps);
   if (isFailure(mockFailure)) {
     setMockNetworkConfig({ failure: mockFailure });
+  }
+  const loginFails = readLoginFails(read('mockLoginFails', initialProps));
+  if (loginFails !== undefined) {
+    setMockNetworkConfig({ loginFails });
   }
 
   if (__DEV__ || env.TEST_LOGIN) {

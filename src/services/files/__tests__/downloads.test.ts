@@ -1,7 +1,8 @@
 import { Platform } from 'react-native';
 import Share from 'modules/share';
 import CookieManager from '@preeternal/react-native-cookie-manager';
-import { dataSource, ensureSession } from 'data/source';
+import { FailReason } from '@robertying/thu-learn-lib';
+import { dataSource } from 'data/source';
 import { getCachedCourses } from 'data/queries';
 import { Directory, File as FileSystemFile } from 'expo-file-system';
 import {
@@ -27,8 +28,18 @@ jest.mock('data/queries', () => ({ getCachedCourses: jest.fn(() => []) }));
 
 jest.mock('data/source', () => ({
   addCSRF: (url: string) => `${url}&csrf=token`,
-  dataSource: { prepareFileDownload: jest.fn(() => Promise.resolve()) },
-  ensureSession: jest.fn(() => Promise.resolve()),
+  dataSource: {
+    prepareFileDownload: jest.fn(() => Promise.resolve()),
+    // thu-learn-lib's: runs the request again once after NOT_LOGGED_IN.
+    withSession: jest.fn((send: () => Promise<unknown>) =>
+      send().catch((error: { reason?: string }) => {
+        if (error?.reason !== 'not logged in or login timeout') {
+          throw error;
+        }
+        return send();
+      }),
+    ),
+  },
 }));
 
 const DOCUMENTS = 'file:///app/Documents';
@@ -95,7 +106,7 @@ describe('downloadFile', () => {
     expect(__fs.tasks).toHaveLength(0);
 
     await expect(downloadFile(file, { refresh: true })).resolves.toBe(target);
-    expect(ensureSession).toHaveBeenCalled();
+    expect(dataSource.withSession).toHaveBeenCalledTimes(1);
     expect(__fs.tasks).toHaveLength(1);
   });
 
@@ -174,13 +185,6 @@ describe('downloadFile', () => {
         return task.target;
       },
     ],
-    [
-      "saves the server's login redirect",
-      async (task: { target: { uri: string } }) => {
-        __fs.write(task.target.uri, '<script>location.href="/"</script>');
-        return task.target;
-      },
-    ],
   ])(
     'throws, deletes the partial file and keeps the old copy when it %s',
     async (_, download) => {
@@ -193,6 +197,42 @@ describe('downloadFile', () => {
       expect(__fs.read(target)).toBe('old');
     },
   );
+
+  describe('after the session ran out', () => {
+    const REDIRECT = '<script>location.href="/";</script>';
+    const answer = (...bodies: string[]) => {
+      __fs.download = async task => {
+        __fs.write(task.target.uri, bodies.shift() ?? 'body');
+        return task.target;
+      };
+    };
+
+    it('downloads once more in the session thu-learn-lib renews', async () => {
+      answer(REDIRECT, 'body');
+      await expect(downloadFile(file)).resolves.toBe(target);
+      expect(dataSource.withSession).toHaveBeenCalledTimes(1);
+      expect(__fs.tasks).toHaveLength(2);
+      expect(__fs.read(target)).toBe('body');
+      expect(__fs.files(PARTIAL)).toEqual([]);
+    });
+
+    it('fails with NOT_LOGGED_IN, keeping the old copy, when the new session gets the redirect too', async () => {
+      answer(REDIRECT, REDIRECT);
+      __fs.write(target, 'old');
+      await expect(downloadFile(file, { refresh: true })).rejects.toEqual({
+        reason: FailReason.NOT_LOGGED_IN,
+      });
+      expect(__fs.tasks).toHaveLength(2);
+      expect(__fs.files(PARTIAL)).toEqual([]);
+      expect(__fs.read(target)).toBe('old');
+    });
+
+    it('takes a large file for the file, without reading it', async () => {
+      answer(`location.href=${'x'.repeat(5000)}`);
+      await expect(downloadFile(file)).resolves.toBe(target);
+      expect(__fs.tasks).toHaveLength(1);
+    });
+  });
 
   it('makes no folders for a download that failed', async () => {
     __fs.download = (task: { target: { uri: string } }) => {

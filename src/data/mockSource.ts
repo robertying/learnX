@@ -41,8 +41,11 @@ export interface MockNetworkConfig {
   latency: MockLatency;
   /** Applies to every request, login included. */
   failure: MockFailure;
-  /** Logins are rejected as if the password had changed. */
-  loginFails: boolean;
+  /**
+   * Logins are rejected as if the password had changed: every one for `true`,
+   * or the next so many for a number (E2E flows reject a few, then log in).
+   */
+  loginFails: boolean | number;
 }
 
 export const defaultMockNetworkConfig: MockNetworkConfig = {
@@ -117,6 +120,9 @@ const roundTrip = async ({ isLogin = false } = {}) => {
       await wait(randomLatency());
   }
   if (isLogin && config.loginFails) {
+    if (typeof config.loginFails === 'number') {
+      setMockNetworkConfig({ loginFails: config.loginFails - 1 });
+    }
     throw apiError(FailReason.BAD_CREDENTIAL);
   }
 };
@@ -291,6 +297,8 @@ const withFavorite = <T extends { id: string }>(item: T) => ({
  */
 export const mockSource: AppSource = {
   login: () => roundTrip({ isLogin: true }),
+  // The emulated session never expires: the request runs once.
+  withSession: send => send(),
   // The emulated session never expires: one request either way.
   ensureSession: () => roundTrip(),
   // Not awaited by callers; never fails.

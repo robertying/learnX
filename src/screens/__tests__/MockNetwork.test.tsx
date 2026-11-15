@@ -55,3 +55,11 @@ it('rejects logins, and logs in again on demand', async () => {
     duration: 1000,
   });
 });
+
+it('shows logins as rejected while a count of them is left', async () => {
+  setMockNetworkConfig({ loginFails: 1 });
+  await render(<MockNetwork />);
+  expect(
+    screen.getByRole('switch', { name: 'Reject Login (Bad Credential)' }),
+  ).toBeChecked();
+});

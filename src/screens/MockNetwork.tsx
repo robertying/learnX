@@ -80,7 +80,7 @@ const MockNetwork: React.FC = () => {
             testID="mock-network-login-fails"
             icon="badCredential"
             title="Reject Login (Bad Credential)"
-            value={config.loginFails}
+            value={!!config.loginFails}
             onValueChange={value => setMockNetworkConfig({ loginFails: value })}
           />
           <FormButton

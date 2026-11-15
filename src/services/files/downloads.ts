@@ -1,8 +1,13 @@
 import { Platform } from 'react-native';
+import {
+  type ApiError,
+  FailReason,
+  isExpiredSessionPage,
+} from '@robertying/thu-learn-lib';
 import { Directory, DownloadTask, File, Paths } from 'expo-file-system';
 import Share from 'modules/share';
 import CookieManager from '@preeternal/react-native-cookie-manager';
-import { addCSRF, dataSource, ensureSession } from 'data/source';
+import { addCSRF, dataSource } from 'data/source';
 import { getCachedCourses } from 'data/queries';
 import { localizedCourseName } from 'data/courseNames';
 import { Course, DownloadableFile } from 'data/types/state';
@@ -70,12 +75,17 @@ const newPartialFile = () => {
   );
 };
 
+/** Longer files are never the login or redirect page of an expired session. */
+const MAX_SESSION_PAGE_SIZE = 4096;
+
 /**
- * The server answers an expired session with a tiny HTML page that redirects
- * to the login page instead of an error status.
+ * Whether the server answered with the login or redirect page of an expired
+ * session (a 200 page) instead of the file.
  */
-const isLoginRedirect = async (file: File) =>
-  file.size < 100 && (await file.text()).includes('location.href');
+const isExpiredSessionFile = async (file: File) =>
+  file.size < MAX_SESSION_PAGE_SIZE && isExpiredSessionPage(await file.text());
+
+const expiredSession: ApiError = { reason: FailReason.NOT_LOGGED_IN };
 
 const deleteQuietly = (file: File) => {
   try {
@@ -175,32 +185,15 @@ export interface DownloadOptions {
 }
 
 /**
- * The downloaded file's URI, downloading it first unless it is already on
- * the device (or `refresh` is set).
+ * Downloads `url` once into a new partial file and returns it, or deletes it
+ * and throws: `NOT_LOGGED_IN` for the login redirect an expired session gets
+ * (so `withSession` logs in again and calls it once more), or an error for a
+ * download that saved nothing.
  */
-export const downloadFile = async (
-  file: DownloadableFile,
-  { refresh = false, onProgress, signal }: DownloadOptions = {},
-) => {
-  let url = file.downloadUrl;
-  if (url.startsWith('file://') || url.startsWith('content://')) {
-    return url;
-  }
-
-  const target = getDownloadedFile(file);
-  if (!refresh && target.exists) {
-    return target.uri;
-  }
-
-  if (!url.startsWith('http://') && !url.startsWith('https://')) {
-    throw new Error('Invalid file url');
-  }
-
-  if (refresh) {
-    try {
-      await ensureSession();
-    } catch {}
-  }
+const attemptDownload = async (
+  url: string,
+  { onProgress, signal }: Pick<DownloadOptions, 'onProgress' | 'signal'>,
+): Promise<File> => {
   // Only a real download is emulated (mock account); a file already on the
   // device is not.
   await dataSource.prepareFileDownload();
@@ -211,8 +204,6 @@ export const downloadFile = async (
   if (checkUrl) {
     await fetch(addCSRF(checkUrl)).catch(() => {});
   }
-
-  url = addCSRF(url);
 
   // iOS sends the login cookies from the shared cookie store by itself;
   // Android's download client has no cookie jar, so they go in a header, and
@@ -229,7 +220,7 @@ export const downloadFile = async (
   }
 
   const partial = newPartialFile();
-  const task = new DownloadTask(url, partial, {
+  const task = new DownloadTask(addCSRF(url), partial, {
     headers,
     // A background session would not share the app's cookies reliably and
     // outlives the screen that shows the progress.
@@ -257,14 +248,44 @@ export const downloadFile = async (
     task.release();
   }
 
-  const complete =
-    !!downloaded?.exists &&
-    downloaded.size > 0 &&
-    !(await isLoginRedirect(downloaded));
-  if (!complete) {
+  if (!downloaded?.exists || downloaded.size === 0) {
     deleteQuietly(partial);
     throw new Error('File download failed');
   }
+  if (await isExpiredSessionFile(downloaded)) {
+    deleteQuietly(partial);
+    throw expiredSession;
+  }
+  return partial;
+};
+
+/**
+ * The downloaded file's URI, downloading it first unless it is already on
+ * the device (or `refresh` is set).
+ */
+export const downloadFile = async (
+  file: DownloadableFile,
+  { refresh = false, onProgress, signal }: DownloadOptions = {},
+) => {
+  const url = file.downloadUrl;
+  if (url.startsWith('file://') || url.startsWith('content://')) {
+    return url;
+  }
+
+  const target = getDownloadedFile(file);
+  if (!refresh && target.exists) {
+    return target.uri;
+  }
+
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    throw new Error('Invalid file url');
+  }
+
+  // thu-learn-lib's session handling, as for its own requests: an expired
+  // session logs in again and the download runs once more.
+  const partial = await dataSource.withSession(() =>
+    attemptDownload(url, { onProgress, signal }),
+  );
 
   // A rename within Caches: the file at `target` is either the old copy or
   // the whole new one.

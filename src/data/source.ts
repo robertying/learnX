@@ -37,6 +37,7 @@ export type DataSource = Pick<
   | 'getCalendar'
   | 'addToFavorites'
   | 'removeFromFavorites'
+  | 'withSession'
 >;
 
 /** What an assignment submission sends. */
@@ -51,7 +52,8 @@ export interface Submission {
 
 /**
  * Everything the app asks of the school's server: thu-learn-lib's calls, and
- * the few requests the app sends itself.
+ * the few requests the app sends itself, which go through thu-learn-lib's
+ * `withSession` so an expired session is handled as for its own requests.
  */
 export interface AppSource extends DataSource {
   /**
@@ -106,36 +108,41 @@ const realRequests: Omit<AppSource, keyof DataSource> = {
   ) => {
     assertServerWritesAllowed('Assignment submission');
 
-    // Checks the session first, logging in again only if it has expired.
-    const { url, body } = await helper.getHomeworkSubmitRequest(
-      studentHomeworkId,
-      {
-        content,
-        attachment: attachment && {
-          filename: attachment.name,
-          content: {
-            uri: attachment.uri,
-            type: mime.getType(attachment.uri) || 'application/octet-stream',
+    // thu-learn-lib's session handling, as for its own requests: the login
+    // page of a session that expired meanwhile (NOT_LOGGED_IN from
+    // checkHomeworkSubmitResponse) logs in again and sends it once more, with
+    // the new session's CSRF token.
+    await helper.withSession(async () => {
+      const { url, body } = await helper.getHomeworkSubmitRequest(
+        studentHomeworkId,
+        {
+          content,
+          attachment: attachment && {
+            filename: attachment.name,
+            content: {
+              uri: attachment.uri,
+              type: mime.getType(attachment.uri) || 'application/octet-stream',
+            },
           },
+          removeAttachment: remove,
         },
-        removeAttachment: remove,
-      },
-    );
-    const res = await axios.post<string>(url, body, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-      // Read as text: an expired session answers with the login page.
-      responseType: 'text',
-      transformResponse: data => data,
-      onUploadProgress: e => {
-        // Two decimals are plenty for a progress bar.
-        onProgress?.(
-          Math.round((e.total ? e.loaded / e.total : 0) * 100) / 100,
-        );
-      },
+      );
+      const res = await axios.post<string>(url, body, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        // Read as text: an expired session answers with the login page.
+        responseType: 'text',
+        transformResponse: data => data,
+        onUploadProgress: e => {
+          // Two decimals are plenty for a progress bar.
+          onProgress?.(
+            Math.round((e.total ? e.loaded / e.total : 0) * 100) / 100,
+          );
+        },
+      });
+      checkHomeworkSubmitResponse(res.data);
     });
-    checkHomeworkSubmitResponse(res.data);
   },
   prepareFileDownload: async () => {},
 };

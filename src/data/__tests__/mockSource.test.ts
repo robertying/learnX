@@ -1,6 +1,7 @@
 import { ContentType, FailReason, Language } from '@robertying/thu-learn-lib';
 import {
   defaultMockNetworkConfig,
+  getMockNetworkConfig,
   MOCK_TIMEOUT_MS,
   mockDownloadFile,
   mockSource,
@@ -186,6 +187,26 @@ describe('mockSource', () => {
     await expect(mockSource.getSemesterIdList()).resolves.toEqual(
       mockSemesters,
     );
+  });
+
+  it('runs a request sent outside it once, the session never expiring', async () => {
+    const send = jest.fn(() => Promise.resolve('sent'));
+    await expect(mockSource.withSession(send)).resolves.toBe('sent');
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects only the next so many logins when given a count', async () => {
+    setMockNetworkConfig({ loginFails: 2 });
+    await expect(mockSource.getSemesterIdList()).resolves.toEqual(
+      mockSemesters,
+    );
+    for (const left of [1, 0]) {
+      await expect(mockSource.login()).rejects.toEqual({
+        reason: FailReason.BAD_CREDENTIAL,
+      });
+      expect(getMockNetworkConfig().loginFails).toBe(left);
+    }
+    await expect(mockSource.login()).resolves.toBeUndefined();
   });
 
   it('reports upload progress when submitting', async () => {

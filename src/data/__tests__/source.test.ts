@@ -68,6 +68,14 @@ jest.mock('@robertying/thu-learn-lib', () => ({
     getCSRFToken = () => 'token';
     login = (credential?: unknown) => mockLogin(credential);
     ensureSession = () => mockEnsureSession();
+    // thu-learn-lib's: sends once more after NOT_LOGGED_IN.
+    withSession = (send: () => Promise<unknown>) =>
+      send().catch((error: { reason?: unknown }) => {
+        if (error?.reason !== 'not logged in or login timeout') {
+          throw error;
+        }
+        return send();
+      });
     markNotificationRead = (notification: unknown) =>
       mockMarkNotificationRead(notification);
     // These call this file's consts only once a test runs.
@@ -125,14 +133,26 @@ describe('submitAssignment', () => {
     );
   });
 
-  it('fails on the login redirect page an expired session gets', async () => {
-    post.mockResolvedValueOnce({
-      status: 200,
-      data: '<html><body><p>您未登录或登录失效</p></body></html>',
-    });
+  const loginPage = {
+    status: 200,
+    data: '<html><body><p>您未登录或登录失效</p></body></html>',
+  };
+
+  it('sends again, with a new request, once thu-learn-lib renews an expired session', async () => {
+    post
+      .mockResolvedValueOnce(loginPage)
+      .mockResolvedValueOnce({ status: 200, data: '{"result":"success"}' });
+    await expect(submit()).resolves.toBeUndefined();
+    expect(mockGetSubmitRequest).toHaveBeenCalledTimes(2);
+    expect(post).toHaveBeenCalledTimes(2);
+  });
+
+  it('fails when the renewed session gets the login page too', async () => {
+    post.mockResolvedValueOnce(loginPage).mockResolvedValueOnce(loginPage);
     await expect(submit()).rejects.toMatchObject({
       reason: FailReason.NOT_LOGGED_IN,
     });
+    expect(post).toHaveBeenCalledTimes(2);
   });
 
   it('fails with the server message on an error result', async () => {
