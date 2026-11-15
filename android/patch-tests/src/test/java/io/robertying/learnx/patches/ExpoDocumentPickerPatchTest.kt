@@ -18,7 +18,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 
 /**
- * What patches/expo-document-picker@58.0.4.patch changes: files are picked with ACTION_GET_CONTENT, which lists cloud
+ * What patches/expo-document-picker@58.0.5.patch changes: files are picked with ACTION_GET_CONTENT, which lists cloud
  * and local providers (and apps) alike, instead of ACTION_OPEN_DOCUMENT.
  */
 @RunWith(RobolectricTestRunner::class)

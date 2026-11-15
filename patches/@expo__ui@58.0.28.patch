@@ -79,7 +79,7 @@ index 2a4ce000d3ac0d08d57eab9a8bd1490758b68e27..9037d4da9155ca8275d5c01f997fde68
  internal data class LayoutContentEvent(
    @Field
 diff --git a/android/src/main/java/expo/modules/ui/ModifierRegistry.kt b/android/src/main/java/expo/modules/ui/ModifierRegistry.kt
-index b1431d5c60665f8ea1708d1cde2e7d703e8efe97..52d81330d9300ddff0c14d015b09d4858e03a4c5 100644
+index debff9b0bc7bcf9b7658b2bedae17aa759292fd3..6ce81b4e3ae8d7be1034b489546e674735594fae 100644
 --- a/android/src/main/java/expo/modules/ui/ModifierRegistry.kt
 +++ b/android/src/main/java/expo/modules/ui/ModifierRegistry.kt
 @@ -70,6 +70,7 @@ import androidx.compose.ui.platform.LocalDensity
@@ -123,7 +123,7 @@ index 6c36d1fcad46d12b693fe962b8594534b8fb2cbe..aa6fb62127a3105ac3647cf981eb3c16
  
  internal fun String?.toContentType(): ContentType? = when (this) {
 diff --git a/build/jetpack-compose/modifiers/index.d.ts b/build/jetpack-compose/modifiers/index.d.ts
-index 7326d9b5413e66478b1900db60a4a721d3e4e407..e4cc0cb6ba1430cd256d56cffeb781ce4da3279d 100644
+index 5a667d6d91731ca9a9e99ea08d84cad17c853ae9..bdfe3bb2288d2146e4431a162a9e03ad08dba678 100644
 --- a/build/jetpack-compose/modifiers/index.d.ts
 +++ b/build/jetpack-compose/modifiers/index.d.ts
 @@ -344,6 +344,10 @@ export type SemanticsConfig = {
@@ -206,7 +206,7 @@ index 23a980a2a1cb9deb335d6e26f5ffbaf67b8afe2a..e057ed82dc6bb31c64e594495fa4381c
    var onButtonPress = EventDispatcher()
  }
 diff --git a/src/jetpack-compose/modifiers/index.ts b/src/jetpack-compose/modifiers/index.ts
-index 08143ae8a3dec00e5e38b6dc9854ba651e3943bb..7d4c42e5533389245958045155919c3b960b4362 100644
+index 91a0e72da596dd78b8301a11a94bd38f0d8beff1..e14554027afed3cc80484e56b7bd98a66f1c0ebd 100644
 --- a/src/jetpack-compose/modifiers/index.ts
 +++ b/src/jetpack-compose/modifiers/index.ts
 @@ -488,6 +488,10 @@ export type SemanticsConfig = {

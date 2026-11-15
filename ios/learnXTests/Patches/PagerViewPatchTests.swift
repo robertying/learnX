@@ -4,7 +4,7 @@ import UIKit
 
 @testable import react_native_pager_view
 
-/// What patches/react-native-pager-view@10.0.0.patch changes: a scroll view that key-value observing has already
+/// What patches/react-native-pager-view@10.0.2.patch changes: a scroll view that key-value observing has already
 /// subclassed (Mac Catalyst's window observes them for its toolbar) keeps its class. A subclass of KVO's subclass
 /// broke KVO, and SwiftUI then crashed in course details.
 @MainActor
