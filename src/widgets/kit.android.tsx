@@ -66,6 +66,13 @@ export function widgetKit() {
     colors,
     openUrl,
     /**
+     * What TalkBack reads for a row, as one sentence without the dots
+     * (handled by our patch too).
+     */
+    spoken: (...parts: string[]) => [
+      { $type: 'contentDescription', text: parts.filter(Boolean).join(', ') },
+    ],
+    /**
      * Whether the system language is Chinese, for the text shown before the
      * app has sent its translated strings.
      */

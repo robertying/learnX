@@ -31,11 +31,16 @@ for patch in patches/*.patch; do
     missing=1
   fi
   # Expo ships some modules' Android code prebuilt (local-maven-repo), and the
-  # app links that instead of the patched sources unless the package is in
-  # expo.autolinking.android.buildFromSource (package.json).
+  # app links that instead of the patched sources unless the module's Gradle
+  # project is in expo.autolinking.android.buildFromSource (package.json).
+  # Autolinking matches those entries, as regular expressions, against the
+  # project's name: the package name without its scope's "@", "/" as "-"
+  # (@expo/ui is expo-ui).
+  project=$(echo "$package" | sed 's|^@||; s|/|-|')
+  # shellcheck disable=SC2016 # ${entry} is a JavaScript template literal, for Node.
   if [ -d "node_modules/$package/local-maven-repo" ] && grep -q '^diff --git a/android/' "$patch" &&
-    ! "$node" -e 'process.exit(require("./package.json").expo.autolinking.android.buildFromSource.includes(process.argv[1]) ? 0 : 1)' "$package"; then
-    echo "error: $patch changes Android code that $package ships prebuilt. Add it to expo.autolinking.android.buildFromSource in package.json." >&2
+    ! "$node" -e 'process.exit(require("./package.json").expo.autolinking.android.buildFromSource.some((entry) => new RegExp(`^(?:${entry})$`).test(process.argv[1])) ? 0 : 1)' "$project"; then
+    echo "error: $patch changes Android code that $package ships prebuilt. Add $project to expo.autolinking.android.buildFromSource in package.json." >&2
     missing=1
   fi
 done

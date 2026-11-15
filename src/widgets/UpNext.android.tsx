@@ -92,7 +92,17 @@ function UpNextWidget(
       </Text>
       <Spacer modifiers={[height(4)]} />
       {featured ? (
-        <Column modifiers={[fillMaxWidth(), ...kit.openUrl(featured.url)]}>
+        <Column
+          modifiers={[
+            fillMaxWidth(),
+            ...kit.openUrl(featured.url),
+            ...kit.spoken(
+              featured.courseName,
+              when(featured),
+              featured.location,
+            ),
+          ]}
+        >
           <Text
             color={colors.title}
             style={{ fontSize: 16, fontWeight: 'bold' }}
@@ -118,7 +128,14 @@ function UpNextWidget(
         </Box>
       )}
       {following.map((c, i) => (
-        <Column key={c.key} modifiers={[fillMaxWidth(), ...kit.openUrl(c.url)]}>
+        <Column
+          key={c.key}
+          modifiers={[
+            fillMaxWidth(),
+            ...kit.openUrl(c.url),
+            ...kit.spoken(i === 0 ? props.later : '', c.courseName, when(c)),
+          ]}
+        >
           <Spacer modifiers={[height(i === 0 ? 6 : 2)]} />
           <Text color={colors.caption} style={{ fontSize: 12 }} maxLines={1}>
             {i === 0

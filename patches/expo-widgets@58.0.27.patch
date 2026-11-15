@@ -1,5 +1,5 @@
 diff --git a/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt b/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt
-index 3df9e4a4d92155a00d3f5652d17d20be10bef1c1..fe6e492d5ed73e7b5bf00e4314251a3ba5205328 100644
+index 3df9e4a4d92155a00d3f5652d17d20be10bef1c1..2b6062d2c7d6fe2039684ba231365b4ab6283611 100644
 --- a/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt
 +++ b/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt
 @@ -4,6 +4,8 @@ package expo.modules.widgets
@@ -20,7 +20,7 @@ index 3df9e4a4d92155a00d3f5652d17d20be10bef1c1..fe6e492d5ed73e7b5bf00e4314251a3b
  import androidx.glance.appwidget.CheckboxDefaults
  import androidx.glance.appwidget.cornerRadius
  import androidx.glance.appwidget.EmittableCheckBox
-@@ -419,6 +423,15 @@ private fun ModifierType.toPeekModifier(converterContext: ConverterContext): Gla
+@@ -419,6 +423,20 @@ private fun ModifierType.toPeekModifier(converterContext: ConverterContext): Gla
      "background" -> asRecord<BackgroundParams>(converterContext)?.color?.toGlanceColorProvider()
        ?.let { GlanceModifier.background(it) }
      "cornerRadius" -> asRecord<CornerRadiusParams>(converterContext)?.let { GlanceModifier.cornerRadius(it.radius.dp) }
@@ -32,6 +32,11 @@ index 3df9e4a4d92155a00d3f5652d17d20be10bef1c1..fe6e492d5ed73e7b5bf00e4314251a3b
 +      val context = converterContext.applicationContext
 +      val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).setPackage(context.packageName)
 +      GlanceModifier.clickable(actionStartActivity(intent))
++    }
++    // learnX: `{ $type: 'contentDescription', text }` is what TalkBack reads for the view instead of its texts, e.g.
++    // a widget row as one sentence.
++    "contentDescription" -> this["text"]?.asString()?.let { text ->
++      GlanceModifier.semantics { contentDescription = text }
 +    }
      // Unsupported Expo UI modifiers are ignored until they have exact Glance semantics.
      else -> null

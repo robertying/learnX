@@ -8,8 +8,37 @@ struct ContextMenuAction: Record {
 }
 
 /// Shows a menu of actions for its content on right-click (Mac, iPad with a pointer) or long press (iPad).
+///
+/// With `keyboardFocusable`, it also takes keyboard focus, as rows do in Mail: Tab moves focus into the list, the
+/// arrow keys between its rows (UIKit's focus system, which draws the focus ring and scrolls to the focused row), and
+/// Return or Space sends `onPrimaryAction`.
 final class ContextMenuView: ExpoView, UIContextMenuInteractionDelegate {
   let onAction = EventDispatcher()
+  let onPrimaryAction = EventDispatcher()
+
+  var keyboardFocusable = false {
+    didSet {
+      focusEffect = keyboardFocusable ? UIFocusHaloEffect() : nil
+      if !keyboardFocusable, isFocused {
+        setNeedsFocusUpdate()
+      }
+    }
+  }
+
+  override var canBecomeFocused: Bool { keyboardFocusable }
+
+  /// Whether a key opens the focused row: Return, Enter or Space.
+  static func opens(_ key: UIKeyboardHIDUsage) -> Bool {
+    key == .keyboardReturnOrEnter || key == .keypadEnter || key == .keyboardSpacebar
+  }
+
+  override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+    guard isFocused, presses.contains(where: { $0.key.map { Self.opens($0.keyCode) } ?? false }) else {
+      super.pressesBegan(presses, with: event)
+      return
+    }
+    onPrimaryAction()
+  }
 
   private var actions: [ContextMenuAction] = []
   private lazy var interaction = UIContextMenuInteraction(delegate: self)

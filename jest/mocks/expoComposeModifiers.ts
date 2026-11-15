@@ -25,16 +25,19 @@ export const selectable = (
 });
 
 /**
- * What TalkBack reads, as the stand-in's accessibility label, and the
- * Autofill content type, which text field stand-ins pass on.
+ * What TalkBack reads, as the stand-in's accessibility label, the Autofill
+ * content type, which text field stand-ins pass on, and whether it is a
+ * heading (the `Text` stand-in's header role).
  */
 export const semantics = ({
   contentDescription,
   contentType,
+  heading,
 }: {
   contentDescription?: string;
   contentType?: string;
-}) => ({ accessibilityLabel: contentDescription, contentType });
+  heading?: boolean;
+}) => ({ accessibilityLabel: contentDescription, contentType, heading });
 
 const layout = () => undefined;
 /** Read by the button stand-ins, as their style. */

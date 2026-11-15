@@ -13,6 +13,8 @@ import androidx.glance.action.ActionModifier
 import androidx.glance.appwidget.AppWidgetId
 import androidx.glance.appwidget.action.StartActivityIntentAction
 import androidx.glance.layout.EmittableBox
+import androidx.glance.semantics.SemanticsModifier
+import androidx.glance.semantics.SemanticsProperties
 import com.facebook.react.bridge.DynamicFromObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -26,9 +28,10 @@ import org.robolectric.annotation.Config
 
 /**
  * What patches/expo-widgets@58.0.27.patch changes on Android: tapping a widget opens the app, an `openUrl` modifier
- * opens a link in the app, an `appWidgetBackground` modifier marks the background, and layouts get the locale, the
- * text size setting, the launcher's widget corner radius and their size. The library keeps these internal, so
- * they're reached by reflection. (The size is passed only with a layout, which needs the widgets' JS runtime.)
+ * opens a link in the app, an `appWidgetBackground` modifier marks the background, a `contentDescription` modifier
+ * sets what TalkBack reads, and layouts get the locale, the text size setting, the launcher's widget corner radius
+ * and their size. The library keeps these internal, so they're reached by reflection. (The size is passed only with a
+ * layout, which needs the widgets' JS runtime.)
  */
 @RunWith(RobolectricTestRunner::class)
 class ExpoWidgetsPatchTest {
@@ -123,5 +126,17 @@ class ExpoWidgetsPatchTest {
     assertEquals(Intent.ACTION_VIEW, intent.action)
     assertEquals(Uri.parse("learnx://assignment/1"), intent.data)
     assertEquals(context.packageName, intent.`package`)
+  }
+
+  @Test
+  fun contentDescriptionModifierSetsWhatTalkBackReads() {
+    val modifier = peekModifier("\$type" to "contentDescription", "text" to "Assignment, 3 PM, Course")
+    val semantics = checkNotNull(
+      modifier.foldIn<SemanticsModifier?>(null) { found, element -> found ?: element as? SemanticsModifier },
+    )
+    assertEquals(
+      listOf("Assignment, 3 PM, Course"),
+      semantics.configuration.getOrNull(SemanticsProperties.ContentDescription),
+    )
   }
 }

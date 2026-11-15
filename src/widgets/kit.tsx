@@ -1,5 +1,7 @@
 import { HStack, Spacer, Text, VStack } from '@expo/ui/swift-ui';
 import {
+  accessibilityHidden,
+  accessibilityLabel,
   containerBackground,
   environment,
   font,
@@ -172,7 +174,13 @@ export function widgetKit() {
       <HStack spacing={0}>
         {title ? (
           <Text
-            modifiers={[font({ textStyle }), lineLimit(1), layoutPriority(2)]}
+            modifiers={[
+              font({ textStyle }),
+              lineLimit(1),
+              layoutPriority(2),
+              // VoiceOver reads the row as one element, without the dots.
+              accessibilityLabel(title),
+            ]}
           >
             {`${title} · `}
           </Text>
@@ -183,7 +191,14 @@ export function widgetKit() {
           </Text>
         ) : null}
         {courseName ? (
-          <Text modifiers={[font({ textStyle }), secondary, layoutPriority(1)]}>
+          <Text
+            modifiers={[
+              font({ textStyle }),
+              secondary,
+              layoutPriority(1),
+              accessibilityHidden(true),
+            ]}
+          >
             {' · '}
           </Text>
         ) : null}

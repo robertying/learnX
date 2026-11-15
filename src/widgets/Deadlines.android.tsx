@@ -102,7 +102,12 @@ function DeadlinesWidget(
       {deadlines.map(item => (
         <Column
           key={item.id}
-          modifiers={[fillMaxWidth(), paddingAll(2), ...kit.openUrl(item.url)]}
+          modifiers={[
+            fillMaxWidth(),
+            paddingAll(2),
+            ...kit.openUrl(item.url),
+            ...kit.spoken(item.title, item.due, item.courseName),
+          ]}
         >
           <Text
             color={colors.title}
