@@ -24,6 +24,7 @@ import { errorReason, isBadCredential, isNetworkError } from 'helpers/errors';
 import env from 'helpers/env';
 import { isMockUser } from 'helpers/mock';
 import { retry } from 'helpers/retry';
+import { waitAtMost } from 'helpers/waitAtMost';
 
 /**
  * Makes the saved data `username`'s: when it belonged to someone else, or to
@@ -75,7 +76,11 @@ export async function login({
   fingerGenPrint3 = '',
   resume = false,
 }: Partial<Credentials> & { resume?: boolean }) {
-  if (username && (!password || !fingerPrint)) {
+  const given: Credentials | undefined =
+    username && password && fingerPrint
+      ? { username, password, fingerPrint, fingerGenPrint, fingerGenPrint3 }
+      : undefined;
+  if (username && !given) {
     // SSO didn't capture the login: signing in with the saved one instead
     // would log in as someone else, so this login just fails.
     useAuthStore.setState({
@@ -102,18 +107,8 @@ export async function login({
       () =>
         resume
           ? dataSource.ensureSession()
-          : loginWithFingerPrint(
-              // An incomplete login signs in with the saved one.
-              username && password && fingerPrint
-                ? {
-                    username,
-                    password,
-                    fingerPrint,
-                    fingerGenPrint,
-                    fingerGenPrint3,
-                  }
-                : undefined,
-            ),
+          : // Without a given login, signs in with the saved one.
+            loginWithFingerPrint(given),
       {
         // A wrong password won't become right, and repeated tries may lock
         // the account.
@@ -121,15 +116,9 @@ export async function login({
       },
     );
 
-    if (username && password && fingerPrint) {
+    if (given) {
       // A failed write keeps the login for this session only.
-      await saveCredentials({
-        username,
-        password,
-        fingerPrint,
-        fingerGenPrint,
-        fingerGenPrint3,
-      }).catch(() => undefined);
+      await saveCredentials(given).catch(() => undefined);
     }
     const account = username ?? getCredentials()?.username;
     if (account) {
@@ -196,14 +185,7 @@ export async function logout() {
   // gets a moment to end the session before its cookies are dropped.
   const serverLogout = dataSource.logout().catch(() => {});
   endSession();
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  await Promise.race([
-    serverLogout,
-    new Promise(resolve => {
-      timer = setTimeout(resolve, SERVER_LOGOUT_WAIT_MS);
-    }),
-  ]);
-  clearTimeout(timer);
+  await waitAtMost(serverLogout, SERVER_LOGOUT_WAIT_MS);
   await Promise.all([
     clearSessionCookies().catch(() => {}),
     clearAccountData(),

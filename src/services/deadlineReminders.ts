@@ -1,4 +1,3 @@
-import { isShownBy } from 'helpers/shown';
 import dayjs from 'dayjs';
 import * as Notifications from 'expo-notifications';
 import { Assignment, NotificationSettings } from 'data/types/state';
@@ -15,6 +14,7 @@ import {
   dateTrigger,
   reconcileScheduled,
 } from 'services/scheduledNotifications';
+import { isShownBy } from 'helpers/shown';
 import { capitalize } from 'helpers/text';
 import { upcomingDeadlines, WidgetDeadline } from 'helpers/widgetDeadlines';
 
@@ -33,6 +33,10 @@ const PREFIX = DEADLINE_REMINDER_PREFIX;
  * plan, so syncing the reminders leaves it alone.
  */
 const LATER_PREFIX = 'deadline-later:';
+
+/** Whether a scheduled notification is a deadline reminder, put off or not. */
+const isDeadlineReminder = (identifier: string) =>
+  identifier.startsWith(PREFIX) || identifier.startsWith(LATER_PREFIX);
 
 /** How long Remind Later puts a reminder off. */
 const LATER_MINUTES = 60;
@@ -108,8 +112,9 @@ const lateWindows = (
 
 /**
  * The reminders to have scheduled, the earliest first, at most
- * `MAX_REMINDERS` (fewer with class reminders on): one per open assignment `offset` minutes before its
- * deadline; and for one that takes late submissions, one when its deadline
+ * `MAX_REMINDERS` (fewer with class reminders on): one per open assignment
+ * `offset` minutes before its deadline; and for one that takes late
+ * submissions, one when its deadline
  * passes and one `offset` minutes before the late submission deadline (if
  * that's after the deadline). Reminders whose time has passed are left out.
  */
@@ -265,7 +270,7 @@ export const syncDeadlineReminders = async (
   const wantedLater = new Set(open);
 
   await reconcileScheduled(
-    id => id.startsWith(PREFIX) || id.startsWith(LATER_PREFIX),
+    isDeadlineReminder,
     plan.map(r => ({
       identifier: r.identifier,
       content: reminderContent(r.deadline, r.date, r.kind),
@@ -277,7 +282,7 @@ export const syncDeadlineReminders = async (
 
 /** Cancels every reminder, e.g. when logging out. */
 export const cancelDeadlineReminders = () =>
-  cancelScheduled(id => id.startsWith(PREFIX) || id.startsWith(LATER_PREFIX));
+  cancelScheduled(isDeadlineReminder);
 
 /**
  * Cancels the reminders of these assignments, e.g. when they are archived
@@ -285,12 +290,10 @@ export const cancelDeadlineReminders = () =>
  */
 export const cancelDeadlineRemindersOf = (assignmentIds: string[]) => {
   const ids = new Set(assignmentIds);
-  return cancelScheduled(identifier => {
-    const [prefix, id] = identifier.split(':');
-    return (
-      (`${prefix}:` === PREFIX || `${prefix}:` === LATER_PREFIX) && ids.has(id)
-    );
-  });
+  return cancelScheduled(
+    identifier =>
+      isDeadlineReminder(identifier) && ids.has(identifier.split(':')[1]),
+  );
 };
 
 /**

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { persistStorage } from 'data/storage';
+import storeVersions from 'data/storeVersions.json';
 import { defaultSwipeSettings } from 'helpers/cardActions';
 import { SettingsState } from 'data/types/state';
 
@@ -66,7 +67,7 @@ export const useSettingsStore = create<SettingsState>()(
     name: SETTINGS_KEY,
     // Earlier versions only ran in development builds; 18.0.x's settings
     // come in through `data/legacy`.
-    version: 3,
+    version: storeVersions[SETTINGS_KEY],
     storage: persistStorage,
     merge: (saved, current) =>
       mergeSettings(current, (saved ?? {}) as Partial<SettingsState>),

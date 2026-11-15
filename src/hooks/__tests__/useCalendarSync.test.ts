@@ -37,10 +37,6 @@ beforeEach(() => {
   resetSettings();
 });
 
-afterEach(() => {
-  jest.useRealTimers();
-});
-
 describe('useCourseScheduleSync', () => {
   it('asks for access, turns the sync on and waits for the surfaces to write', async () => {
     const { result } = await renderHook(() => useCourseScheduleSync());

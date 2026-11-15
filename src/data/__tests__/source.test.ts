@@ -369,3 +369,7 @@ describe('failed requests', () => {
     expect(dataSource.getCSRFToken()).toBe(mockSource.getCSRFToken());
   });
 });
+
+it("isn't taken for a promise, having no then", async () => {
+  await expect(Promise.resolve(dataSource)).resolves.toBe(dataSource);
+});

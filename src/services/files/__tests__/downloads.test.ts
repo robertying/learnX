@@ -1,5 +1,5 @@
 import { Platform } from 'react-native';
-import Share from '../../../../modules/share';
+import Share from 'modules/share';
 import CookieManager from '@preeternal/react-native-cookie-manager';
 import { dataSource, ensureSession } from 'data/source';
 import { getCachedCourses } from 'data/queries';

@@ -1,6 +1,7 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import dayjs from 'dayjs';
+import * as Updates from 'expo-updates';
 import { t } from 'helpers/i18n';
 import { loginRetryDelay } from 'helpers/loginRetry';
 import { toast } from 'components/Toast';
@@ -9,6 +10,7 @@ import { getAuth, useAuthStore } from 'data/auth';
 import { login } from 'data/login';
 import { queryClient } from 'data/queryClient';
 import { flushServerActionsWithin } from 'data/serverActions';
+import { updateOnReturn } from 'services/ota';
 
 /** How long the waiting server actions may hold up the refetch on return. */
 const FLUSH_BEFORE_REFETCH_MS = 3_000;
@@ -44,8 +46,10 @@ const canLogIn = () => {
  * the server still accepts it), and when it comes back without a session.
  * While the server can't be reached, it also retries on its own, less and
  * less often, as long as the app is open. This is the one place that handles
- * coming back to the app: the session first, then, with a session, the
- * waiting server actions, then the open lists that are out of date.
+ * coming back to the app: an over-the-air update first (`services/ota`), which
+ * when one starts leaves the rest to the reloaded app, then the session, then,
+ * with a session, the waiting server actions, then the open lists that are out
+ * of date.
  */
 const useReLogin = () => {
   const appState = useRef(AppState.currentState);
@@ -56,6 +60,7 @@ const useReLogin = () => {
   const failure = useAuthStore(state => state.failure);
   const loggingIn = useAuthStore(state => state.loggingIn);
   const reloginRequested = useAuthStore(state => state.reloginRequested);
+  const { isUpdatePending } = Updates.useUpdates();
 
   const handleReLogin = useEffectEvent(async () => {
     if (!canLogIn()) {
@@ -80,6 +85,14 @@ const useReLogin = () => {
     }
   });
 
+  const handleReturn = useEffectEvent(async () => {
+    const away = dayjs().diff(lastActiveTime.current);
+    if (await updateOnReturn(away, isUpdatePending)) {
+      return;
+    }
+    await handleReLogin();
+  });
+
   useEffect(() => {
     void handleReLogin();
 
@@ -92,7 +105,7 @@ const useReLogin = () => {
         appState.current?.match(/inactive|background/) &&
         nextAppState === 'active'
       ) {
-        void handleReLogin();
+        void handleReturn();
       }
 
       appState.current = nextAppState;

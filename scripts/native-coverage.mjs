@@ -1,6 +1,8 @@
 // Prints a line coverage table of learnX's own native sources from the
 // `xcrun xccov view --report --json` reports on stdin (one or more, back to
-// back), keeping each file's best run. Used by scripts/test-ios.sh.
+// back), keeping each file's best run, and names the own sources that no
+// report has (no test target builds them). Used by scripts/test-ios.sh.
+import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { relative } from 'node:path';
 import { coverageTable } from './lib/coverage-table.mjs';
@@ -30,6 +32,7 @@ const own = path =>
   (path.startsWith('modules/') || path.startsWith('ios/')) &&
   !path.includes('/Tests/') &&
   !path.startsWith('ios/learnXTests/') &&
+  !path.startsWith('ios/learnXUITests/') &&
   !path.startsWith('ios/Pods/') &&
   // The widgets' layouts come from JS (src/widgets), which Jest tests.
   !path.startsWith('ios/ExpoWidgetsTarget/') &&
@@ -47,6 +50,13 @@ for (const report of reports) {
   }
 }
 
+const untested = execFileSync('git', ['ls-files', '*.swift'], {
+  cwd: root,
+  encoding: 'utf8',
+})
+  .split('\n')
+  .filter(path => own(path) && !files.has(path));
+
 const rows = [...files.entries()]
   .sort(([a], [b]) => a.localeCompare(b))
   .map(([path, file]) => ({
@@ -54,4 +64,4 @@ const rows = [...files.entries()]
     covered: file.coveredLines,
     executable: file.executableLines,
   }));
-console.log(coverageTable(rows).join('\n'));
+console.log(coverageTable(rows, untested).join('\n'));

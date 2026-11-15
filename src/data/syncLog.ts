@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { persistStorage } from 'data/storage';
+import storeVersions from 'data/storeVersions.json';
 import type { ContentListName } from 'data/types/state';
 
 export const SYNC_LOG_KEY = 'syncLog';
@@ -27,7 +28,7 @@ export interface SyncRun {
 export const useSyncLogStore = create<{ runs: SyncRun[] }>()(
   persist(() => ({ runs: [] as SyncRun[] }), {
     name: SYNC_LOG_KEY,
-    version: 1,
+    version: storeVersions[SYNC_LOG_KEY],
     storage: persistStorage,
   }),
 );

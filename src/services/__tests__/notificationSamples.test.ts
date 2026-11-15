@@ -101,6 +101,15 @@ it('posts them all', async () => {
   );
 });
 
+it('posts no reminders without an assignment to name', async () => {
+  const posted = await postNotificationSamples({
+    ...(lists as object),
+    assignments: [],
+  } as never);
+  expect(posted).toBe(jest.mocked(postNotification).mock.calls.length);
+  expect(Notifications.scheduleNotificationAsync).not.toHaveBeenCalled();
+});
+
 describe('previewScheduledReminder', () => {
   const scheduled = jest.mocked(
     Notifications.getAllScheduledNotificationsAsync,

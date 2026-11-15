@@ -1,10 +1,10 @@
 #!/bin/bash
 # Build the release JS bundles (Android and iOS) as the release builds do, and
 # fail if either contains a .env value it must not: anything but the mock
-# login (DUMMY_*), as fastlane's release lanes also check. It catches what Jest
-# can't: a Babel or Metro config change that breaks the production build, a
-# broken import in a file no test loads, and a .env value leaking into a
-# release bundle (babel/inline-env.js).
+# login (DUMMY_*), with scripts/check-bundle-env.mjs, which fastlane's build
+# lanes also run. It catches what Jest can't: a Babel or Metro config change
+# that breaks the production build, a broken import in a file no test loads,
+# and a .env value leaking into a release bundle (babel/inline-env.js).
 #
 #   scripts/check-release-bundle.sh
 #
@@ -43,30 +43,4 @@ for platform in android ios; do
   }
 done
 
-# Every .env value but the mock login's, as fastlane checks it: values shorter
-# than 4 characters would match by chance.
-node --input-type=module - "$out/android.bundle" "$out/ios.bundle" <<'JS'
-import { readFileSync } from 'node:fs';
-import dotenv from 'dotenv';
-
-const env = dotenv.parse(readFileSync('.env'));
-const secrets = Object.entries(env).filter(
-  ([key, value]) => !key.startsWith('DUMMY_') && value.length >= 4,
-);
-let leaked = false;
-for (const bundle of process.argv.slice(2)) {
-  const code = readFileSync(bundle, 'utf8');
-  for (const [key, value] of secrets) {
-    if (code.includes(value)) {
-      console.error(`${bundle} contains the .env value of ${key}`);
-      leaked = true;
-    }
-  }
-  if (!code.includes(env.DUMMY_USERNAME ?? '\0')) {
-    console.error(`${bundle} doesn't contain the mock login: .env wasn't inlined`);
-    leaked = true;
-  }
-}
-if (leaked) process.exit(1);
-console.log(`No .env secrets in the release bundles (checked ${secrets.length} values)`);
-JS
+node scripts/check-bundle-env.mjs "$out/android.bundle" "$out/ios.bundle"

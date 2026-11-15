@@ -2,7 +2,7 @@ import * as BackgroundTask from 'expo-background-task';
 import * as TaskManager from 'expo-task-manager';
 import { AppState } from 'react-native';
 import { ensureSession } from 'data/source';
-import { loadCredentials } from 'data/credentials';
+import { hasSavedLogin, loadCredentials } from 'data/credentials';
 import { coursesQuery, schoolSemesterQuery } from 'data/queries';
 import { queryClient, restoreQueryCache } from 'data/queryClient';
 import { applyLatestSemester, getUserData } from 'data/userData';
@@ -27,6 +27,7 @@ import {
 import { refreshSurfaces } from 'services/surfaces';
 import { calendarWeekQuery } from 'data/schedule';
 import { startOfWeek } from 'helpers/schedule';
+import { waitAtMost } from 'helpers/waitAtMost';
 import { beijingDate } from 'helpers/serverTime';
 
 export type SyncResult =
@@ -85,20 +86,15 @@ const refreshTimetable = async (deadline: number) => {
     if (left < TIMETABLE_MIN_MS) {
       return;
     }
-    let timer: ReturnType<typeof setTimeout> | undefined;
     try {
-      await Promise.race([
+      await waitAtMost(
         queryClient.fetchQuery(
           calendarWeekQuery(week.format('YYYY-MM-DD'), graduate),
         ),
-        new Promise<void>(resolve => {
-          timer = setTimeout(resolve, left);
-        }),
-      ]);
+        left,
+      );
     } catch {
       // Kept as it was; Today shows the saved week and tries again.
-    } finally {
-      clearTimeout(timer);
     }
   }
 };
@@ -155,13 +151,7 @@ export const syncContent = async ({
     shownSemester &&
     queryClient.getQueryData(coursesQuery(shownSemester).queryKey);
 
-  if (
-    !shownSemester ||
-    !credentials?.username ||
-    !credentials.password ||
-    !credentials.fingerPrint ||
-    !courses?.length
-  ) {
+  if (!shownSemester || !hasSavedLogin(credentials) || !courses?.length) {
     return record({ status: 'skipped' });
   }
 

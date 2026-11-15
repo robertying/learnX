@@ -1,5 +1,4 @@
 import ExpoModulesCore
-import FirebaseCrashlytics
 
 struct JSStackFrame: Record {
   @Field var symbol: String = ""
@@ -8,25 +7,40 @@ struct JSStackFrame: Record {
   @Field var column: Int = 0
 
   /// A frame only has a line, and symbolicating needs the column too, so it goes with the file.
-  var stackFrame: StackFrame {
-    StackFrame(symbol: symbol, file: "\(file):\(line):\(column)", line: line)
+  var crashFrame: CrashFrame {
+    CrashFrame(symbol: symbol, file: "\(file):\(line):\(column)", line: line)
   }
 }
 
-/// What the module asks of Crashlytics, so tests can record into a fake.
-protocol CrashReporter {
-  func record(exceptionModel: ExceptionModel)
-  func log(_ msg: String)
-  func setCustomValue(_ value: Any?, forKey key: String)
+/// One frame of a reported error's stack.
+public struct CrashFrame: Equatable, Sendable {
+  public let symbol: String
+  public let file: String
+  public let line: Int
+
+  public init(symbol: String, file: String, line: Int) {
+    self.symbol = symbol
+    self.file = file
+    self.line = line
+  }
 }
 
-extension Crashlytics: CrashReporter {}
+/// What the module asks of Crashlytics. The app links Firebase as a Swift package, which a pod can't import, so the
+/// app sets `CrashlyticsModule.reporter` to Crashlytics at launch; tests record into a fake.
+public protocol CrashReporter: Sendable {
+  func recordError(name: String, reason: String, frames: [CrashFrame])
+  func log(_ message: String)
+  func setCustomValue(_ value: String, forKey key: String)
+}
 
 /// Reports JavaScript errors to Crashlytics with their JS frames as the stack, so the console shows where they
 /// happened in the bundle instead of the native frames that reported them.
 public final class CrashlyticsModule: Module {
-  /// Crashlytics itself; tests use a fake.
-  lazy var reporter: CrashReporter = Crashlytics.crashlytics()
+  /// Set once by the app at launch, before JavaScript runs; nil reports nothing (the modules' test host).
+  nonisolated(unsafe) public static var reporter: CrashReporter?
+
+  /// The app's reporter; tests use a fake.
+  lazy var reporter: CrashReporter? = Self.reporter
 
   public func definition() -> ModuleDefinition {
     Name("Crashlytics")
@@ -37,16 +51,14 @@ public final class CrashlyticsModule: Module {
   }
 
   func recordError(name: String, message: String, frames: [JSStackFrame]) {
-    let exception = ExceptionModel(name: name, reason: message)
-    exception.stackTrace = frames.map(\.stackFrame)
-    reporter.record(exceptionModel: exception)
+    reporter?.recordError(name: name, reason: message, frames: frames.map(\.crashFrame))
   }
 
   func addLog(_ message: String) {
-    reporter.log(message)
+    reporter?.log(message)
   }
 
   func setCustomKey(_ key: String, _ value: String) {
-    reporter.setCustomValue(value, forKey: key)
+    reporter?.setCustomValue(value, forKey: key)
   }
 }

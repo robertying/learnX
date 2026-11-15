@@ -73,14 +73,17 @@ const isReminderList = (type: AssignmentEventType) =>
   Platform.OS === 'ios' && type === 'reminder';
 
 /**
- * Throws without the access assignment sync of `type` needs: Reminders for
- * reminders on Apple platforms, the calendars otherwise. `ask` as in
- * `requirePermission`.
+ * The access assignment sync of `type` needs: Reminders for reminders on
+ * Apple platforms, the calendars otherwise.
  */
+const assignmentAccess = (type: AssignmentEventType) =>
+  isReminderList(type) ? 'reminder' : 'calendar';
+
+/** Throws without the access assignment sync of `type` needs. */
 export const requireAssignmentAccess = (
   type: AssignmentEventType,
   { ask }: { ask: boolean },
-) => requirePermission(isReminderList(type) ? 'reminder' : 'calendar', { ask });
+) => requirePermission(assignmentAccess(type), { ask });
 
 /**
  * Where a new calendar or list goes: the account of the user's default
@@ -131,25 +134,16 @@ interface CalendarSpec {
  * Returns the stored calendar if it still exists, else adopts one with the
  * same title, else creates it. The id is saved in `data/calendarSync`.
  */
-const getOrCreateCalendar = async ({
-  setting,
-  title,
-  name,
-  entityType,
-  onCreate,
-}: CalendarSpec): Promise<Calendar.ExpoCalendar> =>
-  (await findCalendar(setting, title, entityType)) ??
-  createCalendar({ setting, title, name, entityType, onCreate });
+const getOrCreateCalendar = async (
+  spec: CalendarSpec,
+): Promise<Calendar.ExpoCalendar> =>
+  (await findCalendar(spec)) ?? createCalendar(spec);
 
 /**
  * The stored calendar if it still exists, else one with the same title (whose
  * id is then saved in `data/calendarSync`), else undefined.
  */
-const findCalendar = async (
-  setting: SyncedCalendar,
-  title: string,
-  entityType: Calendar.EntityTypes,
-) => {
+const findCalendar = async ({ setting, title, entityType }: CalendarSpec) => {
   // Listed by type, since EventKit guards each with its own permission:
   // Reminders sync works with only Reminders access.
   const calendars = await Calendar.getCalendars(entityType);
@@ -232,18 +226,18 @@ export const getCourseCalendar = () => getOrCreateCalendar(courseCalendar);
  * The course calendar if it's there (stored, or adopted by its title), else
  * undefined: it isn't created.
  */
-export const findCourseCalendar = () =>
-  findCalendar(
-    courseCalendar.setting,
-    courseCalendar.title,
-    courseCalendar.entityType,
-  );
+export const findCourseCalendar = () => findCalendar(courseCalendar);
 
-export const getAssignmentCalendar = () =>
-  getOrCreateCalendar(assignmentCalendar);
+/** Where assignment sync of `type` keeps its entries. */
+const assignmentSpec = (type: AssignmentEventType) =>
+  isReminderList(type) ? assignmentReminderList : assignmentCalendar;
 
-export const getAssignmentReminder = () =>
-  getOrCreateCalendar(assignmentReminderList);
+/**
+ * The calendar (or, for reminders on Apple platforms, the Reminders list)
+ * assignment sync of `type` writes to, created when it isn't there.
+ */
+export const getAssignmentCalendar = (type: AssignmentEventType) =>
+  getOrCreateCalendar(assignmentSpec(type));
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 /**
@@ -257,6 +251,21 @@ const withoutDoneMark = (title: string | undefined) =>
 
 const time = (date: Date | string | undefined) =>
   date === undefined ? NaN : new Date(date).getTime();
+
+/**
+ * The events of `calendar` from a day before the first of these deadlines to
+ * a day after the last.
+ */
+const eventsAround = (
+  calendar: Calendar.ExpoCalendar,
+  inputs: AssignmentEventInput[],
+) => {
+  const deadlines = inputs.map(input => input.dueDate.valueOf());
+  return calendar.listEvents(
+    new Date(Math.min(...deadlines) - DAY_MS),
+    new Date(Math.max(...deadlines) + DAY_MS),
+  );
+};
 
 /**
  * Takes over entries already in `calendar` for assignments with no saved
@@ -278,19 +287,17 @@ const adoptExistingEntries = async (
     return;
   }
   const isReminder = isReminderList(type);
-  const deadlines = missing.map(input => input.dueDate.valueOf());
   let entries: { id: string; title?: string; due: number }[];
   try {
     entries = isReminder
       ? (await calendar.listReminders()).flatMap(r =>
           r.id ? [{ id: r.id, title: r.title, due: time(r.dueDate) }] : [],
         )
-      : (
-          await calendar.listEvents(
-            new Date(Math.min(...deadlines) - DAY_MS),
-            new Date(Math.max(...deadlines) + DAY_MS),
-          )
-        ).map(e => ({ id: e.id, title: e.title, due: time(e.endDate) }));
+      : (await eventsAround(calendar, missing)).map(e => ({
+          id: e.id,
+          title: e.title,
+          due: time(e.endDate),
+        }));
   } catch {
     return;
   }
@@ -327,13 +334,7 @@ const listEntryIds = async (
   if (isReminderList(type)) {
     return (await calendar.listReminders()).map(r => r.id);
   }
-  const deadlines = inputs.map(input => input.dueDate.valueOf());
-  return (
-    await calendar.listEvents(
-      new Date(Math.min(...deadlines) - DAY_MS),
-      new Date(Math.max(...deadlines) + DAY_MS),
-    )
-  ).map(e => e.id);
+  return (await eventsAround(calendar, inputs)).map(e => e.id);
 };
 
 /**
@@ -348,20 +349,10 @@ export const assignmentEntriesMissing = async (
   assignments: Assignment[],
 ) => {
   const inputs = buildAssignmentEventInputs(assignments, getCachedCourses());
-  if (
-    inputs.length === 0 ||
-    !(await hasPermission(isReminderList(type) ? 'reminder' : 'calendar'))
-  ) {
+  if (inputs.length === 0 || !(await hasPermission(assignmentAccess(type)))) {
     return false;
   }
-  const spec = isReminderList(type)
-    ? assignmentReminderList
-    : assignmentCalendar;
-  const calendar = await findCalendar(
-    spec.setting,
-    spec.title,
-    spec.entityType,
-  );
+  const calendar = await findCalendar(assignmentSpec(type));
   const synced = getAssignmentEventIds(type);
   if (!calendar || inputs.some(input => !synced[input.assignmentId])) {
     return true;
@@ -464,9 +455,7 @@ export const saveAssignmentsToReminderOrCalendar = async (
 
   await requireAssignmentAccess(type, { ask });
 
-  const calendar = isReminderList(type)
-    ? await getAssignmentReminder()
-    : await getAssignmentCalendar();
+  const calendar = await getAssignmentCalendar(type);
 
   const inputs = buildAssignmentEventInputs(assignments, getCachedCourses());
   await adoptExistingEntries(type, calendar, inputs);

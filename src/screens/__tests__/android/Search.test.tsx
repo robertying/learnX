@@ -32,7 +32,6 @@ beforeEach(() => {
 
 afterEach(async () => {
   await act(() => resetUserData());
-  jest.useRealTimers();
 });
 
 const setup = async () => {

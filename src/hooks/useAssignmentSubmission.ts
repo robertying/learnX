@@ -10,11 +10,11 @@ import {
   usePendingAssignmentData,
 } from 'data/pendingAssignment';
 import { Assignment } from 'data/types/state';
+import type { PickedAttachment } from 'data/submissionDrafts';
 import { getUserData } from 'data/userData';
 import { groupSubmittedKey } from 'helpers/contentNotifications';
 import { isLocaleChinese, t } from 'helpers/i18n';
 import {
-  PickedAttachment,
   defaultAttachmentName,
   sendSubmission,
   uploadAttachment,
@@ -32,22 +32,11 @@ export const useAttachmentPicker = (
   const pendingAssignmentData = usePendingAssignmentData();
 
   const [picked, setPicked] = useState<PickedAttachment | null>(initialPicked);
-  const [menuVisible, setMenuVisible] = useState(false);
 
   const defaultName = (mimeType?: string | null) =>
     defaultAttachmentName(title, mimeType, isLocaleChinese());
 
-  const openMenu = () => {
-    Keyboard.dismiss();
-    setMenuVisible(true);
-  };
-
-  const closeMenu = () => {
-    setMenuVisible(false);
-  };
-
   const pickDocument = async () => {
-    closeMenu();
     const result = await DocumentPicker.getDocumentAsync({
       copyToCacheDirectory: true,
     }).catch(() => null);
@@ -70,7 +59,6 @@ export const useAttachmentPicker = (
   };
 
   const pickPhoto = async () => {
-    closeMenu();
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images', 'videos'],
       quality: 1,
@@ -116,9 +104,6 @@ export const useAttachmentPicker = (
     picked,
     /** The picked file came from a share, not from the pickers */
     isShared: !!pendingAssignmentData,
-    menuVisible,
-    openMenu,
-    closeMenu,
     pickDocument,
     pickPhoto,
     removePicked,
@@ -127,7 +112,8 @@ export const useAttachmentPicker = (
 
 /**
  * Uploads the submission after a confirmation alert. On success it clears
- * shared data, refreshes the course's assignments and calls `onSubmitted`.
+ * shared data, refreshes the course's assignments and calls `onSubmitted`; on
+ * failure it says so and leaves the form as it was.
  */
 export const useSubmitAssignment = (
   assignment: Pick<Assignment, 'courseId' | 'id' | 'submittedContent'>,
@@ -145,11 +131,9 @@ export const useSubmitAssignment = (
   onSubmitted: () => void,
 ) => {
   const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState(false);
   const [progress, setProgress] = useState(0);
 
   const submit = async () => {
-    setUploadError(false);
     setUploading(true);
 
     // Kept out of the try block: React Compiler can't compile conditional
@@ -167,9 +151,8 @@ export const useSubmitAssignment = (
       });
     } catch {
       setUploading(false);
-      setUploadError(true);
       setProgress(0);
-      // The screen's error toast plays the haptic.
+      toast(t('assignmentSubmissionFailed'), 'error', { duration: 3000 });
       return;
     }
 
@@ -208,11 +191,5 @@ export const useSubmitAssignment = (
     );
   };
 
-  return {
-    uploading,
-    uploadError,
-    dismissUploadError: () => setUploadError(false),
-    progress,
-    confirmSubmit,
-  };
+  return { uploading, progress, confirmSubmit };
 };

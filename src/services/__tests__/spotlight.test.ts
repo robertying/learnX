@@ -211,6 +211,17 @@ it('indexes everything again when the index state cannot be read', async () => {
   });
 });
 
+it('indexes everything again when what was saved is unreadable', async () => {
+  await updateSpotlight({ notices }, options);
+  Storage.setItemSync(SPOTLIGHT_INDEXED_KEY, '{not json');
+
+  await restart(async (spotlight, native) => {
+    await spotlight.updateSpotlight({ notices }, options);
+    expect(native.removeAllItems).toHaveBeenCalledTimes(1);
+    expect(native.replaceItems).toHaveBeenCalledTimes(1);
+  });
+});
+
 it('reports a failed write and indexes everything on the next start', async () => {
   await updateSpotlight({ notices }, options);
   const error = new Error('Quota exceeded');
@@ -237,4 +248,16 @@ it('forgets the saved index on logout and after a failed write', async () => {
   clearSpotlight();
   await updateSpotlight({}, options);
   expect(Storage.getItemSync(SPOTLIGHT_INDEXED_KEY)).toBeNull();
+});
+
+// Last, as it loads the modules again.
+it('does nothing where there is no Spotlight', async () => {
+  jest.clearAllMocks();
+  jest.resetModules();
+  jest.doMock('modules/spotlight', () => ({ __esModule: true, default: null }));
+  const spotlight: typeof import('services/spotlight') = require('services/spotlight');
+  await spotlight.updateSpotlight({ notices }, options);
+  spotlight.clearSpotlight();
+  expect(Spotlight.replaceItems).not.toHaveBeenCalled();
+  expect(Spotlight.removeAllItems).not.toHaveBeenCalled();
 });

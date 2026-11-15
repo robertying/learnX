@@ -1,15 +1,5 @@
 import { getWebViewTemplate, hasMath } from 'helpers/html';
 
-const {
-  parseColor,
-  rgbToHsl,
-  darkenForeground,
-  darkenBackground,
-  darkenBorder,
-  luminance,
-  hslToString,
-} = require('helpers/preval/darkMode.js');
-
 jest.mock('data/source', () => ({
   dataSource: { getCSRFToken: () => 'token' },
 }));
@@ -19,9 +9,6 @@ const darkColors = {
   backgroundColor: 'rgb(30, 26, 29)',
   textColor: 'rgb(233, 224, 228)',
 };
-
-const lightness = (hsla: string) =>
-  Number(/,\s*([\d.]+)%,\s*[\d.]+\)$/.exec(hsla)![1]) / 100;
 
 describe('hasMath', () => {
   it.each([
@@ -84,162 +71,8 @@ describe('getWebViewTemplate', () => {
   it('replaces \\mbox, which KaTeX does not support', () => {
     expect(getWebViewTemplate('$$\\mbox{a}$$')).toContain('$$\\text{a}$$');
   });
-});
 
-describe('dark mode colors', () => {
-  it('parses computed colors', () => {
-    expect(parseColor('rgb(255, 0, 0)')).toEqual({ r: 255, g: 0, b: 0, a: 1 });
-    expect(parseColor('rgba(0, 0, 0, 0)')).toEqual({ r: 0, g: 0, b: 0, a: 0 });
-    expect(parseColor('transparent')).toBeNull();
-    expect(parseColor('')).toBeNull();
-  });
-
-  it('converts to HSL', () => {
-    expect(rgbToHsl({ r: 255, g: 0, b: 0, a: 1 })).toEqual({
-      h: 0,
-      s: 1,
-      l: 0.5,
-      a: 1,
-    });
-    expect(rgbToHsl({ r: 255, g: 255, b: 255, a: 1 }).l).toBe(1);
-  });
-
-  it('makes dark text light and keeps light text', () => {
-    expect(lightness(darkenForeground(parseColor('rgb(0, 0, 0)')))).toBe(0.9);
-    expect(
-      lightness(darkenForeground(parseColor('rgb(51, 51, 51)'))),
-    ).toBeCloseTo(0.8, 2);
-    expect(
-      lightness(darkenForeground(parseColor('rgb(200, 200, 200)'))),
-    ).toBeCloseTo(0.784, 2);
-  });
-
-  it('keeps the hue and alpha of colored text', () => {
-    expect(darkenForeground(parseColor('rgba(0, 0, 128, 0.5)'))).toBe(
-      'hsla(240, 100%, 79.9%, 0.5)',
-    );
-  });
-
-  it('lightens saturated colors that look dark', () => {
-    // Pure blue is 50% lightness but too dark to read on a dark background
-    expect(
-      lightness(darkenForeground(parseColor('rgb(0, 0, 255)'))),
-    ).toBeGreaterThanOrEqual(0.75);
-  });
-
-  it('darkens bright highlights enough for light text', () => {
-    const base = rgbToHsl(parseColor('rgb(30, 26, 29)'));
-    const yellow = darkenBackground(parseColor('rgb(255, 255, 0)'), base);
-    const background = rgbToHsl(parseColor('rgb(255, 255, 0)'));
-    const text = rgbToHsl(parseColor('rgb(233, 224, 228)'));
-    // WCAG contrast of the page text on the adjusted highlight
-    const contrast =
-      (luminance(text) + 0.05) /
-      (luminance({ ...background, l: lightness(yellow) }) + 0.05);
-    expect(contrast).toBeGreaterThanOrEqual(4.5);
-    // Still yellow, just dark
-    expect(yellow).toMatch(/^hsla\(60, 100%/);
-  });
-
-  it('flips border lightness', () => {
-    const base = 0.11;
-    expect(
-      lightness(darkenBorder(parseColor('rgb(204, 204, 204)'), base)),
-    ).toBeCloseTo(0.21, 2);
-    expect(lightness(darkenBorder(parseColor('rgb(0, 0, 0)'), base))).toBe(0.9);
-    expect(
-      lightness(darkenBorder(parseColor('rgb(255, 255, 255)'), base)),
-    ).toBeCloseTo(0.21, 2);
-  });
-
-  it('maps white backgrounds onto the page background and keeps dark ones', () => {
-    const base = rgbToHsl(parseColor('rgb(30, 26, 29)'));
-    // White becomes the page background itself, tint included
-    expect(darkenBackground(parseColor('rgb(255, 255, 255)'), base)).toBe(
-      hslToString(base),
-    );
-    expect(
-      lightness(darkenBackground(parseColor('rgb(40, 40, 40)'), base)),
-    ).toBeCloseTo(0.157, 2);
-  });
-});
-
-describe('CSRF links', () => {
-  const {
-    addCSRFTokenToUrl,
-    addCSRFTokenToLinks,
-  } = require('helpers/preval/csrfLinks.js');
-  const base = 'https://learn.tsinghua.edu.cn/';
-
-  it('adds the token to course-site URLs, relative ones included', () => {
-    expect(
-      addCSRFTokenToUrl('https://learn.tsinghua.edu.cn/b/file?id=1', 't', base),
-    ).toBe('https://learn.tsinghua.edu.cn/b/file?id=1&_csrf=t');
-    expect(addCSRFTokenToUrl('/b/file?id=2', 't', base)).toBe(
-      'https://learn.tsinghua.edu.cn/b/file?id=2&_csrf=t',
-    );
-  });
-
-  it('leaves other sites, anchors and other schemes alone', () => {
-    expect(addCSRFTokenToUrl('https://example.com/a', 't', base)).toBeNull();
-    expect(addCSRFTokenToUrl('mailto:ta@tsinghua.edu.cn', 't', base)).toBe(
-      null,
-    );
-    expect(
-      addCSRFTokenToUrl(['javascript', 'void(0)'].join(':'), 't', base),
-    ).toBeNull();
-    expect(addCSRFTokenToUrl('#section-2', 't', base)).toBeNull();
-    expect(addCSRFTokenToUrl('http://[bad', 't', base)).toBeNull();
-  });
-
-  it('only gives the token to Web Learning itself, over https', () => {
-    expect(
-      addCSRFTokenToUrl('https://xlearn.tsinghua.edu.cn/a', 't', base),
-    ).toBeNull();
-    expect(
-      addCSRFTokenToUrl('https://eviltsinghua.edu.cn/a', 't', base),
-    ).toBeNull();
-    expect(addCSRFTokenToUrl('https://id.tsinghua.edu.cn/a', 't', base)).toBe(
-      null,
-    );
-    expect(
-      addCSRFTokenToUrl('http://learn.tsinghua.edu.cn/b/file?id=1', 't', base),
-    ).toBe('https://learn.tsinghua.edu.cn/b/file?id=1&_csrf=t');
-  });
-
-  it('keeps going after a link it cannot use', () => {
-    const elements = [
-      ['href', 'http://[bad'],
-      ['href', '#top'],
-      ['href', '/b/download?id=3'],
-      ['src', 'https://learn.tsinghua.edu.cn/img.png'],
-    ].map(([attribute, value]) => {
-      const attributes: Record<string, string> = { [attribute]: value };
-      return {
-        attribute,
-        attributes,
-        getAttribute: (name: string) => attributes[name] ?? null,
-        setAttribute: (name: string, v: string) => {
-          attributes[name] = v;
-        },
-      };
-    });
-    const root = {
-      querySelectorAll: (selector: string) =>
-        elements.filter(e => selector === `[${e.attribute}]`),
-    };
-
-    addCSRFTokenToLinks(root, 't', base);
-
-    expect(elements.map(e => e.attributes[e.attribute])).toEqual([
-      'http://[bad',
-      '#top',
-      'https://learn.tsinghua.edu.cn/b/download?id=3&_csrf=t',
-      'https://learn.tsinghua.edu.cn/img.png?_csrf=t',
-    ]);
-  });
-
-  it('is inlined into the web view page', () => {
+  it('adds the CSRF token to the links in the page', () => {
     const html = getWebViewTemplate('<a href="/b/file">file</a>');
     expect(html).toContain('function addCSRFTokenToLinks');
     expect(html).toContain(

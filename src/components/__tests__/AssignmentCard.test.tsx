@@ -19,8 +19,6 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.useRealTimers();
-  mockLocale.current = 'en-US';
   dayjs.locale('en');
 });
 
