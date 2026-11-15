@@ -4,8 +4,8 @@ import Testing
 
 @testable import LearnXSpotlight
 
-/// The module's functions, as JS calls them. They use the shared taps, the app's user defaults and the device's
-/// index, so they run one at a time.
+/// The module's functions, as JS calls them. They use the shared taps and the device's index, so they run one at a
+/// time.
 @MainActor
 @Suite(.serialized) struct SpotlightModuleTests {
   let module = SpotlightModule(appContext: AppContext())
@@ -43,27 +43,5 @@ import Testing
     #expect(try await SpotlightModule.indexState() == "b2")
     try await SpotlightModule.removeAllItems(state: "c3")
     #expect(try await SpotlightModule.indexState() == "c3")
-  }
-
-  @Test func savesTheUpcomingDeadlines() {
-    var record = UpcomingDeadlineRecord()
-    record.id = "1"
-    record.deadline = Date.distantFuture.timeIntervalSince1970 * 1000
-    SpotlightModule.setUpcomingDeadlines([record])
-    #expect(UpcomingDeadlines.load().map(\.id) == ["1"])
-
-    SpotlightModule.setUpcomingDeadlines([])
-    #expect(UpcomingDeadlines.load().isEmpty)
-  }
-
-  @Test func savesTheUpcomingClasses() {
-    var record = UpcomingClassRecord()
-    record.courseName = "Physics"
-    record.end = Date.distantFuture.timeIntervalSince1970 * 1000
-    SpotlightModule.setUpcomingClasses([record])
-    #expect(UpcomingClasses.load().map(\.courseName) == ["Physics"])
-
-    SpotlightModule.setUpcomingClasses([])
-    #expect(UpcomingClasses.load().isEmpty)
   }
 }

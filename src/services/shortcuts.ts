@@ -1,8 +1,8 @@
 // What the "Next Deadline" and "Next Class" App Intents read without starting
-// React Native (iOS and Mac). The native side is in modules/spotlight, which
-// saves them to UserDefaults; Spotlight indexing is separate (services/spotlight).
+// React Native (iOS and Mac). The native side is modules/shortcuts, which saves
+// them to UserDefaults; Spotlight indexing is separate (services/spotlight).
 // A failed save throws: services/surfaces reports it and tries again.
-import Spotlight from 'modules/spotlight';
+import Shortcuts from 'modules/shortcuts';
 import { Assignment } from 'data/types/state';
 import type { UpcomingClass } from 'helpers/upNext';
 import { upcomingDeadlines } from 'helpers/widgetDeadlines';
@@ -16,7 +16,7 @@ export function saveUpcomingDeadlines(
   assignments: Assignment[],
   { hiddenCourses, archived }: { hiddenCourses: string[]; archived: string[] },
 ) {
-  if (!Spotlight) {
+  if (!Shortcuts) {
     return;
   }
   const { deadlines } = upcomingDeadlines(assignments, {
@@ -28,13 +28,13 @@ export function saveUpcomingDeadlines(
   if (key === savedDeadlines) {
     return;
   }
-  Spotlight.setUpcomingDeadlines(deadlines);
+  Shortcuts.setUpcomingDeadlines(deadlines);
   savedDeadlines = key;
 }
 
 /** Saves the classes still ahead for the "Next Class" App Intent. */
 export function saveUpcomingClasses(classes: UpcomingClass[]) {
-  if (!Spotlight) {
+  if (!Shortcuts) {
     return;
   }
   const items = classes.map(({ courseName, location, start, end }) => ({
@@ -47,7 +47,7 @@ export function saveUpcomingClasses(classes: UpcomingClass[]) {
   if (key === savedClasses) {
     return;
   }
-  Spotlight.setUpcomingClasses(items);
+  Shortcuts.setUpcomingClasses(items);
   savedClasses = key;
 }
 

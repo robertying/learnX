@@ -23,7 +23,7 @@ on:
 permissions:
   contents: read
 
-# Only main saves caches (Pods, Xcode compilation cache), so branches start
+# Only main saves caches (Pods, Swift packages, Xcode compilation cache), so branches start
 # from main's and can't evict or poison them. caches.yml prunes superseded
 # ones afterwards.
 env:
@@ -86,6 +86,15 @@ jobs:
             ~/Library/Caches/CocoaPods
           key: ${{ steps.pods.outputs.cache-primary-key }}
 
+      # The Swift packages (Firebase) Xcode checks out into the build folder.
+      - name: Restore Swift packages
+        id: spm
+        uses: actions/cache/restore@v6
+        with:
+          path: build/DerivedData/SourcePackages
+          key: spm-${{ runner.os }}-${{ hashFiles('ios/learnX.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+          restore-keys: spm-${{ runner.os }}-
+
       # Xcode's own compilation cache (Swift and C-family). ccache doesn't work
       # here: Xcode 26 never calls the CC wrapper React Native sets up.
       - name: Restore compilation cache
@@ -136,6 +145,14 @@ jobs:
             exit 1
           }
           tail -n 5 build/xcodebuild.log
+
+      # Both matrix jobs check out the same packages; whichever finishes second skips the save.
+      - name: Save Swift packages
+        if: env.SAVE_CACHE == 'true' && steps.spm.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: build/DerivedData/SourcePackages
+          key: ${{ steps.spm.outputs.cache-primary-key }}
 
       - name: Save compilation cache
         if: always() && env.CACHE_CAS == 'true' && env.SAVE_CACHE == 'true'

@@ -6,7 +6,7 @@ import {
 } from 'services/shortcuts';
 import { upcomingDeadlines } from 'helpers/widgetDeadlines';
 
-jest.mock('../../../modules/spotlight', () => ({
+jest.mock('../../../modules/shortcuts', () => ({
   __esModule: true,
   default: {
     setUpcomingDeadlines: jest.fn(),
@@ -17,7 +17,7 @@ jest.mock('helpers/widgetDeadlines', () => ({
   upcomingDeadlines: jest.fn(),
 }));
 
-const Spotlight = jest.requireMock('../../../modules/spotlight').default as {
+const Shortcuts = jest.requireMock('../../../modules/shortcuts').default as {
   setUpcomingDeadlines: jest.Mock;
   setUpcomingClasses: jest.Mock;
 };
@@ -48,8 +48,8 @@ const assignments = [] as Assignment[];
 beforeEach(() => {
   deadlinesAre();
   clearShortcuts();
-  Spotlight.setUpcomingDeadlines.mockClear();
-  Spotlight.setUpcomingClasses.mockClear();
+  Shortcuts.setUpcomingDeadlines.mockClear();
+  Shortcuts.setUpcomingClasses.mockClear();
 });
 
 it('saves up to 20 open deadlines, without hidden or archived ones', () => {
@@ -60,7 +60,7 @@ it('saves up to 20 open deadlines, without hidden or archived ones', () => {
     ...filters,
     limit: 20,
   });
-  expect(Spotlight.setUpcomingDeadlines).toHaveBeenCalledWith([deadline('A')]);
+  expect(Shortcuts.setUpcomingDeadlines).toHaveBeenCalledWith([deadline('A')]);
 });
 
 it('skips deadlines that have not changed', () => {
@@ -70,7 +70,7 @@ it('skips deadlines that have not changed', () => {
   deadlinesAre('A', 'B');
   saveUpcomingDeadlines(assignments, filters);
 
-  expect(Spotlight.setUpcomingDeadlines.mock.calls).toEqual([
+  expect(Shortcuts.setUpcomingDeadlines.mock.calls).toEqual([
     [[deadline('A')]],
     [[deadline('A'), deadline('B')]],
   ]);
@@ -80,14 +80,14 @@ it('saves the next classes with only the fields the intent reads', () => {
   saveUpcomingClasses([cls('Physics')] as never);
   saveUpcomingClasses([cls('Physics')] as never);
 
-  expect(Spotlight.setUpcomingClasses.mock.calls).toEqual([
+  expect(Shortcuts.setUpcomingClasses.mock.calls).toEqual([
     [[{ courseName: 'Physics', location: 'Room 1', start: 1, end: 2 }]],
   ]);
 });
 
 it('throws when the native module does, and tries again next time', () => {
   deadlinesAre('A');
-  Spotlight.setUpcomingDeadlines.mockImplementationOnce(() => {
+  Shortcuts.setUpcomingDeadlines.mockImplementationOnce(() => {
     throw new Error('UserDefaults');
   });
   expect(() => saveUpcomingDeadlines(assignments, filters)).toThrow(
@@ -95,10 +95,10 @@ it('throws when the native module does, and tries again next time', () => {
   );
   saveUpcomingDeadlines(assignments, filters);
 
-  expect(Spotlight.setUpcomingDeadlines).toHaveBeenLastCalledWith([
+  expect(Shortcuts.setUpcomingDeadlines).toHaveBeenLastCalledWith([
     deadline('A'),
   ]);
-  expect(Spotlight.setUpcomingDeadlines).toHaveBeenCalledTimes(2);
+  expect(Shortcuts.setUpcomingDeadlines).toHaveBeenCalledTimes(2);
 });
 
 it('empties both intents', () => {
@@ -109,6 +109,6 @@ it('empties both intents', () => {
   deadlinesAre();
   clearShortcuts();
 
-  expect(Spotlight.setUpcomingDeadlines).toHaveBeenLastCalledWith([]);
-  expect(Spotlight.setUpcomingClasses).toHaveBeenLastCalledWith([]);
+  expect(Shortcuts.setUpcomingDeadlines).toHaveBeenLastCalledWith([]);
+  expect(Shortcuts.setUpcomingClasses).toHaveBeenLastCalledWith([]);
 });
