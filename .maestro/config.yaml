@@ -25,4 +25,5 @@ executionOrder:
     # Deletes the file 02 downloaded, which the next one needs gone.
     - Download a file, then delete it
     - Show no results and failures
+    - Open items from links
     - Open settings pages and log out
