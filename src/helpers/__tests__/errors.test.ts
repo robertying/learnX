@@ -1,5 +1,21 @@
 import { FailReason } from '@robertying/thu-learn-lib';
-import { errorReason, isBadCredential, isNetworkError } from 'helpers/errors';
+import {
+  apiReason,
+  errorReason,
+  isBadCredential,
+  isNetworkError,
+  isServerRejection,
+} from 'helpers/errors';
+
+describe('apiReason', () => {
+  it('reads the reason of an ApiError only', () => {
+    expect(apiReason({ reason: FailReason.NETWORK_ERROR })).toBe(
+      FailReason.NETWORK_ERROR,
+    );
+    expect(apiReason(new Error('boom'))).toBeUndefined();
+    expect(apiReason(null)).toBeUndefined();
+  });
+});
 
 describe('errorReason', () => {
   it('reads the reason of an ApiError without changing it', () => {
@@ -64,5 +80,23 @@ describe('isBadCredential', () => {
       false,
     );
     expect(isBadCredential(null)).toBe(false);
+  });
+});
+
+describe('isServerRejection', () => {
+  it('spots an answer that turned the request down', () => {
+    expect(isServerRejection({ reason: FailReason.UNEXPECTED_STATUS })).toBe(
+      true,
+    );
+    expect(isServerRejection({ reason: FailReason.OPERATION_FAILED })).toBe(
+      true,
+    );
+  });
+
+  it('does not count no answer, an expired session or other errors', () => {
+    expect(isServerRejection({ reason: FailReason.NETWORK_ERROR })).toBe(false);
+    expect(isServerRejection({ reason: FailReason.NOT_LOGGED_IN })).toBe(false);
+    expect(isServerRejection(new Error('boom'))).toBe(false);
+    expect(isServerRejection(null)).toBe(false);
   });
 });

@@ -189,7 +189,8 @@ export class DownloadTask {
   }
   downloadAsync = jest.fn(async () => {
     if (this.options.signal?.aborted) {
-      throw new Error('Download canceled');
+      // As expo-file-system rejects an aborted download.
+      throw new DOMException('Download canceled', 'AbortError');
     }
     return __fs.download(this);
   });

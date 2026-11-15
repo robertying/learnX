@@ -65,10 +65,44 @@ it('reads how the emulated server fails', () => {
   expect(getMockNetworkConfig().failure).toBe('serverError');
 });
 
+it('reads whether the emulated server rejects logins, and how many', () => {
+  jest.replaceProperty(Platform, 'OS', 'android');
+  applyLaunchOptions({ mockLoginFails: 'true' });
+  expect(getMockNetworkConfig().loginFails).toBe(true);
+  applyLaunchOptions({ mockLoginFails: 'false' });
+  expect(getMockNetworkConfig().loginFails).toBe(false);
+  applyLaunchOptions({ mockLoginFails: '2' });
+  expect(getMockNetworkConfig().loginFails).toBe(2);
+
+  jest.replaceProperty(Platform, 'OS', 'ios');
+  for (const [value, expected] of [
+    [true, true],
+    [false, false],
+    [3, 3],
+  ] as const) {
+    mockSettingsGet.mockImplementation(key =>
+      key === 'mockLoginFails' ? value : undefined,
+    );
+    applyLaunchOptions();
+    expect(getMockNetworkConfig().loginFails).toBe(expected);
+  }
+});
+
+it('reads what happens to the emulated session after the launch login', () => {
+  jest.replaceProperty(Platform, 'OS', 'android');
+  applyLaunchOptions({ mockSessionExpiry: 'passwordChanged' });
+  expect(getMockNetworkConfig().sessionExpiry).toBe('passwordChanged');
+  applyLaunchOptions({ mockSessionExpiry: 'sometimes' });
+  expect(getMockNetworkConfig().sessionExpiry).toBe('passwordChanged');
+});
+
 it('ignores missing and unknown values', () => {
   jest.replaceProperty(Platform, 'OS', 'android');
   applyLaunchOptions();
   applyLaunchOptions({ mockLatency: 'instant', mockFailure: 'sometimes' });
+  for (const mockLoginFails of ['yes', '-1', '1.5', '', 1.5, -1, null]) {
+    applyLaunchOptions({ mockLoginFails });
+  }
   jest.replaceProperty(Platform, 'OS', 'ios');
   mockSettingsGet.mockReturnValue(undefined);
   applyLaunchOptions();
