@@ -137,15 +137,15 @@ export default {
   graduate: 'Graduate',
   syncCourseSchedule: 'Sync More Dates',
   classAlarm: 'Class Alert',
-  classAlarmBefore: 'Alert Before Class (Minutes)',
+  classAlarmBefore: 'Alert Before (Minutes)',
   calendarEventLength: 'Event Length (Minutes)',
   assignmentCalendarAlarm: 'Calendar Alert',
-  assignmentCalendarAlarmOffset: 'Alert Before Deadline (Minutes)',
+  assignmentCalendarAlarmOffset: 'Alert Before (Minutes)',
   assignmentCalendarSecondAlarm: 'Second Calendar Alert',
-  assignmentCalendarSecondAlarmOffset: 'Second Alert Before Deadline (Minutes)',
+  assignmentCalendarSecondAlarmOffset: 'Second Alert Before (Minutes)',
   assignmentCalendarNoAlarmIfComplete: 'No Alerts for Submitted Assignments',
   assignmentReminderAlarm: 'Reminder Alerts',
-  assignmentReminderAlarmOffset: 'Alert Before Deadline (Minutes)',
+  assignmentReminderAlarmOffset: 'Alert Before (Minutes)',
   assignmentReminderAlarmCaption:
     'Reminders shows an alert at the deadline and the set minutes before it, and lists each reminder at its earliest alert.',
   assignmentSyncDescription:
@@ -362,7 +362,7 @@ export default {
   notificationChannelClasses: 'Class reminders',
   notificationChannelClassesDescription: 'Reminders before your classes start',
   notifyClassReminders: 'Class Reminders',
-  classReminderOffset: 'Remind Before Class (Minutes)',
+  classReminderOffset: 'Remind Before (Minutes)',
   classStartsAt: 'Starts at {time}',
   classStartsAtBeijing: 'Starts at {time} Beijing Time',
   notifyClassRemindersCaption:
@@ -372,7 +372,7 @@ export default {
     "Reminds you of unsubmitted assignments before they're due, and when they can still be submitted late. Works alongside Calendar and Reminders alerts.",
   notifyDeadlineRemindersCaptionAndroid:
     "Reminds you of unsubmitted assignments before they're due, and when they can still be submitted late. Works alongside calendar alerts.",
-  deadlineReminderOffset: 'Remind Before Deadline (Minutes)',
+  deadlineReminderOffset: 'Remind Before (Minutes)',
   allowExactReminders: 'Allow Exact Reminder Times',
   exactRemindersCaption:
     'Android may hold reminders back while your phone is idle. Allow alarms and reminders for learnX so they arrive on time.',

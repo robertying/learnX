@@ -132,15 +132,15 @@ const zh: typeof en = {
   graduate: '研究生',
   syncCourseSchedule: '同步更多日期',
   classAlarm: '上课日历提醒',
-  classAlarmBefore: '课前提醒（分钟）',
+  classAlarmBefore: '提前提醒（分钟）',
   calendarEventLength: '日程长度（分钟）',
   assignmentCalendarAlarm: '日历提醒',
-  assignmentCalendarAlarmOffset: '截止前提醒（分钟）',
+  assignmentCalendarAlarmOffset: '提前提醒（分钟）',
   assignmentCalendarSecondAlarm: '第二次日历提醒',
-  assignmentCalendarSecondAlarmOffset: '截止前第二次提醒（分钟）',
+  assignmentCalendarSecondAlarmOffset: '第二次提前提醒（分钟）',
   assignmentCalendarNoAlarmIfComplete: '已提交的作业不提醒',
   assignmentReminderAlarm: '在提醒事项中提醒',
-  assignmentReminderAlarmOffset: '截止前提醒（分钟）',
+  assignmentReminderAlarmOffset: '提前提醒（分钟）',
   assignmentReminderAlarmCaption:
     '提醒事项会在截止时和截止前提醒，列表中显示最早的提醒时间。',
   assignmentSyncDescription:
@@ -349,7 +349,7 @@ const zh: typeof en = {
   notificationChannelClasses: '上课提醒',
   notificationChannelClassesDescription: '上课前的提醒',
   notifyClassReminders: '上课提醒',
-  classReminderOffset: '课前提醒（分钟）',
+  classReminderOffset: '提前提醒（分钟）',
   classStartsAt: '{time} 上课',
   classStartsAtBeijing: '北京时间 {time} 上课',
   notifyClassRemindersCaption:
@@ -359,7 +359,7 @@ const zh: typeof en = {
     '在未提交的作业截止前提醒你，截止后仍可补交时也会提醒。可与日历和提醒事项的提醒同时使用。',
   notifyDeadlineRemindersCaptionAndroid:
     '在未提交的作业截止前提醒你，截止后仍可补交时也会提醒。可与日历提醒同时使用。',
-  deadlineReminderOffset: '截止前提醒（分钟）',
+  deadlineReminderOffset: '提前提醒（分钟）',
   allowExactReminders: '允许准时提醒',
   exactRemindersCaption:
     '手机空闲时，Android 可能会推迟提醒。允许 learnX 设置闹钟和提醒，提醒才能准时送达。',
