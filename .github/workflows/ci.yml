@@ -115,7 +115,6 @@ jobs:
           cat > .env <<'ENV'
           DUMMY_USERNAME=ci-mock-user
           DUMMY_PASSWORD=ci-mock-password
-          COURSEX_REFRESH_TOKEN=ci-canary-coursex-token
           LIVE_USERNAME=ci-canary-live-username
           LIVE_PASSWORD=ci-canary-live-password
           LIVE_FINGERPRINT=ci-canary-live-fingerprint
