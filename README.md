@@ -74,7 +74,7 @@ Requires iOS / iPadOS 17.6, macOS 14.6 or Android 9 and later.
 
 ### 高级功能 Advanced
 
-- 桌面小组件（作业截止、接下来） Home screen widgets (Deadlines, Up Next)
+- 桌面小组件（作业截止、下一节课） Home screen widgets (Deadlines, Next Up)
 - 新内容、成绩和截止时间变更通知 Notifications for new notices, files, assignments, grades and deadline changes
 - 作业截止提醒和上课提醒 Deadline reminders and class reminders
 - 聚焦搜索、Siri 与快捷指令 Spotlight search, Siri and Shortcuts (iOS, iPadOS, macOS)

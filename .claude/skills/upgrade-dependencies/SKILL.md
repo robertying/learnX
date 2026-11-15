@@ -73,8 +73,8 @@ Everything here must pass before the pull request is merged:
 
 - `pnpm install --frozen-lockfile` is clean: no skipped install scripts (add a needed one to `allowBuilds` only after asking, like a new dependency) and no new peer dependency warnings.
 - `scripts/check-patches.sh`
-- `pnpm format`, then `pnpm typecheck`, `pnpm lint --deny-warnings`, `pnpm format --check` and `pnpm test`. New lint rules or type errors from a bump are fixed in code, not turned off.
-- JS bundles for both platforms (with a `.env` copied from `.env.example`): `npx expo export:embed --platform ios --dev false --entry-file index.js --bundle-output /tmp/learnx-ios.js` and the same with `--platform android`.
+- `pnpm format`, then `pnpm check` (typecheck, lint, format check, the over-the-air runtime version check, Jest with coverage, ShellCheck). New lint rules or type errors from a bump are fixed in code, not turned off. A bump that changes native code moves the native fingerprint: set the runtime version or update `ota-fingerprint.json` as the check says ("Over-the-air updates" in `AGENTS.md`), with CI's values, which come from a clean checkout.
+- `scripts/check-release-bundle.sh` (with the mock login in `.env`) builds both platforms' release JS bundles.
 - iOS (on a Mac): `cd ios && bundle exec pod install`, `scripts/test-ios.sh <simulator udid>`, then build and launch the app on an iOS simulator and as the Mac Catalyst app (`pnpm ios`, or Xcode with "My Mac (Mac Catalyst)"); the widget and share extensions build with it.
 - Android: `scripts/test-android.sh`, `cd android && ./gradlew :app:assembleDebug :app:assembleRelease` (the release build runs R8), then install and launch on an emulator.
 - In the running app, log in with the mock account (`src/data/AGENTS.md`) and go through the areas the upgraded packages drive: every tab and its lists, a notice and an assignment detail (web view), a PDF file, the course timetable, search, swipe actions, Settings, and the widgets. The Maestro flows (`pnpm e2e:ios`, `pnpm e2e:android`) cover the main paths.
