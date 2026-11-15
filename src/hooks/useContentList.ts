@@ -1,9 +1,5 @@
 import { useEffect, useEffectEvent } from 'react';
-import {
-  StackActions,
-  type NavigationProp,
-  type ParamListBase,
-} from '@react-navigation/native';
+import type { NavigationProp, ParamListBase } from '@react-navigation/native';
 import { useLoggedIn } from 'data/auth';
 import { useCourseIds } from 'data/queries';
 import { useUserData } from 'data/userData';
@@ -67,11 +63,7 @@ const useContentList = <
 
   const screen = targetRoutes[type].detail;
   const show = useShowDetail(navigation);
-  usePendingTarget(type, (id, inDetail) =>
-    inDetail
-      ? show(screen, { id })
-      : navigation.dispatch(StackActions.push(screen, { id })),
-  );
+  usePendingTarget(type, id => show(screen, { id }));
 
   return {
     ...filtered,

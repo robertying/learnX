@@ -1,9 +1,9 @@
 import { Alert, AlertButton } from 'react-native';
 import { act, renderHook } from '@testing-library/react-native';
 import * as DocumentPicker from 'expo-document-picker';
-import * as Haptics from 'expo-haptics';
 import * as ImagePicker from 'expo-image-picker';
 import { toast } from 'components/Toast';
+import { t } from 'helpers/i18n';
 import { refreshCourseAssignments } from 'data/content';
 import {
   setPendingAssignmentData,
@@ -11,7 +11,7 @@ import {
 } from 'data/pendingAssignment';
 import { dataSource } from 'data/source';
 import { resetUserData, setCurrentSemester } from 'data/userData';
-import { PickedAttachment } from 'services/submission';
+import type { PickedAttachment } from 'data/submissionDrafts';
 import {
   useAttachmentPicker,
   useSubmitAssignment,
@@ -51,11 +51,7 @@ describe('useAttachmentPicker', () => {
     });
     const { result } = await setup();
 
-    await act(() => result.current.openMenu());
-    expect(result.current.menuVisible).toBe(true);
-
     await act(() => result.current.pickDocument());
-    expect(result.current.menuVisible).toBe(false);
     expect(result.current.picked).toEqual({
       uri: 'file:///doc.pdf',
       type: 'application/pdf',
@@ -320,16 +316,16 @@ describe('useSubmitAssignment', () => {
     const { result, onSubmitted } = await setup();
     await confirm(result.current.confirmSubmit);
 
-    expect(result.current.uploadError).toBe(true);
+    expect(toast).toHaveBeenCalledWith(
+      t('assignmentSubmissionFailed'),
+      'error',
+      { duration: 3000 },
+    );
     expect(result.current.uploading).toBe(false);
-    // The screen's error toast plays the haptic, so it plays once.
-    expect(Haptics.notificationAsync).not.toHaveBeenCalled();
+    expect(result.current.progress).toBe(0);
     expect(onSubmitted).not.toHaveBeenCalled();
     expect(refreshCourseAssignments).not.toHaveBeenCalled();
     expect(usePendingAssignmentStore.getState().data).not.toBeNull();
-
-    await act(() => result.current.dismissUploadError());
-    expect(result.current.uploadError).toBe(false);
   });
 
   it('skips the refresh without a current semester', async () => {

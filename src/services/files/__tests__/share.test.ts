@@ -1,7 +1,7 @@
 import * as IntentLauncher from 'expo-intent-launcher';
 import Share from 'react-native-share';
 import DeviceInfo from 'constants/DeviceInfo';
-import ShareModule from '../../../../modules/share';
+import ShareModule from 'modules/share';
 import {
   copyFileToCache,
   exportTextFile,
@@ -142,4 +142,15 @@ it('shares and opens a file of unknown type as plain bytes', async () => {
       flags: 1,
     },
   );
+});
+
+// Last, as it loads the modules again.
+it('fails to save on Mac without the native share module', async () => {
+  jest.resetModules();
+  jest.doMock('modules/share', () => ({ __esModule: true, default: null }));
+  jest.doMock('constants/DeviceInfo', () => ({ isMac: () => true }));
+  const share: typeof import('services/files/share') = require('services/files/share');
+  await expect(
+    share.exportTextFile('a.ics', 'BEGIN', 'text/calendar'),
+  ).rejects.toThrow('LearnXShare');
 });

@@ -18,7 +18,6 @@ beforeEach(() => {
 
 afterEach(async () => {
   await act(() => toast('', 'none'));
-  jest.useRealTimers();
 });
 
 describe('Toast (iOS)', () => {

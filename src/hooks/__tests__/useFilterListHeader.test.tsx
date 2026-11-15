@@ -136,3 +136,25 @@ it('adds a refresh button on the Mac, disabled while refreshing', async () => {
   expect(o.onRefresh).toHaveBeenCalled();
   isMac.mockRestore();
 });
+
+it('keeps the header when only the handlers change, calling the latest ones', async () => {
+  const first = options({ type: 'course' });
+  const hook = await renderHook(
+    (props: FilterListHeaderOptions) => useFilterListHeader(props),
+    { initialProps: first },
+  );
+  const calls = setOptions.mock.calls.length;
+  // The same screen's next render: new handlers, the rest as it was.
+  const { navigation, filterOptions } = first;
+  const second = options({ type: 'course', navigation, filterOptions });
+  await hook.rerender(second);
+  expect(setOptions).toHaveBeenCalledTimes(calls);
+
+  header().left[1].menu!.items[0].onPress();
+  expect(second.onReorder).toHaveBeenCalled();
+  expect(first.onReorder).not.toHaveBeenCalled();
+
+  await hook.rerender({ ...second, selectionMode: true });
+  header().left[1].onPress!();
+  expect(second.onCheckAll).toHaveBeenCalled();
+});

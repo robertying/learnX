@@ -2,12 +2,12 @@ import { Directory, File, Paths } from 'expo-file-system';
 import * as IntentLauncher from 'expo-intent-launcher';
 import Share from 'react-native-share';
 import mime from 'mime';
-import ShareModule from '../../../modules/share';
+import ShareModule from 'modules/share';
 import { DownloadableFile } from 'data/types/state';
 import DeviceInfo from 'constants/DeviceInfo';
 import { fileNameOf, sanitizeFileName } from 'helpers/filename';
 import { t } from 'helpers/i18n';
-import { downloadFile, SHARED_DIR } from './downloads';
+import { downloadFile, SHARED_DIR } from 'services/files/downloads';
 
 /** Where a file is named for the save panel, under Caches. */
 const SAVE_DIR = 'save';

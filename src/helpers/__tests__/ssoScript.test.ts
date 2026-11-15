@@ -49,6 +49,15 @@ describe('fillSSOScript', () => {
     expect(filled).toContain(`= ${JSON.stringify(values.username)};`);
   });
 
+  it.each(['$&', "$'", '$`', '$$'])(
+    'keeps %s in a password as it is',
+    pattern => {
+      const password = `a${pattern}b`;
+      const filled = fillSSOScript(script, { ...values, password });
+      expect(filled).toContain(`= ${JSON.stringify(password)};`);
+    },
+  );
+
   it('runs on the Tsinghua login page', () => {
     const { result, document } = runAt(
       'https://id.tsinghua.edu.cn/do/off/ui/auth/login/form/x/0',

@@ -32,10 +32,6 @@ beforeEach(() => {
   jest.useFakeTimers({ now: 1_000_000 });
 });
 
-afterEach(() => {
-  jest.useRealTimers();
-});
-
 describe('useCardSwipe', () => {
   it('lets presses through while the actions are closed', async () => {
     const { result, methods } = await setup();

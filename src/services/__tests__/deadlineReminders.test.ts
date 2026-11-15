@@ -310,9 +310,6 @@ describe('remindLater', () => {
   beforeEach(() => {
     jest.useFakeTimers({ now });
   });
-  afterEach(() => {
-    jest.useRealTimers();
-  });
 
   it('replaces the put-off reminder, its text as of when it shows again', async () => {
     jest.replaceProperty(Platform, 'OS', 'ios');

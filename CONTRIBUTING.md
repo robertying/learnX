@@ -55,6 +55,7 @@ Install Ruby with Homebrew and put it first on your `PATH`:
 ```sh
 brew install ruby
 echo 'export PATH="$(brew --prefix ruby)/bin:$PATH"' >> ~/.zshrc   # then open a new terminal
+echo 'export LANG=en_US.UTF-8' >> ~/.zshrc   # CocoaPods needs a UTF-8 locale
 ruby -v             # should print 4.x
 bundle install      # installs the locked CocoaPods (and fastlane) into Homebrew Ruby's gems
 ```
@@ -63,7 +64,7 @@ Then install the pods:
 
 ```sh
 cd ios
-LANG=en_US.UTF-8 bundle exec pod install
+bundle exec pod install
 cd ..
 ```
 
@@ -146,18 +147,19 @@ Mock data details, and how to add to it, are in [src/data/AGENTS.md](src/data/AG
 
 ## Checks
 
-The pull request checks (`CI / JS checks` and `CI / Release bundles` in `.github/workflows/ci.yml`) run these, and all of them must pass. `pnpm check` runs the first five in one go:
+The pull request checks (`CI / JS checks` and `CI / Release bundles` in `.github/workflows/ci.yml`) run these, and all of them must pass. `pnpm check` runs the first six in one go:
 
 ```sh
 pnpm typecheck                   # TypeScript (tsc)
 pnpm lint --deny-warnings        # Oxlint, type-aware; config in .oxlintrc.json and lint/plugin.mjs
 pnpm format --check              # Oxfmt; run `pnpm format` to fix
+node scripts/check-ota-runtime.mjs   # The over-the-air runtime version changes when native code does (AGENTS.md)
 pnpm test --coverage             # Jest, iOS and Android projects; fails below the coverage thresholds in jest.config.js
 git ls-files -z '*.sh' | xargs -0 shellcheck   # ShellCheck, for every shell script
 scripts/check-release-bundle.sh  # The Android and iOS release JS bundles, with no .env value but the mock login in them
 ```
 
-The first five need neither `.env` nor any native setup, so you can run them anywhere Node runs (ShellCheck comes from your package manager, for example `brew install shellcheck`). The bundle check needs a `.env` with the mock login and takes about two minutes. Lint is strict about a few project rules: Chinese text belongs in `src/assets/translations` (`en.ts` and `zh.ts`), and an intentionally unawaited promise is marked with `void`.
+The first six need neither `.env` nor any native setup, so you can run them anywhere Node runs (ShellCheck comes from your package manager, for example `brew install shellcheck`). The bundle check needs a `.env` with the mock login and takes about two minutes. Lint is strict about a few project rules: Chinese text belongs in `src/assets/translations` (`en.ts` and `zh.ts`), and an intentionally unawaited promise is marked with `void`.
 
 End-to-end flows use [Maestro](https://docs.maestro.dev) against a Release build with the mock login: install it with `scripts/e2e-build.sh ios <simulator udid>` or `scripts/e2e-build.sh android <emulator serial>`, then run `pnpm e2e:ios` or `pnpm e2e:android`. See [.maestro/AGENTS.md](.maestro/AGENTS.md).
 
@@ -181,7 +183,7 @@ Pull requests are squash-merged once `CI / JS checks`, `CI / Release bundles` an
 
 - **"… isn't applied to node_modules" at the start of a build:** `pnpm install --force`, then `bundle exec pod install` in `ios/` again.
 - **"The sandbox is not in sync with the Podfile.lock":** run `bundle exec pod install` in `ios/`.
-- **Xcode can't find `node`** (common with nvm, fnm or asdf): create `ios/.xcode.env.local` (git-ignored) with `export NODE_BINARY=/full/path/to/node` (from `command -v node`).
+- **Xcode can't find `node`, or a build fails running `node` after you upgrade or switch Node:** the first `pod install` writes `ios/.xcode.env.local` (git-ignored) with the full path of the `node` it ran, which with Homebrew, nvm, fnm or asdf includes the version. Delete the file and run `bundle exec pod install` again, or set `export NODE_BINARY=/full/path/to/node` in it yourself.
 - **Gradle fails running `node`:** Gradle runs `node` while it configures the project. Start Android Studio from a terminal that has `node` on its `PATH` (`open -a "Android Studio"`), or build from the terminal.
 - **"Signing for … requires a development team" or a provisioning error:** set your own team and bundle IDs (see [Signing](#signing-use-your-own-team-and-bundle-ids)).
 - **The app shows a red screen saying it can't connect to the development server:** start Metro (`pnpm start`). On Android, also run `adb reverse tcp:8081 tcp:8081`.

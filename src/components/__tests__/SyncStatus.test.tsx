@@ -10,7 +10,6 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.useRealTimers();
   useAuthStore.setState(initialAuth);
 });
 

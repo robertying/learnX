@@ -293,7 +293,7 @@ describe('Login', () => {
         duration: 8000,
       });
 
-      // The login check flow (.maestro/00-login-check.yaml) reads it.
+      // The login check flow (.maestro/01-login-check.yaml) reads it.
       (env as { TEST_LOGIN?: boolean }).TEST_LOGIN = true;
       await fail();
       expect(toast).toHaveBeenLastCalledWith(

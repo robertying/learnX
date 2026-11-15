@@ -102,7 +102,6 @@ it('gives each tab split a detail container of its own', async () => {
     </TabSplit>,
   );
   expect(screen.getByText('master')).toBeTruthy();
-  expect(mockSplitProps.enabled).toBe(true);
   // The detail pane's container, which the split hands to the master's links.
   expect(mockSplitProps.detailNavigationContainerRef.current).not.toBeNull();
   expect(screen.getByTestId('navigator')).toBeTruthy();

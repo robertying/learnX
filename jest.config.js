@@ -44,6 +44,11 @@ module.exports = {
   // Count every source file, not only the ones some test imports.
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
+    // Browser scripts the web views run (helpers/html inlines them), loaded
+    // as modules by their tests. sso.js and ssoAlerts.js are run as text
+    // (a template, and a script whose result the web view reads), so their
+    // tests can't count them.
+    'src/helpers/preval/{csrfLinks,darkMode}.js',
     '!src/**/__tests__/**',
     '!src/**/*.d.ts',
     // Widget layouts and their kit become source text at build time ('widget'

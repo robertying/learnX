@@ -152,13 +152,13 @@ export const useShowDetail = (
   navigation: Pick<NavigationProp<ParamListBase>, 'dispatch'>,
 ): OpenScreen => {
   const detailNavigator = useDetailNavigator();
-  const container =
-    useContext(SplitViewContext).detailNavigationContainerRef?.current;
+  const detailRef = useContext(SplitViewContext).detailNavigationContainerRef;
   // Optional, for lists rendered outside a navigator (as in tests).
   const listNavigation = useContext(NavigationContext);
   const routeKey = useContext(NavigationRouteContext)?.key;
 
   const moveToDetail = useEffectEvent(() => {
+    const container = detailRef?.current;
     const detailState = container?.getRootState();
     const stack = listNavigation?.getState();
     if (!detailState || !stack) {

@@ -16,6 +16,7 @@ import { userQuery } from 'data/queries';
 import { clearQueryCache, queryClient } from 'data/queryClient';
 import { getSettings, resetSettings } from 'data/settings';
 import { t } from 'helpers/i18n';
+import * as whatsNew from 'helpers/whatsNew';
 import { setServerWritesAllowed } from 'helpers/serverWrites';
 import useAvailableUpdate from 'hooks/useAvailableUpdate';
 import { useShowDetail } from 'hooks/useDetailNavigator';
@@ -129,13 +130,34 @@ it('leaves out Swipe Actions on Mac, which has no swipe', async () => {
   jest.restoreAllMocks();
 });
 
-it("opens What's New as a sheet", async () => {
+it("opens What's New as a sheet, at this install's newest", async () => {
+  jest
+    .spyOn(whatsNew, 'findWhatsNew')
+    .mockReturnValue({ version: '19.0.0', highlights: [] });
   await renderScreen();
   await userEvent.press(screen.getByTestId('settings-whats-new'));
   expect(navigation.navigate).toHaveBeenCalledWith('WhatsNewStack', {
     screen: 'WhatsNew',
-    params: expect.objectContaining({ version: expect.any(String) }),
+    params: { version: '19.0.0' },
   });
+});
+
+it("previews the newest What's New in debug builds, which predate it", async () => {
+  jest.spyOn(whatsNew, 'findWhatsNew').mockReturnValue(null);
+  await renderScreen();
+  await userEvent.press(screen.getByTestId('settings-whats-new'));
+  expect(navigation.navigate).toHaveBeenCalledWith('WhatsNewStack', {
+    screen: 'WhatsNew',
+    params: { version: whatsNew.releases[0].version, preview: true },
+  });
+
+  jest.replaceProperty(
+    globalThis as unknown as { __DEV__: boolean },
+    '__DEV__',
+    false,
+  );
+  await renderScreen();
+  expect(screen.queryByTestId('settings-whats-new')).toBeNull();
 });
 
 it('marks course sharing never opened, and not the changelog', async () => {

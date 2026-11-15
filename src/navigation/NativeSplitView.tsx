@@ -22,8 +22,6 @@ import SplitSizes from 'constants/SplitSizes';
 import { SplitViewContext } from './SplitView';
 
 export interface NativeSplitViewProps {
-  /** Without the split, only the first child is rendered. */
-  enabled: boolean;
   detailNavigationContainerRef: DetailNavigationContainerRef;
   /**
    * Shown in a column of its own before the master one, which makes it the
@@ -119,7 +117,7 @@ const ColumnSafeArea: React.FC<
  */
 const NativeSplitViewProvider: React.FC<
   React.PropsWithChildren<NativeSplitViewProps>
-> = ({ enabled, detailNavigationContainerRef, sidebar, children }) => {
+> = ({ detailNavigationContainerRef, sidebar, children }) => {
   const [master, detail] = Children.toArray(children);
 
   // UIKit reports the initial collapse, but not an initial expansion.
@@ -152,7 +150,7 @@ const NativeSplitViewProvider: React.FC<
   }
 
   const hasSidebar = sidebar !== undefined;
-  const showDetail = enabled && expanded;
+  const showDetail = expanded;
   const showMaster = displayMode !== 'secondaryOnly';
   // Hidden with the system's button. Taken to be shown until UIKit reports a
   // display mode.
@@ -218,89 +216,79 @@ const NativeSplitViewProvider: React.FC<
           ? detailNavigationContainerRef
           : null,
         showDetail,
-        laidOut: !enabled || laidOut,
+        laidOut,
         showMaster,
         toggleMaster,
         masterWidth: masterWidth ?? SplitSizes.masterWidth,
       }}
     >
-      {enabled ? (
-        <Split.Host
-          preferredDisplayMode={preferredDisplayMode}
-          preferredSplitBehavior="tile"
-          // Tiled, UIKit shows the detail pane alone when it can't fit beside
-          // the list, and on Mac that leaves no button to bring the list back.
-          // The window can't be made narrower than the list beside this.
-          columnMetrics={
-            hasSidebar
-              ? { minimumSecondaryColumnWidth: SplitSizes.minDetailWidth }
-              : undefined
-          }
-          // In the sidebar's bar, which is in the window's title bar on Mac.
-          displayModeButtonVisibility={hasSidebar ? 'automatic' : 'never'}
-          primaryBackgroundStyle={hasSidebar ? 'sidebar' : undefined}
-          topColumnForCollapsing={hasSidebar ? 'supplementary' : 'primary'}
-          // Compared with the split's bounds natively, so that it can't lag
-          // behind a resize (or the hinge, which is handled natively too).
-          // Collapsed, the sidebar would be out of reach.
-          maxCollapsedWidth={
-            hasSidebar ? undefined : SplitSizes.maxCollapsedWidth
-          }
-          onCollapse={() => setExpanded(false)}
-          onExpand={() => setExpanded(true)}
-          onDisplayModeWillChange={e =>
-            handleDisplayModeWillChange(
-              e.nativeEvent.nextDisplayMode as SplitDisplayMode,
-            )
-          }
-        >
-          {/* The secondary column extends underneath the primary one (and any
+      <Split.Host
+        preferredDisplayMode={preferredDisplayMode}
+        preferredSplitBehavior="tile"
+        // Tiled, UIKit shows the detail pane alone when it can't fit beside
+        // the list, and on Mac that leaves no button to bring the list back.
+        // The window can't be made narrower than the list beside this.
+        columnMetrics={
+          hasSidebar
+            ? { minimumSecondaryColumnWidth: SplitSizes.minDetailWidth }
+            : undefined
+        }
+        // In the sidebar's bar, which is in the window's title bar on Mac.
+        displayModeButtonVisibility={hasSidebar ? 'automatic' : 'never'}
+        primaryBackgroundStyle={hasSidebar ? 'sidebar' : undefined}
+        topColumnForCollapsing={hasSidebar ? 'supplementary' : 'primary'}
+        // Compared with the split's bounds natively, so that it can't lag
+        // behind a resize (or the hinge, which is handled natively too).
+        // Collapsed, the sidebar would be out of reach.
+        maxCollapsedWidth={
+          hasSidebar ? undefined : SplitSizes.maxCollapsedWidth
+        }
+        onCollapse={() => setExpanded(false)}
+        onExpand={() => setExpanded(true)}
+        onDisplayModeWillChange={e =>
+          handleDisplayModeWillChange(
+            e.nativeEvent.nextDisplayMode as SplitDisplayMode,
+          )
+        }
+      >
+        {/* The secondary column extends underneath the primary one (and any
               vertical bar); UIKit reports both as safe area insets of the column. */}
-          {hasSidebar && (
-            <Split.Column
-              style={{ width: sidebarWidth }}
-              {...sidebarAppearance.handlers}
-            >
-              <SafeAreaProvider>
-                <ColumnSafeArea
-                  column={sidebarColumn}
-                  appearance={sidebarAppearance}
-                >
-                  {sidebar}
-                </ColumnSafeArea>
-              </SafeAreaProvider>
-            </Split.Column>
-          )}
+        {hasSidebar && (
           <Split.Column
-            style={{ width: masterWidth }}
-            {...masterAppearance.handlers}
+            style={{ width: sidebarWidth }}
+            {...sidebarAppearance.handlers}
           >
             <SafeAreaProvider>
               <ColumnSafeArea
-                column={masterColumn}
-                appearance={masterAppearance}
+                column={sidebarColumn}
+                appearance={sidebarAppearance}
               >
-                {master}
+                {sidebar}
               </ColumnSafeArea>
             </SafeAreaProvider>
           </Split.Column>
-          <Split.Column
-            style={{ width: detailWidth }}
-            {...detailAppearance.handlers}
-          >
-            <SafeAreaProvider>
-              <ColumnSafeArea
-                column={detailColumn}
-                appearance={detailAppearance}
-              >
-                {detail}
-              </ColumnSafeArea>
-            </SafeAreaProvider>
-          </Split.Column>
-        </Split.Host>
-      ) : (
-        master
-      )}
+        )}
+        <Split.Column
+          style={{ width: masterWidth }}
+          {...masterAppearance.handlers}
+        >
+          <SafeAreaProvider>
+            <ColumnSafeArea column={masterColumn} appearance={masterAppearance}>
+              {master}
+            </ColumnSafeArea>
+          </SafeAreaProvider>
+        </Split.Column>
+        <Split.Column
+          style={{ width: detailWidth }}
+          {...detailAppearance.handlers}
+        >
+          <SafeAreaProvider>
+            <ColumnSafeArea column={detailColumn} appearance={detailAppearance}>
+              {detail}
+            </ColumnSafeArea>
+          </SafeAreaProvider>
+        </Split.Column>
+      </Split.Host>
     </SplitViewContext.Provider>
   );
 };
