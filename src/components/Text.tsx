@@ -1,11 +1,12 @@
+import { useSyncExternalStore } from 'react';
 import {
+  Dimensions,
   I18nManager,
   Platform,
   StyleSheet,
   Text as NativeText,
   TextProps as NativeTextProps,
   type TextStyle,
-  useWindowDimensions,
 } from 'react-native';
 import { useTheme } from 'theme';
 
@@ -138,18 +139,31 @@ interface StyledTextProps extends TextProps {
  */
 const nonlinearFontScale = 1.3;
 
-// Only Android reads the font scale, so iOS text doesn't re-render whenever a
-// window (iPad, Mac) is resized.
-const useFontLineHeight =
-  Platform.OS === 'android'
-    ? () => useWindowDimensions().fontScale > nonlinearFontScale
-    : () => false;
+const subscribeToDimensions = (onChange: () => void) => {
+  const subscription = Dimensions.addEventListener('change', onChange);
+  return () => subscription.remove();
+};
+const getFontScale = () => Dimensions.get('window').fontScale;
+
+/**
+ * The text size setting (Dynamic Type on iOS, the font scale on Android),
+ * without the window's size, so text doesn't re-render whenever a window
+ * (iPad, Mac, a foldable) is resized.
+ */
+const useFontScale = () =>
+  useSyncExternalStore(subscribeToDimensions, getFontScale);
 
 const StyledText = ({ color, variant, style, ...rest }: StyledTextProps) => {
   const theme = useTheme();
-  const fontLineHeight = useFontLineHeight();
+  const fontScale = useFontScale();
+  const fontLineHeight =
+    Platform.OS === 'android' && fontScale > nonlinearFontScale;
   return (
     <NativeText
+      // A new text view for a new text size: React Native lays out a text
+      // again only when its props change, so a text size changed while the
+      // app runs would leave text at the old size until a relaunch (iOS).
+      key={fontScale}
       dynamicTypeRamp={ramps[variant]}
       {...rest}
       style={[
