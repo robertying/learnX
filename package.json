@@ -111,7 +111,8 @@
       "android": {
         "buildFromSource": [
           "expo-calendar",
-          "expo-document-picker"
+          "expo-document-picker",
+          "expo-ui"
         ]
       }
     }

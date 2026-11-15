@@ -99,6 +99,7 @@ it('lists the tabs in the sidebar, with their symbols, badges and test ids', asy
       title: 'One',
       systemImage: 'sun.max',
       badge: false,
+      badgeLabel: undefined,
       testID: 'tab-one',
     },
     {
@@ -106,6 +107,8 @@ it('lists the tabs in the sidebar, with their symbols, badges and test ids', asy
       title: 'Two',
       systemImage: 'bell',
       badge: true,
+      // VoiceOver reads the dot as the row's value.
+      badgeLabel: 'New',
       testID: undefined,
     },
     {
@@ -113,6 +116,7 @@ it('lists the tabs in the sidebar, with their symbols, badges and test ids', asy
       title: 'Three',
       systemImage: 'doc',
       badge: false,
+      badgeLabel: undefined,
       testID: undefined,
     },
   ]);

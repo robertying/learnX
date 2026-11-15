@@ -8,6 +8,8 @@ export interface SidebarItem {
   title: string;
   systemImage: SFSymbol;
   badge: boolean;
+  /** What VoiceOver reads for the badge, as the row's value ("New"). */
+  badgeLabel?: string;
   /** The row's accessibility identifier, for UI tests. */
   testID?: string;
 }

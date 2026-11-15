@@ -172,7 +172,7 @@ settings:
   excludeLinksFromLockfile: false
 
 patchedDependencies:
-  '@expo/ui@58.0.27': 6979f4cb3bc3479f47723216d23618346289ec78066d0463c916ad6add482a67
+  '@expo/ui@58.0.27': d616a043e1bb41d59d699cb7699c0077bc20505a8ed691e2bbe127c4c58aa841
   '@react-navigation/native-stack@7.21.0': 0aeab62ce16a183300736465505b6b5a576ebb6747192e24e3a7f22493d4d13f
   expo-calendar@58.0.6: 8ff3b444d6072dd3e56c8194a507ccaa92dc603c88cc5afa9746cdfd0736fd69
   expo-document-picker@58.0.4: a323315f234f3a42070a80336372f3f824106bc9fbafd58ae69447e5c965e517
@@ -202,7 +202,7 @@ importers:
         version: 1.5.0(d499c062a6ab168c97f7f4294c4d4620)
       '@expo/ui':
         specifier: 58.0.27
-        version: 58.0.27(patch_hash=6979f4cb3bc3479f47723216d23618346289ec78066d0463c916ad6add482a67)(6536c01a4d18715d521117678ad0d4d2)
+        version: 58.0.27(patch_hash=d616a043e1bb41d59d699cb7699c0077bc20505a8ed691e2bbe127c4c58aa841)(6536c01a4d18715d521117678ad0d4d2)
       '@preeternal/react-native-cookie-manager':
         specifier: 7.0.0
         version: 7.0.0(react-native@0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1)
@@ -6166,7 +6166,7 @@ snapshots:
 
   '@expo/sudo-prompt@9.3.2': {}
 
-  '@expo/ui@58.0.27(patch_hash=6979f4cb3bc3479f47723216d23618346289ec78066d0463c916ad6add482a67)(6536c01a4d18715d521117678ad0d4d2)':
+  '@expo/ui@58.0.27(patch_hash=d616a043e1bb41d59d699cb7699c0077bc20505a8ed691e2bbe127c4c58aa841)(6536c01a4d18715d521117678ad0d4d2)':
     dependencies:
       expo: 58.0.23(5364ea81da2ec2136e7c5e858b575528)
       react: 19.3.1
@@ -8296,7 +8296,7 @@ snapshots:
   expo-widgets@58.0.27(patch_hash=c95fe51cc95c13beea9aab2bca04519c5fbf728328fda9d73387a889313a488f)(6536c01a4d18715d521117678ad0d4d2):
     dependencies:
       '@expo/plist': 0.10.1
-      '@expo/ui': 58.0.27(patch_hash=6979f4cb3bc3479f47723216d23618346289ec78066d0463c916ad6add482a67)(6536c01a4d18715d521117678ad0d4d2)
+      '@expo/ui': 58.0.27(patch_hash=d616a043e1bb41d59d699cb7699c0077bc20505a8ed691e2bbe127c4c58aa841)(6536c01a4d18715d521117678ad0d4d2)
       expo: 58.0.23(5364ea81da2ec2136e7c5e858b575528)
       react: 19.3.1
       react-native: 0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1)

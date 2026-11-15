@@ -1,3 +1,62 @@
+diff --git a/android/src/main/java/expo/modules/ui/ModifierRegistry.kt b/android/src/main/java/expo/modules/ui/ModifierRegistry.kt
+index b1431d5c60665f8ea1708d1cde2e7d703e8efe97..52d81330d9300ddff0c14d015b09d4858e03a4c5 100644
+--- a/android/src/main/java/expo/modules/ui/ModifierRegistry.kt
++++ b/android/src/main/java/expo/modules/ui/ModifierRegistry.kt
+@@ -70,6 +70,7 @@ import androidx.compose.ui.platform.LocalDensity
+ import androidx.compose.ui.semantics.Role
+ import androidx.compose.ui.semantics.contentDescription
+ import androidx.compose.ui.semantics.contentType
++import androidx.compose.ui.semantics.heading
+ import androidx.compose.ui.semantics.semantics
+ import androidx.compose.ui.unit.DpOffset
+ import androidx.compose.ui.unit.dp
+@@ -738,12 +739,16 @@ object ModifierRegistry {
+       val params = recordFromMap<SemanticsParams>(map, appContext)
+       val type = params.contentType.toContentType()
+       val description = params.contentDescription
+-      if (type == null && description == null) {
++      val isHeading = params.heading == true
++      if (type == null && description == null && !isHeading) {
+         Modifier
+       } else {
+         Modifier.semantics {
+           type?.let { contentType = it }
+           description?.let { contentDescription = it }
++          if (isHeading) {
++            heading()
++          }
+         }
+       }
+     }
+diff --git a/android/src/main/java/expo/modules/ui/SemanticsModifier.kt b/android/src/main/java/expo/modules/ui/SemanticsModifier.kt
+index 6c36d1fcad46d12b693fe962b8594534b8fb2cbe..aa6fb62127a3105ac3647cf981eb3c163d350bba 100644
+--- a/android/src/main/java/expo/modules/ui/SemanticsModifier.kt
++++ b/android/src/main/java/expo/modules/ui/SemanticsModifier.kt
+@@ -8,7 +8,8 @@ import expo.modules.kotlin.types.OptimizedRecord
+ @OptimizedRecord
+ internal data class SemanticsParams(
+   @Field val contentType: String? = null,
+-  @Field val contentDescription: String? = null
++  @Field val contentDescription: String? = null,
++  @Field val heading: Boolean? = null
+ ) : Record
+ 
+ internal fun String?.toContentType(): ContentType? = when (this) {
+diff --git a/build/jetpack-compose/modifiers/index.d.ts b/build/jetpack-compose/modifiers/index.d.ts
+index 7326d9b5413e66478b1900db60a4a721d3e4e407..e4cc0cb6ba1430cd256d56cffeb781ce4da3279d 100644
+--- a/build/jetpack-compose/modifiers/index.d.ts
++++ b/build/jetpack-compose/modifiers/index.d.ts
+@@ -344,6 +344,10 @@ export type SemanticsConfig = {
+      * content does not read well aloud, as with an abbreviation or a glyph.
+      */
+     contentDescription?: string;
++    /**
++     * Marks the element as a heading, which TalkBack announces as one and lets people jump between.
++     */
++    heading?: boolean;
+ };
+ /**
+  * Applies semantic properties. Wraps `Modifier.semantics { ... }`.
 diff --git a/build/swift-ui/Button/index.js b/build/swift-ui/Button/index.js
 index b81f0e2f91e3638a3d2a40f4a05a853a1580e093..917593c6eea621ec84fcc06f170da6ad0d905227 100644
 --- a/build/swift-ui/Button/index.js
@@ -50,7 +109,7 @@ index 337bf4b91ca3f16de5ad3d264af3fe86c16584fe..8984aa1b816d564951c893181558f713
        }) {
          Children()
 diff --git a/ios/Button/ButtonProps.swift b/ios/Button/ButtonProps.swift
-index 23a980a2a1cb9deb335d6e26f5ffbaf67b8afe2a..9e9bbcec03fa2df06d3204f30a0fa7f0863fbf87 100644
+index 23a980a2a1cb9deb335d6e26f5ffbaf67b8afe2a..e057ed82dc6bb31c64e594495fa4381c73a09381 100644
 --- a/ios/Button/ButtonProps.swift
 +++ b/ios/Button/ButtonProps.swift
 @@ -30,5 +30,12 @@ open class ButtonProps: UIBaseViewProps, Observable {
@@ -66,6 +125,21 @@ index 23a980a2a1cb9deb335d6e26f5ffbaf67b8afe2a..9e9bbcec03fa2df06d3204f30a0fa7f0
 +  }
    var onButtonPress = EventDispatcher()
  }
+diff --git a/src/jetpack-compose/modifiers/index.ts b/src/jetpack-compose/modifiers/index.ts
+index 08143ae8a3dec00e5e38b6dc9854ba651e3943bb..7d4c42e5533389245958045155919c3b960b4362 100644
+--- a/src/jetpack-compose/modifiers/index.ts
++++ b/src/jetpack-compose/modifiers/index.ts
+@@ -488,6 +488,10 @@ export type SemanticsConfig = {
+    * content does not read well aloud, as with an abbreviation or a glyph.
+    */
+   contentDescription?: string;
++  /**
++   * Marks the element as a heading, which TalkBack announces as one and lets people jump between.
++   */
++  heading?: boolean;
+ };
+ 
+ /**
 diff --git a/src/swift-ui/Button/index.tsx b/src/swift-ui/Button/index.tsx
 index 41df9325424c31c0c0eb728796bd835c4db2ba09..ad3c3db83913e39bc1d4ef75107005b1fa3393e7 100644
 --- a/src/swift-ui/Button/index.tsx

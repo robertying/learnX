@@ -7,7 +7,13 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import SystemIcon from 'components/SystemIcon';
-import { Caption, Headline, Paragraph, Text } from 'components/Text';
+import {
+  Caption,
+  Headline,
+  Paragraph,
+  Text,
+  useTextIconSize,
+} from 'components/Text';
 import { t } from 'helpers/i18n';
 import { matchRanges } from 'helpers/search';
 import { StatusTone, statusContainerOpacity, useTheme } from 'theme';
@@ -227,12 +233,13 @@ const isFlag = (flag: CardFlag | false | undefined): flag is CardFlag => !!flag;
 
 const CardGlyph: React.FC<{ name: CardFlag }> = ({ name }) => {
   const theme = useTheme();
+  const size = useTextIconSize(15);
   const { tone } = cardFlags[name];
   return (
     <SystemIcon
       testID={`icon-${name}`}
       name={name}
-      size={15}
+      size={size}
       color={tone ? theme.colors.status[tone] : theme.colors.onSurfaceMedium}
     />
   );
@@ -250,6 +257,7 @@ export const CardPill: React.FC<{
   testID?: string;
 }> = ({ children, tone, icon, testID }) => {
   const { colors } = useTheme();
+  const iconSize = useTextIconSize(13);
   const [container, foreground] =
     tone === 'primary'
       ? [colors.primaryContainer, colors.onPrimaryContainer]
@@ -265,7 +273,9 @@ export const CardPill: React.FC<{
           { backgroundColor: tint, opacity: statusContainerOpacity },
         ]}
       />
-      {icon ? <SystemIcon name={icon} size={13} color={foreground} /> : null}
+      {icon ? (
+        <SystemIcon name={icon} size={iconSize} color={foreground} />
+      ) : null}
       <Text
         variant="footnote"
         numberOfLines={1}
