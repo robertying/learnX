@@ -1,6 +1,6 @@
 // The over-the-air update settings: the URL, request headers and runtime
-// version in app.json (`eoas publish` reads them too) and the code-signing
-// certificate in certs/ota-certificate.pem. scripts/ota-config-ios.sh writes
+// version in app.json and the code-signing certificate in
+// certs/ota-certificate.pem. scripts/ota-config-ios.sh writes
 // them into Expo.plist and android/app/build.gradle into resources the
 // manifest reads; the rest is in Expo.plist and the build.gradle. A mismatch
 // shows up only as updates that never arrive, so keep them in step.
@@ -45,7 +45,7 @@ test('the runtime version is an app version', () => {
 test('the update URL is HTTPS', () => {
   expect(appJson.updates.url).toMatch(/^https:\/\/[^/]+\/manifest$/);
   // The channel builds take updates from, and the Expo project the update
-  // server serves (stateless xprem serves one).
+  // server serves.
   expect(appJson.updates.requestHeaders).toEqual({
     'expo-channel-name': 'production',
     'expo-app-id': expect.stringMatching(/^[0-9a-f-]{36}$/),
