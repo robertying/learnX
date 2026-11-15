@@ -42,6 +42,8 @@ it("opens CourseX at the course's page, or its list without one", async () => {
   expect(mockProps.source.uri).toBe('https://tsinghua.app/courses/c1');
   await renderScreen();
   expect(mockProps.source.uri).toBe('https://tsinghua.app/courses');
+  await renderScreen({ id: '../a?b' });
+  expect(mockProps.source.uri).toBe('https://tsinghua.app/courses/..%2Fa%3Fb');
 });
 
 it('goes back and forward only where the page can', async () => {
@@ -80,4 +82,11 @@ it('shows the progress while loading, without reloading or opening meanwhile', a
 it('keeps the page clear of the floating toolbar', async () => {
   await renderScreen();
   expect(mockProps.contentInset).toEqual({ bottom: 0 });
+});
+
+it("opens the course's page in the browser before the page says where it is", async () => {
+  const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue();
+  await renderScreen({ id: 'c1' });
+  await userEvent.press(screen.getByTestId('courseXOpen'));
+  expect(openURL).toHaveBeenCalledWith('https://tsinghua.app/courses/c1');
 });

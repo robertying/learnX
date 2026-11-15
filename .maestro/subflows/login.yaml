@@ -1,6 +1,6 @@
 # Open the app logged in with the mock account (see src/data/AGENTS.md, Mock
 # login), on the notices. The flows share one login: the first flow of a run
-# logs in after 00-reset, the others find the app logged in and only relaunch
+# logs in after 02-reset, the others find the app logged in and only relaunch
 # it. USERNAME / PASSWORD / APP_ID are passed with -e by scripts/e2e.sh.
 appId: ${APP_ID}
 ---

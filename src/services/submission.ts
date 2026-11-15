@@ -3,17 +3,10 @@
 import mime from 'mime';
 import { RemoteFile, homeworkContentHtml } from '@robertying/thu-learn-lib';
 import { dataSource } from 'data/source';
+import type { PickedAttachment } from 'data/submissionDrafts';
 import { getExtension, withExtension } from 'helpers/filename';
 import { interpolate, translationsFor } from 'helpers/i18n';
 import { removeTags } from 'helpers/text';
-
-/** A file picked or shared for submission, not uploaded yet */
-export interface PickedAttachment {
-  uri: string;
-  type: string | null;
-  name: string;
-  size?: number | null;
-}
 
 /**
  * What the content input starts with: the submitted text, tags removed. The

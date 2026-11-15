@@ -1,6 +1,6 @@
 import AppIntents
 import Foundation
-internal import LearnXSpotlight
+internal import LearnXShortcuts
 import Testing
 
 @testable import learnX
@@ -135,6 +135,6 @@ let roundingCases: [(Double, DateComponents)] = [
   }
 
   @Test func offersBothShortcuts() {
-    #expect(LearnXShortcuts.appShortcuts.count == 2)
+    #expect(LearnXAppShortcuts.appShortcuts.count == 2)
   }
 }

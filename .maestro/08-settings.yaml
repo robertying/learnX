@@ -82,7 +82,7 @@ name: Change every setting
 # Notifications: each on, then each off. Android only: on iOS, Maestro holds
 # the notification permission alert back until some later tap, which it then
 # spends on the alert, so which tap is lost isn't known. The page itself is
-# opened on iOS by 06-screens.
+# opened on iOS by 07-screens.
 - runFlow:
     when:
       platform: Android

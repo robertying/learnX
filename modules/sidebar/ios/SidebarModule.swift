@@ -6,12 +6,14 @@ struct SidebarItem: Record, Equatable {
   @Field var title: String = ""
   @Field var systemImage: String = ""
   @Field var badge: Bool = false
+  /// What VoiceOver reads for the badge, as the row's value ("New").
+  @Field var badgeLabel: String = ""
   /// The row's accessibility identifier, for UI tests.
   @Field var testID: String = ""
 
   static func == (lhs: SidebarItem, rhs: SidebarItem) -> Bool {
     lhs.key == rhs.key && lhs.title == rhs.title && lhs.systemImage == rhs.systemImage && lhs.badge == rhs.badge
-      && lhs.testID == rhs.testID
+      && lhs.badgeLabel == rhs.badgeLabel && lhs.testID == rhs.testID
   }
 }
 

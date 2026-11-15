@@ -71,8 +71,10 @@ jest.mock('../modules/share', () => ({
     addListener: jest.fn(() => ({ remove: jest.fn() })),
   },
 }));
-// Spotlight is native only (iOS and Mac), as on Android.
+// Spotlight and the App Intents' store are native only (iOS and Mac), as on
+// Android.
 jest.mock('../modules/spotlight', () => ({ __esModule: true, default: null }));
+jest.mock('../modules/shortcuts', () => ({ __esModule: true, default: null }));
 
 // Native views
 jest.mock('@expo/ui', () => require('./mocks/expoUi'));

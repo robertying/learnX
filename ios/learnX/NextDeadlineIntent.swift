@@ -1,7 +1,7 @@
 import AppIntents
 import Foundation
 // ExpoModulesProvider imports it as `internal`, and Swift rejects mixed implicit levels.
-internal import LearnXSpotlight
+internal import LearnXShortcuts
 
 /// Says which open assignment is due next, from what the app last loaded, so it answers right away and offline.
 struct NextDeadlineIntent: AppIntent {

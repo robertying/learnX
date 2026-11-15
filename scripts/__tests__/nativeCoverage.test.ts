@@ -13,6 +13,7 @@ const run = (script: string, args: string[], input = '') =>
     cwd: root,
     encoding: 'utf8',
     input,
+    stdio: ['pipe', 'pipe', 'pipe'],
   })
     .trimEnd()
     .split('\n');
@@ -75,8 +76,9 @@ describe('android-coverage.mjs', () => {
     rmSync(dir, { recursive: true, force: true });
   });
 
-  it('lists each file of the reports, then the own Kotlin they miss', () => {
-    const report = join(dir, 'report.xml');
+  let report: string;
+  beforeEach(() => {
+    report = join(dir, 'report.xml');
     writeFileSync(
       report,
       `<report name="share"><package name="io/robertying/learnx/share">
@@ -89,7 +91,9 @@ describe('android-coverage.mjs', () => {
         <sourcefile name="NoLines.kt"><counter type="METHOD" missed="0" covered="1"/></sourcefile>
       </package></report>`,
     );
+  });
 
+  it('lists each file of the reports, then the own Kotlin they miss', () => {
     const table = run('android-coverage.mjs', [report]);
 
     expect(table[0]).toBe(
@@ -100,5 +104,14 @@ describe('android-coverage.mjs', () => {
     );
     expect(table.join('\n')).not.toContain('modules/share/');
     expect(table.at(-1)).toMatch(/total, without \d+ untested$/);
+  });
+
+  it('fails below the minimum it is given', () => {
+    expect(run('android-coverage.mjs', ['--min=90', report])[0]).toMatch(
+      /ShareModule\.kt$/,
+    );
+    expect(() => run('android-coverage.mjs', ['--min=95', report])).toThrow(
+      /Line coverage 90\.0% is below the minimum, 95%\./,
+    );
   });
 });

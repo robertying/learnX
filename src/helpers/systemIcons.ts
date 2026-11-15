@@ -132,6 +132,8 @@ export const systemIcons = {
   checked: { ios: 'checkmark', android: 'check' },
   preview: { ios: 'eye', android: 'visibility' },
   reorder: { ios: 'arrow.up.and.down', android: 'swap_vert' },
+  // A header's menu of its less used actions
+  more: { ios: 'ellipsis.circle', android: 'more_vert' },
   // Debug rows
   debug: { ios: 'wrench.and.screwdriver', android: 'handyman' },
   send: { ios: 'paperplane', android: 'send' },
@@ -214,6 +216,7 @@ export const materialCodepoints: Record<SystemIconAndroidName, number> = {
   mail: 0xe158,
   mark_email_unread: 0xf18a,
   more_time: 0xea5d,
+  more_vert: 0xe5d4,
   note_add: 0xe89c,
   notifications: 0xe7f4,
   notifications_active: 0xe7f7,

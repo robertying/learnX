@@ -3,6 +3,7 @@ import {
   canPreviewInline,
   canRenderInIosWebview,
   canRenderInMacWebview,
+  isPreviewLoad,
   needWhiteBackground,
 } from 'helpers/filePreview';
 
@@ -75,5 +76,20 @@ describe('canPreviewInline', () => {
   it('always previews PDFs', () => {
     jest.mocked(DeviceInfo.isMac).mockReturnValue(true);
     expect(canPreviewInline('pdf')).toBe(true);
+  });
+});
+
+describe('isPreviewLoad', () => {
+  it('lets the file, a blank page and converted documents load', () => {
+    expect(isPreviewLoad('file:///Caches/downloads/c/f/a.html')).toBe(true);
+    expect(isPreviewLoad('about:blank')).toBe(true);
+    expect(isPreviewLoad('x-apple-ql-id://abc/a.docx')).toBe(true);
+  });
+
+  it('keeps web pages and other schemes out', () => {
+    expect(isPreviewLoad('https://id.tsinghua.edu.cn/login')).toBe(false);
+    expect(isPreviewLoad('http://example.com')).toBe(false);
+    expect(isPreviewLoad('data:text/html,<form>')).toBe(false);
+    expect(isPreviewLoad('mailto:ta@example.com')).toBe(false);
   });
 });

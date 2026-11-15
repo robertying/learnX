@@ -6,6 +6,13 @@ import { Text } from 'components/Text';
 export interface HeaderTitleProps {
   title: string;
   subtitle?: string;
+  /**
+   * Where a title too long for the bar is shortened: at the end for a
+   * screen's name, in the middle for an item's (a course or file name,
+   * whose end tells it apart).
+   * @default 'tail'
+   */
+  ellipsizeMode?: 'tail' | 'middle';
 }
 
 // Navigation bar titles keep their size on iOS, as UIKit's do. Android's
@@ -14,7 +21,11 @@ export interface HeaderTitleProps {
 const allowFontScaling = Platform.OS !== 'ios';
 const maxFontSizeMultiplier = 1.3;
 
-const HeaderTitle: React.FC<HeaderTitleProps> = ({ title, subtitle }) => {
+const HeaderTitle: React.FC<HeaderTitleProps> = ({
+  title,
+  subtitle,
+  ellipsizeMode = 'tail',
+}) => {
   const { width } = useWindowDimensions();
   // Wide windows (tablets, unfolded foldables) get the roomy header, like the split view.
   const isWide = DeviceInfo.isTablet() || width > SplitSizes.maxCollapsedWidth;
@@ -33,7 +44,7 @@ const HeaderTitle: React.FC<HeaderTitleProps> = ({ title, subtitle }) => {
         allowFontScaling={allowFontScaling}
         maxFontSizeMultiplier={maxFontSizeMultiplier}
         numberOfLines={1}
-        ellipsizeMode="middle"
+        ellipsizeMode={ellipsizeMode}
       >
         {title}
       </Text>

@@ -813,6 +813,8 @@ export const FormParagraph: React.FC<FormParagraphProps> = ({
 const titleModifiers = [
   font({ textStyle: 'title2', weight: 'bold' }),
   ...paragraphModifiers,
+  // A heading, as a section's header is, so the rotor jumps to it.
+  accessibilityAddTraits(['isHeader']),
 ];
 
 /** The title of a detail page, as in Calendar's event details. */

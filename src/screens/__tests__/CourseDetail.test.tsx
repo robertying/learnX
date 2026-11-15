@@ -131,6 +131,12 @@ it("lists the course's notices, and its assignments and files by tab", async () 
   expect(screen.getByText(of(mockFiles)[0].title)).toBeTruthy();
 });
 
+it('says so when a tab has nothing yet', async () => {
+  jest.mocked(useCourse).mockReturnValue({ ...course, id: 'new-course' });
+  await renderScreen();
+  expect(screen.getByText(t('noNotices'))).toBeTruthy();
+});
+
 it('opens an item on top of the course', async () => {
   await renderScreen();
   const notice = of(mockNotices)[0];

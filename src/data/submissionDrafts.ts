@@ -3,8 +3,8 @@ import { persist } from 'zustand/middleware';
 import { Directory, File, Paths } from 'expo-file-system';
 import mime from 'mime';
 import { persistStorage } from 'data/storage';
+import storeVersions from 'data/storeVersions.json';
 import { getExtension } from 'helpers/filename';
-import type { PickedAttachment } from 'services/submission';
 
 export const SUBMISSION_DRAFTS_KEY = 'submissionDrafts';
 
@@ -16,6 +16,14 @@ export const SUBMISSION_DRAFTS_DIR = 'SubmissionDrafts';
 
 /** Drafts not touched for this long are dropped with their files. */
 const MAX_AGE = 1000 * 60 * 60 * 24 * 180;
+
+/** A file picked or shared for submission, not uploaded yet. */
+export interface PickedAttachment {
+  uri: string;
+  type: string | null;
+  name: string;
+  size?: number | null;
+}
 
 /** A picked file as a draft keeps it. */
 interface DraftAttachment {
@@ -52,7 +60,7 @@ const useSubmissionDraftStore = create<{
 }>()(
   persist(() => ({ drafts: {} as Record<string, SubmissionDraft> }), {
     name: SUBMISSION_DRAFTS_KEY,
-    version: 1,
+    version: storeVersions[SUBMISSION_DRAFTS_KEY],
     storage: persistStorage,
   }),
 );

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Alert, Linking } from 'react-native';
+import { Alert } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { setSetting, useSettings } from 'data/settings';
 import { setCourseSharingSeen } from 'data/appState';
@@ -11,6 +11,7 @@ import {
   FormToggle,
 } from 'components/Form';
 import { t } from 'helpers/i18n';
+import { openLink } from 'helpers/openLink';
 import { SettingsStackParams } from 'navigation/types';
 
 type Props = NativeStackScreenProps<
@@ -75,7 +76,7 @@ const CourseInformationSharing: React.FC<Props> = () => {
           <FormButton
             icon="openInBrowser"
             title={t('courseX')}
-            onPress={() => Linking.openURL('https://tsinghua.app/courses')}
+            onPress={() => openLink('https://tsinghua.app/courses')}
           />
         </FormSection>
       </Form>

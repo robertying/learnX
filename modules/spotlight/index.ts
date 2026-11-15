@@ -20,24 +20,6 @@ export interface SpotlightOpenedItem {
   id: string;
 }
 
-/** An open assignment, as the "Next Deadline" App Intent stores it. */
-export interface IntentDeadline {
-  id: string;
-  title: string;
-  courseName: string;
-  /** Milliseconds since the epoch. */
-  deadline: number;
-}
-
-/** A class still ahead, as the "Next Class" App Intent stores it. */
-export interface IntentClass {
-  courseName: string;
-  location: string;
-  /** Milliseconds since the epoch. */
-  start: number;
-  end: number;
-}
-
 type SpotlightEvents = {
   onOpenItem: (item: SpotlightOpenedItem) => void;
 };
@@ -74,10 +56,6 @@ declare class SpotlightModule extends NativeModule<SpotlightEvents> {
    * `onOpenItem`, e.g. the one that launched the app. Returned once.
    */
   takeOpenedItem(): SpotlightOpenedItem | null;
-  /** Saves the open assignments for the "Next Deadline" App Intent. */
-  setUpcomingDeadlines(deadlines: IntentDeadline[]): void;
-  /** Saves the classes still ahead for the "Next Class" App Intent. */
-  setUpcomingClasses(classes: IntentClass[]): void;
 }
 
 /**

@@ -6,7 +6,7 @@ import {
   RestoredSubmissionDraft,
   saveSubmissionDraft,
 } from 'data/submissionDrafts';
-import { PickedAttachment } from 'services/submission';
+import type { PickedAttachment } from 'data/submissionDrafts';
 
 /**
  * Saves the submission as a draft whenever it changes, so it survives leaving

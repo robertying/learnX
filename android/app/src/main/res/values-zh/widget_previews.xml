@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_preview_assignment">第 6 次作业</string>
+    <string name="widget_preview_assignment_due">11月21日 23:59 · 机器学习概论</string>
+    <string name="widget_preview_assignment_2">大作业开题报告</string>
+    <string name="widget_preview_assignment_2_due">11月24日 12:00 · 线性代数</string>
+    <string name="widget_preview_course">机器学习概论</string>
+    <string name="widget_preview_class_time">08:00–09:35 · 六教6A414</string>
+    <string name="widget_preview_later_class">后续课程: 线性代数 · 明天 13:30–15:05</string>
+</resources>

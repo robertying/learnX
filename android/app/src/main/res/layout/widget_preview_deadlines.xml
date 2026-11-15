@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Deadlines widget in the widget picker (Android 12+, xml/deadlines_info.xml): what
+     src/widgets/Deadlines.android.tsx draws, with sample assignments. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_preview_background"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="6dp"
+        android:maxLines="1"
+        android:text="@string/deadlines_display_name"
+        android:textColor="@color/md_theme_primary"
+        android:textSize="13sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="2dp"
+        android:layout_marginTop="2dp"
+        android:maxLines="1"
+        android:text="@string/widget_preview_assignment"
+        android:textColor="@color/md_theme_onSurface"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="2dp"
+        android:layout_marginBottom="2dp"
+        android:maxLines="1"
+        android:text="@string/widget_preview_assignment_due"
+        android:textColor="@color/md_theme_onSurfaceVariant"
+        android:textSize="12sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="2dp"
+        android:layout_marginTop="2dp"
+        android:maxLines="1"
+        android:text="@string/widget_preview_assignment_2"
+        android:textColor="@color/md_theme_onSurface"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="2dp"
+        android:maxLines="1"
+        android:text="@string/widget_preview_assignment_2_due"
+        android:textColor="@color/md_theme_onSurfaceVariant"
+        android:textSize="12sp" />
+</LinearLayout>

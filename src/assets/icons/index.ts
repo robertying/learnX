@@ -20,6 +20,7 @@ export const iconDrawables = {
   fullscreen_exit: require('./fullscreen_exit.xml'),
   handyman: require('./handyman.xml'),
   info: require('./info.xml'),
+  more_vert: require('./more_vert.xml'),
   open_in_browser: require('./open_in_browser.xml'),
   open_in_new: require('./open_in_new.xml'),
   refresh: require('./refresh.xml'),

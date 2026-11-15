@@ -1,4 +1,4 @@
-import { Platform } from 'react-native';
+import { Linking, Platform } from 'react-native';
 import { act, render, screen, userEvent } from '@testing-library/react-native';
 import DeviceInfo from 'constants/DeviceInfo';
 import { markFileSeen } from 'data/content';
@@ -25,6 +25,7 @@ jest.mock('react-native-webview', () => {
       style: object;
       decelerationRate?: string;
       javaScriptEnabled?: boolean;
+      onShouldStartLoadWithRequest?: (request: object) => boolean;
     }) => (
       <View
         testID="webview"
@@ -32,6 +33,7 @@ jest.mock('react-native-webview', () => {
         {...{
           decelerationRate: props.decelerationRate,
           javaScriptEnabled: props.javaScriptEnabled,
+          onShouldStartLoadWithRequest: props.onShouldStartLoadWithRequest,
         }}
       />
     ),
@@ -134,6 +136,28 @@ it("previews other kinds in a web view and an attachment isn't marked seen", asy
   // A downloaded page's scripts don't run.
   expect(screen.getByTestId('webview')).toHaveProp('javaScriptEnabled', false);
   expect(markFileSeen).not.toHaveBeenCalled();
+});
+
+it('keeps the preview on the file and opens tapped links outside', async () => {
+  const open = jest.spyOn(Linking, 'openURL').mockResolvedValue();
+  downloaded({ path: 'file:///a.html' });
+  await renderScreen({
+    attachment: { ...zip, fileType: 'html', downloadUrl: 'https://x' },
+  });
+  const shouldLoad = (url: string, navigationType = 'other') =>
+    screen
+      .getByTestId('webview')
+      .props.onShouldStartLoadWithRequest({ url, navigationType });
+
+  expect(shouldLoad('file:///a.html')).toBe(true);
+  // A refresh or redirect to a web page, such as a fake login form.
+  expect(shouldLoad('https://id.tsinghua.edu.cn/login')).toBe(false);
+  expect(open).not.toHaveBeenCalled();
+
+  expect(shouldLoad('https://example.com', 'click')).toBe(false);
+  expect(open).toHaveBeenCalledWith('https://example.com');
+  expect(shouldLoad('tel:123', 'click')).toBe(false);
+  expect(open).toHaveBeenCalledTimes(1);
 });
 
 it('switches to the info page from the header', async () => {

@@ -1,5 +1,7 @@
 import { HStack, Link, Spacer, Text, VStack } from '@expo/ui/swift-ui';
 import {
+  accessibilityElement,
+  accessibilityLabel,
   font,
   foregroundStyle,
   layoutPriority,
@@ -9,9 +11,11 @@ import {
   truncationMode,
   widgetURL,
 } from '@expo/ui/swift-ui/modifiers';
-import { createWidget, type WidgetEnvironment } from 'expo-widgets';
+import { createWidget } from 'expo-widgets';
 import type { ReactElement } from 'react';
-import { withWidgetKit, type WidgetKit } from 'widgets/kit';
+// Relative, not `widgets/kit`: the build's layout registry bundle turns every
+// bare import but expo-widgets into an empty module, and runs withWidgetKit.
+import { withWidgetKit, type KitEnvironment, type WidgetKit } from './kit';
 import type { UpNextWidgetProps } from 'widgets/props';
 
 /**
@@ -27,12 +31,14 @@ import type { UpNextWidgetProps } from 'widgets/props';
  */
 function UpNextWidget(
   props: UpNextWidgetProps,
-  environment: WidgetEnvironment,
+  environment: KitEnvironment,
   kit: WidgetKit,
 ) {
   'widget';
   const family = environment.widgetFamily ?? 'systemMedium';
   const accent = kit.accent(environment);
+  const firstRun = kit.firstRun(environment.locale);
+  const noClasses = props.noClasses || firstRun.noClasses;
   const openToday = props.url ? [widgetURL(props.url)] : [];
 
   const date = environment.date ?? new Date();
@@ -49,13 +55,13 @@ function UpNextWidget(
   // its time: the range, or where that doesn't fit, the start.
   const when = (c: UpNextWidgetProps['classes'][number], start?: boolean) => {
     const days = daysAway(c.start);
-    const time = start ? c.startTime || c.time : c.time;
+    const time = start ? c.startTime : c.time;
     return days === 0
       ? time
       : days === 1
         ? `${props.tomorrow} ${time}`
         : days < 7
-          ? `${c.weekday || c.day} ${time}`
+          ? `${c.weekday} ${time}`
           : `${c.day} ${time}`;
   };
   // Rooms can be long ("建华/经管新楼 A101"): cut in the middle to keep the
@@ -120,16 +126,23 @@ function UpNextWidget(
           kit.background,
           ...kit.language(props.locale),
           ...(featured?.url ? [widgetURL(featured.url)] : openToday),
+          accessibilityElement('combine'),
         ]}
       >
         <Text modifiers={[font({ textStyle: 'headline' }), lineLimit(1)]}>
-          {featured ? featured.courseName : props.noClasses}
+          {featured ? featured.courseName : noClasses}
         </Text>
         {/* Its day and start, then for a class today the countdown in its
             largest unit; the place gets a line of its own. */}
         {featured ? (
           <HStack spacing={0}>
-            <Text modifiers={[lineLimit(1), layoutPriority(1)]}>
+            <Text
+              modifiers={[
+                lineLimit(1),
+                layoutPriority(1),
+                accessibilityLabel(when(featured, true)),
+              ]}
+            >
               {today ? `${when(featured, true)} · ` : when(featured, true)}
             </Text>
             {today ? (
@@ -158,11 +171,11 @@ function UpNextWidget(
     return kit.empty({
       header: (
         <HStack>
-          {kit.label(props.title, accent)}
+          {kit.label(props.title || firstRun.upNext, accent)}
           <Spacer />
         </HStack>
       ),
-      text: props.noClasses,
+      text: noClasses,
       modifiers: [kit.background, ...kit.language(props.locale), ...openToday],
     });
   }
@@ -175,7 +188,14 @@ function UpNextWidget(
     kit.secondary,
   ];
   const featuredClass = (withCountdown: boolean, compact = false) => (
-    <VStack key={`${withCountdown}-${compact}`} alignment="leading" spacing={1}>
+    <VStack
+      key={`${withCountdown}-${compact}`}
+      alignment="leading"
+      spacing={1}
+      // VoiceOver reads the class as one element: course, time, place and
+      // the countdown.
+      modifiers={[accessibilityElement('combine')]}
+    >
       <Text
         modifiers={[
           font({ textStyle: 'headline', weight: 'semibold' }),
@@ -201,7 +221,14 @@ function UpNextWidget(
             {when(featured, compact)}
           </Text>
           {featured.location ? (
-            <Text modifiers={[...detail, lineLimit(1), place]}>
+            <Text
+              modifiers={[
+                ...detail,
+                lineLimit(1),
+                place,
+                accessibilityLabel(featured.location),
+              ]}
+            >
               {` · ${featured.location}`}
             </Text>
           ) : null}
@@ -228,7 +255,12 @@ function UpNextWidget(
   // widget, which is too narrow for both, the start under the course.
   const laterRow = (c: UpNextWidgetProps['classes'][number]) =>
     small ? (
-      <VStack key={c.key} alignment="leading" spacing={0}>
+      <VStack
+        key={c.key}
+        alignment="leading"
+        spacing={0}
+        modifiers={[accessibilityElement('combine')]}
+      >
         <Text modifiers={[font({ textStyle: 'caption' }), lineLimit(1)]}>
           {c.courseName}
         </Text>
@@ -246,7 +278,11 @@ function UpNextWidget(
       linked(
         c,
         c.key,
-        <HStack key={c.key} spacing={8}>
+        <HStack
+          key={c.key}
+          spacing={8}
+          modifiers={[accessibilityElement('combine')]}
+        >
           <Text modifiers={[font({ textStyle: 'caption' }), lineLimit(1)]}>
             {c.courseName}
           </Text>
@@ -327,7 +363,22 @@ function UpNextWidget(
   });
 }
 
+/** What the widget shows until the app sends its first timeline. */
+const initialProps: UpNextWidgetProps = {
+  classes: [],
+  title: '',
+  now: '',
+  next: '',
+  later: '',
+  startsIn: '',
+  endsIn: '',
+  tomorrow: '',
+  noClasses: '',
+  url: '',
+};
+
 export default createWidget<UpNextWidgetProps>(
   'UpNext',
   withWidgetKit(UpNextWidget),
+  initialProps,
 );

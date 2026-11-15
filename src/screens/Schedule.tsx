@@ -59,9 +59,16 @@ const Schedule: React.FC<Props> = ({ navigation }) => {
   };
   const pullToRefresh = usePullToRefresh(handleRefresh);
 
-  const note =
-    thisWeek.source === 'courses' || nextWeek.source === 'courses'
-      ? t('todayFromCourses')
+  // As on Today: classes worked out from the courses, or a timetable kept
+  // from an earlier update (the oldest, when both weeks failed).
+  const weeks = [thisWeek, nextWeek];
+  const stale = weeks.filter(w => w.source === 'calendar' && w.failed);
+  const note = weeks.some(w => w.source === 'courses')
+    ? t('todayFromCourses')
+    : stale.length > 0
+      ? t('todayCalendarFailed', {
+          time: dayjs(Math.min(...stale.map(w => w.updatedAt))).from(now),
+        })
       : undefined;
 
   return (

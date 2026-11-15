@@ -265,6 +265,12 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
     }
   };
 
+  const press = reorderMode
+    ? undefined
+    : selectionMode
+      ? handleCheck
+      : handlePress;
+
   const touchable = (
     <Touchable
       type="highlight"
@@ -275,9 +281,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
           ? (rowHighlight ?? theme.colors.secondaryContainer)
           : theme.colors.surface,
       }}
-      onPress={
-        reorderMode ? undefined : selectionMode ? handleCheck : handlePress
-      }
+      onPress={press}
       onLongPress={handleLongPress}
       onLayout={({ nativeEvent }) => rowWidth.set(nativeEvent.layout.width)}
       testID={testID}
@@ -351,6 +355,10 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
             : []
       }
       onAction={handleContextMenuAction}
+      // A keyboard moves between cards with the arrow keys and opens (or
+      // checks) one with Return, as in Mail (Mac, iPad with a keyboard).
+      keyboardFocusable={!!press}
+      onPrimaryAction={press}
     >
       {touchable}
     </ContextMenuView>

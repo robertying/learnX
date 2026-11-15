@@ -64,4 +64,26 @@ func contextMenuAction(key: String, title: String, systemImage: String = "") -> 
     #expect(actions[0].image != nil)
     #expect(actions[1].image == nil)
   }
+
+  @Test func takesKeyboardFocusOnlyWhenFocusable() {
+    let view = ContextMenuView(appContext: nil)
+    #expect(!view.canBecomeFocused)
+    #expect(view.focusEffect == nil)
+
+    view.keyboardFocusable = true
+    #expect(view.canBecomeFocused)
+    #expect(view.focusEffect is UIFocusHaloEffect)
+
+    view.keyboardFocusable = false
+    #expect(!view.canBecomeFocused)
+    #expect(view.focusEffect == nil)
+  }
+
+  @Test func opensOnReturnEnterOrSpace() {
+    #expect(ContextMenuView.opens(.keyboardReturnOrEnter))
+    #expect(ContextMenuView.opens(.keypadEnter))
+    #expect(ContextMenuView.opens(.keyboardSpacebar))
+    #expect(!ContextMenuView.opens(.keyboardDownArrow))
+    #expect(!ContextMenuView.opens(.keyboardTab))
+  }
 }

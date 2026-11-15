@@ -4,6 +4,7 @@ import type { WebViewProps } from 'react-native-webview';
 import CookieManager from '@preeternal/react-native-cookie-manager';
 import AutoHeightWebView from 'components/AutoHeightWebView';
 import { recordError } from 'services/crashReporting';
+import { getScriptNonce } from 'helpers/webContent';
 
 jest.mock('services/crashReporting', () => ({ recordError: jest.fn() }));
 // The native web view, as a view that keeps its props.
@@ -132,11 +133,36 @@ describe('loads', () => {
     expect(open).toHaveBeenCalledTimes(1);
   });
 
-  it('treats every load the page starts on Android as a link', async () => {
+  it('refuses every load the page starts on Android and opens nothing', async () => {
     jest.replaceProperty(Platform, 'OS', 'android');
     await renderView();
+    // Android reports no taps: this may be a refresh in the content.
+    expect(shouldLoad({ url: 'https://evil.example' })).toBe(false);
     expect(shouldLoad({ url: 'mailto:ta@example.com' })).toBe(false);
+    expect(open).not.toHaveBeenCalled();
+  });
+
+  it("opens the web and mail links the page's script reports as tapped", async () => {
+    await renderView();
+    const tapped = (fields: object) =>
+      act(() =>
+        webView().onMessage!({
+          nativeEvent: {
+            data: JSON.stringify({
+              type: 'link',
+              key: getScriptNonce(),
+              ...fields,
+            }),
+          },
+        } as never),
+      );
+    await tapped({ url: 'mailto:ta@example.com' });
     expect(open).toHaveBeenCalledWith('mailto:ta@example.com');
+    await tapped({ url: 'intent://scan' });
+    // A frame inside the content doesn't know the key.
+    await tapped({ url: 'https://evil.example', key: 'guess' });
+    expect(open).toHaveBeenCalledTimes(1);
+    expect(height()).toBe(0);
   });
 
   it('leaves frames inside the page alone', async () => {

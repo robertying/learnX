@@ -1,4 +1,6 @@
+import { Platform } from 'react-native';
 import { getWebViewTemplate, hasMath } from 'helpers/html';
+import { getScriptNonce } from 'helpers/webContent';
 
 jest.mock('data/source', () => ({
   dataSource: { getCSRFToken: () => 'token' },
@@ -78,5 +80,24 @@ describe('getWebViewTemplate', () => {
     expect(html).toContain(
       'addCSRFTokenToLinks(\n            document,\n            "token"',
     );
+  });
+});
+
+describe('the page policy and link taps', () => {
+  it("runs only the template's scripts and submits no forms", () => {
+    const html = getWebViewTemplate('<form action="https://x"></form>');
+    expect(html).toContain(
+      `script-src 'nonce-${getScriptNonce()}'; form-action 'none'`,
+    );
+  });
+
+  it('reports link taps with the nonce on Android only', () => {
+    expect(getWebViewTemplate('<a href="https://x">x</a>')).not.toContain(
+      'reportLinkTaps',
+    );
+    jest.replaceProperty(Platform, 'OS', 'android');
+    const html = getWebViewTemplate('<a href="https://x">x</a>');
+    expect(html).toContain('function reportLinkTaps');
+    expect(html).toContain(`"${getScriptNonce()}"`);
   });
 });

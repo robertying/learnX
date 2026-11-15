@@ -53,48 +53,42 @@ const toProps = ({
   locale: widgetLocale(),
 });
 
-/** Deadlines in the Android widget's props; it shows the first four. */
+/** Deadlines in the Android widget's props; it shows as many as fit. */
 const ANDROID_DEADLINES = 10;
 
 /**
  * Shows the open assignments' deadlines in the home screen widget. Pass no
- * assignments (e.g. after logging out) to empty it.
+ * assignments (e.g. after logging out) to empty it. Throws when the widget
+ * can't be updated; `services/surfaces` reports it and tries again.
  */
 export function updateDeadlineWidget(
   assignments: Assignment[],
   { hiddenCourses, archived }: { hiddenCourses: string[]; archived: string[] },
 ) {
-  try {
-    const widget = deadlinesWidget();
-    if (!widget) {
-      return;
-    }
-    const timeline = deadlineTimeline(assignments, { hiddenCourses, archived });
-    if (Platform.OS === 'ios') {
-      widget.updateTimeline(
-        timeline.map(entry => ({
-          date: new Date(entry.date),
-          props: toProps(entry.deadlines),
-        })),
-      );
-    } else {
-      // No timelines: the layout drops what has passed by its own clock as
-      // it's redrawn, so it gets a few more than it shows.
-      widget.updateSnapshot(
-        toProps(
-          upcomingDeadlines(assignments, {
-            hiddenCourses,
-            archived,
-            limit: ANDROID_DEADLINES,
-          }),
-        ),
-      );
-    }
-  } catch (error) {
-    // A widget that can't update shouldn't break a refresh or the sync.
-    if (__DEV__) {
-      console.warn('Failed to update the deadline widget', error);
-    }
+  const widget = deadlinesWidget();
+  if (!widget) {
+    return;
+  }
+  const timeline = deadlineTimeline(assignments, { hiddenCourses, archived });
+  if (Platform.OS === 'ios') {
+    widget.updateTimeline(
+      timeline.map(entry => ({
+        date: new Date(entry.date),
+        props: toProps(entry.deadlines),
+      })),
+    );
+  } else {
+    // No timelines: the layout drops what has passed by its own clock as
+    // it's redrawn, so it gets a few more than it shows.
+    widget.updateSnapshot(
+      toProps(
+        upcomingDeadlines(assignments, {
+          hiddenCourses,
+          archived,
+          limit: ANDROID_DEADLINES,
+        }),
+      ),
+    );
   }
 }
 
@@ -132,36 +126,29 @@ let lastUpNext: string | undefined;
 
 /**
  * Shows the classes still ahead in the Up Next widget. Pass nothing (e.g.
- * after logging out) to empty it.
+ * after logging out) to empty it. Throws when the widget can't be updated;
+ * `services/surfaces` reports it and tries again.
  *
  * The widget picks what's on now from the props by its own clock, so iOS gets
  * one set of props in a timeline entry at each class start and end. Android
  * has no timelines; its widget redraws every half hour.
  */
 export function updateUpNextWidget(classes: UpcomingClass[] = []) {
-  try {
-    const widget = upNextWidget();
-    if (!widget) {
-      return;
-    }
-    const props = upNextProps(classes);
-    const key = JSON.stringify(props);
-    if (key === lastUpNext) {
-      return;
-    }
-    lastUpNext = key;
-    if (Platform.OS === 'ios') {
-      widget.updateTimeline(
-        upNextTimes(classes).map(date => ({ date: new Date(date), props })),
-      );
-    } else {
-      widget.updateSnapshot(props);
-    }
-  } catch (error) {
-    lastUpNext = undefined;
-    // A widget that can't update shouldn't break a refresh.
-    if (__DEV__) {
-      console.warn('Failed to update the Up Next widget', error);
-    }
+  const widget = upNextWidget();
+  if (!widget) {
+    return;
   }
+  const props = upNextProps(classes);
+  const key = JSON.stringify(props);
+  if (key === lastUpNext) {
+    return;
+  }
+  if (Platform.OS === 'ios') {
+    widget.updateTimeline(
+      upNextTimes(classes).map(date => ({ date: new Date(date), props })),
+    );
+  } else {
+    widget.updateSnapshot(props);
+  }
+  lastUpNext = key;
 }

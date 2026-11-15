@@ -49,11 +49,18 @@ const fromModifiers = (modifiers: Modifier[] = []) =>
   Object.assign({}, ...modifiers.filter(Boolean)) as NonNullable<Modifier>;
 
 const Box = ({ children, modifiers, testID }: BoxProps) => {
-  const { onPress, role, checked, selected, disabled, ...rest } =
-    fromModifiers(modifiers);
+  const { onPress, role, checked, selected, disabled, heading, ...rest } =
+    fromModifiers(modifiers) as NonNullable<Modifier> & { heading?: boolean };
   const id = rest.testID ?? testID;
   if (!onPress) {
-    return <View testID={id}>{children}</View>;
+    // A heading row is one node, read as a header with all its text.
+    return heading ? (
+      <View testID={id} accessible accessibilityRole="header">
+        {children}
+      </View>
+    ) : (
+      <View testID={id}>{children}</View>
+    );
   }
   return (
     <Pressable
@@ -124,7 +131,10 @@ export const BadgedBox = Object.assign(
 );
 export const Badge = () => <View testID="badge" />;
 
-/** Its color and line-through as React Native styles, its typography by name. */
+/**
+ * Its color and line-through as React Native styles, its typography by name,
+ * and a `semantics` heading as the header role.
+ */
 export const Text = ({
   children,
   color,
@@ -132,7 +142,7 @@ export const Text = ({
   modifiers,
 }: {
   children?: ReactNode;
-  modifiers?: { accessibilityLabel?: string }[];
+  modifiers?: { accessibilityLabel?: string; heading?: boolean }[];
   color?: string;
   style?: {
     typography?: string;
@@ -151,6 +161,7 @@ export const Text = ({
     accessibilityLabel={
       modifiers?.find(m => m?.accessibilityLabel)?.accessibilityLabel
     }
+    accessibilityRole={modifiers?.some(m => m?.heading) ? 'header' : undefined}
   >
     {children}
   </RNText>
@@ -334,8 +345,8 @@ const MenuItem = ({
   </Pressable>
 );
 export const DropdownMenuItem = Object.assign(MenuItem, {
-  LeadingIcon: slot(),
   Text: slot(),
+  LeadingIcon: slot(),
 });
 export const SelectableDropdownMenuItem = Object.assign(MenuItem, {
   LeadingIcon: slot(),
