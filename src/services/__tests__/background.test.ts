@@ -65,6 +65,7 @@ const mockCredentials = {
 };
 let mockSavedCredentials: typeof mockCredentials | null = mockCredentials;
 jest.mock('data/credentials', () => ({
+  ...jest.requireActual('data/credentials'),
   loadCredentials: () => Promise.resolve(mockSavedCredentials),
 }));
 

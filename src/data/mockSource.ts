@@ -25,17 +25,6 @@ const mock = (): typeof import('data/mock') =>
       ).mockInEnglish()
     : require('data/mock');
 
-/**
- * Stands in for learn.tsinghua.edu.cn when a mock account is logged in.
- *
- * Every call answers with the data in `data/mock.ts` after a network-like
- * delay, and can be made to fail the way the real server and network do, so
- * refreshes, spinners, errors and the re-login flow can be exercised without a
- * real account. Debug builds change the behavior from Network Emulation on the
- * Debug page (`screens/MockNetwork.tsx`), which also applies to file downloads
- * (`services/files/downloads.ts`).
- */
-
 export type MockLatency = 'none' | 'normal' | 'slow';
 
 export type MockFailure =
@@ -287,8 +276,19 @@ const withFavorite = <T extends { id: string }>(item: T) => ({
   isFavorite: mockFavoriteIds().has(item.id),
 });
 
-// The mock data holds the app's slimmer state types, not the library's full
-// types, so results are cast at this one boundary.
+/**
+ * Stands in for learn.tsinghua.edu.cn when a mock account is logged in.
+ *
+ * Every call answers with the data in `data/mock.ts` after a network-like
+ * delay, and can be made to fail the way the real server and network do, so
+ * refreshes, spinners, errors and the re-login flow can be exercised without a
+ * real account. Debug builds change the behavior from Network Emulation on the
+ * Debug page (`screens/MockNetwork.tsx`), which also applies to file downloads
+ * (`services/files/downloads.ts`).
+ *
+ * The mock data holds the app's slimmer state types, not the library's full
+ * types, so results are cast at this one boundary.
+ */
 export const mockSource: AppSource = {
   login: () => roundTrip({ isLogin: true }),
   // The emulated session never expires: one request either way.
