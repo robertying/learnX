@@ -122,6 +122,11 @@ describe('submission drafts', () => {
     expect(mockFiles.has(unused.uri)).toBe(false);
   });
 
+  it("leaves a file that isn't a draft copy where it is", () => {
+    discardDraftFile(picked);
+    expect(mockFiles.has(picked.uri)).toBe(true);
+  });
+
   it('drops drafts left alone for half a year, with their files', async () => {
     const old = await keepDraftFile('old', picked);
     saveSubmissionDraft('old', draft(old));
