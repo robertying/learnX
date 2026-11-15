@@ -5,8 +5,9 @@ import UIKit
 @testable internal import ExpoWidgets
 
 /// What patches/expo-widgets@58.0.27.patch adds to widget layouts on iOS: a `ViewThatFitsView` node (SwiftUI's
-/// ViewThatFits) and a `CountdownView` node, the time left in days, hours and minutes without seconds, in equal-width digits. Nodes are
-/// rendered by their type name, as a widget's layout is, and compared as images with what they should show.
+/// ViewThatFits), a `CountdownView` node, the time left in days, hours and minutes without seconds, in equal-width
+/// digits, and the extension's locale in a layout's environment. Nodes are rendered by their type name, as a widget's
+/// layout is, and compared as images with what they should show.
 @MainActor
 @Suite struct ExpoWidgetsPatchTests {
   private let size = CGSize(width: 200, height: 40)
@@ -73,5 +74,15 @@ import UIKit
       "props": ["date": date.timeIntervalSince1970 * 1000, "maxFieldCount": 1],
     ]
     #expect(try same(node, digits("2 days")))
+  }
+
+  @Test func environmentHasTheLocale() {
+    var environment = EnvironmentValues()
+    environment.locale = Locale(identifier: "zh-Hans_CN")
+    // Foundation may canonicalize the identifier (iOS 27 gives "zh_CN"); the
+    // layouts only look at the language prefix.
+    let locale = getWidgetEnvironment(environment: environment)["locale"] as? String
+    #expect(locale == environment.locale.identifier)
+    #expect(locale?.hasPrefix("zh") == true)
   }
 }

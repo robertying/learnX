@@ -9,9 +9,11 @@ import {
   truncationMode,
   widgetURL,
 } from '@expo/ui/swift-ui/modifiers';
-import { createWidget, type WidgetEnvironment } from 'expo-widgets';
+import { createWidget } from 'expo-widgets';
 import type { ReactElement } from 'react';
-import { withWidgetKit, type WidgetKit } from 'widgets/kit';
+// Relative, not `widgets/kit`: the build's layout registry bundle turns every
+// bare import but expo-widgets into an empty module, and runs withWidgetKit.
+import { withWidgetKit, type KitEnvironment, type WidgetKit } from './kit';
 import type { UpNextWidgetProps } from 'widgets/props';
 
 /**
@@ -27,12 +29,14 @@ import type { UpNextWidgetProps } from 'widgets/props';
  */
 function UpNextWidget(
   props: UpNextWidgetProps,
-  environment: WidgetEnvironment,
+  environment: KitEnvironment,
   kit: WidgetKit,
 ) {
   'widget';
   const family = environment.widgetFamily ?? 'systemMedium';
   const accent = kit.accent(environment);
+  const firstRun = kit.firstRun(environment.locale);
+  const noClasses = props.noClasses || firstRun.noClasses;
   const openToday = props.url ? [widgetURL(props.url)] : [];
 
   const date = environment.date ?? new Date();
@@ -49,13 +53,13 @@ function UpNextWidget(
   // its time: the range, or where that doesn't fit, the start.
   const when = (c: UpNextWidgetProps['classes'][number], start?: boolean) => {
     const days = daysAway(c.start);
-    const time = start ? c.startTime || c.time : c.time;
+    const time = start ? c.startTime : c.time;
     return days === 0
       ? time
       : days === 1
         ? `${props.tomorrow} ${time}`
         : days < 7
-          ? `${c.weekday || c.day} ${time}`
+          ? `${c.weekday} ${time}`
           : `${c.day} ${time}`;
   };
   // Rooms can be long ("建华/经管新楼 A101"): cut in the middle to keep the
@@ -123,7 +127,7 @@ function UpNextWidget(
         ]}
       >
         <Text modifiers={[font({ textStyle: 'headline' }), lineLimit(1)]}>
-          {featured ? featured.courseName : props.noClasses}
+          {featured ? featured.courseName : noClasses}
         </Text>
         {/* Its day and start, then for a class today the countdown in its
             largest unit; the place gets a line of its own. */}
@@ -158,11 +162,11 @@ function UpNextWidget(
     return kit.empty({
       header: (
         <HStack>
-          {kit.label(props.title, accent)}
+          {kit.label(props.title || firstRun.upNext, accent)}
           <Spacer />
         </HStack>
       ),
-      text: props.noClasses,
+      text: noClasses,
       modifiers: [kit.background, ...kit.language(props.locale), ...openToday],
     });
   }
@@ -327,7 +331,22 @@ function UpNextWidget(
   });
 }
 
+/** What the widget shows until the app sends its first timeline. */
+const initialProps: UpNextWidgetProps = {
+  classes: [],
+  title: '',
+  now: '',
+  next: '',
+  later: '',
+  startsIn: '',
+  endsIn: '',
+  tomorrow: '',
+  noClasses: '',
+  url: '',
+};
+
 export default createWidget<UpNextWidgetProps>(
   'UpNext',
   withWidgetKit(UpNextWidget),
+  initialProps,
 );

@@ -246,10 +246,21 @@ index 3e6ff0b55c0b6d57ddeb1ba6605536adae2ca62d..0ac8618fa3c6959af86526cd17cc77f2
  }
 +#endif
 diff --git a/ios/Widgets/Utils.swift b/ios/Widgets/Utils.swift
-index 76b2199c2d3f879463fed5d2bd49038b0428a2e7..bffd6ee91e52c246d59fd9c979cd09eee63a2d97 100644
+index 76b2199c2d3f879463fed5d2bd49038b0428a2e7..641c3aae3c87ada71b148c130eb3ad52cd6e37dd 100644
 --- a/ios/Widgets/Utils.swift
 +++ b/ios/Widgets/Utils.swift
-@@ -117,6 +117,7 @@ public func getWidgetEnvironment(environment: EnvironmentValues) -> [String: Any
+@@ -100,7 +100,9 @@ public func getWidgetEnvironment(environment: EnvironmentValues) -> [String: Any
+     "colorScheme": "\(environment.colorScheme)",
+     "isLuminanceReduced": environment.isLuminanceReduced,
+     "widgetRenderingMode": environment.widgetRenderingMode.description,
+-    "showsWidgetLabel": environment.showsWidgetLabel
++    "showsWidgetLabel": environment.showsWidgetLabel,
++    // The language the extension runs in (the system's), for text a layout shows before the app sends its own.
++    "locale": environment.locale.identifier
+   ]
+ 
+   if #available(iOS 17.0, *) {
+@@ -117,6 +119,7 @@ public func getWidgetEnvironment(environment: EnvironmentValues) -> [String: Any
    return env
  }
  
@@ -257,7 +268,7 @@ index 76b2199c2d3f879463fed5d2bd49038b0428a2e7..bffd6ee91e52c246d59fd9c979cd09ee
  func getLiveActivityEnvironment(for environment: EnvironmentValues, in context: ActivityViewContext<LiveActivityAttributes>) -> [String: Any] {
    var env: [String: Any] = [
      "colorScheme": "\(environment.colorScheme)",
-@@ -134,3 +135,4 @@ func getLiveActivityEnvironment(for environment: EnvironmentValues, in context:
+@@ -134,3 +137,4 @@ func getLiveActivityEnvironment(for environment: EnvironmentValues, in context:
    }
    return env
  }

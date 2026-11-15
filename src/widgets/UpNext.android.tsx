@@ -77,7 +77,7 @@ function UpNextWidget(
       : days === 1
         ? `${props.tomorrow} ${c.time}`
         : days < 7
-          ? `${c.weekday || c.day} ${c.time}`
+          ? `${c.weekday} ${c.time}`
           : `${c.day} ${c.time}`;
   };
 
