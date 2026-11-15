@@ -1,7 +1,7 @@
 {
   "runtimeVersion": "19.0.0",
   "ios": "44d4c3ed8369bb65889990acde9b4f1cd4883f9a",
-  "android": "8328c0adae08d96c1da6a96c9442d27871fefd8d",
+  "android": "3ad14e2fa2a817dd499986ef0c414dd0c4d5a137",
   "sources": {
     "ios": {
       "dir ios": "108402e88dd8158708abd9fb79a5f81e32aa3f75",
@@ -62,9 +62,9 @@
       "package node_modules/unimodules-app-loader/package.json": "c5c0283fd62fe191a27f8c91a80e8be54f1c52d6"
     },
     "android": {
-      "dir android": "5d48771221b2c61d5bd8451b6eea749eb8e48483",
+      "dir android": "0969c6c9deabea731650ff998c0c4e7fe35cee58",
       "dir modules/crashlytics/android": "c197e1f7400e71d52bf820a626fa941218b8e4ae",
-      "dir modules/share/android": "28e80bd75f4dfed63ebde2cf73cf550b6b6b49d7",
+      "dir modules/share/android": "69760341fd85cb091ac06c209f12d905b601c4d9",
       "dir patches": "55cdd58e3dfd88d96686ead9fa130c6f6904035b",
       "contents expoAutolinkingConfig:android": "1ecb82753ff6f07ac5e2ad556e29d4065d33f41e",
       "contents rncoreAutolinkingConfig:android": "d40be427cc3c3ac490e297933ea55327245bd0ce",
