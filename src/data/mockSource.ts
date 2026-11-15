@@ -7,6 +7,7 @@ import {
   Language,
   SemesterInfo,
   SemesterType,
+  sendDownload,
 } from '@robertying/thu-learn-lib';
 import dayjs from 'dayjs';
 import { favoriteContentTypes } from 'data/pendingActions';
@@ -325,10 +326,11 @@ export const mockSource: AppSource = {
   login: () => roundTrip({ isLogin: true }),
   // The emulated server's round trip before a download starts (latency,
   // failures, session expiry); the bytes still come from the mock file's
-  // real URL, so the file can be shown.
+  // real URL, so the file can be shown, and thu-learn-lib checks the answer
+  // as it does a real download's (no connection, a status other than 2xx).
   download: async (url, transport) => {
     await roundTrip();
-    return transport({ url, headers: {} });
+    return sendDownload(transport, { url, headers: {} });
   },
   // The emulated session never expires: one request either way.
   ensureSession: () => roundTrip(),

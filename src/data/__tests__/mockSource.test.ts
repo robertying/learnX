@@ -238,7 +238,7 @@ describe('mockSource', () => {
     expect(progress).toEqual([0.25, 0.5, 0.75, 1]);
   });
 
-  it('applies the emulation to file downloads, then lets the client send them as they are', async () => {
+  it('applies the emulation to file downloads, then checks the answer as thu-learn-lib does', async () => {
     const file = { status: 200, size: 4, text: async () => 'file' };
     const transport = jest.fn(() => Promise.resolve(file));
     await expect(mockSource.download('https://x/a', transport)).resolves.toBe(
@@ -258,6 +258,29 @@ describe('mockSource', () => {
       },
     );
     expect(transport).toHaveBeenCalledTimes(1);
+
+    // The client's own failures are classified as a real download's.
+    setMockNetworkConfig({ failure: 'none' });
+    await expect(
+      mockSource.download('https://x/a', () =>
+        Promise.reject(new Error('Unable to download a file')),
+      ),
+    ).rejects.toMatchObject({ reason: FailReason.NETWORK_ERROR });
+    const discard = jest.fn();
+    await expect(
+      mockSource.download('https://x/a', () =>
+        Promise.resolve({
+          status: 404,
+          size: 0,
+          text: async () => '',
+          discard,
+        }),
+      ),
+    ).rejects.toMatchObject({
+      reason: FailReason.UNEXPECTED_STATUS,
+      extra: { code: 404 },
+    });
+    expect(discard).toHaveBeenCalled();
   });
 
   describe('favorites', () => {
