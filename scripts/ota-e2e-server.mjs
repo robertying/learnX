@@ -226,7 +226,7 @@ const main = () => {
     for (const waiter of waiters) waiter();
   };
 
-  createServer((req, res) => {
+  const handle = (req, res) => {
     const url = new URL(req.url ?? '/', `http://${req.headers.host}`);
     const send = (status, headers, body) => {
       res.writeHead(status, headers);
@@ -290,7 +290,20 @@ const main = () => {
       return send(200, { 'content-type': file.contentType }, file.data);
     }
     send(404, {}, 'Not found');
-  }).listen(port, () => {
+  };
+
+  // Only this Mac answers: the simulator shares its network, and an Android
+  // device comes in through `adb reverse`. Anyone else on the network would
+  // otherwise be able to switch the mode. Both loopback addresses, since
+  // `localhost` can be either; IPv4 must work, IPv6 may be off.
+  createServer(handle)
+    .on('error', (/** @type {NodeJS.ErrnoException} */ error) => {
+      if (error.code !== 'EADDRNOTAVAIL' && error.code !== 'EAFNOSUPPORT') {
+        throw error;
+      }
+    })
+    .listen(port, '::1');
+  createServer(handle).listen(port, '127.0.0.1', () => {
     console.log(
       `Serving update ${update.manifest.id} for ${platform} at http://localhost:${port}/manifest`,
     );

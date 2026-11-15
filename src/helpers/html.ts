@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 import { dataSource } from 'data/source';
+import { getScriptNonce } from 'helpers/webContent';
 
 const darkMode = require('./preval/darkMode.preval.js');
 
@@ -8,6 +9,8 @@ const csrfLinks = require('./preval/csrfLinks.preval.js');
 const katexStyles = require('./preval/katexStyles.preval.js');
 
 const katex = require('./preval/katex.preval.js');
+
+const linkTaps = require('./preval/linkTaps.preval.js');
 
 /**
  * Whether the content has math for KaTeX's auto-render, using its default
@@ -23,17 +26,6 @@ export interface WebViewTemplateColors {
   /** Links, in the app's tint instead of the browser's blue. */
   linkColor?: string;
 }
-
-let scriptNonce: string | undefined;
-
-/**
- * Marks the template's own scripts, the only ones its policy lets run: the
- * content is written by teachers and runs as Web Learning, with the login
- * cookies. One per launch, so the same content gives the same page and the
- * web view doesn't reload. The web view's injected scripts aren't held to it.
- */
-const getScriptNonce = () =>
-  (scriptNonce ??= globalThis.crypto.randomUUID().replaceAll('-', ''));
 
 /**
  * The language screen readers read the content in: Chinese when it has any
@@ -61,7 +53,7 @@ export const getWebViewTemplate = (
     <head>
       <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests; script-src 'nonce-${nonce}'" />
+      <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests; script-src 'nonce-${nonce}'; form-action 'none'" />
       <style>
         body {
           margin: 0px;
@@ -125,7 +117,21 @@ export const getWebViewTemplate = (
           );
         });
       </script>
-      ${math ? `<script nonce="${nonce}">${katex}</script>` : ''}
+      ${math ? `<script nonce="${nonce}">${katex}</script>` : ''}${
+        Platform.OS === 'android'
+          ? `
+      <script nonce="${nonce}">
+        ${linkTaps}
+        reportLinkTaps(
+          document,
+          function (message) {
+            window.ReactNativeWebView.postMessage(message);
+          },
+          ${JSON.stringify(nonce)}
+        );
+      </script>`
+          : ''
+      }
     </head>
     <body>
       <div id="root">

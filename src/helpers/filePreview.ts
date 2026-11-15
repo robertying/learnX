@@ -49,3 +49,12 @@ export const canPreviewInline = (fileType?: string | null) =>
     (DeviceInfo.isMac()
       ? canRenderInMacWebview(fileType)
       : canRenderInIosWebview(fileType)));
+
+/**
+ * Whether the file preview may show a load: the file itself, a blank page,
+ * or the pages WebKit converts an Office or iWork document into
+ * (`x-apple-ql-id:`). Anything else, like a web page a downloaded .html file
+ * links or refreshes to, would look like part of learnX.
+ */
+export const isPreviewLoad = (url: string) =>
+  /^(file|about|x-apple-ql-id):/i.test(url);

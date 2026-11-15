@@ -1,5 +1,7 @@
 import { HStack, Link, Spacer, Text, VStack } from '@expo/ui/swift-ui';
 import {
+  accessibilityElement,
+  accessibilityLabel,
   font,
   foregroundStyle,
   layoutPriority,
@@ -50,6 +52,7 @@ function DeadlinesWidget(
           kit.background,
           ...kit.language(props.locale),
           ...openUrl(next?.url ?? props.url),
+          accessibilityElement('combine'),
         ]}
       >
         <Text modifiers={[font({ textStyle: 'headline' }), lineLimit(1)]}>
@@ -106,7 +109,13 @@ function DeadlinesWidget(
   ];
   const row = (item: (typeof deadlines)[number]) => {
     const content = (
-      <VStack key={item.id} alignment="leading" spacing={large ? 2 : 1}>
+      <VStack
+        key={item.id}
+        alignment="leading"
+        spacing={large ? 2 : 1}
+        // VoiceOver reads a row as one element: title, time left, course.
+        modifiers={[accessibilityElement('combine')]}
+      >
         <Text modifiers={[...titleFont, lineLimit(1)]}>{item.title}</Text>
         {small ? (
           // Too narrow for the full countdown and the course: the time left in
@@ -127,6 +136,7 @@ function DeadlinesWidget(
                 font({ textStyle: 'caption' }),
                 kit.secondary,
                 lineLimit(1),
+                accessibilityLabel(item.courseName),
               ]}
             >
               {` · ${item.courseName}`}

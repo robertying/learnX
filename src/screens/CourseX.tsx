@@ -13,7 +13,8 @@ type Props = NativeStackScreenProps<CourseXParamList, 'CourseX'>;
 const CourseX: React.FC<Props> = ({ route }) => {
   const courseId = route.params?.id ?? '';
   const pageUrl =
-    'https://tsinghua.app/courses' + (courseId ? `/${courseId}` : '');
+    'https://tsinghua.app/courses' +
+    (courseId ? `/${encodeURIComponent(courseId)}` : '');
 
   const webViewRef = useRef<WebView | null>(null);
   // The page shown, once the web view reports it.

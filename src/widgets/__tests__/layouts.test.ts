@@ -90,6 +90,30 @@ const modifier = (node: Node, name: string) =>
     .find(m => name in m)?.[name];
 
 /**
+ * What VoiceOver reads for each element a layout combines
+ * (`accessibilityElement('combine')`): its texts' labels, or their words,
+ * leaving out hidden ones.
+ */
+const spoken = (node: Node) =>
+  all(node)
+    .filter(n => modifier(n, 'accessibilityElement') === 'combine')
+    .map(n =>
+      all(n)
+        .filter(
+          t =>
+            (t.type === 'Text' || t.type === 'CountdownView') &&
+            !modifier(t, 'accessibilityHidden'),
+        )
+        .map(
+          t =>
+            (modifier(t, 'accessibilityLabel') as string | undefined) ??
+            (t.props.date
+              ? `in ${(t.props.date as Date).toISOString()}`
+              : [t.props.children].flat().join('')),
+        ),
+    );
+
+/**
  * The version of a deadline list with this many rows: the layout offers one
  * per row count in a ViewThatFits, which shows the longest that fits.
  */
@@ -107,6 +131,14 @@ const links = (node: Node) =>
   all(node)
     .filter(n => n.type === 'Link')
     .map(n => n.props.destination);
+
+/** What TalkBack reads: the `contentDescription` modifier of our patch. */
+const descriptions = (node: Node) =>
+  all(node).flatMap(n =>
+    ((n.props.modifiers as { $type?: string; text?: string }[]) ?? [])
+      .filter(m => m?.$type === 'contentDescription')
+      .map(m => m.text),
+  );
 
 /** Android rows open through the `openUrl` modifier of our patch. */
 const openUrls = (node: Node) =>
@@ -262,6 +294,17 @@ describe('Up Next on iOS', () => {
         .filter(n => n.type === 'CountdownView')
         .map(n => modifier(n, 'font')),
     ).toEqual([{ textStyle: 'footnote' }]);
+    // VoiceOver reads each class as one element, without the dot.
+    expect(spoken(oneLater)).toEqual([
+      [
+        'Course now',
+        'now-time',
+        '六教6A414',
+        'Ends in ',
+        `in ${iso(at('11:25'))}`,
+      ],
+      ['Course later', 'Tomorrow later-time'],
+    ]);
     // Each class opens its course; no deadlines.
     expect(links(oneLater)).toEqual([
       'learnx://course/now',
@@ -430,6 +473,10 @@ describe('Up Next on iOS', () => {
       `in ${iso(at('11:25'))}`,
       '六教6A414',
     ]);
+    // VoiceOver reads it as one element, without the dot.
+    expect(spoken(render('accessoryRectangular'))).toEqual([
+      ['Course now', 'now-start', `in ${iso(at('11:25'))}`, '六教6A414'],
+    ]);
     // Opens the class's course, or Today when its course isn't known.
     expect(modifier(render('accessoryRectangular'), 'widgetURL')).toBe(
       'learnx://course/now',
@@ -544,6 +591,7 @@ describe('Deadlines on iOS', () => {
       `in ${iso(at('23:59') + DAY)}`,
     ]);
     expect(modifier(widget, 'widgetURL')).toBe('learnx://assignment/d1');
+    expect(spoken(widget)).toEqual([texts(widget)]);
 
     const empty = render('accessoryRectangular', {
       ...deadlineProps,
@@ -612,6 +660,14 @@ describe('Deadlines on iOS', () => {
     expect(links(list)).toEqual(
       [1, 2, 3].map(i => `learnx://assignment/d${i}`),
     );
+    // VoiceOver reads each row as one element, without the dots.
+    expect(spoken(list)).toEqual(
+      [1, 2, 3].map(i => [
+        `Assignment d${i}`,
+        `Course of d${i}`,
+        `in ${iso(at('23:59') + i * DAY)}`,
+      ]),
+    );
   });
 
   it('lists rows with the time left and the course, and no links, in a small widget', () => {
@@ -633,6 +689,13 @@ describe('Deadlines on iOS', () => {
     ).toEqual([1, 1, 1]);
     expect(texts(version(widget, 1)).slice(0, 2)).toEqual(['Deadlines', '+8']);
     expect(links(widget)).toEqual([]);
+    expect(spoken(version(widget, 3))).toEqual(
+      [1, 2, 3].map(i => [
+        `Assignment d${i}`,
+        `in ${iso(at('23:59') + i * DAY)}`,
+        `Course of d${i}`,
+      ]),
+    );
   });
 
   it('shows rows with their due times when large, up to ten', () => {
@@ -740,6 +803,10 @@ describe('Deadlines on Android', () => {
       ...[1, 2, 3, 4].map(i => `learnx://assignment/d${i}`),
     ]);
     expect(modifier(widget, 'background')).toBe('#171216');
+    // TalkBack reads each row as one sentence, without the dot.
+    expect(descriptions(widget)).toEqual(
+      [1, 2, 3, 4].map(i => `Assignment d${i}, d${i}-due, Course of d${i}`),
+    );
   });
 
   it('colors due times red under a day and orange by tomorrow', () => {
@@ -751,6 +818,39 @@ describe('Deadlines on Android', () => {
     expect(color('red')).toBe('#BA1A1A');
     expect(color('orange')).toBe('#9A4605');
     expect(color('plain')).toBe('#4D444C');
+  });
+
+  it('lists as many as fit its height at the text size', () => {
+    // A title and "+N", then three texts a row.
+    const rows = (environment: object) =>
+      (texts(layout(deadlineProps, environment)).length - 2) / 3;
+    // 2 × 2 cells: two rows, and the rest counted.
+    const short = layout(deadlineProps, { height: 140 });
+    expect(texts(short).slice(0, 2)).toEqual(['Deadlines', '  +7']);
+    expect(openUrls(short)).toEqual([
+      'learnx://assignment',
+      'learnx://assignment/d1',
+      'learnx://assignment/d2',
+    ]);
+    // Taller: all seven in the props (two more than they hold are counted).
+    expect(rows({ height: 400 })).toBe(7);
+    expect(rows({ height: 300 })).toBe(6);
+    // Larger text: fewer rows.
+    expect(rows({ height: 300, fontScale: 1.5 })).toBe(4);
+    // Always at least one.
+    expect(rows({ height: 60 })).toBe(1);
+  });
+
+  it("is the launcher's widget background", () => {
+    const widget = layout(deadlineProps, { cornerRadius: 28 });
+    expect(modifier(widget, 'cornerRadius')).toBe(28);
+    expect(
+      (widget.props.modifiers as { $type?: string }[]).some(
+        m => m?.$type === 'appWidgetBackground',
+      ),
+    ).toBe(true);
+    // Before Android 12
+    expect(modifier(layout(deadlineProps, {}), 'cornerRadius')).toBe(16);
   });
 
   it('asks to open the app before it has sent anything, in the system language', () => {
@@ -807,6 +907,25 @@ describe('Up Next on Android', () => {
       'learnx://course/later',
       'learnx://course/c3',
     ]);
+    expect(descriptions(widget)).toEqual([
+      'Course now, now-time, 六教6A414',
+      'Later, Course later, Tomorrow later-time',
+      'Course c3, c3-weekday c3-time',
+    ]);
+  });
+
+  it('lists as many later classes as fit its height', () => {
+    // The label and the featured class, then one text a class.
+    const later = (environment: object) =>
+      texts(layout(upNextProps, environment)).length - 3;
+    // 2 × 2 cells
+    expect(later({ height: 130 })).toBe(2);
+    expect(later({ height: 160 })).toBe(3);
+    // All five after the featured one.
+    expect(later({ height: 400 })).toBe(5);
+    // Larger text: fewer.
+    expect(later({ height: 200, fontScale: 1.3 })).toBe(4);
+    expect(later({ height: 160, fontScale: 1.3 })).toBe(2);
   });
 
   it("dates a class after tomorrow, and leaves out what's missing", () => {

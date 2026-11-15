@@ -1,5 +1,5 @@
 diff --git a/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt b/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt
-index 3df9e4a4d92155a00d3f5652d17d20be10bef1c1..b2257d0c76ede0d358b51163c75de9d794f4ba48 100644
+index 3df9e4a4d92155a00d3f5652d17d20be10bef1c1..2b6062d2c7d6fe2039684ba231365b4ab6283611 100644
 --- a/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt
 +++ b/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt
 @@ -4,6 +4,8 @@ package expo.modules.widgets
@@ -11,29 +11,38 @@ index 3df9e4a4d92155a00d3f5652d17d20be10bef1c1..b2257d0c76ede0d358b51163c75de9d7
  import android.graphics.Color as AndroidColor
  import androidx.compose.ui.unit.DpSize
  import androidx.compose.ui.unit.TextUnit
-@@ -66,6 +68,7 @@ import androidx.glance.ImageProvider
+@@ -66,6 +68,8 @@ import androidx.glance.ImageProvider
  import androidx.glance.TintColorFilterParams
  import androidx.glance.GlanceModifier
  import androidx.glance.action.clickable
 +import androidx.glance.appwidget.action.actionStartActivity
++import androidx.glance.appwidget.appWidgetBackground
  import androidx.glance.appwidget.CheckboxDefaults
  import androidx.glance.appwidget.cornerRadius
  import androidx.glance.appwidget.EmittableCheckBox
-@@ -419,6 +422,12 @@ private fun ModifierType.toPeekModifier(converterContext: ConverterContext): Gla
+@@ -419,6 +423,20 @@ private fun ModifierType.toPeekModifier(converterContext: ConverterContext): Gla
      "background" -> asRecord<BackgroundParams>(converterContext)?.color?.toGlanceColorProvider()
        ?.let { GlanceModifier.background(it) }
      "cornerRadius" -> asRecord<CornerRadiusParams>(converterContext)?.let { GlanceModifier.cornerRadius(it.radius.dp) }
++    // learnX: `{ $type: 'appWidgetBackground' }` marks the widget's background, which the launcher shapes and
++    // animates from.
++    "appWidgetBackground" -> GlanceModifier.appWidgetBackground()
 +    // learnX: `{ $type: 'openUrl', url }` opens the URL in the app, e.g. a widget row's assignment.
 +    "openUrl" -> this["url"]?.asString()?.let { url ->
 +      val context = converterContext.applicationContext
 +      val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).setPackage(context.packageName)
 +      GlanceModifier.clickable(actionStartActivity(intent))
 +    }
++    // learnX: `{ $type: 'contentDescription', text }` is what TalkBack reads for the view instead of its texts, e.g.
++    // a widget row as one sentence.
++    "contentDescription" -> this["text"]?.asString()?.let { text ->
++      GlanceModifier.semantics { contentDescription = text }
++    }
      // Unsupported Expo UI modifiers are ignored until they have exact Glance semantics.
      else -> null
    } ?: GlanceModifier
 diff --git a/android/src/main/java/expo/modules/widgets/ExpoWidgetsPeekWidget.kt b/android/src/main/java/expo/modules/widgets/ExpoWidgetsPeekWidget.kt
-index edabde8f51b3bd9162b634e46f2f09686c3a3b8a..95f0cb550a517f20f44e26cf7ccf36843791c514 100644
+index edabde8f51b3bd9162b634e46f2f09686c3a3b8a..7c426253f6ac20734f31818fec8cc1bfa5ca3252 100644
 --- a/android/src/main/java/expo/modules/widgets/ExpoWidgetsPeekWidget.kt
 +++ b/android/src/main/java/expo/modules/widgets/ExpoWidgetsPeekWidget.kt
 @@ -6,8 +6,13 @@ import android.content.Context
@@ -50,14 +59,17 @@ index edabde8f51b3bd9162b634e46f2f09686c3a3b8a..95f0cb550a517f20f44e26cf7ccf3684
  import io.github.expo.peek.emittables.PeekEmittableAppWidget
  
  internal class ExpoWidgetsPeekWidget(
-@@ -23,11 +28,21 @@ internal class ExpoWidgetsPeekWidget(
+@@ -23,11 +28,23 @@ internal class ExpoWidgetsPeekWidget(
    ): Emittable {
      val appContext = context.applicationContext
      val layout = WidgetsLayoutRegistry.layout(appContext, widgetName)
 -      ?: return createErrorRoot("No layout found for $widgetName")
 +      ?: return createErrorRoot("No layout found for $widgetName").openingApp(appContext)
      val props = WidgetsLayoutRegistry.props(appContext, widgetName)
-     val environment = getWidgetEnvironment(appContext)
+-    val environment = getWidgetEnvironment(appContext)
++    // learnX: the size it's drawn at (dp), so a layout can show as much as fits.
++    val environment = getWidgetEnvironment(appContext) +
++      mapOf("width" to size.width.value.toDouble(), "height" to size.height.value.toDouble())
      val node = evaluateLayout(appContext, layout, props, environment)
  
 -    return node.toPeekRoot(appContext, InteractionSource.Widget(widgetName), size)
@@ -75,18 +87,44 @@ index edabde8f51b3bd9162b634e46f2f09686c3a3b8a..95f0cb550a517f20f44e26cf7ccf3684
    }
  }
 diff --git a/android/src/main/java/expo/modules/widgets/WidgetsUtils.kt b/android/src/main/java/expo/modules/widgets/WidgetsUtils.kt
-index 1ffad5e5a9b07c06e28269c53023d295f80a1396..cb27e85d17bbae087441568cda9b94de763cc5b0 100644
+index 1ffad5e5a9b07c06e28269c53023d295f80a1396..af8bca5dd886ae7d02ccc5bbaf5553a28913e139 100644
 --- a/android/src/main/java/expo/modules/widgets/WidgetsUtils.kt
 +++ b/android/src/main/java/expo/modules/widgets/WidgetsUtils.kt
-@@ -9,6 +9,8 @@ import expo.modules.ui.colors.getMaterialColorTokens
+@@ -2,6 +2,7 @@ package expo.modules.widgets
+ 
+ import android.content.Context
+ import android.content.res.Configuration
++import android.os.Build
+ import com.facebook.react.bridge.Arguments
+ import com.facebook.react.bridge.ReadableMap
+ import expo.modules.ui.colors.getMaterialColorTokens
+@@ -9,6 +10,11 @@ import expo.modules.ui.colors.getMaterialColorTokens
  internal fun getWidgetEnvironment(context: Context): Map<String, Any?> {
    return mapOf(
      "colorScheme" to context.colorScheme(),
 +    // learnX: lets a layout pick its language before the app has sent any props.
 +    "locale" to context.resources.configuration.locales[0].toLanguageTag(),
++    // learnX: the text size setting, and the corner radius of the launcher's widgets (dp; Android 12+).
++    "fontScale" to context.resources.configuration.fontScale.toDouble(),
++    "cornerRadius" to context.systemWidgetCornerRadius(),
      "configuration" to emptyMap<String, Any?>(),
      // TODO(@jakex7): accessing a materialColors through environment is
      //  a hack to fulfill expo-ui module stub with data
+@@ -52,6 +58,14 @@ internal fun createErrorNode(message: String): ReadableMap {
+   )
+ }
+ 
++private fun Context.systemWidgetCornerRadius(): Double? =
++  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
++    (resources.getDimension(android.R.dimen.system_app_widget_background_radius) / resources.displayMetrics.density)
++      .toDouble()
++  } else {
++    null
++  }
++
+ private fun Context.colorScheme(): String {
+   val nightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+   return if (nightMode == Configuration.UI_MODE_NIGHT_YES) {
 diff --git a/ios/ExpoWidgets.podspec b/ios/ExpoWidgets.podspec
 index ad96b6aab2173cd32514b7b409960fca21791cbd..06fafe3651c194663bdad5e611cd5847cb6b90ee 100644
 --- a/ios/ExpoWidgets.podspec

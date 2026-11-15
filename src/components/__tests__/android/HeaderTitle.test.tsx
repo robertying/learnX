@@ -28,6 +28,14 @@ describe('HeaderTitle (Android)', () => {
     expect(screen.getByText('Notices').props.allowFontScaling).toBe(true);
   });
 
+  it("shortens a screen's name at the end and an item's in the middle", async () => {
+    atWidth(400);
+    await render(<HeaderTitle title="Assignments" />);
+    expect(screen.getByText('Assignments').props.ellipsizeMode).toBe('tail');
+    await render(<HeaderTitle title="Calculus (1)" ellipsizeMode="middle" />);
+    expect(screen.getByText('Calculus (1)').props.ellipsizeMode).toBe('middle');
+  });
+
   it('gets the roomy bar on a wide window', async () => {
     atWidth(1200);
     await render(<HeaderTitle title="Notices" />);

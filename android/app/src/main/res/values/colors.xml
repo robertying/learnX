@@ -23,7 +23,15 @@
     <color name="md_theme_onSurface">#1F1A1F</color>
     <color name="md_theme_surfaceVariant">#EDDFE8</color>
     <color name="md_theme_onSurfaceVariant">#4D444C</color>
+    <color name="md_theme_surfaceContainerLowest">#FFFFFF</color>
+    <color name="md_theme_surfaceContainerLow">#FCF0F7</color>
+    <color name="md_theme_surfaceContainer">#F6EBF2</color>
+    <color name="md_theme_surfaceContainerHigh">#F0E5EC</color>
+    <color name="md_theme_surfaceContainerHighest">#EBDFE6</color>
+    <color name="md_theme_surfaceBright">#FFF7FA</color>
+    <color name="md_theme_surfaceDim">#E2D7DE</color>
     <color name="md_theme_outline">#7F747C</color>
+    <color name="md_theme_outlineVariant">#D0C3CC</color>
     <color name="md_theme_inverseOnSurface">#F9EEF4</color>
     <color name="md_theme_inverseSurface">#352F34</color>
     <color name="md_theme_inversePrimary">#F4ABFF</color>

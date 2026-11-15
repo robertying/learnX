@@ -19,6 +19,7 @@ import {
 } from '@react-navigation/native';
 import type { DetailNavigationContainerRef, DetailStackParams } from './types';
 import { SidebarView } from 'modules/sidebar';
+import { t } from 'helpers/i18n';
 import NativeSplitViewProvider from './NativeSplitView';
 import { TabLayer, TabSplitContext } from './SplitView';
 import { useTheme } from 'theme';
@@ -77,6 +78,7 @@ const Sidebar: React.FC<{
       title,
       systemImage: sfSymbol,
       badge: !!badge,
+      badgeLabel: badge ? t('a11yNewBadge') : undefined,
       testID,
     };
   });

@@ -2,10 +2,21 @@
 // (src/test: JUnit, Robolectric, MockK; scripts/test-android.sh runs them).
 // Nothing links this project: it only has tests, against the patched
 // libraries' Gradle projects.
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    // For the Compose tests of @expo/ui, as @expo/ui itself adds it.
+    classpath("org.jetbrains.kotlin.plugin.compose:org.jetbrains.kotlin.plugin.compose.gradle.plugin:${kotlinVersion}")
+  }
+}
+
 plugins {
   id 'com.android.library'
   id 'expo-module-gradle-plugin'
 }
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 // The Expo module plugin wants both, though nothing is published.
 group = 'io.robertying.learnx'
@@ -13,12 +24,16 @@ version = '1.0.0'
 
 android {
   namespace = "io.robertying.learnx.patches"
+  buildFeatures {
+    compose = true
+  }
 }
 
 apply from: "../../modules/unit-tests.gradle"
 
 dependencies {
   testImplementation project(':expo-calendar')
+  testImplementation project(':expo-ui')
   testImplementation project(':expo-document-picker')
   testImplementation project(':expo-widgets')
   testImplementation project(':react-native-pdf')
@@ -28,4 +43,7 @@ dependencies {
   testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2'
   testImplementation 'com.github.zacharee:AndroidPdfViewer:4.0.1'
   testImplementation 'io.legere:pdfiumandroid:1.0.35'
+  testImplementation 'androidx.compose.foundation:foundation-android:1.12.1'
+  testImplementation 'androidx.compose.ui:ui-test-junit4:1.12.1'
+  testImplementation 'androidx.compose.ui:ui-test-manifest:1.12.1'
 }

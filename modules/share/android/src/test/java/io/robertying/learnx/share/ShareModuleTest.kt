@@ -88,8 +88,9 @@ class TakeTest {
   }
 
   @Test
-  @Config(sdk = [31])
+  @Config(sdk = [31, 33])
   fun readsTheFileOnOlderAndroid() {
+    // 33's typed getParcelableExtra is unreliable, so IntentCompat uses the old one there too.
     assertEquals(fileUri.toString(), ShareModule.take(share())?.get("uri"))
   }
 }

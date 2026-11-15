@@ -3,6 +3,9 @@ import type {
   NativeStackHeaderItem,
   NativeStackNavigationOptions,
 } from '@react-navigation/native-stack';
+import type { ReactElement } from 'react';
+import FilterMenu from 'components/FilterMenu';
+import OverflowMenu from 'components/OverflowMenu';
 import DeviceInfo from 'constants/DeviceInfo';
 import { t } from 'helpers/i18n';
 import useFilterListHeader, {
@@ -10,6 +13,7 @@ import useFilterListHeader, {
 } from 'hooks/useFilterListHeader';
 
 jest.mock('components/FilterMenu', () => () => null);
+jest.mock('components/OverflowMenu', () => () => null);
 
 const setOptions = jest.fn();
 const navigate = jest.fn();
@@ -124,6 +128,24 @@ it('puts reorder and Course X in a menu on Courses', async () => {
   expect(more.map(i => i.label)).toEqual([t('reorder'), t('courseX')]);
   more[1].onPress();
   expect(o.onCourseX).toHaveBeenCalled();
+});
+
+it('puts reorder and Course X in an overflow menu on Android', async () => {
+  const o = options({ type: 'course' });
+  await renderHook(() => useFilterListHeader(o));
+  const set = setOptions.mock.lastCall![0] as NativeStackNavigationOptions;
+  // The row of header elements, each in a keyed fragment.
+  const row = (
+    set.headerLeft as () => ReactElement<{
+      children: ReactElement<{
+        children: ReactElement<{ items?: { id: string }[] }>;
+      }>[];
+    }>
+  )();
+  const [filter, more] = row.props.children.map(entry => entry.props.children);
+  expect(filter.type).toBe(FilterMenu);
+  expect(more.type).toBe(OverflowMenu);
+  expect(more.props.items!.map(i => i.id)).toEqual(['reorder', 'courseX']);
 });
 
 it('adds a refresh button on the Mac, disabled while refreshing', async () => {
