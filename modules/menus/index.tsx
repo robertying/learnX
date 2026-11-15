@@ -43,6 +43,14 @@ export interface ContextMenuViewProps extends ViewProps {
   /** No actions, no menu. */
   actions: ContextMenuAction[];
   onAction: (event: NativeSyntheticEvent<{ key: string }>) => void;
+  /**
+   * Takes keyboard focus, as a row in Mail: Tab moves into the list, the arrow
+   * keys between rows, and Return or Space sends `onPrimaryAction`. Not
+   * `focusable`, which React Native reads as a prop of its own.
+   */
+  keyboardFocusable?: boolean;
+  /** Return or Space on the focused view. */
+  onPrimaryAction?: () => void;
 }
 
 /**

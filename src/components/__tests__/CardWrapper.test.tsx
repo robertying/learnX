@@ -401,6 +401,41 @@ describe('on iPad and Mac', () => {
     expect(onMove).toHaveBeenCalledWith(1);
   });
 
+  it('opens, or checks, the card focused with the keyboard on Return', async () => {
+    const Card = loadCard(true);
+    const keyboard = () =>
+      jest.mocked(menus.ContextMenuView).mock.lastCall![0] as unknown as {
+        keyboardFocusable?: boolean;
+        onPrimaryAction?: () => void;
+      };
+    const onPress = jest.fn();
+    const onCheck = jest.fn();
+    const view = await render(
+      <Card accessibilityLabel="Card label" onPress={onPress} onCheck={onCheck}>
+        <Text>Card</Text>
+      </Card>,
+    );
+    expect(keyboard().keyboardFocusable).toBe(true);
+    keyboard().onPrimaryAction!();
+    expect(onPress).toHaveBeenCalledTimes(1);
+
+    await view.rerender(
+      <Card accessibilityLabel="Card label" selectionMode onCheck={onCheck}>
+        <Text>Card</Text>
+      </Card>,
+    );
+    keyboard().onPrimaryAction!();
+    expect(onCheck).toHaveBeenCalledWith(true);
+
+    // Reordering has nothing to open.
+    await view.rerender(
+      <Card accessibilityLabel="Card label" reorderMode onPress={onPress}>
+        <Text>Card</Text>
+      </Card>,
+    );
+    expect(keyboard().keyboardFocusable).toBe(false);
+  });
+
   it('offers no moves on iPad, where a long press drags', async () => {
     const Card = loadCard(false);
     await render(
