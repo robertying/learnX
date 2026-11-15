@@ -47,11 +47,10 @@ describe('brand color', () => {
   });
 
   it('is what the widgets use', () => {
-    // The iOS layouts take it from their kit.
+    // The layouts take it from their platform's kit.
     const darkTones = {
       kit: brandColors.dark,
-      'Deadlines.android': brandColors.materialDark,
-      'UpNext.android': brandColors.materialDark,
+      'kit.android': brandColors.materialDark,
     };
     for (const [widget, dark] of Object.entries(darkTones)) {
       const source = read(`src/widgets/${widget}.tsx`);

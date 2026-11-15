@@ -56,7 +56,7 @@ module.exports = {
     // it would be missing where it runs); src/widgets/__tests__/layouts.test.ts
     // runs that text instead.
     '!src/widgets/{Deadlines,UpNext}{,.android}.tsx',
-    '!src/widgets/kit.tsx',
+    '!src/widgets/kit{,.android}.tsx',
   ],
   // CI runs `pnpm test --coverage` and fails below these, so coverage can't
   // slip unnoticed. Keep them just under the current numbers; raise them as

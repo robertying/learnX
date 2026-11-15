@@ -17,6 +17,7 @@ import androidx.glance.semantics.SemanticsModifier
 import androidx.glance.semantics.SemanticsProperties
 import com.facebook.react.bridge.DynamicFromObject
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -27,8 +28,10 @@ import org.robolectric.annotation.Config
 
 /**
  * What patches/expo-widgets@58.0.27.patch changes on Android: tapping a widget opens the app, an `openUrl` modifier
- * opens a link in the app, a `contentDescription` modifier sets what TalkBack reads, and layouts get the locale. The
- * library keeps them internal, so they're reached by reflection.
+ * opens a link in the app, an `appWidgetBackground` modifier marks the background, a `contentDescription` modifier
+ * sets what TalkBack reads, and layouts get the locale, the text size setting, the launcher's widget corner radius
+ * and their size. The library keeps these internal, so they're reached by reflection. (The size is passed only with a
+ * layout, which needs the widgets' JS runtime.)
  */
 @RunWith(RobolectricTestRunner::class)
 class ExpoWidgetsPatchTest {
@@ -41,10 +44,27 @@ class ExpoWidgetsPatchTest {
   @Test
   @Config(qualifiers = "zh-rCN")
   fun environmentHasTheLocale() {
-    val environment = Class.forName("expo.modules.widgets.WidgetsUtilsKt")
-      .getMethod("getWidgetEnvironment", Context::class.java)
-      .invoke(null, context) as Map<*, *>
-    assertEquals("zh-CN", environment["locale"])
+    assertEquals("zh-CN", environment()["locale"])
+  }
+
+  private fun environment() = Class.forName("expo.modules.widgets.WidgetsUtilsKt")
+    .getMethod("getWidgetEnvironment", Context::class.java)
+    .invoke(null, context) as Map<*, *>
+
+  @Test
+  fun environmentHasTheTextSizeAndCornerRadius() {
+    RuntimeEnvironment.setFontScale(1.3f)
+    val environment = environment()
+    assertEquals(1.3, environment["fontScale"] as Double, 0.001)
+    val radius = context.resources.getDimension(android.R.dimen.system_app_widget_background_radius) /
+      context.resources.displayMetrics.density
+    assertEquals(radius.toDouble(), environment["cornerRadius"] as Double, 0.001)
+  }
+
+  @Test
+  @Config(sdk = [30])
+  fun environmentHasNoCornerRadiusBeforeAndroid12() {
+    assertNull(environment()["cornerRadius"])
   }
 
   @Test
@@ -73,8 +93,8 @@ class ExpoWidgetsPatchTest {
     assertEquals(1, (root as EmittableBox).children.size)
   }
 
-  /** The Glance modifier the patched library makes for one layout modifier. */
-  private fun peekModifier(vararg fields: Pair<String, String>): GlanceModifier {
+  /** Converts one modifier as a layout passes it (`{ $type, ...params }`). */
+  private fun peekModifier(vararg entries: Pair<String, Any>): GlanceModifier {
     val tree = Class.forName("expo.modules.widgets.ExpoWidgetEmittableTreeKt")
     val converterContextClass = Class.forName("expo.modules.widgets.WidgetConverterContext")
     // Its size is a DpSize (a Long); Kotlin adds a synthetic constructor beside it.
@@ -87,9 +107,15 @@ class ExpoWidgetsPatchTest {
       .apply { isAccessible = true }
     return toPeekModifier.invoke(
       null,
-      fields.associate { (key, value) -> key to DynamicFromObject(value) },
+      entries.associate { (key, value) -> key to DynamicFromObject(value) },
       converterContext,
     ) as GlanceModifier
+  }
+
+  @Test
+  fun appWidgetBackgroundModifierMarksTheBackground() {
+    val modifier = peekModifier("\$type" to "appWidgetBackground")
+    assertTrue(modifier.any { it.javaClass.name == "androidx.glance.appwidget.AppWidgetBackgroundModifier" })
   }
 
   @Test
