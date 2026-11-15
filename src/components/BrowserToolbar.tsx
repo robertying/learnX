@@ -11,9 +11,11 @@ import {
   labelStyle,
   padding,
 } from '@expo/ui/swift-ui/modifiers';
-import { t } from 'helpers/i18n';
 import { systemIcons } from 'helpers/systemIcons';
-import type { BrowserToolbarProps } from './BrowserToolbar.shared';
+import {
+  browserToolbarItems,
+  type BrowserToolbarProps,
+} from './BrowserToolbar.shared';
 import DeviceInfo from 'constants/DeviceInfo';
 import ThemedHost from 'components/ThemedHost';
 
@@ -35,67 +37,37 @@ const capsuleModifiers = [
 
 const MARGIN = 8;
 
+const itemModifiers = [
+  labelStyle('iconOnly'),
+  buttonStyle('borderless'),
+  frame({ width: 48, height: 44 }),
+];
+
 /** The page's back, forward, reload and open buttons, floating at the bottom. */
-const BrowserToolbar: React.FC<BrowserToolbarProps> = ({
-  canGoBack,
-  canGoForward,
-  loading,
-  onBack,
-  onForward,
-  onReload,
-  onOpenInBrowser,
-  onOverlapChange,
-}) => {
+const BrowserToolbar: React.FC<BrowserToolbarProps> = props => {
   const insets = useSafeAreaInsets();
   const bottom = Math.max(insets.bottom, MARGIN);
-
-  const item = (
-    icon: 'back' | 'forward' | 'refresh' | 'openInBrowser',
-    label: string,
-    isDisabled: boolean,
-    onPress: () => void,
-    testID: string,
-  ) => (
-    <Button
-      systemImage={systemIcons[icon].ios}
-      label={label}
-      onPress={onPress}
-      testID={testID}
-      modifiers={[
-        labelStyle('iconOnly'),
-        buttonStyle('borderless'),
-        frame({ width: 48, height: 44 }),
-        disabled(isDisabled),
-      ]}
-    />
-  );
 
   return (
     <View
       style={[styles.container, { bottom }]}
       pointerEvents="box-none"
       onLayout={e =>
-        onOverlapChange?.(e.nativeEvent.layout.height + bottom + MARGIN)
+        props.onOverlapChange?.(e.nativeEvent.layout.height + bottom + MARGIN)
       }
     >
       <ThemedHost matchContents>
         <HStack spacing={4} modifiers={capsuleModifiers}>
-          {item('back', t('back'), !canGoBack, onBack, 'courseXBack')}
-          {item(
-            'forward',
-            t('forward'),
-            !canGoForward,
-            onForward,
-            'courseXForward',
-          )}
-          {item('refresh', t('refresh'), loading, onReload, 'courseXReload')}
-          {item(
-            'openInBrowser',
-            t('openInBrowser'),
-            loading,
-            onOpenInBrowser,
-            'courseXOpen',
-          )}
+          {browserToolbarItems(props).map(item => (
+            <Button
+              key={item.icon}
+              systemImage={systemIcons[item.icon].ios}
+              label={item.label}
+              onPress={item.onPress}
+              testID={item.testID}
+              modifiers={[...itemModifiers, disabled(item.disabled)]}
+            />
+          ))}
         </HStack>
       </ThemedHost>
     </View>

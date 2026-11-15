@@ -4,7 +4,8 @@ import dayjs from 'dayjs';
 import { mockAssignments } from 'data/mock';
 import { saveSubmissionDraft } from 'data/submissionDrafts';
 import type { Assignment } from 'data/types/state';
-import { getAssignmentGradeLevelDescription, t } from 'helpers/i18n';
+import { gradeLabel } from 'helpers/assignments';
+import { t } from 'helpers/i18n';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import AssignmentDetail from 'screens/AssignmentDetail';
 import { screenProps } from 'test-utils/screenProps';
@@ -131,11 +132,7 @@ it('shows a grade level, or the score', async () => {
   await renderScreen(leveled);
   // The detail ends the row's text.
   const detail = (text: string) => new RegExp(` ${text}$`);
-  expect(
-    screen.getByText(
-      detail(getAssignmentGradeLevelDescription(leveled.gradeLevel!)),
-    ),
-  ).toBeTruthy();
+  expect(screen.getByText(detail(gradeLabel(leveled)!))).toBeTruthy();
 
   const scored = find(a => a.graded && !a.gradeLevel && a.grade !== undefined);
   await renderScreen(scored);

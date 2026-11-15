@@ -1,10 +1,13 @@
 import dayjs from 'dayjs';
+import { HomeworkGradeLevel } from '@robertying/thu-learn-lib';
 import { Assignment } from 'data/types/state';
+import { t } from 'helpers/i18n';
 import {
   deadlineDayTime,
   deadlineText,
   deadlineUrgency,
   deadlineTextBesideDate,
+  gradeLabel,
   sortAssignments,
   upcomingAssignments,
 } from 'helpers/assignments';
@@ -170,6 +173,19 @@ describe('deadlineTextBesideDate', () => {
 
   it('says nothing for one over a year away, whose date is beside it', () => {
     expect(deadlineTextBesideDate('2027-03-15T12:01:00Z', now)).toBeUndefined();
+  });
+});
+
+describe('gradeLabel', () => {
+  it('names a known level and shows an unknown one as it is', () => {
+    expect(gradeLabel({ gradeLevel: HomeworkGradeLevel.PASS })).toBe(t('pass'));
+    expect(gradeLabel({ gradeLevel: 'A+' as HomeworkGradeLevel })).toBe('A+');
+  });
+
+  it('falls back to the score, and to nothing without either', () => {
+    expect(gradeLabel({ grade: 0 })).toBe('0');
+    expect(gradeLabel({ grade: 92.5, gradeLevel: undefined })).toBe('92.5');
+    expect(gradeLabel({})).toBeUndefined();
   });
 });
 

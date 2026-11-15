@@ -75,6 +75,7 @@ import { useTheme } from 'theme';
 import {
   parseNumberInput,
   sectionRows,
+  stackedDetail,
   type FormButtonProps,
   type FormChoiceButtonProps,
   type FormFileProps,
@@ -401,19 +402,9 @@ const RowLabel: React.FC<{
   );
 };
 
-/**
- * At accessibility text sizes the detail goes under the subtitle instead of
- * at the end of the row, which would squeeze the title into a narrow column.
- */
-const useStackedDetail = (subtitle?: string, detail?: string) => {
-  const { fontScale } = useWindowDimensions();
-  return detail && fontScale >= 1.5
-    ? {
-        subtitle: [subtitle, detail].filter(Boolean).join('\n'),
-        detail: undefined,
-      }
-    : { subtitle, detail };
-};
+/** The row's subtitle and detail for the text size (`stackedDetail`). */
+const useStackedDetail = (subtitle?: string, detail?: string) =>
+  stackedDetail({ subtitle, detail }, useWindowDimensions().fontScale);
 
 const RowDetail: React.FC<{
   detail?: string;

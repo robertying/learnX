@@ -1,9 +1,7 @@
 import type * as Localization from 'expo-localization';
 import dayjs from 'dayjs';
-import { HomeworkGradeLevel } from '@robertying/thu-learn-lib';
 import {
   formatLiteral,
-  getAssignmentGradeLevelDescription,
   getLocale,
   isLocaleChinese,
   resetLocale,
@@ -41,17 +39,6 @@ describe('tCount', () => {
 describe('formatLiteral', () => {
   it('wraps text so dayjs prints it as is, without brackets inside', () => {
     expect(formatLiteral('Dr. [M] Y')).toBe('[Dr. M Y]');
-  });
-});
-
-describe('getAssignmentGradeLevelDescription', () => {
-  it('names a known level and shows an unknown one as it is', () => {
-    expect(getAssignmentGradeLevelDescription(HomeworkGradeLevel.PASS)).toBe(
-      t('pass'),
-    );
-    expect(getAssignmentGradeLevelDescription('A+' as HomeworkGradeLevel)).toBe(
-      'A+',
-    );
   });
 });
 

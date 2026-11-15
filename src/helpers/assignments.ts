@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
+import { HomeworkGradeLevel } from '@robertying/thu-learn-lib';
 import { Assignment } from 'data/types/state';
-import { t, tCount, timeFormat } from './i18n';
+import { t, tCount, timeFormat, type TranslationKey } from './i18n';
 
 const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;
@@ -166,3 +167,29 @@ export function sortAssignments(assignments: Assignment[]): Assignment[] {
   );
   return [...upcoming, ...past];
 }
+
+const gradeLevelKeys: Partial<Record<HomeworkGradeLevel, TranslationKey>> = {
+  [HomeworkGradeLevel.CHECKED]: 'reviewed',
+  [HomeworkGradeLevel.DISTINCTION]: 'good',
+  [HomeworkGradeLevel.EXEMPTED_COURSE]: 'exemptedCourse',
+  [HomeworkGradeLevel.EXEMPTION]: 'exempted',
+  [HomeworkGradeLevel.PASS]: 'pass',
+  [HomeworkGradeLevel.FAILURE]: 'fail',
+  [HomeworkGradeLevel.INCOMPLETE]: 'incomplete',
+};
+
+/**
+ * A graded assignment's grade as the app shows it everywhere (cards, detail,
+ * notifications): its level in the app's language (a letter grade as it is),
+ * else its score, else nothing when the grader gave neither.
+ */
+export const gradeLabel = ({
+  grade,
+  gradeLevel,
+}: Pick<Assignment, 'grade' | 'gradeLevel'>): string | undefined => {
+  if (gradeLevel) {
+    const key = gradeLevelKeys[gradeLevel];
+    return key ? t(key) : gradeLevel;
+  }
+  return grade !== undefined ? String(grade) : undefined;
+};

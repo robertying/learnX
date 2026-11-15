@@ -16,6 +16,7 @@ import {
 } from 'components/Text';
 import { t } from 'helpers/i18n';
 import { matchRanges } from 'helpers/search';
+import { truncate } from 'helpers/text';
 import { StatusTone, statusContainerOpacity, useTheme } from 'theme';
 
 const isAndroid = Platform.OS === 'android';
@@ -176,9 +177,7 @@ export const cardAccessibilityLabel = ({
     status,
     ...flags.filter(isFlag).map(flag => cardFlags[flag].label()),
     // The row shows two lines of it; a whole notice is too long to listen to.
-    preview && preview.length > previewLength
-      ? `${preview.slice(0, previewLength)}…`
-      : preview,
+    preview && truncate(preview, previewLength),
   ]
     .filter(Boolean)
     .join(', ');
@@ -227,7 +226,7 @@ const cardFlags: Record<CardFlag, { label: () => string; tone?: StatusTone }> =
   };
 
 /** A row's flags in the order shown; `false` and `undefined` are left out. */
-type CardFlags = readonly (CardFlag | false | undefined)[];
+export type CardFlags = readonly (CardFlag | false | undefined)[];
 
 const isFlag = (flag: CardFlag | false | undefined): flag is CardFlag => !!flag;
 

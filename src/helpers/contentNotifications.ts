@@ -1,11 +1,11 @@
 import dayjs from 'dayjs';
 import { ContentDiff } from 'data/contentDiff';
 import { BookmarkType } from 'data/userData';
-import { Assignment, NotificationSettings } from 'data/types/state';
-import { deadlineDayTime } from 'helpers/assignments';
-import { getAssignmentGradeLevelDescription, t } from 'helpers/i18n';
+import { NotificationSettings } from 'data/types/state';
+import { deadlineDayTime, gradeLabel } from 'helpers/assignments';
+import { t } from 'helpers/i18n';
 import { ItemTarget } from 'helpers/openTarget';
-import { capitalize, hash, removeTags } from 'helpers/text';
+import { capitalize, hash, removeTags, truncate } from 'helpers/text';
 
 /** Items older than this aren't news, e.g. when an old course comes back. */
 const RECENT_DAYS = 7;
@@ -103,12 +103,7 @@ const formatTime = (time: string) =>
 
 /** About two lines of a notice, as a preview. */
 const PREVIEW_LENGTH = 120;
-const preview = (html?: string) => {
-  const text = removeTags(html);
-  return text.length > PREVIEW_LENGTH
-    ? `${text.slice(0, PREVIEW_LENGTH).trimEnd()}…`
-    : text;
-};
+const preview = (html?: string) => truncate(removeTags(html), PREVIEW_LENGTH);
 
 const joined = (...parts: (string | null | undefined)[]) =>
   parts.filter(Boolean).join(' · ');
@@ -119,13 +114,6 @@ const joined = (...parts: (string | null | undefined)[]) =>
  */
 export const groupSubmittedKey = (assignmentId: string) =>
   `group-submitted:${assignmentId}`;
-
-const gradeText = (a: Assignment) => {
-  if (a.gradeLevel) {
-    return getAssignmentGradeLevelDescription(a.gradeLevel);
-  }
-  return a.grade !== undefined ? String(a.grade) : '';
-};
 
 /**
  * Picks what a sync's diff should tell the user: the kinds they turned on,
@@ -211,7 +199,7 @@ export const pickContentItems = (
   }
   if (settings.grades) {
     for (const { after: a } of diff.assignments.graded) {
-      const grade = gradeText(a);
+      const grade = gradeLabel(a);
       const graded = grade
         ? t('notifyGraded', { grade })
         : t('notifyGradedNoGrade');

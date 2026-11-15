@@ -1,11 +1,12 @@
 import { FormLink, FormText, type FormTextProps } from 'components/Form';
 
-type ItemRowProps = FormTextProps & { key: string; onPress?: () => void };
+export type ItemRowProps = FormTextProps & { onPress?: () => void };
 
-/** A link row when there's somewhere to go, and a plain row otherwise. */
-export const itemRow = ({ key, onPress, ...row }: ItemRowProps) =>
-  onPress ? (
-    <FormLink key={key} {...row} onPress={onPress} />
-  ) : (
-    <FormText key={key} {...row} />
-  );
+/**
+ * A form row about an item: a link row when there's somewhere to go, and a
+ * plain row otherwise.
+ */
+const ItemRow: React.FC<ItemRowProps> = ({ onPress, ...row }) =>
+  onPress ? <FormLink {...row} onPress={onPress} /> : <FormText {...row} />;
+
+export default ItemRow;

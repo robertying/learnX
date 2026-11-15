@@ -16,15 +16,12 @@ import { useMinute } from 'hooks/useClock';
 import { removeTags } from 'helpers/text';
 import { displayFileSize } from 'helpers/filename';
 import { attachmentFile } from 'helpers/attachments';
-import {
-  formatLiteral,
-  getAssignmentGradeLevelDescription,
-  t,
-} from 'helpers/i18n';
+import { formatLiteral, t } from 'helpers/i18n';
 import {
   deadlineTextBesideDate,
   deadlineTone,
   deadlineUrgency,
+  gradeLabel,
 } from 'helpers/assignments';
 import { Assignment } from 'data/types/state';
 import { useAssignment, useExcellentHomeworkDetail } from 'data/content';
@@ -220,13 +217,7 @@ const AssignmentDetailContent: React.FC<{
                     })
                   : t('gradedAtFormat'),
               )}
-              detail={
-                gradeLevel
-                  ? getAssignmentGradeLevelDescription(gradeLevel)
-                  : grade !== undefined
-                    ? String(grade)
-                    : t('graded')
-              }
+              detail={gradeLabel({ grade, gradeLevel }) ?? t('graded')}
               detailTint="accent"
               icon="grade"
             />

@@ -1,4 +1,5 @@
 import type { StyleProp, ViewStyle } from 'react-native';
+import { t } from 'helpers/i18n';
 import type { iconDrawables } from 'assets/icons';
 import type { SystemIconName, systemIcons } from 'helpers/systemIcons';
 
@@ -32,3 +33,12 @@ export interface IconButtonProps {
 
 /** The space around the icon, inside the button. */
 export const PADDING = 8;
+
+/** What a screen reader says for the button: its label, then the badge's dot. */
+export const spokenLabel = ({
+  accessibilityLabel,
+  badge,
+}: Pick<IconButtonProps, 'accessibilityLabel' | 'badge'>) =>
+  badge && accessibilityLabel
+    ? `${accessibilityLabel}, ${t('a11yNewBadge')}`
+    : accessibilityLabel;

@@ -1,4 +1,4 @@
-import { capitalize, hash, removeTags } from 'helpers/text';
+import { capitalize, hash, removeTags, truncate } from 'helpers/text';
 
 describe('removeTags', () => {
   it('drops tags and decodes entities', () => {
@@ -44,6 +44,14 @@ describe('removeTags', () => {
   it('is empty for nothing', () => {
     expect(removeTags()).toBe('');
     expect(removeTags('')).toBe('');
+  });
+});
+
+describe('truncate', () => {
+  it('keeps short text and cuts long text before an ellipsis', () => {
+    expect(truncate('short', 10)).toBe('short');
+    expect(truncate('exactly 10', 10)).toBe('exactly 10');
+    expect(truncate('one two three', 8)).toBe('one two…');
   });
 });
 

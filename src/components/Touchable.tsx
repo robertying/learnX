@@ -19,8 +19,12 @@ export interface TouchableProps extends Omit<PressableProps, 'style'> {
   style?: StyleProp<ViewStyle>;
 }
 
-// UITableViewCell's selected background
-const highlight = Platform.OS === 'ios' ? PlatformColor('systemGray4') : null;
+/**
+ * UITableViewCell's selected background (iOS and Mac): a pressed row, and a
+ * row that stays selected (`CardWrapper`'s `opened`).
+ */
+export const rowHighlight =
+  Platform.OS === 'ios' ? PlatformColor('systemGray4') : null;
 
 /** A pressable area with the platform's own press feedback. */
 const Touchable: React.FC<TouchableProps> = ({
@@ -49,7 +53,7 @@ const Touchable: React.FC<TouchableProps> = ({
         pressed &&
           (type === 'opacity'
             ? { opacity: 0.5 }
-            : { backgroundColor: highlight }),
+            : { backgroundColor: rowHighlight }),
       ]}
       {...props}
     />

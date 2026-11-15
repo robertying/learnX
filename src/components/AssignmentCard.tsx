@@ -1,29 +1,17 @@
 import { Assignment } from 'data/types/state';
-import { removeTags } from 'helpers/text';
-import { snippet } from 'helpers/search';
 import {
   deadlineText,
   deadlineTone,
   deadlineUrgency,
+  gradeLabel,
 } from 'helpers/assignments';
-import { getAssignmentGradeLevelDescription, t } from 'helpers/i18n';
+import { t } from 'helpers/i18n';
 import { useMinute } from 'hooks/useClock';
-import CardWrapper, { CardWrapperProps } from 'components/CardWrapper';
-import CardRow, { CardPill, cardAccessibilityLabel } from 'components/CardRow';
+import { CardPill } from './CardRow';
+import ContentCard, { cardPreview, type ContentCardProps } from './ContentCard';
 
-export interface AssignmentCardProps extends CardWrapperProps {
+export interface AssignmentCardProps extends ContentCardProps {
   data: Assignment;
-  hideCourseName?: boolean;
-  /**
-   * Marks an archived item with a glyph, in a list that shows archived items
-   * among the rest (a course's lists), where they can't be favorited.
-   */
-  markArchived?: boolean;
-  /**
-   * Search words: the title and preview emphasize them, and the preview
-   * starts near the first one when it's further in than the preview shows.
-   */
-  highlight?: readonly string[];
 }
 
 const AssignmentCard: React.FC<AssignmentCardProps> = ({
@@ -43,7 +31,6 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
     isLateSubmission,
   },
   hideCourseName,
-  markArchived,
   highlight,
   ...restProps
 }) => {
@@ -51,16 +38,10 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
   const dueText = deadlineText(deadline, now);
   const urgency = deadlineUrgency(deadline, now, submitted);
 
-  const gradeText = gradeLevel
-    ? getAssignmentGradeLevelDescription(gradeLevel)
-    : grade !== undefined
-      ? String(grade)
-      : t('graded');
+  const gradeText = gradeLabel({ grade, gradeLevel }) ?? t('graded');
   const submittedText = isLateSubmission ? t('submittedLate') : t('submitted');
   const statusText = graded ? gradeText : submitted ? submittedText : dueText;
   const overline = hideCourseName ? courseTeacherName : courseName;
-  const body = removeTags(description);
-  const preview = highlight ? snippet(body, highlight) : body;
   const hasAnswer = !!(answerContent || answerAttachment);
 
   const status = graded ? (
@@ -79,34 +60,18 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
     dueText
   );
 
-  const flags = [
-    attachment && 'attachment',
-    hasAnswer && 'answer',
-    restProps.fav && 'favorited',
-    markArchived && restProps.archived && 'archived',
-  ] as const;
-
   return (
-    <CardWrapper
+    <ContentCard
       {...restProps}
       testID="assignment-card"
-      accessibilityLabel={cardAccessibilityLabel({
-        title,
-        overline,
-        status: statusText,
-        flags,
-        preview,
-      })}
-    >
-      <CardRow
-        overline={overline}
-        title={title}
-        preview={preview}
-        highlight={highlight}
-        flags={flags}
-        trailing={status}
-      />
-    </CardWrapper>
+      overline={overline}
+      title={title}
+      preview={cardPreview(description, highlight)}
+      highlight={highlight}
+      flags={[attachment && 'attachment', hasAnswer && 'answer']}
+      trailing={status}
+      status={statusText}
+    />
   );
 };
 

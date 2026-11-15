@@ -9,9 +9,12 @@ import {
   labelStyle,
 } from '@expo/ui/swift-ui/modifiers';
 import BadgeDot from 'components/Badge';
-import { t } from 'helpers/i18n';
 import { systemIcons } from 'helpers/systemIcons';
-import { PADDING, type IconButtonProps } from './IconButton.shared';
+import {
+  PADDING,
+  spokenLabel,
+  type IconButtonProps,
+} from './IconButton.shared';
 import ThemedHost from 'components/ThemedHost';
 
 export type { IconButtonIcon, IconButtonProps } from './IconButton.shared';
@@ -35,16 +38,13 @@ const IconButton: React.FC<IconButtonProps> = ({
     mode === 'contained' ? 0 : MIN_TARGET,
   );
   const badgeInset = (buttonSize - size) / 2 - 2;
-  const label = badge
-    ? `${accessibilityLabel ?? ''}, ${t('a11yNewBadge')}`
-    : (accessibilityLabel ?? '');
 
   return (
     <View style={style}>
       <ThemedHost matchContents>
         <Button
           systemImage={systemIcons[icon].ios}
-          label={label}
+          label={spokenLabel({ accessibilityLabel, badge }) ?? ''}
           onPress={onPress}
           testID={testID}
           modifiers={[

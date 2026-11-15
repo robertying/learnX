@@ -1,6 +1,6 @@
 import { useLayoutEffect } from 'react';
 import dayjs from 'dayjs';
-import { itemRow } from 'components/ItemRow';
+import ItemRow from 'components/ItemRow';
 import {
   Form,
   FormLink,
@@ -196,27 +196,29 @@ const Today: React.FC<Props> = ({ navigation }) => {
             rather than beside it, so a busy day keeps what's due on screen.
             The whole week is a tap away in Schedule. */}
         <FormSection title={classesTitle} footer={note}>
-          {current &&
-            itemRow({
-              key: current.key,
-              overline: `${t('todayNow')} · ${t('todayEndsIn', {
+          {current && (
+            <ItemRow
+              key={current.key}
+              overline={`${t('todayNow')} · ${t('todayEndsIn', {
                 time: dayjs(now).to(current.end),
-              })}`,
-              title: current.courseName,
-              subtitle: classDetails(current),
-              progress: (now - current.start) / (current.end - current.start),
-              onPress: pressOf(current),
-            })}
-          {next &&
-            itemRow({
-              key: next.key,
-              overline: `${t('todayNext')} · ${t('todayStartsIn', {
+              })}`}
+              title={current.courseName}
+              subtitle={classDetails(current)}
+              progress={(now - current.start) / (current.end - current.start)}
+              onPress={pressOf(current)}
+            />
+          )}
+          {next && (
+            <ItemRow
+              key={next.key}
+              overline={`${t('todayNext')} · ${t('todayStartsIn', {
                 time: dayjs(now).to(next.start),
-              })}`,
-              title: next.courseName,
-              subtitle: classDetails(next),
-              onPress: pressOf(next),
-            })}
+              })}`}
+              title={next.courseName}
+              subtitle={classDetails(next)}
+              onPress={pressOf(next)}
+            />
+          )}
           <FormLink
             icon="calendar"
             title={t('schedule')}
