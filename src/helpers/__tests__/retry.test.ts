@@ -4,10 +4,6 @@ beforeEach(() => {
   jest.useFakeTimers();
 });
 
-afterEach(() => {
-  jest.useRealTimers();
-});
-
 describe('retry', () => {
   it('returns the first result that works', async () => {
     const fn = jest

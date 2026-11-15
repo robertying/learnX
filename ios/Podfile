@@ -39,11 +39,6 @@ target 'learnX' do
     hermes_enabled: true
   )
 
-  # Analytics without the advertising identifier (Firebase 12 dropped the
-  # WithoutAdIdSupport subspec; Core is the same set without IdentitySupport).
-  pod 'FirebaseAnalytics/Core'
-  pod 'FirebaseCrashlytics'
-
   # The app's own tests (learnXTests), hosted in the app.
   target 'learnXTests' do
     inherit! :search_paths
@@ -156,6 +151,16 @@ target 'learnX' do
       # never call React Native's CC wrapper, and with C_COMPILER_LAUNCHER
       # ccache can't cache explicitly built modules.
       config.build_settings['COMPILATION_CACHE_ENABLE_CACHING'] = 'YES' if config.name == 'Debug'
+    end
+
+    # A script phase that declares no outputs runs on every build anyway (such
+    # as CocoaPods' "Create Symlinks to Header Folders" and EXConstants'
+    # "Generate app.config"). Saying so stops Xcode warning about each one.
+    installer.pods_project.targets.each do |target|
+      target.shell_script_build_phases.each do |phase|
+        next unless phase.output_paths.to_a.empty? && phase.output_file_list_paths.to_a.empty?
+        phase.always_out_of_date = '1'
+      end
     end
 
     # React Native's prebuilt Mac Catalyst frameworks ship without the

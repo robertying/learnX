@@ -16,10 +16,6 @@ describe('buildICS', () => {
     jest.useFakeTimers({ now: new Date('2026-03-15T12:34:56.789Z') });
   });
 
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
   it('builds a calendar with a timed event', () => {
     expect(buildICS('Assignments', [event()])).toBe(
       [

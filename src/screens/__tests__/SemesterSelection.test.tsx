@@ -1,7 +1,9 @@
 import { refreshable } from '@expo/ui/swift-ui/modifiers';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { act, render, screen, userEvent } from '@testing-library/react-native';
+import { toast } from 'components/Toast';
 import { initialAuth, useAuthStore } from 'data/auth';
+import { login } from 'data/login';
 import { schoolSemesterQuery, semestersQuery } from 'data/queries';
 import { clearQueryCache, queryClient } from 'data/queryClient';
 import { dataSource } from 'data/source';
@@ -10,10 +12,13 @@ import {
   setCurrentSemester,
   useUserDataStore,
 } from 'data/userData';
+import { t } from 'helpers/i18n';
 import { getSemesterTextFromId } from 'helpers/semester';
 import SemesterSelection from 'screens/SemesterSelection';
 import { screenProps } from 'test-utils/screenProps';
 
+jest.mock('data/login', () => ({ login: jest.fn() }));
+jest.mock('components/Toast', () => ({ toast: jest.fn() }));
 jest.mock('data/source', () => ({
   dataSource: {
     getSemesterIdList: jest.fn(),
@@ -64,10 +69,11 @@ it("puts the school's latest semester first before it is listed", async () => {
   );
 });
 
-it('refreshes both lists only while logged in', async () => {
+it('refreshes both lists while logged in, and logs in again otherwise', async () => {
   await renderScreen();
   await refresh();
   expect(dataSource.getSemesterIdList).not.toHaveBeenCalled();
+  expect(login).toHaveBeenCalled();
 
   await act(() => useAuthStore.setState({ loggedIn: true }));
   jest
@@ -85,4 +91,17 @@ it('refreshes both lists only while logged in', async () => {
   expect(
     await screen.findByText(getSemesterTextFromId('2026-2027-1')),
   ).toBeTruthy();
+});
+
+it('says when the refresh fails', async () => {
+  await act(() => useAuthStore.setState({ loggedIn: true }));
+  jest
+    .mocked(dataSource.getSemesterIdList)
+    .mockRejectedValue(new Error('offline'));
+  jest
+    .mocked(dataSource.getCurrentSemester)
+    .mockRejectedValue(new Error('offline'));
+  await renderScreen();
+  await refresh();
+  expect(toast).toHaveBeenCalledWith(t('refreshFailed'), 'error');
 });

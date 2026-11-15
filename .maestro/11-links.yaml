@@ -1,0 +1,35 @@
+appId: ${APP_ID}
+name: Open items from links
+# Mock content only: the links point at mock items (checked by
+# scripts/__tests__/e2eLinks.test.ts).
+---
+# The learnx:// links that widget rows, notifications and Spotlight results
+# open (helpers/openTarget, hooks/useLinkTaps), on the Release build. Android
+# only for now: iOS may first ask "Open in “learnX”?", whose button Maestro
+# can only tap by position (subflows/open-on-inner.yaml does so on the closed
+# iPhone Duo), and that isn't set up for the other iOS devices yet.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - runFlow: subflows/login.yaml
+      - runFlow:
+          file: subflows/open-link.yaml
+          env:
+            LINK: 'learnx://notice/26ef84e76d60efc1016d000000000001'
+            ID: notice-detail
+      - runFlow:
+          file: subflows/open-link.yaml
+          env:
+            LINK: 'learnx://assignment/26ef84e76db3f55b016d000000000001'
+            ID: assignment-detail
+      - runFlow:
+          file: subflows/open-link.yaml
+          env:
+            LINK: 'learnx://file/2016310501_KJ_173100010b5f1dcc2-f77a-4cca-be0f-95808af85d82'
+            ID: file-detail
+      - runFlow:
+          file: subflows/open-link.yaml
+          env:
+            LINK: 'learnx://today'
+            ID: today

@@ -26,3 +26,9 @@ patchedDependencies:
   'react-native-webview@14.0.1': patches/react-native-webview@14.0.1.patch
   'whatwg-fetch@3.6.20': patches/whatwg-fetch@3.6.20.patch
   '@expo/ui@58.0.27': patches/@expo__ui@58.0.27.patch
+
+# Agent skills that packages ship. Agents here work from the repo's own
+# AGENTS.md files and .claude/skills, so none are taken from dependencies.
+permissions:
+  expo-sqlite:
+    skills: false

@@ -1,7 +1,8 @@
 // What the "Next Deadline" and "Next Class" App Intents read without starting
-// React Native (iOS and Mac). The native side is in modules/spotlight, which
-// saves them to UserDefaults; Spotlight indexing is separate (services/spotlight).
-import Spotlight from 'modules/spotlight';
+// React Native (iOS and Mac). The native side is modules/shortcuts, which saves
+// them to UserDefaults; Spotlight indexing is separate (services/spotlight).
+// A failed save throws: services/surfaces reports it and tries again.
+import Shortcuts from 'modules/shortcuts';
 import { Assignment } from 'data/types/state';
 import type { UpcomingClass } from 'helpers/upNext';
 import { upcomingDeadlines } from 'helpers/widgetDeadlines';
@@ -15,7 +16,7 @@ export function saveUpcomingDeadlines(
   assignments: Assignment[],
   { hiddenCourses, archived }: { hiddenCourses: string[]; archived: string[] },
 ) {
-  if (!Spotlight) {
+  if (!Shortcuts) {
     return;
   }
   const { deadlines } = upcomingDeadlines(assignments, {
@@ -27,19 +28,13 @@ export function saveUpcomingDeadlines(
   if (key === savedDeadlines) {
     return;
   }
-  try {
-    Spotlight.setUpcomingDeadlines(deadlines);
-    savedDeadlines = key;
-  } catch (error) {
-    if (__DEV__) {
-      console.warn('Failed to save upcoming deadlines', error);
-    }
-  }
+  Shortcuts.setUpcomingDeadlines(deadlines);
+  savedDeadlines = key;
 }
 
 /** Saves the classes still ahead for the "Next Class" App Intent. */
 export function saveUpcomingClasses(classes: UpcomingClass[]) {
-  if (!Spotlight) {
+  if (!Shortcuts) {
     return;
   }
   const items = classes.map(({ courseName, location, start, end }) => ({
@@ -52,14 +47,8 @@ export function saveUpcomingClasses(classes: UpcomingClass[]) {
   if (key === savedClasses) {
     return;
   }
-  try {
-    Spotlight.setUpcomingClasses(items);
-    savedClasses = key;
-  } catch (error) {
-    if (__DEV__) {
-      console.warn('Failed to save upcoming classes', error);
-    }
-  }
+  Shortcuts.setUpcomingClasses(items);
+  savedClasses = key;
 }
 
 /** Empties both App Intents, e.g. on logout. */

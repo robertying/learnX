@@ -39,6 +39,8 @@ final class SidebarView: ExpoView, UICollectionViewDelegate {
       content.image = UIImage(systemName: item.systemImage)
       cell.contentConfiguration = content
       cell.accessibilityIdentifier = item.testID.isEmpty ? nil : item.testID
+      // The dot is drawn only, so VoiceOver reads it as the row's value, as it does a tab bar's badge.
+      cell.accessibilityValue = item.badge && !item.badgeLabel.isEmpty ? item.badgeLabel : nil
 
       if item.badge {
         let (accessory, dot) = Self.badge()

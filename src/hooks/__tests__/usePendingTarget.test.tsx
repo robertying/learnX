@@ -31,7 +31,7 @@ it('opens a pending item of its type once', async () => {
   const open = jest.fn();
   setPendingTarget({ type: 'notice', id: 'n1' });
   const hook = await renderHook(() => usePendingTarget('notice', open));
-  expect(open.mock.calls).toEqual([['n1', false]]);
+  expect(open.mock.calls).toEqual([['n1']]);
   await hook.rerender({});
   expect(open).toHaveBeenCalledTimes(1);
 });
@@ -47,7 +47,7 @@ it('opens a tap that arrives while the list is shown', async () => {
   const open = jest.fn();
   await renderHook(() => usePendingTarget('assignment', open));
   await act(() => setPendingTarget({ type: 'assignment', id: 'a1' }));
-  expect(open.mock.calls).toEqual([['a1', false]]);
+  expect(open.mock.calls).toEqual([['a1']]);
 });
 
 it('waits for the detail pane of a split view', async () => {
@@ -66,7 +66,7 @@ it('waits for the detail pane of a split view', async () => {
 
   context = splitContext({ isReady: () => true });
   await hook.rerender({});
-  expect(open.mock.calls).toEqual([['n1', true]]);
+  expect(open.mock.calls).toEqual([['n1']]);
 });
 
 it('waits for a native split to be laid out, which may still collapse', async () => {
@@ -84,13 +84,13 @@ it('waits for a native split to be laid out, which may still collapse', async ()
   });
   expect(open).not.toHaveBeenCalled();
 
-  // Collapsed, as on an iPhone: pushed on the list.
+  // Collapsed, as on an iPhone: opened on the list.
   context = splitContext(null, { showDetail: false });
   await hook.rerender({});
-  expect(open.mock.calls).toEqual([['n1', false]]);
+  expect(open.mock.calls).toEqual([['n1']]);
 });
 
-it('opens in the detail pane of an expanded split, whatever the device', async () => {
+it('opens at once in an expanded split, whatever the device', async () => {
   const open = jest.fn();
   const context = splitContext({ isReady: () => true });
   const wrapper = ({ children }: React.PropsWithChildren) => (
@@ -100,5 +100,5 @@ it('opens in the detail pane of an expanded split, whatever the device', async (
   );
   setPendingTarget({ type: 'file', id: 'f1' });
   await renderHook(() => usePendingTarget('file', open), { wrapper });
-  expect(open.mock.calls).toEqual([['f1', true]]);
+  expect(open.mock.calls).toEqual([['f1']]);
 });

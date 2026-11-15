@@ -11,10 +11,14 @@ public final class MenusModule: Module {
     OnStopObserving(nil, stopObserving)
 
     View(ContextMenuView.self) {
-      Events("onAction")
+      Events("onAction", "onPrimaryAction")
 
       Prop("actions") { (view: ContextMenuView, actions: [ContextMenuAction]) in
         view.setActions(actions)
+      }
+
+      Prop("keyboardFocusable") { (view: ContextMenuView, focusable: Bool) in
+        view.keyboardFocusable = focusable
       }
     }
   }

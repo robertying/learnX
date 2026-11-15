@@ -14,7 +14,6 @@ import {
   exportCalendars,
   syncAssignments,
   syncCourseSchedule,
-  upcomingAssignments,
 } from 'services/calendar/actions';
 import {
   exportSyncedCalendarsToICS,
@@ -119,6 +118,13 @@ describe('error toasts', () => {
       type: 'error',
     });
   });
+
+  it('says what was thrown when it is not an Error', () => {
+    expect(assignmentSyncErrorToast('Boom')).toEqual({
+      text: t('assignmentSyncFailed', { error: 'Boom' }),
+      type: 'error',
+    });
+  });
 });
 
 describe('syncCourseSchedule', () => {
@@ -191,19 +197,6 @@ describe('syncCourseSchedule', () => {
       text: t('courseScheduleSyncNoCalendarPermission'),
       type: 'error',
     });
-  });
-});
-
-describe('upcomingAssignments', () => {
-  it('keeps assignments due after now', () => {
-    const now = dayjs('2026-03-15T12:00:00Z');
-    const assignments = [
-      { id: 'past', deadline: '2026-03-15T11:59:00Z' },
-      { id: 'due', deadline: '2026-03-15T12:01:00Z' },
-    ] as Assignment[];
-    expect(upcomingAssignments(assignments, now).map(a => a.id)).toEqual([
-      'due',
-    ]);
   });
 });
 

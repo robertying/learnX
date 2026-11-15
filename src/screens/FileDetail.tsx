@@ -1,5 +1,4 @@
-import { displayFileSize } from 'helpers/filename';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Linking, Platform, StyleSheet, View, ViewProps } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import WebView from 'react-native-webview';
@@ -13,6 +12,7 @@ import {
   needWhiteBackground,
 } from 'helpers/filePreview';
 import { t } from 'helpers/i18n';
+import { displayFileSize } from 'helpers/filename';
 import Spinner from 'components/Spinner';
 import SafeArea from 'components/SafeArea';
 import { FileDetailParamList } from 'navigation/types';
@@ -88,17 +88,14 @@ const FileDetailContent: React.FC<{
 
   const handlePreviewError = () => setPreviewFailed(true);
 
-  // Handed to the header from an effect, so it keeps its identity.
-  const handleRedownload = useCallback(() => {
+  const handleRedownload = () => {
     setPreviewFailed(false);
     redownload();
-  }, [redownload]);
+  };
 
   const canRender = !!path && canPreviewInline(file.fileType);
 
-  const handleShowInfo = useCallback(() => {
-    setShowInfo(shown => !shown);
-  }, []);
+  const handleShowInfo = () => setShowInfo(shown => !shown);
 
   useFileDetailHeader({
     navigation,

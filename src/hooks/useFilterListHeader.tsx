@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
+import { useLayoutEffect } from 'react';
 import type {
   NativeStackHeaderItem,
   NativeStackNavigationProp,
 } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
 import FilterMenu from 'components/FilterMenu';
+import OverflowMenu from 'components/OverflowMenu';
 import { getTitleOptions } from 'navigation/options';
 import DeviceInfo from 'constants/DeviceInfo';
 import {
@@ -17,6 +18,7 @@ import { t } from 'helpers/i18n';
 import { systemIcons } from 'helpers/systemIcons';
 import { headerButtons, type HeaderButton } from 'navigation/headerButtons';
 import { RootStackParams } from 'navigation/types';
+import useLatest from 'hooks/useLatest';
 
 const TITLES = {
   notice: 'notices',
@@ -25,7 +27,19 @@ const TITLES = {
   course: 'courses',
 } as const;
 
-export interface FilterListHeaderOptions {
+/** What the header's buttons do: the screen's handlers. */
+export interface FilterListHeaderHandlers {
+  onRefresh?: () => void;
+  onFilterSelect: (selected: FilterSelection) => void;
+  onReorder: () => void;
+  onSelect: () => void;
+  onCheckAll: () => void;
+  /** Archives (or restores, in the archived filter) the checked items */
+  onArchiveSelected: () => void;
+  onCourseX: () => void;
+}
+
+export interface FilterListHeaderOptions extends FilterListHeaderHandlers {
   navigation: Pick<NativeStackNavigationProp<ParamListBase>, 'setOptions'> &
     Pick<NativeStackNavigationProp<RootStackParams>, 'navigate'>;
   type: keyof typeof TITLES;
@@ -35,16 +49,8 @@ export interface FilterListHeaderOptions {
   selectionMode: boolean;
   selectedCount: number;
   refreshing: boolean;
-  onRefresh?: () => void;
   /** The choices in the filter menu */
   filterOptions: FilterOption[];
-  onFilterSelect: (selected: FilterSelection) => void;
-  onReorder: () => void;
-  onSelect: () => void;
-  onCheckAll: () => void;
-  /** Archives (or restores, in the archived filter) the checked items */
-  onArchiveSelected: () => void;
-  onCourseX: () => void;
 }
 
 /**
@@ -61,18 +67,24 @@ const useFilterListHeader = ({
   selectionMode,
   selectedCount,
   refreshing,
-  onRefresh,
   filterOptions,
-  onFilterSelect,
-  onReorder,
-  onSelect,
-  onCheckAll,
-  onArchiveSelected,
-  onCourseX,
+  ...handlers
 }: FilterListHeaderOptions) => {
+  // The header is set again only when what it shows changes; its buttons
+  // call the screen's current handlers.
+  const latest = useLatest(handlers);
   const isCourse = type === 'course';
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    const {
+      onRefresh,
+      onFilterSelect,
+      onReorder,
+      onSelect,
+      onCheckAll,
+      onArchiveSelected,
+      onCourseX,
+    } = bind(latest);
     const reorder: HeaderButton = {
       id: 'reorder',
       label: t('reorder'),
@@ -163,25 +175,28 @@ const useFilterListHeader = ({
       onPress: onCourseX,
     };
 
+    const moreActions = [reorder, courseX];
+
     navigation.setOptions({
       ...headerButtons(
         'left',
         isCourse
           ? [
-              { ...reorder, nativeItem: false },
               filter,
-              { ...courseX, nativeItem: false },
-              // A third native button leaves the title no room beside a
-              // sidebar of the default width, so the rest go in a menu.
+              // Beside a third button the title has no room: next to a
+              // sidebar of the default width (iOS and Mac), or at a large
+              // font scale in a narrow pane (Android). So the less used
+              // actions go in a menu: a native More menu, or Material's
+              // overflow menu.
               {
                 id: 'more',
                 item: {
                   type: 'menu',
                   identifier: 'more',
                   label: t('more'),
-                  icon: { type: 'sfSymbol', name: 'ellipsis.circle' },
+                  icon: { type: 'sfSymbol', name: systemIcons.more.ios },
                   menu: {
-                    items: [reorder, courseX].map(button => ({
+                    items: moreActions.map(button => ({
                       type: 'action',
                       label: button.label,
                       icon: {
@@ -192,6 +207,13 @@ const useFilterListHeader = ({
                     })),
                   },
                 },
+                element: (
+                  <OverflowMenu
+                    label={t('more')}
+                    items={moreActions}
+                    testID="more"
+                  />
+                ),
               },
             ]
           : [select, filter],
@@ -205,7 +227,7 @@ const useFilterListHeader = ({
             ? 'arrow.trianglehead.2.clockwise.rotate.90'
             : undefined,
           disabled: refreshing,
-          onPress: () => onRefresh?.(),
+          onPress: onRefresh,
         },
         {
           id: 'search',
@@ -224,14 +246,8 @@ const useFilterListHeader = ({
     filterOptions,
     filterSelected,
     isCourse,
+    latest,
     navigation,
-    onArchiveSelected,
-    onCheckAll,
-    onCourseX,
-    onFilterSelect,
-    onRefresh,
-    onReorder,
-    onSelect,
     refreshing,
     reorderMode,
     selectedCount,
@@ -239,5 +255,18 @@ const useFilterListHeader = ({
     type,
   ]);
 };
+
+/** Handlers that call the screen's latest ones when pressed. */
+const bind = (latest: {
+  current: FilterListHeaderHandlers;
+}): Required<FilterListHeaderHandlers> => ({
+  onRefresh: () => latest.current.onRefresh?.(),
+  onFilterSelect: selected => latest.current.onFilterSelect(selected),
+  onReorder: () => latest.current.onReorder(),
+  onSelect: () => latest.current.onSelect(),
+  onCheckAll: () => latest.current.onCheckAll(),
+  onArchiveSelected: () => latest.current.onArchiveSelected(),
+  onCourseX: () => latest.current.onCourseX(),
+});
 
 export default useFilterListHeader;

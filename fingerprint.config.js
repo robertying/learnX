@@ -6,6 +6,18 @@
 // Expo.plist's update settings are written by every build anyway.
 /** @type {import('@expo/fingerprint').Config} */
 module.exports = {
+  // The persisted stores' versions count as native: a store without a
+  // `migrate` that finds a newer version than its code knows starts from its
+  // defaults, and expo-updates can go back to an older bundle (a rollback, or
+  // after an update that crashed at launch). Bumping one so needs a new
+  // runtime version, and no bundle of the same build reads the newer shape.
+  extraSources: [
+    {
+      type: 'file',
+      filePath: 'src/data/storeVersions.json',
+      reasons: ['persistedStoreVersions'],
+    },
+  ],
   sourceSkips: [
     'PackageJsonAndroidAndIosScriptsIfNotContainRun',
     'EasJson',

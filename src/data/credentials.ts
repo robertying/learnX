@@ -65,10 +65,7 @@ const isCredentials = (value: unknown): value is Credentials => {
   );
 };
 
-const parse = (raw: string | null): Credentials | null => {
-  if (!raw) {
-    return null;
-  }
+const parse = (raw: string): Credentials | null => {
   try {
     const value: unknown = JSON.parse(raw);
     return isCredentials(value) ? value : null;

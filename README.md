@@ -9,9 +9,9 @@
 App for Tsinghua University Web Learning, developed with React Native. ⚛️
 
 <a href="https://github.com/robertying/learnX/releases" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/github/v/release/robertying/learnX?color=brightgreen" alt="GitHub release (latest SemVer)" height="20" width="auto"></a>
-<a href="https://apps.apple.com/cn/app/learnx/id1459073115#?platform=iphone" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/platform-ios-blue" alt="Platform iOS" height="20" width="auto"></a>
-<a href="https://apps.apple.com/cn/app/learnx/id1459073115#?platform=ipad" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/platform-ipados-blue" alt="Platform iPadOS" height="20" width="auto"></a>
-<a href="https://apps.apple.com/cn/app/learnx/id1459073115#?platform=mac" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/platform-macos-blue" alt="Platform macOS" height="20" width="auto"></a>
+<a href="https://apps.apple.com/cn/app/learnx-thu-web-learning/id1459073115?platform=iphone" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/platform-ios-blue" alt="Platform iOS" height="20" width="auto"></a>
+<a href="https://apps.apple.com/cn/app/learnx-thu-web-learning/id1459073115?platform=ipad" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/platform-ipados-blue" alt="Platform iPadOS" height="20" width="auto"></a>
+<a href="https://apps.apple.com/cn/app/learnx-thu-web-learning/id1459073115?platform=mac" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/platform-macos-blue" alt="Platform macOS" height="20" width="auto"></a>
 <a href="https://play.google.com/store/apps/details?id=io.robertying.learnx" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/platform-android-red" alt="Platform Android" height="20" width="auto"></a>
 
 <div align="center">

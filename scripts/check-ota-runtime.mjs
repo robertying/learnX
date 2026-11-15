@@ -79,8 +79,10 @@ const changedSources = (recorded = {}, current = {}) =>
   );
 
 /**
- * What to tell the developer, or null when the record matches. `released`:
- * whether the recorded runtime version has shipped.
+ * What to tell the developer, or null when the record matches. `released`
+ * says whether the recorded runtime version has shipped; it asks origin, so
+ * it's only called when native code changed (the check works offline
+ * otherwise).
  */
 export const verdict = (recorded, current, released) => {
   const nativeChanged =
@@ -98,7 +100,7 @@ export const verdict = (recorded, current, released) => {
   }
   const record = `Record it in ota-fingerprint.json:\n${JSON.stringify(current, null, 2)}`;
   if (nativeChanged && !runtimeChanged) {
-    if (!released) {
+    if (!released()) {
       return `Native code changed (${changes}) before ${current.runtimeVersion} shipped, so the runtime version can stay. ${record}`;
     }
     return `Native code changed (${changes}) but the over-the-air runtime version is still ${current.runtimeVersion}, which has shipped: set runtimeVersion in app.json to the app version of the release this goes in ("Over-the-air updates" in AGENTS.md). ${record}`;
@@ -139,9 +141,7 @@ const main = () => {
     return;
   }
   const recorded = JSON.parse(readFileSync(recordPath, 'utf8'));
-  const message = verdict(
-    recorded,
-    current,
+  const message = verdict(recorded, current, () =>
     isReleased(recorded.runtimeVersion),
   );
   if (message) {

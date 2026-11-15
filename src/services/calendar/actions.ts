@@ -1,6 +1,6 @@
 // The Calendar & Reminders settings actions, as plain async functions that
 // resolve to the toast to show. hooks/useCalendarSync adds loading state.
-import dayjs, { Dayjs } from 'dayjs';
+import type { Dayjs } from 'dayjs';
 import type { ToastType } from 'components/Toast';
 import { ensureSession } from 'data/source';
 import { fetchCalendarRange } from 'data/schedule';
@@ -24,7 +24,8 @@ export interface ToastMessage {
   type: ToastType;
 }
 
-const messageOf = (err: unknown) => (err as Error).message;
+const messageOf = (err: unknown) =>
+  err instanceof Error ? err.message : String(err);
 
 /** Android has no "full access" to calendars and needs no restart once allowed. */
 const noCalendarPermission = (
@@ -151,12 +152,6 @@ export const allowCourseCalendarSync = async (): Promise<
     return courseSyncErrorToast(err);
   }
 };
-
-/** Assignments whose deadline is still ahead */
-export const upcomingAssignments = (
-  assignments: Assignment[],
-  now: Dayjs = dayjs(),
-) => assignments.filter(assignment => dayjs(assignment.deadline).isAfter(now));
 
 /**
  * Writes assignments to the calendar or reminders and deletes the entries of

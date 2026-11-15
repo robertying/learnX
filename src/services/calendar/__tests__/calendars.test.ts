@@ -10,7 +10,6 @@ import {
   assignmentEntriesMissing,
   exportSyncedCalendarsToICS,
   getAssignmentCalendar,
-  getAssignmentReminder,
   getCourseCalendar,
   removeCalendars,
   saveAssignmentsToReminderOrCalendar,
@@ -132,7 +131,7 @@ describe('synced calendars', () => {
       { id: 'x', title: 'Local', source: local },
     ]);
 
-    await expect(getAssignmentCalendar()).resolves.toMatchObject({
+    await expect(getAssignmentCalendar('calendar')).resolves.toMatchObject({
       id: 'created',
     });
     expect(mocked.getCalendars).toHaveBeenCalledWith('event');
@@ -168,7 +167,7 @@ describe('synced calendars', () => {
         : [],
     );
 
-    await expect(getAssignmentReminder()).resolves.toMatchObject({
+    await expect(getAssignmentCalendar('reminder')).resolves.toMatchObject({
       id: 'created',
     });
     expect(mocked.createCalendar).toHaveBeenCalledWith(

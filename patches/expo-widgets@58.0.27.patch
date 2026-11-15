@@ -1,5 +1,5 @@
 diff --git a/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt b/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt
-index 3df9e4a4d92155a00d3f5652d17d20be10bef1c1..b2257d0c76ede0d358b51163c75de9d794f4ba48 100644
+index 3df9e4a4d92155a00d3f5652d17d20be10bef1c1..932b58e3f3f30e5924d6dbde2fcd6af32ce4737a 100644
 --- a/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt
 +++ b/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt
 @@ -4,6 +4,8 @@ package expo.modules.widgets
@@ -19,7 +19,7 @@ index 3df9e4a4d92155a00d3f5652d17d20be10bef1c1..b2257d0c76ede0d358b51163c75de9d7
  import androidx.glance.appwidget.CheckboxDefaults
  import androidx.glance.appwidget.cornerRadius
  import androidx.glance.appwidget.EmittableCheckBox
-@@ -419,6 +422,12 @@ private fun ModifierType.toPeekModifier(converterContext: ConverterContext): Gla
+@@ -419,6 +422,17 @@ private fun ModifierType.toPeekModifier(converterContext: ConverterContext): Gla
      "background" -> asRecord<BackgroundParams>(converterContext)?.color?.toGlanceColorProvider()
        ?.let { GlanceModifier.background(it) }
      "cornerRadius" -> asRecord<CornerRadiusParams>(converterContext)?.let { GlanceModifier.cornerRadius(it.radius.dp) }
@@ -28,6 +28,11 @@ index 3df9e4a4d92155a00d3f5652d17d20be10bef1c1..b2257d0c76ede0d358b51163c75de9d7
 +      val context = converterContext.applicationContext
 +      val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).setPackage(context.packageName)
 +      GlanceModifier.clickable(actionStartActivity(intent))
++    }
++    // learnX: `{ $type: 'contentDescription', text }` is what TalkBack reads for the view instead of its texts, e.g.
++    // a widget row as one sentence.
++    "contentDescription" -> this["text"]?.asString()?.let { text ->
++      GlanceModifier.semantics { contentDescription = text }
 +    }
      // Unsupported Expo UI modifiers are ignored until they have exact Glance semantics.
      else -> null
@@ -213,10 +218,21 @@ index 3e6ff0b55c0b6d57ddeb1ba6605536adae2ca62d..0ac8618fa3c6959af86526cd17cc77f2
  }
 +#endif
 diff --git a/ios/Widgets/Utils.swift b/ios/Widgets/Utils.swift
-index 76b2199c2d3f879463fed5d2bd49038b0428a2e7..bffd6ee91e52c246d59fd9c979cd09eee63a2d97 100644
+index 76b2199c2d3f879463fed5d2bd49038b0428a2e7..641c3aae3c87ada71b148c130eb3ad52cd6e37dd 100644
 --- a/ios/Widgets/Utils.swift
 +++ b/ios/Widgets/Utils.swift
-@@ -117,6 +117,7 @@ public func getWidgetEnvironment(environment: EnvironmentValues) -> [String: Any
+@@ -100,7 +100,9 @@ public func getWidgetEnvironment(environment: EnvironmentValues) -> [String: Any
+     "colorScheme": "\(environment.colorScheme)",
+     "isLuminanceReduced": environment.isLuminanceReduced,
+     "widgetRenderingMode": environment.widgetRenderingMode.description,
+-    "showsWidgetLabel": environment.showsWidgetLabel
++    "showsWidgetLabel": environment.showsWidgetLabel,
++    // The language the extension runs in (the system's), for text a layout shows before the app sends its own.
++    "locale": environment.locale.identifier
+   ]
+ 
+   if #available(iOS 17.0, *) {
+@@ -117,6 +119,7 @@ public func getWidgetEnvironment(environment: EnvironmentValues) -> [String: Any
    return env
  }
  
@@ -224,7 +240,7 @@ index 76b2199c2d3f879463fed5d2bd49038b0428a2e7..bffd6ee91e52c246d59fd9c979cd09ee
  func getLiveActivityEnvironment(for environment: EnvironmentValues, in context: ActivityViewContext<LiveActivityAttributes>) -> [String: Any] {
    var env: [String: Any] = [
      "colorScheme": "\(environment.colorScheme)",
-@@ -134,3 +135,4 @@ func getLiveActivityEnvironment(for environment: EnvironmentValues, in context:
+@@ -134,3 +137,4 @@ func getLiveActivityEnvironment(for environment: EnvironmentValues, in context:
    }
    return env
  }

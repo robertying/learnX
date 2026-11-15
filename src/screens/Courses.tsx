@@ -1,4 +1,3 @@
-import { StackActions } from '@react-navigation/native';
 import CourseCard from 'components/CourseCard';
 import FilterList from 'components/FilterList';
 import SafeArea from 'components/SafeArea';
@@ -60,11 +59,7 @@ const Courses: React.FC<Props> = ({ navigation }) => {
 
   const handlePush = (item: Course) => show('CourseDetail', { id: item.id });
   // A class event's learnx://course link.
-  usePendingTarget('course', (id, inDetail) =>
-    inDetail
-      ? show('CourseDetail', { id })
-      : navigation.dispatch(StackActions.push('CourseDetail', { id })),
-  );
+  usePendingTarget('course', id => show('CourseDetail', { id }));
 
   return (
     <SafeArea>

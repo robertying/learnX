@@ -27,10 +27,6 @@ describe('updateDeadlineWidget', () => {
     jest.useFakeTimers({ now: new Date('2026-03-15T12:00:00Z') });
   });
 
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
   it('gives iOS an entry now and one as each deadline changes color or passes', () => {
     jest.replaceProperty(Platform, 'OS', 'ios');
     updateDeadlineWidget(assignments, options);
@@ -118,7 +114,6 @@ describe('updateUpNextWidget', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
     // Clears what was last sent, so each test sends.
     updateUpNextWidget();
   });
@@ -194,7 +189,6 @@ describe('a widget that is missing or fails', () => {
     jest.useFakeTimers({ now: new Date('2026-03-15T12:00:00Z') });
   });
   afterEach(() => {
-    jest.useRealTimers();
     jest.restoreAllMocks();
     updateUpNextWidget();
   });
@@ -209,13 +203,14 @@ describe('a widget that is missing or fails', () => {
     }
   });
 
-  it("doesn't break the caller, and sends again next time", () => {
+  it('throws for the caller to report, and sends again next time', () => {
     jest.replaceProperty(Platform, 'OS', 'android');
-    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
     jest.mocked(androidWidget.updateSnapshot).mockImplementationOnce(() => {
       throw new Error('no widget host');
     });
-    expect(() => updateDeadlineWidget(assignments, options)).not.toThrow();
+    expect(() => updateDeadlineWidget(assignments, options)).toThrow(
+      'no widget host',
+    );
 
     jest.mocked(androidUpNext.updateSnapshot).mockImplementationOnce(() => {
       throw new Error('no widget host');
@@ -223,9 +218,8 @@ describe('a widget that is missing or fails', () => {
     const classes = [
       { key: 'a', courseName: 'A', location: '', start: 1, end: 2 },
     ];
-    expect(() => updateUpNextWidget(classes)).not.toThrow();
+    expect(() => updateUpNextWidget(classes)).toThrow('no widget host');
     updateUpNextWidget(classes);
     expect(androidUpNext.updateSnapshot).toHaveBeenCalledTimes(2);
-    expect(warn).toHaveBeenCalledTimes(2);
   });
 });

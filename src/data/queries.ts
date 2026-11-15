@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { queryOptions, useQuery } from '@tanstack/react-query';
 import { Language } from '@robertying/thu-learn-lib';
 import { queryClient } from 'data/queryClient';
@@ -99,9 +100,9 @@ export const useCourses = () => {
 };
 
 /**
- * Ids of the semester's courses, sorted. A new array only when the set changes:
- * the React Compiler memoizes the split on the joined key, so effects can
- * depend on it.
+ * Ids of the semester's courses, sorted. A new array only when the set
+ * changes, so effects can depend on it (memoized on purpose: the compiler's
+ * memoization isn't a guarantee).
  */
 export const useCourseIds = () => {
   const { courses } = useCourses();
@@ -109,7 +110,7 @@ export const useCourseIds = () => {
     .map(course => course.id)
     .sort()
     .join(',');
-  return key ? key.split(',') : [];
+  return useMemo(() => (key ? key.split(',') : []), [key]);
 };
 
 export const useCourse = (courseId: string) =>

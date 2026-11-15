@@ -1,13 +1,17 @@
 import { HStack, Link, Spacer, Text, VStack } from '@expo/ui/swift-ui';
 import {
+  accessibilityElement,
+  accessibilityLabel,
   font,
   foregroundStyle,
   layoutPriority,
   lineLimit,
   widgetURL,
 } from '@expo/ui/swift-ui/modifiers';
-import { createWidget, type WidgetEnvironment } from 'expo-widgets';
-import { withWidgetKit, type WidgetKit } from 'widgets/kit';
+import { createWidget } from 'expo-widgets';
+// Relative, not `widgets/kit`: the build's layout registry bundle turns every
+// bare import but expo-widgets into an empty module, and runs withWidgetKit.
+import { withWidgetKit, type KitEnvironment, type WidgetKit } from './kit';
 import type { DeadlineWidgetProps } from 'widgets/props';
 
 /**
@@ -24,15 +28,18 @@ import type { DeadlineWidgetProps } from 'widgets/props';
  */
 function DeadlinesWidget(
   props: DeadlineWidgetProps,
-  environment: WidgetEnvironment,
+  environment: KitEnvironment,
   kit: WidgetKit,
 ) {
   'widget';
   const family = environment.widgetFamily ?? 'systemMedium';
   const accent = kit.accent(environment);
+  const firstRun = kit.firstRun(environment.locale);
+  const title = props.title || firstRun.deadlines;
+  const empty = props.empty || firstRun.noDeadlines;
   const deadlines = props.deadlines ?? [];
   const now = (environment.date ?? new Date()).getTime();
-  // Props sent before widget rows had links have no URLs.
+  // No link until the app has sent its first props.
   const openUrl = (url: string | undefined) => (url ? [widgetURL(url)] : []);
 
   if (family === 'accessoryRectangular') {
@@ -45,10 +52,11 @@ function DeadlinesWidget(
           kit.background,
           ...kit.language(props.locale),
           ...openUrl(next?.url ?? props.url),
+          accessibilityElement('combine'),
         ]}
       >
         <Text modifiers={[font({ textStyle: 'headline' }), lineLimit(1)]}>
-          {next ? next.title : props.empty}
+          {next ? next.title : empty}
         </Text>
         {next ? (
           <Text modifiers={[lineLimit(1)]}>{next.courseName}</Text>
@@ -71,7 +79,7 @@ function DeadlinesWidget(
 
   const header = (more: number) => (
     <HStack key="header">
-      {kit.label(props.title, accent)}
+      {kit.label(title, accent)}
       <Spacer />
       {more > 0 ? (
         <Text modifiers={[font({ textStyle: 'caption2' }), kit.secondary]}>
@@ -84,7 +92,7 @@ function DeadlinesWidget(
   if (deadlines.length === 0) {
     return kit.empty({
       header: header(0),
-      text: props.empty,
+      text: empty,
       modifiers: [
         kit.background,
         ...kit.language(props.locale),
@@ -101,7 +109,13 @@ function DeadlinesWidget(
   ];
   const row = (item: (typeof deadlines)[number]) => {
     const content = (
-      <VStack key={item.id} alignment="leading" spacing={large ? 2 : 1}>
+      <VStack
+        key={item.id}
+        alignment="leading"
+        spacing={large ? 2 : 1}
+        // VoiceOver reads a row as one element: title, time left, course.
+        modifiers={[accessibilityElement('combine')]}
+      >
         <Text modifiers={[...titleFont, lineLimit(1)]}>{item.title}</Text>
         {small ? (
           // Too narrow for the full countdown and the course: the time left in
@@ -122,6 +136,7 @@ function DeadlinesWidget(
                 font({ textStyle: 'caption' }),
                 kit.secondary,
                 lineLimit(1),
+                accessibilityLabel(item.courseName),
               ]}
             >
               {` · ${item.courseName}`}
@@ -150,7 +165,7 @@ function DeadlinesWidget(
       </VStack>
     );
     // A small widget can't have links; its widgetURL opens the list.
-    return small || !item.url ? (
+    return small ? (
       content
     ) : (
       <Link
@@ -187,7 +202,17 @@ function DeadlinesWidget(
   });
 }
 
+/** What the widget shows until the app sends its first timeline. */
+const initialProps: DeadlineWidgetProps = {
+  deadlines: [],
+  total: 0,
+  title: '',
+  empty: '',
+  url: '',
+};
+
 export default createWidget<DeadlineWidgetProps>(
   'Deadlines',
   withWidgetKit(DeadlinesWidget),
+  initialProps,
 );

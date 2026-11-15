@@ -4,12 +4,15 @@ import UIKit
 
 @testable import Sidebar
 
-func sidebarItem(_ key: String, title: String? = nil, badge: Bool = false, testID: String = "") -> SidebarItem {
+func sidebarItem(
+  _ key: String, title: String? = nil, badge: Bool = false, badgeLabel: String = "", testID: String = ""
+) -> SidebarItem {
   var item = SidebarItem()
   item.key = key
   item.title = title ?? key.capitalized
   item.systemImage = "tray"
   item.badge = badge
+  item.badgeLabel = badgeLabel
   item.testID = testID
   return item
 }
@@ -70,6 +73,7 @@ extension SidebarView {
   @Test func comparesItems() {
     #expect(sidebarItem("a") == sidebarItem("a"))
     #expect(sidebarItem("a") != sidebarItem("a", badge: true))
+    #expect(sidebarItem("a", badge: true) != sidebarItem("a", badge: true, badgeLabel: "New"))
     #expect(sidebarItem("a") != sidebarItem("a", title: "Other"))
     #expect(sidebarItem("a") != sidebarItem("b"))
     #expect(sidebarItem("a") != sidebarItem("a", testID: "tab-a"))
@@ -78,7 +82,9 @@ extension SidebarView {
   @Test func showsTheItems() throws {
     let (view, window) = makeSidebar()
     defer { window.isHidden = true }
-    view.setItems([sidebarItem("today", testID: "tab-today"), sidebarItem("notices", badge: true)])
+    view.setItems([
+      sidebarItem("today", testID: "tab-today"), sidebarItem("notices", badge: true, badgeLabel: "New"),
+    ])
 
     let today = try #require(view.cell(0))
     let content = try #require(today.contentConfiguration as? UIListContentConfiguration)
@@ -86,21 +92,25 @@ extension SidebarView {
     #expect(content.image != nil)
     #expect(today.accessories.isEmpty)
     #expect(today.accessibilityIdentifier == "tab-today")
+    #expect(today.accessibilityValue == nil)
 
     let notices = try #require(view.cell(1))
     #expect(notices.accessories.count == 1)
     #expect(notices.accessibilityIdentifier == nil)
+    // VoiceOver reads the dot as the row's value.
+    #expect(notices.accessibilityValue == "New")
   }
 
   @Test func updatesChangedItems() throws {
     let (view, window) = makeSidebar()
     defer { window.isHidden = true }
-    view.setItems([sidebarItem("notices", badge: true), sidebarItem("files")])
+    view.setItems([sidebarItem("notices", badge: true, badgeLabel: "New"), sidebarItem("files")])
     _ = view.cell(0)
 
     view.setItems([sidebarItem("notices"), sidebarItem("files"), sidebarItem("courses")])
 
     #expect(try #require(view.cell(0)).accessories.isEmpty)
+    #expect(try #require(view.cell(0)).accessibilityValue == nil)
     #expect(view.list.numberOfItems(inSection: 0) == 3)
   }
 
