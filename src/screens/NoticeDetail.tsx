@@ -1,10 +1,10 @@
-import { displayFileSize } from 'helpers/filename';
 import { useEffect } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import dayjs from 'dayjs';
 import FormWebView from 'components/FormWebView';
 import { NoticeDetailParamList } from 'navigation/types';
 import { t } from 'helpers/i18n';
+import { displayFileSize } from 'helpers/filename';
 import { attachmentFile } from 'helpers/attachments';
 import { Notice } from 'data/types/state';
 import { useNotice } from 'data/content';
@@ -52,14 +52,6 @@ const NoticeDetailContent: React.FC<{
     attachment,
   } = notice;
 
-  const handleFileOpen = () => {
-    if (attachment) {
-      navigation.push('FileDetail', {
-        attachment: attachmentFile(notice, attachment),
-      });
-    }
-  };
-
   // Opening the notice's page marks it read on the server (now, or once the
   // app is back online); the cached list shows it right away.
   useEffect(() => {
@@ -93,7 +85,11 @@ const NoticeDetailContent: React.FC<{
               title={attachment.name}
               detail={displayFileSize(attachment.size)}
               icon="file"
-              onPress={handleFileOpen}
+              onPress={() =>
+                navigation.push('FileDetail', {
+                  attachment: attachmentFile(notice, attachment),
+                })
+              }
             />
           </FormSection>
         ) : null}

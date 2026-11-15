@@ -1,8 +1,7 @@
 import dayjs from 'dayjs';
-import { Alert } from 'react-native';
+import { Alert, Keyboard } from 'react-native';
 import { act, render, screen, userEvent } from '@testing-library/react-native';
 import { showChoices } from 'components/choiceSheet';
-import { toast } from 'components/Toast';
 import { mockAssignments } from 'data/mock';
 import { saveSubmissionDraft } from 'data/submissionDrafts';
 import type { Assignment } from 'data/types/state';
@@ -15,7 +14,6 @@ import useSaveSubmissionDraft from 'hooks/useSaveSubmissionDraft';
 import AssignmentSubmission from 'screens/AssignmentSubmission';
 import { screenProps } from 'test-utils/screenProps';
 
-jest.mock('components/Toast', () => ({ toast: jest.fn() }));
 jest.mock('components/choiceSheet', () => ({ showChoices: jest.fn() }));
 let mockAssignment: Assignment | undefined;
 jest.mock('data/content', () => ({ useAssignment: () => mockAssignment }));
@@ -28,8 +26,6 @@ jest.mock('hooks/useSaveSubmissionDraft', () => jest.fn());
 const picker = {
   picked: null as null | { uri: string; type: string; name: string },
   isShared: false,
-  openMenu: jest.fn(),
-  closeMenu: jest.fn(),
   pickDocument: jest.fn(),
   pickPhoto: jest.fn(),
   removePicked: jest.fn(),
@@ -37,8 +33,6 @@ const picker = {
 const stop = jest.fn();
 const submit = {
   uploading: false,
-  uploadError: false,
-  dismissUploadError: jest.fn(),
   progress: 0,
   confirmSubmit: jest.fn(),
 };
@@ -185,12 +179,12 @@ it('stops saving the draft and goes back once submitted', async () => {
   expect(navigation.goBack).toHaveBeenCalled();
 });
 
-it('picks from documents or photos, closing the menu when cancelled', async () => {
+it('picks from documents or photos, with the keyboard down', async () => {
+  const dismiss = jest.spyOn(Keyboard, 'dismiss');
   await renderScreen();
   await userEvent.press(screen.getByTestId('pickAttachment'));
-  expect(picker.openMenu).toHaveBeenCalled();
-  const { title, choices, onCancel } =
-    jest.mocked(showChoices).mock.calls[0][0];
+  expect(dismiss).toHaveBeenCalled();
+  const { title, choices } = jest.mocked(showChoices).mock.calls[0][0];
   expect(title).toBe(t('pickAttachment'));
   expect(choices.map(choice => choice.label)).toEqual([
     t('documents'),
@@ -200,8 +194,6 @@ it('picks from documents or photos, closing the menu when cancelled', async () =
   expect(picker.pickDocument).toHaveBeenCalled();
   choices[1].onPress();
   expect(picker.pickPhoto).toHaveBeenCalled();
-  onCancel!();
-  expect(picker.closeMenu).toHaveBeenCalled();
 });
 
 it('shows a picked file, which can be renamed, opened or removed', async () => {
@@ -250,7 +242,7 @@ it('removes the uploaded file, and undoes that', async () => {
   expect(screen.getByTestId('pickAttachment')).toBeTruthy();
 });
 
-it('shows progress while uploading, and a failure as a toast', async () => {
+it('shows progress while uploading', async () => {
   jest
     .mocked(useSubmitAssignment)
     .mockImplementation(
@@ -259,15 +251,6 @@ it('shows progress while uploading, and a failure as a toast', async () => {
   await renderScreen();
   expect(screen.getByText(t('uploadingSubmission'))).toBeTruthy();
   expect(submitItem().disabled).toBe(true);
-
-  jest
-    .mocked(useSubmitAssignment)
-    .mockImplementation(() => ({ ...submit, uploadError: true }) as never);
-  await renderScreen();
-  expect(toast).toHaveBeenCalledWith(t('assignmentSubmissionFailed'), 'error', {
-    duration: 3000,
-  });
-  expect(submit.dismissUploadError).toHaveBeenCalled();
 });
 
 it('restores a draft and discards it once confirmed', async () => {

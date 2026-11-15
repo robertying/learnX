@@ -16,13 +16,14 @@ export const setPendingTarget = (target: ListTarget | null) =>
   usePendingTargetStore.setState({ target });
 
 /**
- * Lets a list screen open the pending item (`setPendingTarget`): in the detail
- * pane of its split view once the split is laid out and the pane is ready
- * (`inDetail`), or else pushed on the list.
+ * Lets a list screen open the pending item (`setPendingTarget`) with `open`,
+ * its `useShowDetail`, once that knows where the item goes: in the detail pane
+ * of its split view once the split is laid out and the pane is ready, or else
+ * on the list.
  */
 const usePendingTarget = (
   type: ListTarget['type'],
-  open: (id: string, inDetail: boolean) => void,
+  open: (id: string) => void,
 ) => {
   const target = usePendingTargetStore(state => state.target);
   const { showDetail, laidOut } = useContext(SplitViewContext);
@@ -30,7 +31,6 @@ const usePendingTarget = (
   // A native split that hasn't been on screen yet may still collapse (on an
   // iPhone, or a folded one), so it hands out a detail pane that won't show.
   const waitingForDetail = !laidOut || (showDetail && !detailNavigator);
-  const inDetail = !!detailNavigator;
 
   const openTarget = useEffectEvent(open);
 
@@ -39,8 +39,8 @@ const usePendingTarget = (
       return;
     }
     setPendingTarget(null);
-    openTarget(target.id, inDetail);
-  }, [target, type, waitingForDetail, inDetail]);
+    openTarget(target.id);
+  }, [target, type, waitingForDetail]);
 };
 
 export default usePendingTarget;
