@@ -9,7 +9,8 @@
 # The update server's publish API isn't public: this tunnels to it over SSH
 # (OTA_SSH_HOST in the repo-root .env, a host your ~/.ssh/config can reach,
 # port 3001 on it) and runs eoas against the tunnel. eoas signs in with
-# `npx eas-cli login` or EXPO_TOKEN. It builds the update with `expo export`
+# EXPO_TOKEN (an Expo access token, from the environment or .env) or a
+# `npx eas-cli login` session. It builds the update with `expo export`
 # from a clean tree, inlining .env's mock login as a store build does, and
 # keeps each platform's source map in build/ota/updates/<update id>/ for
 # metro-symbolicate (crash reports name the update in `js_bundle`).
@@ -33,6 +34,10 @@ host="$(env_value OTA_SSH_HOST)"
 if [ -z "$host" ]; then
   echo "No OTA_SSH_HOST in .env: the SSH host that runs the update server (see .env.example)" >&2
   exit 1
+fi
+if [ -z "${EXPO_TOKEN:-}" ] && [ -n "$(env_value EXPO_TOKEN)" ]; then
+  EXPO_TOKEN="$(env_value EXPO_TOKEN)"
+  export EXPO_TOKEN
 fi
 if [ -z "$(env_value DUMMY_USERNAME)" ]; then
   echo "No mock login in .env: updates inline it as store builds do (.env.example)" >&2
