@@ -6,10 +6,6 @@ beforeEach(() => {
   jest.useFakeTimers({ now: new Date('2026-03-15T12:00:30Z') });
 });
 
-afterEach(() => {
-  jest.useRealTimers();
-});
-
 describe('useMinute', () => {
   it('is the current minute and moves on with the clock', async () => {
     const view = await renderHook(() => useMinute());

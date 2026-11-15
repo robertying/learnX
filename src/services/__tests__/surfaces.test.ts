@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { assignmentsQuery, noticesQuery } from 'data/content';
 import { mockAssignments, mockNotices } from 'data/mock';
 import { clearQueryCache, queryClient } from 'data/queryClient';
@@ -60,7 +61,6 @@ jest.mock('services/classReminders', () => ({
 }));
 jest.mock('services/calendar/actions', () => ({
   syncAssignments: jest.fn(async () => undefined),
-  upcomingAssignments: (assignments: unknown[]) => assignments,
 }));
 jest.mock('services/calendar/classes', () => ({
   updateSyncedClasses: jest.fn(async () => {}),
@@ -82,9 +82,11 @@ const { syncAssignments } = jest.requireMock('services/calendar/actions') as {
 };
 
 const semester = 'semester';
+// Due ahead, so the calendar sync writes them all.
 const assignments = mockAssignments.slice(0, 3).map(a => ({
   ...a,
   courseId: a.courseId ?? 'course',
+  deadline: dayjs().add(1, 'week').format(),
 }));
 
 const cacheAssignments = (list = assignments) =>

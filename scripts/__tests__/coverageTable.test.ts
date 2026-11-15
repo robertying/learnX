@@ -18,3 +18,16 @@ it('lists each file, then the total', () => {
 it('counts nothing as fully covered', () => {
   expect(coverageTable([])).toEqual([' 100.0%     0/0     total']);
 });
+
+it('names the untested files, which the total leaves out', () => {
+  expect(
+    coverageTable(
+      [{ path: 'ios/A.swift', covered: 6, executable: 8 }],
+      ['ios/B.swift'],
+    ),
+  ).toEqual([
+    '  75.0%     6/8     ios/A.swift',
+    '          untested  ios/B.swift',
+    '  75.0%     6/8     total, without 1 untested',
+  ]);
+});

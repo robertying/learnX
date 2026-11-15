@@ -27,10 +27,6 @@ describe('updateDeadlineWidget', () => {
     jest.useFakeTimers({ now: new Date('2026-03-15T12:00:00Z') });
   });
 
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
   it('gives iOS an entry now and one as each deadline changes color or passes', () => {
     jest.replaceProperty(Platform, 'OS', 'ios');
     updateDeadlineWidget(assignments, options);
@@ -118,7 +114,6 @@ describe('updateUpNextWidget', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
     // Clears what was last sent, so each test sends.
     updateUpNextWidget();
   });
@@ -194,7 +189,6 @@ describe('a widget that is missing or fails', () => {
     jest.useFakeTimers({ now: new Date('2026-03-15T12:00:00Z') });
   });
   afterEach(() => {
-    jest.useRealTimers();
     jest.restoreAllMocks();
     updateUpNextWidget();
   });
