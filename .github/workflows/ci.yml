@@ -291,20 +291,14 @@ jobs:
           arch: x86_64
           profile: pixel_7
           disable-animations: true
-          # The action's default options, and the system language
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -change-locale zh-CN
-          # About a minute after boot, the emulator sometimes drops its adb
-          # connection for a moment ("device offline"), which fails whichever
-          # flow is running. A throwaway reset first starts Maestro's driver
-          # and gets past that window, so the flows below start on a settled
-          # device; its result doesn't count.
-          # -change-locale restarts Android's framework once it has booted,
-          # which breaks an install made meanwhile: wait for the language to
-          # be set and the package service to answer, then a little more.
+          # The action's default options. The system language is set after
+          # boot by scripts/android-locale.sh, which doesn't restart Android:
+          # the emulator's -change-locale does, and the emulator sometimes
+          # exited or dropped its adb connection during that restart.
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           script: |
-            for i in $(seq 60); do [ "$(adb shell getprop persist.sys.locale | tr -d '\r')" = zh-CN ] && adb shell pm path android > /dev/null 2>&1 && break; sleep 5; done; sleep 30; adb shell getprop persist.sys.locale
+            scripts/android-locale.sh zh-CN
             adb install -r build/app-x86_64-release.apk
-            scripts/e2e.sh android .maestro/subflows/reset.yaml || echo "Warm-up run failed; running the flows anyway"
             mkdir -p build/maestro; scripts/e2e.sh android --format junit --output build/maestro/report.xml --test-output-dir build/maestro; status=$?; scripts/e2e-ota.sh android || status=1; cp build/ota-e2e/server-android.log build/maestro/ || true; adb logcat -d > build/maestro/logcat.txt; exit $status
 
       - name: Upload results
