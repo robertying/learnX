@@ -1,6 +1,7 @@
 // scripts/updater-e2e-server.mjs stands in for the TUNA mirror in E2E runs:
 // `latest.json` as fastlane writes it, naming the one APK it serves under
-// every ABI, with its SHA-256 (and a damaged APK, to test the check).
+// every ABI, with its SHA-256 (and a damaged APK, to test the check, or one
+// sent slowly).
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
@@ -12,10 +13,14 @@ interface Answer {
   type: string;
   body: string;
   apk?: boolean;
+  slow?: boolean;
 }
 
-/** What the server answers to a GET of `path` in `mode`, serving "apk". */
-const answer = (path: string, mode: string): Answer =>
+/**
+ * What the server answers to a GET of `path` in `mode`, serving "apk" as
+ * `version` (the default without one).
+ */
+const answer = (path: string, mode: string, version?: string): Answer =>
   JSON.parse(
     execFileSync(
       'node',
@@ -24,7 +29,7 @@ const answer = (path: string, mode: string): Answer =>
         '-e',
         `
 const { respond } = await import(${JSON.stringify(server)});
-const answer = respond(${JSON.stringify(path)}, ${JSON.stringify(mode)}, Buffer.from('apk'));
+const answer = respond(${JSON.stringify(path)}, ${JSON.stringify(mode)}, Buffer.from('apk'), ${JSON.stringify(version)});
 process.stdout.write(JSON.stringify({ ...answer, body: answer.body.toString() }));
 `,
       ],
@@ -78,4 +83,27 @@ it('serves the APK by any ABI name, and nothing else', () => {
   });
   expect(answer('/learnX-x86_64-v98.0.0.apk', 'update').status).toBe(404);
   expect(answer('/other', 'update').status).toBe(404);
+});
+
+it('serves the APK as another version', () => {
+  const latest = JSON.parse(
+    answer('/latest.json', 'update', '99.0.1').body,
+  ) as {
+    version: string;
+  };
+  expect(latest.version).toBe('99.0.1');
+  expect(answer('/learnX-x86_64-v99.0.1.apk', 'update', '99.0.1').body).toBe(
+    'apk',
+  );
+  expect(answer('/learnX-x86_64-v99.0.0.apk', 'update', '99.0.1').status).toBe(
+    404,
+  );
+});
+
+it('marks the APK to send slowly in slow mode', () => {
+  expect(answer('/learnX-x86_64-v99.0.0.apk', 'slow')).toMatchObject({
+    body: 'apk',
+    slow: true,
+  });
+  expect(answer('/learnX-x86_64-v99.0.0.apk', 'update').slow).toBeUndefined();
 });

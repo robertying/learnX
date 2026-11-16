@@ -69,6 +69,23 @@ const onceBack = (back: () => void) => {
   return () => subscription.remove();
 };
 
+/**
+ * Resolves once the app is in the foreground: at once if it is, otherwise
+ * when people come back to it. Android doesn't let an app in the background
+ * open its install confirmation.
+ */
+const inForeground = () =>
+  AppState.currentState === 'active'
+    ? Promise.resolve()
+    : new Promise<void>(resolve => {
+        const subscription = AppState.addEventListener('change', state => {
+          if (state === 'active') {
+            subscription.remove();
+            resolve();
+          }
+        });
+      });
+
 export type UpdateStep = 'downloading' | 'installing';
 
 export interface InstallUpdateOptions {
@@ -82,8 +99,10 @@ export interface InstallUpdateOptions {
  * allow learnX to install apps first if they haven't, downloads the APK and
  * hands it to `modules/updater`, which checks it and installs it. Updating
  * ends the app, so this only settles when it fails, with an `UpdateError`.
- * Declining Android's confirmation, or leaving it without an answer (which
- * some Android versions never report), fails with `ERR_UPDATE_CANCELLED`.
+ * A download that finishes in the background installs once the app is back
+ * in the foreground. Declining Android's confirmation, or leaving it without
+ * an answer (which some Android versions never report), fails with
+ * `ERR_UPDATE_CANCELLED`.
  */
 export const installUpdate = async (
   release: Release,
@@ -115,6 +134,9 @@ export const installUpdate = async (
       throw new UpdateError('ERR_UPDATE_DOWNLOAD');
     }
 
+    // A download that finished while people were in another app installs
+    // when they come back.
+    await inForeground();
     onStep?.('installing');
     // Android's confirmation takes people out of the app. Back in it with no
     // answer, they dismissed it: an update would have ended the app by then.

@@ -90,6 +90,7 @@
         "PATH_": "readonly",
         "PHASE": "readonly",
         "UPDATER_SERVER": "readonly",
+        "AFTER": "readonly",
         "USERNAME": "readonly",
         "CALENDAR_URL": "readonly",
         "MATCH": "readonly",

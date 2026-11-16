@@ -68,6 +68,14 @@ android {
         targetSdk = rootProject.ext.targetSdkVersion
         versionCode = 9204544
         versionName = "19.0.0"
+        // A newer build of the same app for scripts/e2e-updater.sh to update
+        // to: -Pe2eVersion=99.0.<n> names it so and raises the version code
+        // by n + 1.
+        def e2eVersion = findProperty("e2eVersion")
+        if (e2eVersion) {
+            versionCode = versionCode + 1 + (e2eVersion.tokenize(".").last() as int)
+            versionName = e2eVersion
+        }
         applyOtaConfig(delegate, false)
     }
 

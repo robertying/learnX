@@ -42,12 +42,15 @@ const apk = 'file:///app/Caches/update/learnX-v20.0.0.apk';
 
 /** The app's foreground state, as AppState reports it to listeners. */
 let appStateListeners: ((state: AppStateStatus) => void)[] = [];
-const setAppState = (state: AppStateStatus) =>
+const setAppState = (state: AppStateStatus) => {
+  AppState.currentState = state;
   appStateListeners.forEach(listener => listener(state));
+};
 
 beforeEach(() => {
   __fs.reset();
   appStateListeners = [];
+  AppState.currentState = 'active';
   jest.spyOn(AppState, 'addEventListener').mockImplementation((_, listener) => {
     appStateListeners.push(listener);
     return {
@@ -112,6 +115,24 @@ it('downloads the APK and installs it, then deletes it', async () => {
   expect(steps).toEqual(['downloading', 'installing']);
   expect(updater.openInstallSettings).not.toHaveBeenCalled();
   expect(__fs.files('file:///app')).toEqual([]);
+  expect(appStateListeners).toEqual([]);
+});
+
+it('installs a download that finished in the background once the app is back', async () => {
+  const steps: string[] = [];
+  jest.mocked(downloadInto).mockImplementationOnce(async (_, file) => {
+    setAppState('background');
+    file.writeSync('apk');
+  });
+  updater.install.mockResolvedValueOnce(undefined);
+  const done = installUpdate(release, { onStep: step => steps.push(step) });
+  await settle();
+  expect(updater.install).not.toHaveBeenCalled();
+  expect(steps).toEqual(['downloading']);
+  setAppState('active');
+  await done;
+  expect(updater.install).toHaveBeenCalledWith(apk, 'abc123');
+  expect(steps).toEqual(['downloading', 'installing']);
   expect(appStateListeners).toEqual([]);
 });
 
