@@ -45,10 +45,6 @@ if (process.platform === 'win32') {
   // Groups the taskbar button and notifications under learnX.
   app.setAppUserModelId(APP_ID);
 }
-/** False in a second launch, which hands its arguments over and quits. */
-const primaryInstance = claimSingleInstance(app);
-/** @type {ReturnType<typeof setUpDesktop> | undefined} */
-let desktop;
 
 /**
  * A dev run: Electron opening this folder (`electron electron/`, which sets
@@ -74,6 +70,13 @@ if (devDataDir) {
   }
   app.commandLine.appendSwitch('use-mock-keychain');
 }
+/**
+ * False in a second launch, which hands its arguments over and quits. Its
+ * lock is in the data folder, so after a dev run has moved that.
+ */
+const primaryInstance = claimSingleInstance(app);
+/** @type {ReturnType<typeof setUpDesktop> | undefined} */
+let desktop;
 /**
  * Launch options for a test run (src/services/launchOptions), as JSON: the
  * app's root props, as Android's launch extras are. Development only.
