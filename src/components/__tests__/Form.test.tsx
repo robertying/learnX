@@ -35,6 +35,7 @@ import {
   font,
   foregroundStyle,
   listRowBackground,
+  listRowSeparator,
   listSectionMargins,
 } from '@expo/ui/swift-ui/modifiers';
 import { FormProfile } from 'components/Form';
@@ -261,6 +262,10 @@ describe('Form', () => {
     // In the gray of a list's selected row
     expect(open.props.modifiers).toContainEqual(
       listRowBackground(PlatformColor('systemGray4')),
+    );
+    // with no separators running into it
+    expect(open.props.modifiers).toContainEqual(
+      listRowSeparator('hidden', 'all'),
     );
     const closed = screen.getByRole('button', {
       name: 'Downloads',
