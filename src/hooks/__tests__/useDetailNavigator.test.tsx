@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { act, renderHook } from '@testing-library/react-native';
 import {
   CommonActions,
@@ -192,5 +193,106 @@ describe('pages pushed on the list before there was a pane', () => {
     });
     await renderList(navigation);
     expect(container.dispatch).not.toHaveBeenCalled();
+  });
+});
+
+describe('what the pane showed when it goes away', () => {
+  const listNavigation = (...names: string[]) => ({
+    dispatch: jest.fn(),
+    getState: () => ({
+      key: 'list-stack',
+      routeNames: ['Notices', 'NoticeDetail', 'FileDetail', 'Settings'],
+      routes: names.map((name, i) => ({ key: `${name}-${i}`, name })),
+    }),
+  });
+  const paneState = (...names: string[]) => ({
+    key: 'detail',
+    routeNames: detailRouteNames,
+    routes: names.map((name, i) => ({ name, params: { id: `p${i}` } })),
+  });
+
+  /** A list in a split whose pane can collapse (`setShown(false)`). */
+  const renderList = async (
+    navigation: ReturnType<typeof listNavigation>,
+    routeIndex = 0,
+  ) => {
+    let setShown: (shown: boolean) => void = () => {};
+    const Wrapper = ({ children }: React.PropsWithChildren) => {
+      const [shown, set] = useState(true);
+      setShown = set;
+      return (
+        <NavigationContext.Provider value={navigation as never}>
+          <NavigationRouteContext.Provider
+            value={navigation.getState().routes[routeIndex] as never}
+          >
+            <SplitViewContext.Provider
+              value={{
+                detailNavigationContainerRef: shown ? containerRef : null,
+                showDetail: shown,
+                laidOut: true,
+                showMaster: true,
+                toggleMaster: () => {},
+                masterWidth: SplitSizes.masterWidth,
+              }}
+            >
+              {children}
+            </SplitViewContext.Provider>
+          </NavigationRouteContext.Provider>
+        </NavigationContext.Provider>
+      );
+    };
+    await renderHook(() => useShowDetail(navigation), { wrapper: Wrapper });
+    return (value: boolean) => act(() => setShown(value));
+  };
+
+  const getRootState = container.getRootState;
+  afterEach(() => {
+    container.getRootState = getRootState;
+  });
+
+  it('moves onto the list, as UIKit does when a split collapses', async () => {
+    container.ready = true;
+    container.getRootState = (() =>
+      paneState('NoticeDetail', 'FileDetail')) as never;
+    const navigation = listNavigation('Notices');
+    const setShown = await renderList(navigation);
+    container.dispatch.mockClear();
+
+    await setShown(false);
+    expect(navigation.dispatch.mock.calls).toEqual([
+      [StackActions.push('NoticeDetail', { id: 'p0' })],
+      [StackActions.push('FileDetail', { id: 'p1' })],
+    ]);
+    expect(container.dispatch).toHaveBeenCalledWith(
+      CommonActions.reset({ index: 0, routes: [{ name: 'EmptyDetail' }] }),
+    );
+  });
+
+  it('leaves an empty pane alone', async () => {
+    container.ready = true;
+    container.getRootState = (() => paneState('EmptyDetail')) as never;
+    const navigation = listNavigation('Notices');
+    const setShown = await renderList(navigation);
+    container.dispatch.mockClear();
+
+    await setShown(false);
+    expect(navigation.dispatch).not.toHaveBeenCalled();
+    expect(container.dispatch).not.toHaveBeenCalled();
+  });
+
+  it('is left to the list on top (Settings on Today)', async () => {
+    container.ready = true;
+    container.getRootState = (() => paneState('NoticeDetail')) as never;
+    const navigation = listNavigation('Notices', 'Settings');
+    const setShown = await renderList(navigation, 0);
+    await setShown(false);
+    expect(navigation.dispatch).not.toHaveBeenCalled();
+  });
+
+  it('does nothing for a list that never had a pane', async () => {
+    const navigation = listNavigation('Notices');
+    const setShown = await renderList(navigation);
+    await setShown(false);
+    expect(navigation.dispatch).not.toHaveBeenCalled();
   });
 });
