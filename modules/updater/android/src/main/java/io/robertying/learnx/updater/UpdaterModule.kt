@@ -53,7 +53,7 @@ class UpdaterModule : Module() {
   }
 
   /** The system page where people allow learnX to install apps ("Install unknown apps"). */
-  private fun openInstallSettings() {
+  internal fun openInstallSettings() {
     val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:${context.packageName}"))
     val activity = appContext.currentActivity
     if (activity != null) {
@@ -63,7 +63,7 @@ class UpdaterModule : Module() {
     }
   }
 
-  private fun install(uri: String, sha256: String, promise: Promise) {
+  internal fun install(uri: String, sha256: String, promise: Promise) {
     val context = context
     val file = File(Uri.parse(uri).path ?: uri)
     val pm = context.packageManager
@@ -216,8 +216,8 @@ class UpdaterModule : Module() {
      */
     fun signersOf(archive: PackageInfo): List<ByteArray>? {
       val info = archive.signingInfo ?: return null
-      val current = info.apkContentsSigners.orEmpty()
-      val history = if (info.hasMultipleSigners()) emptyArray() else info.signingCertificateHistory.orEmpty()
+      val current = info.apkContentsSigners.orEmpty().toList()
+      val history = if (info.hasMultipleSigners()) emptyList() else info.signingCertificateHistory.orEmpty().toList()
       return (current + history).map { it.toByteArray() }
     }
 
