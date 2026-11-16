@@ -118,7 +118,7 @@ def release_notes(path)
 
   file = File.expand_path(path, ROOT)
   UI.user_error!("Release notes not found: #{file}") unless File.exist?(file)
-  text = File.read(file)
+  text = File.read(file, encoding: "UTF-8")
   if text.include?(NOTES_TODO)
     UI.user_error!("#{file} still has #{NOTES_TODO} placeholders. Finish the notes and delete them first.")
   end
