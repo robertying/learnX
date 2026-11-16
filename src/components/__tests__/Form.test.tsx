@@ -676,9 +676,9 @@ describe('Form (iOS details)', () => {
         <FormTextField value="" onChangeText={jest.fn()} multiline />
       </FormSection>,
     );
-    // In the Mac's headline style, not iOS's larger title
+    // The name in Title 2, which the Mac draws at its own smaller size
     expect(font).toHaveBeenCalledWith({
-      textStyle: 'headline',
+      textStyle: 'title2',
       weight: 'semibold',
     });
     expect(screen.getByText('Problem set')).toBeTruthy();
