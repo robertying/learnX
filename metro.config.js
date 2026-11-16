@@ -31,9 +31,25 @@ const inlinedInputsHash = () => {
   return hash.digest('hex').slice(0, 16);
 };
 
+const defaultConfig = getDefaultConfig(__dirname);
+
+// .claude holds agent worktrees (each a full checkout with its own
+// node_modules) and other local files, none of them app code. Without
+// Watchman, Metro's crawler walks the whole project and warns about every
+// folder a package install in a worktree moves while it reads it.
+const claudeFolder = new RegExp(
+  `^${path
+    .join(__dirname, '.claude')
+    .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([\\\\/]|$)`,
+);
+
 /** @type {ReturnType<typeof getDefaultConfig>} */
 const config = {
-  ...getDefaultConfig(__dirname),
+  ...defaultConfig,
+  resolver: {
+    ...defaultConfig.resolver,
+    blockList: [defaultConfig.resolver.blockList ?? [], claudeFolder].flat(),
+  },
   cacheVersion: inlinedInputsHash(),
 };
 
