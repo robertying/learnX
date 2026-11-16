@@ -47,7 +47,7 @@ const points = (...values: Margin[]) => {
  */
 export const withGutter = (
   style: StyleProp<ViewStyle>,
-  gutter: { vertical: number; start?: number },
+  gutter: { vertical: number; start?: number; end?: number },
 ): [StyleProp<ViewStyle>, ViewStyle] => {
   const {
     margin,
@@ -57,6 +57,8 @@ export const withGutter = (
     marginBottom,
     marginStart,
     marginLeft,
+    marginEnd,
+    marginRight,
   } = StyleSheet.flatten(style) ?? {};
   return [
     style,
@@ -69,6 +71,13 @@ export const withGutter = (
             marginStart:
               points(marginStart, marginLeft, marginHorizontal, margin) -
               gutter.start,
+          }
+        : null),
+      ...(gutter.end
+        ? {
+            marginEnd:
+              points(marginEnd, marginRight, marginHorizontal, margin) -
+              gutter.end,
           }
         : null),
     },
