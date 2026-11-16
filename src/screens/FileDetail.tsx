@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { scrollInsetBehavior } from 'constants/scrollInsetBehavior';
 import { Linking, Platform, StyleSheet, View, ViewProps } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import WebView from 'react-native-webview';
@@ -178,7 +179,12 @@ const FileDetailContent: React.FC<{
               return false;
             }}
             decelerationRate={Platform.OS === 'ios' ? 'normal' : undefined}
-            contentInsetAdjustmentBehavior="automatic"
+            contentInsetAdjustmentBehavior={scrollInsetBehavior}
+            // React Native's own inset from the safe area, which is the same
+            // toolbar on Mac (`scrollInsetBehavior`)
+            automaticallyAdjustContentInsets={
+              scrollInsetBehavior === 'automatic'
+            }
           />
         )
       ) : (

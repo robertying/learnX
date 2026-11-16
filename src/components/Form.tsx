@@ -52,6 +52,9 @@ import {
   lineLimit,
   listRowBackground,
   listSectionMargins,
+  listSectionSpacing,
+  listRowInsets,
+  lineSpacing,
   opacity,
   padding,
   refreshable,
@@ -98,17 +101,46 @@ import ThemedHost from 'components/ThemedHost';
 
 export * from './Form.shared';
 
+type SwiftUITextStyle = NonNullable<Parameters<typeof font>[0]['textStyle']>;
+type FontWeight = Parameters<typeof font>[0]['weight'];
+
+// The Mac draws SwiftUI's text styles at macOS sizes (body 13 pt), while the
+// rest of the app (lists, toasts, detail pages) is drawn at iOS sizes. Forms
+// match the rest of the app there: iOS's default size for each style.
+const iosTextSizes: Record<SwiftUITextStyle, number> = {
+  largeTitle: 34,
+  title: 28,
+  title2: 22,
+  title3: 20,
+  headline: 17,
+  body: 17,
+  callout: 16,
+  subheadline: 15,
+  footnote: 13,
+  caption: 12,
+  caption2: 11,
+};
+
+/** A text style's font: iOS's size on Mac (`iosTextSizes`). */
+const textFont = (textStyle: SwiftUITextStyle, weight?: FontWeight) =>
+  DeviceInfo.isMac()
+    ? font({
+        size: iosTextSizes[textStyle],
+        weight: weight ?? (textStyle === 'headline' ? 'semibold' : undefined),
+      })
+    : font({ textStyle, weight });
+
 // Concrete system colors: inside a Button, hierarchical styles resolve to
 // the tint.
 const primaryText = foregroundStyle(PlatformColor('label'));
 // A button reads the names of the symbols in it ("Forward", "Checkmark"):
 // the chevron is decoration, and a choice says Selected with its trait.
 const checkmarkModifiers = [
-  font({ textStyle: 'body', weight: 'semibold' }),
+  textFont('body', 'semibold'),
   accessibilityHidden(true),
 ];
 const chevronModifiers = [
-  font({ textStyle: 'footnote', weight: 'semibold' }),
+  textFont('footnote', 'semibold'),
   foregroundStyle(PlatformColor('tertiaryLabel')),
   accessibilityHidden(true),
 ];
@@ -119,6 +151,9 @@ const selectedModifiers = [accessibilityAddTraits(['isSelected'])];
 const macFormModifiers = [
   scrollContentBackground('hidden'),
   background(PlatformColor('systemBackground')),
+  // What rows show without a font of their own, as `textFont` does.
+  font({ size: 17 }),
+  listSectionSpacing(24),
 ];
 
 // Behind iOS's inset grouped rows
@@ -257,13 +292,17 @@ const glassHeaderModifiers = [scrollEdgeEffectStyle('soft', 'top')];
 const macRowBackground = listRowBackground(
   PlatformColor('quaternarySystemFill'),
 );
-const macSectionModifiers = [macRowBackground];
+// Clear of the toolbar, as System Settings starts its first group.
+const macFirstSectionModifiers = [
+  listSectionMargins({ edges: 'top', length: 20 }),
+];
+const macSectionModifiers = [
+  macRowBackground,
+  listRowInsets({ top: 10, leading: 20, bottom: 10, trailing: 20 }),
+];
 // System Settings on the Mac: bold titles in the label color above the
 // group. (Catalyst ignores headerProminence, so the title is our own Text.)
-const macHeaderModifiers = [
-  font({ textStyle: 'headline', weight: 'bold' }),
-  primaryText,
-];
+const macHeaderModifiers = [textFont('headline', 'bold'), primaryText];
 
 export const FormSection: React.FC<FormSectionProps> = ({
   children,
@@ -284,14 +323,23 @@ export const FormSection: React.FC<FormSectionProps> = ({
       }
       footer={
         footer ? (
-          <Text modifiers={footerHidden ? hiddenFooterModifiers : undefined}>
+          <Text
+            modifiers={
+              isMac || footerHidden
+                ? [
+                    ...(isMac ? macFooterModifiers : []),
+                    ...(footerHidden ? hiddenFooterModifiers : []),
+                  ]
+                : undefined
+            }
+          >
             {footer}
           </Text>
         ) : undefined
       }
       modifiers={
         isMac
-          ? macSectionModifiers
+          ? [...macSectionModifiers, ...(first ? macFirstSectionModifiers : [])]
           : [
               ...(first ? firstSectionModifiers : []),
               ...(last ? lastSectionModifiers : []),
@@ -303,14 +351,14 @@ export const FormSection: React.FC<FormSectionProps> = ({
   );
 };
 
+// The Mac's footnote is set tight, which crowds Chinese lines.
+const macFooterModifiers = [textFont('footnote'), lineSpacing(3)];
+
 // A footer that keeps its place while hidden (`footerHidden`)
 const hiddenFooterModifiers = [opacity(0), accessibilityHidden(true)];
 
 const secondaryText = foregroundStyle(PlatformColor('secondaryLabel'));
-const subtitleModifiers = [font({ textStyle: 'subheadline' }), secondaryText];
-// Mac Form rows hug their text; two-line rows get the breathing room they
-// have in Mail and System Settings, and that iOS rows get from their height.
-const macTwoLineModifiers = [padding({ vertical: 4 })];
+const subtitleModifiers = [textFont('subheadline'), secondaryText];
 const struckText = [
   secondaryText,
   strikethrough({ isActive: true, pattern: 'solid' }),
@@ -318,7 +366,7 @@ const struckText = [
 
 const unavailableModifiers = [foregroundStyle(PlatformColor('tertiaryLabel'))];
 
-const overlineModifiers = [font({ textStyle: 'caption', weight: 'semibold' })];
+const overlineModifiers = [textFont('caption', 'semibold')];
 
 const RowLabel: React.FC<{
   title: string;
@@ -361,12 +409,7 @@ const RowLabel: React.FC<{
   const text = (
     <Text
       modifiers={
-        item
-          ? [
-              font({ textStyle: 'body', weight: 'medium' }),
-              ...(modifiers ?? []),
-            ]
-          : modifiers
+        item ? [textFont('body', 'medium'), ...(modifiers ?? [])] : modifiers
       }
     >
       {title}
@@ -374,11 +417,7 @@ const RowLabel: React.FC<{
   );
   const label =
     subtitle || overline ? (
-      <VStack
-        alignment="leading"
-        spacing={2}
-        modifiers={DeviceInfo.isMac() ? macTwoLineModifiers : undefined}
-      >
+      <VStack alignment="leading" spacing={2}>
         {overline ? (
           <Text
             modifiers={[
@@ -399,17 +438,41 @@ const RowLabel: React.FC<{
     );
   // The system draws the symbol at the row's text size. (@expo/ui's Image
   // would draw it at a fixed 24 pt.)
-  return icon ? (
+  if (!icon) {
+    return label;
+  }
+  // The Mac's label sets the symbol right against the text, at the Mac's
+  // own text size: there the symbol gets a column of its own, at the rows'
+  // text size, as in System Settings.
+  return DeviceInfo.isMac() ? (
+    <HStack spacing={12}>
+      <Image
+        systemName={systemIcons[icon].ios}
+        size={iosTextSizes.body}
+        // In the tint beside text in the label color, as a label's symbol
+        // is, and otherwise as the text (red in a destructive button).
+        color={
+          unavailable
+            ? PlatformColor('tertiaryLabel')
+            : plain
+              ? theme.colors.primary
+              : undefined
+        }
+        modifiers={macIconModifiers}
+      />
+      {label}
+    </HStack>
+  ) : (
     <Label
       systemImage={systemIcons[icon].ios}
       modifiers={unavailable ? unavailableModifiers : undefined}
     >
       {label}
     </Label>
-  ) : (
-    label
   );
 };
+
+const macIconModifiers = [frame({ width: 24 })];
 
 /** The row's subtitle and detail for the text size (`stackedDetail`). */
 const useStackedDetail = (subtitle?: string, detail?: string) =>
@@ -425,13 +488,10 @@ const RowDetail: React.FC<{
   }
   const modifiers =
     tint === 'accent'
-      ? [
-          font({ textStyle: 'title3', weight: 'bold' }),
-          foregroundStyle(theme.colors.primary),
-        ]
+      ? [textFont('title3', 'bold'), foregroundStyle(theme.colors.primary)]
       : tint
         ? [
-            font({ textStyle: 'body', weight: 'semibold' }),
+            textFont('body', 'semibold'),
             // The text shade of the hue, readable on the row
             foregroundStyle(theme.colors.onStatusContainer[tint]),
           ]
@@ -595,9 +655,10 @@ export const FormButton: React.FC<FormButtonProps> = ({
           title={title}
           subtitle={subtitle}
           icon={icon}
-          // Mac forms don't tint action rows; only choices and the Mac use
-          // the label color, and destructive rows stay red.
-          plain={(choice || DeviceInfo.isMac()) && !destructive}
+          // Action rows are drawn in the tint, which says they can be
+          // clicked (on Mac too, where a row has no other sign of it);
+          // choices use the label color, and destructive rows stay red.
+          plain={choice && !destructive}
           unavailable={isDisabled}
         />
         <Spacer />
@@ -768,11 +829,16 @@ export const FormToggle: React.FC<FormToggleProps> = ({
     <Toggle
       isOn={value}
       onIsOnChange={onValueChange}
-      label={title}
-      systemImage={icon ? systemIcons[icon].ios : undefined}
+      // The Mac's own label crowds its symbol (`RowLabel`).
+      label={DeviceInfo.isMac() ? undefined : title}
+      systemImage={
+        icon && !DeviceInfo.isMac() ? systemIcons[icon].ios : undefined
+      }
       testID={testID}
       modifiers={isDisabled ? [switchStyle, disabled(true)] : [switchStyle]}
-    />
+    >
+      {DeviceInfo.isMac() ? <RowLabel title={title} icon={icon} plain /> : null}
+    </Toggle>
   );
 
 /** A number typed in at the end of the row. */
@@ -803,10 +869,7 @@ export const FormNumberField: React.FC<FormNumberFieldProps> = ({
 };
 
 const paragraphModifiers = [primaryText, textSelection(true)];
-const headlineModifiers = [
-  font({ textStyle: 'headline' }),
-  ...paragraphModifiers,
-];
+const headlineModifiers = [textFont('headline'), ...paragraphModifiers];
 
 /** Text over several lines, filling the row. */
 export const FormParagraph: React.FC<FormParagraphProps> = ({
@@ -823,7 +886,7 @@ export const FormParagraph: React.FC<FormParagraphProps> = ({
 );
 
 const titleModifiers = [
-  font({ textStyle: 'title2', weight: 'bold' }),
+  textFont('title2', 'bold'),
   ...paragraphModifiers,
   // A heading, as a section's header is, so the rotor jumps to it.
   accessibilityAddTraits(['isHeader']),
@@ -861,10 +924,7 @@ export const FormProfile: React.FC<FormProfileProps> = ({ name, detail }) => {
   // Smaller on the Mac, as the account row in System Settings.
   const isMac = DeviceInfo.isMac();
   const avatarSize = isMac ? 40 : 56;
-  const nameFont = font({
-    textStyle: isMac ? 'headline' : 'title2',
-    weight: 'semibold',
-  });
+  const nameFont = textFont(isMac ? 'headline' : 'title2', 'semibold');
   return (
     <HStack spacing={12}>
       <ZStack modifiers={[frame({ width: avatarSize, height: avatarSize })]}>
@@ -880,7 +940,7 @@ export const FormProfile: React.FC<FormProfileProps> = ({ name, detail }) => {
         {detail ? (
           <Text
             modifiers={[
-              font({ textStyle: 'subheadline' }),
+              textFont('subheadline'),
               foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
             ]}
           >
