@@ -68,6 +68,7 @@ server=
 # The installed build, to put back afterwards.
 original=build/updater-e2e/original.apk
 adb_ pull "$(adb_ shell pm path "$package" | sed -n 's/^package://p' | head -1 | tr -d '\r')" "$original" >/dev/null
+# shellcheck disable=SC2329 # run by the EXIT trap
 restore() {
   kill "$server" 2>/dev/null || true
   if ! adb_ install -r -d "$original" >/dev/null 2>&1; then
