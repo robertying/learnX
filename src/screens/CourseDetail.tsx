@@ -43,6 +43,7 @@ import {
   MainStackScreenProps,
 } from 'navigation/types';
 import useHeaderButtons from 'hooks/useHeaderButtons';
+import useRefreshCommand from 'hooks/useRefreshCommand';
 import SegmentedTabs from 'components/SegmentedTabs';
 import { SafeAreaView } from 'react-native-screens/experimental';
 import { hasGlassHeader } from 'navigation/options';
@@ -263,8 +264,20 @@ const CourseDetailContent: React.FC<{
     }
   };
 
+  // The selected tab's refresh, where there's no pull to refresh (Mac) or
+  // from the menu bar.
+  const loggedIn = useLoggedIn();
+  const selectedRefresh = [refreshNotices, refreshAssignments, refreshFiles][
+    index
+  ];
+  const refreshButton = useRefreshCommand({
+    refreshing: selectedRefresh.isPending,
+    onRefresh: () => loggedIn && selectedRefresh.mutate(),
+  });
+
   // The course's page on CourseX, from the header like an item's info.
   useHeaderButtons(navigation, 'right', [
+    refreshButton,
     {
       id: 'courseInformation',
       label: t('courseInformation'),

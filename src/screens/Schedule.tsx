@@ -6,7 +6,9 @@ import { formatDate, relativeTime, t } from 'helpers/i18n';
 import { classDetails } from 'helpers/schedule';
 import { beijingDate, showsBeijingTime } from 'helpers/serverTime';
 import { useMinute } from 'hooks/useClock';
+import useHeaderButtons from 'hooks/useHeaderButtons';
 import usePullToRefresh from 'hooks/usePullToRefresh';
+import useRefreshCommand from 'hooks/useRefreshCommand';
 import { MainStackScreenProps, ScheduleParamList } from 'navigation/types';
 
 type Props = MainStackScreenProps<ScheduleParamList, 'Schedule'>;
@@ -58,6 +60,7 @@ const Schedule: React.FC<Props> = ({ navigation }) => {
     return { isError: results.some(r => r.isError) };
   };
   const pullToRefresh = usePullToRefresh(handleRefresh);
+  useHeaderButtons(navigation, 'right', [useRefreshCommand(pullToRefresh)]);
 
   // As on Today: classes worked out from the courses, or a timetable kept
   // from an earlier update (the oldest, when both weeks failed).

@@ -7,7 +7,6 @@ import { ParamListBase } from '@react-navigation/native';
 import FilterMenu from 'components/FilterMenu';
 import OverflowMenu from 'components/OverflowMenu';
 import { getTitleOptions } from 'navigation/options';
-import DeviceInfo from 'constants/DeviceInfo';
 import {
   filterSubtitle,
   selectedCountLabel,
@@ -19,6 +18,7 @@ import { systemIcons } from 'helpers/systemIcons';
 import { headerButtons, type HeaderButton } from 'navigation/headerButtons';
 import { RootStackParams } from 'navigation/types';
 import useLatest from 'hooks/useLatest';
+import { refreshHeaderButton } from 'hooks/useRefreshCommand';
 
 const TITLES = {
   notice: 'notices',
@@ -219,16 +219,7 @@ const useFilterListHeader = ({
           : [select, filter],
       ),
       ...headerButtons('right', [
-        DeviceInfo.isMac() && {
-          id: 'refresh',
-          label: t('refresh'),
-          icon: 'refresh',
-          sfSymbol: refreshing
-            ? 'arrow.trianglehead.2.clockwise.rotate.90'
-            : undefined,
-          disabled: refreshing,
-          onPress: onRefresh,
-        },
+        refreshHeaderButton(refreshing, onRefresh),
         {
           id: 'search',
           label: t('search'),
