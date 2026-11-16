@@ -56,10 +56,10 @@ export const sampleDiff = (
         courseId: `${kind}-${group}`,
       })),
     );
+  // The items keep their ids, so a tap opens them as a real one would.
   const assignments = (kind: string) =>
     take(lists.assignments, kind).map(a => ({
       ...a,
-      id: `${kind}-${a.id}`,
       submitted: false,
       deadline: due,
     }));
