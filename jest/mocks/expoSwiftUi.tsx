@@ -103,18 +103,21 @@ export const ProgressView = ({
   </View>
 );
 
+// Its modifiers stay on the view, for tests of a section's margins.
 export const Section = ({
   title,
   header,
   footer,
   children,
+  modifiers,
 }: {
   title?: string;
   header?: ReactNode;
   footer?: ReactNode;
   children?: ReactNode;
+  modifiers?: unknown[];
 }) => (
-  <View>
+  <View testID="section" {...{ modifiers }}>
     {title ? <RNText>{title}</RNText> : null}
     {header}
     {children}

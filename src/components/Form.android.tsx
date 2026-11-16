@@ -273,6 +273,8 @@ const FormRow: React.FC<
     /** A state the row shows only visually (a badge), read after the title. */
     spokenState?: string;
     trailing?: ReactNode;
+    /** In Material's selected container color (`FormLinkProps['opened']`). */
+    opened?: boolean;
   }
 > = ({
   title,
@@ -291,8 +293,12 @@ const FormRow: React.FC<
   trailing,
   done,
   progress,
+  opened,
 }) => {
   const colors = useMaterialColors();
+  const containerColor = opened
+    ? colors.secondaryContainer
+    : colors.surfaceContainer;
   const theme = useMaterialTheme();
   const { subtitle: supporting, detail: endDetail } = stackedDetail(
     { subtitle, detail },
@@ -338,7 +344,7 @@ const FormRow: React.FC<
     );
   const item = (rowModifiers: ModifierConfig[]) => (
     <ListItem
-      colors={{ containerColor: colors.surfaceContainer }}
+      colors={{ containerColor }}
       modifiers={[fillMaxWidth(), ...rowModifiers]}
     >
       <ListItem.HeadlineContent>
@@ -398,7 +404,7 @@ const FormRow: React.FC<
       modifiers={[
         fillMaxWidth(),
         rowShape(position),
-        background(colors.surfaceContainer),
+        background(containerColor),
         ...(action ? [action] : []),
         ...withTestID(testID),
       ]}
@@ -433,11 +439,13 @@ export const FormText: React.FC<FormTextProps> = ({ action, ...row }) => (
 export const FormLink: React.FC<FormLinkProps> = ({
   onPress,
   badge,
+  opened,
   ...row
 }) => (
   <FormRow
     {...row}
-    action={clickable(onPress)}
+    opened={opened}
+    action={opened ? selectable(true, onPress) : clickable(onPress)}
     spokenState={badge ? t('a11yNewBadge') : undefined}
     trailing={badge ? <Badge /> : null}
   />

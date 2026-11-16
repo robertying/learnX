@@ -1,14 +1,15 @@
 import { Platform, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-screens/experimental';
 import ProgressBar from 'components/ProgressBar';
+import { underHeader } from 'constants/scrollInsetBehavior';
 
 /**
- * A web page's loading progress, over the top of the page and below the
- * header, a transparent one too: on iOS it keeps clear of the top safe area,
- * which includes the header.
+ * A web page's loading progress, over the top of the page and right below the
+ * header: on iPhone and iPad, where the page is under the header, it keeps
+ * clear of the top safe area, which includes the header (`underHeader`).
  */
 const PageProgressBar: React.FC<{ progress: number }> = ({ progress }) =>
-  Platform.OS === 'ios' ? (
+  Platform.OS === 'ios' && underHeader() ? (
     <SafeAreaView
       edges={{ top: true }}
       style={styles.overlay}

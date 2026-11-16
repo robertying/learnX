@@ -98,6 +98,7 @@ import {
   type FormViewProps,
 } from './Form.shared';
 import ThemedHost from 'components/ThemedHost';
+import { rowHighlight } from 'components/Touchable';
 
 export * from './Form.shared';
 
@@ -145,6 +146,12 @@ const chevronModifiers = [
   accessibilityHidden(true),
 ];
 const selectedModifiers = [accessibilityAddTraits(['isSelected'])];
+// A row whose page is open beside the Form, in the gray of a list's
+// selected row.
+const openedModifiers = [
+  ...selectedModifiers,
+  listRowBackground(rowHighlight ?? PlatformColor('systemGray4')),
+];
 
 // Mac apps draw grouped rows in light gray on the window's white (black in
 // Dark Mode), not white rows on gray as on iOS.
@@ -153,16 +160,19 @@ const macFormModifiers = [
   background(PlatformColor('systemBackground')),
   // What rows show without a font of their own, as `textFont` does.
   font({ size: 17 }),
-  listSectionSpacing(24),
+  // Sections close together, as System Settings groups them: with a
+  // section's title or footer, SwiftUI's own spacing is already wide.
+  listSectionSpacing(12),
 ];
 
 // Behind iOS's inset grouped rows
 const groupedBackground = PlatformColor('systemGroupedBackground');
 
 // The last section would otherwise end right at the floating tab bar's top
-// edge when scrolled to the end; with this its rows end about a section's
-// spacing above it (its footer a little less), as one more section would.
-// (Android's list has its own bottom padding.)
+// edge when scrolled to the end (on Mac, its footer at the window's bottom
+// edge); with this its rows end about a section's spacing above it (its
+// footer a little less), as one more section would. (Android's list has its
+// own bottom padding.)
 const lastSectionModifiers = [
   listSectionMargins({ edges: 'bottom', length: Spacing.l }),
 ];
@@ -339,7 +349,11 @@ export const FormSection: React.FC<FormSectionProps> = ({
       }
       modifiers={
         isMac
-          ? [...macSectionModifiers, ...(first ? macFirstSectionModifiers : [])]
+          ? [
+              ...macSectionModifiers,
+              ...(first ? macFirstSectionModifiers : []),
+              ...(last ? lastSectionModifiers : []),
+            ]
           : [
               ...(first ? firstSectionModifiers : []),
               ...(last ? lastSectionModifiers : []),
@@ -601,10 +615,15 @@ export const FormLink: React.FC<FormLinkProps> = ({
   testID,
   onPress,
   badge,
+  opened,
   ...row
 }) => {
   return (
-    <Button onPress={onPress} testID={testID}>
+    <Button
+      onPress={onPress}
+      testID={testID}
+      modifiers={opened ? openedModifiers : undefined}
+    >
       <ItemRow
         {...row}
         badge={

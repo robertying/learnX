@@ -102,6 +102,12 @@ export interface FormLinkProps extends FormItemRowProps {
   onPress: () => void;
   /** A dot for something new on the page it opens. */
   badge?: boolean;
+  /**
+   * What it opens is open beside the Form, in a split view's detail pane:
+   * the row shows as selected, as a list's row does (`CardWrapper`'s
+   * `opened`).
+   */
+  opened?: boolean;
 }
 
 export interface FormButtonProps extends FormRowProps {

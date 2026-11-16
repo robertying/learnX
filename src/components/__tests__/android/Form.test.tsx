@@ -150,6 +150,24 @@ describe('Form (Android)', () => {
     expect(onPress).toHaveBeenCalledTimes(1);
   });
 
+  it('shows the link whose page is open beside the Form as selected', async () => {
+    const onPress = jest.fn();
+    await render(
+      <FormSection>
+        <FormLink title="Notifications" opened onPress={onPress} testID="on" />
+        <FormLink title="Downloads" onPress={jest.fn()} testID="off" />
+      </FormSection>,
+    );
+    expect(screen.getByTestId('on').props.accessibilityState).toMatchObject({
+      selected: true,
+    });
+    expect(
+      screen.getByTestId('off').props.accessibilityState?.selected,
+    ).toBeFalsy();
+    await userEvent.setup().press(screen.getByTestId('on'));
+    expect(onPress).toHaveBeenCalledTimes(1);
+  });
+
   it("doesn't run a loading or disabled button", async () => {
     const onPress = jest.fn();
     await render(
