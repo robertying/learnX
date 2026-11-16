@@ -11,6 +11,7 @@ import {
   timeRange,
 } from 'helpers/i18n';
 import { mockClock, mockLocale } from 'test-utils/locale';
+import zh from 'assets/translations/zh';
 
 // A runtime that never loads App.tsx (the background task) still formats in
 // the app's language once helpers/i18n is loaded.
@@ -100,6 +101,50 @@ describe('timeRange', () => {
     expect(timeRange(at('17:00'), at('19:35'))).toBe('下午5:00–7:35');
     expect(timeRange(at('08:00'), at('09:35'))).toBe('上午8:00–9:35');
     expect(timeRange(at('09:50'), at('12:15'))).toBe('上午9:50–下午12:15');
+  });
+});
+
+// iOS and Android write a Chinese date, time or duration with no spaces
+// ("上午9:50", "3小时前", "第3周"), and iOS and macOS draw their own narrow gap
+// between Chinese and digits. Only a date and its time are a space apart, as
+// the systems write them ("11月12日 下午9:30").
+describe('Chinese dates and times', () => {
+  const DATE_TIME = /\{(?:time|date|before|week)\}/u.source;
+  const AMOUNT = /(?:\d+|\{count\})/u.source;
+  const UNIT = /(?:分钟|小时|天|周|个月)/u.source;
+  const spaced = new RegExp(
+    [
+      // "今天 {time}", "{date} 截止", but not a date then its time
+      `(?!日)\\p{Script=Han} +${DATE_TIME}`,
+      `${DATE_TIME} +[\\p{Script=Han}\\[]`,
+      // "还剩 3 小时", "第 {week} 周"
+      `${AMOUNT} +${UNIT}`,
+      `\\p{Script=Han} +${AMOUNT}${UNIT}`,
+    ].join('|'),
+    'u',
+  );
+
+  it('are written without spaces around them', () => {
+    expect(Object.entries(zh).filter(([, text]) => spaced.test(text))).toEqual(
+      [],
+    );
+  });
+
+  it('writes relative times the way the systems do', () => {
+    const now = dayjs('2026-11-12T21:30:00').locale('zh-cn');
+    expect(now.to(now.add(3, 'hour'))).toBe('3小时后');
+    expect(now.to(now.subtract(2, 'day'))).toBe('2天前');
+    expect(now.to(now.add(2, 'month'), true)).toBe('2个月');
+  });
+
+  it('fills a class reminder without spaces', () => {
+    mockClock.uses24hourClock = false;
+    mockLocale.current = 'zh-CN';
+    expect(
+      t('classStartsAtBeijing', {
+        time: dayjs('2026-11-16T09:50:00').locale('zh-cn').format(timeFormat()),
+      }),
+    ).toBe('北京时间上午9:50上课');
   });
 });
 

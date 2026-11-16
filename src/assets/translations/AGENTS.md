@@ -21,5 +21,6 @@ Every user-visible string is a key in `en.ts` and `zh.ts`, with the same keys in
 - Address the user as 你, never 您, and call the app "learnX", not "App".
 - An error says what failed with 失败 (登录失败, 作业同步失败：…), the pair of 成功 on success; 无法 is only for what learnX can't do (如果 learnX 无法发送通知…).
 - Full-width punctuation (，。：) in Chinese text. A message ends with 。 when its English ends with a period.
-- Put a space between Chinese and Latin letters or numbers (`{count} 条未读公告`), except inside a date, which is written the system's way without spaces (`YYYY年M月D日`, `M月D日`).
+- Put a space between Chinese and Latin letters or numbers (`{count} 条未读公告`), except in dates, times and durations.
+- Write a date, time or duration the way iOS and Android do, with no space inside it or between it and the Chinese around it (`YYYY年M月D日`, `北京时间{time}上课`, `还剩{count}小时`, `第{week}周`); iOS and macOS draw their own narrow gap next to the digits. Only a date and its time are a space apart (`M月D日 {time}`). Relative times from dayjs follow this too (`3小时前`, `3小时后`), set in `helpers/i18n`, and a test in `helpers/__tests__/i18n.test.ts` checks the strings.
 - Times of day follow the device's 12/24-hour setting. A date format (a key ending in `Format`) writes `{time}` where the time goes, and `t()` fills it with `timeFormat()` from `helpers/i18n`; code formatting a time alone uses `timeFormat()`, never `HH:mm`.

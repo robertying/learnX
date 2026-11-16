@@ -42,9 +42,28 @@ dayjs.extend(relativeTime);
 dayjs.locale(
   {
     ...zhCn,
-    // oxlint-disable-next-line learnx/no-han-outside-translations -- locale data: Chinese in every app language
+    /* oxlint-disable learnx/no-han-outside-translations -- locale data: Chinese in every app language */
     meridiem: (hour: number) => (hour < 12 ? '上午' : '下午'),
     // Not in dayjs's ILocale type, though dayjs reads it.
+    // Relative times as iOS and Android write them ("3小时前", "3小时后"):
+    // no space between a number and its unit, and a time ahead is "…后", not
+    // dayjs's "…内" ("within").
+    relativeTime: {
+      future: '%s后',
+      past: '%s前',
+      s: '几秒',
+      m: '1分钟',
+      mm: '%d分钟',
+      h: '1小时',
+      hh: '%d小时',
+      d: '1天',
+      dd: '%d天',
+      M: '1个月',
+      MM: '%d个月',
+      y: '1年',
+      yy: '%d年',
+    },
+    /* oxlint-enable learnx/no-han-outside-translations */
   } as typeof zhCn,
   undefined,
   true,
