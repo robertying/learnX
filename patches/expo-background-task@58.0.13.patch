@@ -1,0 +1,37 @@
+diff --git a/ios/BackgroundTaskScheduler.swift b/ios/BackgroundTaskScheduler.swift
+index 906678bacad15d4fa23ad5b61c279b0b2d8d334a..1f5305a0f560b19264462a7aa88e25a2e2810af2 100644
+--- a/ios/BackgroundTaskScheduler.swift
++++ b/ios/BackgroundTaskScheduler.swift
+@@ -4,7 +4,7 @@ import Foundation
+ 
+ protocol BackgroundTaskScheduling: Sendable {
+   func cancel(taskRequestWithIdentifier identifier: String)
+-  func submit(_ request: BGProcessingTaskRequest) throws
++  func submit(_ request: BGTaskRequest) throws
+   func pendingTaskRequests() async -> [BGTaskRequest]
+ }
+ 
+@@ -13,7 +13,7 @@ private struct SystemBackgroundTaskScheduler: BackgroundTaskScheduling {
+     BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: identifier)
+   }
+ 
+-  func submit(_ request: BGProcessingTaskRequest) throws {
++  func submit(_ request: BGTaskRequest) throws {
+     try BGTaskScheduler.shared.submit(request)
+   }
+ 
+@@ -89,9 +89,11 @@ public class BackgroundTaskScheduler {
+ 
+       stopWorkerOnce()
+ 
+-      let request = BGProcessingTaskRequest(identifier: BackgroundTaskConstants.BackgroundWorkerIdentifier)
+-      request.requiresNetworkConnectivity = true
+-      request.requiresExternalPower = false
++      // An app refresh task, not a processing task: iOS runs processing tasks when the device is idle (usually
++      // locked and charging overnight) and stops them when it's picked up, while app refresh tasks run through
++      // the day, as often as the app is used. The identifier stays the same, so the request an earlier build
++      // submitted is the one replaced here.
++      let request = BGAppRefreshTaskRequest(identifier: BackgroundTaskConstants.BackgroundWorkerIdentifier)
+       request.earliestBeginDate = Date().addingTimeInterval(intervalSeconds)
+ 
+       do {
