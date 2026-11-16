@@ -764,11 +764,12 @@ const styles = StyleSheet.create({
   done: {
     opacity: 0.5,
   },
-  // The label takes the row, and the detail what it needs, up to half.
+  // The label takes the row; when the row is short of room, it and the
+  // detail both wrap, each by its length.
   label: {
     flexGrow: 1,
     flexShrink: 1,
-    flexBasis: 0,
+    flexBasis: 'auto',
     gap: 2,
   },
   overline: {
@@ -782,8 +783,7 @@ const styles = StyleSheet.create({
   },
   detail: {
     textAlign: 'right',
-    flexShrink: 0,
-    maxWidth: '50%',
+    flexShrink: 1,
   },
   tinted: {
     fontWeight: '600',

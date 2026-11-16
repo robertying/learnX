@@ -105,6 +105,7 @@ module.exports = {
       haste: { defaultPlatform: 'web', platforms: ['web'] },
       moduleNameMapper: {
         '^react-native$': 'react-native-web',
+        '\\.png$': '<rootDir>/jest/mocks/image.js',
         ...webAliases,
       },
       setupFiles: ['<rootDir>/jest/web/setup.ts'],

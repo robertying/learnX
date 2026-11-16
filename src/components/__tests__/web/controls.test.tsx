@@ -328,3 +328,9 @@ it('starts a date range today when it has none', () => {
   const { startDate, endDate } = onConfirm.mock.calls[0][0];
   expect(startDate).toEqual(endDate);
 });
+
+it("shows the app's icon as its logo", () => {
+  const Logo = require('components/Logo').default;
+  renderFluent(<Logo iosSize={96} />);
+  expect(document.querySelector('img')).toBeTruthy();
+});

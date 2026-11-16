@@ -64,8 +64,9 @@ export const toast = (
 };
 
 /**
- * The current toast: a Fluent toast card at the bottom of the window, above
- * everything else, which goes away by itself. Mount once.
+ * The current toast: a Fluent toast card at the bottom end of the window, as
+ * Windows apps show theirs, above everything else (clear of the buttons a
+ * page centers at its foot), which goes away by itself. Mount once.
  */
 export const Toast: React.FC = () => {
   const theme = useTheme();
@@ -122,7 +123,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: Spacing.l,
-    alignItems: 'center',
+    alignItems: 'flex-end',
     zIndex: 1000,
   },
   toast: {
