@@ -44,8 +44,8 @@ dayjs.locale(
   {
     ...zhCn,
     /* oxlint-disable learnx/no-han-outside-translations -- locale data: Chinese in every app language */
-    meridiem: (hour: number) => (hour < 12 ? '上午' : '下午'),
     // Not in dayjs's ILocale type, though dayjs reads it.
+    meridiem: (hour: number) => (hour < 12 ? '上午' : '下午'),
     // Relative times as iOS and Android write them ("3小时前", "3小时后"):
     // no space between a number and its unit, and a time ahead is "…后", not
     // dayjs's "…内" ("within").

@@ -109,7 +109,10 @@ export type LoginStackParams = {
 };
 
 export type WhatsNewStackParams = {
-  /** `preview` shows every highlight of this platform, whatever native version this install has. */
+  /**
+   * `preview` shows every highlight of this platform, whatever native version
+   * this install has.
+   */
   WhatsNew: { version: string; preview?: boolean };
   Changelog: undefined;
 };

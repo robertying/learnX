@@ -332,7 +332,8 @@ export const mockSource: AppSource = {
     await roundTrip();
     return sendDownload(transport, { url, headers: {} });
   },
-  // The emulated session never expires: one request either way.
+  // One request, which logs in again first once the emulated session has
+  // expired (`roundTrip`).
   ensureSession: () => roundTrip(),
   // Not awaited by callers; never fails.
   logout: () => Promise.resolve(),
@@ -440,7 +441,7 @@ export const mockSource: AppSource = {
       }));
       return { events, failedRanges: [] };
     }),
-  // The requests the app sends itself.
+  // The requests the app wraps.
   markNoticeRead: () => mockMarkNoticeRead(),
   submitAssignment: (_id, { onProgress }) => mockSubmitAssignment(onProgress),
 };

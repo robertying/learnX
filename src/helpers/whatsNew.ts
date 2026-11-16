@@ -34,8 +34,8 @@ export interface Release {
 }
 
 /**
- * The most rows a What's New lists on one platform, as in Apple's own sheets, so it stays
- * short enough to read at a glance.
+ * The most rows a What's New lists on one platform, as in Apple's own sheets,
+ * so it stays short enough to read at a glance.
  */
 export const maxHighlights = 4;
 

@@ -75,7 +75,7 @@ class UpdaterModule : Module() {
     if (!sha256Hex(file).equals(sha256, ignoreCase = true)) {
       throw UpdateException(CHECKSUM, "The download doesn't match its SHA-256")
     }
-    // Android 10 (and 9) reads an archive's certificates only for GET_SIGNATURES, and then fills in
+    // Android 10 reads an archive's certificates only for GET_SIGNATURES, and then fills in
     // signingInfo for GET_SIGNING_CERTIFICATES too.
     val archive = pm.getPackageArchiveInfo(file.path, ARCHIVE_FLAGS)
     @Suppress("DEPRECATION")
