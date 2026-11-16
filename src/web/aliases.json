@@ -1,0 +1,12 @@
+{
+  "@bottom-tabs/react-navigation": "packages/bottomTabs.tsx",
+  "@expo/ui/swift-ui": "packages/swiftUI.tsx",
+  "@expo/ui/swift-ui/modifiers": "packages/swiftUIModifiers.js",
+  "@preeternal/react-native-cookie-manager": "cookieManager.ts",
+  "expo-file-system": "packages/fileSystem.ts",
+  "expo-notifications": "packages/notifications.ts",
+  "expo-secure-store": "secureStore.ts",
+  "expo-sqlite/kv-store": "kvStore.ts",
+  "react-native-pdf": "packages/Pdf.tsx",
+  "react-native-share": "packages/share.ts"
+}

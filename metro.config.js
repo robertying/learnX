@@ -31,10 +31,34 @@ const inlinedInputsHash = () => {
   return hash.digest('hex').slice(0, 16);
 };
 
+// The Electron app (a web build): packages with no web build, or one that
+// can't run there, resolve to the stand-ins in src/web that aliases.json
+// names. Every other module, and every other platform, resolves as usual.
+/** @type {Record<string, string>} */
+const webAliases = require('./src/web/aliases.json');
+
+const defaultConfig = getDefaultConfig(__dirname);
+const upstreamResolveRequest = defaultConfig.resolver?.resolveRequest;
+
 /** @type {ReturnType<typeof getDefaultConfig>} */
 const config = {
-  ...getDefaultConfig(__dirname),
+  ...defaultConfig,
   cacheVersion: inlinedInputsHash(),
+  resolver: {
+    ...defaultConfig.resolver,
+    resolveRequest: (context, moduleName, platform) => {
+      const alias = platform === 'web' ? webAliases[moduleName] : undefined;
+      if (alias) {
+        return {
+          type: 'sourceFile',
+          filePath: path.join(__dirname, 'src/web', alias),
+        };
+      }
+      return upstreamResolveRequest
+        ? upstreamResolveRequest(context, moduleName, platform)
+        : context.resolveRequest(context, moduleName, platform);
+    },
+  },
 };
 
 module.exports = wrapWithReanimatedMetroConfig(

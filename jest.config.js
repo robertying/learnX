@@ -36,7 +36,8 @@ const base = {
  * default platform here); the component tests under `__tests__/android` with
  * the `.android.tsx` files, Compose stand-ins (`jest/mocks/expoCompose.tsx`)
  * and `Platform.OS` 'android'; and `tooling`, the tests of the repo's scripts,
- * Maestro flows and lint rules in `scripts/__tests__`, typed with Node
+ * Maestro flows and lint rules in `scripts/__tests__` and of the Electron
+ * app's main process in `electron/__tests__`, typed with Node
  * (`scripts/tsconfig.json`).
  */
 /** @type {import('jest').Config} */
@@ -87,7 +88,7 @@ module.exports = {
     {
       ...base,
       displayName: 'tooling',
-      roots: ['<rootDir>/scripts'],
+      roots: ['<rootDir>/scripts', '<rootDir>/electron'],
       testEnvironment: 'node',
     },
   ],

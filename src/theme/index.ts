@@ -8,7 +8,8 @@ import {
   DefaultTheme as NavigationDefaultTheme,
   DarkTheme as NavigationDarkTheme,
 } from '@react-navigation/native';
-import { isApple } from 'helpers/platform';
+import { isApple, isElectron } from 'helpers/platform';
+import { buildElectronColors } from './electron';
 
 /**
  * The brand color: Tsinghua purple, and the lighter tone of it used in dark
@@ -336,7 +337,11 @@ const buildAppleColors = (dark: boolean): ColorRoles => {
 };
 
 const buildColors = (dark: boolean): ColorRoles =>
-  isApple() ? buildAppleColors(dark) : buildMaterialColors(dark);
+  isApple()
+    ? buildAppleColors(dark)
+    : isElectron()
+      ? buildElectronColors(dark)
+      : buildMaterialColors(dark);
 
 export type ThemeColors = ColorRoles;
 

@@ -1,7 +1,8 @@
 {
   // The repo's tooling: scripts and their tests, the config files, the Babel
-  // and lint plugins. They run in Node, so they get Node's types, which the
-  // app's own tsconfig leaves out. `pnpm typecheck` checks both.
+  // and lint plugins, and the Electron app's main process (electron/). They
+  // run in Node, so they get Node's types, which the app's own tsconfig leaves
+  // out. `pnpm typecheck` checks both.
   "extends": "../tsconfig.json",
   "include": [
     "**/*.ts",
@@ -9,7 +10,10 @@
     "../babel/*.js",
     "../lint/*.mjs",
     "../jest/transformer.js",
-    "../*.config.js"
+    "../*.config.js",
+    "../electron/*.cjs",
+    "../electron/*.mjs",
+    "../electron/__tests__/*.ts"
   ],
   "exclude": [],
   "compilerOptions": {
