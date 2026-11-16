@@ -38,6 +38,9 @@ import UIKit
     let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 320, height: 480))
     let screen = UIViewController()
     window.rootViewController = screen
+    // The root view joins the window only once it's shown.
+    window.isHidden = false
+    defer { window.isHidden = true }
     let view = QuickLookView(appContext: nil)
 
     screen.view.addSubview(view)

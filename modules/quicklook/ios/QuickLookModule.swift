@@ -67,7 +67,7 @@ final class QuickLookView: ExpoView {
   }
 }
 
-extension QuickLookView: @preconcurrency QLPreviewControllerDataSource {
+extension QuickLookView: QLPreviewControllerDataSource {
   func numberOfPreviewItems(in controller: QLPreviewController) -> Int {
     url == nil ? 0 : 1
   }
