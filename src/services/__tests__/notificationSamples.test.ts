@@ -68,6 +68,19 @@ it('makes a single and a grouped notification of every kind, and the summary', (
   expect(single('groupSubmissions')).toBe('Submitted by your group');
 });
 
+it('points every sample at an item that exists, so tapping it opens it', () => {
+  const ids = new Set(
+    Object.values(lists as Record<string, { id: string }[]>).flatMap(items =>
+      items.map(item => item.id),
+    ),
+  );
+  for (const n of sampleContentNotifications(sampleDiff(lists, now), now)) {
+    for (const id of [n.target.id, ...(n.ids ?? [])].filter(Boolean)) {
+      expect(ids).toContain(id);
+    }
+  }
+});
+
 it('makes a deadline reminder an hour ahead', () => {
   const reminder = sampleReminder(
     { id: 'a1', title: 'Essay', courseName: 'Writing' } as never,
