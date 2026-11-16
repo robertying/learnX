@@ -83,7 +83,7 @@ Requires iOS / iPadOS 17.6, macOS 14.6 or Android 9 and later.
 - courseX 课程信息共享计划 Course Information Sharing
 - 收藏内容（与网络学堂同步） Favorites, synced with Web Learning
 - 归档内容 Archiving notices, files and assignments
-- 隐藏课程 Hiding courses
+- 屏蔽课程 Hiding courses
 - 全局搜索 Global search
 - 切换学期 Switching among semesters
 - 暗黑模式 Dark mode

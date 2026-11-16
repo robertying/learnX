@@ -38,16 +38,19 @@ it('shows the highlights this install has, and marks the running version seen', 
   );
 });
 
-it('previews every highlight of the release', async () => {
+it('previews every highlight of the release on this platform', async () => {
+  // An 18.x Android install: the preview lists the rows that need 19's
+  // native code too, but not the Apple-only ones.
   await renderScreen({ version: '19.0.0', preview: true });
   for (const title of [
     'whatsNew19TodayTitle',
     'whatsNew19WidgetsTitle',
-    'whatsNew19RemindersTitle',
-    'whatsNew19SpotlightTitle',
+    'whatsNew19NotificationsTitle',
+    'whatsNew19DesignTitle',
   ] as const) {
     expect(screen.getByText(t(title))).toBeTruthy();
   }
+  expect(screen.queryByText(t('whatsNew19SpotlightTitle'))).toBeNull();
 });
 
 it('shows no highlights for a release without any', async () => {

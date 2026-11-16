@@ -27,14 +27,14 @@ export interface Release {
   /** The JS version (`package.json`) that brings these. */
   version: string;
   /**
-   * At most `maxHighlights`, the biggest changes; the rest go in the
-   * changelog.
+   * The biggest changes, at most `maxHighlights` on each platform; the rest
+   * go in the changelog.
    */
   highlights: Highlight[];
 }
 
 /**
- * The most rows a What's New lists, as in Apple's own sheets, so it stays
+ * The most rows a What's New lists on one platform, as in Apple's own sheets, so it stays
  * short enough to read at a glance.
  */
 export const maxHighlights = 4;
@@ -59,11 +59,12 @@ export const releases: Release[] = [
         title: 'whatsNew19WidgetsTitle',
         body: 'whatsNew19WidgetsBody',
         minNative: '19.0.0',
+        platforms: ['ios', 'android'],
       },
       {
-        icon: 'reminder',
-        title: 'whatsNew19RemindersTitle',
-        body: 'whatsNew19RemindersBody',
+        icon: 'notifications',
+        title: 'whatsNew19NotificationsTitle',
+        body: 'whatsNew19NotificationsBody',
         minNative: '19.0.0',
       },
       {
@@ -72,6 +73,13 @@ export const releases: Release[] = [
         body: 'whatsNew19SpotlightBody',
         minNative: '19.0.0',
         platforms: ['ios', 'mac'],
+      },
+      {
+        icon: 'design',
+        title: 'whatsNew19DesignTitle',
+        body: 'whatsNew19DesignBody',
+        minNative: '19.0.0',
+        platforms: ['android'],
       },
     ],
   },

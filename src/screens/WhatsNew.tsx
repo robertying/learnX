@@ -23,11 +23,15 @@ type Props = NativeStackScreenProps<WhatsNewStackParams, 'WhatsNew'>;
 const WhatsNew: React.FC<Props> = ({ navigation, route }) => {
   const { version, preview } = route.params;
   const release = releases.find(item => item.version === version);
+  const context = whatsNewContext();
+  // A preview counts the install as having the release's native code, so it
+  // lists every row this platform would get.
   const highlights = !release
     ? []
-    : preview
-      ? release.highlights
-      : applicableHighlights(release, whatsNewContext());
+    : applicableHighlights(release, {
+        ...context,
+        nativeVersion: preview ? release.version : context.nativeVersion,
+      });
 
   // Seen up to the running version, however the sheet is closed.
   useEffect(() => {

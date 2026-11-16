@@ -495,13 +495,17 @@ const zh: typeof en = {
   whatsNewTitle: 'learnX {version} 新功能',
   fullChangelog: '完整更新日志',
   whatsNew19TodayTitle: '今天',
-  whatsNew19TodayBody: '新的首个标签页，汇总当天课程、截止作业和新内容。',
+  whatsNew19TodayBody: '新的首个标签页，汇总当天课程、即将截止的作业和新内容。',
   whatsNew19WidgetsTitle: '小组件',
   whatsNew19WidgetsBody: '不打开 learnX 也能看到作业截止和下一节课。',
-  whatsNew19RemindersTitle: '截止提醒',
-  whatsNew19RemindersBody: '作业截止前发送通知提醒你。',
+  whatsNew19NotificationsTitle: '通知',
+  whatsNew19NotificationsBody:
+    '新公告、新文件和成绩会通知你，作业截止和上课前也会提醒你。',
   whatsNew19SpotlightTitle: '聚焦搜索与 Siri',
-  whatsNew19SpotlightBody: '在设备上的任何地方查找公告、作业和文件。',
+  whatsNew19SpotlightBody:
+    '在聚焦搜索中查找公告、作业和文件，或问 Siri 下一节课和作业截止。',
+  whatsNew19DesignTitle: '全新设计',
+  whatsNew19DesignBody: '更简洁的界面，遵循 Android 设计风格，换上清华紫。',
 };
 
 export default zh;

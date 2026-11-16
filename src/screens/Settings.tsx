@@ -28,7 +28,8 @@ type Props = MainStackScreenProps<SettingsStackParams, 'Settings'>;
 
 /**
  * The newest What's New this install has. Debug builds preview the newest
- * one with every row, since their version is usually behind it.
+ * one with every row of this platform, since their version is usually
+ * behind it.
  */
 const latestWhatsNew = () => {
   const found = findWhatsNew(whatsNewContext());
