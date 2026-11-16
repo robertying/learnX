@@ -1,6 +1,6 @@
 import { Dimensions, StyleSheet } from 'react-native';
 import { act, render, screen } from '@testing-library/react-native';
-import { Headline, Paragraph, Title } from 'components/Text';
+import { Headline, Paragraph, Title, useTextIconSize } from 'components/Text';
 
 it('lets a title, headline or paragraph take another text style', async () => {
   await render(
@@ -16,6 +16,33 @@ it('lets a title, headline or paragraph take another text style', async () => {
   expect(size('Small title')).toBeLessThan(size('Default title')!);
   expect(size('Big headline')).toBe(size('Default title'));
   expect(size('Small paragraph')).toBeLessThan(size('Big headline')!);
+});
+
+it("takes macOS's text sizes on a Mac", () => {
+  jest.isolateModules(() => {
+    const DeviceInfo = require('constants/DeviceInfo').default;
+    jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+    const { textStyles } = require('components/Text');
+    expect(textStyles.body.fontSize).toBe(13);
+    expect(textStyles.subheadline.fontSize).toBe(11);
+    expect(textStyles.headline.fontWeight).toBe('700');
+  });
+});
+
+it('sizes an icon beside text as the text, growing with the text size', async () => {
+  const Probe = () => <Title>{String(useTextIconSize('subheadline'))}</Title>;
+  const window = Dimensions.get('window');
+  Dimensions.set({ window: { ...window, fontScale: 1 } });
+  await render(<Probe />);
+  expect(screen.getByText('15')).toBeTruthy();
+  await act(() => {
+    Dimensions.set({ window: { ...window, fontScale: 3 } });
+  });
+  // Up to twice the text's default size
+  expect(screen.getByText('30')).toBeTruthy();
+  await act(() => {
+    Dimensions.set({ window });
+  });
 });
 
 describe('when the text size changes while the app runs', () => {

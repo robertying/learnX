@@ -676,8 +676,11 @@ describe('Form (iOS details)', () => {
         <FormTextField value="" onChangeText={jest.fn()} multiline />
       </FormSection>,
     );
-    // At iOS's headline size, as the rest of the app on Mac
-    expect(font).toHaveBeenCalledWith({ size: 17, weight: 'semibold' });
+    // The name in Title 2, which the Mac draws at its own smaller size
+    expect(font).toHaveBeenCalledWith({
+      textStyle: 'title2',
+      weight: 'semibold',
+    });
     expect(screen.getByText('Problem set')).toBeTruthy();
   });
 });
