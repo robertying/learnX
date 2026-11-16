@@ -135,6 +135,7 @@ it("previews other kinds in a web view and an attachment isn't marked seen", asy
   });
   // A downloaded page's scripts don't run.
   expect(screen.getByTestId('webview')).toHaveProp('javaScriptEnabled', false);
+  expect(screen.getByTestId('webview')).toHaveProp('decelerationRate', 'normal');
   expect(markFileSeen).not.toHaveBeenCalled();
 });
 
@@ -198,14 +199,16 @@ it('offers download on the Mac and open on Android', async () => {
   isMac.mockRestore();
 });
 
-it('previews office documents on white, as they are drawn for paper', async () => {
+it('previews Office documents with Quick Look', async () => {
   downloaded({ path: 'file:///a.docx' });
   await renderScreen({
     attachment: { ...zip, fileType: 'docx', downloadUrl: 'https://x' },
   });
-  const webView = screen.getByTestId('webview');
-  expect(webView.props.style).toEqual({ backgroundColor: 'white' });
-  expect(webView.props.decelerationRate).toBe('normal');
+  expect(screen.getByTestId('quick-look').props.uri).toBe('file:///a.docx');
+  expect(screen.queryByTestId('webview')).toBeNull();
+  expect(jest.mocked(useFileDetailHeader).mock.lastCall![0].canRender).toBe(
+    true,
+  );
 });
 
 it('lists only what is known of a file', async () => {

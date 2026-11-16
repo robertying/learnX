@@ -1,6 +1,6 @@
 # modules
 
-Local Expo modules (`expo-module.config.json` in each): `crashlytics`, `menus`, `share`, `shortcuts`, `sidebar`, `spotlight`, `toast` and `updater`. They have no JS-only fallback, so a change to their native code needs a rebuild.
+Local Expo modules (`expo-module.config.json` in each): `crashlytics`, `menus`, `quicklook`, `share`, `shortcuts`, `sidebar`, `spotlight`, `toast` and `updater`. They have no JS-only fallback, so a change to their native code needs a rebuild.
 
 ## Native tests (iOS)
 
