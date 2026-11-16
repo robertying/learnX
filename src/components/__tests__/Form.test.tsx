@@ -112,6 +112,31 @@ describe('Form', () => {
     isMac.mockRestore();
   });
 
+  it('draws the Mac rows at iOS text sizes, padded, with tinted actions', async () => {
+    jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+    const onToggle = jest.fn();
+    await render(
+      <FormSection title="Calendar" footer="Synced weekly">
+        <FormToggle
+          title="Add to Calendar"
+          icon="calendar"
+          value={false}
+          onValueChange={onToggle}
+        />
+        <FormButton title="Sync" icon="sync" onPress={jest.fn()} />
+      </FormSection>,
+    );
+    // The row's own icon and label instead of the Mac's crowded label
+    expect(screen.getByText('Add to Calendar')).toBeTruthy();
+    expect(screen.getByTestId('icon-calendar')).toBeTruthy();
+    await fireEvent(screen.getByRole('switch'), 'valueChange', true);
+    expect(onToggle).toHaveBeenCalledWith(true);
+    // An action in the tint: no label color on its title
+    expect(screen.getByText('Sync').props.modifiers).toBeUndefined();
+    // The footer at iOS's footnote size, its lines spaced apart
+    expect(screen.getByText('Synced weekly').props.modifiers).toHaveLength(2);
+  });
+
   it('shows a detail at the end of a row', async () => {
     await render(
       <FormSection>
@@ -607,10 +632,8 @@ describe('Form (iOS details)', () => {
         <FormTextField value="" onChangeText={jest.fn()} multiline />
       </FormSection>,
     );
-    expect(font).toHaveBeenCalledWith({
-      textStyle: 'headline',
-      weight: 'semibold',
-    });
+    // At iOS's headline size, as the rest of the app on Mac
+    expect(font).toHaveBeenCalledWith({ size: 17, weight: 'semibold' });
     expect(screen.getByText('Problem set')).toBeTruthy();
   });
 });

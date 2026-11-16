@@ -11,6 +11,7 @@ import { getSettings, setSetting, useSettings } from 'data/settings';
 import useAppCommand from 'hooks/useAppCommand';
 import useDetailNavigator, { useDetailRoot } from 'hooks/useDetailNavigator';
 import useFilterListHeader from 'hooks/useFilterListHeader';
+import { scrollInsetBehavior } from 'constants/scrollInsetBehavior';
 import useListSelection from 'hooks/useListSelection';
 import type { DetailStackParams, RootStackParams } from 'navigation/types';
 import Styles from 'constants/Styles';
@@ -315,7 +316,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
 
   const listProps = {
     style: { height: '100%' as const },
-    contentInsetAdjustmentBehavior: 'automatic' as const,
+    contentInsetAdjustmentBehavior: scrollInsetBehavior,
     data,
     // In the list, so that the list is the screen's first scroll view: iOS
     // collapses the large title as it scrolls.
