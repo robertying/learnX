@@ -135,7 +135,10 @@ it("previews other kinds in a web view and an attachment isn't marked seen", asy
   });
   // A downloaded page's scripts don't run.
   expect(screen.getByTestId('webview')).toHaveProp('javaScriptEnabled', false);
-  expect(screen.getByTestId('webview')).toHaveProp('decelerationRate', 'normal');
+  expect(screen.getByTestId('webview')).toHaveProp(
+    'decelerationRate',
+    'normal',
+  );
   expect(markFileSeen).not.toHaveBeenCalled();
 });
 
