@@ -1,5 +1,5 @@
 diff --git a/ios/TabBarFontSize.swift b/ios/TabBarFontSize.swift
-index dec5c0a..6a22852 100644
+index dec5c0ae3f7ff643b2e3313b191bf702be107e8e..6a228526c9888c4a941ce9808e3bd50b3fe3abce 100644
 --- a/ios/TabBarFontSize.swift
 +++ b/ios/TabBarFontSize.swift
 @@ -29,19 +29,21 @@ enum TabBarFontSize {
@@ -51,8 +51,25 @@ index dec5c0a..6a22852 100644
        family: fontFamily,
        weight: fontWeight,
        color: inactiveColor
+diff --git a/ios/TabItem.swift b/ios/TabItem.swift
+index 3992f27d10f09ef450273017254ca2a2b8272f6f..3e4528ed9ae3e9712e2e9db1545f8b4ede2afe60 100644
+--- a/ios/TabItem.swift
++++ b/ios/TabItem.swift
+@@ -15,8 +15,11 @@ struct TabItem: View {
+       Image(uiImage: renderedIcon(icon))
+ #endif
+     } else if let sfSymbol, !sfSymbol.isEmpty {
++      // learnX: the system picks the variant, as for any SwiftUI tab: filled
++      // in the tab bar and the outline in the iPad sidebar, as Apple's
++      // guidelines draw them. The selected tab bar item still shows
++      // `focusedSfSymbol`.
+       Image(systemName: sfSymbol)
+-        .noneSymbolVariant()
+     }
+     if labeled != false {
+       Text(title ?? "")
 diff --git a/ios/TabItemEventModifier.swift b/ios/TabItemEventModifier.swift
-index 674e602..17ee79d 100644
+index 674e602d5b959b1c12362efdd3d7800e6917aa4f..17ee79d895cd1132c5512ddd2a7f5a301580c12d 100644
 --- a/ios/TabItemEventModifier.swift
 +++ b/ios/TabItemEventModifier.swift
 @@ -8,6 +8,8 @@ import UIKit
@@ -189,7 +206,7 @@ index 674e602..17ee79d 100644
  }
  
 diff --git a/ios/TabViewImpl.swift b/ios/TabViewImpl.swift
-index 6de510d..6e6da89 100644
+index 6de510d0190ee9fc99b99a68f2e8f021c3776391..6e6da893ebbf8ec33f1add7d4e42607fcfd9c00f 100644
 --- a/ios/TabViewImpl.swift
 +++ b/ios/TabViewImpl.swift
 @@ -58,7 +58,21 @@ struct TabViewImpl: View {
@@ -234,7 +251,7 @@ index 6de510d..6e6da89 100644
        weight: props.fontWeight,
        color: props.selectedActiveTintColor
 diff --git a/ios/TabViewProvider.swift b/ios/TabViewProvider.swift
-index e566345..ce1be79 100644
+index e5663453ad1c54461a85b4a54ac85f3ffc52e032..ce1be799f8309a7ffc918b70ee299fba15695c23 100644
 --- a/ios/TabViewProvider.swift
 +++ b/ios/TabViewProvider.swift
 @@ -211,18 +211,41 @@ public final class TabInfo: NSObject {
