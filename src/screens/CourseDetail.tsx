@@ -33,7 +33,6 @@ import ListBackground from 'components/ListBackground';
 import { t } from 'helpers/i18n';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import { SplitViewContext } from 'navigation/SplitView';
-import DeviceInfo from 'constants/DeviceInfo';
 import Styles from 'constants/Styles';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
@@ -47,10 +46,7 @@ import useRefreshCommand from 'hooks/useRefreshCommand';
 import SegmentedTabs from 'components/SegmentedTabs';
 import { SafeAreaView } from 'react-native-screens/experimental';
 import { hasGlassHeader } from 'navigation/options';
-
-const listContentInsetAdjustmentBehavior = DeviceInfo.isMac()
-  ? ('never' as const)
-  : ('automatic' as const);
+import { scrollInsetBehavior } from 'constants/scrollInsetBehavior';
 
 type NavigationProp = MainStackNavigationProp<
   CourseDetailParamList,
@@ -128,7 +124,7 @@ const CourseItemList = <T extends Notice | Assignment | File>({
         keyExtractor={item => item.id}
         refreshing={refresh.isPending}
         onRefresh={handleRefresh}
-        contentInsetAdjustmentBehavior={listContentInsetAdjustmentBehavior}
+        contentInsetAdjustmentBehavior={scrollInsetBehavior}
         contentInset={{ top: topInset }}
         // Starts at the top of its inset. React Native reuses scroll views,
         // and one that showed a list before keeps the offset it was given

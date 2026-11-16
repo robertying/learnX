@@ -27,8 +27,9 @@ import { useTheme } from 'theme';
  *
  * On iOS each variant scales with the user's text size along its own Dynamic
  * Type curve (`dynamicTypeRamp`), as UIKit's text styles do. Mac Catalyst
- * ("Optimize for Mac") draws these at 77%, which gives macOS's own sizes
- * (body 13 pt). Android scales them with the system font scale.
+ * ("Optimize for Mac") draws them at these sizes too, larger than macOS's own
+ * (body 13 pt), which SwiftUI's text styles use there; `Form` matches them on
+ * Mac. Android scales them with the system font scale.
  */
 export type TextVariant =
   | 'largeTitle'

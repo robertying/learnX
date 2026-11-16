@@ -9,7 +9,7 @@ import {
   FormSection,
   FormText,
 } from 'components/Form';
-import { SyncStatusSection } from 'components/SyncStatus';
+import { SyncStatusSection, useSyncStatus } from 'components/SyncStatus';
 import { useAssignments, useFiles, useNotices } from 'data/content';
 import { getSettings, setSetting } from 'data/settings';
 import { useWeekSchedule } from 'data/schedule';
@@ -77,6 +77,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
   ).length;
 
   const settingsBadge = useSettingsBadge();
+  const syncShown = !!useSyncStatus(schedule.updatedAt);
 
   const handleRefresh = async () => {
     const results = await Promise.all([
@@ -221,7 +222,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
       <Form testID="today" onRefresh={pullToRefresh.onRefresh}>
         {/* In the Form, which scrolls under the header and collapses the
             large title; a view above it would sit behind the header. */}
-        <SyncStatusSection updatedAt={schedule.updatedAt} />
+        {syncShown && <SyncStatusSection updatedAt={schedule.updatedAt} />}
         {/* One section, and when a class ends or starts goes above its name
             rather than beside it, so a busy day keeps what's due on screen.
             The whole week is a tap away in Schedule. */}

@@ -37,6 +37,7 @@ import type { ToggleMenuOption } from 'components/ToggleMenu.shared';
 import { systemIcons } from 'helpers/systemIcons';
 import { headerButtons } from 'navigation/headerButtons';
 import { hasGlassHeader } from 'navigation/options';
+import { scrollInsetBehavior } from 'constants/scrollInsetBehavior';
 import { t } from 'helpers/i18n';
 import { SearchStackParams } from 'navigation/types';
 import { Paragraph } from 'components/Text';
@@ -297,7 +298,7 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
     <SectionList<TopHit, (typeof sections)[number]>
       // Starts over at the top for another tab or tab height.
       key={`${scope}-${topInset}`}
-      contentInsetAdjustmentBehavior="automatic"
+      contentInsetAdjustmentBehavior={scrollInsetBehavior}
       keyboardDismissMode="on-drag"
       contentContainerStyle={{ paddingBottom: safeAreaInsets.bottom }}
       contentInset={{ top: topInset }}
@@ -408,7 +409,10 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
             </SafeAreaView>
           </>
         ) : (
-          <View style={Styles.flex1}>
+          // Mac: once there are results, the sheet lays the screen out under
+          // its header (the list is its scroll view), so the tabs keep clear
+          // of it themselves.
+          <SafeAreaView edges={{ top: true }} style={Styles.flex1}>
             <SegmentedTabs
               titles={tabTitles}
               selectedIndex={tabs.indexOf(scope)}
@@ -417,7 +421,7 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
               testID="search-tabs"
             />
             {hasResults ? renderList(0) : null}
-          </View>
+          </SafeAreaView>
         )}
       </View>
     </SafeArea>
