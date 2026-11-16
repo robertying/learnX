@@ -1,15 +1,45 @@
-import { render, screen, userEvent } from '@testing-library/react-native';
+import { act, render, screen, userEvent } from '@testing-library/react-native';
 import { StackActions } from '@react-navigation/native';
 import dayjs from 'dayjs';
 import type { Assignment } from 'data/types/state';
 import type { ClassSession } from 'helpers/schedule';
 import DeviceInfo from 'constants/DeviceInfo';
+import useDetailNavigator, { useDetailRoot } from 'hooks/useDetailNavigator';
+import type { AppCommand } from 'modules/menus';
 import { getTitleOptions } from 'navigation/options';
 import Today from 'screens/Today';
 import { getSettings, setSetting } from 'data/settings';
+import { useAuthStore } from 'data/auth';
 import { screenProps } from 'test-utils/screenProps';
 
+jest.mock('@react-navigation/native', () => ({
+  ...jest.requireActual('@react-navigation/native'),
+  useIsFocused: () => true,
+}));
+
 jest.mock('hooks/useAvailableUpdate', () => () => null);
+jest.mock('hooks/useDetailNavigator', () => ({
+  ...jest.requireActual('hooks/useDetailNavigator'),
+  __esModule: true,
+  default: jest.fn(() => undefined),
+  useDetailRoot: jest.fn(() => undefined),
+}));
+
+// The native module's events, as AppCommands.swift sends them.
+const mockListeners = new Set<(event: { command: AppCommand }) => void>();
+jest.mock('modules/menus', () => ({
+  Menus: {
+    addListener: (
+      _event: 'onCommand',
+      listener: (event: { command: AppCommand }) => void,
+    ) => {
+      mockListeners.add(listener);
+      return { remove: () => mockListeners.delete(listener) };
+    },
+  },
+}));
+const choose = (command: AppCommand) =>
+  act(() => mockListeners.forEach(l => l({ command })));
 jest.mock('data/login', () => ({ login: jest.fn() }));
 
 const mockSessions: ClassSession[] = [];
@@ -20,6 +50,7 @@ const query = (data: object) => ({
   refetch: jest.fn(() => Promise.resolve({ isError: false })),
 });
 const mockSchedule: Record<string, unknown> = {};
+const mockScheduleRefetch = jest.fn(() => Promise.resolve({ isError: false }));
 jest.mock('data/schedule', () => ({
   useWeekSchedule: () => ({
     sessions: mockSessions,
@@ -28,7 +59,7 @@ jest.mock('data/schedule', () => ({
     updatedAt: 0,
     fetching: false,
     failed: false,
-    refetch: jest.fn(() => Promise.resolve({ isError: false })),
+    refetch: mockScheduleRefetch,
     ...mockSchedule,
   }),
 }));
@@ -74,6 +105,7 @@ const setup = async () => {
 };
 
 beforeEach(() => {
+  mockListeners.clear();
   mockSessions.length = 0;
   mockAssignments.length = 0;
   for (const key of Object.keys(mockSchedule)) {
@@ -224,6 +256,89 @@ it('puts a refresh button in the header on a Mac', async () => {
   const options = navigation.setOptions.mock.lastCall![0];
   const items = options.unstable_headerRightItems?.() ?? options.headerRight;
   expect(JSON.stringify(items)).toContain('refresh');
+});
+
+describe('menu bar commands', () => {
+  const initialAuth = useAuthStore.getState();
+  const homework = (id: string, hours: number) => ({
+    id,
+    courseId: 'a',
+    courseName: 'Course a',
+    title: `Homework ${id}`,
+    description: '',
+    deadline: dayjs().add(hours, 'hour').toISOString(),
+    submitted: false,
+  });
+
+  afterEach(async () => {
+    jest.mocked(useDetailNavigator).mockReturnValue(undefined);
+    jest.mocked(useDetailRoot).mockReturnValue(undefined);
+    await act(() => useAuthStore.setState(initialAuth));
+  });
+
+  const opened = (navigation: { dispatch: jest.Mock }) =>
+    navigation.dispatch.mock.lastCall?.[0];
+
+  it("steps through the rows that open beside Today, from the one that's open", async () => {
+    jest.useFakeTimers({ now: dayjs().hour(12).minute(0).toDate() });
+    // The class now and the next are of one course, which is one stop.
+    mockSessions.push(session('a', 'a', -30, 30), session('b', 'a', 60, 120));
+    mockAssignments.push(homework('x', 3), homework('y', 5));
+    jest
+      .mocked(useDetailNavigator)
+      .mockReturnValue({ push: jest.fn(), show: jest.fn() });
+    let { navigation } = await setup();
+
+    // Nothing open: from either end
+    await choose('nextItem');
+    expect(opened(navigation)).toEqual(
+      StackActions.push('CourseDetail', { id: 'a' }),
+    );
+    await choose('previousItem');
+    expect(opened(navigation)).toEqual(
+      StackActions.push('AssignmentDetail', { id: 'y' }),
+    );
+    await screen.unmount();
+
+    jest
+      .mocked(useDetailRoot)
+      .mockReturnValue({ name: 'CourseDetail', id: 'a' });
+    ({ navigation } = await setup());
+    await choose('nextItem');
+    expect(opened(navigation)).toEqual(StackActions.push('Schedule'));
+    await screen.unmount();
+
+    jest.mocked(useDetailRoot).mockReturnValue({ name: 'Schedule' });
+    ({ navigation } = await setup());
+    await choose('nextItem');
+    expect(opened(navigation)).toEqual(
+      StackActions.push('AssignmentDetail', { id: 'x' }),
+    );
+    await screen.unmount();
+
+    // Not past the end
+    jest
+      .mocked(useDetailRoot)
+      .mockReturnValue({ name: 'AssignmentDetail', id: 'y' });
+    ({ navigation } = await setup());
+    await choose('nextItem');
+    expect(navigation.dispatch).not.toHaveBeenCalled();
+  });
+
+  it('leaves Next Item to the screen on top without a detail pane', async () => {
+    jest.useFakeTimers({ now: dayjs().hour(12).minute(0).toDate() });
+    mockSessions.push(session('a', 'a', -30, 30));
+    const { navigation } = await setup();
+    await choose('nextItem');
+    expect(navigation.dispatch).not.toHaveBeenCalled();
+  });
+
+  it('refreshes with ⌘R', async () => {
+    await act(() => useAuthStore.setState({ loggedIn: true }));
+    await setup();
+    await choose('refresh');
+    expect(mockScheduleRefetch).toHaveBeenCalled();
+  });
 });
 
 const headerItem = (

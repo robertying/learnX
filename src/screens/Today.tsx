@@ -1,4 +1,5 @@
 import { useLayoutEffect } from 'react';
+import { useIsFocused } from '@react-navigation/native';
 import dayjs from 'dayjs';
 import ItemRow from 'components/ItemRow';
 import {
@@ -9,7 +10,6 @@ import {
   FormText,
 } from 'components/Form';
 import { SyncStatusSection, useSyncStatus } from 'components/SyncStatus';
-import DeviceInfo from 'constants/DeviceInfo';
 import { useAssignments, useFiles, useNotices } from 'data/content';
 import { getSettings, setSetting } from 'data/settings';
 import { useWeekSchedule } from 'data/schedule';
@@ -30,9 +30,14 @@ import {
 } from 'helpers/schedule';
 import { beijingDate, showsBeijingTime } from 'helpers/serverTime';
 import { isShownBy } from 'helpers/shown';
-import { useShowDetail } from 'hooks/useDetailNavigator';
+import useDetailNavigator, {
+  useDetailRoot,
+  useShowDetail,
+} from 'hooks/useDetailNavigator';
+import useItemStepping from 'hooks/useItemStepping';
 import { useMinute } from 'hooks/useClock';
 import usePullToRefresh from 'hooks/usePullToRefresh';
+import useRefreshCommand from 'hooks/useRefreshCommand';
 import useSettingsBadge from 'hooks/useSettingsBadge';
 import { debugTitle, getTitleOptions } from 'navigation/options';
 import useHeaderButtons from 'hooks/useHeaderButtons';
@@ -113,6 +118,40 @@ const Today: React.FC<Props> = ({ navigation }) => {
   const pressOf = (session: ClassSession) =>
     session.courseId ? () => openCourse(session.courseId!) : undefined;
 
+  // Next Item and Previous Item step through the rows that open beside
+  // Today, in their order: the classes' courses, Schedule, what's due.
+  const detailRows = [
+    ...[current, next].flatMap(session =>
+      session?.courseId
+        ? [{ name: 'CourseDetail' as const, id: session.courseId }]
+        : [],
+    ),
+    { name: 'Schedule' as const, id: undefined },
+    ...dueSoon.map(a => ({ name: 'AssignmentDetail' as const, id: a.id })),
+  ].filter(
+    // The class now and the next can be of one course.
+    (row, i, rows) =>
+      rows.findIndex(r => r.name === row.name && r.id === row.id) === i,
+  );
+  const detailRoot = useDetailRoot();
+  const isFocused = useIsFocused();
+  const detailNavigator = useDetailNavigator();
+  useItemStepping(
+    detailRows.length,
+    detailRows.findIndex(
+      row => row.name === detailRoot?.name && row.id === detailRoot?.id,
+    ),
+    index => {
+      const row = detailRows[index];
+      if (row.name === 'Schedule') {
+        show('Schedule');
+      } else {
+        show(row.name, { id: row.id });
+      }
+    },
+    isFocused && !!detailNavigator,
+  );
+
   // the timetable's day (Beijing), so the date matches the week and the classes
   const dateText = formatDate(beijingDate(now), 'todayDateFormat');
   const subtitle =
@@ -123,21 +162,12 @@ const Today: React.FC<Props> = ({ navigation }) => {
   // Settings sits in the sidebar on Mac, and behind this button elsewhere.
   const showSettings = !sidebarSplit;
   const openSettings = () => navigation.push('Settings');
-  const refreshing = pullToRefresh.refreshing;
+  const refreshButton = useRefreshCommand(pullToRefresh);
   useLayoutEffect(() => {
     navigation.setOptions(getTitleOptions(t('today'), subtitle));
   }, [navigation, subtitle]);
   useHeaderButtons(navigation, 'right', [
-    DeviceInfo.isMac() && {
-      id: 'refresh',
-      label: t('refresh'),
-      icon: 'refresh',
-      sfSymbol: refreshing
-        ? 'arrow.trianglehead.2.clockwise.rotate.90'
-        : undefined,
-      disabled: refreshing,
-      onPress: pullToRefresh.onRefresh,
-    },
+    refreshButton,
     // Debug builds: the debug tools, in a group of their own.
     __DEV__ && {
       id: 'debug',

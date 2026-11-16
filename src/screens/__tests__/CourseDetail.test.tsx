@@ -26,6 +26,7 @@ const mockPush = jest.fn();
 jest.mock('@react-navigation/native', () => ({
   ...jest.requireActual('@react-navigation/native'),
   useNavigation: () => ({ push: mockPush }),
+  useIsFocused: () => true,
 }));
 jest.mock('data/queries', () => ({ useCourse: jest.fn() }));
 const mockRefresh = {

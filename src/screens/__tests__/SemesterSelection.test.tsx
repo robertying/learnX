@@ -17,6 +17,11 @@ import { getSemesterTextFromId } from 'helpers/semester';
 import SemesterSelection from 'screens/SemesterSelection';
 import { screenProps } from 'test-utils/screenProps';
 
+jest.mock('@react-navigation/native', () => ({
+  ...jest.requireActual('@react-navigation/native'),
+  useIsFocused: () => true,
+}));
+
 jest.mock('data/login', () => ({ login: jest.fn() }));
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
 jest.mock('data/source', () => ({
@@ -29,7 +34,9 @@ jest.mock('data/source', () => ({
 const renderScreen = () =>
   render(
     <QueryClientProvider client={queryClient}>
-      <SemesterSelection {...screenProps()} />
+      <SemesterSelection
+        {...screenProps({ navigation: { setOptions: jest.fn() } })}
+      />
     </QueryClientProvider>,
   );
 

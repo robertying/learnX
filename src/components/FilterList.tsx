@@ -8,10 +8,11 @@ import ReorderableList, {
 } from 'react-native-reorderable-list';
 import { Assignment, Course, File, Notice } from 'data/types/state';
 import { getSettings, setSetting, useSettings } from 'data/settings';
-import useAppCommand from 'hooks/useAppCommand';
 import useDetailNavigator, { useDetailRoot } from 'hooks/useDetailNavigator';
 import useFilterListHeader from 'hooks/useFilterListHeader';
 import { scrollInsetBehavior } from 'constants/scrollInsetBehavior';
+import useItemStepping from 'hooks/useItemStepping';
+import useRefreshCommand from 'hooks/useRefreshCommand';
 import useListSelection from 'hooks/useListSelection';
 import type { DetailStackParams, RootStackParams } from 'navigation/types';
 import Styles from 'constants/Styles';
@@ -251,34 +252,15 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   // screen. Every tab's list stays mounted.
   const isFocused = useIsFocused();
   const commandsEnabled = isFocused && !selectionMode && !reorderMode;
-  useAppCommand(
-    'refresh',
-    () => {
-      if (!refreshing) {
-        onRefresh?.();
-      }
-    },
+  useRefreshCommand(
+    { refreshing, onRefresh: () => onRefresh?.() },
     commandsEnabled,
   );
   // Steps through the list from the item open beside it in the split view.
-  const openAdjacent = (offset: 1 | -1) => {
-    const index = data.findIndex(i => i.id === openedId);
-    const item =
-      index === -1
-        ? data[offset === 1 ? 0 : data.length - 1]
-        : data[index + offset];
-    if (item) {
-      rowHandlers.press(item);
-    }
-  };
-  useAppCommand(
-    'nextItem',
-    () => openAdjacent(1),
-    commandsEnabled && !!detailNavigator,
-  );
-  useAppCommand(
-    'previousItem',
-    () => openAdjacent(-1),
+  useItemStepping(
+    data.length,
+    data.findIndex(i => i.id === openedId),
+    index => rowHandlers.press(data[index]),
     commandsEnabled && !!detailNavigator,
   );
 

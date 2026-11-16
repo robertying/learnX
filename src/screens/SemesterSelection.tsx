@@ -9,14 +9,16 @@ import {
 import { useLoggedIn } from 'data/auth';
 import { setCurrentSemester, useCurrentSemester } from 'data/userData';
 import { getSemesterTextFromId } from 'helpers/semester';
+import useHeaderButtons from 'hooks/useHeaderButtons';
 import usePullToRefresh from 'hooks/usePullToRefresh';
+import useRefreshCommand from 'hooks/useRefreshCommand';
 import { SettingsStackParams } from 'navigation/types';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'SemesterSelection'>;
 
 const noSemesters: string[] = [];
 
-const SemesterSelection: React.FC<Props> = () => {
+const SemesterSelection: React.FC<Props> = ({ navigation }) => {
   const loggedIn = useLoggedIn();
   const currentSemesterId = useCurrentSemester();
   const semestersResult = useQuery({ ...semestersQuery, enabled: loggedIn });
@@ -37,6 +39,7 @@ const SemesterSelection: React.FC<Props> = () => {
     return { isError: results.some(result => result.isError) };
   };
   const pullToRefresh = usePullToRefresh(handleRefresh);
+  useHeaderButtons(navigation, 'right', [useRefreshCommand(pullToRefresh)]);
 
   // The latest semester can be missing from the list before it starts.
   const choices =
