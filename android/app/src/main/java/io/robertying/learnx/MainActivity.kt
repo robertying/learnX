@@ -2,6 +2,7 @@ package io.robertying.learnx
 
 import android.os.Bundle
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.ViewGroupCompat
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
@@ -17,6 +18,13 @@ class MainActivity : ReactActivity() {
         installSplashScreen()
         supportFragmentManager.fragmentFactory = RNScreensFragmentFactory()
         super.onCreate(null)
+        // Before Android 11, window insets stop at the first view that
+        // consumes them, so a view drawn after a sibling that takes the
+        // insets (the tab bar, after the screen above it) never gets its
+        // padding and ends up under the navigation buttons. Dispatch them
+        // the Android 11 way instead: every view sees the insets its parent
+        // passes down, whatever its siblings did. A no-op on Android 11+.
+        ViewGroupCompat.installCompatInsetsDispatch(window.decorView)
     }
 
     override fun createReactActivityDelegate(): ReactActivityDelegate =
