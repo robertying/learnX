@@ -51,6 +51,7 @@ import {
   background,
   lineLimit,
   listRowBackground,
+  listRowSeparator,
   listSectionMargins,
   listSectionSpacing,
   listRowInsets,
@@ -119,10 +120,12 @@ const chevronModifiers = [
 ];
 const selectedModifiers = [accessibilityAddTraits(['isSelected'])];
 // A row whose page is open beside the Form, in the gray of a list's
-// selected row.
+// selected row, without the separators above and below it, as UIKit leaves
+// them out beside a selected cell.
 const openedModifiers = [
   ...selectedModifiers,
   listRowBackground(rowHighlight ?? PlatformColor('systemGray4')),
+  listRowSeparator('hidden', 'all'),
 ];
 
 // Mac apps draw grouped rows in light gray on the window's white (black in

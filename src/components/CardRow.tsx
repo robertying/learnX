@@ -10,7 +10,6 @@ import SystemIcon from 'components/SystemIcon';
 import {
   Caption,
   Headline,
-  itemTitleWeight,
   Paragraph,
   Text,
   textStyles,
@@ -332,7 +331,7 @@ const styles = StyleSheet.create({
   },
   title: {
     flex: 1,
-    fontWeight: itemTitleWeight,
+    fontWeight: '500',
   },
   match: {
     fontWeight: '600',

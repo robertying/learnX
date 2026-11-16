@@ -295,7 +295,35 @@ diff --git a/ios/RNSScreenStackHeaderConfig.mm b/ios/RNSScreenStackHeaderConfig.
 index 12f22720..0d912b2e 100644
 --- a/ios/RNSScreenStackHeaderConfig.mm
 +++ b/ios/RNSScreenStackHeaderConfig.mm
-@@ -765,6 +765,11 @@ + (void)updateViewController:(UIViewController *)vc
+@@ -400,6 +400,18 @@ + (void)updateViewController:(UIViewController *)vc
+   }
+ }
+ 
++// learnX: Mac windows draw the line under a toolbar, and a split view's column
++// divider, in the separator color; UIKit's default shadow is the iPhone's
++// darker line (black at 30%).
+++ (void)applyPlatformShadow:(UINavigationBarAppearance *)appearance
++{
++#if TARGET_OS_MACCATALYST
++  if (appearance.shadowColor != nil) {
++    appearance.shadowColor = UIColor.separatorColor;
++  }
++#endif
++}
++
+ + (UINavigationBarAppearance *)buildAppearance:(UIViewController *)vc withConfig:(RNSScreenStackHeaderConfig *)config
+ {
+   UINavigationBarAppearance *appearance = [UINavigationBarAppearance new];
+@@ -442,6 +454,8 @@ + (UINavigationBarAppearance *)buildAppearance:(UIViewController *)vc withC
+     appearance.shadowColor = nil;
+   }
+ 
++  [self applyPlatformShadow:appearance];
++
+   if (config.titleFontFamily || config.titleFontSize || config.titleFontWeight || config.titleColor) {
+     NSMutableDictionary *attrs = [NSMutableDictionary new];
+ 
+@@ -765,6 +779,11 @@ + (void)updateViewController:(UIViewController *)vc
    // This assignment should be done after `navitem.titleView = ...` assignment (iOS 16.0 bug).
    // See: https://github.com/software-mansion/react-native-screens/issues/1570 (comments)
    navitem.title = config.title;
@@ -307,7 +335,7 @@ index 12f22720..0d912b2e 100644
    navitem.leftBarButtonItems = [config barButtonItemsFromConfigs:config.headerLeftBarButtonItems
                                                  withCurrentItems:navitem.leftBarButtonItems];
    navitem.rightBarButtonItems = [config barButtonItemsFromConfigs:config.headerRightBarButtonItems
-@@ -1147,6 +1152,7 @@ - (void)updateProps:(react::Props::Shared const &)props oldProps:(react::Props::
+@@ -1147,6 +1166,7 @@ - (void)updateProps:(react::Props::Shared const &)props oldProps:(react::Props::
    }
  
    _title = RCTNSStringFromStringNilIfEmpty(newScreenProps.title);
