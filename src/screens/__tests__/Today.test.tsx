@@ -325,6 +325,24 @@ describe('menu bar commands', () => {
     expect(navigation.dispatch).not.toHaveBeenCalled();
   });
 
+  it('shows the row whose page is open beside Today as selected', async () => {
+    jest.useFakeTimers({ now: dayjs().hour(12).minute(0).toDate() });
+    mockSessions.push(session('a', 'a', -30, 30));
+    mockAssignments.push(homework('x', 3), homework('y', 5));
+    jest
+      .mocked(useDetailRoot)
+      .mockReturnValue({ name: 'AssignmentDetail', id: 'y' });
+    await setup();
+    expect(
+      screen.getByRole('button', { name: /Homework y/, selected: true }),
+    ).toBeTruthy();
+    for (const name of [/Homework x/, /^Now/, /^Schedule/]) {
+      expect(
+        screen.getByRole('button', { name, selected: false }),
+      ).toBeTruthy();
+    }
+  });
+
   it('leaves Next Item to the screen on top without a detail pane', async () => {
     jest.useFakeTimers({ now: dayjs().hour(12).minute(0).toDate() });
     mockSessions.push(session('a', 'a', -30, 30));

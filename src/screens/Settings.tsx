@@ -18,11 +18,15 @@ import { userQuery } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
 import { useAppState } from 'data/appState';
 import { useCredentialsStore } from 'data/credentials';
-import { useShowDetail } from 'hooks/useDetailNavigator';
+import { useDetailRoot, useShowDetail } from 'hooks/useDetailNavigator';
 import { calendarSettingsTitle } from 'helpers/calendar/details';
 import { t } from 'helpers/i18n';
 import { findWhatsNew, releases, whatsNewContext } from 'helpers/whatsNew';
-import { MainStackScreenProps, SettingsStackParams } from 'navigation/types';
+import {
+  MainStackScreenProps,
+  SettingDetailParams,
+  SettingsStackParams,
+} from 'navigation/types';
 
 type Props = MainStackScreenProps<SettingsStackParams, 'Settings'>;
 
@@ -43,6 +47,13 @@ const latestWhatsNew = () => {
 
 const Settings: React.FC<Props> = ({ navigation }) => {
   const show = useShowDetail(navigation);
+  // A row opens its page beside Settings where there's a detail pane, and
+  // shows as selected while it's open there.
+  const detailRoot = useDetailRoot();
+  const linkTo = (name: keyof SettingDetailParams) => ({
+    onPress: () => show(name),
+    opened: detailRoot?.name === name,
+  });
   const graduate = useSettings(settings => settings.graduate);
 
   const loggedIn = useLoggedIn();
@@ -131,25 +142,25 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             icon="semester"
             testID="settings-semester"
             title={t('semesterSelection')}
-            onPress={() => show('SemesterSelection')}
+            {...linkTo('SemesterSelection')}
           />
           <FormLink
             testID="settings-notifications"
             icon="notifications"
             title={t('notifications')}
-            onPress={() => show('NotificationSettings')}
+            {...linkTo('NotificationSettings')}
           />
           <FormLink
             icon="calendar"
             testID="settings-calendar"
             title={calendarSettingsTitle()}
-            onPress={() => show('CalendarSettings')}
+            {...linkTo('CalendarSettings')}
           />
           <FormLink
             icon="download"
             testID="settings-downloads"
             title={t('downloads')}
-            onPress={() => show('Downloads')}
+            {...linkTo('Downloads')}
           />
           {/* The Mac has no swipe: its cards' actions are in a right-click menu. */}
           {!DeviceInfo.isMac() && (
@@ -157,7 +168,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
               testID="settings-swipe-actions"
               icon="swipe"
               title={t('swipeActions')}
-              onPress={() => show('SwipeActions')}
+              {...linkTo('SwipeActions')}
             />
           )}
         </FormSection>
@@ -167,7 +178,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             badge={!courseSharingSeen}
             testID="settings-course-sharing"
             title={t('courseInformationSharing')}
-            onPress={() => show('CourseInformationSharing')}
+            {...linkTo('CourseInformationSharing')}
           />
         </FormSection>
         <FormSection>
@@ -188,25 +199,25 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             icon="changelog"
             testID="settings-changelog"
             title={t('changelog')}
-            onPress={() => show('Changelog')}
+            {...linkTo('Changelog')}
           />
           <FormLink
             icon="maintainer"
             testID="settings-maintainer"
             title={t('becomeMaintainer')}
-            onPress={() => show('Maintainer')}
+            {...linkTo('Maintainer')}
           />
           <FormLink
             icon="help"
             testID="settings-help"
             title={t('helpAndFeedback')}
-            onPress={() => show('Help')}
+            {...linkTo('Help')}
           />
           <FormLink
             icon="about"
             testID="settings-about"
             title={t('about')}
-            onPress={() => show('About')}
+            {...linkTo('About')}
           />
         </FormSection>
       </Form>

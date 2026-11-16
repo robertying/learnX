@@ -1,7 +1,7 @@
 import { Platform, View, ViewProps } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SafeAreaView } from 'react-native-screens/experimental';
-import DeviceInfo from 'constants/DeviceInfo';
+import { underHeader } from 'constants/scrollInsetBehavior';
 import Styles from 'constants/Styles';
 
 export interface SafeAreaProps extends ViewProps {
@@ -30,10 +30,10 @@ const SafeArea: React.FC<SafeAreaProps> = ({
         edges={{
           left: true,
           right: true,
-          // The Mac's header is opaque with the screen below it, but in a
-          // split view's later columns the safe area still takes in the
-          // window's toolbar.
-          top: clearOfBars && !DeviceInfo.isMac(),
+          // Only a screen laid out under the header (`underHeader`): on
+          // Mac the top safe area of a split view's later columns is the
+          // window's toolbar, which the screen is already below.
+          top: clearOfBars && underHeader(),
           bottom: clearOfBars,
         }}
         style={style}

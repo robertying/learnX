@@ -4,7 +4,12 @@ import { tCount, type TextKey } from 'helpers/i18n';
 import { CardGutter } from './CardRow';
 import SystemIcon from './SystemIcon';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
-import { Caption, Headline, useTextIconSize } from 'components/Text';
+import {
+  Caption,
+  Headline,
+  itemTitleWeight,
+  useTextIconSize,
+} from 'components/Text';
 import { useTheme } from 'theme';
 
 export interface CourseCardProps extends CardWrapperProps {
@@ -105,7 +110,7 @@ const styles = StyleSheet.create({
   },
   // Medium weight, as the other lists' titles (`CardRow`).
   name: {
-    fontWeight: '500',
+    fontWeight: itemTitleWeight,
   },
   counts: {
     flexDirection: 'row',

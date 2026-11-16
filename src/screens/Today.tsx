@@ -42,7 +42,11 @@ import useSettingsBadge from 'hooks/useSettingsBadge';
 import { debugTitle, getTitleOptions } from 'navigation/options';
 import useHeaderButtons from 'hooks/useHeaderButtons';
 import { sidebarSplit } from 'navigation/layout';
-import { MainStackScreenProps, TodayStackParams } from 'navigation/types';
+import {
+  DetailStackParams,
+  MainStackScreenProps,
+  TodayStackParams,
+} from 'navigation/types';
 
 type Props = MainStackScreenProps<TodayStackParams, 'Today'>;
 
@@ -134,6 +138,9 @@ const Today: React.FC<Props> = ({ navigation }) => {
       rows.findIndex(r => r.name === row.name && r.id === row.id) === i,
   );
   const detailRoot = useDetailRoot();
+  // The row whose page is open beside Today shows as selected.
+  const opened = (name: keyof DetailStackParams, id?: string) =>
+    detailRoot?.name === name && detailRoot.id === id;
   const isFocused = useIsFocused();
   const detailNavigator = useDetailNavigator();
   useItemStepping(
@@ -237,6 +244,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
               subtitle={classDetails(current)}
               progress={(now - current.start) / (current.end - current.start)}
               onPress={pressOf(current)}
+              opened={opened('CourseDetail', current.courseId)}
             />
           )}
           {next && (
@@ -248,6 +256,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
               title={next.courseName}
               subtitle={classDetails(next)}
               onPress={pressOf(next)}
+              opened={opened('CourseDetail', next.courseId)}
             />
           )}
           <FormLink
@@ -255,6 +264,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
             title={t('schedule')}
             detail={classCount}
             onPress={() => show('Schedule')}
+            opened={opened('Schedule')}
             testID="today-schedule"
           />
         </FormSection>
@@ -276,6 +286,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
                   ]
                 }
                 onPress={() => openAssignment(assignment)}
+                opened={opened('AssignmentDetail', assignment.id)}
               />
             ))
           )}

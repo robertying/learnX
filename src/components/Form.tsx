@@ -98,6 +98,7 @@ import {
   type FormViewProps,
 } from './Form.shared';
 import ThemedHost from 'components/ThemedHost';
+import { rowHighlight } from 'components/Touchable';
 
 export * from './Form.shared';
 
@@ -145,6 +146,12 @@ const chevronModifiers = [
   accessibilityHidden(true),
 ];
 const selectedModifiers = [accessibilityAddTraits(['isSelected'])];
+// A row whose page is open beside the Form, in the gray of a list's
+// selected row.
+const openedModifiers = [
+  ...selectedModifiers,
+  listRowBackground(rowHighlight ?? PlatformColor('systemGray4')),
+];
 
 // Mac apps draw grouped rows in light gray on the window's white (black in
 // Dark Mode), not white rows on gray as on iOS.
@@ -153,7 +160,9 @@ const macFormModifiers = [
   background(PlatformColor('systemBackground')),
   // What rows show without a font of their own, as `textFont` does.
   font({ size: 17 }),
-  listSectionSpacing(24),
+  // Sections close together, as System Settings groups them: with a
+  // section's title or footer, SwiftUI's own spacing is already wide.
+  listSectionSpacing(12),
 ];
 
 // Behind iOS's inset grouped rows
@@ -601,10 +610,15 @@ export const FormLink: React.FC<FormLinkProps> = ({
   testID,
   onPress,
   badge,
+  opened,
   ...row
 }) => {
   return (
-    <Button onPress={onPress} testID={testID}>
+    <Button
+      onPress={onPress}
+      testID={testID}
+      modifiers={opened ? openedModifiers : undefined}
+    >
       <ItemRow
         {...row}
         badge={

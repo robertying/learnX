@@ -8,6 +8,7 @@ import {
   TextProps as NativeTextProps,
   type TextStyle,
 } from 'react-native';
+import DeviceInfo from 'constants/DeviceInfo';
 import { useTheme } from 'theme';
 
 /**
@@ -98,6 +99,16 @@ const androidStyles: Record<TextVariant, TextStyle> = {
     letterSpacing: 0.5,
   },
 };
+
+/**
+ * The weight of an item's title in a list (`CardRow`, `CourseCard`): medium,
+ * as an item row in a Form. SwiftUI draws medium a step heavier on Mac than
+ * UIKit does, so there the lists take semibold to look the same as Today's
+ * and Schedule's rows.
+ */
+export const itemTitleWeight = DeviceInfo.isMac()
+  ? ('600' as const)
+  : ('500' as const);
 
 const ramps: Record<TextVariant, Ramp> = {
   largeTitle: 'largeTitle',

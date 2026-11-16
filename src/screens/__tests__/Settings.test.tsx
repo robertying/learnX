@@ -19,7 +19,7 @@ import { t } from 'helpers/i18n';
 import * as whatsNew from 'helpers/whatsNew';
 import { setServerWritesAllowed } from 'helpers/serverWrites';
 import useAvailableUpdate from 'hooks/useAvailableUpdate';
-import { useShowDetail } from 'hooks/useDetailNavigator';
+import { useDetailRoot, useShowDetail } from 'hooks/useDetailNavigator';
 import Settings from 'screens/Settings';
 import { installsUpdate, installUpdate } from 'services/update';
 import { screenProps } from 'test-utils/screenProps';
@@ -34,6 +34,7 @@ jest.mock('services/update', () => ({
 const mockShow = jest.fn();
 jest.mock('hooks/useDetailNavigator', () => ({
   useShowDetail: jest.fn(() => mockShow),
+  useDetailRoot: jest.fn(() => undefined),
 }));
 
 const navigation = { navigate: jest.fn() };
@@ -127,6 +128,17 @@ it('opens each page in the detail view', async () => {
     expect(mockShow).toHaveBeenLastCalledWith(page);
   }
   expect(useShowDetail).toHaveBeenCalledWith(navigation);
+});
+
+it('shows the page open beside Settings as selected', async () => {
+  jest.mocked(useDetailRoot).mockReturnValue({ name: 'NotificationSettings' });
+  await renderScreen();
+  expect(
+    screen.getByRole('button', { name: t('notifications'), selected: true }),
+  ).toBeTruthy();
+  expect(
+    screen.getByRole('button', { name: t('downloads'), selected: false }),
+  ).toBeTruthy();
 });
 
 it('leaves out Swipe Actions on Mac, which has no swipe', async () => {
