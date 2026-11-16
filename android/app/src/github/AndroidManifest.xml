@@ -1,0 +1,7 @@
+<!-- The github flavor's APKs update themselves (modules/updater): they may
+     install packages, and on Android 12+ update learnX without asking again
+     once learnX installed it. Google Play doesn't allow either. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION" />
+</manifest>

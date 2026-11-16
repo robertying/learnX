@@ -75,6 +75,9 @@ jest.mock('../modules/share', () => ({
 // Android.
 jest.mock('../modules/spotlight', () => ({ __esModule: true, default: null }));
 jest.mock('../modules/shortcuts', () => ({ __esModule: true, default: null }));
+// The APK updater (Android's github flavor only); tests that install an
+// update mock it themselves.
+jest.mock('../modules/updater', () => ({ __esModule: true, default: null }));
 
 // Native views
 jest.mock('@expo/ui', () => require('./mocks/expoUi'));

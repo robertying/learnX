@@ -1,0 +1,22 @@
+appId: ${APP_ID}
+name: Update the Android app again without a confirmation
+# Run by scripts/e2e-updater.sh after update.yaml, on Android 12+ only: learnX
+# installed the running version, so Android installs the next update without
+# asking.
+---
+- runScript:
+    file: server.js
+    env:
+      PATH_: /mode/update
+- runFlow: ../subflows/login.yaml
+- runFlow: ../subflows/settings.yaml
+- runFlow: start.yaml
+# No confirmation: the update ends the app by itself.
+- extendedWaitUntil:
+    notVisible:
+      id: settings-update
+    timeout: 60000
+- assertNotVisible: '(?i)(update|install|更新|安装)'
+- launchApp:
+    stopApp: false
+- runFlow: ../subflows/login.yaml

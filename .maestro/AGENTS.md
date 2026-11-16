@@ -47,6 +47,10 @@
 
 - `.maestro/ota/` isn't in the normal run: `scripts/e2e-ota.sh ios|android` starts the E2E update server and runs it ("Over-the-air updates" in the root `AGENTS.md`). The flow switches the server's mode with `runScript` (`ota/server.js`) and waits for the app's requests through the server's `/wait`, since the app shows nothing while it downloads; the running update shows in Settings › About.
 
+## APK updater (Android)
+
+- `.maestro/updater/` isn't in the normal run: `scripts/e2e-updater.sh android [apk]` serves the installed E2E build's own APK as version 99.0.0 from a local mirror (`scripts/updater-e2e-server.mjs`, switched with `runScript` through `updater/server.js`) and runs `update.yaml`: Android's "Install unknown apps" page (reset first with `appops`), a download whose SHA-256 doesn't match, then the update through Android's confirmation. The script then checks with `dumpsys` that Android replaced the app and names learnX as its installer. On Android 12+ `update-again.yaml` updates once more, which Android installs without asking. The flows tap the system's own labels ("Allow from this source", the installer's Update or Install) in English and Chinese. CI's Android E2E job runs it on API 37 after the flows; run it locally on the oldest Android (API 28, the `android-min` emulator) too.
+
 ## Upgrade test
 
 - `.maestro/upgrade/` isn't in the normal run: `scripts/e2e-upgrade.sh ios <udid>` / `android <serial>` runs it. `1-use-18.0.3.yaml` drives 18.0.3 (English labels, no testIDs), `2-after-upgrade.yaml` runs on the current build installed over it and checks the `storeReport` JSON with `check-report.js`, whose expected values are 18.0.3's mock data. 18.0.3 has no testIDs, so its flow taps switches by position on a phone layout; on Android the script folds a foldable emulator first. The calendar and reminder list 18.0.3 makes outlive the app, and 18.0.3 adds its events to the ones it finds by title, so the flow first deletes an earlier run's with 18.0.3's own Delete Synced Calendars & Reminders.

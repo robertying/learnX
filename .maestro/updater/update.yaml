@@ -1,0 +1,66 @@
+appId: ${APP_ID}
+name: Update the Android app from the APK mirror
+# Run by scripts/e2e-updater.sh, which starts the APK mirror and serves the
+# installed build's own APK as 99.0.0; not part of the normal runs. Android
+# only: the APKs update themselves, the stores update the other builds.
+---
+- runFlow: ../subflows/reset.yaml
+- runScript:
+    file: server.js
+    env:
+      PATH_: /mode/badsum
+- runFlow: ../subflows/login.yaml
+- runFlow: ../subflows/settings.yaml
+
+# learnX isn't allowed to install apps yet: the confirmation says Android will
+# ask, and the update opens the system page for it. Allowing it and coming
+# back goes on with the update.
+- runFlow: start.yaml
+- extendedWaitUntil:
+    visible: '(Allow from this source|允许来自此来源的应用)'
+    timeout: 15000
+- tapOn: '(Allow from this source|允许来自此来源的应用)'
+- back
+# Some Android versions restart an app they let install apps; it then starts
+# over at the update row. The download from localhost takes seconds.
+- extendedWaitUntil:
+    visible: '.*(${T_updateFailed}).*'
+    timeout: 45000
+    optional: true
+- runFlow:
+    when:
+      notVisible: '.*(${T_updateFailed}).*'
+    commands:
+      - launchApp:
+          stopApp: false
+      - runFlow: ../subflows/settings.yaml
+      - runFlow: start.yaml
+
+# A download that doesn't match latest.json's SHA-256 is refused.
+- extendedWaitUntil:
+    visible: '.*(${T_updateVerifyFailed}).*'
+    timeout: 60000
+- runScript:
+    file: server.js
+    env:
+      PATH_: /status
+- assertTrue: ${output.updater.apkDownloads >= 1}
+- tapOn: ${T_cancel}
+
+# A good download installs through Android's confirmation, which ends the app.
+- runScript:
+    file: server.js
+    env:
+      PATH_: /mode/update
+- runFlow: start.yaml
+- extendedWaitUntil:
+    visible: '(?i)(update|install|更新|安装)'
+    timeout: 60000
+- tapOn: '(?i)(update|install|更新|安装)'
+- extendedWaitUntil:
+    notVisible:
+      id: settings-update
+    timeout: 60000
+- launchApp:
+    stopApp: false
+- runFlow: ../subflows/login.yaml
