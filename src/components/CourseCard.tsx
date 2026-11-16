@@ -4,12 +4,7 @@ import { tCount, type TextKey } from 'helpers/i18n';
 import { CardGutter } from './CardRow';
 import SystemIcon from './SystemIcon';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
-import {
-  Caption,
-  Headline,
-  itemTitleWeight,
-  useTextIconSize,
-} from 'components/Text';
+import { Caption, Headline, useTextIconSize } from 'components/Text';
 import { useTheme } from 'theme';
 
 export interface CourseCardProps extends CardWrapperProps {
@@ -28,7 +23,7 @@ const Count: React.FC<{ icon: CountIcon; count: number }> = ({
   count,
 }) => {
   const theme = useTheme();
-  const iconSize = useTextIconSize(15);
+  const iconSize = useTextIconSize('subheadline');
   if (!count) {
     return null;
   }
@@ -110,7 +105,7 @@ const styles = StyleSheet.create({
   },
   // Medium weight, as the other lists' titles (`CardRow`).
   name: {
-    fontWeight: itemTitleWeight,
+    fontWeight: '500',
   },
   counts: {
     flexDirection: 'row',

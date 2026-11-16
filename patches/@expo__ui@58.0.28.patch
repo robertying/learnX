@@ -250,3 +250,84 @@ index 41df9325424c31c0c0eb728796bd835c4db2ba09..ad3c3db83913e39bc1d4ef75107005b1
      modifiers,
      ...(modifiers ? createViewModifierEventListener(modifiers) : undefined),
      onButtonPress: onPress,
+diff --git a/ios/Modifiers/FontModifier.swift b/ios/Modifiers/FontModifier.swift
+index a9e0dac..f5a6eb1 100644
+--- a/ios/Modifiers/FontModifier.swift
++++ b/ios/Modifiers/FontModifier.swift
+@@ -27,6 +27,21 @@ internal enum FontWeight: String, Enumerable {
+     case .black: .black
+     }
+   }
++
++  // learnX
++  func toUIKit() -> UIFont.Weight {
++    switch self {
++    case .ultraLight: .ultraLight
++    case .thin: .thin
++    case .light: .light
++    case .regular: .regular
++    case .medium: .medium
++    case .semibold: .semibold
++    case .bold: .bold
++    case .heavy: .heavy
++    case .black: .black
++    }
++  }
+ }
+ 
+ internal enum FontLeading: String, Enumerable {
+@@ -87,6 +102,23 @@ internal enum FontTextStyle: String, Enumerable {
+     case .caption2: .caption2
+     }
+   }
++
++  // learnX
++  func toUIKit() -> UIFont.TextStyle {
++    switch self {
++    case .largeTitle: .largeTitle
++    case .title: .title1
++    case .title2: .title2
++    case .title3: .title3
++    case .headline: .headline
++    case .subheadline: .subheadline
++    case .body: .body
++    case .callout: .callout
++    case .footnote: .footnote
++    case .caption: .caption1
++    case .caption2: .caption2
++    }
++  }
+ }
+ 
+ internal struct FontModifier: ViewModifier, Record {
+@@ -117,6 +149,11 @@ internal struct FontModifier: ViewModifier, Record {
+   }
+ 
+   private func resolveBaseFont() -> Font {
++    #if targetEnvironment(macCatalyst)
++    if family == nil, design == nil || design == .default {
++      return Font(uiKitFont() as CTFont)
++    }
++    #endif
+     if let family = family {
+       let baseSize = size ?? 17
+       var font: Font = if let textStyle = textStyle {
+@@ -144,4 +181,18 @@ internal struct FontModifier: ViewModifier, Record {
+       design: design?.toSwiftUI() ?? .default
+     )
+   }
++
++  // learnX: on Mac, SwiftUI draws a system font's weights heavier than UIKit does (its medium looks like UIKit's
++  // semibold), so the system font comes from UIKit there, drawn as the rest of a Catalyst app's text (React Native's)
++  // is: a text style at the Mac's size for it, or a size, in the weight asked for.
++  func uiKitFont() -> UIFont {
++    guard let textStyle else {
++      return UIFont.systemFont(ofSize: size ?? 17, weight: weight?.toUIKit() ?? .regular)
++    }
++    let styled = UIFont.preferredFont(forTextStyle: textStyle.toUIKit())
++    guard let weight else {
++      return styled
++    }
++    return UIFont.systemFont(ofSize: styled.pointSize, weight: weight.toUIKit())
++  }
+ }

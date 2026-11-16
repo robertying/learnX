@@ -172,7 +172,7 @@ settings:
   excludeLinksFromLockfile: false
 
 patchedDependencies:
-  '@expo/ui@58.0.28': 22135189839ab2155e9afaed0d94a25fa9371ab851c912aaab9eaee084199c4e
+  '@expo/ui@58.0.28': aba94a6b819ae7f46c47b57d169173904987a71ff329dbbc0db20326cbc875fc
   '@react-navigation/native-stack@7.21.0': 0aeab62ce16a183300736465505b6b5a576ebb6747192e24e3a7f22493d4d13f
   expo-background-task@58.0.13: 31d2b86985f5833a56adedeb62d7b017f82c426b349d711eba78adea300cf707
   expo-calendar@58.0.7: b62bb1b60978bf8ee6206c2c71abca18695e2d9c92263ff773ad1ae732c2f298
@@ -182,7 +182,7 @@ patchedDependencies:
   react-native-pager-view@10.0.2: da0b1a8d1b06c1378b4cf4e23824ad81c87ac25f20a67aae0e125a474c952179
   react-native-pdf@7.0.5: 5fdb347578d0837ed5387677fe9c4a7798e5ffede4868a1ddfe7bbfd410ede6b
   react-native-reanimated@4.7.1: 403fbb8138ca5b749e55a7fef8eafc1ef7d0d2fc3b60646eb9cebed696b452bd
-  react-native-screens@4.30.1: 674f729948e935f1b46922576e1ea5bce412a5772c12dc7a0d6888bd381f21ef
+  react-native-screens@4.30.1: bbce69ffd2c379d9ae8d780fa608f5fc4879114a788c4a912a74cab85110ca6f
   react-native-tab-view@4.3.4: d1f94d3e0603cd957291d18f64866f2b0e3c37c2af3cd7cef6d18bb102132c53
   react-native-webview@14.0.1: bc6f2a4f1c022d0d0888955dc039c9e48e60fba940c26f6e70ba36d9869d7c6a
   react-native@0.88.1: 0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f
@@ -203,7 +203,7 @@ importers:
         version: 1.5.0(5d59aa49f14acfc995df6105129e9d0c)
       '@expo/ui':
         specifier: 58.0.28
-        version: 58.0.28(patch_hash=22135189839ab2155e9afaed0d94a25fa9371ab851c912aaab9eaee084199c4e)(096e5b8b50590a9cbec74e3451cfd958)
+        version: 58.0.28(patch_hash=aba94a6b819ae7f46c47b57d169173904987a71ff329dbbc0db20326cbc875fc)(096e5b8b50590a9cbec74e3451cfd958)
       '@preeternal/react-native-cookie-manager':
         specifier: 7.0.0
         version: 7.0.0(react-native@0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1)
@@ -230,7 +230,7 @@ importers:
         version: 7.5.1(react-native@0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1)
       '@react-navigation/native-stack':
         specifier: 7.21.0
-        version: 7.21.0(patch_hash=0aeab62ce16a183300736465505b6b5a576ebb6747192e24e3a7f22493d4d13f)(31253fa0884468b665d6ae6de6ba153b)
+        version: 7.21.0(patch_hash=0aeab62ce16a183300736465505b6b5a576ebb6747192e24e3a7f22493d4d13f)(1ba77366138f09b4b791280862b7ec3f)
       '@robertying/thu-learn-lib':
         specifier: 9.0.0
         version: 9.0.0
@@ -395,7 +395,7 @@ importers:
         version: 5.11.1(react-native@0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1)
       react-native-screens:
         specifier: 4.30.1
-        version: 4.30.1(patch_hash=674f729948e935f1b46922576e1ea5bce412a5772c12dc7a0d6888bd381f21ef)(react-native@0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1)
+        version: 4.30.1(patch_hash=bbce69ffd2c379d9ae8d780fa608f5fc4879114a788c4a912a74cab85110ca6f)(react-native@0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1)
       react-native-share:
         specifier: 12.3.1
         version: 12.3.1
@@ -6085,7 +6085,7 @@ snapshots:
 
   '@expo/sudo-prompt@9.3.2': {}
 
-  '@expo/ui@58.0.28(patch_hash=22135189839ab2155e9afaed0d94a25fa9371ab851c912aaab9eaee084199c4e)(096e5b8b50590a9cbec74e3451cfd958)':
+  '@expo/ui@58.0.28(patch_hash=aba94a6b819ae7f46c47b57d169173904987a71ff329dbbc0db20326cbc875fc)(096e5b8b50590a9cbec74e3451cfd958)':
     dependencies:
       expo: 58.0.25(4626ff8028c762c070f5b54f2c5a564f)
       react: 19.3.1
@@ -6934,7 +6934,7 @@ snapshots:
       use-latest-callback: 0.2.6(react@19.3.1)
       use-sync-external-store: 1.7.0(react@19.3.1)
 
-  '@react-navigation/native-stack@7.21.0(patch_hash=0aeab62ce16a183300736465505b6b5a576ebb6747192e24e3a7f22493d4d13f)(31253fa0884468b665d6ae6de6ba153b)':
+  '@react-navigation/native-stack@7.21.0(patch_hash=0aeab62ce16a183300736465505b6b5a576ebb6747192e24e3a7f22493d4d13f)(1ba77366138f09b4b791280862b7ec3f)':
     dependencies:
       '@react-navigation/elements': 2.9.45(9f6c9b12cf909c9919e021a06bd6c157)
       '@react-navigation/native': 7.5.1(react-native@0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1)
@@ -6942,7 +6942,7 @@ snapshots:
       react: 19.3.1
       react-native: 0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1)
       react-native-safe-area-context: 5.11.1(react-native@0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1)
-      react-native-screens: 4.30.1(patch_hash=674f729948e935f1b46922576e1ea5bce412a5772c12dc7a0d6888bd381f21ef)(react-native@0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1)
+      react-native-screens: 4.30.1(patch_hash=bbce69ffd2c379d9ae8d780fa608f5fc4879114a788c4a912a74cab85110ca6f)(react-native@0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1)
       sf-symbols-typescript: 2.2.0
       warn-once: 0.1.1
     transitivePeerDependencies:
@@ -8184,7 +8184,7 @@ snapshots:
   expo-widgets@58.0.28(patch_hash=9244587b17ef3b062bec42e454afa19174e62c3ba28f9f2f02d4c6d6ac0f3944)(096e5b8b50590a9cbec74e3451cfd958):
     dependencies:
       '@expo/plist': 0.10.2
-      '@expo/ui': 58.0.28(patch_hash=22135189839ab2155e9afaed0d94a25fa9371ab851c912aaab9eaee084199c4e)(096e5b8b50590a9cbec74e3451cfd958)
+      '@expo/ui': 58.0.28(patch_hash=aba94a6b819ae7f46c47b57d169173904987a71ff329dbbc0db20326cbc875fc)(096e5b8b50590a9cbec74e3451cfd958)
       expo: 58.0.25(4626ff8028c762c070f5b54f2c5a564f)
       react: 19.3.1
       react-native: 0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1)
@@ -9953,7 +9953,7 @@ snapshots:
       react: 19.3.1
       react-native: 0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1)
 
-  react-native-screens@4.30.1(patch_hash=674f729948e935f1b46922576e1ea5bce412a5772c12dc7a0d6888bd381f21ef)(react-native@0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1):
+  react-native-screens@4.30.1(patch_hash=bbce69ffd2c379d9ae8d780fa608f5fc4879114a788c4a912a74cab85110ca6f)(react-native@0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1):
     dependencies:
       react: 19.3.1
       react-freeze: 1.0.4(react@19.3.1)
