@@ -1,5 +1,4 @@
 @testable import ExpoModulesCore
-import QuickLook
 import Testing
 import UIKit
 
@@ -14,54 +13,6 @@ private func shownWindow(in scene: UIWindowScene? = nil) -> (UIWindow, UIViewCon
   window.rootViewController = screen
   window.isHidden = false
   return (window, screen)
-}
-
-@MainActor
-@Suite(.serialized) struct QuickLookViewTests {
-  @Test func takesTheFileFromJS() throws {
-    let appContext = AppContext()
-    let views = QuickLookModule(appContext: appContext).definition().views
-    let props = try #require(views["QuickLookView"]).propsDict()
-    let view = QuickLookView(appContext: nil)
-    try #require(props["uri"]).set(value: "file:///tmp/a.docx", onView: view, appContext: appContext)
-    let controller = try #require(view.controller)
-    #expect(view.url == URL(fileURLWithPath: "/tmp/a.docx"))
-    #expect(view.numberOfPreviewItems(in: controller) == 1)
-    let item = view.previewController(controller, previewItemAt: 0)
-    #expect(item.previewItemURL == URL(fileURLWithPath: "/tmp/a.docx"))
-  }
-
-  @Test func showsNothingForAWebAddress() throws {
-    let view = QuickLookView(appContext: nil)
-    view.setURI("https://example.com/a.docx")
-    #expect(view.url == nil)
-    #expect(view.numberOfPreviewItems(in: try #require(view.controller)) == 0)
-  }
-
-  @Test func fillsTheView() throws {
-    let view = QuickLookView(appContext: nil)
-    let controller = try #require(view.controller)
-    view.frame = CGRect(x: 0, y: 0, width: 320, height: 480)
-    view.layoutIfNeeded()
-    #expect(controller.view.superview === view)
-    #expect(controller.view.frame == view.bounds)
-  }
-
-  @Test func joinsTheScreensViewControllerWhileInAWindow() throws {
-    let (window, screen) = shownWindow()
-    defer { window.isHidden = true }
-    let view = QuickLookView(appContext: nil)
-    let controller = try #require(view.controller)
-
-    screen.view.addSubview(view)
-    #expect(controller.parent === screen)
-    // Moving within the window keeps it.
-    screen.view.addSubview(view)
-    #expect(controller.parent === screen)
-
-    view.removeFromSuperview()
-    #expect(controller.parent == nil)
-  }
 }
 
 @MainActor
@@ -109,7 +60,6 @@ private final class FakeHost: NSObject, MacPreviewHosting {
   @Test func showsThePreviewOverTheView() {
     let host = FakeHost()
     let view = view(with: host)
-    #expect(view.controller == nil)
     #expect(view.subviews.isEmpty)
     view.setURI("file:///tmp/a.pptx")
     #expect(host.url == URL(fileURLWithPath: "/tmp/a.pptx"))
@@ -216,18 +166,48 @@ private final class FakeHost: NSObject, MacPreviewHosting {
     #expect(view.shownFrame == nil)
   }
 
-  @Test func fallsBackToTheControllerWithoutAnAppKitWindow() throws {
+  @Test func isUnavailableWithoutAnAppKitWindow() {
     let host = FakeHost()
     host.canAttach = false
     let view = view(with: host)
-    view.setURI("file:///tmp/a.docx")
+    #expect(!view.isUnavailable)
     let (window, screen) = shownWindow()
     defer { window.isHidden = true }
     screen.view.addSubview(view)
-    #expect(view.host == nil)
-    let controller = try #require(view.controller)
-    #expect(controller.parent === screen)
-    #expect(view.numberOfPreviewItems(in: controller) == 1)
+    #expect(view.isUnavailable)
+    view.followView()
+    #expect(host.shown == nil)
+  }
+
+  @Test func isUnavailableWithoutThePlugin() {
+    let makeHost = QuickLookView.makeHost
+    QuickLookView.makeHost = { nil }
+    defer { QuickLookView.makeHost = makeHost }
+    let view = QuickLookView(appContext: nil)
+    view.setURI("file:///tmp/a.docx")
+    #expect(view.url == URL(fileURLWithPath: "/tmp/a.docx"))
+    let (window, screen) = shownWindow()
+    defer { window.isHidden = true }
+    screen.view.addSubview(view)
+    #expect(view.isUnavailable)
+  }
+
+  @Test func takesTheFileFromJS() throws {
+    let host = FakeHost()
+    let view = view(with: host)
+    let appContext = AppContext()
+    let views = QuickLookModule(appContext: appContext).definition().views
+    let props = try #require(views["QuickLookView"]).propsDict()
+    try #require(props["uri"]).set(value: "file:///tmp/a.docx", onView: view, appContext: appContext)
+    #expect(host.url == URL(fileURLWithPath: "/tmp/a.docx"))
+    // A web address shows nothing.
+    view.setURI("https://example.com/a.docx")
+    #expect(host.url == nil)
+  }
+
+  @Test func hasNoPluginOutsideTheMac() {
+    #expect(!MacPreviewPlugin.isAvailable)
+    #expect(MacPreviewPlugin.makeHost() == nil)
   }
 }
 

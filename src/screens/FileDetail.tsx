@@ -88,6 +88,9 @@ const FileDetailContent: React.FC<{
   const [previewFailed, setPreviewFailed] = useState(false);
 
   const handlePreviewError = () => setPreviewFailed(true);
+  // The Mac's Quick Look preview had no window to show in: the file's info
+  // shows instead, as for a file it can't preview.
+  const [quickLookUnavailable, setQuickLookUnavailable] = useState(false);
 
   const handleRedownload = () => {
     setPreviewFailed(false);
@@ -95,7 +98,8 @@ const FileDetailContent: React.FC<{
   };
 
   const kind = previewKind(file.fileType);
-  const canRender = !!path && !!kind;
+  const canRender =
+    !!path && !!kind && !(kind === 'quickLook' && quickLookUnavailable);
 
   const handleShowInfo = () => setShowInfo(shown => !shown);
 
@@ -152,7 +156,12 @@ const FileDetailContent: React.FC<{
             onError={handlePreviewError}
           />
         ) : kind === 'quickLook' ? (
-          <QuickLookView testID="quick-look" style={Styles.flex1} uri={path} />
+          <QuickLookView
+            testID="quick-look"
+            style={Styles.flex1}
+            uri={path}
+            onUnavailable={() => setQuickLookUnavailable(true)}
+          />
         ) : (
           <WebView
             style={{

@@ -1,14 +1,20 @@
 import ExpoModulesCore
-import QuickLook
 import UIKit
 
-/// Quick Look's preview of a downloaded file, for the documents the Mac's web view can't draw: Office and iWork files,
-/// which it shows as raw bytes.
+/// Quick Look's preview of a downloaded file on the Mac, for the documents its web view can't draw: Office and iWork
+/// files, which it shows as raw bytes.
 public final class QuickLookModule: Module {
   public func definition() -> ModuleDefinition {
     Name("LearnXQuickLook")
 
+    // Whether the Mac's preview plugin loaded: File detail shows the file's info otherwise.
+    Constant("isAvailable") {
+      MacPreviewPlugin.isAvailable
+    }
+
     View(QuickLookView.self) {
+      Events("onUnavailable")
+
       Prop("uri") { (view: QuickLookView, uri: String) in
         view.setURI(uri)
       }
@@ -16,17 +22,18 @@ public final class QuickLookModule: Module {
   }
 }
 
-/// One local file in Quick Look. On the Mac that is AppKit's `QLPreviewView`, from the app's MacPreview plugin, placed
-/// in the window over this view: Mac Catalyst's `QLPreviewController` shows only a low-resolution thumbnail of the
-/// first page. Without the plugin (iOS, or if it doesn't load) it is a `QLPreviewController`, as a child of the view
-/// controller the view is in, so that it gets its appearance calls.
+/// One local file in AppKit's `QLPreviewView`, from the Mac app's MacPreview plugin, placed in the window over this
+/// view: Mac Catalyst's own `QLPreviewController` shows only a low-resolution thumbnail of the first page. Without
+/// the plugin, or a window to put the preview in, it sends `onUnavailable` and File detail shows the file's info.
 final class QuickLookView: ExpoView {
   /// Makes the Mac's preview host, or nil where there is none. Tests replace it.
   static var makeHost: @MainActor () -> (any MacPreviewHosting)? = MacPreviewPlugin.makeHost
 
+  let onUnavailable = EventDispatcher()
   private(set) var url: URL?
   private(set) var host: (any MacPreviewHosting)?
-  private(set) var controller: QLPreviewController?
+  /// Whether it found no preview to show (sent `onUnavailable`).
+  private(set) var isUnavailable = false
   /// The frame the host shows the preview at, in window coordinates; nil while it is hidden.
   private(set) var shownFrame: CGRect?
   /// The parts of `shownFrame` that windows above draw over.
@@ -36,9 +43,6 @@ final class QuickLookView: ExpoView {
   required init(appContext: AppContext? = nil) {
     super.init(appContext: appContext)
     host = Self.makeHost()
-    if host == nil {
-      embedController()
-    }
   }
 
   /// A `file:` URI; anything else shows nothing.
@@ -49,46 +53,21 @@ final class QuickLookView: ExpoView {
     }
     url = newURL
     host?.setURL(newURL)
-    controller?.reloadData()
   }
 
   override func didMoveToWindow() {
     super.didMoveToWindow()
-    if let host {
-      if let window, host.attach(toWindowOf: window) {
-        host.setURL(url)
-        startFollowing()
-        return
-      }
+    guard let window else {
       stopFollowing()
-      host.detach()
-      if window != nil {
-        // No AppKit window to put the preview in.
-        self.host = nil
-        embedController()
-      } else {
-        return
-      }
-    }
-    guard let controller else {
+      host?.detach()
       return
     }
-    if window != nil {
-      guard controller.parent == nil, let parent = enclosingViewController else {
-        return
-      }
-      parent.addChild(controller)
-      controller.didMove(toParent: parent)
-      // Joining a screen that is already on its way in skips the controller's appearance calls, without which
-      // Quick Look never loads the preview.
-      controller.beginAppearanceTransition(true, animated: false)
-      controller.endAppearanceTransition()
-    } else if controller.parent != nil {
-      controller.beginAppearanceTransition(false, animated: false)
-      controller.endAppearanceTransition()
-      controller.willMove(toParent: nil)
-      controller.removeFromParent()
+    guard let host, host.attach(toWindowOf: window) else {
+      unavailable()
+      return
     }
+    host.setURL(url)
+    startFollowing()
   }
 
   /// Puts the host's preview where this view is in the window, or hides it while something covers the view (a
@@ -167,25 +146,12 @@ final class QuickLookView: ExpoView {
     shownHoles = []
   }
 
-  private func embedController() {
-    let controller = QLPreviewController()
-    controller.dataSource = self
-    controller.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-    controller.view.frame = bounds
-    addSubview(controller.view)
-    self.controller = controller
-  }
-
-  /// The nearest view controller up the responder chain: the screen this view is in.
-  private var enclosingViewController: UIViewController? {
-    var responder = next
-    while let current = responder {
-      if let viewController = current as? UIViewController {
-        return viewController
-      }
-      responder = current.next
+  private func unavailable() {
+    guard !isUnavailable else {
+      return
     }
-    return nil
+    isUnavailable = true
+    onUnavailable()
   }
 }
 
@@ -204,32 +170,28 @@ private final class DisplayLinkTarget: NSObject {
   }
 }
 
-extension QuickLookView: QLPreviewControllerDataSource {
-  func numberOfPreviewItems(in controller: QLPreviewController) -> Int {
-    url == nil ? 0 : 1
-  }
-
-  func previewController(_ controller: QLPreviewController, previewItemAt index: Int) -> any QLPreviewItem {
-    // Only asked for when there is one.
-    url! as NSURL
-  }
-}
-
 /// Loads the Mac's preview plugin (`MacPreview.bundle` in the app's PlugIns, built from `ios/MacPreview`).
 enum MacPreviewPlugin {
   private static let hostClass: NSObject.Type? = {
     #if targetEnvironment(macCatalyst)
       guard let url = Bundle.main.builtInPlugInsURL?.appendingPathComponent("MacPreview.bundle"),
         let bundle = Bundle(url: url),
-        bundle.load()
+        bundle.load(),
+        let hostClass = bundle.principalClass as? NSObject.Type,
+        hostClass.conforms(to: MacPreviewHosting.self)
       else {
         return nil
       }
-      return bundle.principalClass as? NSObject.Type
+      return hostClass
     #else
       return nil
     #endif
   }()
+
+  /// Whether the plugin loaded and makes hosts.
+  static var isAvailable: Bool {
+    hostClass != nil
+  }
 
   @MainActor static func makeHost() -> (any MacPreviewHosting)? {
     hostClass?.init() as? any MacPreviewHosting

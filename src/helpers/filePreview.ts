@@ -2,6 +2,7 @@
 import { Platform } from 'react-native';
 import mime from 'mime';
 import DeviceInfo from 'constants/DeviceInfo';
+import { isQuickLookAvailable } from 'modules/quicklook';
 
 /** Word and Excel pages are drawn on white, also in dark mode. */
 export const needWhiteBackground = (ext?: string | null) =>
@@ -16,7 +17,8 @@ const isWebKitType = (mimeType: string) =>
 
 /**
  * Office and iWork documents. iOS's web view converts them into pages, but the
- * Mac's shows their bytes, so the Mac shows them with Quick Look.
+ * Mac's shows their bytes, so the Mac shows them with Quick Look (AppKit's, from
+ * the app's MacPreview plugin), or their info without it.
  */
 const documentTypes = new Set([
   'application/msword',
@@ -36,7 +38,7 @@ export type PreviewKind = 'pdf' | 'web' | 'quickLook';
  * How File detail shows the downloaded file itself rather than its info, or
  * null when it can't: PDFs everywhere with the PDF viewer; on iOS and Mac,
  * what WebKit draws in the web view; Office and iWork documents in the web
- * view on iOS and with Quick Look on Mac.
+ * view on iOS and with Quick Look on Mac, where it loaded.
  */
 export const previewKind = (fileType?: string | null): PreviewKind | null => {
   if (fileType === 'pdf') {
@@ -52,7 +54,10 @@ export const previewKind = (fileType?: string | null): PreviewKind | null => {
   if (!documentTypes.has(mimeType)) {
     return null;
   }
-  return DeviceInfo.isMac() ? 'quickLook' : 'web';
+  if (!DeviceInfo.isMac()) {
+    return 'web';
+  }
+  return isQuickLookAvailable ? 'quickLook' : null;
 };
 
 /**

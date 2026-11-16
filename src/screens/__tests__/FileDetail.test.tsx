@@ -7,6 +7,7 @@ import type { File } from 'data/types/state';
 import { t } from 'helpers/i18n';
 import useFileDetailHeader from 'hooks/useFileDetailHeader';
 import useFileDownload from 'hooks/useFileDownload';
+import * as quickLook from 'modules/quicklook';
 import FileDetail from 'screens/FileDetail';
 import { screenProps } from 'test-utils/screenProps';
 
@@ -215,6 +216,11 @@ it('previews Office documents on white in the web view on iOS, as they are drawn
 
 it('previews Office documents with Quick Look on the Mac', async () => {
   jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+  jest.replaceProperty(
+    jest.requireMock<typeof quickLook>('modules/quicklook'),
+    'isQuickLookAvailable',
+    true,
+  );
   downloaded({ path: 'file:///a.pptx' });
   await renderScreen({
     attachment: { ...zip, fileType: 'pptx', downloadUrl: 'https://x' },
@@ -223,6 +229,40 @@ it('previews Office documents with Quick Look on the Mac', async () => {
   expect(screen.queryByTestId('webview')).toBeNull();
   expect(jest.mocked(useFileDetailHeader).mock.lastCall![0].canRender).toBe(
     true,
+  );
+});
+
+it("shows an Office document's info on a Mac without Quick Look", async () => {
+  jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+  downloaded({ path: 'file:///a.pptx' });
+  await renderScreen({
+    attachment: { ...zip, fileType: 'pptx', downloadUrl: 'https://x' },
+  });
+  expect(screen.queryByTestId('quick-look')).toBeNull();
+  expect(screen.getByText(t('fileType'))).toBeTruthy();
+  expect(jest.mocked(useFileDetailHeader).mock.lastCall![0].canRender).toBe(
+    false,
+  );
+});
+
+it("shows an Office document's info when Quick Look has nowhere to show it", async () => {
+  jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+  jest.replaceProperty(
+    jest.requireMock<typeof quickLook>('modules/quicklook'),
+    'isQuickLookAvailable',
+    true,
+  );
+  downloaded({ path: 'file:///a.pptx' });
+  await renderScreen({
+    attachment: { ...zip, fileType: 'pptx', downloadUrl: 'https://x' },
+  });
+  await act(async () => {
+    screen.getByTestId('quick-look').props.onUnavailable();
+  });
+  expect(screen.queryByTestId('quick-look')).toBeNull();
+  expect(screen.getByText(t('fileType'))).toBeTruthy();
+  expect(jest.mocked(useFileDetailHeader).mock.lastCall![0].canRender).toBe(
+    false,
   );
 });
 

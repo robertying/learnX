@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 import DeviceInfo from 'constants/DeviceInfo';
+import * as quickLook from 'modules/quicklook';
 import {
   isPreviewLoad,
   needWhiteBackground,
@@ -61,9 +62,22 @@ describe('previewKind', () => {
 
   it('shows Office and iWork documents with Quick Look on Mac', () => {
     jest.mocked(DeviceInfo.isMac).mockReturnValue(true);
+    jest.replaceProperty(
+      jest.requireMock<typeof quickLook>('modules/quicklook'),
+      'isQuickLookAvailable',
+      true,
+    );
     for (const ext of documents) {
       expect(previewKind(ext)).toBe('quickLook');
     }
+  });
+
+  it("shows the info of Office and iWork documents on a Mac without Quick Look's plugin", () => {
+    jest.mocked(DeviceInfo.isMac).mockReturnValue(true);
+    for (const ext of documents) {
+      expect(previewKind(ext)).toBeNull();
+    }
+    expect(previewKind('png')).toBe('web');
   });
 
   it('shows the info of anything else', () => {

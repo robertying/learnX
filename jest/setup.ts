@@ -100,4 +100,5 @@ jest.mock('react-native-screens/experimental', () =>
 jest.mock('../modules/toast', () => require('./mocks/toast'));
 jest.mock('../modules/quicklook', () => ({
   QuickLookView: require('react-native').View,
+  isQuickLookAvailable: false,
 }));
