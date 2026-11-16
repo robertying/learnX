@@ -22,8 +22,12 @@ const { createFileStore } = require('./fileStore.cjs');
 const { mainFetch } = require('./net.cjs');
 const { createSecrets } = require('./secrets.cjs');
 
-/** Not the iOS bundle id, which the Mac Catalyst app has on a Mac. */
-const APP_ID = 'io.robertying.learnX.electron';
+/**
+ * A top-level app's id, named as the repo's other top-level targets are
+ * (`io.robertying.learnXTests`): `io.robertying.learnX.<name>` is for the iOS
+ * app's extensions, and the iOS bundle id is the Mac Catalyst app's on a Mac.
+ */
+const APP_ID = 'io.robertying.learnXElectron';
 const ORIGIN = 'app://learnx';
 
 app.setName('learnX');

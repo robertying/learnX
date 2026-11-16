@@ -5,7 +5,7 @@ const { version } = require('../package.json');
 
 /** @type {Record<string, unknown>} */
 module.exports = {
-  appId: 'io.robertying.learnX.electron',
+  appId: 'io.robertying.learnXElectron',
   productName: 'learnX',
   copyright: `Copyright © ${new Date().getFullYear()} Rui Ying`,
   // The app's version, and what Windows shows as the file's description
