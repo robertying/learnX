@@ -187,6 +187,10 @@ const zh: typeof en = {
   updateAllowInstall:
     'Android会先请你允许learnX安装应用。允许后返回learnX继续更新。',
   updateDownloading: '正在下载{percent}%',
+  updateRestartMessage:
+    'learnX将重新启动以安装更新。如果不重新启动，更新将在下次退出learnX时安装。',
+  restart: '重新启动',
+  experimental: '实验版',
   updateInstalling: '正在安装',
   updateFailed: '更新失败',
   updateDownloadFailed: '更新下载失败。请检查网络连接后重试。',

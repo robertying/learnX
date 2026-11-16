@@ -11,6 +11,11 @@
     "start": "node dev.mjs"
   },
   "devDependencies": {
-    "electron": "45.3.2"
+    "@playwright/test": "1.65.1",
+    "electron": "45.3.2",
+    "electron-builder": "26.18.0"
+  },
+  "dependencies": {
+    "electron-updater": "6.8.11"
   }
 }

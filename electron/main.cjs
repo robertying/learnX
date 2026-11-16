@@ -21,11 +21,14 @@ const {
   shell,
   webContents,
 } = require('electron');
+const { aboutPanelOptions, readBuildInfo } = require('./buildInfo.cjs');
 const { createFileStore } = require('./fileStore.cjs');
 const { createFiles } = require('./files.cjs');
 const { popupMenu } = require('./menus.cjs');
 const { mainFetch } = require('./net.cjs');
+const { createReleasesProvider } = require('./releasesProvider.cjs');
 const { createSecrets } = require('./secrets.cjs');
+const { createUpdater, updatesSupported } = require('./updater.cjs');
 const { PARTITION, createWebviews, hardenWebview } = require('./webviews.cjs');
 
 /**
@@ -419,6 +422,84 @@ const createWindow = (/** @type {Electron.Session} */ ses) => {
   void win.loadURL(`${ORIGIN}/`);
   return win;
 };
+
+// The version, the About panel and updates (buildInfo.cjs, updater.cjs). A
+// packaged build carries its build number in its package.json (written by
+// packageConfig.cjs), and where it looks for updates; a dev run
+// reads the checkout's, and checks for updates only at `LEARNX_UPDATE_URL`
+// (a local test server, updateServer.mjs).
+const packaged = /** @type {{ buildNumber?: string; updateUrl?: string }} */ (
+  require('./package.json')
+);
+const buildInfo = dev
+  ? readBuildInfo(path.join(__dirname, '..'))
+  : { version: app.getVersion(), build: packaged.buildNumber ?? '' };
+// E2E runs (electron/e2e) turn checks off with LEARNX_NO_UPDATES.
+const updateUrl = process.env.LEARNX_NO_UPDATES
+  ? undefined
+  : dev
+    ? process.env.LEARNX_UPDATE_URL
+    : packaged.updateUrl;
+const updater =
+  updateUrl &&
+  (dev ||
+    updatesSupported({ dev, platform: process.platform, env: process.env }))
+    ? (() => {
+        const { autoUpdater } = require('electron-updater');
+        if (dev && devDataDir) {
+          // electron-updater reads its cache folder's name from the update
+          // config electron-builder writes into packaged builds.
+          const config = path.join(devDataDir, 'app-update.yml');
+          fs.writeFileSync(config, 'updaterCacheDirName: learnX\n');
+          autoUpdater.updateConfigPath = config;
+          autoUpdater.forceDevUpdateConfig = true;
+          // The checkout's version, not this folder's package.json's (0.0.0),
+          // as electron-updater's own copy of semver parses it.
+          const semver = require(
+            require.resolve('semver', {
+              paths: [path.dirname(require.resolve('electron-updater'))],
+            }),
+          );
+          Object.assign(autoUpdater, {
+            currentVersion: semver.parse(buildInfo.version),
+          });
+        }
+        return createUpdater({
+          autoUpdater,
+          feed: {
+            provider: 'custom',
+            updateProvider: createReleasesProvider(
+              require('electron-updater/out/providers/Provider'),
+            ),
+            url: updateUrl,
+          },
+          onReady: update => {
+            for (const win of BrowserWindow.getAllWindows()) {
+              win.webContents.send('updates:ready', update);
+            }
+          },
+          log: message => console.log(`[updater] ${message}`),
+        });
+      })()
+    : null;
+ipcMain.on('app:info', event => {
+  fromApp(event);
+  event.returnValue = buildInfo;
+});
+ipcMain.on('updates:pending', event => {
+  fromApp(event);
+  event.returnValue = updater?.ready() ?? null;
+});
+ipcMain.on('updates:install', event => {
+  fromApp(event);
+  updater?.install();
+});
+void app.whenReady().then(() => {
+  app.setAboutPanelOptions(
+    aboutPanelOptions(buildInfo, app.getLocale(), iconFile),
+  );
+  updater?.start();
+});
 
 void app.whenReady().then(() => {
   const ses = session.fromPartition(PARTITION);

@@ -2,7 +2,7 @@
 // `pnpm electron:clean`: removes what learnX's Electron dev runs leave on this
 // Mac, and prints each thing it removed:
 //
-// - the dev app's data folder (build/electron/data);
+// - the dev app's data folder (build/electron/data), unless --keep-data;
 // - the preferences of io.robertying.learnXElectron, and of
 //   com.github.Electron, which runs of the stock Electron.app wrote;
 // - folders and files under ~/Library named after either id (or starting
@@ -44,7 +44,8 @@ const main = () => {
   const removed = [];
 
   const dataDir = path.join(root, 'build', 'electron', 'data');
-  if (fs.existsSync(dataDir)) {
+  // --keep-data: the E2E tests' teardown, which leaves the dev login.
+  if (!process.argv.includes('--keep-data') && fs.existsSync(dataDir)) {
     fs.rmSync(dataDir, { recursive: true, force: true });
     removed.push(dataDir);
   }

@@ -40,6 +40,12 @@ export const installBridge = (overrides: Partial<Bridge> = {}): Bridge => {
       onAsk: jest.fn(),
       answer: jest.fn(),
     },
+    appInfo: jest.fn(() => ({ version: '19.0.0', build: '4544' })),
+    updates: {
+      pending: jest.fn(() => null),
+      onReady: jest.fn(),
+      install: jest.fn(),
+    },
     launchOptions: jest.fn(() => ({})),
     capture: jest.fn(async () => null),
     ...overrides,

@@ -8,6 +8,9 @@ allowBuilds:
   # Its install script downloads Electron itself (about 100 MB), which only
   # the Electron app needs: electron/dev.mjs downloads it on first run.
   electron: false
+  # Squirrel.Windows' installer tools, which electron-builder brings for a
+  # target learnX doesn't build (it builds NSIS).
+  electron-winstaller: false
 nodeLinker: hoisted
 # Install fails on a Node older than package.json's `engines`.
 engineStrict: true

@@ -119,6 +119,8 @@ module.exports = {
       ...base,
       displayName: 'tooling',
       roots: ['<rootDir>/scripts', '<rootDir>/electron'],
+      // Playwright's (`pnpm e2e:electron`).
+      testPathIgnorePatterns: ['/node_modules/', '/electron/e2e/'],
       testEnvironment: 'node',
     },
   ],

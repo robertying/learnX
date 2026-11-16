@@ -14,6 +14,8 @@
     "ios": "react-native run-ios",
     "electron": "node electron/dev.mjs",
     "electron:clean": "node electron/clean.mjs",
+    "electron:package": "node electron/package.mjs",
+    "e2e:electron": "playwright test -c electron/playwright.config.ts",
     "lint": "oxlint",
     "typecheck": "tsc && tsc -p scripts",
     "format": "oxfmt",

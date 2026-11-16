@@ -76,6 +76,11 @@ export interface WebviewLoadRequest {
   isTopFrame: boolean;
 }
 
+/** An update of the Electron app, downloaded and waiting for a restart. */
+export interface BridgeUpdate {
+  version: string;
+}
+
 /**
  * What the Electron app's main process offers the page, as `window.learnx`
  * (electron/preload.cjs).
@@ -134,6 +139,17 @@ export interface Bridge {
     ) => Promise<boolean>;
     onAsk: (listener: (request: WebviewLoadRequest) => void) => void;
     answer: (requestId: number, allow: boolean) => void;
+  };
+  /** The app's version and its build number (electron/buildInfo.cjs). */
+  appInfo: () => { version: string; build: string };
+  /** Updates of the packaged app (electron/updater.cjs). */
+  updates: {
+    /** The update downloaded and waiting for a restart, or null. */
+    pending: () => BridgeUpdate | null;
+    /** Called when an update has downloaded. */
+    onReady: (listener: (update: BridgeUpdate) => void) => void;
+    /** Quits, installs the waiting update and opens the app again. */
+    install: () => void;
   };
   /** A test run's launch options in development; empty elsewhere. */
   launchOptions: () => Record<string, unknown>;

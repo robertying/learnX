@@ -199,6 +199,10 @@ export default {
   updateAllowInstall:
     'Android will first ask you to allow learnX to install apps. Allow it, then come back to learnX to continue.',
   updateDownloading: 'Downloading {percent}%',
+  updateRestartMessage:
+    'learnX will restart to install the update. Otherwise, it installs the next time you quit learnX.',
+  restart: 'Restart',
+  experimental: 'Experimental',
   updateInstalling: 'Installing',
   updateFailed: "Couldn't Update learnX",
   updateDownloadFailed:

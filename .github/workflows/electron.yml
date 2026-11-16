@@ -1,0 +1,158 @@
+name: Electron (experimental)
+
+# The experimental Windows and Linux app (electron/). None of these checks is
+# required: a break here never blocks a mobile change (the support tier in
+# electron/AGENTS.md). Pull requests bundle the web build, run the `web` Jest
+# project and the Playwright E2E tests on Windows and Linux; main pushes and
+# manual runs also package the installers on Windows and Linux (unsigned,
+# uploaded as workflow artifacts, never published).
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: electron-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    name: Web build (experimental, not required)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up JS
+        id: install
+        uses: ./.github/actions/setup-js
+
+      # Fluent UI and React Native Web in jsdom (`__tests__/web/` folders).
+      # JS checks in ci.yml runs it too; here it reports on its own.
+      - name: Web Jest project
+        run: pnpm test --selectProjects web
+
+      # The mock login, as the release bundles have it, so the E2E tests can
+      # log in; the web build inlines it as the mobile bundles do.
+      - name: Export web build
+        id: export
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: |
+          printf 'DUMMY_USERNAME=e2e\nDUMMY_PASSWORD=e2e\n' > .env
+          pnpm exec expo export --platform web --output-dir build/electron/web
+        env:
+          CI: '1'
+
+      - name: Upload web build
+        if: ${{ !cancelled() && steps.export.outcome == 'success' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: electron-web
+          path: build/electron/web
+          retention-days: 1
+
+  e2e:
+    # The Playwright E2E tests (electron/e2e) in a dev run of the app on the
+    # web build: mock login, Today, every tab. Linux runs them under a
+    # virtual display.
+    name: E2E ${{ matrix.name }} (experimental, not required)
+    needs: web
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            os: windows-latest
+          - name: Linux
+            os: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up JS
+        uses: ./.github/actions/setup-js
+
+      - name: Download web build
+        uses: actions/download-artifact@v8
+        with:
+          name: electron-web
+          path: build/electron/web
+
+      # The same mock login as the web build's.
+      - name: E2E tests
+        shell: bash
+        run: |
+          printf 'DUMMY_USERNAME=e2e\nDUMMY_PASSWORD=e2e\n' > .env
+          if [ "$RUNNER_OS" = Linux ]; then
+            xvfb-run --auto-servernum pnpm e2e:electron
+          else
+            pnpm e2e:electron
+          fi
+
+      # Traces and screenshots of failed tests, and the HTML report.
+      - name: Upload results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: electron-e2e-${{ matrix.name }}
+          path: build/electron/e2e
+          if-no-files-found: ignore
+
+  package:
+    # Each platform on its own runner, so Windows builds get their icon and
+    # version info (which electron-builder can't write from Linux without
+    # Wine). Both CPU architectures per platform.
+    name: Package ${{ matrix.name }} (experimental, not required)
+    needs: web
+    if: github.event_name != 'pull_request'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            os: windows-latest
+            flag: --win
+          - name: Linux
+            os: ubuntu-latest
+            flag: --linux
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up JS
+        uses: ./.github/actions/setup-js
+
+      - name: Download web build
+        uses: actions/download-artifact@v8
+        with:
+          name: electron-web
+          path: build/electron/web
+
+      # Unsigned, and never published (package.mjs passes --publish never).
+      - name: Package
+        shell: bash
+        run: pnpm electron:package ${{ matrix.flag }} --skip-export
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - name: Upload installers
+        uses: actions/upload-artifact@v7
+        with:
+          name: electron-${{ matrix.name }}
+          path: |
+            build/electron/dist/*.exe
+            build/electron/dist/*.blockmap
+            build/electron/dist/*.AppImage
+            build/electron/dist/*.deb
+            build/electron/dist/latest*.yml
+          if-no-files-found: error
+          retention-days: 7

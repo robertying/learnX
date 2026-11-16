@@ -1,4 +1,4 @@
-import { Linking } from 'react-native';
+import { Linking, Platform } from 'react-native';
 import { render, screen, userEvent } from '@testing-library/react-native';
 import * as Updates from 'expo-updates';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -29,6 +29,16 @@ it('adds the over-the-air update it runs to the version', async () => {
   expect(
     screen.getByText(
       `${packageJson.version} (${DeviceInfo.buildNo()}) · 0f3c9a12`,
+    ),
+  ).toBeTruthy();
+});
+
+it("labels the Electron app's build Experimental", async () => {
+  jest.replaceProperty(Platform, 'OS', 'web');
+  await render(<About {...screenProps()} />);
+  expect(
+    screen.getByText(
+      `${packageJson.version} (${DeviceInfo.buildNo()}) · ${t('experimental')}`,
     ),
   ).toBeTruthy();
 });

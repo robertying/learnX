@@ -44,6 +44,16 @@ contextBridge.exposeInMainWorld('learnx', {
     answer: (requestId, allow) =>
       ipcRenderer.send('webview:answer', requestId, allow),
   },
+  // The app's version and build number, and the update waiting for a
+  // restart (updater.cjs): null until one has downloaded.
+  appInfo: () => ipcRenderer.sendSync('app:info'),
+  updates: {
+    pending: () => ipcRenderer.sendSync('updates:pending'),
+    onReady: listener => {
+      ipcRenderer.on('updates:ready', (_event, update) => listener(update));
+    },
+    install: () => ipcRenderer.send('updates:install'),
+  },
   // Development only: the dev runner's launch options (empty otherwise), and
   // a window capture, which main.cjs saves when the dev runner asks for them
   // and returns null otherwise.
