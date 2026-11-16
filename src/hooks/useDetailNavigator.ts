@@ -38,6 +38,8 @@ export interface DetailNavigator {
   show: OpenScreen;
 }
 
+type DetailContainer = NonNullable<DetailNavigationContainerRef['current']>;
+
 // A detail stack's container is only ready some time after it mounts, and a
 // ref says nothing when it changes. Its `onReady` reports it here.
 const readyListeners = new Set<() => void>();
@@ -197,9 +199,9 @@ export const useShowDetail = (
     navigation.dispatch(StackActions.pop(above.length));
   });
   // The pane's container, still there (out of sight) once it collapses.
-  const lastDetailRef = useRef(detailRef);
+  const lastContainer = useRef<DetailContainer>(null);
   const moveToList = useEffectEvent(() => {
-    const container = lastDetailRef.current?.current;
+    const container = lastContainer.current;
     const detailState = container?.getRootState();
     const stack = listNavigation?.getState();
     if (!container || !detailState || !stack) {
@@ -225,17 +227,20 @@ export const useShowDetail = (
       CommonActions.reset({ index: 0, routes: [{ name: 'EmptyDetail' }] }),
     );
   });
+  const rememberContainer = useEffectEvent(() => {
+    lastContainer.current = detailRef?.current ?? null;
+  });
   const hadDetail = useRef(false);
   useEffect(() => {
     if (detailNavigator) {
       hadDetail.current = true;
-      lastDetailRef.current = detailRef;
+      rememberContainer();
       moveToDetail();
     } else if (hadDetail.current) {
       hadDetail.current = false;
       moveToList();
     }
-  }, [detailNavigator, detailRef]);
+  }, [detailNavigator]);
 
   return (name, ...params) => {
     if (detailNavigator) {
