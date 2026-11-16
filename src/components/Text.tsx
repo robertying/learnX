@@ -113,16 +113,6 @@ const androidStyles: Record<TextVariant, TextStyle> = {
   },
 };
 
-/**
- * The weight of an item's title in a list (`CardRow`, `CourseCard`): medium,
- * as an item row in a Form. SwiftUI draws medium a step heavier on Mac than
- * UIKit does, so there the lists take semibold to look the same as Today's
- * and Schedule's rows.
- */
-export const itemTitleWeight = DeviceInfo.isMac()
-  ? ('600' as const)
-  : ('500' as const);
-
 const ramps: Record<TextVariant, Ramp> = {
   largeTitle: 'largeTitle',
   title: 'title3',
