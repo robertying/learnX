@@ -3,6 +3,7 @@ import {
   useEffect,
   useEffectEvent,
   useMemo,
+  useRef,
   useSyncExternalStore,
 } from 'react';
 import {
@@ -36,6 +37,8 @@ export interface DetailNavigator {
   /** In place of what the pane shows, without animation, as a list does. */
   show: OpenScreen;
 }
+
+type DetailContainer = NonNullable<DetailNavigationContainerRef['current']>;
 
 // A detail stack's container is only ready some time after it mounts, and a
 // ref says nothing when it changes. Its `onReady` reports it here.
@@ -145,7 +148,10 @@ const useDetailNavigator = (): DetailNavigator | undefined => {
  *
  * What was pushed on the list without a pane (on a folded phone, or in a
  * narrow window) moves into the pane once there is one, so that the item
- * isn't left covering the list.
+ * isn't left covering the list. What the pane showed moves onto the list when
+ * the pane goes away (the split collapses, as UIKit does with its own), so
+ * that it stays on screen. That also covers an item opened just before a new
+ * split reported that it is collapsed, as on an iPhone.
  */
 export const useShowDetail = (
   /** The list screen's own. */
@@ -192,9 +198,47 @@ export const useShowDetail = (
     );
     navigation.dispatch(StackActions.pop(above.length));
   });
+  // The pane's container, still there (out of sight) once it collapses.
+  const lastContainer = useRef<DetailContainer>(null);
+  const moveToList = useEffectEvent(() => {
+    const container = lastContainer.current;
+    const detailState = container?.getRootState();
+    const stack = listNavigation?.getState();
+    if (!container || !detailState || !stack) {
+      return;
+    }
+    const pages = detailState.routes.filter(
+      route => route.name !== 'EmptyDetail',
+    );
+    // Only for the list on screen, the top of its stack (Settings on Today,
+    // not Today), and not for a screen in the pane itself.
+    if (
+      stack.key === detailState.key ||
+      stack.routes.at(-1)?.key !== routeKey ||
+      pages.length === 0 ||
+      pages.some(route => !stack.routeNames.includes(route.name))
+    ) {
+      return;
+    }
+    for (const { name, params } of pages) {
+      navigation.dispatch(StackActions.push(name, params));
+    }
+    container.dispatch(
+      CommonActions.reset({ index: 0, routes: [{ name: 'EmptyDetail' }] }),
+    );
+  });
+  const rememberContainer = useEffectEvent(() => {
+    lastContainer.current = detailRef?.current ?? null;
+  });
+  const hadDetail = useRef(false);
   useEffect(() => {
     if (detailNavigator) {
+      hadDetail.current = true;
+      rememberContainer();
       moveToDetail();
+    } else if (hadDetail.current) {
+      hadDetail.current = false;
+      moveToList();
     }
   }, [detailNavigator]);
 

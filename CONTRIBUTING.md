@@ -15,7 +15,7 @@ Once you're set up, the code conventions and architecture are in [AGENTS.md](AGE
 | Android Studio + SDK | SDK Platform 37, Build-Tools 37.0.0, NDK 30.0.16248370, CMake 4.1.2 | Only for Android. Versions are in `android/build.gradle`.                                                                |
 | JDK                  | 17 or newer to run Gradle                                           | Android Studio's bundled JDK works. The build compiles with a JDK 17 toolchain, which Gradle downloads if missing.       |
 
-The app supports iOS / iPadOS 17.6, macOS 14.6 (Mac Catalyst) and Android 9 (API 28) and later, so use a simulator or emulator at least that new.
+The app supports iOS / iPadOS 17.6, macOS 14.6 (Mac Catalyst) and Android 10 (API 29) and later, so use a simulator or emulator at least that new.
 
 You can build Android on macOS or Linux. iOS and Mac builds need a Mac.
 
@@ -124,7 +124,7 @@ Debug builds load JavaScript from Metro, so JS changes show up on reload. Rebuil
    If Gradle still can't find the SDK, copy `android/local.properties.example` to `android/local.properties` and set `sdk.dir`. Debug builds need only `sdk.dir` from that file.
 
 3. Make sure `java -version` prints 17 or newer, or set `JAVA_HOME` to Android Studio's bundled JDK (`/Applications/Android Studio.app/Contents/jbr/Contents/Home` on a Mac).
-4. Create an emulator in Android Studio's Device Manager with Android 9 or later. On an Apple silicon Mac, use an arm64-v8a system image.
+4. Create an emulator in Android Studio's Device Manager with Android 10 or later. On an Apple silicon Mac, use an arm64-v8a system image.
 
 ### Build and run
 

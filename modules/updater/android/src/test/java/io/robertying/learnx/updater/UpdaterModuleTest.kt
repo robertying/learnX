@@ -279,9 +279,7 @@ class InstallTest {
     install(promise)
     assertEquals("learnX", written.toString())
     verify { session.commit(any()) }
-    // Android 9 leaves out the archive's certificates without GET_SIGNATURES.
-    verify { packageManager.getPackageArchiveInfo(apk.path, UpdaterModule.ARCHIVE_FLAGS) }
-    assertTrue(UpdaterModule.ARCHIVE_FLAGS and PackageManager.GET_SIGNATURES != 0)
+    verify { packageManager.getPackageArchiveInfo(apk.path, PackageManager.GET_SIGNING_CERTIFICATES) }
     report(PackageInstaller.STATUS_SUCCESS)
     assertTrue(promise.resolved)
     verify { context.unregisterReceiver(receivers.last()) }
