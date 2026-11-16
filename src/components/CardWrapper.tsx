@@ -1,10 +1,5 @@
 import { PropsWithChildren, useState } from 'react';
-import {
-  AccessibilityActionEvent,
-  View,
-  StyleSheet,
-  Platform,
-} from 'react-native';
+import { AccessibilityActionEvent, View, StyleSheet } from 'react-native';
 import { SharedValue, useSharedValue } from 'react-native-reanimated';
 import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -22,10 +17,11 @@ import SystemIcon from './SystemIcon';
 import { useTheme } from 'theme';
 import { ContextMenuView } from 'modules/menus';
 import { playHaptic } from 'services/haptics';
+import { isApple } from 'helpers/platform';
 
 // A long press (or a pointer's right-click) shows the actions in a menu: the
 // system context menu on iOS, iPadOS and Mac, a Material dropdown on Android.
-const contextMenuSupported = Platform.OS === 'ios';
+const contextMenuSupported = isApple();
 
 export interface CardWrapperProps {
   fav?: boolean;
@@ -322,7 +318,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
           />
         )}
         {children}
-        {Platform.OS === 'ios' && !last ? (
+        {isApple() && !last ? (
           <View
             testID="card-separator"
             style={[
@@ -389,8 +385,8 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
       }
       // The card follows the finger past the button (iOS), as far as the
       // full-swipe point and beyond.
-      overshootLeft={Platform.OS === 'ios'}
-      overshootRight={Platform.OS === 'ios'}
+      overshootLeft={isApple()}
+      overshootRight={isApple()}
       enabled={
         actionsEnabled && !!(swipeActions.leading || swipeActions.trailing)
       }

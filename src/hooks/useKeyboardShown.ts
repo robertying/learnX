@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Keyboard, Platform } from 'react-native';
+import { Keyboard } from 'react-native';
+import { isAndroid } from 'helpers/platform';
 
 // Android only fires the Did events; iOS keeps its tab bar under the keyboard
 // on its own, so there this is always false.
@@ -7,7 +8,7 @@ const useKeyboardShown = () => {
   const [shown, setShown] = useState(false);
 
   useEffect(() => {
-    if (Platform.OS !== 'android') {
+    if (!isAndroid()) {
       return;
     }
 

@@ -1,6 +1,5 @@
 import { useRef, useState } from 'react';
 import {
-  Platform,
   ScrollView,
   StyleSheet,
   useWindowDimensions,
@@ -14,6 +13,7 @@ import SystemIcon from 'components/SystemIcon';
 import { Caption, Headline, Title } from 'components/Text';
 import type { SystemIconName } from 'helpers/systemIcons';
 import { useTheme } from 'theme';
+import { isApple } from 'helpers/platform';
 
 export interface Feature {
   icon: SystemIconName;
@@ -35,7 +35,7 @@ export interface FeatureListProps {
   testID?: string;
 }
 
-const apple = Platform.OS === 'ios';
+const apple = isApple();
 
 /**
  * A page of features under a title, with a button at the bottom: Apple's

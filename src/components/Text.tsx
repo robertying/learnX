@@ -2,13 +2,13 @@ import { useSyncExternalStore } from 'react';
 import {
   Dimensions,
   I18nManager,
-  Platform,
   StyleSheet,
   Text as NativeText,
   TextProps as NativeTextProps,
   type TextStyle,
 } from 'react-native';
 import { useTheme } from 'theme';
+import { isAndroid, isApple } from 'helpers/platform';
 
 /**
  * The platform's own text styles: Apple's Dynamic Type styles on iOS, iPadOS
@@ -44,7 +44,7 @@ type Ramp = NonNullable<NativeTextProps['dynamicTypeRamp']>;
 
 // Android uses the default typeface: with a named family, React Native only
 // picks between normal and bold, so a medium or semibold weight draws regular.
-const fontFamily = Platform.select({ ios: 'System', default: undefined });
+const fontFamily = isApple() ? 'System' : undefined;
 
 const iosStyles: Record<TextVariant, TextStyle> = {
   largeTitle: { fontSize: 34, lineHeight: 41, fontWeight: '700' },
@@ -115,7 +115,7 @@ const ramps: Record<TextVariant, Ramp> = {
  */
 export const textStyles: Record<TextVariant, TextStyle> = StyleSheet.create(
   Object.fromEntries(
-    Object.entries(Platform.OS === 'ios' ? iosStyles : androidStyles).map(
+    Object.entries(isApple() ? iosStyles : androidStyles).map(
       ([variant, style]) => [variant, { fontFamily, ...style }],
     ),
   ) as Record<TextVariant, TextStyle>,
@@ -165,8 +165,7 @@ export const useTextIconSize = (size: number) =>
 const StyledText = ({ color, variant, style, ...rest }: StyledTextProps) => {
   const theme = useTheme();
   const fontScale = useFontScale();
-  const fontLineHeight =
-    Platform.OS === 'android' && fontScale > nonlinearFontScale;
+  const fontLineHeight = isAndroid() && fontScale > nonlinearFontScale;
   return (
     <NativeText
       // A new text view for a new text size: React Native lays out a text

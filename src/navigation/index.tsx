@@ -1,4 +1,3 @@
-import { Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import {
   createNativeStackNavigator,
@@ -21,15 +20,15 @@ import {
   SearchStack,
   WhatsNewStack,
 } from './stacks';
+import { isAndroid, isApple } from 'helpers/platform';
 
 const RootNavigator = createNativeStackNavigator<RootStackParams>();
 
 // A page sheet on iOS, iPadOS and Mac, which a swipe down closes, as the
 // system's own apps present search and web pages. Android covers the window.
-const sheetOptions: NativeStackNavigationOptions =
-  Platform.OS === 'ios'
-    ? { presentation: 'pageSheet' }
-    : { gestureEnabled: false };
+const sheetOptions: NativeStackNavigationOptions = isApple()
+  ? { presentation: 'pageSheet' }
+  : { gestureEnabled: false };
 
 const rootScreenOptions = {
   headerShown: false,
@@ -52,7 +51,7 @@ const renderSheets = () => (
       presentation: 'formSheet',
       sheetAllowedDetents: [1],
       // Material 3's extra-large shape; iOS keeps the system's.
-      sheetCornerRadius: Platform.OS === 'android' ? 28 : undefined,
+      sheetCornerRadius: isAndroid() ? 28 : undefined,
     }}
   >
     <Sheets.Screen name="Setup" component={Setup} />

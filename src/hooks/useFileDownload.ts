@@ -1,5 +1,4 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
-import { Platform } from 'react-native';
 import { toast } from 'components/Toast';
 import { useSettings } from 'data/settings';
 import { DownloadableFile } from 'data/types/state';
@@ -7,6 +6,7 @@ import { downloadFile } from 'services/files/downloads';
 import { saveFileOnMac, openFile, shareFile } from 'services/files/share';
 import { fileNameOf } from 'helpers/filename';
 import { t } from 'helpers/i18n';
+import { isAndroid } from 'helpers/platform';
 
 /**
  * Downloads a file on mount (from the cache when it is there) and offers
@@ -110,7 +110,7 @@ const useFileDownload = (file: DownloadableFile) => {
 
   const openAfterDownload = useEffectEvent(() => {
     if (
-      Platform.OS === 'android' &&
+      isAndroid() &&
       openFileAfterDownload &&
       downloadable.fileType !== 'pdf'
     ) {

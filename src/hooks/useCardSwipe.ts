@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-import { Platform } from 'react-native';
 import {
   SwipeableMethods,
   SwipeDirection,
@@ -7,6 +6,7 @@ import {
 import type { SwipeSide } from 'components/CardSwipeAction';
 import { pressWhileSwiped } from 'helpers/cardActions';
 import { playHaptic } from 'services/haptics';
+import { isAndroid, isApple } from 'helpers/platform';
 
 /** Closes the card whose actions are open, so only one is open at a time, as in Mail */
 let closeOpenCard: (() => void) | null = null;
@@ -80,13 +80,13 @@ const useCardSwipe = ({
     openRef.current = true;
     openedAtRef.current = Date.now();
     const side = sideOf(direction);
-    if (Platform.OS === 'ios' && armedRef.current[side]) {
+    if (isApple() && armedRef.current[side]) {
       commit(side);
     }
   };
 
   const onOpen = (direction: SwipeDirection) => {
-    if (Platform.OS === 'android') {
+    if (isAndroid()) {
       commit(sideOf(direction));
     }
   };

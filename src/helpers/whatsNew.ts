@@ -1,4 +1,3 @@
-import { Platform } from 'react-native';
 import { nativeApplicationVersion } from 'expo-application';
 import semverGt from 'semver/functions/gt';
 import semverLte from 'semver/functions/lte';
@@ -6,6 +5,7 @@ import semverValid from 'semver/functions/valid';
 import DeviceInfo from 'constants/DeviceInfo';
 import type { TextKey } from 'helpers/i18n';
 import type { SystemIconName } from 'helpers/systemIcons';
+import { isApple } from 'helpers/platform';
 
 export type WhatsNewPlatform = 'ios' | 'mac' | 'android';
 
@@ -162,11 +162,7 @@ export const whatsNewSince = (
 export const whatsNewContext = (): WhatsNewContext => ({
   version: DeviceInfo.appVersion(),
   nativeVersion: nativeApplicationVersion,
-  platform: DeviceInfo.isMac()
-    ? 'mac'
-    : Platform.OS === 'android'
-      ? 'android'
-      : 'ios',
+  platform: DeviceInfo.isMac() ? 'mac' : isApple() ? 'ios' : 'android',
 });
 
 /** The title's version: "19" for 19.0.0, "19.1" for 19.1.0, else as is. */

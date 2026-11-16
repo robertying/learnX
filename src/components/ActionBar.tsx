@@ -1,8 +1,9 @@
-import { Platform, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ContainedButton from 'components/ContainedButton';
 import Divider from 'components/Divider';
 import TextButton from 'components/TextButton';
+import { isApple } from 'helpers/platform';
 
 export interface BarAction {
   label: string;
@@ -20,7 +21,7 @@ export interface ActionBarProps {
   scrolledUnder?: boolean;
 }
 
-const apple = Platform.OS === 'ios';
+const apple = isApple();
 
 /**
  * The buttons pinned to the bottom of a page that scrolls above them, as in

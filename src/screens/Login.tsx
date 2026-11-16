@@ -3,7 +3,6 @@ import {
   Alert,
   Keyboard,
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
   StyleSheet,
   View,
@@ -31,6 +30,7 @@ import { mockNetworkTitle } from 'navigation/options';
 import { noteLoginShown } from 'hooks/useLaunchSheet';
 import { LoginStackParams } from 'navigation/types';
 import { Caption, Text } from 'components/Text';
+import { isAndroid, isApple } from 'helpers/platform';
 
 type Props = NativeStackScreenProps<LoginStackParams, 'Login'>;
 
@@ -148,7 +148,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
         <KeyboardAvoidingView
           style={styles.inputs}
           behavior="padding"
-          enabled={Platform.OS !== 'ios'}
+          enabled={!isApple()}
         >
           <Logo iosSize={120} style={styles.logo} />
           <View style={styles.switchContainer}>
@@ -205,7 +205,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
   );
 };
 
-const android = Platform.OS === 'android';
+const android = isAndroid();
 
 // Centered on Apple platforms, as Apple's sign-in pages are. Start-aligned on
 // Android, as Material 3 pages and the welcome, set-up and What's New pages

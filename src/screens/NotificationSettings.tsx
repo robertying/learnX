@@ -1,4 +1,3 @@
-import { Platform } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   Form,
@@ -20,6 +19,7 @@ import {
 import { openSystemSettings } from 'helpers/systemSettings';
 import useNotificationPermission from 'hooks/useNotificationPermission';
 import { SettingsStackParams } from 'navigation/types';
+import { isApple } from 'helpers/platform';
 
 type Props = NativeStackScreenProps<
   SettingsStackParams,
@@ -118,7 +118,7 @@ const NotificationSettings: React.FC<Props> = () => {
         <FormSection
           title={t('assignments')}
           footer={[
-            Platform.OS === 'ios'
+            isApple()
               ? t('notifyDeadlineRemindersCaption')
               : t('notifyDeadlineRemindersCaptionAndroid'),
             showExact && t('exactRemindersCaption'),

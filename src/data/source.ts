@@ -1,4 +1,3 @@
-import { Platform } from 'react-native';
 import { Learn2018Helper, type Credential } from '@robertying/thu-learn-lib';
 import mime from 'mime';
 import CookieManager from '@preeternal/react-native-cookie-manager';
@@ -12,6 +11,7 @@ import {
   assertServerWritesAllowed,
   getServerWritesAllowed,
 } from 'helpers/serverWrites';
+import { isAndroid, isApple } from 'helpers/platform';
 
 /** The part of thu-learn-lib the app calls. */
 export type DataSource = Pick<
@@ -177,7 +177,7 @@ export const serverWritesBlocked = () =>
  * both are cleared; Android has one store, where each cookie is emptied.
  */
 export const clearLoginCookies = async () => {
-  if (Platform.OS === 'ios') {
+  if (isApple()) {
     await Promise.all(
       (['foundation', 'webKit'] as const).map(async iosCookieStore => {
         const cookies = await CookieManager.get(Urls.id, { iosCookieStore });
@@ -249,8 +249,7 @@ const helper = new Learn2018Helper({
   clearLoginCookies: () => clearLoginCookies(),
   // Android's download client has no cookie jar, so downloads carry the
   // Web Learning cookies in a header; iOS sends them from the shared store.
-  cookieHeader: () =>
-    Platform.OS === 'android' ? learnCookieHeader() : undefined,
+  cookieHeader: () => (isAndroid() ? learnCookieHeader() : undefined),
   provider: () => {
     const credentials = getCredentials();
     return {

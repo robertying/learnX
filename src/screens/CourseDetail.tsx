@@ -1,5 +1,5 @@
 import { Fragment, useContext, useState } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import {
   useSafeAreaFrame,
   useSafeAreaInsets,
@@ -46,6 +46,7 @@ import useHeaderButtons from 'hooks/useHeaderButtons';
 import SegmentedTabs from 'components/SegmentedTabs';
 import { SafeAreaView } from 'react-native-screens/experimental';
 import { hasGlassHeader } from 'navigation/options';
+import { isApple } from 'helpers/platform';
 
 const listContentInsetAdjustmentBehavior = DeviceInfo.isMac()
   ? ('never' as const)
@@ -175,7 +176,7 @@ const CourseDetailContent: React.FC<{
     frame.width -
     insets.left -
     insets.right -
-    (Platform.OS === 'android' && detailNavigator ? masterWidth + 1 : 0);
+    (!isApple() && detailNavigator ? masterWidth + 1 : 0);
 
   const { notices } = useNotices();
   const { assignments } = useAssignments();

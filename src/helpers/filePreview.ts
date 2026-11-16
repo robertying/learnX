@@ -1,7 +1,7 @@
 // Which downloaded files File detail can show inline, and how.
-import { Platform } from 'react-native';
 import mime from 'mime';
 import DeviceInfo from 'constants/DeviceInfo';
+import { isApple } from 'helpers/platform';
 
 /** Word and Excel pages are drawn on white, also in dark mode. */
 export const needWhiteBackground = (ext?: string | null) =>
@@ -45,7 +45,7 @@ export const canRenderInIosWebview = (ext?: string | null) => {
  */
 export const canPreviewInline = (fileType?: string | null) =>
   fileType === 'pdf' ||
-  (Platform.OS === 'ios' &&
+  (isApple() &&
     (DeviceInfo.isMac()
       ? canRenderInMacWebview(fileType)
       : canRenderInIosWebview(fileType)));

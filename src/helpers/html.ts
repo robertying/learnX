@@ -1,6 +1,6 @@
-import { Platform } from 'react-native';
 import { dataSource } from 'data/source';
 import { getScriptNonce } from 'helpers/webContent';
+import { isAndroid, isApple } from 'helpers/platform';
 
 const darkMode = require('./preval/darkMode.preval.js');
 
@@ -60,7 +60,7 @@ export const getWebViewTemplate = (
           padding: 0px;${
             // The Body text style, which follows Dynamic Type like the rest
             // of the app. Android's WebView follows the font scale itself.
-            Platform.OS === 'ios' ? '\n          font: -apple-system-body;' : ''
+            isApple() ? '\n          font: -apple-system-body;' : ''
           }
         }
         #root {
@@ -118,7 +118,7 @@ export const getWebViewTemplate = (
         });
       </script>
       ${math ? `<script nonce="${nonce}">${katex}</script>` : ''}${
-        Platform.OS === 'android'
+        isAndroid()
           ? `
       <script nonce="${nonce}">
         ${linkTaps}

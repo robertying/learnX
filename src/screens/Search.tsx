@@ -1,7 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
-  Platform,
   SectionList,
   StyleSheet,
   View,
@@ -41,6 +40,7 @@ import { t } from 'helpers/i18n';
 import { SearchStackParams } from 'navigation/types';
 import { Paragraph } from 'components/Text';
 import { useTheme } from 'theme';
+import { isAndroid, isApple } from 'helpers/platform';
 
 type Props = NativeStackScreenProps<SearchStackParams, 'Search'>;
 
@@ -114,7 +114,7 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
   // iOS and Mac: a native menu of toggles across from Close. Android's open
   // search bar takes the whole toolbar, so its menu sits beside the tabs.
   useLayoutEffect(() => {
-    if (Platform.OS === 'android') {
+    if (isAndroid()) {
       return;
     }
     const options = searchFilterOptions(includeArchived, includeHidden);
@@ -345,7 +345,7 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
             never learns its height, so the prompt would sit behind it. */}
         <View style={StyleSheet.absoluteFill} pointerEvents="none">
           <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            behavior={isApple() ? 'padding' : 'height'}
             style={Styles.flex1}
           >
             {hasResults && !scopeEmpty ? null : noResults ? (
@@ -359,7 +359,7 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
             )}
           </KeyboardAvoidingView>
         </View>
-        {Platform.OS === 'android' ? (
+        {isAndroid() ? (
           // The menu also brings back what it leaves out when nothing
           // matches.
           showTabs ? (

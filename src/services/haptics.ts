@@ -7,6 +7,7 @@
 // app draws itself call this.
 import { Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
+import { isAndroid, isApple } from 'helpers/platform';
 
 export type Haptic =
   /** A task the user started finished (submitted, saved, exported). */
@@ -95,11 +96,12 @@ const androidLegacy: Partial<Record<Haptic, Haptics.NotificationFeedbackType>> =
   };
 
 const play = (haptic: Haptic): Promise<void> | undefined => {
-  if (Platform.OS === 'ios') {
+  if (isApple()) {
     return ios[haptic]?.();
   }
-  if (Platform.OS === 'android') {
-    const api = Platform.Version;
+  if (isAndroid()) {
+    // The API level, a number on Android.
+    const api = Platform.Version as number;
     const constant = android[haptic].find(([since]) => api >= since)?.[1];
     if (constant) {
       return Haptics.performAndroidHapticsAsync(constant);

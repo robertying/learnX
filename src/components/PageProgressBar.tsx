@@ -1,6 +1,7 @@
-import { Platform, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-screens/experimental';
 import ProgressBar from 'components/ProgressBar';
+import { isApple } from 'helpers/platform';
 
 /**
  * A web page's loading progress, over the top of the page and below the
@@ -8,7 +9,7 @@ import ProgressBar from 'components/ProgressBar';
  * which includes the header.
  */
 const PageProgressBar: React.FC<{ progress: number }> = ({ progress }) =>
-  Platform.OS === 'ios' ? (
+  isApple() ? (
     <SafeAreaView
       edges={{ top: true }}
       style={styles.overlay}

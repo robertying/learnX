@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Linking, Platform, StyleSheet, View, ViewProps } from 'react-native';
+import { Linking, StyleSheet, View, ViewProps } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import WebView from 'react-native-webview';
 import Pdf from 'react-native-pdf';
@@ -30,6 +30,7 @@ import {
   FormScreen,
   FormText,
 } from 'components/Form';
+import { isAndroid, isApple } from 'helpers/platform';
 
 type Props = NativeStackScreenProps<FileDetailParamList, 'FileDetail'>;
 
@@ -177,7 +178,7 @@ const FileDetailContent: React.FC<{
               }
               return false;
             }}
-            decelerationRate={Platform.OS === 'ios' ? 'normal' : undefined}
+            decelerationRate={isApple() ? 'normal' : undefined}
             contentInsetAdjustmentBehavior="automatic"
           />
         )
@@ -236,7 +237,7 @@ const FileInfo: React.FC<{
       {DeviceInfo.isMac() ? (
         <FormButton title={t('download')} icon="download" onPress={onSave} />
       ) : null}
-      {Platform.OS === 'android' ? (
+      {isAndroid() ? (
         <FormButton title={t('open')} icon="open" onPress={onOpen} />
       ) : null}
     </FormSection>

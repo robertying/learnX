@@ -1,4 +1,5 @@
-import { Image, ImageProps, Platform } from 'react-native';
+import { Image, ImageProps } from 'react-native';
+import { isApple } from 'helpers/platform';
 
 export interface LogoProps {
   iosSize: number;
@@ -12,14 +13,14 @@ const Logo: React.FC<LogoProps> = ({ iosSize, style }) => {
     <Image
       style={[
         {
-          width: Platform.OS === 'android' ? androidSize : iosSize,
-          height: Platform.OS === 'android' ? androidSize : iosSize,
+          width: isApple() ? iosSize : androidSize,
+          height: isApple() ? iosSize : androidSize,
           marginVertical: -32,
         },
         style,
       ]}
       source={{
-        uri: Platform.OS === 'android' ? 'splash_screen_icon' : 'MaskedAppIcon',
+        uri: isApple() ? 'MaskedAppIcon' : 'splash_screen_icon',
       }}
     />
   );

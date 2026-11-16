@@ -1,7 +1,7 @@
 import { useLayoutEffect, useState } from 'react';
 import useHeaderButtons from 'hooks/useHeaderButtons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Alert, Keyboard, Platform } from 'react-native';
+import { Alert, Keyboard } from 'react-native';
 import { showChoices } from 'components/choiceSheet';
 import {
   Form,
@@ -39,6 +39,7 @@ import {
 } from 'hooks/useAssignmentSubmission';
 import useSaveSubmissionDraft from 'hooks/useSaveSubmissionDraft';
 import { AssignmentSubmissionParamList } from 'navigation/types';
+import { isApple } from 'helpers/platform';
 
 type Props = NativeStackScreenProps<
   AssignmentSubmissionParamList,
@@ -143,7 +144,7 @@ const AssignmentSubmissionContent: React.FC<{
     const parent = navigation.getParent();
     const parentState = parent?.getState();
     if (
-      Platform.OS === 'ios' &&
+      isApple() &&
       parentState?.routes[parentState.index]?.name ===
         'AssignmentSubmissionStack'
     ) {

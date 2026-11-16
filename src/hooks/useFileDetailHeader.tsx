@@ -1,11 +1,11 @@
 import { useContext, useLayoutEffect } from 'react';
-import { Platform } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
 import { SplitViewContext } from 'navigation/SplitView';
 import DeviceInfo from 'constants/DeviceInfo';
 import { t } from 'helpers/i18n';
 import useHeaderButtons from 'hooks/useHeaderButtons';
+import { isAndroid } from 'helpers/platform';
 
 /**
  * File detail's header buttons: full screen (split view, outside search),
@@ -79,7 +79,7 @@ const useFileDetailHeader = ({
       onPress: onSave,
       disabled: unavailable,
     },
-    Platform.OS === 'android' && {
+    isAndroid() && {
       id: 'open',
       label: t('open'),
       icon: 'open',

@@ -1,7 +1,8 @@
-import { Platform, View, ViewProps } from 'react-native';
+import { View, ViewProps } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SafeAreaView } from 'react-native-screens/experimental';
 import Styles from 'constants/Styles';
+import { isApple } from 'helpers/platform';
 
 export interface SafeAreaProps extends ViewProps {
   /**
@@ -21,7 +22,7 @@ const SafeArea: React.FC<SafeAreaProps> = ({
 }) => {
   const insets = useSafeAreaInsets();
 
-  if (Platform.OS === 'ios') {
+  if (isApple()) {
     // Applied natively, in the same layout pass as the insets change (e.g.
     // while a split view's sidebar slides in or out), not a render later.
     return (

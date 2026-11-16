@@ -1,5 +1,4 @@
 import { startTransition, useEffect, useState } from 'react';
-import { Platform } from 'react-native';
 import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
 import type { SFSymbol } from 'sf-symbols-typescript';
 import type { DayPart } from 'helpers/dayPart';
@@ -27,6 +26,7 @@ import {
   SettingStack,
   TodayStack,
 } from './stacks';
+import { isAndroid, isApple } from 'helpers/platform';
 
 const MainNativeNavigator = createNativeBottomTabNavigator<MainTabParams>();
 const MainSidebarNavigator = createSidebarSplitNavigator<MainTabParams>();
@@ -62,7 +62,7 @@ const filledSymbols: Record<TabIcon, SFSymbol> = {
 // (`tab_<symbol>` and `tab_<symbol>_filled`, drawn from the Material Symbols
 // font), since the bar loads its icons as images.
 const getTabBarIcon = (icon: TabIcon, focused: boolean) =>
-  Platform.OS === 'ios'
+  isApple()
     ? { sfSymbol: focused ? filledSymbols[icon] : systemIcons[icon].ios }
     : { uri: `tab_${systemIcons[icon].android}${focused ? '_filled' : ''}` };
 
@@ -212,9 +212,7 @@ const MainTab = () => {
       sidebarAdaptable={DeviceInfo.isIPad()}
       // Material's baseline otherwise, which doesn't match the headers
       tabBarStyle={
-        Platform.OS === 'android'
-          ? { backgroundColor: theme.colors.card }
-          : undefined
+        isAndroid() ? { backgroundColor: theme.colors.card } : undefined
       }
       // Given, so the navigator doesn't blend its own from the theme, which
       // it can't do with system colors: secondaryLabel on iOS, and Material's

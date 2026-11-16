@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Platform, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import ActionBar from 'components/ActionBar';
 import { Form, FormScreen, FormSection, FormToggle } from 'components/Form';
@@ -20,6 +20,7 @@ import {
 } from 'hooks/useCalendarSync';
 import useNotificationPermission from 'hooks/useNotificationPermission';
 import { RootStackParams } from 'navigation/types';
+import { isAndroid, isApple } from 'helpers/platform';
 
 type Props = NativeStackScreenProps<RootStackParams, 'Setup'>;
 
@@ -156,7 +157,7 @@ const Setup: React.FC<Props> = ({ navigation, route }) => {
             value={choices.calendar}
             onValueChange={choose('calendar')}
           />
-          {Platform.OS === 'ios' && (
+          {isApple() && (
             <FormToggle
               icon="reminders"
               title={t('setupReminders')}
@@ -185,7 +186,7 @@ const Setup: React.FC<Props> = ({ navigation, route }) => {
 
 const styles = StyleSheet.create({
   title: {
-    textAlign: Platform.OS === 'android' ? 'auto' : 'center',
+    textAlign: isAndroid() ? 'auto' : 'center',
     paddingHorizontal: 24,
     paddingTop: 34,
     paddingBottom: 10,

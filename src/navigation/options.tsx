@@ -1,4 +1,3 @@
-import { Platform } from 'react-native';
 import { ParamListBase, RouteProp, Theme } from '@react-navigation/native';
 import type {
   NativeStackNavigationOptions,
@@ -12,6 +11,7 @@ import { getAssignment, getFile, getNotice } from 'data/content';
 import { getCachedCourses } from 'data/queries';
 import { headerButtons } from './headerButtons';
 import type { ItemDetailParams } from './types';
+import { isApple } from 'helpers/platform';
 
 // From iOS 26 the header shows a subtitle itself.
 const supportsNativeSubtitle = DeviceInfo.hasLiquidGlass();
@@ -106,7 +106,7 @@ export const getDetailScreenOptions = (title = '', subtitle?: string) =>
   function ({ theme }: { theme: Theme }): NativeStackNavigationOptions {
     return {
       ...getTitleOptions(title, subtitle, { item: true }),
-      headerTintColor: Platform.OS === 'ios' ? brandColor : undefined,
+      headerTintColor: isApple() ? brandColor : undefined,
       // A native title would otherwise take the tint color.
       headerTitleStyle: supportsNativeSubtitle
         ? { color: theme.colors.text }

@@ -1,5 +1,6 @@
-import { ActionSheetIOS, Alert, Platform } from 'react-native';
+import { ActionSheetIOS, Alert } from 'react-native';
 import { t } from 'helpers/i18n';
+import { isApple } from 'helpers/platform';
 
 export interface Choice {
   label: string;
@@ -29,7 +30,7 @@ export const showChoices = ({
   choices,
   onCancel,
 }: ChoiceSheet) => {
-  if (Platform.OS === 'ios') {
+  if (isApple()) {
     ActionSheetIOS.showActionSheetWithOptions(
       {
         title,

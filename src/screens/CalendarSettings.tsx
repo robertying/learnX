@@ -1,4 +1,3 @@
-import { Platform } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import DateRangePicker from 'components/DateRangePicker';
 import {
@@ -25,6 +24,7 @@ import {
 } from 'hooks/useCalendarSync';
 import useCalendarAccess, { CalendarAccess } from 'hooks/useCalendarAccess';
 import { SettingsStackParams } from 'navigation/types';
+import { isApple } from 'helpers/platform';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'CalendarSettings'>;
 
@@ -102,7 +102,7 @@ const CalendarSettings: React.FC<Props> = () => {
     access.calendar,
   );
   const remindersBlocked =
-    Platform.OS === 'ios' && blocked(assignmentReminderSync, access.reminders);
+    isApple() && blocked(assignmentReminderSync, access.reminders);
   const allow = (type: 'calendar' | 'reminder', state: CalendarAccess | null) =>
     state === 'denied' ? openSystemSettings('security') : access.request(type);
 
@@ -203,9 +203,7 @@ const CalendarSettings: React.FC<Props> = () => {
             the schedule's does. */}
         <FormSection
           title={
-            Platform.OS === 'ios'
-              ? t('assignmentsInCalendarSection')
-              : t('assignments')
+            isApple() ? t('assignmentsInCalendarSection') : t('assignments')
           }
           footer={
             assignmentCalendarSync
@@ -290,7 +288,7 @@ const CalendarSettings: React.FC<Props> = () => {
             />
           )}
         </FormSection>
-        {Platform.OS === 'ios' && (
+        {isApple() && (
           <FormSection
             title={t('assignmentsInRemindersSection')}
             footer={
@@ -354,7 +352,7 @@ const CalendarSettings: React.FC<Props> = () => {
         </FormSection>
         <FormSection
           footer={
-            Platform.OS === 'ios'
+            isApple()
               ? t('calendarAndReminderAccessCaption')
               : t('calendarAccessCaption')
           }
@@ -372,7 +370,7 @@ const CalendarSettings: React.FC<Props> = () => {
             testID="calendar-delete"
             icon="delete"
             title={
-              Platform.OS === 'ios'
+              isApple()
                 ? t('deleteSyncedCalendarsAndRemindersEllipsis')
                 : t('deleteSyncedCalendarsEllipsis')
             }
