@@ -51,6 +51,8 @@ react {
         commandLine("node", "--print", "require.resolve('@expo/cli', { paths: [require.resolve('expo/package.json')] })")
     }.standardOutput.asText.get().trim())
     bundleCommand = "export:embed"
+    // Debug builds of both distributions load JS from Metro.
+    debuggableVariants = ["googlePlayDebug", "githubDebug"]
 }
 
 // The NDK, CMake, Java and Kotlin JVM settings come from the root build.gradle,
@@ -66,7 +68,30 @@ android {
         targetSdk = rootProject.ext.targetSdkVersion
         versionCode = 9204544
         versionName = "19.0.0"
+        // A newer build of the same app for scripts/e2e-updater.sh to update
+        // to: -Pe2eVersion=99.0.<n> names it so and raises the version code
+        // by n + 1.
+        def e2eVersion = findProperty("e2eVersion")
+        if (e2eVersion) {
+            versionCode = versionCode + 1 + (e2eVersion.tokenize(".").last() as int)
+            versionName = e2eVersion
+        }
         applyOtaConfig(delegate, false)
+    }
+
+    // Where a build is published. googlePlay: the AAB for Google Play, which
+    // updates the app itself. github: the APKs on GitHub Releases and the TUNA
+    // mirror, which update themselves in the app (modules/updater); only they
+    // may install packages (src/github/AndroidManifest.xml), which Google Play
+    // doesn't allow. Both are the same app otherwise.
+    flavorDimensions = ["distribution"]
+    productFlavors {
+        googlePlay {
+            dimension = "distribution"
+        }
+        github {
+            dimension = "distribution"
+        }
     }
 
     androidResources {
@@ -137,7 +162,7 @@ android {
     }
 }
 
-// Per-ABI APKs (GitHub Releases and the TUNA mirror) get their own version
+// Per-ABI APKs (the github flavor) get their own version
 // codes: 1,000,000,000 + build number * 10 + the ABI's digit, e.g. 1000045403
 // for arm64-v8a of build 4540. Up to 18.0.3 they were (versionCode * 1000 +
 // digit), which overflowed Int (18.0.3's arm64-v8a APK is 614595411), so these

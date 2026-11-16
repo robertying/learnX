@@ -1,0 +1,103 @@
+appId: ${APP_ID}
+name: Update the Android app from the APK mirror
+# Run by scripts/e2e-updater.sh, which starts the APK mirror and serves a
+# newer E2E build as VERSION (99.0.0); not part of the normal runs. Android
+# only: the APKs update themselves, the stores update the other builds.
+---
+- runFlow: ../subflows/reset.yaml
+- runScript:
+    file: server.js
+    env:
+      PATH_: /mode/badsum
+- runFlow: ../subflows/login.yaml
+- runFlow: ../subflows/settings.yaml
+
+# learnX isn't allowed to install apps yet: the confirmation says Android will
+# ask, and the update opens the system page for it. Allowing it and coming
+# back goes on with the update.
+- runFlow: start.yaml
+- extendedWaitUntil:
+    visible: '(Allow from this source|Always allow|允许来自此来源的应用|允许从此来源安装应用|始终允许)'
+    timeout: 15000
+- tapOn: '(Allow from this source|Always allow|允许来自此来源的应用|允许从此来源安装应用|始终允许)'
+- back
+# Some Android versions restart an app they let install apps; it then starts
+# over at the update row. The download from localhost takes seconds.
+- extendedWaitUntil:
+    visible: '.*(${T_updateFailed}).*'
+    timeout: 45000
+    optional: true
+- runFlow:
+    when:
+      notVisible: '.*(${T_updateFailed}).*'
+    commands:
+      - launchApp:
+          stopApp: false
+      - runFlow: ../subflows/settings.yaml
+      - runFlow: start.yaml
+
+# A download that doesn't match latest.json's SHA-256 is refused.
+- extendedWaitUntil:
+    visible: '.*(${T_updateVerifyFailed}).*'
+    timeout: 60000
+- runScript:
+    file: server.js
+    env:
+      PATH_: /status
+- assertTrue: ${output.updater.apkDownloads >= 1}
+- tapOn: ${T_cancel}
+
+# A good download installs, which ends the app, also when people leave the
+# app while it downloads: it waits for them to come back, as Android doesn't
+# let an app in the background ask to install. The mirror takes seconds to
+# send it (slow mode). Android asks to confirm the install, except from
+# Android 17 on, where "Always allow" lets learnX install without asking
+# (CONFIRMS, set by scripts/e2e-updater.sh).
+- runScript:
+    file: server.js
+    env:
+      PATH_: /mode/slow
+- runFlow: start.yaml
+- pressKey: Home
+- runScript:
+    file: wait-sent.js
+    env:
+      AFTER: ${output.updater.apkSent}
+# With E2E_SCREENSHOTS: the home screen with the download done (no install
+# screen yet), the app back in front, then Android's confirmation where it
+# asks.
+- runFlow:
+    file: ../subflows/shot.yaml
+    env:
+      NAME: updater-downloaded-away
+- launchApp:
+    stopApp: false
+- runFlow:
+    file: ../subflows/shot.yaml
+    env:
+      NAME: updater-back
+- runFlow:
+    when:
+      true: ${CONFIRMS == 'true'}
+    commands:
+      - extendedWaitUntil:
+          visible: '(?i)(update|install|更新|安装)'
+          timeout: 60000
+      - runFlow:
+          file: ../subflows/shot.yaml
+          env:
+            NAME: updater-confirmation
+      - tapOn: '(?i)(update|install|更新|安装)'
+- runFlow: play-protect.yaml
+- extendedWaitUntil:
+    notVisible:
+      id: settings-update
+    timeout: 60000
+# The new version is installed (scripts/e2e-updater.sh checks it too), so
+# there's no update to offer.
+- launchApp:
+    stopApp: false
+- runFlow: ../subflows/login.yaml
+- runFlow: ../subflows/settings.yaml
+- assertNotVisible:
+    id: settings-update

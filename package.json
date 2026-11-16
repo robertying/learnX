@@ -10,7 +10,7 @@
     "bump": "scripts/bump.sh",
     "pod": "cd ios && bundle exec pod install && bundle exec pod update && cd ..",
     "start": "react-native start --client-logs",
-    "android": "react-native run-android",
+    "android": "react-native run-android --mode githubDebug",
     "ios": "react-native run-ios",
     "lint": "oxlint",
     "typecheck": "tsc && tsc -p scripts",

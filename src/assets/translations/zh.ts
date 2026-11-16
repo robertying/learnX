@@ -178,7 +178,22 @@ const zh: typeof en = {
   logoutQuestion: '退出登录？',
   logoutConfirmation:
     '此设备上的设置、收藏、归档和屏蔽的项目以及草稿将被清除。',
-  foundNewVersion: '有新版本：v{version}',
+  foundNewVersion: '检测到新版本：v{version}',
+  updateTitle: '更新到v{version}？',
+  viewChangelog: '查看更新日志',
+  update: '更新',
+  updateDownloads: 'learnX将从TUNA镜像下载更新并安装。',
+  updateDownloadsSize: 'learnX将从TUNA镜像下载更新（{size}）并安装。',
+  updateAllowInstall:
+    'Android会先请你允许learnX安装应用。允许后返回learnX继续更新。',
+  updateDownloading: '正在下载{percent}%',
+  updateInstalling: '正在安装',
+  updateFailed: '更新失败',
+  updateDownloadFailed: '更新下载失败。请检查网络连接后重试。',
+  updateVerifyFailed: '无法验证下载的更新。请重试，或在浏览器中下载。',
+  updateNotAllowed:
+    '你尚未允许learnX安装应用。请在Android询问时允许，然后重试。',
+  updateInstallFailed: 'Android安装更新失败。请重试，或在浏览器中下载。',
   unfinished: '未完成',
   finished: '已完成',
   all: '全部',

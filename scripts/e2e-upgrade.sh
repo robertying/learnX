@@ -139,7 +139,7 @@ if [ "${SKIP_CURRENT_BUILD:-}" = 1 ]; then
     xcrun simctl install "$device" "$app"
     ;;
   android)
-    adb -s "$device" install -r -d "android/app/build/outputs/apk/release/app-${ANDROID_ABI:-arm64-v8a}-release.apk"
+    adb -s "$device" install -r -d "android/app/build/outputs/apk/github/release/app-github-${ANDROID_ABI:-arm64-v8a}-release.apk"
     ;;
   esac
 else

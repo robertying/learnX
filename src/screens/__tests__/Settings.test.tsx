@@ -21,10 +21,16 @@ import { setServerWritesAllowed } from 'helpers/serverWrites';
 import useAvailableUpdate from 'hooks/useAvailableUpdate';
 import { useShowDetail } from 'hooks/useDetailNavigator';
 import Settings from 'screens/Settings';
+import { installsUpdate, installUpdate } from 'services/update';
 import { screenProps } from 'test-utils/screenProps';
 
 jest.mock('data/login', () => ({ logout: jest.fn() }));
 jest.mock('hooks/useAvailableUpdate', () => jest.fn(() => null));
+jest.mock('services/update', () => ({
+  ...jest.requireActual<typeof import('services/update')>('services/update'),
+  installsUpdate: jest.fn(() => false),
+  installUpdate: jest.fn(),
+}));
 const mockShow = jest.fn();
 jest.mock('hooks/useDetailNavigator', () => ({
   useShowDetail: jest.fn(() => mockShow),
@@ -180,4 +186,32 @@ it('links a newer Android release', async () => {
   );
   expect(open).toHaveBeenCalledWith('https://mirror/learnX.apk');
   jest.mocked(useAvailableUpdate).mockReturnValue(null);
+});
+
+it('shows how far an update has come in its row', async () => {
+  jest.mocked(useAvailableUpdate).mockReturnValue({
+    version: '20.0.0',
+    url: 'https://mirror/learnX.apk',
+    sha256: 'abc',
+  });
+  jest.mocked(installsUpdate).mockReturnValue(true);
+  jest.mocked(installUpdate).mockImplementation((_, { onProgress } = {}) => {
+    onProgress?.(0.42);
+    return new Promise(() => {});
+  });
+  const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  await renderScreen();
+  await userEvent.press(screen.getByTestId('settings-update'));
+  const buttons = alert.mock.lastCall?.[2] ?? [];
+  await act(async () =>
+    buttons.find(button => button.text === t('update'))?.onPress?.(),
+  );
+  expect(
+    screen.getByText(t('updateDownloading', { percent: 42 })),
+  ).toBeTruthy();
+  // The confirmation's changelog button opens it in the detail pane.
+  buttons.find(button => button.text === t('viewChangelog'))?.onPress?.();
+  expect(mockShow).toHaveBeenCalledWith('Changelog');
+  jest.mocked(useAvailableUpdate).mockReturnValue(null);
+  jest.mocked(installsUpdate).mockReturnValue(false);
 });

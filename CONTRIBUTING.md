@@ -130,7 +130,7 @@ Debug builds load JavaScript from Metro, so JS changes show up on reload. Rebuil
 
 ```sh
 pnpm start                        # Metro, in its own terminal
-pnpm android --active-arch-only   # builds Debug for the running emulator's ABI only, installs and launches it
+pnpm android --active-arch-only   # builds Debug (the github flavor) for the running emulator's ABI only, installs and launches it
 ```
 
 `--active-arch-only` builds only the emulator's ABI, which saves a lot of build time.

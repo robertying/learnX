@@ -189,6 +189,26 @@ export default {
   logoutConfirmation:
     'Your settings, favorites, archived and hidden items and drafts on this device will be removed.',
   foundNewVersion: 'Update Available: v{version}',
+  updateTitle: 'Update to v{version}?',
+  viewChangelog: 'View Changelog',
+  update: 'Update',
+  updateDownloads:
+    'learnX will download the update from the TUNA mirror and install it.',
+  updateDownloadsSize:
+    'learnX will download the update ({size}) from the TUNA mirror and install it.',
+  updateAllowInstall:
+    'Android will first ask you to allow learnX to install apps. Allow it, then come back to learnX to continue.',
+  updateDownloading: 'Downloading {percent}%',
+  updateInstalling: 'Installing',
+  updateFailed: "Couldn't Update learnX",
+  updateDownloadFailed:
+    "Couldn't download the update. Check your connection and try again.",
+  updateVerifyFailed:
+    "The downloaded update couldn't be verified. Try again, or download it in the browser.",
+  updateNotAllowed:
+    "learnX isn't allowed to install apps. Allow it when Android asks, then try again.",
+  updateInstallFailed:
+    "Android couldn't install the update. Try again, or download it in the browser.",
   unfinished: 'Unfinished',
   finished: 'Finished',
   all: 'All',

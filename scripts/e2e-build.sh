@@ -79,10 +79,11 @@ android)
   abi="${ANDROID_ABI:-arm64-v8a}"
   # Gradle doesn't know the JS bundle depends on TEST_LOGIN (see
   # babel/inline-env.js), so the task always reruns rather than reuse a bundle
-  # made without it.
-  (cd android && ./gradlew app:createBundleReleaseJsAndAssets --rerun \
-    app:assembleRelease -PciRelease -PreactNativeArchitectures="$abi")
-  apk="android/app/build/outputs/apk/release/app-$abi-release.apk"
+  # made without it. The github flavor: the APKs that update themselves, which
+  # the updater flows test.
+  (cd android && ./gradlew app:createBundleGithubReleaseJsAndAssets --rerun \
+    app:assembleGithubRelease -PciRelease -PreactNativeArchitectures="$abi")
+  apk="android/app/build/outputs/apk/github/release/app-github-$abi-release.apk"
   # -d: a newer debug build may be installed; both are signed with the debug key.
   adb -s "$device" install -r -d "$apk"
   echo "Installed $apk"

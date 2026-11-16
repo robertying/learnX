@@ -1,6 +1,6 @@
 # modules
 
-Local Expo modules (`expo-module.config.json` in each): `crashlytics`, `menus`, `share`, `shortcuts`, `sidebar`, `spotlight` and `toast`. They have no JS-only fallback, so a change to their native code needs a rebuild.
+Local Expo modules (`expo-module.config.json` in each): `crashlytics`, `menus`, `share`, `shortcuts`, `sidebar`, `spotlight`, `toast` and `updater`. They have no JS-only fallback, so a change to their native code needs a rebuild.
 
 ## Native tests (iOS)
 
@@ -37,3 +37,10 @@ Local Expo modules (`expo-module.config.json` in each): `crashlytics`, `menus`, 
 - Android: `MainActivity`'s SEND filter (files and `text/*`); the module reads `EXTRA_STREAM` from the launch intent or a new intent and removes the extras once read. Only `content:` URIs are taken: a `file:` URI would be read with learnX's own access. Text without a file comes back as `{ kind: 'unsupported' }`, and the app says only files can be attached.
 - Saving out (Mac): `saveFile(uri)` presents the system save panel for a copy of a file, which keeps its own name (`services/files/share` copies it under `Caches/save/<name>` first and deletes that copy after). It resolves to false when cancelled. The app may write only where people pick (user-selected read-write entitlement), so nothing goes to Downloads directly.
 - `hooks/useShareHandler` copies an Android content URI into the cache and keeps the file in `data/pendingAssignment` for the next submission.
+
+## Updating the Android app
+
+- Android has two flavors (`android/app/build.gradle`): `googlePlay` (the AAB, which Google Play updates) and `github` (the per-ABI APKs on GitHub Releases and the TUNA mirror, which update themselves). Only `github` declares `REQUEST_INSTALL_PACKAGES` and `UPDATE_PACKAGES_WITHOUT_USER_ACTION` (`android/app/src/github/AndroidManifest.xml`), which Google Play doesn't allow. Debug builds, `pnpm android` and the E2E builds are `github`.
+- `hooks/useAvailableUpdate` reads `latest.json` from the mirror (`helpers/update`; fastlane's Android build writes it with each APK's size and SHA-256) once a day, only where `modules/updater`'s `isSupported` is true, that is in the `github` build. A newer version than the installed app's native one shows a row at the top of Settings.
+- Tapping it (`hooks/useUpdateInstaller`) asks first, with the size and a View Changelog button (the GitHub releases page), then `services/update`: if learnX may not install apps yet, it opens Android's "Install unknown apps" page for it and goes on when people come back; it downloads the APK into `Caches/update` (`downloadInto` from `services/files/downloads`) with the progress in the row, and hands it to `modules/updater`'s `install`. That checks the SHA-256, that the APK is learnX signed with the installed app's key (or a key it rotated from), then installs it with a `PackageInstaller` session: Android asks to confirm, except on Android 12+ once learnX installed the version it replaces. Updating ends the app. A failure offers Try Again (which reads `latest.json` again, in case the mirror was between a release's files) and Open in Browser; declining the confirmation, or leaving it without an answer (which some Android versions never report), just ends the attempt. A build without a checksum in `latest.json`, and the Google Play build if it ever got the row, open the APK in the browser.
+- E2E builds look for updates at `http://localhost:8198` instead: `scripts/e2e-updater.sh android` serves newer E2E builds of the same checkout (99.0.0, then 99.0.1, built with `-Pe2eVersion`) from `scripts/updater-e2e-server.mjs` and runs `.maestro/updater/` (see `.maestro/AGENTS.md`).

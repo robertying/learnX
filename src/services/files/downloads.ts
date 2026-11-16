@@ -174,7 +174,7 @@ export interface DownloadOptions {
  * server returned HTTP 403" on iOS, "…: HTTP 403" on Android) instead of
  * saving it.
  */
-const httpStatusOf = (error: unknown) => {
+export const httpStatusOf = (error: unknown) => {
   const match = /^Unable to download a file:.*\bHTTP (\d{3})\b/.exec(
     error instanceof Error ? error.message : '',
   );
@@ -186,6 +186,47 @@ interface PartialDownload extends DownloadResponse {
 }
 
 /**
+ * Downloads `url` into `file` in the foreground, reporting progress in whole
+ * percents. Rejects when the download fails, also on a status other than 2xx
+ * (`httpStatusOf` reads it).
+ */
+export const downloadInto = async (
+  url: string,
+  file: File,
+  {
+    headers,
+    onProgress,
+    signal,
+  }: Pick<DownloadOptions, 'onProgress' | 'signal'> & {
+    headers?: Record<string, string>;
+  } = {},
+) => {
+  const task = new DownloadTask(url, file, {
+    headers,
+    // A background session would not share the app's cookies reliably and
+    // outlives the screen that shows the progress.
+    sessionType: 'foreground',
+    signal,
+    onProgress: event => {
+      // iOS reports the byte counts as BigInt, which can't be divided by a
+      // number or formatted with toFixed.
+      const bytesWritten = Number(event.bytesWritten);
+      const totalBytes = Number(event.totalBytes);
+      if (totalBytes > 0) {
+        // Rounded to whole percents, so a screen showing it re-renders at
+        // most 100 times.
+        onProgress?.(Math.round((bytesWritten / totalBytes) * 100) / 100);
+      }
+    },
+  });
+  try {
+    await task.downloadAsync();
+  } finally {
+    task.release();
+  }
+};
+
+/**
  * Sends the download request thu-learn-lib hands it into a new partial file,
  * and reports what came back; thu-learn-lib tells the file from an expired
  * session's answer and from an error status, and discards what it won't use.
@@ -194,27 +235,9 @@ const partialDownload =
   ({ onProgress, signal }: Pick<DownloadOptions, 'onProgress' | 'signal'>) =>
   async ({ url, headers }: DownloadRequest): Promise<PartialDownload> => {
     const partial = newPartialFile();
-    const task = new DownloadTask(url, partial, {
-      headers,
-      // A background session would not share the app's cookies reliably and
-      // outlives the screen that shows the progress.
-      sessionType: 'foreground',
-      signal,
-      onProgress: event => {
-        // iOS reports the byte counts as BigInt, which can't be divided by a
-        // number or formatted with toFixed.
-        const bytesWritten = Number(event.bytesWritten);
-        const totalBytes = Number(event.totalBytes);
-        if (totalBytes > 0) {
-          // Rounded to whole percents, so a screen showing it re-renders at
-          // most 100 times.
-          onProgress?.(Math.round((bytesWritten / totalBytes) * 100) / 100);
-        }
-      },
-    });
     const discard = () => deleteQuietly(partial);
     try {
-      await task.downloadAsync();
+      await downloadInto(url, partial, { headers, onProgress, signal });
     } catch (error) {
       discard();
       const status = httpStatusOf(error);
@@ -222,8 +245,6 @@ const partialDownload =
         throw error;
       }
       return { status, size: 0, text: async () => '', discard, partial };
-    } finally {
-      task.release();
     }
     return {
       status: 200,

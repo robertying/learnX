@@ -12,6 +12,7 @@ import {
 import { setSetting, useSettings } from 'data/settings';
 import DeviceInfo from 'constants/DeviceInfo';
 import useAvailableUpdate from 'hooks/useAvailableUpdate';
+import useUpdateInstaller from 'hooks/useUpdateInstaller';
 import { logout } from 'data/login';
 import { userQuery } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
@@ -20,7 +21,6 @@ import { useCredentialsStore } from 'data/credentials';
 import { useShowDetail } from 'hooks/useDetailNavigator';
 import { calendarSettingsTitle } from 'helpers/calendar/details';
 import { t } from 'helpers/i18n';
-import { openLink } from 'helpers/openLink';
 import { findWhatsNew, releases, whatsNewContext } from 'helpers/whatsNew';
 import { MainStackScreenProps, SettingsStackParams } from 'navigation/types';
 
@@ -51,6 +51,9 @@ const Settings: React.FC<Props> = ({ navigation }) => {
   const courseSharingSeen = useAppState(state => state.courseSharingSeen);
 
   const update = useAvailableUpdate();
+  const installer = useUpdateInstaller(update, {
+    onViewChangelog: () => show('Changelog'),
+  });
   const whatsNew = latestWhatsNew();
 
   const handleLogout = () => {
@@ -77,6 +80,32 @@ const Settings: React.FC<Props> = ({ navigation }) => {
   return (
     <FormScreen>
       <Form testID="settings-list">
+        {/* On top, where an update is seen first; only the APKs show it. */}
+        {update && (
+          <FormSection>
+            <FormLink
+              icon="update"
+              testID="settings-update"
+              badge={!installer.step}
+              title={t('foundNewVersion', { version: update.version })}
+              subtitle={
+                installer.step === 'downloading'
+                  ? t('updateDownloading', {
+                      percent: Math.round(installer.progress * 100),
+                    })
+                  : installer.step === 'installing'
+                    ? t('updateInstalling')
+                    : undefined
+              }
+              progress={
+                installer.step === 'downloading'
+                  ? installer.progress
+                  : undefined
+              }
+              onPress={installer.update}
+            />
+          </FormSection>
+        )}
         <FormSection>
           <FormProfile
             name={userInfo?.name ?? username ?? 'learnX'}
@@ -161,14 +190,6 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             title={t('changelog')}
             onPress={() => show('Changelog')}
           />
-          {update && (
-            <FormLink
-              icon="update"
-              badge
-              title={t('foundNewVersion', { version: update.version })}
-              onPress={() => openLink(update.url)}
-            />
-          )}
           <FormLink
             icon="maintainer"
             testID="settings-maintainer"

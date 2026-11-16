@@ -452,29 +452,40 @@ def build_android
   verify_release_env!
   verify_ota_config!
   # The release config reads LEARNX_RELEASE_* from android/local.properties and
-  # signs with android/app/release.keystore.
+  # signs with android/app/release.keystore. Two flavors (android/app/build.gradle):
+  # googlePlay makes the AAB, github the APKs that update themselves in the app.
   gradle(
     project_dir: File.join(ROOT, "android"),
-    tasks: ["app:bundleRelease", "app:assembleRelease", "app:uploadCrashlyticsSymbolFileRelease"],
+    tasks: [
+      "app:bundleGooglePlayRelease", "app:assembleGithubRelease",
+      "app:uploadCrashlyticsSymbolFileGooglePlayRelease", "app:uploadCrashlyticsSymbolFileGithubRelease",
+    ],
   )
 
-  check_bundle_env!(Dir[File.join(ANDROID_APP, "build/generated/assets/react/release/index.android.bundle")])
+  check_bundle_env!(Dir[File.join(ANDROID_APP, "build/generated/assets/react/{googlePlayRelease,githubRelease}/index.android.bundle")])
 
   FileUtils.rm_rf(android_out_dir)
   FileUtils.mkdir_p(android_out_dir)
-  FileUtils.cp(File.join(ANDROID_APP, "build/outputs/bundle/release/app-release.aab"), aab_path)
+  FileUtils.cp(File.join(ANDROID_APP, "build/outputs/bundle/googlePlayRelease/app-googlePlay-release.aab"), aab_path)
 
   # APKs for GitHub Releases and the TUNA mirror. The app's updater reads
-  # latest.json from the mirror and downloads learnX-<abi>-v<version>.apk.
+  # latest.json from the mirror, downloads learnX-<abi>-v<version>.apk and
+  # checks it against the SHA-256 here before installing it; the size is shown
+  # when it asks to update.
   files = APK_ABIS.zip(apk_paths).map do |abi, dest|
-    FileUtils.cp(File.join(ANDROID_APP, "build/outputs/apk/release/app-#{abi}-release.apk"), dest)
-    { name: File.basename(dest), sha256: Digest::SHA256.file(dest).hexdigest }
+    FileUtils.cp(File.join(ANDROID_APP, "build/outputs/apk/github/release/app-github-#{abi}-release.apk"), dest)
+    { name: File.basename(dest), size: File.size(dest), sha256: Digest::SHA256.file(dest).hexdigest }
   end
   File.write(latest_json_path, "#{JSON.pretty_generate({ version: app_version, files: files })}\n")
 
+  # Both flavors bundle the same JS, so one map decodes either's crashes.
+  maps = %w[googlePlayRelease githubRelease].map do |variant|
+    File.join(ANDROID_APP, "build/generated/sourcemaps/react/#{variant}/index.android.bundle.map")
+  end
+  UI.user_error!("The googlePlay and github JS bundles differ; keep both source maps.") unless FileUtils.compare_file(*maps)
   map = sourcemap_path("android")
   FileUtils.mkdir_p(File.dirname(map))
-  FileUtils.cp(File.join(ANDROID_APP, "build/generated/sourcemaps/react/release/index.android.bundle.map"), map)
+  FileUtils.cp(maps.first, map)
 
   UI.success("Android release files: #{android_out_dir}")
   UI.success("Source map: #{map}")

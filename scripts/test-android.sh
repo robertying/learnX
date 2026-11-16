@@ -32,4 +32,4 @@ for project in "${projects[@]}"; do
 done
 # Fails below this line coverage of the modules' Kotlin. Keep it just under
 # the current total; raise it as coverage grows.
-node scripts/android-coverage.mjs --min=96 "${reports[@]}"
+node scripts/android-coverage.mjs --min=98 "${reports[@]}"

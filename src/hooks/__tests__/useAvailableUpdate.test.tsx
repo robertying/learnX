@@ -1,12 +1,18 @@
-import { Platform } from 'react-native';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react-native';
 import { createElement, type ReactNode } from 'react';
 import { clearQueryCache, queryClient } from 'data/queryClient';
 import { getLatestRelease } from 'helpers/update';
 import useAvailableUpdate from 'hooks/useAvailableUpdate';
+import Updater from 'modules/updater';
 
 jest.mock('helpers/update', () => ({ getLatestRelease: jest.fn() }));
+// The APKs: the build that updates itself.
+jest.mock('modules/updater', () => ({
+  __esModule: true,
+  default: { isSupported: true },
+}));
+const updater = jest.mocked(Updater!);
 jest.mock('expo-application', () => ({
   nativeApplicationVersion: '19.0.0',
   nativeBuildVersion: '1',
@@ -34,8 +40,7 @@ describe('useAvailableUpdate', () => {
     return result;
   };
 
-  it('offers a newer Android release than the installed app', async () => {
-    jest.replaceProperty(Platform, 'OS', 'android');
+  it('offers a newer release than the installed app', async () => {
     const result = await offered('19.1.0');
     await waitFor(() =>
       expect(result.current).toMatchObject({ version: '19.1.0' }),
@@ -43,14 +48,13 @@ describe('useAvailableUpdate', () => {
   });
 
   it('offers nothing as new or older', async () => {
-    jest.replaceProperty(Platform, 'OS', 'android');
     expect((await offered('19.0.0')).current).toBeNull();
     clearQueryCache();
     expect((await offered('18.9.0')).current).toBeNull();
   });
 
-  it("doesn't check outside Android, where the stores update the app", async () => {
-    jest.replaceProperty(Platform, 'OS', 'ios');
+  it("doesn't check in builds the stores update", async () => {
+    jest.replaceProperty(updater, 'isSupported', false);
     const { result } = await renderHook(() => useAvailableUpdate(), {
       wrapper,
     });

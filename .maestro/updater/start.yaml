@@ -1,0 +1,12 @@
+# From Settings, tap the update row (to VERSION) and confirm the update.
+appId: ${APP_ID}
+---
+- runFlow:
+    file: ../subflows/scroll-to-id.yaml
+    env:
+      LIST: settings-list
+      ID: settings-update
+- assertVisible: '.*${VERSION}.*'
+- tapOn:
+    id: settings-update
+- tapOn: ${T_update}

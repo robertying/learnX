@@ -1,0 +1,35 @@
+appId: ${APP_ID}
+name: Update the Android app again without a confirmation
+# Run by scripts/e2e-updater.sh after update.yaml, on Android 12+ only, with
+# the next version (VERSION, 99.0.1) served: learnX installed the running
+# version, so Android installs the next update without asking.
+---
+# The app keeps latest.json for a day: start afresh to read the new one.
+# Clearing the app may also take back its permission to install apps.
+- runFlow: ../subflows/reset.yaml
+- runFlow: ../subflows/login.yaml
+- runFlow: ../subflows/settings.yaml
+- runFlow: start.yaml
+- extendedWaitUntil:
+    visible: '(Allow from this source|Always allow|允许来自此来源的应用|允许从此来源安装应用|始终允许)'
+    timeout: 5000
+    optional: true
+- runFlow:
+    when:
+      visible: '(Allow from this source|Always allow|允许来自此来源的应用|允许从此来源安装应用|始终允许)'
+    commands:
+      - tapOn: '(Allow from this source|Always allow|允许来自此来源的应用|允许从此来源安装应用|始终允许)'
+      - back
+# No confirmation: the update ends the app by itself.
+- runFlow: play-protect.yaml
+- extendedWaitUntil:
+    notVisible:
+      id: settings-update
+    timeout: 60000
+- assertNotVisible: '(?i)(update|install|更新|安装)'
+- launchApp:
+    stopApp: false
+- runFlow: ../subflows/login.yaml
+- runFlow: ../subflows/settings.yaml
+- assertNotVisible:
+    id: settings-update
