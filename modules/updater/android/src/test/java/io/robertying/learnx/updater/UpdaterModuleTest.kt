@@ -287,7 +287,7 @@ class InstallTest {
   }
 
   @Test
-  @Config(sdk = [28])
+  @Config(sdk = [29])
   fun installsOnOlderAndroid() {
     val promise = RecordingPromise()
     install(promise)
