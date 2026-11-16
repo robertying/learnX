@@ -927,10 +927,8 @@ export const FormProfile: React.FC<FormProfileProps> = ({ name, detail }) => {
   // Smaller on the Mac, as the account row in System Settings.
   const isMac = DeviceInfo.isMac();
   const avatarSize = isMac ? 40 : 56;
-  const nameFont = font({
-    textStyle: isMac ? 'headline' : 'title2',
-    weight: 'semibold',
-  });
+  // Title 2: 22 pt on iOS, 17 pt on the Mac, a step above its 13 pt rows.
+  const nameFont = font({ textStyle: 'title2', weight: 'semibold' });
   return (
     <HStack spacing={12}>
       <ZStack modifiers={[frame({ width: avatarSize, height: avatarSize })]}>

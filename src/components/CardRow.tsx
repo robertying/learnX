@@ -13,6 +13,7 @@ import {
   itemTitleWeight,
   Paragraph,
   Text,
+  textStyles,
   useTextIconSize,
 } from 'components/Text';
 import { t } from 'helpers/i18n';
@@ -30,6 +31,11 @@ const useTitleLines = () => (useWindowDimensions().fontScale >= 1.5 ? 3 : 1);
 // Mail's first line is Subheadline; a Material three-line item's overline is
 // small (bodySmall).
 const metaVariant = isAndroid ? 'footnote' : 'subheadline';
+
+// The unread dot, two thirds as tall as the subheadline text (10 pt on iOS,
+// 7 pt on the Mac's smaller text), centered where a 10 pt dot 6 pt down is.
+const dotSize = Math.round(((textStyles.subheadline.fontSize ?? 15) * 2) / 3);
+const dotTop = 6 + (10 - dotSize) / 2;
 
 export interface CardRowProps {
   /** Whose item this is (the course, or the publisher inside a course). */
@@ -302,12 +308,12 @@ const styles = StyleSheet.create({
   gutter: {
     width: 10,
     marginStart: -8,
-    paddingTop: 6,
+    paddingTop: dotTop,
   },
   dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: dotSize,
+    height: dotSize,
+    borderRadius: dotSize / 2,
   },
   // The lines 4 apart, with 2 above and below.
   content: {
