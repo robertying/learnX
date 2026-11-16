@@ -299,7 +299,7 @@ jobs:
           script: |
             scripts/android-locale.sh zh-CN
             adb install -r build/app-x86_64-release.apk
-            mkdir -p build/maestro; E2E_SCREENSHOTS=build/maestro/screenshots scripts/e2e.sh android --format junit --output build/maestro/report.xml --test-output-dir build/maestro; status=$?; scripts/e2e-ota.sh android || status=1; cp build/ota-e2e/server-android.log build/maestro/ || true; adb logcat -d > build/maestro/logcat.txt; exit $status
+            mkdir -p build/maestro; E2E_SCREENSHOTS=build/maestro/screenshots scripts/e2e.sh android --format junit --output build/maestro/report.xml --test-output-dir build/maestro; status=$?; scripts/e2e-ota.sh android || status=1; cp build/ota-e2e/server-android.log build/maestro/ || true; adb logcat -d > build/maestro/logcat.txt; scripts/android-crash-reports.sh build/maestro; exit $status
 
       - name: Upload results
         if: always()
