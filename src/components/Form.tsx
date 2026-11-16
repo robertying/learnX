@@ -169,9 +169,10 @@ const macFormModifiers = [
 const groupedBackground = PlatformColor('systemGroupedBackground');
 
 // The last section would otherwise end right at the floating tab bar's top
-// edge when scrolled to the end; with this its rows end about a section's
-// spacing above it (its footer a little less), as one more section would.
-// (Android's list has its own bottom padding.)
+// edge when scrolled to the end (on Mac, its footer at the window's bottom
+// edge); with this its rows end about a section's spacing above it (its
+// footer a little less), as one more section would. (Android's list has its
+// own bottom padding.)
 const lastSectionModifiers = [
   listSectionMargins({ edges: 'bottom', length: Spacing.l }),
 ];
@@ -348,7 +349,11 @@ export const FormSection: React.FC<FormSectionProps> = ({
       }
       modifiers={
         isMac
-          ? [...macSectionModifiers, ...(first ? macFirstSectionModifiers : [])]
+          ? [
+              ...macSectionModifiers,
+              ...(first ? macFirstSectionModifiers : []),
+              ...(last ? lastSectionModifiers : []),
+            ]
           : [
               ...(first ? firstSectionModifiers : []),
               ...(last ? lastSectionModifiers : []),

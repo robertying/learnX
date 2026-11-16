@@ -35,6 +35,7 @@ import {
   font,
   foregroundStyle,
   listRowBackground,
+  listSectionMargins,
 } from '@expo/ui/swift-ui/modifiers';
 import { FormProfile } from 'components/Form';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -592,6 +593,26 @@ describe('Form (iOS details)', () => {
       textStyle: 'body',
       weight: 'medium',
     });
+  });
+
+  it('ends the last section clear of the window edge on Mac, as on iOS', async () => {
+    for (const isMac of [false, true]) {
+      jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(isMac);
+      await render(
+        <Form>
+          <FormSection footer="First">
+            <FormText title="Row" />
+          </FormSection>
+          <FormSection footer="Last">
+            <FormText title="Row" />
+          </FormSection>
+        </Form>,
+      );
+      const [first, last] = screen.getAllByTestId('section');
+      const margin = listSectionMargins({ edges: 'bottom', length: 24 });
+      expect(last.props.modifiers).toContainEqual(margin);
+      expect(first.props.modifiers).not.toContainEqual(margin);
+    }
   });
 
   it('leaves the Mac header alone', async () => {
