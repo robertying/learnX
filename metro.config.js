@@ -31,9 +31,24 @@ const inlinedInputsHash = () => {
   return hash.digest('hex').slice(0, 16);
 };
 
+const defaultConfig = getDefaultConfig(__dirname);
+
+// Git worktrees of this repository inside it (git-ignored, see .gitignore),
+// each with its own node_modules: Metro would otherwise crawl and watch them,
+// and trip over files a package install there moves while it runs.
+const worktrees = new RegExp(
+  `^${path
+    .join(__dirname, '.claude', 'worktrees')
+    .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(/|$)`,
+);
+
 /** @type {ReturnType<typeof getDefaultConfig>} */
 const config = {
-  ...getDefaultConfig(__dirname),
+  ...defaultConfig,
+  resolver: {
+    ...defaultConfig.resolver,
+    blockList: [defaultConfig.resolver.blockList ?? [], worktrees].flat(),
+  },
   cacheVersion: inlinedInputsHash(),
 };
 
