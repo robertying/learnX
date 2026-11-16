@@ -170,3 +170,20 @@ it('does nothing without a release', async () => {
   expect(alert).not.toHaveBeenCalled();
   expect(open).not.toHaveBeenCalled();
 });
+
+it('opens the changelog from the confirmation', async () => {
+  const onViewChangelog = jest.fn();
+  const { result } = await renderHook(() =>
+    useUpdateInstaller(release, { onViewChangelog }),
+  );
+  await act(() => result.current.update());
+  const buttons = (alert.mock.lastCall?.[2] ?? []) as AlertButton[];
+  expect(buttons.map(button => button.text)).toEqual([
+    t('cancel'),
+    t('viewChangelog'),
+    t('update'),
+  ]);
+  await press(t('viewChangelog'));
+  expect(onViewChangelog).toHaveBeenCalled();
+  expect(installUpdate).not.toHaveBeenCalled();
+});

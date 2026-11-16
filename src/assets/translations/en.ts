@@ -190,6 +190,7 @@ export default {
     'Your settings, favorites, archived and hidden items and drafts on this device will be removed.',
   foundNewVersion: 'Update Available: v{version}',
   updateTitle: 'Update to v{version}?',
+  viewChangelog: 'View Changelog',
   update: 'Update',
   updateDownloads:
     'learnX will download the update from the TUNA mirror and install it.',

@@ -178,8 +178,9 @@ const zh: typeof en = {
   logoutQuestion: '退出登录？',
   logoutConfirmation:
     '此设备上的设置、收藏、归档和屏蔽的项目以及草稿将被清除。',
-  foundNewVersion: '有新版本：v{version}',
+  foundNewVersion: '检测到新版本：v{version}',
   updateTitle: '更新到v{version}？',
+  viewChangelog: '查看更新日志',
   update: '更新',
   updateDownloads: 'learnX将从TUNA镜像下载更新并安装。',
   updateDownloadsSize: 'learnX将从TUNA镜像下载更新（{size}）并安装。',

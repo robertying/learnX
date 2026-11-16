@@ -209,6 +209,9 @@ it('shows how far an update has come in its row', async () => {
   expect(
     screen.getByText(t('updateDownloading', { percent: 42 })),
   ).toBeTruthy();
+  // The confirmation's changelog button opens it in the detail pane.
+  buttons.find(button => button.text === t('viewChangelog'))?.onPress?.();
+  expect(mockShow).toHaveBeenCalledWith('Changelog');
   jest.mocked(useAvailableUpdate).mockReturnValue(null);
   jest.mocked(installsUpdate).mockReturnValue(false);
 });

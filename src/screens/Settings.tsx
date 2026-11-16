@@ -51,7 +51,9 @@ const Settings: React.FC<Props> = ({ navigation }) => {
   const courseSharingSeen = useAppState(state => state.courseSharingSeen);
 
   const update = useAvailableUpdate();
-  const installer = useUpdateInstaller(update);
+  const installer = useUpdateInstaller(update, {
+    onViewChangelog: () => show('Changelog'),
+  });
   const whatsNew = latestWhatsNew();
 
   const handleLogout = () => {
@@ -78,6 +80,32 @@ const Settings: React.FC<Props> = ({ navigation }) => {
   return (
     <FormScreen>
       <Form testID="settings-list">
+        {/* On top, where an update is seen first; only the APKs show it. */}
+        {update && (
+          <FormSection>
+            <FormLink
+              icon="update"
+              testID="settings-update"
+              badge={!installer.step}
+              title={t('foundNewVersion', { version: update.version })}
+              subtitle={
+                installer.step === 'downloading'
+                  ? t('updateDownloading', {
+                      percent: Math.round(installer.progress * 100),
+                    })
+                  : installer.step === 'installing'
+                    ? t('updateInstalling')
+                    : undefined
+              }
+              progress={
+                installer.step === 'downloading'
+                  ? installer.progress
+                  : undefined
+              }
+              onPress={installer.update}
+            />
+          </FormSection>
+        )}
         <FormSection>
           <FormProfile
             name={userInfo?.name ?? username ?? 'learnX'}
@@ -162,29 +190,6 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             title={t('changelog')}
             onPress={() => show('Changelog')}
           />
-          {update && (
-            <FormLink
-              icon="update"
-              testID="settings-update"
-              badge={!installer.step}
-              title={t('foundNewVersion', { version: update.version })}
-              subtitle={
-                installer.step === 'downloading'
-                  ? t('updateDownloading', {
-                      percent: Math.round(installer.progress * 100),
-                    })
-                  : installer.step === 'installing'
-                    ? t('updateInstalling')
-                    : undefined
-              }
-              progress={
-                installer.step === 'downloading'
-                  ? installer.progress
-                  : undefined
-              }
-              onPress={installer.update}
-            />
-          )}
           <FormLink
             icon="maintainer"
             testID="settings-maintainer"
