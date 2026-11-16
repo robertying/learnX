@@ -11,6 +11,7 @@ import {
   Pressable,
   Text as RNText,
   TextInput as RNTextInput,
+  TextStyle,
   View,
   ViewProps,
 } from 'react-native';
@@ -147,7 +148,7 @@ export const Text = ({
   style?: {
     typography?: string;
     textDecoration?: string;
-    fontWeight?: 'bold';
+    fontWeight?: TextStyle['fontWeight'];
   };
 }) => (
   <RNText

@@ -81,7 +81,8 @@ const CardSwipeAction: React.FC<CardSwipeActionProps> = ({
             ]}
           >
             <CardActionIcon action={action} size={28} />
-            {/* Named under the icon, as in Mail; VoiceOver reads the button's label. */}
+            {/* Named under the icon in regular weight, as iOS names its own
+                swipe actions; VoiceOver reads the button's label. */}
             <Text
               variant="caption"
               numberOfLines={1}
@@ -128,7 +129,6 @@ const styles = StyleSheet.create({
   },
   label: {
     marginTop: 4,
-    fontWeight: '600',
   },
 });
 

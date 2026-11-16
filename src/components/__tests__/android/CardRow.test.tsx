@@ -16,9 +16,12 @@ describe('CardRow (Android)', () => {
       </>,
     );
     expect(screen.queryByTestId('unread-dot')).toBeNull();
-    expect(style(screen.getByText('Read')).fontWeight).toBe('400');
-    expect(style(screen.getByText('Never unread')).fontWeight).toBe('400');
-    expect(style(screen.getByText('Unread')).fontWeight).not.toBe('400');
+    expect(style(screen.getByText('Read')).fontWeight).toBe('500');
+    expect(style(screen.getByText('Never unread')).fontWeight).toBe('500');
+    expect(style(screen.getByText('Unread')).fontWeight).toBe('700');
+    // The default typeface, which draws every weight (a named family draws
+    // only normal and bold).
+    expect(style(screen.getByText('Unread')).fontFamily).toBeUndefined();
     expect(screen.getByText('10:00')).toBeTruthy();
   });
 });

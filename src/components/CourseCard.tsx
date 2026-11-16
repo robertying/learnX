@@ -103,10 +103,9 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     gap: 4,
   },
-  // Regular weight, as the other lists' titles (`CardRow`): a course has
-  // nothing unread for weight to stand for.
+  // Medium weight, as the other lists' titles (`CardRow`).
   name: {
-    fontWeight: '400',
+    fontWeight: '500',
   },
   counts: {
     flexDirection: 'row',

@@ -17,12 +17,12 @@ afterEach(() => {
 });
 
 describe('NoticeCard', () => {
-  it('sets the title in regular weight, read or not; the dot marks unread', async () => {
+  it('sets the title in medium weight, read or not; the dot marks unread', async () => {
     await render(<NoticeCard data={notice({ hasRead: false })} />);
     expect(
       StyleSheet.flatten(screen.getByText('Midterm room change').props.style)
         .fontWeight,
-    ).toBe('400');
+    ).toBe('500');
     expect(screen.getByTestId('unread-dot')).toBeTruthy();
   });
 

@@ -327,6 +327,8 @@ const RowLabel: React.FC<{
   icon?: FormIcon;
   plain?: boolean;
   struck?: boolean;
+  /** An item's title, in medium weight. */
+  item?: boolean;
   /** Read out as over, which the row only shows by being dimmed. */
   done?: boolean;
   /**
@@ -341,23 +343,30 @@ const RowLabel: React.FC<{
   icon,
   plain,
   struck,
+  item,
   done,
   unavailable,
 }) => {
   const theme = useTheme();
+  const modifiers = unavailable
+    ? unavailableModifiers
+    : struck
+      ? // the strikethrough isn't read out
+        [...struckText, accessibilityValue(t('a11yStruck'))]
+      : plain
+        ? done
+          ? [primaryText, accessibilityValue(t('a11yDone'))]
+          : [primaryText]
+        : undefined;
   const text = (
     <Text
       modifiers={
-        unavailable
-          ? unavailableModifiers
-          : struck
-            ? // the strikethrough isn't read out
-              [...struckText, accessibilityValue(t('a11yStruck'))]
-            : plain
-              ? done
-                ? [primaryText, accessibilityValue(t('a11yDone'))]
-                : [primaryText]
-              : undefined
+        item
+          ? [
+              font({ textStyle: 'body', weight: 'medium' }),
+              ...(modifiers ?? []),
+            ]
+          : modifiers
       }
     >
       {title}
@@ -445,6 +454,7 @@ const ItemRow: React.FC<
   title,
   overline,
   icon,
+  item,
   done,
   progress,
   detailTint,
@@ -461,6 +471,7 @@ const ItemRow: React.FC<
         overline={overline}
         icon={icon}
         plain
+        item={item}
         done={done}
       />
       <Spacer />
@@ -515,6 +526,7 @@ export const FormText: React.FC<FormTextProps> = ({
           overline={row.overline}
           icon={row.icon}
           plain
+          item={row.item}
         />
       }
       testID={testID}

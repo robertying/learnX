@@ -279,6 +279,7 @@ const FormRow: React.FC<
   subtitle,
   overline,
   icon,
+  item: itemTitle,
   testID,
   position,
   action,
@@ -343,7 +344,10 @@ const FormRow: React.FC<
       <ListItem.HeadlineContent>
         <Text
           color={contentColor}
-          style={struck ? { textDecoration: 'lineThrough' } : undefined}
+          style={{
+            ...(itemTitle ? { fontWeight: '500' as const } : {}),
+            ...(struck ? { textDecoration: 'lineThrough' as const } : {}),
+          }}
           // Always set: a row that loses its state must read its title alone
           // again, which leaving the modifier out wouldn't undo.
           modifiers={[

@@ -235,6 +235,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
             dueSoon.map(assignment => (
               <FormLink
                 key={assignment.id}
+                item
                 title={assignment.title}
                 subtitle={assignment.courseName}
                 detail={deadlineText(assignment.deadline, now)}

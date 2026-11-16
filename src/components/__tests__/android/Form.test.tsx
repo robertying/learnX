@@ -367,6 +367,17 @@ describe('Form (Android)', () => {
     expect(screen.queryByTestId('icon-check')).toBeNull();
   });
 
+  it("sets an item's title in medium weight, and other rows' in the default", async () => {
+    await render(
+      <FormSection>
+        <FormLink item title="Essay" onPress={jest.fn()} />
+        <FormText title="Schedule" />
+      </FormSection>,
+    );
+    expect(style('Essay').fontWeight).toBe('500');
+    expect(style('Schedule').fontWeight).toBeUndefined();
+  });
+
   it('puts the detail under the subtitle at large font sizes', async () => {
     atFontScale(1.5);
     await render(

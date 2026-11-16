@@ -51,5 +51,9 @@ describe('CardRow highlight', () => {
     expect(screen.getByText('midterm')).toBeTruthy();
     expect(screen.getByText('101')).toBeTruthy();
     expect(screen.getByText('Midterm review')).toBeTruthy();
+    // A step above what's around them: bold in the medium title, semibold in
+    // the regular preview.
+    expect(style(screen.getByText('Midterm')).fontWeight).toBe('700');
+    expect(style(screen.getByText('midterm')).fontWeight).toBe('600');
   });
 });

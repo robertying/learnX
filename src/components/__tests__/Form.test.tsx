@@ -524,6 +524,28 @@ describe('Form (iOS details)', () => {
     expect(screen.getByText('Physics')).toBeOnTheScreen();
   });
 
+  it("sets an item's title in medium weight, and other rows' in regular", async () => {
+    await render(
+      <FormSection>
+        <FormText item title="Linear Algebra" subtitle="09:50–11:25" />
+        <FormLink item title="Essay" onPress={jest.fn()} />
+      </FormSection>,
+    );
+    expect(font).toHaveBeenCalledTimes(2);
+    expect(font).toHaveBeenCalledWith({ textStyle: 'body', weight: 'medium' });
+    jest.mocked(font).mockClear();
+    await render(
+      <FormSection>
+        <FormText title="Schedule" />
+        <FormLink title="Settings" onPress={jest.fn()} />
+      </FormSection>,
+    );
+    expect(font).not.toHaveBeenCalledWith({
+      textStyle: 'body',
+      weight: 'medium',
+    });
+  });
+
   it('leaves the Mac header alone', async () => {
     jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
     const navigation = { setOptions: jest.fn() };
