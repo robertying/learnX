@@ -9,7 +9,10 @@
 // can drive it:
 //   GET /mode/update   the release (the default); each /mode/… answers with
 //                      /status
-//   GET /mode/badsum   the release with a SHA-256 that doesn't match the APK
+//   GET /mode/badsum   the release, with the APK damaged (its last byte
+//                      changed), so it doesn't match latest.json's SHA-256.
+//                      latest.json stays the same as in update mode, since
+//                      the app keeps it for a day
 //   GET /mode/none     no release (latest.json answers 404)
 //   GET /status        the mode and how many APK downloads came in, as JSON
 //
@@ -25,15 +28,21 @@ const ABIS = ['arm64-v8a', 'armeabi-v7a', 'x86_64', 'universal'];
 export const apkName = abi => `learnX-${abi}-v${VERSION}.apk`;
 
 /** `latest.json` as fastlane writes it, for `apk` under every ABI's name. */
-export const latestJson = (apk, mode) => {
-  const sha256 =
-    mode === 'badsum'
-      ? '0'.repeat(64)
-      : createHash('sha256').update(apk).digest('hex');
+export const latestJson = apk => {
+  const sha256 = createHash('sha256').update(apk).digest('hex');
   return {
     version: VERSION,
     files: ABIS.map(abi => ({ name: apkName(abi), size: apk.length, sha256 })),
   };
+};
+
+/** `apk` with its last byte changed: the same size, another SHA-256. */
+const damaged = apk => {
+  const copy = Buffer.from(apk);
+  if (copy.length > 0) {
+    copy[copy.length - 1] ^= 0xff;
+  }
+  return copy;
 };
 
 /**
@@ -47,14 +56,14 @@ export const respond = (path, mode, apk) => {
       : {
           status: 200,
           type: 'application/json',
-          body: JSON.stringify(latestJson(apk, mode)),
+          body: JSON.stringify(latestJson(apk)),
         };
   }
   if (ABIS.some(abi => path === `/${apkName(abi)}`)) {
     return {
       status: 200,
       type: 'application/vnd.android.package-archive',
-      body: apk,
+      body: mode === 'badsum' ? damaged(apk) : apk,
       apk: true,
     };
   }

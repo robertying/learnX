@@ -12,6 +12,7 @@ name: Update the Android app again without a confirmation
 - runFlow: ../subflows/settings.yaml
 - runFlow: start.yaml
 # No confirmation: the update ends the app by itself.
+- runFlow: play-protect.yaml
 - extendedWaitUntil:
     notVisible:
       id: settings-update

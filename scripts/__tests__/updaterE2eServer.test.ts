@@ -1,6 +1,6 @@
 // scripts/updater-e2e-server.mjs stands in for the TUNA mirror in E2E runs:
 // `latest.json` as fastlane writes it, naming the one APK it serves under
-// every ABI, with its SHA-256 (or a wrong one, to test the check).
+// every ABI, with its SHA-256 (and a damaged APK, to test the check).
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
@@ -55,11 +55,14 @@ it('lists the APK under every ABI as a newer release', () => {
   ]);
 });
 
-it('gives a wrong checksum in badsum mode', () => {
-  const latest = JSON.parse(answer('/latest.json', 'badsum').body) as {
-    files: { sha256: string }[];
-  };
-  expect(latest.files[0].sha256).not.toBe(sha256);
+it('serves a damaged APK in badsum mode, with the same latest.json', () => {
+  expect(answer('/latest.json', 'badsum').body).toBe(
+    answer('/latest.json', 'update').body,
+  );
+  const download = answer('/learnX-arm64-v8a-v99.0.0.apk', 'badsum');
+  expect(download.apk).toBe(true);
+  expect(download.body).toHaveLength(3);
+  expect(download.body).not.toBe('apk');
 });
 
 it('has no release in none mode', () => {

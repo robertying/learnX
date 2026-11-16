@@ -4,10 +4,11 @@
 # APK as version 99.0.0, and runs .maestro/updater/update.yaml against that
 # build (scripts/e2e-build.sh), which looks for updates there: allowing learnX
 # to install apps, a download whose SHA-256 doesn't match refused, then the
-# update installed through Android's confirmation. Then checks that Android
-# replaced the app and now names learnX as its installer. On Android 12+ it
-# updates once more with .maestro/updater/update-again.yaml, which Android
-# installs without asking, since learnX installed the version it replaces.
+# update installed (through Android's confirmation before Android 17). Then
+# checks that Android replaced the app and now names learnX as its installer.
+# On Android 12+ it updates once more with .maestro/updater/update-again.yaml,
+# which Android installs without asking, since learnX installed the version it
+# replaces.
 #
 #   scripts/e2e-updater.sh android [apk]
 #
@@ -84,18 +85,33 @@ check_updated() {
   echo "Updated at $after by $(installer)"
 }
 
+sdk="$(adb_ shell getprop ro.build.version.sdk | tr -d '\r')"
+# From Android 17 on, "Always allow" on the "Install unknown apps" page
+# installs without a confirmation.
+confirms=true
+if [ "$sdk" -ge 37 ]; then
+  confirms=false
+fi
+# Images with the Play Store have Google Play Protect, which offers to scan an
+# app it hasn't seen before it installs.
+play_protect=false
+if adb_ shell pm path com.android.vending >/dev/null 2>&1; then
+  play_protect=true
+fi
+flow_env=(-e UPDATER_SERVER="http://localhost:$port" -e CONFIRMS="$confirms"
+  -e PLAY_PROTECT="$play_protect")
+
 status=0
 before="$(last_update)"
-scripts/e2e.sh "$platform" -e UPDATER_SERVER="http://localhost:$port" \
+scripts/e2e.sh "$platform" "${flow_env[@]}" \
   .maestro/updater/update.yaml || status=$?
 if [ "$status" = 0 ]; then
   check_updated "$before" || status=1
 fi
 
-sdk="$(adb_ shell getprop ro.build.version.sdk | tr -d '\r')"
 if [ "$status" = 0 ] && [ "$sdk" -ge 31 ]; then
   before="$(last_update)"
-  scripts/e2e.sh "$platform" -e UPDATER_SERVER="http://localhost:$port" \
+  scripts/e2e.sh "$platform" "${flow_env[@]}" \
     .maestro/updater/update-again.yaml || status=$?
   if [ "$status" = 0 ]; then
     check_updated "$before" || status=1

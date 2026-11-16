@@ -1,0 +1,23 @@
+# Emulator images with the Play Store (not CI's) have Google Play Protect offer
+# to scan an app it hasn't seen before installing it: install without the
+# scan. "More details" shows "Install without scanning", the last line of the
+# text above the buttons, not a view of its own. PLAY_PROTECT is set by
+# scripts/e2e-updater.sh.
+appId: ${APP_ID}
+---
+- runFlow:
+    when:
+      true: ${PLAY_PROTECT == 'true'}
+    commands:
+      - extendedWaitUntil:
+          visible: 'App scan recommended'
+          timeout: 30000
+          optional: true
+      - runFlow:
+          when:
+            visible: 'App scan recommended'
+          commands:
+            - tapOn: More details
+            - tapOn:
+                text: '[\s\S]*Install without scanning'
+                point: '50%,88%'

@@ -17,9 +17,9 @@ name: Update the Android app from the APK mirror
 # back goes on with the update.
 - runFlow: start.yaml
 - extendedWaitUntil:
-    visible: '(Allow from this source|允许来自此来源的应用)'
+    visible: '(Allow from this source|Always allow|允许来自此来源的应用|允许从此来源安装应用|始终允许)'
     timeout: 15000
-- tapOn: '(Allow from this source|允许来自此来源的应用)'
+- tapOn: '(Allow from this source|Always allow|允许来自此来源的应用|允许从此来源安装应用|始终允许)'
 - back
 # Some Android versions restart an app they let install apps; it then starts
 # over at the update row. The download from localhost takes seconds.
@@ -47,16 +47,23 @@ name: Update the Android app from the APK mirror
 - assertTrue: ${output.updater.apkDownloads >= 1}
 - tapOn: ${T_cancel}
 
-# A good download installs through Android's confirmation, which ends the app.
+# A good download installs, which ends the app. Android asks to confirm it
+# first, except from Android 17 on, where "Always allow" lets learnX install
+# without asking (CONFIRMS, set by scripts/e2e-updater.sh).
 - runScript:
     file: server.js
     env:
       PATH_: /mode/update
 - runFlow: start.yaml
-- extendedWaitUntil:
-    visible: '(?i)(update|install|更新|安装)'
-    timeout: 60000
-- tapOn: '(?i)(update|install|更新|安装)'
+- runFlow:
+    when:
+      true: ${CONFIRMS == 'true'}
+    commands:
+      - extendedWaitUntil:
+          visible: '(?i)(update|install|更新|安装)'
+          timeout: 60000
+      - tapOn: '(?i)(update|install|更新|安装)'
+- runFlow: play-protect.yaml
 - extendedWaitUntil:
     notVisible:
       id: settings-update
