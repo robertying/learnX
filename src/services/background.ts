@@ -58,11 +58,14 @@ const followLatestSemester = async (shownSemester: string) => {
 
 /**
  * How long a sync may spend logging in and fetching. iOS runs the task as a
- * background processing task, which it can end at any moment (when the user
- * picks the phone up), and Android stops it after 10 minutes; what's fetched
- * by then is saved and notified about, and the rest waits for the next run.
+ * background app refresh task, which has about 30 s from launch before the
+ * system ends it, and gives fewer runs to an app that overruns; the rest of
+ * that time goes to starting the app and to saving, the widgets and the
+ * notifications after the fetch. Android stops it after 10 minutes. What's
+ * fetched by then is saved and notified about, and the rest waits for the
+ * next run.
  */
-export const SYNC_BUDGET_MS = 25_000;
+export const SYNC_BUDGET_MS = 20_000;
 
 /**
  * The least time left for a timetable week to be asked for; the registrar
