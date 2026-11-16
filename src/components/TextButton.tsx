@@ -38,23 +38,25 @@ const macSizes = {
 } as const;
 
 /**
- * Vertical padding inside the label on a Mac, so the click target is about
- * as tall as a regular Mac control (22 pt) instead of one line of text. It
- * goes into the gutter, so rows keep their height.
+ * Padding inside the label, so the tap target reaches the 44 pt minimum of
+ * Apple's guidelines at the default text size (one line of footnote,
+ * subheadline or body is 18, 20 or 22 pt tall) instead of being one line of
+ * text. On a Mac it makes the click target about as tall as a regular Mac
+ * control (22 pt). It goes into the gutter, so the label stays where it was
+ * and rows keep their size.
  */
-const macPadding = 4;
-const macGutter = { vertical: macPadding };
+const iosPadding = {
+  small: { vertical: 13, horizontal: 8 },
+  regular: { vertical: 12, horizontal: 8 },
+  large: { vertical: 11, horizontal: 8 },
+} as const;
+const macPadding = { vertical: 4, horizontal: 0 };
 
 const oneLine = [lineLimit(1), truncationMode('middle')];
 
 const struckModifiers = [
   foregroundStyle(PlatformColor('secondaryLabel')),
   strikethrough({ isActive: true, pattern: 'solid' }),
-];
-
-const macLabelModifiers = [
-  padding({ vertical: macPadding }),
-  contentShape(shapes.rectangle()),
 ];
 
 /**
@@ -85,27 +87,26 @@ const TextButton: React.FC<TextButtonProps> = ({
     ...(disabled ? [disabledModifier(true)] : []),
   ];
 
+  const inset = isMac ? macPadding : iosPadding[size];
+
   return (
     <ThemedHost
       // A filling button gets its width from React Native, so a long label
       // shortens instead of growing past the screen.
       matchContents={fill ? { vertical: true } : true}
-      style={isMac ? withGutter(style, macGutter) : style}
+      style={withGutter(style, {
+        vertical: inset.vertical,
+        start: inset.horizontal,
+        end: inset.horizontal,
+      })}
     >
-      {isMac ? (
-        // A label view, so the padding (and the click target) sits inside the
-        // button.
-        <Button onPress={onPress} testID={testID} modifiers={modifiers}>
-          <Text modifiers={macLabelModifiers}>{children}</Text>
-        </Button>
-      ) : (
-        <Button
-          label={children}
-          onPress={onPress}
-          testID={testID}
-          modifiers={modifiers}
-        />
-      )}
+      {/* A label view, so the padding (and the tap target) sits inside the
+          button. */}
+      <Button onPress={onPress} testID={testID} modifiers={modifiers}>
+        <Text modifiers={[padding(inset), contentShape(shapes.rectangle())]}>
+          {children}
+        </Text>
+      </Button>
     </ThemedHost>
   );
 };

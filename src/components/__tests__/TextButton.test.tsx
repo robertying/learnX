@@ -1,5 +1,5 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
-import { font } from '@expo/ui/swift-ui/modifiers';
+import { font, padding } from '@expo/ui/swift-ui/modifiers';
 import TextButton from 'components/TextButton';
 import { withGutter } from 'components/TextButton.shared';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -27,6 +27,16 @@ describe('withGutter', () => {
     });
   });
 
+  it('pulls padding on both sides into the horizontal margins', () => {
+    const style = { marginHorizontal: 4, marginRight: 2 };
+    expect(withGutter(style, { vertical: 12, start: 8, end: 8 })[1]).toEqual({
+      marginTop: -12,
+      marginBottom: -12,
+      marginStart: -4,
+      marginEnd: -6,
+    });
+  });
+
   it('treats a percentage margin as none', () => {
     expect(
       withGutter({ marginVertical: '10%' }, { vertical: 4 })[1],
@@ -35,6 +45,17 @@ describe('withGutter', () => {
 });
 
 describe('TextButton (iOS)', () => {
+  it('pads its label to a 44 pt tap target', async () => {
+    await render(
+      <>
+        <TextButton size="small">See All</TextButton>
+        <TextButton size="large">Done</TextButton>
+      </>,
+    );
+    expect(padding).toHaveBeenCalledWith({ vertical: 13, horizontal: 8 });
+    expect(padding).toHaveBeenCalledWith({ vertical: 11, horizontal: 8 });
+  });
+
   it('follows Dynamic Type through text styles, bold or crossed out', async () => {
     await render(
       <>
