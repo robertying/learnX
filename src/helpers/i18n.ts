@@ -1,11 +1,12 @@
-import { AppState } from 'react-native';
+import { AppState, Platform } from 'react-native';
 import { getCalendars, getLocales } from 'expo-localization';
 import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
+import relativeTimePlugin from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/en';
 import zhCn from 'dayjs/locale/zh-cn';
 import en from 'assets/translations/en';
 import zh from 'assets/translations/zh';
+import { addCjkGaps, joinWithCjkGaps } from './cjk';
 
 let locale: string | undefined;
 
@@ -35,16 +36,35 @@ export const isLocaleChinese = () => getLocale().startsWith('zh');
 // strings, rather than in App.tsx: Metro inlines requires, so a runtime that
 // never renders the app (the background task, a notification action) would
 // otherwise format in English. index.js imports this file for that reason.
-dayjs.extend(relativeTime);
+dayjs.extend(relativeTimePlugin);
 // Chinese 12-hour times say 上午 or 下午, as iOS and Android write them, not
 // the six parts of the day dayjs's zh-cn has (凌晨, 早上, 上午, 中午, 下午,
 // 晚上); so a range marks the half of the day once ("上午9:50–11:25").
 dayjs.locale(
   {
     ...zhCn,
-    // oxlint-disable-next-line learnx/no-han-outside-translations -- locale data: Chinese in every app language
+    /* oxlint-disable learnx/no-han-outside-translations -- locale data: Chinese in every app language */
     meridiem: (hour: number) => (hour < 12 ? '上午' : '下午'),
     // Not in dayjs's ILocale type, though dayjs reads it.
+    // Relative times as iOS and Android write them ("3小时前", "3小时后"):
+    // no space between a number and its unit, and a time ahead is "…后", not
+    // dayjs's "…内" ("within").
+    relativeTime: {
+      future: '%s后',
+      past: '%s前',
+      s: '几秒',
+      m: '1分钟',
+      mm: '%d分钟',
+      h: '1小时',
+      hh: '%d小时',
+      d: '1天',
+      dd: '%d天',
+      M: '1个月',
+      MM: '%d个月',
+      y: '1年',
+      yy: '%d年',
+    },
+    /* oxlint-enable learnx/no-han-outside-translations */
   } as typeof zhCn,
   undefined,
   true,
@@ -67,6 +87,15 @@ AppState.addEventListener('change', state => {
 
 export type TranslationKey = keyof typeof en;
 
+/**
+ * A dayjs format (a key ending in `Format`): written out by `formatDate`, never
+ * shown as it is.
+ */
+export type FormatKey = Extract<TranslationKey, `${string}Format`>;
+
+/** A string shown as it is, read with `t()`. */
+export type TextKey = Exclude<TranslationKey, FormatKey>;
+
 /** The translations for a locale, Chinese or English. */
 export const translationsFor = (chinese: boolean) => (chinese ? zh : en);
 
@@ -82,11 +111,65 @@ export const interpolate = (
     : text;
 
 /**
+ * Whether Chinese next to Latin letters or digits needs its gap typed in:
+ * only on Android, as iOS and macOS draw it themselves (helpers/cjk).
+ */
+const typesCjkGap = () => Platform.OS === 'android';
+
+/**
+ * `text` with a gap between Chinese and Latin letters or digits on Android
+ * ("还剩 3 天", "上午 9:50"), as iOS shows it. Unchanged on iOS and macOS.
+ */
+export const spaceCjk = (text: string) =>
+  typesCjkGap() ? addCjkGaps(text) : text;
+
+/**
  * The dayjs format of a time of day: 24-hour or 12-hour as the device shows
  * times, in the app's language ("21:30", "9:30 PM", "下午9:30").
  */
-export const timeFormat = () =>
-  uses24HourClock() ? 'HH:mm' : t('time12HourFormat');
+const timeFormat = () =>
+  uses24HourClock()
+    ? 'HH:mm'
+    : translationsFor(isLocaleChinese()).time12HourFormat;
+
+/** `time` in dayjs, in the app's language whatever locale it came with. */
+const inAppLanguage = (time: dayjs.ConfigType) =>
+  dayjs(time).locale(isLocaleChinese() ? 'zh-cn' : 'en');
+
+/**
+ * `time` written with the format `key` in the app's language ("周一 下午9:30"):
+ * its `{time}` is the time of day as the device shows it (`timeFormat()`),
+ * and other placeholders take `params` (wrap free text in `formatLiteral`).
+ * This, `formatTime`, `timeRange` and `relativeTime` are the only ways dates
+ * and times become text, so each gets the gaps `spaceCjk` adds.
+ */
+export const formatDate = (
+  time: dayjs.ConfigType,
+  key: FormatKey,
+  params?: Record<string, string | number>,
+) =>
+  spaceCjk(
+    inAppLanguage(time).format(
+      interpolate(translationsFor(isLocaleChinese())[key], {
+        time: timeFormat(),
+        ...params,
+      }),
+    ),
+  );
+
+/** The time of day of `time`, as the device shows times ("21:30", "下午9:30"). */
+export const formatTime = (time: dayjs.ConfigType) =>
+  spaceCjk(inAppLanguage(time).format(timeFormat()));
+
+/**
+ * How far `to` is from `from`, in the app's language: "in 3 hours" / "3小时后",
+ * "2 days ago" / "2天前", or with `withoutSuffix` just "3 hours" / "3小时".
+ */
+export const relativeTime = (
+  from: dayjs.ConfigType,
+  to: dayjs.ConfigType,
+  withoutSuffix?: boolean,
+) => spaceCjk(inAppLanguage(from).to(to, withoutSuffix));
 
 /**
  * A start–end range of times. On a 12-hour clock, AM or PM is written once
@@ -94,46 +177,52 @@ export const timeFormat = () =>
  * so the range fits where space is tight (the lock screen widget).
  */
 export const timeRange = (start: dayjs.ConfigType, end: dayjs.ConfigType) => {
-  const from = dayjs(start);
-  const to = dayjs(end);
+  const from = inAppLanguage(start);
+  const to = inAppLanguage(end);
   const format = timeFormat();
   if (uses24HourClock() || from.format('A') !== to.format('A')) {
-    return `${from.format(format)}–${to.format(format)}`;
+    return spaceCjk(`${from.format(format)}–${to.format(format)}`);
   }
   // The format with its AM/PM marker ("A") and the space next to it removed.
   const bare = format.replace(/\s*A\s*/, '');
-  return format.startsWith('A')
-    ? `${from.format(format)}–${to.format(bare)}`
-    : `${from.format(bare)}–${to.format(format)}`;
+  return spaceCjk(
+    format.startsWith('A')
+      ? `${from.format(format)}–${to.format(bare)}`
+      : `${from.format(bare)}–${to.format(format)}`,
+  );
 };
 
 /**
- * The string for `key` in the app's language, with its placeholders filled.
- * A dayjs format (a key ending in `Format`) gets its `{time}` filled with
- * `timeFormat()`.
+ * The string for `key` in the app's language, with its placeholders filled
+ * from `params`. On Android its own text gets the gaps `spaceCjk` adds, and a
+ * gap goes in where a filled-in value meets Chinese; the values themselves
+ * (names, titles, dates already written out) are kept as they are.
  */
 export function t(
-  key: TranslationKey,
+  key: TextKey,
   params?: Record<string, string | number>,
 ): string {
   const text = translationsFor(isLocaleChinese())[key];
-  return interpolate(
-    text,
-    key.endsWith('Format') && text.includes('{time}')
-      ? { time: timeFormat(), ...params }
-      : params,
-  );
+  const pieces: string[] = [];
+  let rest = 0;
+  for (const match of text.matchAll(/\{(\w+)\}/g)) {
+    const [placeholder, name] = match;
+    pieces.push(
+      spaceCjk(text.slice(rest, match.index)),
+      params && name in params ? String(params[name]) : placeholder,
+    );
+    rest = match.index + placeholder.length;
+  }
+  pieces.push(spaceCjk(text.slice(rest)));
+  return typesCjkGap() ? joinWithCjkGaps(pieces) : pieces.join('');
 }
 
 /**
  * `one` for a count of 1, else `other` with `{count}` filled in. English and
  * Chinese need nothing more: Chinese uses the same words either way.
  */
-export const tCount = (
-  one: TranslationKey,
-  other: TranslationKey,
-  count: number,
-) => (count === 1 ? t(one, { count }) : t(other, { count }));
+export const tCount = (one: TextKey, other: TextKey, count: number) =>
+  count === 1 ? t(one, { count }) : t(other, { count });
 
 /** Escapes text for a dayjs format string, so it is printed as is. */
 export const formatLiteral = (text: string) =>

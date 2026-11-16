@@ -96,14 +96,14 @@ describe('AssignmentCard', () => {
     mockLocale.current = 'zh-CN';
     dayjs.locale('zh-cn');
     const view = await render(<AssignmentCard data={assignment()} />);
-    expect(screen.getByText('还剩 3 天')).toBeTruthy();
+    expect(screen.getByText('还剩3天')).toBeTruthy();
 
     await view.rerender(
       <AssignmentCard
         data={assignment({ deadline: daysFromNow(-2) } as Partial<Assignment>)}
       />,
     );
-    expect(screen.getByText('2 天前截止')).toBeTruthy();
+    expect(screen.getByText('2天前截止')).toBeTruthy();
   });
 
   it('shows submitted and graded assignments as a status', async () => {

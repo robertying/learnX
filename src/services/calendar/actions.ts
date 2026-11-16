@@ -17,7 +17,7 @@ import { setLastSynced } from 'data/calendarSync';
 import { calendarErrorCode } from 'services/calendar/errors';
 import { exportTextFile } from 'services/files/share';
 import { Platform } from 'react-native';
-import { t, TranslationKey } from 'helpers/i18n';
+import { t, TextKey } from 'helpers/i18n';
 
 export interface ToastMessage {
   text: string;
@@ -35,9 +35,7 @@ const noCalendarPermission = (
     | 'deleteFailedNoCalendarPermission'
     | 'calendarExportNoCalendarPermission',
 ): ToastMessage => ({
-  text: t(
-    Platform.OS === 'android' ? (`${key}Android` as TranslationKey) : key,
-  ),
+  text: t(Platform.OS === 'android' ? (`${key}Android` as TextKey) : key),
   type: 'error',
 });
 

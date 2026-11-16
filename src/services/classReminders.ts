@@ -3,7 +3,7 @@
 // reminders, so they go off without the app. They are planned again whenever
 // the timetable or the settings change (`services/surfaces`).
 import { NotificationSettings } from 'data/types/state';
-import { t, timeFormat } from 'helpers/i18n';
+import { formatTime, t } from 'helpers/i18n';
 import {
   canScheduleExactAlarms,
   getNotificationPermission,
@@ -90,7 +90,7 @@ export const classReminderContent = ({
   body: [
     // In Beijing time, as Today lists the class, saying so on a phone elsewhere
     t(showsBeijingTime(start) ? 'classStartsAt' : 'classStartsAtBeijing', {
-      time: beijingWallClock(start).format(timeFormat()),
+      time: formatTime(beijingWallClock(start)),
     }),
     location,
   ]

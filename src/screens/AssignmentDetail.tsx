@@ -16,7 +16,7 @@ import { useMinute } from 'hooks/useClock';
 import { removeTags } from 'helpers/text';
 import { displayFileSize } from 'helpers/filename';
 import { attachmentFile } from 'helpers/attachments';
-import { formatLiteral, t } from 'helpers/i18n';
+import { formatDate, formatLiteral, t } from 'helpers/i18n';
 import {
   deadlineTextBesideDate,
   deadlineTone,
@@ -164,8 +164,9 @@ const AssignmentDetailContent: React.FC<{
   // once the status row shows the grade.
   const submittedTitle = isLateSubmission ? t('submittedLate') : t('submitted');
   const submittedTime = submitTime
-    ? dayjs(submitTime).format(
-        isLateSubmission ? t('submittedLateAtFormat') : t('submittedAtFormat'),
+    ? formatDate(
+        submitTime,
+        isLateSubmission ? 'submittedLateAtFormat' : 'submittedAtFormat',
       )
     : undefined;
   const submittedIcon = isLateSubmission ? 'submittedLate' : 'done';
@@ -193,7 +194,7 @@ const AssignmentDetailContent: React.FC<{
         <FormSection>
           <FormText
             title={t('deadline')}
-            subtitle={dayjs(deadline).format(t('dateTimeFormat'))}
+            subtitle={formatDate(deadline, 'dateTimeFormat')}
             detail={deadlineTextBesideDate(deadline, now)}
             detailTint={urgency && deadlineTone[urgency]}
             icon="deadline"
@@ -201,22 +202,20 @@ const AssignmentDetailContent: React.FC<{
           {lateSubmissionDeadline ? (
             <FormText
               title={t('lateSubmission')}
-              subtitle={dayjs(lateSubmissionDeadline).format(
-                t('dateTimeFormat'),
-              )}
+              subtitle={formatDate(lateSubmissionDeadline, 'dateTimeFormat')}
               icon="lateSubmission"
             />
           ) : null}
           {graded ? (
             <FormText
               title={t('grade')}
-              subtitle={dayjs(gradeTime).format(
+              subtitle={
                 graderName
-                  ? t('gradedByAtFormat', {
+                  ? formatDate(gradeTime, 'gradedByAtFormat', {
                       grader: formatLiteral(graderName),
                     })
-                  : t('gradedAtFormat'),
-              )}
+                  : formatDate(gradeTime, 'gradedAtFormat')
+              }
               detail={gradeLabel({ grade, gradeLevel }) ?? t('graded')}
               detailTint="accent"
               icon="grade"

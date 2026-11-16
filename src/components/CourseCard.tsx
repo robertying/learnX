@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import { Course } from 'data/types/state';
-import { tCount, type TranslationKey } from 'helpers/i18n';
+import { tCount, type TextKey } from 'helpers/i18n';
 import { CardGutter } from './CardRow';
 import SystemIcon from './SystemIcon';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
@@ -40,7 +40,7 @@ const Count: React.FC<{ icon: CountIcon; count: number }> = ({
   );
 };
 
-const countText = (count: number, one: TranslationKey, other: TranslationKey) =>
+const countText = (count: number, one: TextKey, other: TextKey) =>
   count === 0 ? undefined : tCount(one, other, count);
 
 const CourseCard: React.FC<CourseCardProps> = ({

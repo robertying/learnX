@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import * as Notifications from 'expo-notifications';
 import { Assignment, NotificationSettings } from 'data/types/state';
 import { deadlineDayTime } from 'helpers/assignments';
-import { t } from 'helpers/i18n';
+import { formatDate, t } from 'helpers/i18n';
 import {
   canScheduleExactAlarms,
   getNotificationPermission,
@@ -204,7 +204,7 @@ const reminderBodies: Record<
   due: (deadline, showsAt) => deadlineDayTime(deadline, showsAt),
   lateOpen: deadline =>
     t('notifyLateOpen', {
-      date: dayjs(deadline).format(t('shortDateTimeFormat')),
+      date: formatDate(deadline, 'shortDateTimeFormat'),
     }),
   lateDue: (deadline, showsAt) =>
     deadlineDayTime(deadline, showsAt, 'lateCloses'),

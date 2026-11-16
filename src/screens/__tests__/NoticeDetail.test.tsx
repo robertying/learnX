@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import { mockNotices } from 'data/mock';
 import { openNotice } from 'data/serverActions';
 import type { Notice } from 'data/types/state';
-import { t } from 'helpers/i18n';
+import { formatDate, t } from 'helpers/i18n';
 import NoticeDetail from 'screens/NoticeDetail';
 import { screenProps } from 'test-utils/screenProps';
 
@@ -76,7 +76,7 @@ it('says when it expires or expired, and when it has no content', async () => {
     expireTime: future.toISOString(),
   });
   expect(
-    screen.getByText(future.format(t('noticeExpireTimeFormat')), {
+    screen.getByText(formatDate(future, 'noticeExpireTimeFormat'), {
       exact: false,
     }),
   ).toBeTruthy();
@@ -86,7 +86,7 @@ it('says when it expires or expired, and when it has no content', async () => {
   const past = dayjs().subtract(3, 'day');
   await renderScreen({ ...withAttachment, expireTime: past.toISOString() });
   expect(
-    screen.getByText(past.format(t('noticeExpiredTimeFormat')), {
+    screen.getByText(formatDate(past, 'noticeExpiredTimeFormat'), {
       exact: false,
     }),
   ).toBeTruthy();

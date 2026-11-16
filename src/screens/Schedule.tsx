@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import ItemRow from 'components/ItemRow';
 import { Form, FormScreen, FormSection, FormText } from 'components/Form';
 import { useWeekSchedule } from 'data/schedule';
-import { t } from 'helpers/i18n';
+import { formatDate, relativeTime, t } from 'helpers/i18n';
 import { classDetails } from 'helpers/schedule';
 import { beijingDate, showsBeijingTime } from 'helpers/serverTime';
 import { useMinute } from 'hooks/useClock';
@@ -39,7 +39,7 @@ const Schedule: React.FC<Props> = ({ navigation }) => {
           : i === 1
             ? t('scheduleTomorrow')
             : undefined,
-        day.format(t('todayDate')),
+        formatDate(day, 'todayDateFormat'),
       ]
         .filter(Boolean)
         .join(' · '),
@@ -67,7 +67,7 @@ const Schedule: React.FC<Props> = ({ navigation }) => {
     ? t('todayFromCourses')
     : stale.length > 0
       ? t('todayCalendarFailed', {
-          time: dayjs(Math.min(...stale.map(w => w.updatedAt))).from(now),
+          time: relativeTime(now, Math.min(...stale.map(w => w.updatedAt))),
         })
       : undefined;
 
