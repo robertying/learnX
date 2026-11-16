@@ -7,7 +7,10 @@ export interface QuickLookViewProps extends ViewProps {
   uri: string;
 }
 
-/** Quick Look's preview of a downloaded file. iOS and Mac only. */
+/**
+ * Quick Look's preview of a downloaded file. File detail uses it on Mac only,
+ * for the Office and iWork documents the Mac's web view doesn't convert.
+ */
 export const QuickLookView: React.ComponentType<QuickLookViewProps> =
   Platform.OS === 'ios'
     ? requireNativeView('LearnXQuickLook', 'QuickLookView')

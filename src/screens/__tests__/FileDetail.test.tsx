@@ -202,12 +202,24 @@ it('offers download on the Mac and open on Android', async () => {
   isMac.mockRestore();
 });
 
-it('previews Office documents with Quick Look', async () => {
+it('previews Office documents on white in the web view on iOS, as they are drawn for paper', async () => {
   downloaded({ path: 'file:///a.docx' });
   await renderScreen({
     attachment: { ...zip, fileType: 'docx', downloadUrl: 'https://x' },
   });
-  expect(screen.getByTestId('quick-look').props.uri).toBe('file:///a.docx');
+  expect(screen.getByTestId('webview').props.style).toEqual({
+    backgroundColor: 'white',
+  });
+  expect(screen.queryByTestId('quick-look')).toBeNull();
+});
+
+it('previews Office documents with Quick Look on the Mac', async () => {
+  jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+  downloaded({ path: 'file:///a.pptx' });
+  await renderScreen({
+    attachment: { ...zip, fileType: 'pptx', downloadUrl: 'https://x' },
+  });
+  expect(screen.getByTestId('quick-look').props.uri).toBe('file:///a.pptx');
   expect(screen.queryByTestId('webview')).toBeNull();
   expect(jest.mocked(useFileDetailHeader).mock.lastCall![0].canRender).toBe(
     true,

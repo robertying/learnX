@@ -6,7 +6,11 @@ import WebView from 'react-native-webview';
 import Pdf from 'react-native-pdf';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
-import { isPreviewLoad, previewKind } from 'helpers/filePreview';
+import {
+  isPreviewLoad,
+  needWhiteBackground,
+  previewKind,
+} from 'helpers/filePreview';
 import { QuickLookView } from 'modules/quicklook';
 import { formatDate, t } from 'helpers/i18n';
 import { displayFileSize } from 'helpers/filename';
@@ -151,7 +155,11 @@ const FileDetailContent: React.FC<{
           <QuickLookView testID="quick-look" style={Styles.flex1} uri={path} />
         ) : (
           <WebView
-            style={styles.webView}
+            style={{
+              backgroundColor: needWhiteBackground(file.fileType)
+                ? 'white'
+                : 'transparent',
+            }}
             source={{
               uri: path,
             }}
@@ -246,9 +254,6 @@ const FileInfo: React.FC<{
 );
 
 const styles = StyleSheet.create({
-  webView: {
-    backgroundColor: 'transparent',
-  },
   centered: {
     flex: 1,
     alignItems: 'center',

@@ -1,31 +1,67 @@
 import { Platform } from 'react-native';
-import { isPreviewLoad, previewKind } from 'helpers/filePreview';
+import DeviceInfo from 'constants/DeviceInfo';
+import {
+  isPreviewLoad,
+  needWhiteBackground,
+  previewKind,
+} from 'helpers/filePreview';
+
+jest.mock('constants/DeviceInfo', () => ({
+  isMac: jest.fn(() => false),
+}));
+
+beforeEach(() => {
+  jest.mocked(DeviceInfo.isMac).mockReturnValue(false);
+});
+
+const documents = [
+  'doc',
+  'docx',
+  'xls',
+  'xlsx',
+  'ppt',
+  'pptx',
+  'pages',
+  'key',
+  'numbers',
+];
+
+describe('needWhiteBackground', () => {
+  it('is on for Word and Excel files only', () => {
+    expect(needWhiteBackground('docx')).toBe(true);
+    expect(needWhiteBackground('xls')).toBe(true);
+    expect(needWhiteBackground('pptx')).toBe(false);
+    expect(needWhiteBackground('pdf')).toBe(false);
+    expect(needWhiteBackground(null)).toBe(false);
+  });
+});
 
 describe('previewKind', () => {
   it('shows PDFs with the PDF viewer everywhere', () => {
+    expect(previewKind('pdf')).toBe('pdf');
+    jest.mocked(DeviceInfo.isMac).mockReturnValue(true);
     expect(previewKind('pdf')).toBe('pdf');
     jest.replaceProperty(Platform, 'OS', 'android');
     expect(previewKind('pdf')).toBe('pdf');
   });
 
-  it('shows what WebKit draws in the web view', () => {
+  it('shows what WebKit draws in the web view on iOS and Mac', () => {
     for (const ext of ['png', 'jpg', 'mp4', 'mp3', 'txt', 'html', 'svg']) {
+      expect(previewKind(ext)).toBe('web');
+    }
+    jest.mocked(DeviceInfo.isMac).mockReturnValue(true);
+    expect(previewKind('png')).toBe('web');
+  });
+
+  it("shows Office and iWork documents in iOS's web view", () => {
+    for (const ext of documents) {
       expect(previewKind(ext)).toBe('web');
     }
   });
 
-  it('shows Office and iWork documents with Quick Look', () => {
-    for (const ext of [
-      'doc',
-      'docx',
-      'xls',
-      'xlsx',
-      'ppt',
-      'pptx',
-      'pages',
-      'key',
-      'numbers',
-    ]) {
+  it('shows Office and iWork documents with Quick Look on Mac', () => {
+    jest.mocked(DeviceInfo.isMac).mockReturnValue(true);
+    for (const ext of documents) {
       expect(previewKind(ext)).toBe('quickLook');
     }
   });
@@ -36,6 +72,8 @@ describe('previewKind', () => {
     expect(previewKind('')).toBeNull();
     expect(previewKind(null)).toBeNull();
     expect(previewKind(undefined)).toBeNull();
+    jest.mocked(DeviceInfo.isMac).mockReturnValue(true);
+    expect(previewKind('zip')).toBeNull();
   });
 
   it('previews only PDFs on Android', () => {
@@ -46,12 +84,13 @@ describe('previewKind', () => {
 });
 
 describe('isPreviewLoad', () => {
-  it('allows the file itself and a blank page', () => {
+  it('lets the file, a blank page and converted documents load', () => {
     expect(isPreviewLoad('file:///Caches/downloads/c/f/a.html')).toBe(true);
     expect(isPreviewLoad('about:blank')).toBe(true);
+    expect(isPreviewLoad('x-apple-ql-id://abc/a.docx')).toBe(true);
   });
 
-  it('refuses web pages and other schemes', () => {
+  it('keeps web pages and other schemes out', () => {
     expect(isPreviewLoad('https://id.tsinghua.edu.cn/login')).toBe(false);
     expect(isPreviewLoad('http://example.com')).toBe(false);
     expect(isPreviewLoad('data:text/html,<form>')).toBe(false);
