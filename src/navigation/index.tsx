@@ -1,3 +1,4 @@
+import DeviceInfo from 'constants/DeviceInfo';
 import { Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import {
@@ -48,12 +49,20 @@ const Sheets =
 /** Sheets the main UI opens with (hooks/useLaunchSheet). */
 const renderSheets = () => (
   <Sheets.Group
-    screenOptions={{
-      presentation: 'formSheet',
-      sheetAllowedDetents: [1],
-      // Material 3's extra-large shape; iOS keeps the system's.
-      sheetCornerRadius: Platform.OS === 'android' ? 28 : undefined,
-    }}
+    screenOptions={
+      // The Mac has no sheet detents: a form sheet there opens and closes
+      // without its slide, takes a moment to come and go, and leaves the
+      // window unclickable for a moment after it closes. It gets the page
+      // sheet Search has.
+      DeviceInfo.isMac()
+        ? sheetOptions
+        : {
+            presentation: 'formSheet',
+            sheetAllowedDetents: [1],
+            // Material 3's extra-large shape; iOS keeps the system's.
+            sheetCornerRadius: Platform.OS === 'android' ? 28 : undefined,
+          }
+    }
   >
     <Sheets.Screen name="Setup" component={Setup} />
     <Sheets.Screen name="WhatsNewStack" component={WhatsNewStack} />
