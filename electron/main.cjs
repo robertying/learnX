@@ -321,7 +321,8 @@ const handleIpc = ses => {
     const file = path.join(captureDir, `${name}.png`);
     fs.mkdirSync(captureDir, { recursive: true });
     fs.writeFileSync(file, image.toPNG());
-    // A window's capture leaves its web views out: each gets its own.
+    // A window's capture leaves its web views out: each gets its own, except
+    // those in a hidden screen or tab, which have no frame to capture.
     const guests = webContents
       .getAllWebContents()
       .filter(
@@ -330,7 +331,10 @@ const handleIpc = ses => {
           guest.hostWebContents === event.sender,
       );
     for (const [index, guest] of guests.entries()) {
-      const guestImage = await guest.capturePage();
+      const guestImage = await guest.capturePage().catch(() => null);
+      if (!guestImage) {
+        continue;
+      }
       fs.writeFileSync(
         path.join(captureDir, `${name}-webview-${index + 1}.png`),
         guestImage.toPNG(),
