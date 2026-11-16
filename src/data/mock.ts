@@ -63,7 +63,7 @@ const samples = {
   handoutPdf: { file: 'project1-handout.pdf', size: '44.92KB' },
   solutionPdf: { file: 'homework-solution.pdf', size: '35.96KB' },
   labDocx: { file: 'lab-report-template.docx', size: '36.21KB' },
-  dataXlsx: { file: 'fir-measurements.xlsx', size: '5.31KB' },
+  dataXlsx: { file: 'fir-measurements.xlsx', size: '5.43KB' },
   slidesPptx: { file: 'deep-learning-frameworks.pptx', size: '33.40KB' },
   audioZip: { file: 'dtmf-signals.zip', size: '74.09KB' },
   timingPng: { file: 'counter-timing.png', size: '26.05KB' },
