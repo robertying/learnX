@@ -676,7 +676,7 @@ platform :ios do
   end
 
   desc "Set a processed build's TestFlight What to Test to the App Store notes (no upload, nothing sent to testers)."
-  desc "Usage: bundle exec fastlane ios testflight_notes [build:4551] [notes:/path/to/notes.md]   (build: this version's build number)"
+  desc "Usage: bundle exec fastlane ios testflight_notes [build:<number>] [notes:/path/to/notes.md]   (build: this version's build number)"
   lane :testflight_notes do |options|
     notes = release_notes(notes_path(options))
     set_testflight_notes("ios", notes && notes[:ios], options[:build] || build_number)
@@ -698,7 +698,7 @@ platform :mac do
   end
 
   desc "Set a processed build's TestFlight What to Test to the Mac App Store notes (no upload, nothing sent to testers)."
-  desc "Usage: bundle exec fastlane mac testflight_notes [build:4551] [notes:/path/to/notes.md]   (build: this version's build number)"
+  desc "Usage: bundle exec fastlane mac testflight_notes [build:<number>] [notes:/path/to/notes.md]   (build: this version's build number)"
   lane :testflight_notes do |options|
     notes = release_notes(notes_path(options))
     set_testflight_notes("macos", notes && notes[:mac], options[:build] || build_number)
