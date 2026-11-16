@@ -21,7 +21,7 @@
 #                   simulator is iOS 17.5, which scripts/e2e-build.sh
 #                   builds for), in Chinese
 #   android-min     every flow on a phone emulator on the oldest Android the
-#                   app supports (minSdkVersion, API 28), in Chinese
+#                   app supports (minSdkVersion, API 29), in Chinese
 # The -min profiles aren't in the default run: name them. They're local only.
 #
 # The flows run on the Release app (what ships: bundled JS, Hermes, R8).
@@ -41,7 +41,7 @@
 #   E2E_DUO            an iPhone Duo (duo-*)
 #   E2E_AVD            a foldable emulator, such as a Pixel Fold (fold-*)
 #   E2E_IPHONE_MIN     an iPhone on the iOS 17.5 runtime (iphone-min)
-#   E2E_AVD_MIN        a phone emulator on API 28 (android-min)
+#   E2E_AVD_MIN        a phone emulator on API 29 (android-min)
 # The ipad-windowed and iPhone Duo profiles need the patched Maestro
 # (scripts/maestro/build.sh: it finds an app outside the full screen and folds
 # the Duo with setFoldPosture): put its bin folder first on PATH.

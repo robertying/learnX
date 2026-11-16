@@ -86,7 +86,7 @@ const android: Record<Haptic, [api: number, Haptics.AndroidHaptics][]> = {
   ],
 };
 
-/** Android 9 and 10 have no CONFIRM or REJECT: play the old vibrations. */
+/** Android 10 has no CONFIRM or REJECT: play the old vibrations. */
 const androidLegacy: Partial<Record<Haptic, Haptics.NotificationFeedbackType>> =
   {
     success: NotificationFeedbackType.Success,
