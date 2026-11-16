@@ -1,6 +1,8 @@
 import { Alert, type AlertButton, Linking } from 'react-native';
 import { act, renderHook } from '@testing-library/react-native';
+import { clearQueryCache } from 'data/queryClient';
 import { t } from 'helpers/i18n';
+import { getLatestRelease } from 'helpers/update';
 import useUpdateInstaller from 'hooks/useUpdateInstaller';
 import {
   installsUpdate,
@@ -10,6 +12,7 @@ import {
   UpdateError,
 } from 'services/update';
 
+jest.mock('helpers/update', () => ({ getLatestRelease: jest.fn() }));
 jest.mock('services/update', () => ({
   ...jest.requireActual<typeof import('services/update')>('services/update'),
   installsUpdate: jest.fn(() => true),
@@ -28,6 +31,8 @@ let alert: jest.SpyInstance;
 let open: jest.SpyInstance;
 
 beforeEach(() => {
+  clearQueryCache();
+  jest.mocked(getLatestRelease).mockRejectedValue(new Error('offline'));
   alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   open = jest.spyOn(Linking, 'openURL').mockResolvedValue();
 });
@@ -129,10 +134,26 @@ it('offers to try again or to download in the browser after a failure', async ()
   await press(t('openInBrowser'));
   expect(open).toHaveBeenCalledWith(release.url);
 
+  // latest.json can't be read again: the same release.
   pendingInstall();
   await press(t('tryAgain'));
   expect(installUpdate).toHaveBeenCalledTimes(2);
+  expect(installUpdate).toHaveBeenLastCalledWith(release, expect.any(Object));
   expect(result.current.step).toBe('downloading');
+});
+
+it('tries again with latest.json read again', async () => {
+  const first = pendingInstall();
+  const { result } = await renderHook(() => useUpdateInstaller(release));
+  await act(() => result.current.update());
+  await press(t('update'));
+  await first.fail(new UpdateError('ERR_UPDATE_CHECKSUM'));
+
+  const fresh = { ...release, sha256: 'fixed' };
+  jest.mocked(getLatestRelease).mockResolvedValueOnce(fresh);
+  pendingInstall();
+  await press(t('tryAgain'));
+  expect(installUpdate).toHaveBeenLastCalledWith(fresh, expect.any(Object));
 });
 
 it("opens the APK in the browser where the app can't install it", async () => {

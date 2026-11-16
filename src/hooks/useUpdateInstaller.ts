@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Alert } from 'react-native';
+import { queryClient } from 'data/queryClient';
 import type { Release } from 'helpers/update';
 import { formatFileSize } from 'helpers/filename';
 import { t, type TextKey } from 'helpers/i18n';
 import { openLink } from 'helpers/openLink';
+import { latestReleaseQuery } from 'hooks/useAvailableUpdate';
 import {
   installsUpdate,
   installUpdate,
@@ -23,6 +25,15 @@ const failureMessages: Record<
   ERR_UPDATE_FAILED: 'updateInstallFailed',
 };
 
+/**
+ * `latest.json` again, not the copy kept for a day: after a failure, the
+ * mirror may have been between a release's files.
+ */
+const freshRelease = (current: Release) =>
+  queryClient
+    .fetchQuery({ ...latestReleaseQuery, staleTime: 0 })
+    .catch(() => current);
+
 const failureOf = (error: unknown): UpdateFailure =>
   (error as { code?: UpdateFailure } | null)?.code ?? 'ERR_UPDATE_FAILED';
 
@@ -30,8 +41,8 @@ const failureOf = (error: unknown): UpdateFailure =>
  * Updates the Android app to `release` from the update row in Settings: asks
  * first (with the download's size, and that Android will ask to allow
  * installing apps if it hasn't), then downloads and installs it
- * (`services/update`), and on failure offers to try again or to download the
- * APK in the browser. Builds that can't install (Google Play's) open the APK
+ * (`services/update`), and on failure offers to try again (with `latest.json`
+ * read again) or to download the APK in the browser. Builds that can't install (Google Play's) open the APK
  * in the browser. `step` and `progress` are for the row to show.
  */
 const useUpdateInstaller = (release: Release | null) => {
@@ -48,7 +59,12 @@ const useUpdateInstaller = (release: Release | null) => {
           Alert.alert(t('updateFailed'), t(failureMessages[failure]), [
             { text: t('cancel'), style: 'cancel' },
             { text: t('openInBrowser'), onPress: () => openLink(target.url) },
-            { text: t('tryAgain'), onPress: () => run(target) },
+            {
+              text: t('tryAgain'),
+              onPress: () => {
+                void freshRelease(target).then(run);
+              },
+            },
           ]);
         }
       })

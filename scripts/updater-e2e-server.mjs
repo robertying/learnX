@@ -40,7 +40,7 @@ export const latestJson = apk => {
 const damaged = apk => {
   const copy = Buffer.from(apk);
   if (copy.length > 0) {
-    copy[copy.length - 1] ^= 0xff;
+    copy[copy.length - 1] = 0xff - copy[copy.length - 1];
   }
   return copy;
 };
