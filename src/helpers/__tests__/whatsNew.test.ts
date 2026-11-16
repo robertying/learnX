@@ -129,8 +129,8 @@ describe('platforms', () => {
     ).toBe('19.0.0');
   });
 
-  it('keeps Spotlight out of the Android 19 highlights', () => {
-    const titles = (platform: 'ios' | 'android') =>
+  it('gives each platform only the 19 highlights it has', () => {
+    const titles = (platform: 'ios' | 'mac' | 'android') =>
       applicableHighlights(
         releases.find(r => r.version === '19.0.0')!,
         {
@@ -138,8 +138,25 @@ describe('platforms', () => {
           platform,
         },
       ).map(h => h.title);
-    expect(titles('ios')).toContain('whatsNew19SpotlightTitle');
-    expect(titles('android')).not.toContain('whatsNew19SpotlightTitle');
+    expect(titles('ios')).toEqual([
+      'whatsNew19TodayTitle',
+      'whatsNew19WidgetsTitle',
+      'whatsNew19NotificationsTitle',
+      'whatsNew19SpotlightTitle',
+    ]);
+    // The Mac has no widgets.
+    expect(titles('mac')).toEqual([
+      'whatsNew19TodayTitle',
+      'whatsNew19NotificationsTitle',
+      'whatsNew19SpotlightTitle',
+    ]);
+    // Android has no Spotlight or Siri.
+    expect(titles('android')).toEqual([
+      'whatsNew19TodayTitle',
+      'whatsNew19WidgetsTitle',
+      'whatsNew19NotificationsTitle',
+      'whatsNew19DesignTitle',
+    ]);
   });
 
   it('describes this install', () => {
@@ -207,9 +224,16 @@ describe('releases', () => {
   it('lists newest first, with translated rows', () => {
     const versions = releases.map(release => release.version);
     expect([...versions].sort().reverse()).toEqual(versions);
-    for (const { highlights } of releases) {
+    for (const release of releases) {
+      const { highlights } = release;
       expect(highlights.length).toBeGreaterThan(0);
-      expect(highlights.length).toBeLessThanOrEqual(maxHighlights);
+      for (const platform of ['ios', 'mac', 'android'] as const) {
+        const shown = applicableHighlights(release, {
+          nativeVersion: release.version,
+          platform,
+        });
+        expect(shown.length).toBeLessThanOrEqual(maxHighlights);
+      }
       for (const { title, body } of highlights) {
         expect(en[title]).toBeTruthy();
         expect(en[body]).toBeTruthy();

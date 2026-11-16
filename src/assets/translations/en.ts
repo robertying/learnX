@@ -519,9 +519,13 @@ export default {
   whatsNew19WidgetsTitle: 'Widgets',
   whatsNew19WidgetsBody:
     'See deadlines and your next class without opening learnX.',
-  whatsNew19RemindersTitle: 'Deadline Reminders',
-  whatsNew19RemindersBody: 'A notification before an assignment is due.',
+  whatsNew19NotificationsTitle: 'Notifications',
+  whatsNew19NotificationsBody:
+    'Get notified of new notices, files and grades, and before deadlines and classes.',
   whatsNew19SpotlightTitle: 'Spotlight & Siri',
   whatsNew19SpotlightBody:
-    'Find notices, assignments and files from anywhere on your device.',
+    'Find notices, assignments and files in Spotlight, and ask Siri for your next class or deadline.',
+  whatsNew19DesignTitle: 'New Design',
+  whatsNew19DesignBody:
+    'A cleaner look that follows Android, in Tsinghua purple.',
 };
