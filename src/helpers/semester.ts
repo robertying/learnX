@@ -1,6 +1,6 @@
-import { t, type TranslationKey } from './i18n';
+import { t, type TextKey } from './i18n';
 
-const TERMS: Record<string, TranslationKey> = {
+const TERMS: Record<string, TextKey> = {
   '1': 'semesterFall',
   '2': 'semesterSpring',
   '3': 'semesterSummer',

@@ -16,7 +16,7 @@ import {
 import dayjs from 'dayjs';
 import { RemoteFile } from '@robertying/thu-learn-lib';
 import { attachmentFile } from 'helpers/attachments';
-import { t } from 'helpers/i18n';
+import { formatDate, t } from 'helpers/i18n';
 import { deadlineTextBesideDate } from 'helpers/assignments';
 import { useMinute } from 'hooks/useClock';
 import {
@@ -79,13 +79,13 @@ const AssignmentSubmissionContent: React.FC<{
   const now = useMinute();
   const deadlineSubtitle = [
     [
-      dayjs(deadline).format(t('dateTimeFormat')),
+      formatDate(deadline, 'dateTimeFormat'),
       deadlineTextBesideDate(deadline, now),
     ]
       .filter(Boolean)
       .join(' · '),
     lateSubmissionDeadline && !dayjs(now).isBefore(deadline)
-      ? `${t('lateSubmission')} ${dayjs(lateSubmissionDeadline).format(t('dateTimeFormat'))}`
+      ? formatDate(lateSubmissionDeadline, 'lateDeadlineFormat')
       : null,
   ]
     .filter(Boolean)
@@ -269,7 +269,7 @@ const AssignmentSubmissionContent: React.FC<{
           title={t('submissionAttachment')}
           footer={
             submitTime
-              ? dayjs(submitTime).format(t('lastSubmittedAtFormat'))
+              ? formatDate(submitTime, 'lastSubmittedAtFormat')
               : undefined
           }
         >

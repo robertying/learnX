@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import { Platform } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import DateRangePicker from 'components/DateRangePicker';
@@ -14,7 +13,7 @@ import { SyncKind, useCalendarSyncStore } from 'data/calendarSync';
 import { setSetting, useSettings } from 'data/settings';
 import { AlarmSettings } from 'data/types/state';
 import { calendarDefaults } from 'helpers/calendar/details';
-import { t } from 'helpers/i18n';
+import { formatDate, t } from 'helpers/i18n';
 import { showsBeijingTime } from 'helpers/serverTime';
 import { useMinute } from 'hooks/useClock';
 import { openSystemSettings } from 'helpers/systemSettings';
@@ -79,7 +78,7 @@ const CalendarSettings: React.FC<Props> = () => {
         ...captions,
         time &&
           t('lastSynced', {
-            time: dayjs(time).format(t('shortDateTimeFormat')),
+            time: formatDate(time, 'shortDateTimeFormat'),
           }),
       ]
         .filter(Boolean)

@@ -4,7 +4,7 @@ import semverGt from 'semver/functions/gt';
 import semverLte from 'semver/functions/lte';
 import semverValid from 'semver/functions/valid';
 import DeviceInfo from 'constants/DeviceInfo';
-import type { TranslationKey } from 'helpers/i18n';
+import type { TextKey } from 'helpers/i18n';
 import type { SystemIconName } from 'helpers/systemIcons';
 
 export type WhatsNewPlatform = 'ios' | 'mac' | 'android';
@@ -12,8 +12,8 @@ export type WhatsNewPlatform = 'ios' | 'mac' | 'android';
 /** One row of a release's What's New. */
 export interface Highlight {
   icon: SystemIconName;
-  title: TranslationKey;
-  body: TranslationKey;
+  title: TextKey;
+  body: TextKey;
   /**
    * The native app version this needs (a widget, an App Intent, a native
    * module). Left out when an over-the-air update to the JS can deliver it.

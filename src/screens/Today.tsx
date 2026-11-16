@@ -21,7 +21,7 @@ import {
   deadlineUrgency,
   isDueSoon,
 } from 'helpers/assignments';
-import { t, tCount } from 'helpers/i18n';
+import { formatDate, relativeTime, t, tCount } from 'helpers/i18n';
 import {
   ClassSession,
   classDetails,
@@ -113,7 +113,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
     session.courseId ? () => openCourse(session.courseId!) : undefined;
 
   // the timetable's day (Beijing), so the date matches the week and the classes
-  const dateText = dayjs(beijingDate(now)).format(t('todayDate'));
+  const dateText = formatDate(beijingDate(now), 'todayDateFormat');
   const subtitle =
     schedule.week && schedule.week > 0
       ? `${dateText} · ${t('todayWeek', { week: schedule.week })}`
@@ -171,7 +171,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
       ? t('todayFromCourses')
       : schedule.source === 'calendar' && schedule.failed
         ? t('todayCalendarFailed', {
-            time: dayjs(schedule.updatedAt).from(now),
+            time: relativeTime(now, schedule.updatedAt),
           })
         : undefined;
   // Class times are Beijing's; a phone elsewhere says so beside them.
@@ -200,7 +200,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
             <ItemRow
               key={current.key}
               overline={`${t('todayNow')} · ${t('todayEndsIn', {
-                time: dayjs(now).to(current.end),
+                time: relativeTime(now, current.end),
               })}`}
               title={current.courseName}
               subtitle={classDetails(current)}
@@ -212,7 +212,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
             <ItemRow
               key={next.key}
               overline={`${t('todayNext')} · ${t('todayStartsIn', {
-                time: dayjs(now).to(next.start),
+                time: relativeTime(now, next.start),
               })}`}
               title={next.courseName}
               subtitle={classDetails(next)}

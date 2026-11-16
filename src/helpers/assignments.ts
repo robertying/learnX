@@ -1,7 +1,14 @@
 import dayjs from 'dayjs';
 import { HomeworkGradeLevel } from '@robertying/thu-learn-lib';
 import { Assignment } from 'data/types/state';
-import { t, tCount, timeFormat, type TranslationKey } from './i18n';
+import {
+  formatDate,
+  formatTime,
+  relativeTime,
+  t,
+  tCount,
+  type TextKey,
+} from './i18n';
 
 const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;
@@ -32,10 +39,10 @@ export const deadlineText = (deadline: string, now?: dayjs.ConfigType) => {
   const n = dayjs(now);
   const dl = dayjs(deadline);
   if (!dl.isAfter(n)) {
-    return t('deadlinePassed', { time: n.to(dl) });
+    return t('deadlinePassed', { time: relativeTime(n, dl) });
   }
   if (isFarOff(dl, n)) {
-    return t('deadlineOn', { date: dl.format(t('deadlineDateFormat')) });
+    return t('deadlineOn', { date: formatDate(dl, 'deadlineDateFormat') });
   }
   const left = dl.diff(n);
   if (left < HOUR) {
@@ -51,7 +58,7 @@ export const deadlineText = (deadline: string, now?: dayjs.ConfigType) => {
   }
   const days = dl.startOf('day').diff(n.startOf('day'), 'day');
   return days > 25
-    ? t('deadlineIn', { time: n.to(dl, true) })
+    ? t('deadlineIn', { time: relativeTime(n, dl, true) })
     : tCount('deadlineInOneDay', 'deadlineInDays', days);
 };
 
@@ -131,12 +138,12 @@ export const deadlineDayTime = (
   const [today, tomorrow, at] = dayTimeKeys[phrase];
   const n = dayjs(now);
   const dl = dayjs(deadline);
-  const time = dl.format(timeFormat());
+  const time = formatTime(dl);
   return dl.isSame(n, 'day')
     ? t(today, { time })
     : dl.isSame(n.add(1, 'day'), 'day')
       ? t(tomorrow, { time })
-      : t(at, { date: dl.format(t('shortDateTimeFormat')) });
+      : t(at, { date: formatDate(dl, 'shortDateTimeFormat') });
 };
 
 /**
@@ -168,7 +175,7 @@ export function sortAssignments(assignments: Assignment[]): Assignment[] {
   return [...upcoming, ...past];
 }
 
-const gradeLevelKeys: Partial<Record<HomeworkGradeLevel, TranslationKey>> = {
+const gradeLevelKeys: Partial<Record<HomeworkGradeLevel, TextKey>> = {
   [HomeworkGradeLevel.CHECKED]: 'reviewed',
   [HomeworkGradeLevel.DISTINCTION]: 'good',
   [HomeworkGradeLevel.EXEMPTED_COURSE]: 'exemptedCourse',

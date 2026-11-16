@@ -1,8 +1,7 @@
 import { StyleSheet, View } from 'react-native';
-import dayjs from 'dayjs';
 import SystemIcon from 'components/SystemIcon';
 import { requestRelogin, useAuthStore } from 'data/auth';
-import { t } from 'helpers/i18n';
+import { relativeTime, t } from 'helpers/i18n';
 import { Caption, Text } from 'components/Text';
 import { FormSection, FormText } from 'components/Form';
 import TextButton from 'components/TextButton';
@@ -41,7 +40,7 @@ const useSyncStatus = (updatedAt?: number) => {
         ? t('syncStatusOffline')
         : t('syncStatusLoginFailed'),
     updated: updatedAt
-      ? t('syncStatusUpdated', { time: dayjs(updatedAt).from(now) })
+      ? t('syncStatusUpdated', { time: relativeTime(now, updatedAt) })
       : null,
     canLogIn: failure === 'rejected' && !loggingIn,
   };

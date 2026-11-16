@@ -3,7 +3,6 @@ import { Linking, Platform, StyleSheet, View, ViewProps } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import WebView from 'react-native-webview';
 import Pdf from 'react-native-pdf';
-import dayjs from 'dayjs';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
 import {
@@ -11,7 +10,7 @@ import {
   isPreviewLoad,
   needWhiteBackground,
 } from 'helpers/filePreview';
-import { t } from 'helpers/i18n';
+import { formatDate, t } from 'helpers/i18n';
 import { displayFileSize } from 'helpers/filename';
 import Spinner from 'components/Spinner';
 import SafeArea from 'components/SafeArea';
@@ -225,7 +224,7 @@ const FileInfo: React.FC<{
       {file.uploadTime ? (
         <FormText
           title={t('fileUploadTime')}
-          detail={dayjs(file.uploadTime).format(t('dateTimeFormat'))}
+          detail={formatDate(file.uploadTime, 'dateTimeFormat')}
         />
       ) : null}
     </FormSection>
