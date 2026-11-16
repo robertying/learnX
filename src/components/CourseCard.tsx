@@ -28,7 +28,7 @@ const Count: React.FC<{ icon: CountIcon; count: number }> = ({
   count,
 }) => {
   const theme = useTheme();
-  const iconSize = useTextIconSize(15);
+  const iconSize = useTextIconSize('subheadline');
   if (!count) {
     return null;
   }

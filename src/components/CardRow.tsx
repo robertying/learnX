@@ -238,7 +238,7 @@ const isFlag = (flag: CardFlag | false | undefined): flag is CardFlag => !!flag;
 
 const CardGlyph: React.FC<{ name: CardFlag }> = ({ name }) => {
   const theme = useTheme();
-  const size = useTextIconSize(15);
+  const size = useTextIconSize('subheadline');
   const { tone } = cardFlags[name];
   return (
     <SystemIcon
@@ -262,7 +262,7 @@ export const CardPill: React.FC<{
   testID?: string;
 }> = ({ children, tone, icon, testID }) => {
   const { colors } = useTheme();
-  const iconSize = useTextIconSize(13);
+  const iconSize = useTextIconSize('footnote');
   const [container, foreground] =
     tone === 'primary'
       ? [colors.primaryContainer, colors.onPrimaryContainer]

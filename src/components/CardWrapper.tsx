@@ -409,7 +409,8 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
 const styles = StyleSheet.create({
   root: {
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    // The Mac's smaller text in rows as tall as its Form rows (`Form`).
+    paddingVertical: DeviceInfo.isMac() ? 10 : 12,
     flexDirection: 'row',
     alignItems: 'center',
   },

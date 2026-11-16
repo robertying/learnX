@@ -83,7 +83,7 @@ describe('TextButton (iOS)', () => {
     ).not.toContain('strikethrough');
   });
 
-  it('uses iOS point sizes on a Mac, with a taller click target', async () => {
+  it("uses the Mac's own text sizes there, with a taller click target", async () => {
     jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
     const onPress = jest.fn();
     await render(
@@ -91,7 +91,7 @@ describe('TextButton (iOS)', () => {
         Open
       </TextButton>,
     );
-    expect(font).toHaveBeenCalledWith({ size: 17, weight: undefined });
+    expect(font).toHaveBeenCalledWith({ textStyle: 'body', weight: undefined });
     // The label view, padded inside the button
     expect(screen.getByText('Open')).toBeTruthy();
     await userEvent.setup().press(screen.getByTestId('open'));
