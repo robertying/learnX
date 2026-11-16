@@ -48,14 +48,16 @@ name: Download a file, then delete it
           visible: 'Cancel|取消'
           timeout: 10000
       - tapOn: 'Cancel|取消'
-# Android's folder picker goes up a folder on each back before it closes.
+# Android's folder picker goes up a folder on each back before it closes. It's
+# com.google.android.documentsui on images with Google Play, and AOSP's
+# com.android.documentsui on the others (the min-SDK emulator).
 - runFlow:
     when:
       platform: Android
     commands:
       - extendedWaitUntil:
           visible:
-            id: 'com.google.android.documentsui:id/.*'
+            id: 'com\.(google\.)?android\.documentsui:id/.*'
           timeout: 10000
       - repeat:
           times: 5
