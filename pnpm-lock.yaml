@@ -177,7 +177,7 @@ patchedDependencies:
   expo-calendar@58.0.7: b62bb1b60978bf8ee6206c2c71abca18695e2d9c92263ff773ad1ae732c2f298
   expo-document-picker@58.0.5: f6b22f329e4dd4b82362600de611418bab926a130f3793ec089256a637d47146
   expo-widgets@58.0.28: 9244587b17ef3b062bec42e454afa19174e62c3ba28f9f2f02d4c6d6ac0f3944
-  react-native-bottom-tabs@1.5.0: 2bd6bf19cfe50ab962c73bfc01b22ed89d7b139102a3e303e3fd8d211ddb66ef
+  react-native-bottom-tabs@1.5.0: 27be4003477f834bc13677a4b7eb872fb5b9c910ca82630723b4f40b695874e1
   react-native-pager-view@10.0.2: da0b1a8d1b06c1378b4cf4e23824ad81c87ac25f20a67aae0e125a474c952179
   react-native-pdf@7.0.5: 5fdb347578d0837ed5387677fe9c4a7798e5ffede4868a1ddfe7bbfd410ede6b
   react-native-reanimated@4.7.1: 403fbb8138ca5b749e55a7fef8eafc1ef7d0d2fc3b60646eb9cebed696b452bd
@@ -199,7 +199,7 @@ importers:
         version: 7.29.13
       '@bottom-tabs/react-navigation':
         specifier: 1.5.0
-        version: 1.5.0(d499c062a6ab168c97f7f4294c4d4620)
+        version: 1.5.0(5d59aa49f14acfc995df6105129e9d0c)
       '@expo/ui':
         specifier: 58.0.28
         version: 58.0.28(patch_hash=22135189839ab2155e9afaed0d94a25fa9371ab851c912aaab9eaee084199c4e)(096e5b8b50590a9cbec74e3451cfd958)
@@ -373,7 +373,7 @@ importers:
         version: 1.1.1(react-native@0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1)
       react-native-bottom-tabs:
         specifier: 1.5.0
-        version: 1.5.0(patch_hash=2bd6bf19cfe50ab962c73bfc01b22ed89d7b139102a3e303e3fd8d211ddb66ef)(react-native@0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1)
+        version: 1.5.0(patch_hash=27be4003477f834bc13677a4b7eb872fb5b9c910ca82630723b4f40b695874e1)(react-native@0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1)
       react-native-gesture-handler:
         specifier: 3.5.0
         version: 3.5.0(react-native@0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1)
@@ -5721,13 +5721,13 @@ snapshots:
 
   '@bcoe/v8-coverage@0.2.3': {}
 
-  '@bottom-tabs/react-navigation@1.5.0(d499c062a6ab168c97f7f4294c4d4620)':
+  '@bottom-tabs/react-navigation@1.5.0(5d59aa49f14acfc995df6105129e9d0c)':
     dependencies:
       '@react-navigation/native': 7.5.1(react-native@0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1)
       color: 5.0.3
       react: 19.3.1
       react-native: 0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1)
-      react-native-bottom-tabs: 1.5.0(patch_hash=2bd6bf19cfe50ab962c73bfc01b22ed89d7b139102a3e303e3fd8d211ddb66ef)(react-native@0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1)
+      react-native-bottom-tabs: 1.5.0(patch_hash=27be4003477f834bc13677a4b7eb872fb5b9c910ca82630723b4f40b695874e1)(react-native@0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1)
 
   '@expo-google-fonts/material-symbols@0.4.54': {}
 
@@ -9899,7 +9899,7 @@ snapshots:
       react: 19.3.1
       react-native: 0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1)
 
-  react-native-bottom-tabs@1.5.0(patch_hash=2bd6bf19cfe50ab962c73bfc01b22ed89d7b139102a3e303e3fd8d211ddb66ef)(react-native@0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1):
+  react-native-bottom-tabs@1.5.0(patch_hash=27be4003477f834bc13677a4b7eb872fb5b9c910ca82630723b4f40b695874e1)(react-native@0.88.1(patch_hash=0bea2929154ccf63370639d1456c802e429c0e5d5a68c15a2f7cf4d4e986940f)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1):
     dependencies:
       react: 19.3.1
       react-freeze: 1.0.4(react@19.3.1)

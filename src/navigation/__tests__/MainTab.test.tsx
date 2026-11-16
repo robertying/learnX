@@ -136,14 +136,23 @@ it('waits for a split to be laid out before mounting the other tabs', async () =
   expect(idle).toHaveLength(0);
 });
 
-it('wraps each tab in a split of its own, with filled SF Symbols', async () => {
+it('wraps each tab in a split of its own, with outline SF Symbols, filled when selected', async () => {
   at('2026-03-15T14:00:00');
   const MainTab = loadMainTab(iPhone);
   await render(<MainTab />);
   const today = lastNavigatorScreens()[0];
   await render(<>{today.options && (today.component as React.FC)({})}</>);
   expect(screen.getByText('TodayStack')).toBeTruthy();
+  // The system fills them in the tab bar and keeps the outline in the iPad
+  // sidebar; the selected tab bar item gets the filled one.
   expect([0, 1, 2, 3, 4].map(i => tabBarIcon(i))).toEqual([
+    { sfSymbol: 'sun.max' },
+    { sfSymbol: 'bell' },
+    { sfSymbol: 'list.bullet.clipboard' },
+    { sfSymbol: 'folder' },
+    { sfSymbol: 'books.vertical' },
+  ]);
+  expect([0, 1, 2, 3, 4].map(i => tabBarIcon(i, true))).toEqual([
     { sfSymbol: 'sun.max.fill' },
     { sfSymbol: 'bell.fill' },
     { sfSymbol: 'list.bullet.clipboard.fill' },
@@ -164,7 +173,8 @@ it.each([
     at(`2026-03-15T${time}:00`);
     const MainTab = loadMainTab(iPhone);
     await render(<MainTab />);
-    expect(tabBarIcon(0)).toEqual({ sfSymbol: ios });
+    expect(tabBarIcon(0, true)).toEqual({ sfSymbol: ios });
+    expect(tabBarIcon(0)).toEqual({ sfSymbol: ios.replace('.fill', '') });
     jest.replaceProperty(Platform, 'OS', 'android');
     expect(tabBarIcon(0)).toEqual({ uri: `tab_${material}` });
   },

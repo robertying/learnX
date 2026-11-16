@@ -39,8 +39,12 @@ type TabIcon =
   | 'settings'
   | DayPart;
 
-// The tab bar draws each tab's icon filled, as iOS's own apps do; the Mac's
-// sidebar draws the outline (`systemIcons`), as Finder and Mail do.
+// Each tab gives its outline symbol (`systemIcons`) and the filled one for the
+// selected tab bar item. The system fills the tab bar's icons, as iOS's own
+// apps do, and keeps the outline in a sidebar, as Finder, Mail and Files do,
+// where the highlight shows the selected tab: iPad's tab bar turns into one
+// (react-native-bottom-tabs is patched to let SwiftUI pick the variant), and
+// the Mac's sidebar navigator takes the outline.
 const filledSymbols: Record<TabIcon, SFSymbol> = {
   notices: 'bell.fill',
   assignments: 'list.bullet.clipboard.fill',
@@ -59,7 +63,7 @@ const filledSymbols: Record<TabIcon, SFSymbol> = {
 // font), since the bar loads its icons as images.
 const getTabBarIcon = (icon: TabIcon, focused: boolean) =>
   Platform.OS === 'ios'
-    ? { sfSymbol: filledSymbols[icon] }
+    ? { sfSymbol: focused ? filledSymbols[icon] : systemIcons[icon].ios }
     : { uri: `tab_${systemIcons[icon].android}${focused ? '_filled' : ''}` };
 
 // UIKit only moves the tab bar into the vertical bar when the tab bar controller
