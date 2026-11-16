@@ -86,7 +86,7 @@ export const endSession = () => {
   sessionServer = null;
 };
 
-/** The requests the app sends to learn.tsinghua.edu.cn itself. */
+/** The requests the app wraps: thu-learn-lib's calls, with what the app adds. */
 const realRequests: Omit<AppSource, keyof DataSource> = {
   markNoticeRead: async url => {
     // Only Web Learning's own pages: the session cookies go with the request.

@@ -162,9 +162,9 @@ android {
     }
 }
 
-// Per-ABI APKs (the github flavor) get their own version
-// codes: 1,000,000,000 + build number * 10 + the ABI's digit, e.g. 1000045403
-// for arm64-v8a of build 4540. Up to 18.0.3 they were (versionCode * 1000 +
+// Per-ABI APKs (the github flavor) get their own version codes:
+// 1,000,000,000 + build number * 10 + the ABI's digit, e.g. 1000045403 for
+// arm64-v8a of build 4540. Up to 18.0.3 they were (versionCode * 1000 +
 // digit), which overflowed Int (18.0.3's arm64-v8a APK is 614595411), so these
 // start above that to keep sideloaded installs upgradable. The AAB for Google
 // Play and the universal APK keep versionCode (9200000 + build number).

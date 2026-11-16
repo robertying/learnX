@@ -42,8 +42,8 @@ const macSizes = {
  * Apple's guidelines at the default text size (one line of footnote,
  * subheadline or body is 18, 20 or 22 pt tall) instead of being one line of
  * text. On a Mac it makes the click target about as tall as a regular Mac
- * control (22 pt). It goes into the gutter, so the label stays where it was
- * and rows keep their size.
+ * control (22 pt). It goes into the gutter, so the label sits where a label
+ * without it would and rows keep their size.
  */
 const iosPadding = {
   small: { vertical: 13, horizontal: 8 },

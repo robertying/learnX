@@ -1,10 +1,10 @@
 # Save the screen as <time>-$NAME.png in folder SHOTS_DIR of the run's output
 # folder when SHOTS_DIR is set (scripts/e2e.sh with E2E_SCREENSHOTS, which
 # moves and numbers them afterwards), once it has settled; otherwise do
-# nothing. The shared subflows
-# call it on each tab, detail and settings page, and some flows on states
-# those don't reach (search results, failures), so a run's screenshots can be
-# looked through instead of opening each screen by hand.
+# nothing. The shared subflows call it on each tab, detail and settings page,
+# and some flows on states those don't reach (search results, failures), so a
+# run's screenshots can be looked through instead of opening each screen by
+# hand.
 appId: ${APP_ID}
 ---
 - runFlow:

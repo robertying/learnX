@@ -7,12 +7,18 @@ import { downloadInto } from 'services/files/downloads';
 /** Where the APK is downloaded to, under Caches; deleted once it's used. */
 export const UPDATE_DIR = 'update';
 
-/** How long after people come back from Android's confirmation it counts as dismissed. */
+/**
+ * How long after people come back from Android's confirmation it counts as
+ * dismissed.
+ */
 const DISMISS_MS = 3000;
 
 const updateDirectory = () => new Directory(Paths.cache, UPDATE_DIR);
 
-/** Deletes a downloaded update, which an install ended by the app closing leaves behind. */
+/**
+ * Deletes a downloaded update, which an install ended by the app closing
+ * leaves behind.
+ */
 export const clearDownloadedUpdate = () => {
   try {
     const dir = updateDirectory();

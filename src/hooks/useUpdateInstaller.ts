@@ -41,10 +41,10 @@ const failureOf = (error: unknown): UpdateFailure =>
  * Updates the Android app to `release` from the update row in Settings: asks
  * first (with the download's size, that Android will ask to allow installing
  * apps if it hasn't, and a button for the changelog when `onViewChangelog` is
- * given), then downloads and installs it
- * (`services/update`), and on failure offers to try again (with `latest.json`
- * read again) or to download the APK in the browser. Builds that can't install (Google Play's) open the APK
- * in the browser. `step` and `progress` are for the row to show.
+ * given), then downloads and installs it (`services/update`), and on failure
+ * offers to try again (with `latest.json` read again) or to download the APK
+ * in the browser. Builds that can't install (Google Play's) open the APK in
+ * the browser. `step` and `progress` are for the row to show.
  */
 const useUpdateInstaller = (
   release: Release | null,

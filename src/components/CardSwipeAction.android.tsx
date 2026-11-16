@@ -12,9 +12,10 @@ import { Text } from './Text';
 /**
  * A card's swipe action on Android, as in Gmail: the card slides over a
  * full-width background in the action's color with its icon, named under it,
- * at the edge it leaves. Let go past `FULL_SWIPE` (or flung), the card slides off and the
- * action runs; short of it, the card springs back. The icon grows as the swipe
- * passes that point. TalkBack gets the actions from the card itself.
+ * at the edge it leaves. Let go past `FULL_SWIPE` (or flung), the card slides
+ * off and the action runs; short of it, the card springs back. The icon grows
+ * as the swipe passes that point. TalkBack gets the actions from the card
+ * itself.
  */
 const CardSwipeAction: React.FC<CardSwipeActionProps> = ({
   side,
