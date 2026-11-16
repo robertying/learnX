@@ -25,6 +25,25 @@ contextBridge.exposeInMainWorld('learnx', {
     set: (key, value) => ipcRenderer.invoke('secrets:set', key, value),
     remove: key => ipcRenderer.invoke('secrets:remove', key),
   },
+  files: {
+    sync: (op, ...args) => ipcRenderer.sendSync('files', op, ...args),
+    download: (id, req) => ipcRenderer.invoke('files:download', id, req),
+    abortDownload: id => ipcRenderer.send('files:abortDownload', id),
+    onProgress: listener => {
+      ipcRenderer.on('files:progress', (_event, id, written, total) =>
+        listener(id, written, total),
+      );
+    },
+  },
+  webviews: {
+    configure: (guestId, scripts) =>
+      ipcRenderer.invoke('webview:configure', guestId, scripts),
+    onAsk: listener => {
+      ipcRenderer.on('webview:ask', (_event, request) => listener(request));
+    },
+    answer: (requestId, allow) =>
+      ipcRenderer.send('webview:answer', requestId, allow),
+  },
   // Development only: the dev runner's launch options (empty otherwise), and
   // a window capture, which main.cjs saves when the dev runner asks for them
   // and returns null otherwise.

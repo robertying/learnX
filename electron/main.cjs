@@ -1,7 +1,8 @@
 // learnX's Electron main process: one window showing the app's web build,
 // served from app://learnx/, and the services the renderer asks for over IPC
 // (preload.cjs): requests to Tsinghua's servers, their cookies, key-value
-// storage and the saved login.
+// storage, the saved login, the app's own files and downloads, native menus
+// and the web views the page shows (webviews.cjs).
 //
 // It registers nothing with the system: no protocol handler, no login item.
 const fs = require('node:fs');
@@ -18,11 +19,14 @@ const {
   safeStorage,
   session,
   shell,
+  webContents,
 } = require('electron');
 const { createFileStore } = require('./fileStore.cjs');
+const { createFiles } = require('./files.cjs');
 const { popupMenu } = require('./menus.cjs');
 const { mainFetch } = require('./net.cjs');
 const { createSecrets } = require('./secrets.cjs');
+const { PARTITION, createWebviews, hardenWebview } = require('./webviews.cjs');
 
 /**
  * A top-level app's id, named as the repo's other top-level targets are
@@ -116,14 +120,26 @@ const serveWeb = async (/** @type {Request} */ request) => {
   return new Response(response.body, { status: response.status, headers });
 };
 
-/** Only the app's own pages may call the main process. */
+/**
+ * Only the app's own pages may call the main process: its window, never a
+ * web view it shows.
+ */
 const fromApp = (
   /** @type {Electron.IpcMainEvent | Electron.IpcMainInvokeEvent} */ event,
 ) => {
-  if (!event.senderFrame?.url.startsWith(`${ORIGIN}/`)) {
+  if (
+    event.sender.getType() !== 'window' ||
+    !event.senderFrame?.url.startsWith(`${ORIGIN}/`)
+  ) {
     throw new Error('IPC from outside the app');
   }
 };
+
+const webviews = createWebviews({
+  openExternal: url => {
+    shell.openExternal(url).catch(() => {});
+  },
+});
 
 /**
  * @param {Electron.Session} ses
@@ -213,6 +229,80 @@ const handleIpc = ses => {
     return win ? popupMenu(Menu, win, items, position) : null;
   });
 
+  // The app's own files, synchronous as expo-file-system's are.
+  const files = createFiles({
+    cache: path.join(app.getPath('userData'), 'Files', 'Caches'),
+    document: path.join(app.getPath('userData'), 'Files', 'Documents'),
+  });
+  ipcMain.on('files', (event, op, ...args) => {
+    fromApp(event);
+    try {
+      switch (op) {
+        case 'roots':
+          event.returnValue = { result: files.roots() };
+          return;
+        case 'info':
+        case 'list':
+        case 'makeDirectory':
+        case 'remove':
+        case 'move':
+        case 'copy':
+        case 'write':
+        case 'read':
+          event.returnValue = {
+            result: /** @type {any} */ (files[op])(...args),
+          };
+          return;
+        default:
+          throw new Error(`Unknown file operation: ${op}`);
+      }
+    } catch (error) {
+      event.returnValue = {
+        error: String(/** @type {Error} */ (error).message),
+      };
+    }
+  });
+  /** Downloads in flight, by the renderer's id, so it can abort them. */
+  const downloads = new Map();
+  ipcMain.handle('files:download', async (event, id, req) => {
+    fromApp(event);
+    const controller = new AbortController();
+    downloads.set(id, controller);
+    try {
+      return await files.download(net, ses, req, {
+        signal: controller.signal,
+        onProgress: (written, total) => {
+          if (!event.sender.isDestroyed()) {
+            event.sender.send('files:progress', id, written, total);
+          }
+        },
+      });
+    } finally {
+      downloads.delete(id);
+    }
+  });
+  ipcMain.on('files:abortDownload', (event, id) => {
+    fromApp(event);
+    downloads.get(id)?.abort();
+  });
+
+  ipcMain.handle('webview:configure', (event, guestId, scripts) => {
+    fromApp(event);
+    return webviews.configure(
+      event.sender,
+      webContents.fromId(guestId),
+      scripts,
+    );
+  });
+  ipcMain.on('webview:answer', (event, requestId, allow) => {
+    fromApp(event);
+    webviews.answer(event.sender, requestId, allow);
+  });
+  // From a web view's own preload (webviewPreload.cjs).
+  ipcMain.on('webview:scripts', event => {
+    event.returnValue = webviews.scriptsFor(event.sender);
+  });
+
   ipcMain.on('launchOptions', event => {
     fromApp(event);
     event.returnValue = launchOptions;
@@ -231,6 +321,21 @@ const handleIpc = ses => {
     const file = path.join(captureDir, `${name}.png`);
     fs.mkdirSync(captureDir, { recursive: true });
     fs.writeFileSync(file, image.toPNG());
+    // A window's capture leaves its web views out: each gets its own.
+    const guests = webContents
+      .getAllWebContents()
+      .filter(
+        guest =>
+          guest.getType() === 'webview' &&
+          guest.hostWebContents === event.sender,
+      );
+    for (const [index, guest] of guests.entries()) {
+      const guestImage = await guest.capturePage();
+      fs.writeFileSync(
+        path.join(captureDir, `${name}-webview-${index + 1}.png`),
+        guestImage.toPNG(),
+      );
+    }
     return file;
   });
 };
@@ -258,7 +363,8 @@ const createWindow = (/** @type {Electron.Session} */ ses) => {
       contextIsolation: true,
       sandbox: true,
       nodeIntegration: false,
-      webviewTag: false,
+      // The page's web views (webviews.cjs), hardened as they attach.
+      webviewTag: true,
       spellcheck: false,
       // Captures need frames drawn while the window is in the background.
       backgroundThrottling: !captureDir,
@@ -280,6 +386,21 @@ const createWindow = (/** @type {Electron.Session} */ ses) => {
       event.preventDefault();
     }
   });
+  win.webContents.on('will-attach-webview', (event, webPreferences, params) => {
+    if (
+      !hardenWebview(
+        webPreferences,
+        params,
+        path.join(__dirname, 'webviewPreload.cjs'),
+        { backgroundThrottling: !captureDir },
+      )
+    ) {
+      event.preventDefault();
+    }
+  });
+  win.webContents.on('did-attach-webview', (_event, guest) =>
+    webviews.guard(guest),
+  );
   if (!app.isPackaged) {
     win.webContents.on('console-message', ({ level, message }) => {
       if (level === 'warning' || level === 'error') {
@@ -295,11 +416,16 @@ void app.whenReady().then(() => {
   if (process.platform === 'darwin' && !app.isPackaged) {
     app.dock?.setIcon(path.join(__dirname, 'icons', 'icon.png'));
   }
-  const ses = session.fromPartition('persist:learnx');
+  const ses = session.fromPartition(PARTITION);
   ses.protocol.handle('app', serveWeb);
   // No camera, microphone, location or notifications asked of the system yet.
   ses.setPermissionRequestHandler((_webContents, _permission, callback) =>
     callback(false),
+  );
+  // The web views' top-level loads wait for the page to decide on them.
+  ses.webRequest.onBeforeRequest(
+    { urls: ['http://*/*', 'https://*/*'], types: ['mainFrame'] },
+    webviews.onBeforeRequest,
   );
   handleIpc(ses);
   createWindow(ses);

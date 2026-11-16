@@ -44,6 +44,38 @@ export interface BridgeMenuItem {
   sublabel?: string;
 }
 
+/** What a file operation answers (electron/files.cjs). */
+export type FileResult<T> = { result: T } | { error: string };
+
+/** The file operations the main process runs synchronously. */
+export interface FileOps {
+  roots: () => { cache: string; document: string };
+  info: (uri: string) => {
+    exists: boolean;
+    isDirectory: boolean;
+    size: number;
+  };
+  list: (uri: string) => { name: string; isDirectory: boolean }[];
+  makeDirectory: (
+    uri: string,
+    options?: { intermediates?: boolean; idempotent?: boolean },
+  ) => void;
+  remove: (uri: string) => void;
+  move: (from: string, to: string, overwrite?: boolean) => void;
+  copy: (from: string, to: string, overwrite?: boolean) => void;
+  write: (uri: string, content: string | Uint8Array) => void;
+  read: (uri: string, as: 'utf8' | 'bytes') => string | Uint8Array;
+}
+
+/** A load a web view asks the page about (electron/webviews.cjs). */
+export interface WebviewLoadRequest {
+  guestId: number;
+  requestId: number;
+  url: string;
+  method: string;
+  isTopFrame: boolean;
+}
+
 /**
  * What the Electron app's main process offers the page, as `window.learnx`
  * (electron/preload.cjs).
@@ -78,6 +110,30 @@ export interface Bridge {
     get: (key: string) => Promise<string | null>;
     set: (key: string, value: string) => Promise<void>;
     remove: (key: string) => Promise<void>;
+  };
+  files: {
+    sync: <Op extends keyof FileOps>(
+      op: Op,
+      ...args: Parameters<FileOps[Op]>
+    ) => FileResult<ReturnType<FileOps[Op]>>;
+    /** Downloads into a file with the session's cookies. */
+    download: (
+      id: number,
+      req: { url: string; uri: string; headers?: Record<string, string> },
+    ) => Promise<{ status: number }>;
+    abortDownload: (id: number) => void;
+    onProgress: (
+      listener: (id: number, written: number, total: number) => void,
+    ) => void;
+  };
+  webviews: {
+    /** Sets the scripts a web view injects; false if it isn't the page's. */
+    configure: (
+      guestId: number,
+      scripts: { before?: string; after?: string },
+    ) => Promise<boolean>;
+    onAsk: (listener: (request: WebviewLoadRequest) => void) => void;
+    answer: (requestId: number, allow: boolean) => void;
   };
   /** A test run's launch options in development; empty elsewhere. */
   launchOptions: () => Record<string, unknown>;

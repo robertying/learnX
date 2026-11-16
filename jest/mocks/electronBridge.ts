@@ -29,6 +29,17 @@ export const installBridge = (overrides: Partial<Bridge> = {}): Bridge => {
       set: jest.fn(async () => {}),
       remove: jest.fn(async () => {}),
     },
+    files: {
+      sync: jest.fn(),
+      download: jest.fn(async () => ({ status: 200 })),
+      abortDownload: jest.fn(),
+      onProgress: jest.fn(),
+    },
+    webviews: {
+      configure: jest.fn(async () => true),
+      onAsk: jest.fn(),
+      answer: jest.fn(),
+    },
     launchOptions: jest.fn(() => ({})),
     capture: jest.fn(async () => null),
     ...overrides,

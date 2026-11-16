@@ -258,6 +258,18 @@ describe('picking the server', () => {
     expect(CookieManager.flush).toHaveBeenCalled();
   });
 
+  it("removes the SSO cookies from the Electron app's session", async () => {
+    jest.replaceProperty(Platform, 'OS', 'web');
+    jest
+      .mocked(CookieManager.get)
+      .mockResolvedValueOnce({ JSESSIONID: {}, singleLogin: {} } as never);
+    await helperConfig().clearLoginCookies();
+    expect(
+      jest.mocked(CookieManager.clearByName).mock.calls.map(call => call[1]),
+    ).toEqual(['JSESSIONID', 'singleLogin']);
+    expect(CookieManager.setFromResponse).not.toHaveBeenCalled();
+  });
+
   it('clears every cookie in every store on logout', async () => {
     await clearSessionCookies();
     expect(CookieManager.clearAllStores).toHaveBeenCalledTimes(1);

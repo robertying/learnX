@@ -9,5 +9,6 @@
   "expo-secure-store": "secureStore.ts",
   "expo-sqlite/kv-store": "kvStore.ts",
   "react-native-pdf": "packages/Pdf.tsx",
-  "react-native-share": "packages/share.ts"
+  "react-native-share": "packages/share.ts",
+  "react-native-webview": "packages/WebView.tsx"
 }

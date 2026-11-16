@@ -11,7 +11,7 @@ import {
   assertServerWritesAllowed,
   getServerWritesAllowed,
 } from 'helpers/serverWrites';
-import { isAndroid, isApple } from 'helpers/platform';
+import { isAndroid, isApple, isElectron } from 'helpers/platform';
 
 /** The part of thu-learn-lib the app calls. */
 export type DataSource = Pick<
@@ -174,7 +174,8 @@ export const serverWritesBlocked = () =>
  * form without an SSO session: the SSO page has just signed in there, and a
  * login sent with that session isn't answered with a ticket. On iOS the web
  * views keep their cookies in WebKit's store and fetch in Foundation's, so
- * both are cleared; Android has one store, where each cookie is emptied.
+ * both are cleared; Android has one store, where each cookie is emptied, and
+ * the Electron app one session, where each is removed.
  */
 export const clearLoginCookies = async () => {
   if (isApple()) {
@@ -187,6 +188,13 @@ export const clearLoginCookies = async () => {
           ),
         );
       }),
+    );
+  } else if (isElectron()) {
+    const cookies = await CookieManager.get(Urls.id);
+    await Promise.all(
+      Object.keys(cookies).map(name =>
+        CookieManager.clearByName(Urls.id, name),
+      ),
     );
   } else {
     const cookies = await CookieManager.get(Urls.id);

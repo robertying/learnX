@@ -2,7 +2,6 @@ import { render } from '@testing-library/react-native';
 import Pdf from 'web/packages/Pdf';
 import Share from 'web/packages/share';
 import * as Notifications from 'web/packages/notifications';
-import { Directory, DownloadTask, File, Paths } from 'web/packages/fileSystem';
 
 jest.mock('expo-font', () => ({ useFonts: () => [true, null] }));
 jest.mock('expo-symbols/androidWeights/regular', () => ({
@@ -64,50 +63,5 @@ describe('notifications', () => {
     expect(Notifications.SchedulableTriggerInputTypes.DATE).toBe('date');
     expect(Notifications.AndroidImportance.HIGH).toBe(6);
     expect(Notifications.IosAuthorizationStatus.DENIED).toBe(1);
-  });
-});
-
-describe('file system', () => {
-  it('joins paths and names entries', () => {
-    const dir = new Directory(Paths.cache, 'downloads/');
-    expect(dir.uri).toBe('file:///cache/downloads/');
-    expect(dir.name).toBe('downloads');
-    const file = new File(dir, '/notes.pdf');
-    expect(file.uri).toBe('file:///cache/downloads/notes.pdf');
-    expect(file.parentDirectory.uri).toBe('file:///cache/downloads');
-    expect(Paths.document.uri).toBe('file:///document/');
-  });
-
-  it('has nothing in it', () => {
-    const dir = new Directory(Paths.cache, 'downloads');
-    expect(dir.exists).toBe(false);
-    expect(dir.size).toBe(0);
-    expect(dir.list()).toEqual([]);
-    expect(dir.info()).toEqual({ exists: false, uri: dir.uri });
-    expect(() => dir.delete()).not.toThrow();
-  });
-
-  it('fails to read or write', async () => {
-    const dir = new Directory(Paths.cache, 'a');
-    const file = new File(dir, 'b');
-    for (const call of [
-      () => dir.create(),
-      () => dir.copy(),
-      () => dir.move(),
-      () => dir.createDirectory(),
-      () => dir.createFile(),
-      () => file.write(),
-      () => file.writeSync(),
-      () => file.textSync(),
-      () => file.open(),
-      () => new DownloadTask(),
-    ]) {
-      expect(call).toThrow('No file system');
-    }
-    await expect(file.text()).rejects.toThrow('No file system');
-    await expect(file.bytes()).rejects.toThrow('No file system');
-    await expect(Directory.pickDirectoryAsync()).rejects.toThrow(
-      'No file system',
-    );
   });
 });
