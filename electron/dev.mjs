@@ -16,11 +16,15 @@
 //
 // The first run downloads Electron itself (pnpm install skips its download
 // script, see pnpm-workspace.yaml), with its download cache in build/electron.
+// On a Mac it opens build/electron/learnX.app, a copy of Electron.app named
+// and drawn as learnX (macDevApp.mjs); `pnpm electron:clean` removes what
+// dev runs leave on the Mac (clean.mjs).
 import { spawn, spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
+import { macDevApp } from './macDevApp.mjs';
 
 const electronDir = import.meta.dirname;
 const root = path.join(electronDir, '..');
@@ -66,8 +70,19 @@ if (!values['skip-export']) {
   }
 }
 
-/** The Electron binary's path, as the electron package's index.js gives it. */
-const electron = /** @type {string} */ (require('electron'));
+/**
+ * The app to run: learnX.app on a Mac, or else the Electron binary, as the
+ * electron package's index.js gives its path.
+ */
+const electron =
+  process.platform === 'darwin'
+    ? macDevApp({
+        electronApp: path.join(electronPackage, 'dist', 'Electron.app'),
+        electronVersion: require('electron/package.json').version,
+        iconSource: path.join(root, 'ios', 'learnX', 'AppIcon.icon'),
+        outDir,
+      })
+    : /** @type {string} */ (require('electron'));
 const child = spawn(electron, [electronDir, ...positionals], {
   stdio: 'inherit',
   env: {

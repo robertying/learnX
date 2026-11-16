@@ -42,9 +42,16 @@ if (process.platform === 'win32') {
   app.setAppUserModelId(APP_ID);
 }
 
+/**
+ * A dev run: Electron opening this folder (`electron electron/`, which sets
+ * `process.defaultApp`). `app.isPackaged` only looks at the executable's
+ * name, so it's true for the Mac dev runner's learnX.app (macDevApp.mjs).
+ */
+const dev = !app.isPackaged || Boolean(process.defaultApp);
+
 // The dev runner (dev.mjs) keeps everything Electron writes in one folder
 // and out of the system's keychain.
-const devDataDir = app.isPackaged ? undefined : process.env.LEARNX_DATA_DIR;
+const devDataDir = dev ? process.env.LEARNX_DATA_DIR : undefined;
 if (devDataDir) {
   for (const name of /** @type {const} */ ([
     'userData',
@@ -63,24 +70,21 @@ if (devDataDir) {
  * Launch options for a test run (src/services/launchOptions), as JSON: the
  * app's root props, as Android's launch extras are. Development only.
  */
-const launchOptions = app.isPackaged
-  ? {}
-  : JSON.parse(process.env.LEARNX_LAUNCH_OPTIONS || '{}');
+const launchOptions = dev
+  ? JSON.parse(process.env.LEARNX_LAUNCH_OPTIONS || '{}')
+  : {};
 /** Where dev captures go (`learnx.capture` in the renderer), if anywhere. */
-const captureDir = app.isPackaged ? undefined : process.env.LEARNX_CAPTURE_DIR;
+const captureDir = dev ? process.env.LEARNX_CAPTURE_DIR : undefined;
 // Development: the window in light or dark whatever the system's setting
 // (`LEARNX_COLOR_SCHEME=dark`), for captures of both.
-const colorScheme = app.isPackaged
-  ? undefined
-  : process.env.LEARNX_COLOR_SCHEME;
+const colorScheme = dev ? process.env.LEARNX_COLOR_SCHEME : undefined;
 if (colorScheme === 'light' || colorScheme === 'dark') {
   nativeTheme.themeSource = colorScheme;
 }
 
 /** The web build: next to this file when packaged, or the dev runner's. */
 const webDir = path.resolve(
-  (!app.isPackaged && process.env.LEARNX_WEB_DIR) ||
-    path.join(__dirname, 'web'),
+  (dev && process.env.LEARNX_WEB_DIR) || path.join(__dirname, 'web'),
 );
 
 protocol.registerSchemesAsPrivileged([
@@ -405,7 +409,7 @@ const createWindow = (/** @type {Electron.Session} */ ses) => {
   win.webContents.on('did-attach-webview', (_event, guest) =>
     webviews.guard(guest),
   );
-  if (!app.isPackaged) {
+  if (dev) {
     win.webContents.on('console-message', ({ level, message }) => {
       if (level === 'warning' || level === 'error') {
         console.log(`[renderer ${level}] ${message}`);
@@ -417,9 +421,6 @@ const createWindow = (/** @type {Electron.Session} */ ses) => {
 };
 
 void app.whenReady().then(() => {
-  if (process.platform === 'darwin' && !app.isPackaged) {
-    app.dock?.setIcon(path.join(__dirname, 'icons', 'icon.png'));
-  }
   const ses = session.fromPartition(PARTITION);
   ses.protocol.handle('app', serveWeb);
   // No camera, microphone, location or notifications asked of the system yet.

@@ -13,6 +13,7 @@
     "android": "react-native run-android --mode githubDebug",
     "ios": "react-native run-ios",
     "electron": "node electron/dev.mjs",
+    "electron:clean": "node electron/clean.mjs",
     "lint": "oxlint",
     "typecheck": "tsc && tsc -p scripts",
     "format": "oxfmt",
