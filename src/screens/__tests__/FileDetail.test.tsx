@@ -7,6 +7,7 @@ import type { File } from 'data/types/state';
 import { t } from 'helpers/i18n';
 import useFileDetailHeader from 'hooks/useFileDetailHeader';
 import useFileDownload from 'hooks/useFileDownload';
+import * as quickLook from 'modules/quicklook';
 import FileDetail from 'screens/FileDetail';
 import { screenProps } from 'test-utils/screenProps';
 
@@ -135,6 +136,10 @@ it("previews other kinds in a web view and an attachment isn't marked seen", asy
   });
   // A downloaded page's scripts don't run.
   expect(screen.getByTestId('webview')).toHaveProp('javaScriptEnabled', false);
+  expect(screen.getByTestId('webview')).toHaveProp(
+    'decelerationRate',
+    'normal',
+  );
   expect(markFileSeen).not.toHaveBeenCalled();
 });
 
@@ -198,14 +203,67 @@ it('offers download on the Mac and open on Android', async () => {
   isMac.mockRestore();
 });
 
-it('previews office documents on white, as they are drawn for paper', async () => {
+it('previews Office documents on white in the web view on iOS, as they are drawn for paper', async () => {
   downloaded({ path: 'file:///a.docx' });
   await renderScreen({
     attachment: { ...zip, fileType: 'docx', downloadUrl: 'https://x' },
   });
-  const webView = screen.getByTestId('webview');
-  expect(webView.props.style).toEqual({ backgroundColor: 'white' });
-  expect(webView.props.decelerationRate).toBe('normal');
+  expect(screen.getByTestId('webview').props.style).toEqual({
+    backgroundColor: 'white',
+  });
+  expect(screen.queryByTestId('quick-look')).toBeNull();
+});
+
+it('previews Office documents with Quick Look on the Mac', async () => {
+  jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+  jest.replaceProperty(
+    jest.requireMock<typeof quickLook>('modules/quicklook'),
+    'isQuickLookAvailable',
+    true,
+  );
+  downloaded({ path: 'file:///a.pptx' });
+  await renderScreen({
+    attachment: { ...zip, fileType: 'pptx', downloadUrl: 'https://x' },
+  });
+  expect(screen.getByTestId('quick-look').props.uri).toBe('file:///a.pptx');
+  expect(screen.queryByTestId('webview')).toBeNull();
+  expect(jest.mocked(useFileDetailHeader).mock.lastCall![0].canRender).toBe(
+    true,
+  );
+});
+
+it("shows an Office document's info on a Mac without Quick Look", async () => {
+  jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+  downloaded({ path: 'file:///a.pptx' });
+  await renderScreen({
+    attachment: { ...zip, fileType: 'pptx', downloadUrl: 'https://x' },
+  });
+  expect(screen.queryByTestId('quick-look')).toBeNull();
+  expect(screen.getByText(t('fileType'))).toBeTruthy();
+  expect(jest.mocked(useFileDetailHeader).mock.lastCall![0].canRender).toBe(
+    false,
+  );
+});
+
+it("shows an Office document's info when Quick Look has nowhere to show it", async () => {
+  jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+  jest.replaceProperty(
+    jest.requireMock<typeof quickLook>('modules/quicklook'),
+    'isQuickLookAvailable',
+    true,
+  );
+  downloaded({ path: 'file:///a.pptx' });
+  await renderScreen({
+    attachment: { ...zip, fileType: 'pptx', downloadUrl: 'https://x' },
+  });
+  await act(async () => {
+    screen.getByTestId('quick-look').props.onUnavailable();
+  });
+  expect(screen.queryByTestId('quick-look')).toBeNull();
+  expect(screen.getByText(t('fileType'))).toBeTruthy();
+  expect(jest.mocked(useFileDetailHeader).mock.lastCall![0].canRender).toBe(
+    false,
+  );
 });
 
 it('lists only what is known of a file', async () => {

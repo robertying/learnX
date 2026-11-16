@@ -1,10 +1,10 @@
+import { Platform } from 'react-native';
 import DeviceInfo from 'constants/DeviceInfo';
+import * as quickLook from 'modules/quicklook';
 import {
-  canPreviewInline,
-  canRenderInIosWebview,
-  canRenderInMacWebview,
   isPreviewLoad,
   needWhiteBackground,
+  previewKind,
 } from 'helpers/filePreview';
 
 jest.mock('constants/DeviceInfo', () => ({
@@ -15,67 +15,85 @@ beforeEach(() => {
   jest.mocked(DeviceInfo.isMac).mockReturnValue(false);
 });
 
+const documents = [
+  'doc',
+  'docx',
+  'xls',
+  'xlsx',
+  'ppt',
+  'pptx',
+  'pages',
+  'key',
+  'numbers',
+];
+
 describe('needWhiteBackground', () => {
   it('is on for Word and Excel files only', () => {
     expect(needWhiteBackground('docx')).toBe(true);
     expect(needWhiteBackground('xls')).toBe(true);
+    expect(needWhiteBackground('pptx')).toBe(false);
     expect(needWhiteBackground('pdf')).toBe(false);
     expect(needWhiteBackground(null)).toBe(false);
   });
 });
 
-describe('canRenderInIosWebview', () => {
-  it('renders Office, iWork, PDF and media files', () => {
-    for (const ext of [
-      'docx',
-      'pptx',
-      'xlsx',
-      'key',
-      'pdf',
-      'png',
-      'mp4',
-      'txt',
-    ]) {
-      expect(canRenderInIosWebview(ext)).toBe(true);
+describe('previewKind', () => {
+  it('shows PDFs with the PDF viewer everywhere', () => {
+    expect(previewKind('pdf')).toBe('pdf');
+    jest.mocked(DeviceInfo.isMac).mockReturnValue(true);
+    expect(previewKind('pdf')).toBe('pdf');
+    jest.replaceProperty(Platform, 'OS', 'android');
+    expect(previewKind('pdf')).toBe('pdf');
+  });
+
+  it('shows what WebKit draws in the web view on iOS and Mac', () => {
+    for (const ext of ['png', 'jpg', 'mp4', 'mp3', 'txt', 'html', 'svg']) {
+      expect(previewKind(ext)).toBe('web');
+    }
+    jest.mocked(DeviceInfo.isMac).mockReturnValue(true);
+    expect(previewKind('png')).toBe('web');
+  });
+
+  it("shows Office and iWork documents in iOS's web view", () => {
+    for (const ext of documents) {
+      expect(previewKind(ext)).toBe('web');
     }
   });
 
-  it('does not render archives or unknown types', () => {
-    expect(canRenderInIosWebview('zip')).toBe(false);
-    expect(canRenderInIosWebview('nope')).toBe(false);
-    expect(canRenderInIosWebview(undefined)).toBe(false);
-  });
-});
-
-describe('canRenderInMacWebview', () => {
-  it('renders PDF and media but not Office files', () => {
-    expect(canRenderInMacWebview('pdf')).toBe(true);
-    expect(canRenderInMacWebview('jpg')).toBe(true);
-    expect(canRenderInMacWebview('docx')).toBe(false);
-  });
-
-  it('does not render archives or unknown types', () => {
-    expect(canRenderInMacWebview('zip')).toBe(false);
-    expect(canRenderInMacWebview('nope')).toBe(false);
-    expect(canRenderInMacWebview(null)).toBe(false);
-  });
-});
-
-describe('canPreviewInline', () => {
-  it('uses the iOS web view on iPhone and iPad', () => {
-    expect(canPreviewInline('docx')).toBe(true);
-    expect(canPreviewInline('zip')).toBe(false);
-  });
-
-  it('uses the Mac web view on Mac', () => {
+  it('shows Office and iWork documents with Quick Look on Mac', () => {
     jest.mocked(DeviceInfo.isMac).mockReturnValue(true);
-    expect(canPreviewInline('docx')).toBe(false);
-    expect(canPreviewInline('png')).toBe(true);
+    jest.replaceProperty(
+      jest.requireMock<typeof quickLook>('modules/quicklook'),
+      'isQuickLookAvailable',
+      true,
+    );
+    for (const ext of documents) {
+      expect(previewKind(ext)).toBe('quickLook');
+    }
   });
 
-  it('always previews PDFs', () => {
+  it("shows the info of Office and iWork documents on a Mac without Quick Look's plugin", () => {
     jest.mocked(DeviceInfo.isMac).mockReturnValue(true);
-    expect(canPreviewInline('pdf')).toBe(true);
+    for (const ext of documents) {
+      expect(previewKind(ext)).toBeNull();
+    }
+    expect(previewKind('png')).toBe('web');
+  });
+
+  it('shows the info of anything else', () => {
+    expect(previewKind('zip')).toBeNull();
+    expect(previewKind('nope')).toBeNull();
+    expect(previewKind('')).toBeNull();
+    expect(previewKind(null)).toBeNull();
+    expect(previewKind(undefined)).toBeNull();
+    jest.mocked(DeviceInfo.isMac).mockReturnValue(true);
+    expect(previewKind('zip')).toBeNull();
+  });
+
+  it('previews only PDFs on Android', () => {
+    jest.replaceProperty(Platform, 'OS', 'android');
+    expect(previewKind('png')).toBeNull();
+    expect(previewKind('docx')).toBeNull();
   });
 });
 
