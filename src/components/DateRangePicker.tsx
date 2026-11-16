@@ -11,11 +11,13 @@ import {
   ToolbarItem,
 } from '@expo/ui/swift-ui';
 import {
+  frame,
   navigationBarTitleDisplayMode,
   navigationTitle,
   presentationDetents,
   tint,
 } from '@expo/ui/swift-ui/modifiers';
+import DeviceInfo from 'constants/DeviceInfo';
 import { useTheme } from 'theme';
 import ThemedHost from 'components/ThemedHost';
 import type { DateRangePickerProps } from './DateRangePicker.shared';
@@ -77,7 +79,7 @@ const DateRangeSheet: React.FC<DateRangePickerProps> = ({
   return (
     <NavigationStack
       modifiers={[
-        presentationDetents(['medium', 'large']),
+        ...(DeviceInfo.isMac() ? macSheetModifiers : sheetModifiers),
         tint(theme.colors.primary),
       ]}
     >
@@ -119,6 +121,12 @@ const DateRangeSheet: React.FC<DateRangePickerProps> = ({
     </NavigationStack>
   );
 };
+
+const sheetModifiers = [presentationDetents(['medium', 'large'])];
+// The Mac's sheets have no detents, and one sized only by detents grew out of
+// a sliver at the window's bottom before opening. It's sized by its content,
+// as the Mac's sheets are.
+const macSheetModifiers = [frame({ idealWidth: 420, idealHeight: 240 })];
 
 const styles = StyleSheet.create({
   // Holds only the sheet's zero-size anchor.
