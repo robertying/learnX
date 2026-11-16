@@ -17,7 +17,7 @@ import Testing
     #if targetEnvironment(macCatalyst)
       #expect(medium == Font(UIFont.systemFont(ofSize: 17, weight: .medium) as CTFont))
     #else
-      #expect(medium == .system(size: 17, weight: .medium))
+      #expect(medium == .system(size: 17, weight: .medium, design: .default))
     #endif
   }
 
