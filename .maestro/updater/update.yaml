@@ -63,8 +63,19 @@ name: Update the Android app from the APK mirror
     file: wait-sent.js
     env:
       AFTER: ${output.updater.apkSent}
+# With E2E_SCREENSHOTS: the home screen with the download done (no install
+# screen yet), the app back in front, then Android's confirmation where it
+# asks.
+- runFlow:
+    file: ../subflows/shot.yaml
+    env:
+      NAME: updater-downloaded-away
 - launchApp:
     stopApp: false
+- runFlow:
+    file: ../subflows/shot.yaml
+    env:
+      NAME: updater-back
 - runFlow:
     when:
       true: ${CONFIRMS == 'true'}
@@ -72,6 +83,10 @@ name: Update the Android app from the APK mirror
       - extendedWaitUntil:
           visible: '(?i)(update|install|更新|安装)'
           timeout: 60000
+      - runFlow:
+          file: ../subflows/shot.yaml
+          env:
+            NAME: updater-confirmation
       - tapOn: '(?i)(update|install|更新|安装)'
 - runFlow: play-protect.yaml
 - extendedWaitUntil:
