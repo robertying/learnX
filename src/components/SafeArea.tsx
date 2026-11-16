@@ -1,6 +1,7 @@
 import { Platform, View, ViewProps } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SafeAreaView } from 'react-native-screens/experimental';
+import DeviceInfo from 'constants/DeviceInfo';
 import Styles from 'constants/Styles';
 
 export interface SafeAreaProps extends ViewProps {
@@ -29,7 +30,10 @@ const SafeArea: React.FC<SafeAreaProps> = ({
         edges={{
           left: true,
           right: true,
-          top: clearOfBars,
+          // The Mac's header is opaque with the screen below it, but in a
+          // split view's later columns the safe area still takes in the
+          // window's toolbar.
+          top: clearOfBars && !DeviceInfo.isMac(),
           bottom: clearOfBars,
         }}
         style={style}

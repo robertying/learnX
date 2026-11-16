@@ -3,7 +3,7 @@ import SystemIcon from 'components/SystemIcon';
 import { requestRelogin, useAuthStore } from 'data/auth';
 import { relativeTime, t } from 'helpers/i18n';
 import { Caption, Text } from 'components/Text';
-import { FormSection, FormText } from 'components/Form';
+import { FormSection, FormText, type FormSectionProps } from 'components/Form';
 import TextButton from 'components/TextButton';
 import { useMinute } from 'hooks/useClock';
 import { useTheme } from 'theme';
@@ -20,7 +20,7 @@ export interface SyncStatusProps {
  * login offers to log in again; going offline retries by itself
  * (hooks/useReLogin).
  */
-const useSyncStatus = (updatedAt?: number) => {
+export const useSyncStatus = (updatedAt?: number) => {
   const loggedIn = useAuthStore(state => state.loggedIn);
   const loggingIn = useAuthStore(state => state.loggingIn);
   const failure = useAuthStore(state => state.failure);
@@ -107,9 +107,13 @@ const styles = StyleSheet.create({
 
 /**
  * The same row as the first section of a `Form`, which scrolls under the
- * header like the rest of the Form (Today).
+ * header like the rest of the Form (Today). Render it only while there's a
+ * status (`useSyncStatus`), so that the section after it is the first when
+ * it isn't there, with the first section's margin.
  */
-export const SyncStatusSection: React.FC<SyncStatusProps> = ({ updatedAt }) => {
+export const SyncStatusSection: React.FC<
+  SyncStatusProps & Pick<FormSectionProps, 'first' | 'last'>
+> = ({ updatedAt, first, last }) => {
   const sync = useSyncStatus(updatedAt);
 
   if (!sync) {
@@ -117,7 +121,7 @@ export const SyncStatusSection: React.FC<SyncStatusProps> = ({ updatedAt }) => {
   }
 
   return (
-    <FormSection>
+    <FormSection first={first} last={last}>
       <FormText
         testID="sync-status"
         icon={sync.icon}
