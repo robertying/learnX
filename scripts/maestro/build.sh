@@ -63,11 +63,13 @@ fi
 # Gradle can take a failed earlier build for up to date) with these settings:
 # the simulator driver for Apple silicon only, enough for local runs, and
 # iOS 15 instead of the project's iOS 14, which Xcode 27 no longer builds for.
+# --no-daemon: a one-off build with its own Gradle version, whose daemon (and
+# the Kotlin daemon it starts) would otherwise sit idle for hours.
 xcconfig="$(mktemp -t maestro-driver).xcconfig"
 trap 'rm -f "$xcconfig"' EXIT
 echo "IPHONEOS_DEPLOYMENT_TARGET = 15.0" > "$xcconfig"
 XCODE_XCCONFIG_FILE="$xcconfig" ARCHS=arm64 \
-  ./gradlew :maestro-ios-driver:buildIosDriver --rerun :maestro-cli:installDist >&2
+  ./gradlew --no-daemon :maestro-ios-driver:buildIosDriver --rerun :maestro-cli:installDist >&2
 
 # A failed driver build doesn't fail the Gradle task; it leaves no driver.
 driver="maestro-ios-driver/src/main/resources/driver-iPhoneSimulator/Debug-iphonesimulator"

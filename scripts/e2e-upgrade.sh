@@ -100,7 +100,9 @@ build_baseline() {
       -e 's/nativeSymbolUploadEnabled true/nativeSymbolUploadEnabled false; mappingFileUploadEnabled false/' \
       "$gradle"
     echo "sdk.dir=${ANDROID_HOME:-$HOME/Library/Android/sdk}" >"$worktree/android/local.properties"
-    (cd "$worktree/android" && ./gradlew app:assembleRelease -PreactNativeArchitectures="$abi")
+    # --no-daemon: the old checkout's Gradle may differ from the current one,
+    # and its daemon would stay idle for hours after this one build.
+    (cd "$worktree/android" && ./gradlew --no-daemon app:assembleRelease -PreactNativeArchitectures="$abi")
     cp "$worktree/android/app/build/outputs/apk/release/app-$abi-release.apk" "$artifact"
     ;;
   esac
