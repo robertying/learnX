@@ -273,11 +273,15 @@ class InstallTest {
   }
 
   @Test
+  @Suppress("DEPRECATION")
   fun installsTheUpdate() {
     val promise = RecordingPromise()
     install(promise)
     assertEquals("learnX", written.toString())
     verify { session.commit(any()) }
+    // Android 9 leaves out the archive's certificates without GET_SIGNATURES.
+    verify { packageManager.getPackageArchiveInfo(apk.path, UpdaterModule.ARCHIVE_FLAGS) }
+    assertTrue(UpdaterModule.ARCHIVE_FLAGS and PackageManager.GET_SIGNATURES != 0)
     report(PackageInstaller.STATUS_SUCCESS)
     assertTrue(promise.resolved)
     verify { context.unregisterReceiver(receivers.last()) }

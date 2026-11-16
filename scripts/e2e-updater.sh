@@ -92,10 +92,11 @@ confirms=true
 if [ "$sdk" -ge 37 ]; then
   confirms=false
 fi
-# Images with the Play Store have Google Play Protect, which offers to scan an
+# Images with the Play Store (Phonesky; google_apis images only have a
+# com.android.vending stub) have Google Play Protect, which offers to scan an
 # app it hasn't seen before it installs.
 play_protect=false
-if adb_ shell pm path com.android.vending >/dev/null 2>&1; then
+if adb_ shell pm path com.android.vending | grep -q Phonesky; then
   play_protect=true
 fi
 flow_env=(-e UPDATER_SERVER="http://localhost:$port" -e CONFIRMS="$confirms"

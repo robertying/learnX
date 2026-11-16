@@ -75,8 +75,10 @@ class UpdaterModule : Module() {
     if (!sha256Hex(file).equals(sha256, ignoreCase = true)) {
       throw UpdateException(CHECKSUM, "The download doesn't match its SHA-256")
     }
+    // Android 9 reads an archive's certificates only for GET_SIGNATURES, and then fills in signingInfo for
+    // GET_SIGNING_CERTIFICATES too.
     @Suppress("DEPRECATION")
-    val archive = pm.getPackageArchiveInfo(file.path, PackageManager.GET_SIGNING_CERTIFICATES)
+    val archive = pm.getPackageArchiveInfo(file.path, ARCHIVE_FLAGS)
     @Suppress("DEPRECATION")
     val installed = pm.getPackageInfo(packageName, PackageManager.GET_SIGNING_CERTIFICATES)
     checkArchive(archive?.packageName, archive?.let(::signersOf), installed.signingInfo?.apkContentsSigners.orEmpty().map { it.toByteArray() }, packageName)
@@ -189,6 +191,9 @@ class UpdaterModule : Module() {
     const val NOT_ALLOWED = "ERR_UPDATE_NOT_ALLOWED"
     const val CANCELLED = "ERR_UPDATE_CANCELLED"
     const val FAILED = "ERR_UPDATE_FAILED"
+
+    @Suppress("DEPRECATION")
+    const val ARCHIVE_FLAGS = PackageManager.GET_SIGNING_CERTIFICATES or PackageManager.GET_SIGNATURES
 
     /** Whether this build may install apps: only the github flavor declares the permission. */
     fun declaresInstallPermission(pm: PackageManager, packageName: String): Boolean {

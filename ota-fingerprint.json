@@ -1,7 +1,7 @@
 {
   "runtimeVersion": "19.0.0",
   "ios": "668bdada8022581f3a7a6a38850ef14aeb97a5f6",
-  "android": "00d7abe80a5259162f3d658c2d0fda16fbf75c00",
+  "android": "2e17812f2b3ed2b0d237791624ed964a74320923",
   "sources": {
     "ios": {
       "file src/data/storeVersions.json": "46529c4a96147c7b238c1fb8a460668086e2e2d6",
@@ -68,7 +68,7 @@
       "dir android": "f00db7cbeaf2f4dec5b54578d598376b6ca8c62e",
       "dir modules/crashlytics/android": "c197e1f7400e71d52bf820a626fa941218b8e4ae",
       "dir modules/share/android": "69760341fd85cb091ac06c209f12d905b601c4d9",
-      "dir modules/updater/android": "6e1662a0292997aa18023fda20695283e3860d99",
+      "dir modules/updater/android": "3e8db6f810ad7156365a47d9c0c9928c9554def1",
       "dir patches": "2dc6996d170fafe05fdbf62464ec616da530fdba",
       "contents expoAutolinkingConfig:android": "360e28e1489ebdc30519f09f2b9371f993991761",
       "contents rncoreAutolinkingConfig:android": "d40be427cc3c3ac490e297933ea55327245bd0ce",
