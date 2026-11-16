@@ -26,6 +26,7 @@ patchedDependencies:
   'expo-document-picker@58.0.5': patches/expo-document-picker@58.0.5.patch
   'expo-widgets@58.0.28': patches/expo-widgets@58.0.28.patch
   'react-native-pager-view@10.0.2': patches/react-native-pager-view@10.0.2.patch
+  'expo-background-task@58.0.13': patches/expo-background-task@58.0.13.patch
 
 # Agent skills that packages ship. Agents here work from the repo's own
 # AGENTS.md files and .claude/skills, so none are taken from dependencies.
