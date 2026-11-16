@@ -36,7 +36,7 @@ import usePullToRefresh from 'hooks/usePullToRefresh';
 import useSettingsBadge from 'hooks/useSettingsBadge';
 import { debugTitle, getTitleOptions } from 'navigation/options';
 import useHeaderButtons from 'hooks/useHeaderButtons';
-import { sidebarSplit } from 'navigation/layout';
+import { settingsTab } from 'navigation/layout';
 import { MainStackScreenProps, TodayStackParams } from 'navigation/types';
 
 type Props = MainStackScreenProps<TodayStackParams, 'Today'>;
@@ -119,8 +119,9 @@ const Today: React.FC<Props> = ({ navigation }) => {
       ? `${dateText} · ${t('todayWeek', { week: schedule.week })}`
       : dateText;
 
-  // Settings sits in the sidebar on Mac, and behind this button elsewhere.
-  const showSettings = !sidebarSplit;
+  // Settings sits in the sidebar on Mac and in the Electron app's navigation
+  // pane, and behind this button elsewhere.
+  const showSettings = !settingsTab;
   const openSettings = () => navigation.push('Settings');
   const refreshing = pullToRefresh.refreshing;
   useLayoutEffect(() => {

@@ -301,7 +301,16 @@ export default {
   filter: 'Filter',
   more: 'More',
   refresh: 'Refresh',
+  // A switch's state beside it (Windows)
+  on: 'On',
+  off: 'Off',
+  // An alert's button when it gives none (Windows)
+  ok: 'OK',
+  // The navigation pane's menu button (Windows)
+  collapseSidebar: 'Collapse Navigation',
+  expandSidebar: 'Expand Navigation',
   dragToReorder: 'Hold and drag to reorder',
+  moveToReorder: 'Move courses up or down to reorder',
   documents: 'Choose File',
   photos: 'Photo Library',
   assignmentIndividualCompletion: 'Complete Individually',

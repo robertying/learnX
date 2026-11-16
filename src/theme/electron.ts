@@ -1,10 +1,36 @@
 import type { MaterialColors, StatusTone } from 'theme';
 
 /**
+ * The brand color's ramp for Fluent (`BrandVariants`, darkest at 10): the
+ * brand color at 80, which Fluent's light theme fills and writes with, and
+ * the iOS dark tone at 100. Fluent's dark theme writes with 110, which keeps
+ * 4.5:1 on its darkest surfaces where 100 doesn't. Steps between are blended
+ * in sRGB.
+ */
+export const brandRamp = {
+  10: '#0C010E',
+  20: '#19021D',
+  30: '#26032B',
+  40: '#33043A',
+  50: '#3F0548',
+  60: '#4C0657',
+  70: '#590765',
+  80: '#660874',
+  90: '#9632A5',
+  100: '#C55CD6',
+  110: '#CE76DD',
+  120: '#D88FE3',
+  130: '#E1A9EA',
+  140: '#EAC2F1',
+  150: '#F4DCF7',
+  160: '#FDF5FE',
+} as const;
+
+/**
  * The Electron app's palette (Windows, later Linux): Fluent 2's neutral and
- * status tokens with the brand color as the accent, until the app gets its
- * Fluent UI (phase 3 of the plan). Plain `rgb(…)` strings, as on Android, so
- * the theme's color math works on them.
+ * status tokens, with the brand ramp as the accent, the colors the Fluent UI
+ * components draw too (`web/fluentTheme`). Plain `rgb(…)` strings, as on
+ * Android, so the theme's color math works on them.
  */
 const palette = {
   light: {
@@ -38,8 +64,9 @@ const palette = {
     },
   },
   dark: {
-    brand: 'rgb(197, 92, 214)',
-    onBrand: 'rgb(255, 255, 255)',
+    // brandRamp[110], with dark text on it as Fluent's dark accents take
+    brand: 'rgb(206, 118, 221)',
+    onBrand: 'rgb(31, 31, 31)',
     brandContainer: 'rgb(64, 28, 70)',
     background: 'rgb(31, 31, 31)',
     surface: 'rgb(41, 41, 41)',

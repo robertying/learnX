@@ -33,6 +33,17 @@ export interface BridgeResponse {
   body: ArrayBuffer;
 }
 
+/** An item of a native menu (electron/menus.cjs). */
+export interface BridgeMenuItem {
+  id?: string;
+  label?: string;
+  type?: 'normal' | 'checkbox' | 'radio' | 'separator';
+  checked?: boolean;
+  enabled?: boolean;
+  /** A count or detail after the label. */
+  sublabel?: string;
+}
+
 /**
  * What the Electron app's main process offers the page, as `window.learnx`
  * (electron/preload.cjs).
@@ -55,6 +66,14 @@ export interface Bridge {
     remove: (db: string, key: string) => void;
     clear: (db: string) => void;
   };
+  /**
+   * Shows a native menu at `position` (the page's coordinates) or the
+   * pointer; resolves with the chosen item's id, or null.
+   */
+  menu: (
+    items: BridgeMenuItem[],
+    position?: { x: number; y: number },
+  ) => Promise<string | null>;
   secrets: {
     get: (key: string) => Promise<string | null>;
     set: (key: string, value: string) => Promise<void>;

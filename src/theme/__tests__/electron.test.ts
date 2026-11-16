@@ -7,7 +7,7 @@ it.each([false, true])('has every color role (dark: %s)', dark => {
   )) {
     expect(value).toMatch(/^rgba?\(/);
   }
-  expect(colors.primary).toBe(dark ? 'rgb(197, 92, 214)' : 'rgb(102, 8, 116)');
+  expect(colors.primary).toBe(dark ? 'rgb(206, 118, 221)' : 'rgb(102, 8, 116)');
 });
 
 it('puts dark text on the light status hues of dark mode', () => {

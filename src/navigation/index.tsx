@@ -11,6 +11,7 @@ import { trackScreen } from 'services/crashReporting';
 import { useNavigationTheme } from 'theme';
 import { renderDetailContainer } from './DetailStack';
 import MainTab from './MainTab';
+import WindowFrame from './WindowFrame';
 import { initialTab, nativeSplit } from './layout';
 import Setup from 'screens/Setup';
 import {
@@ -84,21 +85,26 @@ const renderMainScreens = () => (
   </>
 );
 
-/** Android's main UI, in the split view drawn in JS (`SplitViewProvider`). */
+/**
+ * Android's main UI, in the split view drawn in JS (`SplitViewProvider`); the
+ * Electron app's too, with its navigation pane beside it (`WindowFrame`).
+ */
 const AndroidMain = () => {
   const frame = useSafeAreaFrame();
   const showDetail = frame.width > SplitSizes.maxCollapsedWidth;
 
   return (
-    <SplitViewProvider
-      showDetail={showDetail}
-      initialTab={initialTab}
-      renderDetail={renderDetailContainer}
-    >
-      <RootNavigator.Navigator screenOptions={rootScreenOptions}>
-        {renderMainScreens()}
-      </RootNavigator.Navigator>
-    </SplitViewProvider>
+    <WindowFrame>
+      <SplitViewProvider
+        showDetail={showDetail}
+        initialTab={initialTab}
+        renderDetail={renderDetailContainer}
+      >
+        <RootNavigator.Navigator screenOptions={rootScreenOptions}>
+          {renderMainScreens()}
+        </RootNavigator.Navigator>
+      </SplitViewProvider>
+    </WindowFrame>
   );
 };
 

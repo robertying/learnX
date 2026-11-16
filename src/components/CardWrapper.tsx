@@ -17,11 +17,16 @@ import SystemIcon from './SystemIcon';
 import { useTheme } from 'theme';
 import { ContextMenuView } from 'modules/menus';
 import { playHaptic } from 'services/haptics';
-import { isApple } from 'helpers/platform';
+import { isApple, isElectron } from 'helpers/platform';
 
 // A long press (or a pointer's right-click) shows the actions in a menu: the
-// system context menu on iOS, iPadOS and Mac, a Material dropdown on Android.
-const contextMenuSupported = isApple();
+// system context menu on iOS, iPadOS and Mac, a Material dropdown on Android,
+// and a native menu in the Electron app (right-click, with hover buttons in
+// place of swipes).
+const contextMenuSupported = isApple() || isElectron();
+// The window's menus offer the moves in reorder mode where there's a pointer
+// (the Mac, Windows); a long press drags on iPhone and iPad.
+const pointerMoves = DeviceInfo.isMac() || isElectron();
 
 export interface CardWrapperProps {
   fav?: boolean;
@@ -341,8 +346,8 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
               systemImage: systemIcons[a.icon].ios,
             }))
           : // A long press drags in reorder mode on iPhone and iPad, so only
-            // the Mac's right-click menu offers the moves.
-            DeviceInfo.isMac()
+            // the right-click menu (Mac, Windows) offers the moves.
+            pointerMoves
             ? moveActions.map(m => ({
                 key: m.key,
                 title: m.label,
@@ -387,8 +392,11 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
       // full-swipe point and beyond.
       overshootLeft={isApple()}
       overshootRight={isApple()}
+      // No swipes with a mouse (Electron): the menu and hover buttons.
       enabled={
-        actionsEnabled && !!(swipeActions.leading || swipeActions.trailing)
+        actionsEnabled &&
+        !isElectron() &&
+        !!(swipeActions.leading || swipeActions.trailing)
       }
       // A swipe that starts at the screen's edge goes back, not to the card.
       hitSlop={backSwipeEdge ? { left: -backSwipeEdgeWidth } : undefined}

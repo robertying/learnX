@@ -23,6 +23,7 @@ export const installBridge = (overrides: Partial<Bridge> = {}): Bridge => {
       remove: jest.fn(),
       clear: jest.fn(),
     },
+    menu: jest.fn(async () => null),
     secrets: {
       get: jest.fn(async () => null),
       set: jest.fn(async () => {}),

@@ -1,7 +1,8 @@
 {
-  "@bottom-tabs/react-navigation": "packages/bottomTabs.tsx",
+  "@bottom-tabs/react-navigation": "packages/navigationPane.tsx",
   "@expo/ui/swift-ui": "packages/swiftUI.tsx",
   "@expo/ui/swift-ui/modifiers": "packages/swiftUIModifiers.js",
+  "@fluentui/react-icons": "packages/fluentReactIcons.ts",
   "@preeternal/react-native-cookie-manager": "cookieManager.ts",
   "expo-file-system": "packages/fileSystem.ts",
   "expo-notifications": "packages/notifications.ts",

@@ -11,6 +11,7 @@ const {
   app,
   BrowserWindow,
   ipcMain,
+  Menu,
   nativeTheme,
   net,
   protocol,
@@ -19,6 +20,7 @@ const {
   shell,
 } = require('electron');
 const { createFileStore } = require('./fileStore.cjs');
+const { popupMenu } = require('./menus.cjs');
 const { mainFetch } = require('./net.cjs');
 const { createSecrets } = require('./secrets.cjs');
 
@@ -62,6 +64,14 @@ const launchOptions = app.isPackaged
   : JSON.parse(process.env.LEARNX_LAUNCH_OPTIONS || '{}');
 /** Where dev captures go (`learnx.capture` in the renderer), if anywhere. */
 const captureDir = app.isPackaged ? undefined : process.env.LEARNX_CAPTURE_DIR;
+// Development: the window in light or dark whatever the system's setting
+// (`LEARNX_COLOR_SCHEME=dark`), for captures of both.
+const colorScheme = app.isPackaged
+  ? undefined
+  : process.env.LEARNX_COLOR_SCHEME;
+if (colorScheme === 'light' || colorScheme === 'dark') {
+  nativeTheme.themeSource = colorScheme;
+}
 
 /** The web build: next to this file when packaged, or the dev runner's. */
 const webDir = path.resolve(
@@ -193,6 +203,14 @@ const handleIpc = ses => {
   ipcMain.handle('cookies:clearAll', event => {
     fromApp(event);
     return ses.clearStorageData({ storages: ['cookies'] });
+  });
+
+  // A native menu (a card's context menu, a header's menu), resolving with
+  // the id of the item chosen, or null.
+  ipcMain.handle('menu:popup', (event, items, position) => {
+    fromApp(event);
+    const win = BrowserWindow.fromWebContents(event.sender);
+    return win ? popupMenu(Menu, win, items, position) : null;
   });
 
   ipcMain.on('launchOptions', event => {

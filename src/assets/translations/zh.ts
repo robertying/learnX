@@ -284,7 +284,16 @@ const zh: typeof en = {
   filter: '筛选',
   more: '更多',
   refresh: '刷新',
+  // A switch's state beside it (Windows)
+  on: '开',
+  off: '关',
+  // An alert's button when it gives none (Windows)
+  ok: '好',
+  // The navigation pane's menu button (Windows)
+  collapseSidebar: '收起导航',
+  expandSidebar: '展开导航',
   dragToReorder: '按住并拖动以排序',
+  moveToReorder: '上移或下移课程以排序',
   documents: '选取文件',
   photos: '照片图库',
   assignmentIndividualCompletion: '独立完成',

@@ -40,7 +40,8 @@ import { t } from 'helpers/i18n';
 import { SearchStackParams } from 'navigation/types';
 import { Paragraph } from 'components/Text';
 import { useTheme } from 'theme';
-import { isAndroid, isApple } from 'helpers/platform';
+import { isAndroid, isApple, isElectron } from 'helpers/platform';
+import HeaderSearch from 'components/HeaderSearch';
 
 type Props = NativeStackScreenProps<SearchStackParams, 'Search'>;
 
@@ -83,6 +84,20 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
   // the toolbar search view on Android).
   const searchBarRef = useRef<SearchBarCommands>(null);
   useLayoutEffect(() => {
+    // The Electron app has no system search bar: a search box takes the
+    // header's title.
+    if (isElectron()) {
+      navigation.setOptions({
+        headerTitle: () => (
+          <HeaderSearch
+            defaultValue={initialQuery}
+            placeholder={t('searchPlaceholder')}
+            onChangeText={setSearchQuery}
+          />
+        ),
+      });
+      return;
+    }
     navigation.setOptions({
       headerSearchBarOptions: {
         ref: searchBarRef,
@@ -103,7 +118,7 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
         },
       },
     });
-  }, [navigation, theme.colors.primary]);
+  }, [navigation, theme.colors.primary, initialQuery]);
 
   const toggleFilter = (name: string) =>
     name === 'archived'
@@ -111,7 +126,8 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
       : setIncludeHidden(on => !on);
   const filterOptions = searchFilterOptions(includeArchived, includeHidden);
   const filtered = !includeArchived || includeHidden;
-  // iOS and Mac: a native menu of toggles across from Close. Android's open
+  // iOS and Mac: a native menu of toggles across from Close (the Electron
+  // app's too, from a header button). Android's open
   // search bar takes the whole toolbar, so its menu sits beside the tabs.
   useLayoutEffect(() => {
     if (isAndroid()) {
@@ -145,6 +161,15 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
               })),
             },
           } satisfies NativeStackHeaderItem,
+          // The Electron app's header button and native menu (nothing on iOS)
+          element: (
+            <ToggleMenu
+              label={t('filter')}
+              options={options}
+              active={!includeArchived || includeHidden}
+              onToggle={toggleFilter}
+            />
+          ),
         },
       ]),
     );

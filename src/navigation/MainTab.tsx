@@ -16,7 +16,7 @@ import useLaunchSheet from 'hooks/useLaunchSheet';
 import useMainStartup from 'hooks/useMainStartup';
 import useSettingsBadge from 'hooks/useSettingsBadge';
 import { renderDetailContainer, TabSplit } from './DetailStack';
-import { initialTab, nativeSplit, sidebarSplit } from './layout';
+import { initialTab, nativeSplit, settingsTab, sidebarSplit } from './layout';
 import { SplitTab } from './SplitView';
 import {
   AssignmentStack,
@@ -85,9 +85,10 @@ const withSplit = (name: keyof MainTabParams, Master: React.ComponentType) =>
           </SplitTab>
         );
 
-// Today, Notices, Assignments, Files, Courses, and on Mac Settings. Elsewhere
-// Settings open from Today's header: Android's navigation bar holds at most
-// five tabs, and iPhone moves a sixth into "More". The first one mounts with
+// Today, Notices, Assignments, Files, Courses, and in a sidebar (Mac, the
+// Electron app's navigation pane) Settings. Elsewhere Settings open from
+// Today's header: Android's navigation bar holds at most five tabs, and
+// iPhone moves a sixth into "More". The first one mounts with
 // the app, the rest one by one after it (`useMountedTabCount`).
 interface Tab {
   name: keyof MainTabParams;
@@ -134,7 +135,7 @@ const tabs: Tab[] = [
     icon: 'courses',
     testID: 'tab-courses',
   },
-  ...(sidebarSplit
+  ...(settingsTab
     ? ([
         {
           name: 'SettingStack',
@@ -181,8 +182,9 @@ const MainTab = () => {
   useMainCommands();
   const part = useDayPart();
   const iconOf = (tab: Tab) => (tab.icon === 'dayPart' ? part : tab.icon);
-  // Settings' badge is on its sidebar row on Mac, and on its button in
-  // Today's header elsewhere; the tab bar shows none.
+  // Settings' badge is on its sidebar row on Mac and in the Electron app's
+  // navigation pane, and on its button in Today's header elsewhere; the tab
+  // bar shows none.
   const settingsBadge = useSettingsBadge();
 
   if (sidebarSplit) {
@@ -230,6 +232,9 @@ const MainTab = () => {
             title: tab.title,
             tabBarButtonTestID: tab.testID,
             tabBarIcon: ({ focused }) => getTabBarIcon(iconOf(tab), focused),
+            // Only the Electron app's pane has a Settings tab here.
+            tabBarBadge:
+              tab.name === 'SettingStack' && settingsBadge ? '' : undefined,
           }}
         />
       ))}

@@ -11,6 +11,7 @@ import {
 } from 'components/Form';
 import { setSetting, useSettings } from 'data/settings';
 import DeviceInfo from 'constants/DeviceInfo';
+import { isElectron } from 'helpers/platform';
 import useAvailableUpdate from 'hooks/useAvailableUpdate';
 import useUpdateInstaller from 'hooks/useUpdateInstaller';
 import { logout } from 'data/login';
@@ -151,8 +152,9 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             title={t('downloads')}
             onPress={() => show('Downloads')}
           />
-          {/* The Mac has no swipe: its cards' actions are in a right-click menu. */}
-          {!DeviceInfo.isMac() && (
+          {/* The Mac and Windows have no swipe: their cards' actions are in a
+              right-click menu. */}
+          {!DeviceInfo.isMac() && !isElectron() && (
             <FormLink
               testID="settings-swipe-actions"
               icon="swipe"

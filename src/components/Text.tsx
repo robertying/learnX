@@ -8,22 +8,23 @@ import {
   type TextStyle,
 } from 'react-native';
 import { useTheme } from 'theme';
-import { isAndroid, isApple } from 'helpers/platform';
+import { isAndroid, isApple, isElectron } from 'helpers/platform';
 
 /**
  * The platform's own text styles: Apple's Dynamic Type styles on iOS, iPadOS
- * and Mac, and the Material 3 type scale on Android.
+ * and Mac, the Material 3 type scale on Android, and Fluent 2's type ramp in
+ * the Electron app (Windows).
  *
- * | variant       | iOS / Mac (default size)  | Android (M3)   |
- * | ------------- | ------------------------- | -------------- |
- * | `largeTitle`  | Large Title, 34/41 bold   | headlineMedium |
- * | `title`       | Title 3, 20/25 semibold   | titleLarge     |
- * | `headline`    | Headline, 17/22 semibold  | titleMedium    |
- * | `body`        | Body, 17/22               | bodyLarge      |
- * | `subheadline` | Subheadline, 15/20        | bodyMedium     |
- * | `label`       | Subheadline, 15/20 medium | labelLarge     |
- * | `footnote`    | Footnote, 13/18           | bodySmall      |
- * | `caption`     | Caption 2, 11/13          | labelSmall     |
+ * | variant       | iOS / Mac (default size)  | Android (M3)   | Fluent 2    |
+ * | ------------- | ------------------------- | -------------- | ----------- |
+ * | `largeTitle`  | Large Title, 34/41 bold   | headlineMedium | Title 2     |
+ * | `title`       | Title 3, 20/25 semibold   | titleLarge     | Subtitle 1  |
+ * | `headline`    | Headline, 17/22 semibold  | titleMedium    | Subtitle 2  |
+ * | `body`        | Body, 17/22               | bodyLarge      | Body 1      |
+ * | `subheadline` | Subheadline, 15/20        | bodyMedium     | Body 1      |
+ * | `label`       | Subheadline, 15/20 medium | labelLarge     | Body 1 Strong |
+ * | `footnote`    | Footnote, 13/18           | bodySmall      | Caption 1   |
+ * | `caption`     | Caption 2, 11/13          | labelSmall     | Caption 2   |
  *
  * On iOS each variant scales with the user's text size along its own Dynamic
  * Type curve (`dynamicTypeRamp`), as UIKit's text styles do. Mac Catalyst
@@ -98,6 +99,18 @@ const androidStyles: Record<TextVariant, TextStyle> = {
   },
 };
 
+// Fluent 2's type ramp (Segoe UI Variable on Windows).
+const fluentStyles: Record<TextVariant, TextStyle> = {
+  largeTitle: { fontSize: 28, lineHeight: 36, fontWeight: '600' },
+  title: { fontSize: 20, lineHeight: 28, fontWeight: '600' },
+  headline: { fontSize: 16, lineHeight: 22, fontWeight: '600' },
+  body: { fontSize: 14, lineHeight: 20, fontWeight: '400' },
+  subheadline: { fontSize: 14, lineHeight: 20, fontWeight: '400' },
+  label: { fontSize: 14, lineHeight: 20, fontWeight: '600' },
+  footnote: { fontSize: 12, lineHeight: 16, fontWeight: '400' },
+  caption: { fontSize: 10, lineHeight: 14, fontWeight: '400' },
+};
+
 const ramps: Record<TextVariant, Ramp> = {
   largeTitle: 'largeTitle',
   title: 'title3',
@@ -115,9 +128,9 @@ const ramps: Record<TextVariant, Ramp> = {
  */
 export const textStyles: Record<TextVariant, TextStyle> = StyleSheet.create(
   Object.fromEntries(
-    Object.entries(isApple() ? iosStyles : androidStyles).map(
-      ([variant, style]) => [variant, { fontFamily, ...style }],
-    ),
+    Object.entries(
+      isApple() ? iosStyles : isElectron() ? fluentStyles : androidStyles,
+    ).map(([variant, style]) => [variant, { fontFamily, ...style }]),
   ) as Record<TextVariant, TextStyle>,
 );
 

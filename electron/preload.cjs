@@ -19,6 +19,7 @@ contextBridge.exposeInMainWorld('learnx', {
     remove: (db, key) => ipcRenderer.send('storage:remove', db, key),
     clear: db => ipcRenderer.send('storage:clear', db),
   },
+  menu: (items, position) => ipcRenderer.invoke('menu:popup', items, position),
   secrets: {
     get: key => ipcRenderer.invoke('secrets:get', key),
     set: (key, value) => ipcRenderer.invoke('secrets:set', key, value),

@@ -31,8 +31,17 @@ const base = {
   ],
 };
 
+// The Electron app's packages with no web build resolve to the stand-ins
+// src/web/aliases.json names (as metro.config.js does on web).
+const webAliases = Object.fromEntries(
+  Object.entries(require('./src/web/aliases.json')).map(([name, file]) => [
+    `^${name.replace(/[/.]/g, '\\$&')}$`,
+    `<rootDir>/src/web/${file}`,
+  ]),
+);
+
 /**
- * Three runs: everything in src/ with each split component's iOS file (Jest's
+ * Four runs: everything in src/ with each split component's iOS file (Jest's
  * default platform here); the component tests under `__tests__/android` with
  * the `.android.tsx` files, Compose stand-ins (`jest/mocks/expoCompose.tsx`)
  * and `Platform.OS` 'android'; and `tooling`, the tests of the repo's scripts,
@@ -71,7 +80,11 @@ module.exports = {
     {
       ...base,
       displayName: 'ios',
-      testPathIgnorePatterns: ['/node_modules/', '/__tests__/android/'],
+      testPathIgnorePatterns: [
+        '/node_modules/',
+        '/__tests__/android/',
+        '/__tests__/web/',
+      ],
     },
     {
       ...base,
@@ -84,6 +97,22 @@ module.exports = {
       // Material Symbols, which Compose draws from vector drawables
       moduleNameMapper: { '\\.xml$': '<rootDir>/jest/mocks/drawable.ts' },
       testMatch: ['<rootDir>/src/**/__tests__/android/**/*.test.ts?(x)'],
+    },
+    {
+      displayName: 'web',
+      roots: ['<rootDir>/src', '<rootDir>/modules'],
+      testEnvironment: 'jsdom',
+      haste: { defaultPlatform: 'web', platforms: ['web'] },
+      moduleNameMapper: {
+        '^react-native$': 'react-native-web',
+        ...webAliases,
+      },
+      setupFiles: ['<rootDir>/jest/web/setup.ts'],
+      setupFilesAfterEnv: ['<rootDir>/jest/setupAfterEnv.ts'],
+      clearMocks: true,
+      restoreMocks: true,
+      transformIgnorePatterns: base.transformIgnorePatterns,
+      testMatch: ['<rootDir>/**/__tests__/web/**/*.test.ts?(x)'],
     },
     {
       ...base,

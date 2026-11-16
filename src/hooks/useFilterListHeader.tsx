@@ -19,6 +19,7 @@ import { systemIcons } from 'helpers/systemIcons';
 import { headerButtons, type HeaderButton } from 'navigation/headerButtons';
 import { RootStackParams } from 'navigation/types';
 import useLatest from 'hooks/useLatest';
+import { isElectron } from 'helpers/platform';
 
 const TITLES = {
   notice: 'notices',
@@ -56,7 +57,7 @@ export interface FilterListHeaderOptions extends FilterListHeaderHandlers {
 /**
  * Sets a FilterList screen's header for its three modes: reorder (courses),
  * selection (archive or restore the checked items), and the default with
- * filter, select or reorder, Course X, refresh (Mac) and search.
+ * filter, select or reorder, Course X, refresh (Mac, Windows) and search.
  */
 const useFilterListHeader = ({
   navigation,
@@ -102,7 +103,11 @@ const useFilterListHeader = ({
       navigation.setOptions({
         ...headerButtons('left', [{ ...reorder, contained: true }]),
         ...headerButtons('right', []),
-        ...getTitleOptions(t('reorder'), t('dragToReorder')),
+        ...getTitleOptions(
+          t('reorder'),
+          // A mouse moves courses with their menu or hover buttons.
+          isElectron() ? t('moveToReorder') : t('dragToReorder'),
+        ),
       });
       return;
     }
@@ -219,7 +224,8 @@ const useFilterListHeader = ({
           : [select, filter],
       ),
       ...headerButtons('right', [
-        DeviceInfo.isMac() && {
+        // A window has no pull to refresh (Mac, Windows).
+        (DeviceInfo.isMac() || isElectron()) && {
           id: 'refresh',
           label: t('refresh'),
           icon: 'refresh',

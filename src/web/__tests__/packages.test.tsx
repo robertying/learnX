@@ -111,9 +111,3 @@ describe('file system', () => {
     );
   });
 });
-
-it("draws icons with Android's Material Symbols", () => {
-  expect(require('components/SystemIcon.web').default).toBe(
-    require('components/SystemIcon.android').default,
-  );
-});
