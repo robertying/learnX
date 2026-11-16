@@ -47,13 +47,15 @@ export interface CardRowProps {
 }
 
 /**
- * `text` with the parts matching `words` in the primary text color and
- * semibold, as search results show why they matched.
+ * `text` with the parts matching `words` in the primary text color and a step
+ * bolder than the text around them (semibold, or bold in medium titles), as
+ * search results show why they matched.
  */
-const Highlighted: React.FC<{ text: string; words?: readonly string[] }> = ({
-  text,
-  words,
-}) => {
+const Highlighted: React.FC<{
+  text: string;
+  words?: readonly string[];
+  inTitle?: boolean;
+}> = ({ text, words, inTitle }) => {
   const theme = useTheme();
   const ranges = words?.length ? matchRanges(text, words) : [];
   if (!ranges.length) {
@@ -66,7 +68,10 @@ const Highlighted: React.FC<{ text: string; words?: readonly string[] }> = ({
     parts.push(
       <NativeText
         key={start}
-        style={[styles.match, { color: theme.colors.onSurfaceHigh }]}
+        style={[
+          inTitle ? styles.titleMatch : styles.match,
+          { color: theme.colors.onSurfaceHigh },
+        ]}
       >
         {text.slice(start, end)}
       </NativeText>,
@@ -80,11 +85,11 @@ const Highlighted: React.FC<{ text: string; words?: readonly string[] }> = ({
 /**
  * A list item laid out like Mail on iOS and Mac and like a Material 3
  * three-line list item on Android: who it's from and when on a small first
- * line, then the title and a preview. Titles are regular weight, so weight
- * never reads as unread where it doesn't mean it. Unread items get a dot in a
- * gutter on the leading edge on iOS and Mac (Mail, Messages), and a bolder
- * title on Android (Gmail). The gutter is there on every iOS and Mac row, so
- * the text of all lists lines up.
+ * line, then the title and a preview. Titles are medium weight, a step above
+ * the secondary text around them. Unread items get a dot in a gutter on the
+ * leading edge on iOS and Mac (Mail, Messages), and a bold title on Android
+ * (Gmail). The gutter is there on every iOS and Mac row, so the text of all
+ * lists lines up.
  */
 const CardRow: React.FC<CardRowProps> = ({
   overline,
@@ -131,9 +136,9 @@ const CardRow: React.FC<CardRowProps> = ({
         <View style={styles.firstLine}>
           <Headline
             numberOfLines={titleLines}
-            style={[styles.title, !(isAndroid && unread) && styles.regular]}
+            style={[styles.title, isAndroid && unread && styles.unread]}
           >
-            <Highlighted text={title} words={highlight} />
+            <Highlighted text={title} words={highlight} inTitle />
           </Headline>
           {overline ? null : meta}
         </View>
@@ -320,12 +325,16 @@ const styles = StyleSheet.create({
   },
   title: {
     flex: 1,
+    fontWeight: '500',
   },
   match: {
     fontWeight: '600',
   },
-  regular: {
-    fontWeight: '400',
+  titleMatch: {
+    fontWeight: '700',
+  },
+  unread: {
+    fontWeight: '700',
   },
   meta: {
     flexDirection: 'row',

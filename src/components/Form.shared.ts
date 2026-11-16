@@ -63,6 +63,11 @@ export type FormRowPosition = 'only' | 'first' | 'middle' | 'last';
 /** Rows that show something about an item: what's on today, for example. */
 export interface FormItemRowProps extends FormRowProps {
   /**
+   * The row of an item (a class, an assignment): its title is medium weight,
+   * as in the lists of notices, assignments and files (`CardRow`).
+   */
+  item?: boolean;
+  /**
    * A short line above the title in the accent color, saying where the item
    * stands: "Now · Ends in an hour". Material's overline; on iOS and Mac a
    * caption, as above the headline of a widget or an App Store card.

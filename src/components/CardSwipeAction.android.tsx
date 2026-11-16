@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { useTheme } from 'theme';
 import {
@@ -7,11 +7,12 @@ import {
   useArmedProgress,
 } from './CardSwipeAction.shared';
 import CardActionIcon from './CardActionIcon';
+import { Text } from './Text';
 
 /**
  * A card's swipe action on Android, as in Gmail: the card slides over a
- * full-width background in the action's color with its icon at the edge it
- * leaves. Let go past `FULL_SWIPE` (or flung), the card slides off and the
+ * full-width background in the action's color with its icon, named under it,
+ * at the edge it leaves. Let go past `FULL_SWIPE` (or flung), the card slides off and the
  * action runs; short of it, the card springs back. The icon grows as the swipe
  * passes that point. TalkBack gets the actions from the card itself.
  */
@@ -51,9 +52,21 @@ const CardSwipeAction: React.FC<CardSwipeActionProps> = ({
         rootStyle,
       ]}
     >
-      <Animated.View style={iconStyle}>
-        <CardActionIcon action={action} size={24} />
-      </Animated.View>
+      <View style={styles.content}>
+        <Animated.View style={iconStyle}>
+          <CardActionIcon action={action} size={24} />
+        </Animated.View>
+        <Text
+          variant="caption"
+          numberOfLines={1}
+          style={[
+            styles.label,
+            { color: theme.colors.onStatusContainer[action.tone] },
+          ]}
+        >
+          {action.label}
+        </Text>
+      </View>
     </Animated.View>
   );
 };
@@ -70,6 +83,15 @@ const styles = StyleSheet.create({
   },
   trailing: {
     alignItems: 'flex-end',
+  },
+  content: {
+    alignItems: 'center',
+  },
+  // Material's labelMedium
+  label: {
+    marginTop: 4,
+    fontSize: 12,
+    lineHeight: 16,
   },
 });
 

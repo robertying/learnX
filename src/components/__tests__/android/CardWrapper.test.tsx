@@ -77,10 +77,12 @@ it('swipes like Gmail: right archives and left favorites once the card slides of
   const swipeable = screen.getByTestId('swipeable').props;
   expect(swipeable.enabled).toBe(true);
   // full-width backgrounds, hidden from TalkBack, which has the card's actions
+  const archive = within(
+    screen.getByTestId('swipe-actions-left', { includeHiddenElements: true }),
+  ).getByTestId('card-archive', { includeHiddenElements: true });
+  // named under the icon
   expect(
-    within(
-      screen.getByTestId('swipe-actions-left', { includeHiddenElements: true }),
-    ).getByTestId('card-archive', { includeHiddenElements: true }),
+    within(archive).getByText('Archive', { includeHiddenElements: true }),
   ).toBeTruthy();
   expect(screen.queryByTestId('card-archive')).toBeNull();
 

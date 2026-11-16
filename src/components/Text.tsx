@@ -42,7 +42,9 @@ export type TextVariant =
 
 type Ramp = NonNullable<NativeTextProps['dynamicTypeRamp']>;
 
-const fontFamily = Platform.select({ ios: 'System', default: 'sans-serif' });
+// Android uses the default typeface: with a named family, React Native only
+// picks between normal and bold, so a medium or semibold weight draws regular.
+const fontFamily = Platform.select({ ios: 'System', default: undefined });
 
 const iosStyles: Record<TextVariant, TextStyle> = {
   largeTitle: { fontSize: 34, lineHeight: 41, fontWeight: '700' },
