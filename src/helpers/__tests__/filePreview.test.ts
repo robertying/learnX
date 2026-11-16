@@ -1,6 +1,8 @@
+import { Platform } from 'react-native';
 import DeviceInfo from 'constants/DeviceInfo';
 import {
   canPreviewInline,
+  canRenderInElectron,
   canRenderInIosWebview,
   canRenderInMacWebview,
   isPreviewLoad,
@@ -71,6 +73,17 @@ describe('canPreviewInline', () => {
     jest.mocked(DeviceInfo.isMac).mockReturnValue(true);
     expect(canPreviewInline('docx')).toBe(false);
     expect(canPreviewInline('png')).toBe(true);
+  });
+
+  it('shows PDFs and pictures in the Electron app', () => {
+    jest.replaceProperty(Platform, 'OS', 'web');
+    expect(canPreviewInline('png')).toBe(true);
+    expect(canPreviewInline('JPG')).toBe(true);
+    expect(canPreviewInline('svg')).toBe(false);
+    expect(canPreviewInline('docx')).toBe(false);
+    expect(canPreviewInline(null)).toBe(false);
+    expect(canRenderInElectron('pdf')).toBe(true);
+    expect(canRenderInElectron(undefined)).toBe(false);
   });
 
   it('always previews PDFs', () => {

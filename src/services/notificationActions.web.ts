@@ -1,8 +1,8 @@
 import type * as Native from './notificationActions';
 
 /**
- * The Electron app has no notification action buttons yet: notifications
- * come with the tray (phase 4 of the plan).
+ * The Electron app's notifications have no action buttons (Favorite,
+ * Archive, Remind Later): a click opens the item (`useNotificationTaps`).
  */
 export const handleNotificationAction: typeof Native.handleNotificationAction =
   async () => {};

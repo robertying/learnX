@@ -44,6 +44,51 @@ contextBridge.exposeInMainWorld('learnx', {
     answer: (requestId, allow) =>
       ipcRenderer.send('webview:answer', requestId, allow),
   },
+  // Around the window (desktop.cjs).
+  shell: {
+    open: uri => ipcRenderer.invoke('shell:open', uri),
+    showInFolder: uri => ipcRenderer.invoke('shell:showInFolder', uri),
+    saveAs: (uri, name) => ipcRenderer.invoke('shell:saveAs', uri, name),
+    saveText: (name, content) =>
+      ipcRenderer.invoke('shell:saveText', name, content),
+    pickDirectory: () => ipcRenderer.invoke('shell:pickDirectory'),
+    pickFiles: options => ipcRenderer.invoke('shell:pickFiles', options),
+    copyText: text => ipcRenderer.invoke('shell:copyText', text),
+  },
+  notifications: {
+    supported: () => ipcRenderer.invoke('notifications:supported'),
+    schedule: request => ipcRenderer.invoke('notifications:schedule', request),
+    cancel: identifier =>
+      ipcRenderer.invoke('notifications:cancel', identifier),
+    list: () => ipcRenderer.invoke('notifications:list'),
+    onResponse: listener => {
+      ipcRenderer.on('notifications:response', (_event, request) =>
+        listener(request),
+      );
+    },
+    onDevShown: listener => {
+      ipcRenderer.on('notifications:devShown', (_event, shown) =>
+        listener(shown),
+      );
+    },
+  },
+  background: {
+    start: minutes => ipcRenderer.invoke('background:start', minutes),
+    onRun: listener => {
+      ipcRenderer.on('background:run', (_event, options) => listener(options));
+    },
+  },
+  loginItem: {
+    get: () => ipcRenderer.invoke('loginItem:get'),
+    set: enabled => ipcRenderer.invoke('loginItem:set', enabled),
+  },
+  desktop: {
+    setLabels: labels => ipcRenderer.invoke('desktop:setLabels', labels),
+    takeOpen: () => ipcRenderer.invoke('desktop:takeOpen'),
+    onOpen: listener => {
+      ipcRenderer.on('desktop:open', (_event, target) => listener(target));
+    },
+  },
   // Development only: the dev runner's launch options (empty otherwise), and
   // a window capture, which main.cjs saves when the dev runner asks for them
   // and returns null otherwise.

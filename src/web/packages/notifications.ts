@@ -1,7 +1,17 @@
+import { useSyncExternalStore } from 'react';
+import {
+  bridge,
+  type BridgeNotificationRequest,
+  type BridgeScheduledNotification,
+} from 'web/bridge';
+
 /**
- * Stands in for expo-notifications in the Electron app until it gets Windows
- * notifications from the tray (phase 4 of the plan): permission is denied,
- * so the app schedules nothing, and nothing was tapped.
+ * Stands in for expo-notifications in the Electron app: the main process
+ * shows each notification (electron/notifications.cjs), right away or, for a
+ * reminder, at its time while learnX runs, and says which one was clicked.
+ * Windows and Linux ask for no permission: notifications are allowed
+ * wherever the system shows them. There are no action buttons, channels or
+ * categories, which the app sets up only for the phone.
  */
 
 export const DEFAULT_ACTION_IDENTIFIER =
@@ -36,32 +46,172 @@ export enum SchedulableTriggerInputTypes {
   TIME_INTERVAL = 'timeInterval',
 }
 
-const denied = {
-  status: 'denied',
-  granted: false,
-  canAskAgain: false,
-  expires: 'never',
-} as const;
+const permission = (granted: boolean) =>
+  ({
+    status: granted ? 'granted' : 'denied',
+    granted,
+    canAskAgain: false,
+    expires: 'never',
+  }) as const;
 
-export const getPermissionsAsync = async () => denied;
-export const requestPermissionsAsync = async () => denied;
-export const getExactAlarmPermissionsAsync = async () => denied;
-export const requestExactAlarmPermissionsAsync = async () => denied;
+export const getPermissionsAsync = async () =>
+  permission(await bridge().notifications.supported());
+export const requestPermissionsAsync = getPermissionsAsync;
+/** Reminders go off on time, from the main process's timers. */
+export const getExactAlarmPermissionsAsync = async () => permission(true);
+export const requestExactAlarmPermissionsAsync = getExactAlarmPermissionsAsync;
 
-export const scheduleNotificationAsync = async () => '';
+type TriggerInput = null | {
+  type?: string;
+  date?: Date | number | string;
+  seconds?: number;
+  channelId?: string;
+};
+
+interface RequestInput {
+  identifier?: string;
+  content: BridgeNotificationRequest['content'];
+  trigger?: TriggerInput;
+}
+
+/** A trigger the main process can keep: dates as milliseconds. */
+const toBridgeTrigger = (
+  trigger: TriggerInput | undefined,
+): BridgeNotificationRequest['trigger'] => {
+  if (!trigger || !trigger.type) {
+    return null;
+  }
+  const { type, seconds, date } = trigger;
+  return {
+    type,
+    ...(seconds !== undefined ? { seconds } : {}),
+    ...(date !== undefined ? { date: new Date(date).getTime() } : {}),
+  };
+};
+
+let nextId = 1;
+
+export const scheduleNotificationAsync = async ({
+  identifier,
+  content,
+  trigger,
+}: RequestInput) =>
+  bridge().notifications.schedule({
+    identifier: identifier ?? `learnx-${Date.now()}-${nextId++}`,
+    // Only what can cross to the main process.
+    content: JSON.parse(JSON.stringify(content)) as RequestInput['content'],
+    trigger: toBridgeTrigger(trigger),
+  });
+
 export const getAllScheduledNotificationsAsync = async (): Promise<
-  never[]
-> => [];
-export const cancelScheduledNotificationAsync = async () => {};
+  BridgeScheduledNotification[]
+> => bridge().notifications.list();
+
+export const cancelScheduledNotificationAsync = async (identifier: string) =>
+  bridge().notifications.cancel(identifier);
+
+export const cancelAllScheduledNotificationsAsync = async () => {
+  const scheduled = await getAllScheduledNotificationsAsync();
+  await Promise.all(
+    scheduled.map(n => cancelScheduledNotificationAsync(n.identifier)),
+  );
+};
+
 export const dismissNotificationAsync = async () => {};
 export const setNotificationChannelAsync = async () => null;
 export const setNotificationCategoryAsync = async () => null;
 export const setNotificationHandler = () => {};
 export const registerTaskAsync = async () => null;
 
-export const getLastNotificationResponse = () => null;
-export const useLastNotificationResponse = () => null;
-export const clearLastNotificationResponse = () => {};
-export const addNotificationResponseReceivedListener = () => ({
-  remove: () => {},
-});
+/** A clicked notification, as expo-notifications reports a tap. */
+export interface NotificationResponse {
+  actionIdentifier: string;
+  notification: {
+    date: number;
+    request: BridgeNotificationRequest;
+  };
+}
+
+type ResponseListener = (response: NotificationResponse) => void;
+
+let lastResponse: NotificationResponse | null = null;
+const responseListeners = new Set<ResponseListener>();
+const storeListeners = new Set<() => void>();
+
+const setLastResponse = (response: NotificationResponse | null) => {
+  lastResponse = response;
+  storeListeners.forEach(listener => listener());
+};
+
+/** Called with a notification the user clicked. */
+export const receiveResponse = (request: BridgeNotificationRequest) => {
+  const response: NotificationResponse = {
+    actionIdentifier: DEFAULT_ACTION_IDENTIFIER,
+    notification: { date: Date.now(), request },
+  };
+  setLastResponse(response);
+  responseListeners.forEach(listener => listener(response));
+};
+
+export const getLastNotificationResponse = () => lastResponse;
+export const getLastNotificationResponseAsync = async () => lastResponse;
+export const clearLastNotificationResponse = () => setLastResponse(null);
+export const clearLastNotificationResponseAsync = async () =>
+  clearLastNotificationResponse();
+
+const subscribe = (listener: () => void) => {
+  storeListeners.add(listener);
+  return () => {
+    storeListeners.delete(listener);
+  };
+};
+
+export const useLastNotificationResponse = () =>
+  useSyncExternalStore(subscribe, getLastNotificationResponse);
+
+export const addNotificationResponseReceivedListener = (
+  listener: ResponseListener,
+) => {
+  responseListeners.add(listener);
+  return {
+    remove: () => {
+      responseListeners.delete(listener);
+    },
+  };
+};
+
+/**
+ * A notification a dev run only logged (electron/desktop.cjs), shown as a
+ * toast so it can be seen without posting one to the system.
+ */
+const showDevNotification = ({
+  title,
+  subtitle,
+  body,
+}: {
+  title: string;
+  subtitle?: string;
+  body: string;
+}) => {
+  const { toast } =
+    require('components/Toast') as typeof import('components/Toast');
+  toast(
+    [title, subtitle, body].filter(Boolean).join(' · ').replaceAll('\n', ' · '),
+    'none',
+  );
+};
+
+let listening = false;
+
+/** Starts hearing the main process's clicks, once, in the Electron app. */
+export const listenForResponses = () => {
+  const learnx = (globalThis as { learnx?: ReturnType<typeof bridge> }).learnx;
+  if (listening || !learnx) {
+    return;
+  }
+  listening = true;
+  learnx.notifications.onResponse(receiveResponse);
+  learnx.notifications.onDevShown(showDevNotification);
+};
+
+listenForResponses();

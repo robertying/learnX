@@ -171,6 +171,29 @@ export default {
   downloadAgain: 'Download Again',
   share: 'Share',
   open: 'Open',
+  openInDefaultApp: 'Open in Default App',
+  showInFolder: 'Show in Folder',
+  saveAs: 'Save As',
+  copyLink: 'Copy Link',
+  linkCopied: 'Link copied',
+  fileOpensInDefaultApp:
+    "learnX can't show this type of file. Open it in its default app, or save a copy.",
+  startAtLogin: 'Start at Login',
+  startAtLoginCaption:
+    'learnX starts in the system tray when you sign in, so it keeps syncing and sends reminders. Closing its window keeps it there; Quit in the tray menu ends it.',
+  trayOpen: 'Open learnX',
+  trayQuit: 'Quit learnX',
+  desktopNotificationsCaption:
+    'learnX sends notifications and reminders only while it runs, also in the system tray.',
+  exportCalendar: 'Export Calendar (.ics)',
+  exportCalendarDescription:
+    'Saves your classes for the rest of the semester and your open assignments as an .ics file, which calendar apps such as Outlook can import.',
+  dropToAttach: 'Drop a File to Attach',
+  dropFailed: "Couldn't attach the file",
+  calendarExportNoEventDesktop:
+    'Nothing to export: no classes or open assignments are left this semester.',
+  notifyDeadlineRemindersCaptionDesktop:
+    "Reminds you of unsubmitted assignments before they're due, and when they can still be submitted late.",
   missingUsername: 'Enter your username or student ID',
   missingPassword: 'Enter your password',
   usernameOrId: 'Username or Student ID',

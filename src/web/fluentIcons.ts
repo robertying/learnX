@@ -74,6 +74,7 @@ import {
   LibraryFilled,
   LibraryRegular,
 } from '@fluentui/react-icons/svg/library';
+import { LinkRegular } from '@fluentui/react-icons/svg/link';
 import { LocationOffRegular } from '@fluentui/react-icons/svg/location-off';
 import { MailRegular } from '@fluentui/react-icons/svg/mail';
 import { MailInboxRegular } from '@fluentui/react-icons/svg/mail-inbox';
@@ -195,6 +196,7 @@ export const fluentIcons: Record<SystemIconWindowsName, FluentIcon> = {
   HistoryRegular,
   InfoRegular,
   KeyRegular,
+  LinkRegular,
   LibraryRegular,
   LocationOffRegular,
   MailInboxAllRegular,

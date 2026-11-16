@@ -17,7 +17,8 @@ import { setLastSynced } from 'data/calendarSync';
 import { calendarErrorCode } from 'services/calendar/errors';
 import { exportTextFile } from 'services/files/share';
 import { t, TextKey } from 'helpers/i18n';
-import { isAndroid } from 'helpers/platform';
+import { isAndroid, isElectron } from 'helpers/platform';
+import { buildDesktopICS } from 'services/calendar/desktopExport';
 
 export interface ToastMessage {
   text: string;
@@ -69,7 +70,12 @@ export const calendarExportErrorToast = (err: unknown): ToastMessage => {
     case 'calendarPermission':
       return noCalendarPermission('calendarExportNoCalendarPermission');
     case 'noEvents':
-      return { text: t('calendarExportNoEvent'), type: 'warning' };
+      return {
+        text: isElectron()
+          ? t('calendarExportNoEventDesktop')
+          : t('calendarExportNoEvent'),
+        type: 'warning',
+      };
     default:
       return {
         text: t('calendarExportFailed', { error: messageOf(err) }),
@@ -201,10 +207,15 @@ export const allowAssignmentSync = async (
   }
 };
 
-/** Shares (or on Mac, saves where people pick) the synced calendars as learnX.ics */
+/**
+ * Shares (or on Mac, saves where people pick) the synced calendars as
+ * learnX.ics. The Electron app, which has no calendar to sync, saves the
+ * classes and assignments themselves.
+ */
 export const exportCalendars = async (): Promise<ToastMessage | undefined> => {
+  const build = isElectron() ? buildDesktopICS : exportSyncedCalendarsToICS;
   try {
-    const ics = await exportSyncedCalendarsToICS();
+    const ics = await build();
     const name = 'learnX.ics';
     if (await exportTextFile(name, ics, 'text/calendar')) {
       return { text: t('saveFileSucceeded', { name }), type: 'success' };

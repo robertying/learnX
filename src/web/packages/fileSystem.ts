@@ -5,12 +5,13 @@ import { bridge, type FileOps } from 'web/bridge';
  * own folders under its data folder (`Paths.cache`, `Paths.document`), read
  * and written by the main process (electron/files.cjs), synchronously as
  * expo-file-system's are. Downloads run there with the session's cookies.
- * Picking a folder, and opening a file as a handle, come with exports and
- * previews in phase 4 of the plan, and fail until then.
+ * Picking a folder (an export's destination) asks in the system's folder
+ * dialog, and the page may then write in the folder picked. Opening a file
+ * as a handle isn't offered.
  */
 
 const unavailable = (): never => {
-  throw new Error('Not available in the Electron app yet');
+  throw new Error('Not available in the Electron app');
 };
 
 /** Runs a file operation in the main process, throwing what it threw. */
@@ -183,8 +184,13 @@ export class Directory extends Entry {
     return file;
   }
 
+  /** Asks for a folder; rejects with "cancelled" when none is picked. */
   static async pickDirectoryAsync(): Promise<Directory> {
-    return unavailable();
+    const uri = await bridge().shell.pickDirectory();
+    if (!uri) {
+      throw new Error('Picking a folder was cancelled');
+    }
+    return new Directory(uri);
   }
 }
 

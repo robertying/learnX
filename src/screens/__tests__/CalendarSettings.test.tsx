@@ -322,3 +322,13 @@ describe('access', () => {
     expect(requestAccess).not.toHaveBeenCalled();
   });
 });
+
+it('only exports to an .ics file in the Electron app', async () => {
+  jest.replaceProperty(Platform, 'OS', 'web');
+  await renderScreen();
+  expect(screen.queryByRole('switch')).toBeNull();
+  expect(screen.queryByText(t('openSystemSettings'))).toBeNull();
+  expect(screen.getByText(t('exportCalendarDescription'))).toBeTruthy();
+  await userEvent.setup().press(screen.getByText(t('exportCalendar')));
+  expect(exportToICS).toHaveBeenCalled();
+});

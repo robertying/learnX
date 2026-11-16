@@ -136,10 +136,24 @@ it('refuses paths outside the app folders', () => {
   );
 });
 
-it('leaves opening files and picking folders for later', async () => {
+it('picks a folder in the system dialog, and opens no file handles', async () => {
   const { Directory, File, Paths } = fileSystem;
   expect(() => new File(Paths.cache, 'a').open()).toThrow('Not available');
-  await expect(Directory.pickDirectoryAsync()).rejects.toThrow('Not available');
+
+  // A folder the main process granted (fileShell.cjs) can be written in.
+  const picked = path.join(root, 'Picked');
+  fs.mkdirSync(picked);
+  const files = createFiles({
+    cache: path.join(root, 'Caches'),
+    document: path.join(root, 'Documents'),
+  });
+  const uri = files.grant(picked);
+  jest.mocked(bridge.shell.pickDirectory).mockResolvedValueOnce(uri);
+  const dir = await Directory.pickDirectoryAsync();
+  expect(dir.uri).toBe(uri);
+
+  jest.mocked(bridge.shell.pickDirectory).mockResolvedValueOnce(null);
+  await expect(Directory.pickDirectoryAsync()).rejects.toThrow(/cancel/);
 });
 
 describe('DownloadTask', () => {

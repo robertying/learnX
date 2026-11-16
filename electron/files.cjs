@@ -2,7 +2,8 @@
 // which has no file system: expo-file-system's stand-in
 // (src/web/packages/fileSystem.ts) calls these over IPC. Every path must lie
 // in one of the app's folders under its data folder, `cache` and `document`,
-// as on the phone. Downloads run here with the window session's cookies.
+// as on the phone, or in a folder the user picked for an export (`grant`).
+// Downloads run here with the window session's cookies.
 const fs = require('node:fs');
 const path = require('node:path');
 const { fileURLToPath, pathToFileURL } = require('node:url');
@@ -44,6 +45,9 @@ const createFiles = roots => {
   for (const root of rootPaths) {
     fs.mkdirSync(root, { recursive: true });
   }
+  /** Folders the user picked in a folder dialog, which exports write into. */
+  const granted = new Set(/** @type {string[]} */ ([]));
+  const allowedRoots = () => [...rootPaths, ...granted];
 
   /**
    * The path of a file URI inside the app's folders; throws for anything
@@ -56,7 +60,7 @@ const createFiles = roots => {
     }
     const resolved = path.resolve(fileURLToPath(uri));
     if (
-      !rootPaths.some(
+      !allowedRoots().some(
         root => resolved === root || resolved.startsWith(root + path.sep),
       )
     ) {
@@ -68,13 +72,31 @@ const createFiles = roots => {
   /** A path that may be changed: inside a folder, never a folder itself. */
   const innerPathOf = (/** @type {unknown} */ uri) => {
     const resolved = pathOf(uri);
-    if (rootPaths.includes(resolved)) {
+    if (allowedRoots().includes(resolved)) {
       throw new Error('The app folders themselves stay');
     }
     return resolved;
   };
 
   return {
+    /**
+     * Lets the page work in a folder the user picked (a dialog in the main
+     * process, never the page's own choice), and returns its URI.
+     * @param {string} dir an absolute path
+     */
+    grant: dir => {
+      const resolved = path.resolve(dir);
+      granted.add(resolved);
+      return pathToFileURL(resolved + path.sep).href;
+    },
+
+    /**
+     * The path of a file URI in the app's folders (or a granted one), for
+     * the main process's own use; throws for anything else.
+     * @param {string} uri
+     */
+    localPath: uri => pathOf(uri),
+
     /** The folders' URIs, ending in a slash. */
     roots: () => {
       const uriOf = (/** @type {string} */ root) =>

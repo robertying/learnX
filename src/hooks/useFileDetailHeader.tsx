@@ -5,12 +5,14 @@ import { SplitViewContext } from 'navigation/SplitView';
 import DeviceInfo from 'constants/DeviceInfo';
 import { t } from 'helpers/i18n';
 import useHeaderButtons from 'hooks/useHeaderButtons';
-import { isAndroid } from 'helpers/platform';
+import { isAndroid, isElectron } from 'helpers/platform';
 
 /**
  * File detail's header buttons: full screen (split view, outside search),
- * refresh, share, download (Mac), open (Android) and info/preview (when the
- * file shows inline).
+ * refresh, share (Apple, Android), download (Mac), open (Android), and in
+ * the Electron app Open in Default App and Save As instead of sharing (the
+ * file's info has Show in Folder and Copy Link too), and info/preview (when
+ * the file shows inline).
  */
 const useFileDetailHeader = ({
   navigation,
@@ -65,11 +67,25 @@ const useFileDetailHeader = ({
       onPress: onRefresh,
       disabled: !!progress,
     },
-    {
+    !isElectron() && {
       id: 'share',
       label: t('share'),
       icon: 'share',
       onPress: onShare,
+      disabled: unavailable,
+    },
+    isElectron() && {
+      id: 'open',
+      label: t('openInDefaultApp'),
+      icon: 'open',
+      onPress: onOpen,
+      disabled: unavailable,
+    },
+    isElectron() && {
+      id: 'saveAs',
+      label: t('saveAs'),
+      icon: 'download',
+      onPress: onSave,
       disabled: unavailable,
     },
     DeviceInfo.isMac() && {

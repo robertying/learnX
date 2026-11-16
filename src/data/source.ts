@@ -86,6 +86,14 @@ export const endSession = () => {
   sessionServer = null;
 };
 
+/** A file's bytes, for an upload in the Electron app. */
+const fileBlob = async (uri: string, type: string) => {
+  const { File } =
+    require('expo-file-system') as typeof import('expo-file-system');
+  const bytes = await new File(uri).bytes();
+  return new Blob([bytes as BlobPart], { type });
+};
+
 /** The requests the app wraps: thu-learn-lib's calls, with what the app adds. */
 const realRequests: Omit<AppSource, keyof DataSource> = {
   markNoticeRead: async url => {
@@ -102,20 +110,30 @@ const realRequests: Omit<AppSource, keyof DataSource> = {
   ) => {
     assertServerWritesAllowed('Assignment submission');
 
+    const type = attachment
+      ? mime.getType(attachment.uri) || 'application/octet-stream'
+      : '';
+    // The Electron app's requests go through the main process (web/fetch),
+    // which takes the file's bytes, not a URI, and reports no upload
+    // progress: XMLHttpRequest would go from the page, where Tsinghua's
+    // cookies and cross-origin rules don't allow it.
+    const desktop = isElectron();
     // thu-learn-lib sends it as every request (an expired session logs in
     // again and it goes once more), with XMLHttpRequest for the progress.
     await helper.submitHomework(studentHomeworkId, {
       content,
       attachment: attachment && {
         filename: attachment.name,
-        content: {
-          uri: attachment.uri,
-          type: mime.getType(attachment.uri) || 'application/octet-stream',
-        },
+        content: desktop
+          ? await fileBlob(attachment.uri, type)
+          : { uri: attachment.uri, type },
       },
       removeAttachment: remove,
       // Two decimals are plenty for a progress bar.
-      onProgress: onProgress && (p => onProgress(Math.round(p * 100) / 100)),
+      onProgress:
+        onProgress && !desktop
+          ? p => onProgress(Math.round(p * 100) / 100)
+          : undefined,
     });
   },
 };

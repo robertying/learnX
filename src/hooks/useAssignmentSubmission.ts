@@ -21,8 +21,9 @@ import {
 } from 'services/submission';
 
 /**
- * The attachment to submit: picked from documents or photos, or shared to the
- * app (pending assignment data). Picking a file replaces a shared one.
+ * The attachment to submit: picked from documents or photos, dropped on the
+ * screen (Electron), or shared to the app (pending assignment data). Picking
+ * a file replaces a shared one.
  * Starts with `initialPicked`, the file of a saved draft.
  */
 export const useAttachmentPicker = (
@@ -81,6 +82,12 @@ export const useAttachmentPicker = (
     setPendingAssignmentData(null);
   };
 
+  /** A file dropped on the screen (Electron), already in the cache. */
+  const pickDropped = (file: PickedAttachment) => {
+    setPicked(file);
+    setPendingAssignmentData(null);
+  };
+
   const removePicked = () => {
     setPicked(null);
     setPendingAssignmentData(null);
@@ -106,6 +113,7 @@ export const useAttachmentPicker = (
     isShared: !!pendingAssignmentData,
     pickDocument,
     pickPhoto,
+    pickDropped,
     removePicked,
   };
 };

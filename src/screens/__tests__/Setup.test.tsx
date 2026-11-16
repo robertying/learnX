@@ -181,3 +181,11 @@ it('closes without changes on Not Now, on either platform', async () => {
   expect(request).not.toHaveBeenCalled();
   expect(getSettings().notifications.notices).toBe(false);
 });
+
+it('offers no calendar sync in the Electron app', async () => {
+  jest.replaceProperty(Platform, 'OS', 'web');
+  await renderScreen();
+  expect(screen.queryByText(t('setupCourseCalendar'))).toBeNull();
+  expect(screen.queryByText(t('setupCalendar'))).toBeNull();
+  expect(screen.getByText(t('setupCaption'))).toBeTruthy();
+});

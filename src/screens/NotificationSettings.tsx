@@ -19,7 +19,7 @@ import {
 import { openSystemSettings } from 'helpers/systemSettings';
 import useNotificationPermission from 'hooks/useNotificationPermission';
 import { SettingsStackParams } from 'navigation/types';
-import { isApple } from 'helpers/platform';
+import { isApple, isElectron } from 'helpers/platform';
 
 type Props = NativeStackScreenProps<
   SettingsStackParams,
@@ -97,7 +97,11 @@ const NotificationSettings: React.FC<Props> = () => {
         )}
         <FormSection
           title={t('setupNewContent')}
-          footer={t('notificationsCaption')}
+          footer={
+            isElectron()
+              ? t('desktopNotificationsCaption')
+              : t('notificationsCaption')
+          }
         >
           {newContentToggles.map(renderToggle)}
         </FormSection>
@@ -120,7 +124,9 @@ const NotificationSettings: React.FC<Props> = () => {
           footer={[
             isApple()
               ? t('notifyDeadlineRemindersCaption')
-              : t('notifyDeadlineRemindersCaptionAndroid'),
+              : isElectron()
+                ? t('notifyDeadlineRemindersCaptionDesktop')
+                : t('notifyDeadlineRemindersCaptionAndroid'),
             showExact && t('exactRemindersCaption'),
           ]
             .filter(Boolean)
@@ -143,13 +149,16 @@ const NotificationSettings: React.FC<Props> = () => {
           )}
           {assignmentToggles.map(renderToggle)}
         </FormSection>
-        <FormSection footer={t('notificationAccessCaption')}>
-          <FormButton
-            icon="settings"
-            title={t('openSystemSettings')}
-            onPress={() => openSystemSettings('notifications')}
-          />
-        </FormSection>
+        {/* Windows and Linux ask learnX for no permission to notify. */}
+        {!isElectron() && (
+          <FormSection footer={t('notificationAccessCaption')}>
+            <FormButton
+              icon="settings"
+              title={t('openSystemSettings')}
+              onPress={() => openSystemSettings('notifications')}
+            />
+          </FormSection>
+        )}
       </Form>
     </FormScreen>
   );

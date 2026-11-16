@@ -163,6 +163,28 @@ const zh: typeof en = {
   downloadAgain: '重新下载',
   share: '分享',
   open: '打开',
+  openInDefaultApp: '用默认应用打开',
+  showInFolder: '在文件夹中显示',
+  saveAs: '另存为',
+  copyLink: '复制链接',
+  linkCopied: '已复制链接',
+  fileOpensInDefaultApp: 'learnX无法显示此类文件，可用默认应用打开或另存一份。',
+  startAtLogin: '登录时启动',
+  startAtLoginCaption:
+    '登录电脑时在系统托盘中启动learnX，以便持续同步并发送提醒。关闭窗口后learnX仍在托盘中运行，可在托盘菜单中退出。',
+  trayOpen: '打开learnX',
+  trayQuit: '退出learnX',
+  desktopNotificationsCaption:
+    'learnX仅在运行时（包括在系统托盘中）发送通知和提醒。',
+  exportCalendar: '导出日历（.ics）',
+  exportCalendarDescription:
+    '将本学期剩余的课程和未截止的作业保存为.ics文件，可导入Outlook等日历应用。',
+  dropToAttach: '拖放文件以添加附件',
+  dropFailed: '附件添加失败',
+  calendarExportNoEventDesktop:
+    '没有可导出的内容：本学期已没有剩余的课程或未截止的作业。',
+  notifyDeadlineRemindersCaptionDesktop:
+    '在未提交的作业截止前提醒你，截止后仍可补交时也会提醒。',
   missingUsername: '请输入用户名或学号',
   missingPassword: '请输入密码',
   usernameOrId: '用户名 / 学号',
