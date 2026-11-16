@@ -1,6 +1,6 @@
 {
   "runtimeVersion": "19.0.0",
-  "ios": "ba88d5347eb23d2d0e467272216b0c47198b5071",
+  "ios": "2137b2c3fa04984fd67d4e23926a0cfdaedf32d8",
   "android": "9f7b019ba7c795874fe5e02898f241c52da09fec",
   "sources": {
     "ios": {
@@ -8,7 +8,7 @@
       "dir ios": "35e14e1b54d83d41e64150630d54e15e78cacc2b",
       "dir modules/crashlytics/ios": "e1f7e29111e231cd015ba44f6484e6b9aeafc6c2",
       "dir modules/menus/ios": "f5f2bf4d076a7db2629822f42b6154f1c129afb2",
-      "dir modules/quicklook/ios": "e740f5d32adf2801a17fdf20c653e18271c8af94",
+      "dir modules/quicklook/ios": "bb32e80a2de5a423b5b7654071a8425d3f206db0",
       "dir modules/share/ios": "2a94070ea43a25cc9fa52be05e6476219924fe98",
       "dir modules/shortcuts/ios": "77f8113c1737ea6fef56118e978807bcf4eac572",
       "dir modules/sidebar/ios": "fccb11ed85e5c41d7b26c2a0c6986681585888b9",

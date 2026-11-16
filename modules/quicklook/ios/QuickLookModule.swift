@@ -48,7 +48,13 @@ final class QuickLookView: ExpoView {
       }
       parent.addChild(controller)
       controller.didMove(toParent: parent)
+      // Joining a screen that is already on its way in skips the controller's appearance calls, without which
+      // Quick Look never loads the preview.
+      controller.beginAppearanceTransition(true, animated: false)
+      controller.endAppearanceTransition()
     } else if controller.parent != nil {
+      controller.beginAppearanceTransition(false, animated: false)
+      controller.endAppearanceTransition()
       controller.willMove(toParent: nil)
       controller.removeFromParent()
     }
