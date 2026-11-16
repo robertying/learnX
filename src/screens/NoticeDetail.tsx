@@ -3,7 +3,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import dayjs from 'dayjs';
 import FormWebView from 'components/FormWebView';
 import { NoticeDetailParamList } from 'navigation/types';
-import { t } from 'helpers/i18n';
+import { formatDate, t } from 'helpers/i18n';
 import { displayFileSize } from 'helpers/filename';
 import { attachmentFile } from 'helpers/attachments';
 import { Notice } from 'data/types/state';
@@ -59,14 +59,15 @@ const NoticeDetailContent: React.FC<{
   }, [url, id]);
 
   const subtitle = [
-    [publisher, dayjs(publishTime).format(t('dateTimeFormat'))]
+    [publisher, formatDate(publishTime, 'dateTimeFormat')]
       .filter(Boolean)
       .join(' · '),
     expireTime
-      ? dayjs(expireTime).format(
+      ? formatDate(
+          expireTime,
           dayjs(expireTime).isAfter(now)
-            ? t('noticeExpireTimeFormat')
-            : t('noticeExpiredTimeFormat'),
+            ? 'noticeExpireTimeFormat'
+            : 'noticeExpiredTimeFormat',
         )
       : null,
   ]

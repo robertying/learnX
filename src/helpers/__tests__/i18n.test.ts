@@ -1,13 +1,18 @@
 import type * as Localization from 'expo-localization';
 import dayjs from 'dayjs';
+import { Platform } from 'react-native';
+import { CJK_GAP, TYPED_CJK_SPACE } from 'helpers/cjk';
 import {
+  formatDate,
   formatLiteral,
+  formatTime,
   getLocale,
   isLocaleChinese,
+  relativeTime,
   resetLocale,
+  spaceCjk,
   t,
   tCount,
-  timeFormat,
   timeRange,
 } from 'helpers/i18n';
 import { mockClock, mockLocale } from 'test-utils/locale';
@@ -46,29 +51,52 @@ describe('formatLiteral', () => {
 describe('times of day', () => {
   const evening = dayjs('2026-11-12T21:30:00');
 
+  afterEach(() => {
+    dayjs.locale('en');
+  });
+
   it('follow a 24-hour clock', () => {
-    expect(evening.format(timeFormat())).toBe('21:30');
-    expect(evening.format(t('shortDateTimeFormat'))).toBe('Nov 12 21:30');
+    expect(formatTime(evening)).toBe('21:30');
+    expect(formatDate(evening, 'shortDateTimeFormat')).toBe('Nov 12 21:30');
   });
 
   it('follow a 12-hour clock in English', () => {
     mockClock.uses24hourClock = false;
-    expect(evening.format(timeFormat())).toBe('9:30 PM');
-    expect(evening.format(t('shortDateTimeFormat'))).toBe('Nov 12 9:30 PM');
+    expect(formatTime(evening)).toBe('9:30 PM');
+    expect(formatDate(evening, 'shortDateTimeFormat')).toBe('Nov 12 9:30 PM');
   });
 
   it('follow a 12-hour clock in Chinese', () => {
     mockClock.uses24hourClock = false;
     mockLocale.current = 'zh-CN';
-    expect(evening.locale('zh-cn').format(t('shortDateTimeFormat'))).toBe(
+    dayjs.locale('zh-cn');
+    expect(formatTime(evening)).toBe('下午9:30');
+    expect(formatDate(evening, 'shortDateTimeFormat')).toBe(
       '11月12日 下午9:30',
     );
   });
 
   it('keep other placeholders of a format', () => {
     expect(
-      evening.format(t('gradedByAtFormat', { grader: formatLiteral('Li') })),
+      formatDate(evening, 'gradedByAtFormat', { grader: formatLiteral('Li') }),
     ).toBe('Graded by Li, Thu, Nov 12, 2026 21:30');
+  });
+
+  it('say how far off a time is', () => {
+    expect(relativeTime(evening, evening.add(3, 'hour'))).toBe('in 3 hours');
+    expect(relativeTime(evening, evening.subtract(2, 'day'))).toBe(
+      '2 days ago',
+    );
+    expect(relativeTime(evening, evening.add(2, 'month'), true)).toBe(
+      '2 months',
+    );
+  });
+
+  it('say how far off a time is in Chinese, as iOS and Android do', () => {
+    mockLocale.current = 'zh-CN';
+    expect(relativeTime(evening, evening.add(3, 'hour'))).toBe('3小时后');
+    expect(relativeTime(evening, evening.subtract(2, 'day'))).toBe('2天前');
+    expect(relativeTime(evening, evening.add(2, 'month'), true)).toBe('2个月');
   });
 });
 
@@ -104,47 +132,64 @@ describe('timeRange', () => {
   });
 });
 
-// iOS and Android write a Chinese date, time or duration with no spaces
-// ("上午9:50", "3小时前", "第3周"), and iOS and macOS draw their own narrow gap
-// between Chinese and digits. Only a date and its time are a space apart, as
-// the systems write them ("11月12日 下午9:30").
-describe('Chinese dates and times', () => {
-  const DATE_TIME = /\{(?:time|date|before|week)\}/u.source;
-  const AMOUNT = /(?:\d+|\{count\})/u.source;
-  const UNIT = /(?:分钟|小时|天|周|个月)/u.source;
-  const spaced = new RegExp(
-    [
-      // "今天 {time}", "{date} 截止", but not a date then its time
-      `(?!日)\\p{Script=Han} +${DATE_TIME}`,
-      `${DATE_TIME} +[\\p{Script=Han}\\[]`,
-      // "还剩 3 小时", "第 {week} 周"
-      `${AMOUNT} +${UNIT}`,
-      `\\p{Script=Han} +${AMOUNT}${UNIT}`,
-    ].join('|'),
-    'u',
-  );
+// iOS and macOS draw a narrow gap between Chinese and Latin letters or
+// digits themselves; Android doesn't, so learnX adds one there (helpers/cjk).
+describe('spacing between Chinese and Latin', () => {
+  const android = () => jest.replaceProperty(Platform, 'OS', 'android');
+  const reminder = () =>
+    t('classStartsAtBeijing', { time: formatTime(dayjs('2026-11-16T09:50')) });
 
-  it('are written without spaces around them', () => {
-    expect(Object.entries(zh).filter(([, text]) => spaced.test(text))).toEqual(
-      [],
+  beforeEach(() => {
+    mockClock.uses24hourClock = false;
+    mockLocale.current = 'zh-CN';
+    dayjs.locale('zh-cn');
+  });
+
+  afterEach(() => {
+    dayjs.locale('en');
+  });
+
+  it('is left to the system on iOS', () => {
+    expect(reminder()).toBe('北京时间上午9:50上课');
+    expect(t('todayClassCount', { count: 3 })).toBe('今天3节课');
+    expect(spaceCjk('经管新楼A109')).toBe('经管新楼A109');
+  });
+
+  it('is added on Android, in strings, dates, times and between them', () => {
+    android();
+    const gap = CJK_GAP;
+    expect(reminder()).toBe(`北京时间上午${gap}9:50${gap}上课`);
+    expect(t('todayClassCount', { count: 3 })).toBe(`今天${gap}3${gap}节课`);
+    expect(t('reloadApp')).toBe(`重新加载${gap}learnX`);
+    expect(formatDate(dayjs('2026-11-12T21:30'), 'shortDateTimeFormat')).toBe(
+      `11${gap}月${gap}12${gap}日 下午${gap}9:30`,
+    );
+    expect(
+      timeRange(dayjs('2026-11-12T16:00'), dayjs('2026-11-12T17:35')),
+    ).toBe(`下午${gap}4:00–5:35`);
+    expect(relativeTime(0, 3 * 60 * 60 * 1000)).toBe(`3${gap}小时后`);
+  });
+
+  it('keeps filled-in values as they are on Android', () => {
+    android();
+    // a file name, with a gap only where it meets the string's own text
+    expect(t('saveFileSucceeded', { name: '作业1.pdf' })).toBe(
+      '已保存“作业1.pdf”',
+    );
+    expect(t('whatsNewTitle', { version: '19.0' })).toBe(
+      `learnX 19.0${CJK_GAP}新功能`,
     );
   });
 
-  it('writes relative times the way the systems do', () => {
-    const now = dayjs('2026-11-12T21:30:00').locale('zh-cn');
-    expect(now.to(now.add(3, 'hour'))).toBe('3小时后');
-    expect(now.to(now.subtract(2, 'day'))).toBe('2天前');
-    expect(now.to(now.add(2, 'month'), true)).toBe('2个月');
-  });
-
-  it('fills a class reminder without spaces', () => {
-    mockClock.uses24hourClock = false;
-    mockLocale.current = 'zh-CN';
-    expect(
-      t('classStartsAtBeijing', {
-        time: dayjs('2026-11-16T09:50:00').locale('zh-cn').format(timeFormat()),
-      }),
-    ).toBe('北京时间上午9:50上课');
+  it('is never typed into a Chinese string', () => {
+    // Formats space a date from its weekday and time, as the systems do
+    // ("11月12日 下午9:30"), but not from the words around it.
+    const typed = Object.entries(zh).filter(([key, text]) =>
+      key.endsWith('Format')
+        ? /\] +\S|\S +\[/u.test(text)
+        : TYPED_CJK_SPACE.test(text),
+    );
+    expect(typed).toEqual([]);
   });
 });
 

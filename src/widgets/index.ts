@@ -1,8 +1,7 @@
 import { Platform } from 'react-native';
-import dayjs from 'dayjs';
 import type { Widget } from 'expo-widgets';
 import { Assignment } from 'data/types/state';
-import { isLocaleChinese, t, timeFormat } from 'helpers/i18n';
+import { formatDate, formatTime, isLocaleChinese, t } from 'helpers/i18n';
 import { getTargetUrl } from 'helpers/openTarget';
 import { classTimeRange } from 'helpers/schedule';
 import { beijingWallClock } from 'helpers/serverTime';
@@ -37,7 +36,7 @@ const deadlineProps = (deadlines: UpcomingDeadlines['deadlines']) =>
   deadlines.map(d => ({
     ...d,
     ...deadlineUrgencyTimes(d.deadline),
-    due: dayjs(d.deadline).format(t('widgetDateTimeFormat')),
+    due: formatDate(d.deadline, 'widgetDateTimeFormat'),
     url: getTargetUrl({ type: 'assignment', id: d.id }),
   }));
 
@@ -102,9 +101,9 @@ export const upNextProps = (classes: UpcomingClass[]): UpNextWidgetProps => ({
     end: c.end,
     // Beijing times and days, as Today and Schedule show them
     time: classTimeRange(c),
-    startTime: beijingWallClock(c.start).format(timeFormat()),
-    weekday: beijingWallClock(c.start).format(t('widgetClassWeekday')),
-    day: beijingWallClock(c.start).format(t('widgetClassDay')),
+    startTime: formatTime(beijingWallClock(c.start)),
+    weekday: formatDate(beijingWallClock(c.start), 'widgetClassWeekdayFormat'),
+    day: formatDate(beijingWallClock(c.start), 'widgetClassDayFormat'),
     url: c.courseId
       ? getTargetUrl({ type: 'course', id: c.courseId })
       : undefined,

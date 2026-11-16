@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import { Platform } from 'react-native';
 import {
   act,
@@ -9,7 +8,7 @@ import {
 } from '@testing-library/react-native';
 import { resetCalendarSync, setLastSynced } from 'data/calendarSync';
 import { getSettings, resetSettings, setSetting } from 'data/settings';
-import { t } from 'helpers/i18n';
+import { formatDate, t } from 'helpers/i18n';
 import { openSystemSettings } from 'helpers/systemSettings';
 import {
   confirmDeleteCalendars,
@@ -267,7 +266,7 @@ it('says when each sync last finished, while it is on', async () => {
   setSetting('courseCalendarSync', true);
   await renderScreen();
   const lastSynced = t('lastSynced', {
-    time: dayjs(time).format(t('shortDateTimeFormat')),
+    time: formatDate(time, 'shortDateTimeFormat'),
   });
   expect(screen.getAllByText(lastSynced, { exact: false })).toHaveLength(1);
 

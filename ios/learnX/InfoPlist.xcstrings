@@ -39,13 +39,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "learnX 会将课表和作业同步到日历。它会读取日历列表以选择写入位置，并可删除它创建的日历。"
+            "value" : "learnX会将课表和作业同步到日历。它会读取日历列表以选择写入位置，并可删除它创建的日历。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "learnX 会将课表和作业同步到日历。它会读取日历列表以选择写入位置，并可删除它创建的日历。"
+            "value" : "learnX会将课表和作业同步到日历。它会读取日历列表以选择写入位置，并可删除它创建的日历。"
           }
         }
       }
@@ -62,13 +62,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "learnX 会将课表和作业同步到日历，并可删除它创建的日历。"
+            "value" : "learnX会将课表和作业同步到日历，并可删除它创建的日历。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "learnX 会将课表和作业同步到日历，并可删除它创建的日历。"
+            "value" : "learnX会将课表和作业同步到日历，并可删除它创建的日历。"
           }
         }
       }
@@ -200,13 +200,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "允许 learnX 访问你的麦克风。"
+            "value" : "允许learnX访问你的麦克风。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "允许 learnX 访问你的麦克风。"
+            "value" : "允许learnX访问你的麦克风。"
           }
         }
       }
@@ -246,13 +246,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "将 learnX 中的图片存储到照片图库。"
+            "value" : "将learnX中的图片存储到照片图库。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "将 learnX 中的图片存储到照片图库。"
+            "value" : "将learnX中的图片存储到照片图库。"
           }
         }
       }
@@ -292,13 +292,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "learnX 会将作业同步到提醒事项，并可删除它创建的列表。"
+            "value" : "learnX会将作业同步到提醒事项，并可删除它创建的列表。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "learnX 会将作业同步到提醒事项，并可删除它创建的列表。"
+            "value" : "learnX会将作业同步到提醒事项，并可删除它创建的列表。"
           }
         }
       }
@@ -315,13 +315,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "learnX 会将作业同步到提醒事项，并可删除它创建的列表。"
+            "value" : "learnX会将作业同步到提醒事项，并可删除它创建的列表。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "learnX 会将作业同步到提醒事项，并可删除它创建的列表。"
+            "value" : "learnX会将作业同步到提醒事项，并可删除它创建的列表。"
           }
         }
       }

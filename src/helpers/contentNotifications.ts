@@ -3,7 +3,7 @@ import { ContentDiff } from 'data/contentDiff';
 import { BookmarkType } from 'data/userData';
 import { NotificationSettings } from 'data/types/state';
 import { deadlineDayTime, gradeLabel } from 'helpers/assignments';
-import { t } from 'helpers/i18n';
+import { formatDate, t } from 'helpers/i18n';
 import { ItemTarget } from 'helpers/openTarget';
 import { hash, removeTags, truncate } from 'helpers/text';
 
@@ -98,8 +98,7 @@ const targetTypes: Record<ContentKind, ItemTarget['type']> = {
   groupSubmissions: 'assignment',
 };
 
-const formatTime = (time: string) =>
-  dayjs(time).format(t('shortDateTimeFormat'));
+const formatTime = (time: string) => formatDate(time, 'shortDateTimeFormat');
 
 /** About two lines of a notice, as a preview. */
 const PREVIEW_LENGTH = 120;

@@ -25,7 +25,7 @@ import { queryClient } from 'data/queryClient';
 import { describeSyncRun, useSyncLogStore } from 'data/syncLog';
 import { getUserData } from 'data/userData';
 import { notifyContent, syncContent } from 'services/background';
-import { t } from 'helpers/i18n';
+import { formatDate, t } from 'helpers/i18n';
 import { isMockUser } from 'helpers/mock';
 import { postNotification } from 'services/notifications';
 import {
@@ -161,7 +161,7 @@ const Debug: React.FC<Props> = ({ navigation }) => {
           title="Notifications"
           footer={
             lastBackgroundSync
-              ? `Last background sync ${dayjs(lastBackgroundSync.startedAt).format(t('shortDateTimeFormat'))}: ${describeSyncRun(lastBackgroundSync)}`
+              ? `Last background sync ${formatDate(lastBackgroundSync.startedAt, 'shortDateTimeFormat')}: ${describeSyncRun(lastBackgroundSync)}`
               : undefined
           }
         >

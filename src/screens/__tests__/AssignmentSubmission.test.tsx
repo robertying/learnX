@@ -5,7 +5,7 @@ import { showChoices } from 'components/choiceSheet';
 import { mockAssignments } from 'data/mock';
 import { saveSubmissionDraft } from 'data/submissionDrafts';
 import type { Assignment } from 'data/types/state';
-import { t } from 'helpers/i18n';
+import { formatDate, t } from 'helpers/i18n';
 import {
   useAttachmentPicker,
   useSubmitAssignment,
@@ -108,7 +108,7 @@ it('names the assignment and its deadline at the top', async () => {
   });
   expect(screen.getByText(unsubmitted.title)).toBeTruthy();
   expect(
-    screen.getByText(deadline.format(t('dateTimeFormat')), {
+    screen.getByText(formatDate(deadline, 'dateTimeFormat'), {
       exact: false,
     }),
   ).toBeTruthy();
@@ -122,7 +122,7 @@ it('gives a deadline over a year away as its date once', async () => {
     deadline: deadline.toISOString(),
     lateSubmissionDeadline: undefined,
   });
-  expect(screen.getByText(deadline.format(t('dateTimeFormat')))).toBeTruthy();
+  expect(screen.getByText(formatDate(deadline, 'dateTimeFormat'))).toBeTruthy();
 });
 
 it('keeps the Draft Saved footer in place, hidden, until there is a draft', async () => {
@@ -152,10 +152,7 @@ it('adds the late deadline once the deadline has passed', async () => {
     lateSubmissionDeadline: late.toISOString(),
   });
   expect(
-    screen.getByText(
-      `${t('lateSubmission')} ${late.format(t('dateTimeFormat'))}`,
-      { exact: false },
-    ),
+    screen.getByText(formatDate(late, 'lateDeadlineFormat'), { exact: false }),
   ).toBeTruthy();
 });
 

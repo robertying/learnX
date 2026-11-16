@@ -5,7 +5,7 @@ import { mockAssignments } from 'data/mock';
 import { saveSubmissionDraft } from 'data/submissionDrafts';
 import type { Assignment } from 'data/types/state';
 import { gradeLabel } from 'helpers/assignments';
-import { t } from 'helpers/i18n';
+import { formatDate, t } from 'helpers/i18n';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import AssignmentDetail from 'screens/AssignmentDetail';
 import { screenProps } from 'test-utils/screenProps';
@@ -356,10 +356,10 @@ it('gives a deadline over a year away as its date once', async () => {
   const base = find(a => !a.submitted && !a.graded);
   const deadline = dayjs('2099-09-30T08:59:00+08:00');
   await renderScreen({ ...base, deadline: deadline.toISOString() });
-  expect(screen.getByText(deadline.format(t('dateTimeFormat')))).toBeTruthy();
+  expect(screen.getByText(formatDate(deadline, 'dateTimeFormat'))).toBeTruthy();
   expect(
     screen.queryByText(
-      t('deadlineOn', { date: deadline.format(t('deadlineDateFormat')) }),
+      t('deadlineOn', { date: formatDate(deadline, 'deadlineDateFormat') }),
     ),
   ).toBeNull();
 });
