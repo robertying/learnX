@@ -77,6 +77,7 @@ Everything here must pass before the pull request is merged:
 - `scripts/check-release-bundle.sh` (with the mock login in `.env`) builds both platforms' release JS bundles.
 - iOS (on a Mac): `cd ios && bundle exec pod install`, `scripts/test-ios.sh <simulator udid>`, then build and launch the app on an iOS simulator and as the Mac Catalyst app (`pnpm ios`, or Xcode with "My Mac (Mac Catalyst)"); the widget and share extensions build with it.
 - Android: `scripts/test-android.sh`, `cd android && ./gradlew :app:assembleGithubDebug :app:assembleGithubRelease :app:bundleGooglePlayRelease` (the release builds run R8), then install and launch on an emulator.
+- The Electron app (Electron, electron-builder, electron-updater, Playwright): `pnpm e2e:electron`, and `pnpm electron:package --dir`. After an electron-builder upgrade, check that `toolsets.appimage` in `electron/packageConfig.cjs` is still one of its AppImage runtimes (a test fails if not), then start the x64 and arm64 AppImages on a stock Ubuntu (the Linux VM in UTM), where a missing `libfuse2` or `libz.so` would stop them, and install the .deb there.
 - In the running app, log in with the mock account (`src/data/AGENTS.md`) and go through the areas the upgraded packages drive: every tab and its lists, a notice and an assignment detail (web view), a PDF file, the course timetable, search, swipe actions, Settings, and the widgets. The Maestro flows (`pnpm e2e:ios`, `pnpm e2e:android`) cover the main paths.
 - CI is green.
 

@@ -146,9 +146,20 @@ describe('placeholderKeyProblem', () => {
   it.each([
     { dir: true },
     { updateUrl: 'http://localhost:8299/' },
+    { updateUrl: 'http://127.0.0.1:8299/' },
     { allowPlaceholderKey: true },
   ])('lets %j through, as no release', options => {
     expect(placeholderKeyProblem(options, placeholder)).toBeNull();
+  });
+
+  it.each([
+    'https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/',
+    'http://localhost.example.com/',
+    'not a url',
+  ])('refuses a test build for %s, which could pass for a release', url => {
+    expect(placeholderKeyProblem({ updateUrl: url }, placeholder)).toMatch(
+      /still the placeholder/,
+    );
   });
 
   it('refuses the committed key until the real one is made', () => {
@@ -160,4 +171,17 @@ describe('placeholderKeyProblem', () => {
       !committed.startsWith('PLACEHOLDER'),
     );
   });
+});
+
+it('pins an AppImage runtime electron-builder still knows', () => {
+  // A beta toolset (the static type2 runtime, no libfuse2 or libz.so on the
+  // system): an electron-builder upgrade could drop it.
+  const { appimageChecksums } = require(
+    require.resolve('app-builder-lib/out/toolsets/linux', {
+      paths: [path.join(__dirname, '..')],
+    }),
+  ) as { appimageChecksums: Record<string, unknown> };
+  const version = packageConfig().toolsets?.appimage;
+  expect(version).toBeDefined();
+  expect(Object.keys(appimageChecksums)).toContain(version);
 });

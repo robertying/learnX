@@ -124,12 +124,22 @@ const config = (options = {}) => {
   };
 };
 
+/** Whether `url` is an update server on this computer (updateServer.mjs). */
+const isLocalUrl = (/** @type {string | undefined} */ url) => {
+  try {
+    return ['localhost', '127.0.0.1'].includes(new URL(url ?? '').hostname);
+  } catch {
+    return false;
+  }
+};
+
 /**
  * Why installers can't be built yet, or null: while the committed update key
  * (certs/electron-update.pem) is still the placeholder, nobody can sign an
  * update those installs would take, so they could never update. An unpacked
- * build (`--dir`), a test build for a local update server (`--update-url`)
- * and a build that says so (`--allow-placeholder-key`) may go ahead.
+ * build (`--dir`), a test build for an update server on this computer
+ * (`--update-url` on localhost or 127.0.0.1: any other could pass for a
+ * release) and a build that says so (`--allow-placeholder-key`) may go ahead.
  *
  * @param {{ dir?: boolean; updateUrl?: string; allowPlaceholderKey?: boolean }} options
  * @param {string | Buffer} publicKey the committed key
@@ -138,7 +148,7 @@ const config = (options = {}) => {
 const placeholderKeyProblem = (options, publicKey) =>
   isPlaceholderKey(publicKey) &&
   !options.dir &&
-  !options.updateUrl &&
+  !isLocalUrl(options.updateUrl) &&
   !options.allowPlaceholderKey
     ? 'certs/electron-update.pem is still the placeholder, so these installs could never update: make the key first (electron/AGENTS.md, "Signing updates"), or pass --allow-placeholder-key for a build that will never be released'
     : null;
