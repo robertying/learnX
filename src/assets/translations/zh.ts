@@ -538,6 +538,8 @@ const zh: typeof en = {
   welcomeCoursesBody: '公告、作业和文件，离线也能查看。',
   welcomeDeadlinesTitle: '不再错过截止时间',
   welcomeDeadlinesBody: '截止提醒、日历同步和小组件。',
+  welcomeDeadlinesBodyMac: '截止提醒和日历同步。',
+  welcomeDeadlinesBodyElectron: '截止提醒和日历导出。',
   setupTitle: '及时掌握课程动态',
   setupNewContent: '新内容',
   setupCalendarSection: '日历',
@@ -566,6 +568,8 @@ const zh: typeof en = {
     '在聚焦搜索中查找公告、作业和文件，或问Siri下一节课和作业截止。',
   whatsNew19DesignTitle: '全新设计',
   whatsNew19DesignBody: '更简洁的界面，遵循Android设计风格，换上清华紫。',
+  whatsNew19DesignMacBody:
+    '更简洁的界面，遵循macOS设计风格，并可用快速查看预览课程文件。',
   whatsNew19ElectronTitle: 'Windows与Linux',
   whatsNew19ElectronBody:
     '试用实验性的Windows和Linux桌面版，可从TUNA镜像或GitHub Releases下载。',

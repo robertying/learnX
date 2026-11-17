@@ -564,6 +564,9 @@ export default {
   welcomeCoursesBody: 'Notices, assignments and files, readable offline.',
   welcomeDeadlinesTitle: 'Never Miss a Deadline',
   welcomeDeadlinesBody: "Reminders, calendar sync and widgets for what's due.",
+  welcomeDeadlinesBodyMac: "Reminders and calendar sync for what's due.",
+  welcomeDeadlinesBodyElectron:
+    "Reminders and a calendar export for what's due.",
   setupTitle: 'Stay on Top of Your Courses',
   setupNewContent: 'New Content',
   setupCalendarSection: 'Calendar',
@@ -595,6 +598,8 @@ export default {
   whatsNew19DesignTitle: 'New Design',
   whatsNew19DesignBody:
     'A cleaner look that follows Android, in Tsinghua purple.',
+  whatsNew19DesignMacBody:
+    'A cleaner look that follows macOS, and Quick Look for course files.',
   whatsNew19ElectronTitle: 'Windows & Linux',
   whatsNew19ElectronBody:
     'Try the experimental desktop app for Windows and Linux, from the TUNA mirror or GitHub Releases.',
