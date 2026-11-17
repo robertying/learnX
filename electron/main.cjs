@@ -425,10 +425,14 @@ const createWindow = (/** @type {Electron.Session} */ ses) => {
       void win.loadURL(`${ORIGIN}/`);
     }
   });
-  // Start at login on Windows starts learnX in the tray.
+  // The window shows once its page has drawn, so it never shows blank, except
+  // when Start at login starts learnX in the tray (Windows). On Linux it
+  // shows at once, in its background color: under Wayland a window that was
+  // never shown gets no frames, so a page that first draws after a large
+  // script (the app's) never draws, and `ready-to-show` never comes.
   // A window saved maximized is maximized as it's shown (`maximize()` shows
   // it): at once, or when it first leaves the tray after Start at login.
-  win.once('ready-to-show', () => {
+  const reveal = () => {
     if (system?.startsHidden()) {
       if (state.maximized) {
         win.once('show', () => win.maximize());
@@ -440,7 +444,12 @@ const createWindow = (/** @type {Electron.Session} */ ses) => {
     } else {
       win.show();
     }
-  });
+  };
+  if (process.platform === 'linux') {
+    reveal();
+  } else {
+    win.once('ready-to-show', reveal);
+  }
 
   // Links open in the browser; the window itself never leaves the app.
   win.webContents.setWindowOpenHandler(({ url }) => {

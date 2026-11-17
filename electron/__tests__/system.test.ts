@@ -266,6 +266,15 @@ describe('the window', () => {
       true,
     );
   });
+
+  it('never starts hidden on Linux, which has no Start at login', () => {
+    expect(
+      setUp({
+        platform: 'linux',
+        argv: ['learnx', HIDDEN_ARG],
+      }).system.startsHidden(),
+    ).toBe(false);
+  });
 });
 
 describe('the tray and the Jump List', () => {

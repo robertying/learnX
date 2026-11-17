@@ -437,8 +437,12 @@ const setUpSystem = ({
   updateMenus();
 
   return {
-    /** Whether the window starts hidden: Start at login on Windows. */
-    startsHidden: () => argv.includes(HIDDEN_ARG),
+    /**
+     * Whether the window starts hidden: Start at login on Windows, the only
+     * platform whose login item passes the argument (a launch from anywhere
+     * else always shows the window).
+     */
+    startsHidden: () => platform === 'win32' && argv.includes(HIDDEN_ARG),
     /** A dev run's logged notifications, for its inspector. */
     devShown,
     /**

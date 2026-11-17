@@ -546,10 +546,38 @@ describe('the window', () => {
     expect(win.show).not.toHaveBeenCalled();
   });
 
+  /**
+   * Runs `load` with `process.platform` set (which Jest's replaceProperty
+   * can't restore).
+   */
+  const onPlatform = async (
+    value: NodeJS.Platform,
+    load: () => Promise<unknown>,
+  ) => {
+    const platform = Object.getOwnPropertyDescriptor(process, 'platform')!;
+    Object.defineProperty(process, 'platform', { ...platform, value });
+    try {
+      await load();
+    } finally {
+      Object.defineProperty(process, 'platform', platform);
+    }
+  };
+
+  it('shows the window at once on Linux, where Wayland draws no hidden window', async () => {
+    await onPlatform('linux', () => loadMain());
+    expect(fake.windows[0].show).toHaveBeenCalled();
+  });
+
+  it('maximizes a window saved maximized at once on Linux', async () => {
+    saveState({ maximized: true });
+    await onPlatform('linux', () => loadMain());
+    expect(fake.windows[0].maximize).toHaveBeenCalled();
+  });
+
   it('keeps a window saved maximized in the tray at Start at login, maximized when it comes out', async () => {
     saveState({ maximized: true });
     jest.replaceProperty(process, 'argv', [...process.argv, '--hidden']);
-    await loadMain();
+    await onPlatform('win32', () => loadMain());
     const [win] = fake.windows;
     win.emit('ready-to-show');
     expect(win.maximize).not.toHaveBeenCalled();
