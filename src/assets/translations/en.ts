@@ -355,6 +355,8 @@ export default {
   offlineMode: 'Continue Offline',
   download: 'Download',
   saveFileSucceeded: 'Saved {name}',
+  calendarExportWithoutClasses:
+    "Saved {name} without your classes: the timetable couldn't be loaded.",
   saveFileFailed: "Couldn't save the file",
   sso: 'Electronic ID Service System of Tsinghua University',
   ssoNote:

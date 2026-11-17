@@ -217,12 +217,17 @@ export const exportCalendars = async (): Promise<ToastMessage | undefined> => {
       (
         require('services/calendar/desktopExport') as typeof import('services/calendar/desktopExport')
       ).buildDesktopICS
-    : exportSyncedCalendarsToICS;
+    : async () => ({
+        ics: await exportSyncedCalendarsToICS(),
+        withoutClasses: false,
+      });
   try {
-    const ics = await build();
+    const { ics, withoutClasses } = await build();
     const name = 'learnX.ics';
     if (await exportTextFile(name, ics, 'text/calendar')) {
-      return { text: t('saveFileSucceeded', { name }), type: 'success' };
+      return withoutClasses
+        ? { text: t('calendarExportWithoutClasses', { name }), type: 'warning' }
+        : { text: t('saveFileSucceeded', { name }), type: 'success' };
     }
   } catch (err) {
     return calendarExportErrorToast(err);

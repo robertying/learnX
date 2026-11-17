@@ -59,7 +59,8 @@ it("exports the semester's remaining classes and the open assignments", async ()
     ],
     failedRanges: [],
   } as never);
-  const ics = await buildDesktopICS(now);
+  const { ics, withoutClasses } = await buildDesktopICS(now);
+  expect(withoutClasses).toBe(false);
   expect(fetchCalendarRange).toHaveBeenCalledWith(
     now,
     dayjs(semester.endDate),
@@ -78,7 +79,9 @@ it("exports the semester's remaining classes and the open assignments", async ()
 
 it('exports the assignments when the timetable fails', async () => {
   jest.mocked(fetchCalendarRange).mockRejectedValueOnce(new Error('offline'));
-  await expect(buildDesktopICS(now)).resolves.toContain('Homework 1');
+  const { ics, withoutClasses } = await buildDesktopICS(now);
+  expect(ics).toContain('Homework 1');
+  expect(withoutClasses).toBe(true);
 });
 
 it('skips the classes after the semester has ended', async () => {

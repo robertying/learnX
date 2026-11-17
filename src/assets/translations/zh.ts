@@ -335,6 +335,8 @@ const zh: typeof en = {
   offlineMode: '离线使用',
   download: '下载',
   saveFileSucceeded: '已保存“{name}”',
+  calendarExportWithoutClasses:
+    '已保存“{name}”，但课表加载失败，其中不含课程。',
   saveFileFailed: '文件保存失败',
   sso: '清华大学用户电子身份服务系统',
   ssoNote:

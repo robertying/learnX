@@ -71,12 +71,16 @@ const classEvents = async (now: dayjs.Dayjs): Promise<ICSEvent[]> => {
 
 /**
  * The semester's remaining classes and the open assignments as an .ics
- * calendar. Rejects with `noEvents` when there's nothing to export; the
- * classes are left out when the timetable can't be fetched.
+ * calendar. Rejects with `noEvents` when there's nothing to export; when the
+ * timetable can't be fetched the classes are left out, which `withoutClasses`
+ * says.
  */
-export const buildDesktopICS = async (now = dayjs()) => {
+export const buildDesktopICS = async (
+  now = dayjs(),
+): Promise<{ ics: string; withoutClasses: boolean }> => {
   const assignments = assignmentEvents(now);
   let classes: ICSEvent[] = [];
+  let withoutClasses = false;
   try {
     await ensureSession();
     classes = await classEvents(now);
@@ -84,10 +88,14 @@ export const buildDesktopICS = async (now = dayjs()) => {
     if (assignments.length === 0) {
       throw error;
     }
+    withoutClasses = true;
   }
   const events = [...classes, ...assignments];
   if (events.length === 0) {
     throw new CalendarError('noEvents');
   }
-  return buildICS(exportCalendarName, dedupeAndSortICSEvents(events));
+  return {
+    ics: buildICS(exportCalendarName, dedupeAndSortICSEvents(events)),
+    withoutClasses,
+  };
 };
