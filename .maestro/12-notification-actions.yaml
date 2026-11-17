@@ -1,0 +1,128 @@
+appId: ${APP_ID}
+name: Press notification action buttons
+# Mock content only: the notifications are about mock items (checked by
+# scripts/__tests__/e2eLinks.test.ts).
+---
+# The action buttons on learnX's notifications (services/notificationActions):
+# Favorite and Archive on a new item, Archive All on several, Remind Later and
+# Archive on a deadline reminder. Each launch posts one notification once the
+# lists have loaded (the postNotification launch argument, E2E builds only),
+# then the flow presses a button in the notification shade and checks the
+# item in the app. Some buttons are pressed with the app in the background,
+# which Android hands to the notification action task, and some over the app.
+# Android only: Maestro can't reach iOS's notification center.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - runFlow: subflows/login.yaml
+
+      # Favorite, from the background
+      - runFlow:
+          file: subflows/post-notification.yaml
+          env:
+            NOTIFICATION: 'notice:26ef84e76d60efc1016d000000000001'
+      - pressKey: Home
+      - runFlow:
+          file: subflows/notification-action.yaml
+          env:
+            ACTION: '${T_favorite}'
+      - launchApp:
+          stopApp: false
+      - runFlow:
+          file: subflows/filter.yaml
+          env:
+            LABEL: '(${T_fav})(, .*)?'
+      - assertVisible: '.*(${MOCK_NOTICE}).*'
+      - runFlow:
+          file: subflows/card-actions.yaml
+          env:
+            CARD: '.*(${MOCK_NOTICE}).*'
+      - tapOn: '${T_unfavorite}'
+      - assertNotVisible: '.*(${MOCK_NOTICE}).*'
+      - runFlow:
+          file: subflows/filter.yaml
+          env:
+            LABEL: '(${T_all})(, .*)?'
+
+      # Archive All on two notices (the one search finds is the other), over
+      # the app
+      - runFlow:
+          file: subflows/post-notification.yaml
+          env:
+            NOTIFICATION: 'notice:26ef84e76d60efc1016d000000000001,26ef84e76d60efc1016d00000000000f'
+      - runFlow:
+          file: subflows/notification-action.yaml
+          env:
+            ACTION: '${T_notificationArchiveAll}'
+      - extendedWaitUntil:
+          notVisible: '.*(${MOCK_NOTICE}).*'
+          timeout: 5000
+      - runFlow:
+          file: subflows/filter.yaml
+          env:
+            LABEL: '(${T_archived})(, .*)?'
+      - runFlow:
+          file: subflows/card-actions.yaml
+          env:
+            CARD: '.*(${MOCK_NOTICE}).*'
+      - tapOn: '${T_restore}'
+      - assertNotVisible: '.*(${MOCK_NOTICE}).*'
+      - runFlow:
+          file: subflows/card-actions.yaml
+          env:
+            CARD: '.*(${MOCK_SEARCH_NOTICE}).*'
+      - tapOn: '${T_restore}'
+      - assertNotVisible: '.*(${MOCK_SEARCH_NOTICE}).*'
+      - runFlow:
+          file: subflows/filter.yaml
+          env:
+            LABEL: '(${T_all})(, .*)?'
+      - assertVisible: '.*(${MOCK_NOTICE}).*'
+
+      # Remind Later on a deadline reminder: it goes away until later
+      - runFlow:
+          file: subflows/post-notification.yaml
+          env:
+            NOTIFICATION: 'reminder:26ef84e76db3f55b016d000000000001'
+      - pressKey: Home
+      - runFlow:
+          file: subflows/notification-action.yaml
+          env:
+            ACTION: '${T_notificationRemindLater}'
+
+      # Archive on a deadline reminder, from the background
+      - runFlow:
+          file: subflows/post-notification.yaml
+          env:
+            NOTIFICATION: 'reminder:26ef84e76db3f55b016d000000000001'
+      - pressKey: Home
+      - runFlow:
+          file: subflows/notification-action.yaml
+          env:
+            ACTION: '${T_archive}'
+      - launchApp:
+          stopApp: false
+      - runFlow:
+          file: subflows/tab.yaml
+          env:
+            TAB: 'tab-assignments|list\.bullet\.clipboard\.fill'
+      - runFlow:
+          file: subflows/filter.yaml
+          env:
+            LABEL: '(${T_archived})(, .*)?'
+      - runFlow:
+          file: subflows/card-actions.yaml
+          env:
+            CARD: '.*(${MOCK_ASSIGNMENT}).*'
+      - tapOn: '${T_restore}'
+      - assertNotVisible: '.*(${MOCK_ASSIGNMENT}).*'
+      - runFlow:
+          file: subflows/filter.yaml
+          env:
+            LABEL: '(${T_all})(, .*)?'
+      - assertVisible: '.*(${MOCK_ASSIGNMENT}).*'
+      - runFlow:
+          file: subflows/tab.yaml
+          env:
+            TAB: 'tab-notices|bell\.fill'
