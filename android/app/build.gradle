@@ -55,7 +55,7 @@ react {
     debuggableVariants = ["googlePlayDebug", "githubDebug"]
 }
 
-// The NDK, CMake, Java and Kotlin JVM settings come from the root build.gradle,
+// The build tools, NDK, CMake, Java and Kotlin JVM settings come from the root build.gradle,
 // which sets them for every project.
 android {
     compileSdk = rootProject.ext.compileSdkVersion
