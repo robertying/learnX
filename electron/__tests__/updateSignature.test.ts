@@ -2,74 +2,73 @@ import { generateKeyPairSync, sign } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import {
-  KEY_ID,
-  formatSignature,
-  parseSignature,
+  isPlaceholderKey,
+  signUpdateFile,
   signatureProblem,
   signedProvider,
 } from '../updateSignature.cjs';
 
 const keys = () => {
-  const { privateKey, publicKey } = generateKeyPairSync('rsa', {
-    modulusLength: 2048,
-  });
+  const { privateKey, publicKey } = generateKeyPairSync('ed25519');
   return {
-    privateKey,
-    certificate: publicKey.export({ type: 'spki', format: 'pem' }) as string,
+    privateKey: privateKey.export({ type: 'pkcs8', format: 'pem' }) as string,
+    publicKey: publicKey.export({ type: 'spki', format: 'pem' }) as string,
   };
 };
 const trusted = keys();
 const other = keys();
 
 const YML = 'version: 99.0.0\npath: learnX-Setup-99.0.0.exe\nsha512: abc\n';
-const signed = (data: string, key = trusted.privateKey, keyId = KEY_ID) =>
-  formatSignature(sign('sha256', Buffer.from(data), key), keyId);
+const signed = (data: string, key = trusted.privateKey) =>
+  signUpdateFile(Buffer.from(data), key);
 
-it('reads back what it writes, in the over-the-air signature’s shape', () => {
-  const text = formatSignature(Buffer.from([1, 2, 3]));
-  expect(text).toBe('sig="AQID", keyid="main"\n');
-  expect(parseSignature(text)).toEqual({
-    signature: Buffer.from([1, 2, 3]),
-    keyId: 'main',
-  });
-  expect(parseSignature('AQID')).toBeNull();
-  expect(parseSignature('<html>Not found</html>')).toBeNull();
+it('writes the signature as base64 on a line of its own', () => {
+  expect(signed(YML)).toMatch(/^[A-Za-z0-9+/]{86}==\n$/);
 });
 
 it('accepts a signature by the trusted key', () => {
-  expect(signatureProblem(YML, signed(YML), trusted.certificate)).toBeNull();
+  expect(signatureProblem(YML, signed(YML), trusted.publicKey)).toBeNull();
   expect(
-    signatureProblem(Buffer.from(YML), signed(YML), trusted.certificate),
+    signatureProblem(Buffer.from(YML), signed(YML), trusted.publicKey),
   ).toBeNull();
-});
-
-it('accepts the over-the-air certificate as the trusted key', () => {
-  const certificate = readFileSync(
-    path.join(__dirname, '..', '..', 'certs', 'ota-certificate.pem'),
-  );
-  // Not signed by its key, but read as one.
-  expect(signatureProblem(YML, signed(YML), certificate)).toBe(
-    'signature doesn’t match',
-  );
 });
 
 it.each([
   ['a missing signature', null, 'no signature'],
   ['an empty one', '', 'no signature'],
-  ['an unreadable one', 'garbage', 'unreadable signature'],
-  ['another key', signed(YML, other.privateKey), 'signature doesn’t match'],
+  ['an unreadable one', 'garbage!', 'unreadable signature'],
+  ['a page instead', '<html>Not found</html>', 'unreadable signature'],
+  ['one too short', 'AQID', 'unreadable signature'],
+  ['another key’s', signed(YML, other.privateKey), 'signature doesn’t match'],
   [
-    'a changed file',
+    'a changed file’s',
     signed(YML.replace('abc', 'abd')),
     'signature doesn’t match',
   ],
   [
-    'another key id',
-    signed(YML, trusted.privateKey, 'other'),
-    'signed with key "other", not "main"',
+    'an RSA one (the over-the-air key’s kind)',
+    sign(
+      'sha256',
+      Buffer.from(YML),
+      generateKeyPairSync('rsa', { modulusLength: 2048 }).privateKey,
+    ).toString('base64'),
+    'unreadable signature',
   ],
 ])('refuses %s', (_name, signature, problem) => {
-  expect(signatureProblem(YML, signature, trusted.certificate)).toBe(problem);
+  expect(signatureProblem(YML, signature, trusted.publicKey)).toBe(problem);
+});
+
+it('knows the placeholder key, which nothing it signs can match', () => {
+  const committed = readFileSync(
+    path.join(__dirname, '..', '..', 'certs', 'electron-update.pem'),
+    'utf8',
+  );
+  // A real key or the placeholder, either an Ed25519 public key.
+  expect(signatureProblem(YML, signed(YML), committed)).toBe(
+    'signature doesn’t match',
+  );
+  expect(isPlaceholderKey(`PLACEHOLDER: x\n${trusted.publicKey}`)).toBe(true);
+  expect(isPlaceholderKey(trusted.publicKey)).toBe(false);
 });
 
 describe('signedProvider', () => {
@@ -93,7 +92,7 @@ describe('signedProvider', () => {
     parseUpdateInfo,
     getChannelFilename: channel => `${channel}.yml`,
     newUrlFromBase: (name, base) => new URL(name, base),
-    certificate: trusted.certificate,
+    publicKey: trusted.publicKey,
   });
 
   it('reads a signed update file', async () => {

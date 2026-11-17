@@ -2,68 +2,55 @@
 // (latest-linux.yml, latest-linux-arm64.yml) the mirror serves: the installer
 // is checked against the SHA-512 in it, and the builds carry no publisher
 // signature. So each update file is signed at release time, on the
-// maintainer's Mac, with the over-the-air updates' code-signing key
-// (certs/ota-certificate.pem, keyid `main`, RSA PKCS#1 v1.5 with SHA-256),
-// into a detached `<file>.sig` next to it (scripts/sign-update-files.mjs).
-// The app reads the update file only through `signedProvider`, which refuses
-// one without a valid signature: no update is offered, and the reason is
-// logged.
-const { createPublicKey, verify } = require('node:crypto');
+// maintainer's Mac, with learnX's own Ed25519 update key, into a detached
+// `<file>.sig` next to it (scripts/sign-electron-update.mjs); the app carries
+// the public half (certs/electron-update.pem). It reads an update file only
+// through `signedProvider`, which refuses one without a valid signature: no
+// update is offered, and the reason is logged.
+const { createPublicKey, sign, verify } = require('node:crypto');
 
 /** The signature's file name next to an update file's. */
 const SIGNATURE_SUFFIX = '.sig';
-/** The key the over-the-air updates' certificate names. */
-const KEY_ID = 'main';
 
 /**
- * A signature file's text: the same shape as the `expo-signature` header the
- * over-the-air updates carry.
+ * Whether a public key PEM is the placeholder committed until the real key
+ * is (its first line says so), which no one holds the private half of.
+ * @param {string | Buffer} publicKey
  */
-const formatSignature = (
-  /** @type {Buffer} */ signature,
-  /** @type {string} */ keyId = KEY_ID,
-) => `sig="${signature.toString('base64')}", keyid="${keyId}"\n`;
+const isPlaceholderKey = publicKey =>
+  String(publicKey).trimStart().startsWith('PLACEHOLDER');
 
 /**
- * The signature and key id in a signature file's text, or null when it
- * isn't one.
- *
- * @returns {{ signature: Buffer; keyId: string } | null}
+ * A signature file's text for `data`: the Ed25519 signature in base64.
+ * @param {Buffer} data
+ * @param {string | Buffer} privateKey PEM
  */
-const parseSignature = (/** @type {string} */ text) => {
-  const match = /^sig="([A-Za-z0-9+/]+={0,2})", keyid="([\w-]+)"\s*$/.exec(
-    text,
-  );
-  return match
-    ? { signature: Buffer.from(match[1], 'base64'), keyId: match[2] }
-    : null;
-};
+const signUpdateFile = (data, privateKey) =>
+  `${sign(null, data, privateKey).toString('base64')}\n`;
 
 /**
- * Why `data` doesn't carry a valid signature by the certificate's key, or
- * null when it does.
+ * Why `data` doesn't carry a valid signature by the public key, or null when
+ * it does.
  *
  * @param {Buffer | string} data
  * @param {string | null | undefined} signatureText
- * @param {string | Buffer} certificate a PEM certificate or public key
+ * @param {string | Buffer} publicKey PEM
  * @returns {string | null}
  */
-const signatureProblem = (data, signatureText, certificate) => {
+const signatureProblem = (data, signatureText, publicKey) => {
   if (!signatureText) {
     return 'no signature';
   }
-  const parsed = parseSignature(signatureText);
-  if (!parsed) {
+  const text = signatureText.trim();
+  const signature = Buffer.from(text, 'base64');
+  if (!/^[A-Za-z0-9+/]+={0,2}$/.test(text) || signature.length !== 64) {
     return 'unreadable signature';
   }
-  if (parsed.keyId !== KEY_ID) {
-    return `signed with key "${parsed.keyId}", not "${KEY_ID}"`;
-  }
   const valid = verify(
-    'sha256',
+    null,
     Buffer.isBuffer(data) ? data : Buffer.from(data, 'utf8'),
-    createPublicKey(certificate),
-    parsed.signature,
+    createPublicKey(publicKey),
+    signature,
   );
   return valid ? null : 'signature doesn’t match';
 };
@@ -78,7 +65,7 @@ const signatureProblem = (data, signatureText, certificate) => {
  *   parseUpdateInfo: (rawData: string | null, channelFile: string, channelFileUrl: URL) => unknown;
  *   getChannelFilename: (channel: string) => string;
  *   newUrlFromBase: (pathname: string, baseUrl: URL, addRandomQueryToAvoidCaching?: boolean) => URL;
- *   certificate: string | Buffer;
+ *   publicKey: string | Buffer;
  * }} options
  */
 const signedProvider = ({
@@ -86,7 +73,7 @@ const signedProvider = ({
   parseUpdateInfo,
   getChannelFilename,
   newUrlFromBase,
-  certificate,
+  publicKey,
 }) =>
   class SignedProvider extends GenericProvider {
     async getLatestVersion() {
@@ -108,7 +95,7 @@ const signedProvider = ({
       } catch {
         // No signature (a 404), refused below.
       }
-      const problem = signatureProblem(data ?? '', signatureText, certificate);
+      const problem = signatureProblem(data ?? '', signatureText, publicKey);
       if (problem) {
         throw Object.assign(new Error(`${channelFile} refused: ${problem}`), {
           code: 'ERR_UPDATE_SIGNATURE',
@@ -119,10 +106,9 @@ const signedProvider = ({
   };
 
 module.exports = {
-  KEY_ID,
   SIGNATURE_SUFFIX,
-  formatSignature,
-  parseSignature,
+  isPlaceholderKey,
+  signUpdateFile,
   signatureProblem,
   signedProvider,
 };

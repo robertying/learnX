@@ -5,15 +5,10 @@
 // quits into the installer (recorded instead, mainProcess.ts). The installer
 // here is made-up bytes: what's tested is learnX's side, not the installer.
 // The update file is signed with a throwaway key whose public half the run
-// trusts (LEARNX_UPDATE_CERTIFICATE), as a release's are with the update key
+// trusts (LEARNX_UPDATE_PUBLIC_KEY), as a release's are with the update key
 // (updateSignature.cjs); without a valid signature nothing is downloaded.
 import { type ChildProcess, spawn } from 'node:child_process';
-import {
-  createHash,
-  generateKeyPairSync,
-  randomBytes,
-  sign,
-} from 'node:crypto';
+import { createHash, generateKeyPairSync, randomBytes } from 'node:crypto';
 import fs from 'node:fs';
 import net from 'node:net';
 import path from 'node:path';
@@ -42,7 +37,7 @@ const release = () => {
   }
 };
 
-const keyPair = () => generateKeyPairSync('rsa', { modulusLength: 2048 });
+const keyPair = () => generateKeyPairSync('ed25519');
 /** The key the runs trust, and another. */
 const trustedKey = keyPair();
 const otherKey = keyPair();
@@ -83,14 +78,15 @@ const writeRelease = (
   );
   if (signature !== 'missing') {
     const data = fs.readFileSync(path.join(dir, yml));
-    const signed = sign(
-      'sha256',
-      signature === 'bad' ? Buffer.from('something else') : data,
-      (signature === 'wrong key' ? otherKey : trustedKey).privateKey,
-    );
     fs.writeFileSync(
       path.join(dir, yml + updateSignature.SIGNATURE_SUFFIX),
-      updateSignature.formatSignature(signed),
+      updateSignature.signUpdateFile(
+        signature === 'bad' ? Buffer.from('something else') : data,
+        (signature === 'wrong key' ? otherKey : trustedKey).privateKey.export({
+          type: 'pkcs8',
+          format: 'pem',
+        }),
+      ),
     );
   }
   return installer;
@@ -142,14 +138,14 @@ const serve = async (dir: string, log: string[]) => {
  * updated (AppImageUpdater reads it to download, and would replace it).
  */
 const updateEnv = (url: string, dataDir: string): Record<string, string> => {
-  const certificate = path.join(dataDir, 'update-key.pem');
+  const publicKey = path.join(dataDir, 'update-key.pem');
   fs.writeFileSync(
-    certificate,
+    publicKey,
     trustedKey.publicKey.export({ type: 'spki', format: 'pem' }),
   );
   const env = {
     LEARNX_UPDATE_URL: url,
-    LEARNX_UPDATE_CERTIFICATE: certificate,
+    LEARNX_UPDATE_PUBLIC_KEY: publicKey,
   };
   if (process.platform !== 'linux') {
     return env;

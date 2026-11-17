@@ -447,10 +447,11 @@ const createWindow = (/** @type {Electron.Session} */ ses) => {
 
 // The version, the About panel and updates (buildInfo.cjs, updater.cjs). A
 // packaged build carries its build number and where it looks for updates in
-// its package.json (written by packageConfig.cjs), and the certificate of the
-// key its update files are signed with; a dev run reads the checkout's, and
-// checks for updates only on a local test server at `LEARNX_UPDATE_URL`
-// (updateServer.mjs), signed by the key of `LEARNX_UPDATE_CERTIFICATE` if set.
+// its package.json (written by packageConfig.cjs), and the public key its
+// update files are signed with (electron-update.pem); a dev run reads the
+// checkout's, and checks for updates only on a local test server at
+// `LEARNX_UPDATE_URL` (updateServer.mjs), signed by the key whose public half
+// is at `LEARNX_UPDATE_PUBLIC_KEY` if set.
 const packaged = /** @type {{ buildNumber?: string; updateUrl?: string }} */ (
   require('./package.json')
 );
@@ -516,11 +517,11 @@ const updater =
             currentVersion: semver.parse(buildInfo.version),
           });
         }
-        const certificate = fs.readFileSync(
+        const publicKey = fs.readFileSync(
           dev
-            ? process.env.LEARNX_UPDATE_CERTIFICATE ||
-                path.join(__dirname, '..', 'certs', 'ota-certificate.pem')
-            : path.join(__dirname, 'ota-certificate.pem'),
+            ? process.env.LEARNX_UPDATE_PUBLIC_KEY ||
+                path.join(__dirname, '..', 'certs', 'electron-update.pem')
+            : path.join(__dirname, 'electron-update.pem'),
         );
         return createUpdater({
           autoUpdater,
@@ -534,7 +535,7 @@ const updater =
                 require('electron-updater/out/providers/Provider')
                   .parseUpdateInfo,
               ...require('electron-updater/out/util'),
-              certificate,
+              publicKey,
             }),
           },
           onReady: update => {

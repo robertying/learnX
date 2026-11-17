@@ -59,7 +59,7 @@ const config = (options = {}) => {
       // What the main process shares with the page (shared.cjs).
       { from: '../src/constants', to: 'constants', filter: SHARED_FILES },
       // The key update files are signed with (updateSignature.cjs).
-      { from: '../certs', to: '.', filter: ['ota-certificate.pem'] },
+      { from: '../certs', to: '.', filter: ['electron-update.pem'] },
     ],
     // Where the packaged app finds updates (app-update.yml): the TUNA
     // mirror's copy of the latest GitHub release (`v<version>`, with the

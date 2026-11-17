@@ -44,11 +44,11 @@ it('writes the update files under their default names', () => {
   expect(config.publish).not.toHaveProperty('channel');
 });
 
-it('ships the update key’s certificate, and where updates come from', () => {
+it('ships the update key’s public half, and where updates come from', () => {
   expect(packageConfig().files).toContainEqual({
     from: '../certs',
     to: '.',
-    filter: ['ota-certificate.pem'],
+    filter: ['electron-update.pem'],
   });
   expect(packageConfig().extraMetadata).toMatchObject({
     updateUrl: `${updateMirror.latestRelease}/`,
