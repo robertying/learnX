@@ -64,13 +64,18 @@ test('stays on the login page when the confirmation is cancelled', async ({
 test('asks before opening Tsinghua’s page when Enter logs in', async ({
   window,
 }) => {
-  // Known bug: the Enter that logs in from the password field also presses
-  // the confirmation's Continue, which takes focus as it opens, so the page
-  // opens without asking. Passes (and fails here) once that's fixed.
-  test.fail();
+  // The Enter that logs in from the password field opens the confirmation,
+  // which focuses Continue: that same press mustn't answer it (web/alert).
   await fillLogin(window);
   await window.getByTestId('login-password').press('Enter');
+  const dialog = window.getByRole('dialog');
   await expect(
-    window.getByRole('button', { name: exact('T_cancel') }),
-  ).toBeVisible({ timeout: 5_000 });
+    dialog.getByRole('button', { name: exact('T_continue') }),
+  ).toBeFocused();
+  await expect(window.locator('webview')).toHaveCount(0);
+  // Its own press does.
+  await window.keyboard.press('Enter');
+  await expect
+    .poll(() => guest(window, 'location.hostname'), { timeout: 30_000 })
+    .toBe('id.tsinghua.edu.cn');
 });

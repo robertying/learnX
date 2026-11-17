@@ -69,3 +69,58 @@ it('cancels on Escape', () => {
   expect(onDismiss).toHaveBeenCalled();
   expect(() => Alert.prompt()).not.toThrow();
 });
+
+it('leaves the press that asked for it alone, until its key is released', () => {
+  renderRoot();
+  const onContinue = jest.fn();
+  // Enter in a text field asks for the alert, between its keydown and
+  // keypress.
+  fireEvent.keyDown(window, { key: 'Enter' });
+  act(() =>
+    Alert.alert('Log In?', undefined, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Continue', onPress: onContinue },
+    ]),
+  );
+  const button = screen.getByRole('button', { name: 'Continue' });
+  // The rest of that press, and its auto-repeat, are swallowed.
+  expect(fireEvent.keyPress(button, { key: 'Enter', charCode: 13 })).toBe(
+    false,
+  );
+  expect(fireEvent.keyDown(button, { key: 'Enter', repeat: true })).toBe(false);
+  // Other keys aren't.
+  expect(fireEvent.keyDown(button, { key: 'a' })).toBe(true);
+  fireEvent.keyUp(window, { key: 'Enter' });
+  // A new press is the user's answer.
+  expect(fireEvent.keyDown(button, { key: 'Enter' })).toBe(true);
+  expect(fireEvent.keyPress(button, { key: 'Enter', charCode: 13 })).toBe(true);
+  fireEvent.keyUp(window, { key: 'Enter' });
+  fireEvent.click(button);
+  expect(onContinue).toHaveBeenCalledTimes(1);
+});
+
+it('lets every key through when none was down as it opened', () => {
+  renderRoot();
+  act(() => Alert.alert('Saved'));
+  expect(
+    fireEvent.keyPress(screen.getByRole('button', { name: t('ok') }), {
+      key: 'Enter',
+      charCode: 13,
+    }),
+  ).toBe(true);
+  fireEvent.click(screen.getByRole('button', { name: t('ok') }));
+});
+
+it('forgets the keys down when the window loses focus', () => {
+  renderRoot();
+  fireEvent.keyDown(window, { key: 'Enter' });
+  fireEvent.blur(window);
+  act(() => Alert.alert('Saved'));
+  expect(
+    fireEvent.keyPress(screen.getByRole('button', { name: t('ok') }), {
+      key: 'Enter',
+      charCode: 13,
+    }),
+  ).toBe(true);
+  fireEvent.click(screen.getByRole('button', { name: t('ok') }));
+});

@@ -34,8 +34,8 @@ test.describe('in Chinese', () => {
     await byId(window, 'settings-logout').click();
     await window.getByRole('button', { name: chinese('T_logout') }).click();
     await expect(byId(window, 'login-username')).toBeVisible();
-    // By its text: the login page is left out of the accessibility tree
-    // after logging out (logout.e2e.ts).
-    await expect(shown(window.getByText(chinese('T_login')))).toBeVisible();
+    await expect(
+      shown(window.getByRole('button', { name: chinese('T_login') })),
+    ).toBeVisible();
   });
 });

@@ -43,19 +43,22 @@ test('leaves the login page in the accessibility tree after logging out', async 
   window,
   login,
 }) => {
-  // Known bug: the logout confirmation hides the app from assistive
-  // technology while it's open (aria-hidden on #root) and never gives it
-  // back, since logging out replaces what's under it. Passes (and fails
-  // here) once that's fixed.
-  test.fail();
+  // The confirmation hides the page from assistive technology while it's
+  // open, and must give it back though logging out replaced what was under
+  // it (web/FluentRoot).
   await login();
   await openSettings(window);
   await byId(window, 'settings-logout').click();
+  await expect(window.locator('#root')).toHaveAttribute('aria-hidden', 'true');
   await window.getByRole('button', { name: exact('T_logout') }).click();
-  await expect(byId(window, 'login-username')).toBeVisible();
   await expect(window.locator('#root')).not.toHaveAttribute(
     'aria-hidden',
     'true',
-    { timeout: 5_000 },
   );
+  await expect(
+    window.getByRole('textbox', { name: exact('T_usernameOrId') }),
+  ).toBeVisible();
+  await expect(
+    window.getByRole('button', { name: exact('T_login') }),
+  ).toBeVisible();
 });

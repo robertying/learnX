@@ -3,6 +3,7 @@ import {
   FluentProvider,
   makeStaticStyles,
   tokens,
+  useFocusFinders,
 } from '@fluentui/react-components';
 import { useTheme } from 'theme';
 import { AlertHost } from './alert';
@@ -34,11 +35,26 @@ const useFocusStyles = makeStaticStyles({
  * the menus and dialogs Fluent draws in portals, takes the same tokens.
  * Alerts show here too (`web/alert`).
  */
+/**
+ * Keeps Tabster, Fluent's keyboard and focus manager, for as long as the app
+ * runs. Fluent creates it for the controls that use it and disposes of it
+ * when the last of them unmounts. A dialog's focus trap hides the rest of
+ * the page from assistive technology (`aria-hidden`) and gives it back a
+ * moment after closing: when that dialog was the last such control, as the
+ * logout confirmation is (the login page has none), Tabster went with it
+ * before giving the page back, and the page stayed hidden.
+ */
+const KeepTabster = () => {
+  useFocusFinders();
+  return null;
+};
+
 const FluentRoot = ({ children }: PropsWithChildren) => {
   const { dark } = useTheme();
   useFocusStyles();
   return (
     <FluentProvider theme={fluentTheme(dark)} style={rootStyle}>
+      <KeepTabster />
       {children}
       <AlertHost />
     </FluentProvider>
