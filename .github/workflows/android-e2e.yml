@@ -1,0 +1,88 @@
+name: Android E2E
+
+# Called by ci.yml after its Android job, in the same run, so it downloads that
+# job's artifacts: the E2E APK and updater APKs (apk) and the key the APK
+# trusts for over-the-air updates (ota-e2e-key). It can't run on its own.
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    # The Maestro flows (scripts/e2e.sh) in an emulator on the APK from
+    # the calling run. The first flow logs in through the real SSO login, so
+    # it needs id.tsinghua.edu.cn reachable from
+    # the runner. The flows are kept passing here, as on the local devices
+    # (.maestro/AGENTS.md). No iOS E2E in CI. The emulator runs in Chinese
+    # (its system language: a per-app language doesn't survive the flows'
+    # clearState); the local devices cover English.
+    name: Android E2E tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      MAESTRO_VERSION: 2.12.1
+      MAESTRO_CLI_NO_ANALYTICS: 'true'
+      MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED: 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Download APK
+        uses: actions/download-artifact@v8
+        with:
+          name: apk
+          path: build
+
+      - name: Download update signing key
+        uses: actions/download-artifact@v8
+        with:
+          name: ota-e2e-key
+          path: build/ota-e2e
+
+      # scripts/e2e.sh reads the flows' labels and mock texts from the
+      # translations and mock data (scripts/e2e-env.mjs), which import packages.
+      - name: Set up JS
+        uses: ./.github/actions/setup-js
+
+      # scripts/e2e.sh types the mock login from .env; same values as the build.
+      - name: Write .env
+        run: printf 'DUMMY_USERNAME=e2e\nDUMMY_PASSWORD=e2e\n' > .env
+
+      - name: Install Maestro
+        run: |
+          curl -fsSL https://get.maestro.mobile.dev | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run flows
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        with:
+          api-level: '37.0'
+          target: google_apis
+          arch: x86_64
+          profile: pixel_7
+          disable-animations: true
+          # The action's default options. The system language is set after
+          # boot by scripts/android-locale.sh, which doesn't restart Android:
+          # the emulator's -change-locale does, and the emulator sometimes
+          # exited or dropped its adb connection during that restart.
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          script: |
+            scripts/android-locale.sh zh-CN
+            adb install -r build/app-github-x86_64-release.apk
+            mkdir -p build/maestro; E2E_SCREENSHOTS=build/maestro/screenshots scripts/e2e.sh android --format junit --output build/maestro/report.xml --test-output-dir build/maestro; status=$?; scripts/e2e-ota.sh android || status=1; scripts/e2e-updater.sh android build/updater || status=1; cp build/ota-e2e/server-android.log build/updater-e2e/server.log build/maestro/ 2>/dev/null || true; adb logcat -d > build/maestro/logcat.txt; scripts/android-crash-reports.sh build/maestro; exit $status
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-android
+          path: build/maestro
+          if-no-files-found: ignore
