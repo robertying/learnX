@@ -149,9 +149,14 @@ const setUpDesktop = ({
   };
 
   let quitting = false;
-  app.on('before-quit', () => {
+  const markQuitting = () => {
     quitting = true;
-  });
+  };
+  app.on('before-quit', markQuitting);
+  // Signing out or shutting down ends learnX too, without waiting on a close
+  // it would otherwise turn into hiding (and with an update to install on
+  // quit): Windows tells the window, Linux and macOS the power monitor.
+  powerMonitor.on('shutdown', markQuitting);
 
   /**
    * Closing the window hides it: learnX stays in the tray on Windows (and in
@@ -175,6 +180,7 @@ const setUpDesktop = ({
   /** Whether the window has been ready to show, so the Dock may show it. */
   let windowReady = false;
   app.on('browser-window-created', (_event, win) => {
+    win.on('session-end', markQuitting);
     keepOnClose(win);
     win.once('ready-to-show', () => {
       windowReady = true;

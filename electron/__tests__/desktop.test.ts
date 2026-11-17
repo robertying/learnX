@@ -223,6 +223,22 @@ describe('the window', () => {
     expect(quitting.preventDefault).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ['Windows ends the session', 'session-end'],
+    ['the system shuts down', 'shutdown'],
+  ])('closes for real when %s', (_name, signal) => {
+    const { createWindow, powerMonitor } = setUp();
+    const win = createWindow();
+    if (signal === 'session-end') {
+      win.emit('session-end');
+    } else {
+      powerMonitor.emit('shutdown');
+    }
+    const event = { preventDefault: jest.fn() };
+    win.emit('close', event);
+    expect(event.preventDefault).not.toHaveBeenCalled();
+  });
+
   it('quits on close on Linux, where there may be no tray', () => {
     const { createWindow } = setUp({ platform: 'linux' });
     const win = createWindow();
