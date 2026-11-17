@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { t } from 'helpers/i18n';
 import Notices from 'screens/Notices';
@@ -298,16 +299,23 @@ export const LoginStack = () => {
 export const WhatsNewStack = () => (
   <WhatsNewNavigator.Navigator
     screenLayout={screenLayout}
-    screenOptions={stackScreenOptions}
+    // The sheet starts below the status bar, so Changelog's bar leaves no
+    // room for it (Android; Apple's headers know they're in a sheet).
+    screenOptions={{
+      ...stackScreenOptions,
+      unstable_headerInsets: { top: false },
+    }}
   >
     <WhatsNewNavigator.Screen
       name="WhatsNew"
       component={WhatsNew}
-      // The title is Changelog's back button. The bar is there, empty, with
-      // no line under it on the opaque headers (Mac, before iOS 26): a bar
-      // that only appears for Changelog is laid out too high in the sheet
-      // while it slides in, then drops into place.
+      // The title is Changelog's back button. On Apple platforms the bar is
+      // there, empty, with no line under it on the opaque headers (Mac,
+      // before iOS 26): a bar that only appears for Changelog is laid out too
+      // high in the sheet while it slides in, then drops into place. Android
+      // pushes Changelog with its own bar, so What's New has none, as Setup.
       options={{
+        headerShown: Platform.OS !== 'android',
         headerTitle: '',
         headerShadowVisible: false,
         title: t('whatsNew'),

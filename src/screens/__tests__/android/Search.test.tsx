@@ -40,6 +40,8 @@ const setup = async () => {
     push: jest.fn(),
     addListener: jest.fn(() => jest.fn()),
     getParent: jest.fn(),
+    goBack: jest.fn(),
+    isFocused: jest.fn(() => true),
   };
   await render(
     <Search
@@ -59,7 +61,9 @@ const setup = async () => {
     );
     await act(() => jest.advanceTimersByTime(600));
   };
-  return { navigation, type };
+  const searchBar = { focus: jest.fn(), setText: jest.fn(), blur: jest.fn() };
+  (options().ref as React.RefObject<unknown>).current = searchBar;
+  return { navigation, type, options, searchBar };
 };
 
 describe('Search (Android)', () => {
@@ -80,5 +84,21 @@ describe('Search (Android)', () => {
     expect(screen.queryByText('Midterm room change')).toBeNull();
     await user.press(screen.getByText('Notices'));
     expect(screen.getByRole('checkbox', { name: 'Notices' })).toBeChecked();
+  });
+
+  it("puts the keyboard away with the keyboard's search key", async () => {
+    const { options, searchBar } = await setup();
+    await act(() => options().onSearchButtonPress!({} as never));
+    expect(searchBar.blur).toHaveBeenCalled();
+  });
+
+  it('leaves Search when the search field closes, which covers the Close button', async () => {
+    const { navigation, options } = await setup();
+    await act(() => options().onClose!());
+    expect(navigation.goBack).toHaveBeenCalledTimes(1);
+    // Not once Search is gone or behind a result.
+    navigation.isFocused.mockReturnValue(false);
+    await act(() => options().onClose!());
+    expect(navigation.goBack).toHaveBeenCalledTimes(1);
   });
 });

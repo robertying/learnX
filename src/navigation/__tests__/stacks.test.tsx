@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { render, screen } from '@testing-library/react-native';
 import { useAppStateStore } from 'data/appState';
 import { useCredentialsStore } from 'data/credentials';
@@ -159,7 +160,7 @@ it('leaves the glass header to every stack, with no screen of its own', async ()
     AssignmentSubmissionStack,
   ]) {
     const config = await configOf(Stack);
-    expect(config.screenOptions).toEqual(stackScreenOptions);
+    expect(config.screenOptions).toMatchObject(stackScreenOptions);
     for (const s of config.screens) {
       for (const options of [s.options ?? {}, s.groupOptions ?? {}]) {
         expect(options).not.toHaveProperty('headerTransparent');
@@ -203,6 +204,7 @@ it("shows What's New in a sheet, with the changelog a push away", async () => {
     expect.objectContaining({
       name: 'WhatsNew',
       options: {
+        headerShown: true,
         headerTitle: '',
         headerShadowVisible: false,
         title: t('whatsNew'),
@@ -210,6 +212,16 @@ it("shows What's New in a sheet, with the changelog a push away", async () => {
     }),
     expect.objectContaining({ name: 'Changelog' }),
   ]);
+  // Changelog's bar leaves no room for the status bar above the sheet.
+  expect(config.screenOptions).toMatchObject({
+    unstable_headerInsets: { top: false },
+  });
+});
+
+it("shows What's New on Android with no bar, which Changelog brings", async () => {
+  jest.replaceProperty(Platform, 'OS', 'android');
+  const config = await configOf(WhatsNewStack);
+  expect(config.screens[0].options).toMatchObject({ headerShown: false });
 });
 
 describe('LoginStack', () => {

@@ -1,3 +1,30 @@
+diff --git a/android/src/main/java/expo/modules/ui/DateRangePickerView.kt b/android/src/main/java/expo/modules/ui/DateRangePickerView.kt
+index 48e82b02e2b7829cef14214beeb4f0eee8193a60..f6e2dd12c5e3b459e094f2ba00ae0982437bb54c 100644
+--- a/android/src/main/java/expo/modules/ui/DateRangePickerView.kt
++++ b/android/src/main/java/expo/modules/ui/DateRangePickerView.kt
+@@ -211,14 +211,18 @@ private fun MaterialDateRangePicker(
+   showHeadline: Boolean,
+   colors: DatePickerColors
+ ) {
++  // The range's dates without their year, as Material 3 shows a range
++  // ("Apr 15 – May 30"): with it, two dates don't fit on the headline's line
++  // in Chinese ("2026年11月16日") and wrap a few characters at a time.
++  val dateFormatter = remember { DatePickerDefaults.dateFormatter(selectedDateSkeleton = "MMMd") }
+   when {
+     showTitle && showHeadline ->
+-      DateRangePicker(state = state, modifier = modifier, colors = colors, showModeToggle = showModeToggle)
++      DateRangePicker(state = state, modifier = modifier, dateFormatter = dateFormatter, colors = colors, showModeToggle = showModeToggle)
+     showTitle ->
+-      DateRangePicker(state = state, modifier = modifier, colors = colors, headline = null, showModeToggle = showModeToggle)
++      DateRangePicker(state = state, modifier = modifier, dateFormatter = dateFormatter, colors = colors, headline = null, showModeToggle = showModeToggle)
+     showHeadline ->
+-      DateRangePicker(state = state, modifier = modifier, colors = colors, title = null, showModeToggle = showModeToggle)
++      DateRangePicker(state = state, modifier = modifier, dateFormatter = dateFormatter, colors = colors, title = null, showModeToggle = showModeToggle)
+     else ->
+-      DateRangePicker(state = state, modifier = modifier, colors = colors, title = null, headline = null, showModeToggle = showModeToggle)
++      DateRangePicker(state = state, modifier = modifier, dateFormatter = dateFormatter, colors = colors, title = null, headline = null, showModeToggle = showModeToggle)
+   }
+ }
 diff --git a/android/src/main/java/expo/modules/ui/HostView.kt b/android/src/main/java/expo/modules/ui/HostView.kt
 index 2a4ce000d3ac0d08d57eab9a8bd1490758b68e27..9037d4da9155ca8275d5c01f997fde681dfe4fd6 100644
 --- a/android/src/main/java/expo/modules/ui/HostView.kt
@@ -122,6 +149,54 @@ index 6c36d1fcad46d12b693fe962b8594534b8fb2cbe..aa6fb62127a3105ac3647cf981eb3c16
  ) : Record
  
  internal fun String?.toContentType(): ContentType? = when (this) {
+diff --git a/android/src/main/java/expo/modules/ui/TextView.kt b/android/src/main/java/expo/modules/ui/TextView.kt
+index 9bd672aa1aa9dda660f13986493388e93bdbdd7a..eb3375eca0f837f409d94ec809de29a1a3e853a4 100644
+--- a/android/src/main/java/expo/modules/ui/TextView.kt
++++ b/android/src/main/java/expo/modules/ui/TextView.kt
+@@ -4,6 +4,7 @@ import android.content.Context
+ import android.graphics.Color
+ import android.graphics.Typeface
+ import androidx.compose.material3.MaterialTheme
++import androidx.compose.material3.LocalTextStyle
+ import androidx.compose.material3.Text
+ import androidx.compose.runtime.Composable
+ import androidx.compose.ui.geometry.Offset
+@@ -290,8 +291,10 @@ private fun AnnotatedString.Builder.appendSpans(spans: List<TextSpanRecord>, con
+ 
+ @Composable
+ fun FunctionalComposableScope.TextContent(props: TextProps) {
+-  // Start with typography style if provided, otherwise use default
+-  val baseStyle = props.typography?.toTextStyle() ?: TextStyle.Default
++  // Start with typography style if provided, otherwise the style the text's
++  // container provides (a list item's headline, a button's label), as
++  // Material 3's Text does on its own
++  val baseStyle = props.typography?.toTextStyle() ?: LocalTextStyle.current
+ 
+   // Merge base style with custom properties
+   val mergedStyle = baseStyle.merge(
+diff --git a/android/src/main/java/expo/modules/ui/textfield/TextField.kt b/android/src/main/java/expo/modules/ui/textfield/TextField.kt
+index ef4d779cef5ce980ea30219c8b1c0d3ee17b37c1..94132a3807dde115dad9c76edd9cfb4259e9c770 100644
+--- a/android/src/main/java/expo/modules/ui/textfield/TextField.kt
++++ b/android/src/main/java/expo/modules/ui/textfield/TextField.kt
+@@ -3,6 +3,7 @@ package expo.modules.ui.textfield
+ import android.graphics.Color
+ import androidx.compose.foundation.text.selection.TextSelectionColors
+ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
++import androidx.compose.material3.LocalTextStyle
+ import androidx.compose.material3.MaterialExpressiveTheme
+ import androidx.compose.material3.MotionScheme
+ import androidx.compose.material3.OutlinedTextField
+@@ -269,7 +270,9 @@ fun FunctionalComposableScope.TextFieldContent(
+     }
+   } ?: baseColors
+ 
+-  val textStyle = props.textStyle.toTextStyle(appContext.reactContext)
++  // On the field's own style (bodyLarge), as Material 3's fields take it,
++  // not on a bare one: typed text was smaller than the field's label
++  val textStyle = LocalTextStyle.current.merge(props.textStyle.toTextStyle(appContext.reactContext))
+   val visualTransformation = props.visualTransformation.toVisualTransformation()
+ 
+   // Workaround (pending upstream fix, https://issuetracker.google.com/issues/519816993)
 diff --git a/build/jetpack-compose/modifiers/index.d.ts b/build/jetpack-compose/modifiers/index.d.ts
 index 5a667d6d91731ca9a9e99ea08d84cad17c853ae9..bdfe3bb2288d2146e4431a162a9e03ad08dba678 100644
 --- a/build/jetpack-compose/modifiers/index.d.ts

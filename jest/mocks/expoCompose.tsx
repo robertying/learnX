@@ -250,7 +250,8 @@ type NativeState = ReturnType<typeof useSwiftUINativeState<string>>;
 
 /**
  * A plain text input showing the native state's text. The keyboard action
- * runs `onNext` or `onDone`, and the ref's `focus` is a `jest.fn`.
+ * runs `onNext` or `onDone`, focus and blur report to `onFocusChanged`, and
+ * the ref's `focus` and `blur` are `jest.fn`s (`blur` reports the focus lost).
  */
 const Field = ({
   value,
@@ -260,6 +261,7 @@ const Field = ({
   keyboardActions,
   visualTransformation,
   onValueChange,
+  onFocusChanged,
   modifiers,
   children,
   ref,
@@ -276,11 +278,14 @@ const Field = ({
   keyboardActions?: { onNext?: () => void; onDone?: () => void };
   visualTransformation?: 'password' | 'none';
   onValueChange?: (text: string) => void;
-  ref?: Ref<{ focus: () => void }>;
+  onFocusChanged?: (focused: boolean) => void;
+  ref?: Ref<{ focus: () => void; blur: () => void }>;
 }) => {
   const text = useSyncExternalStore(value.subscribe, value.get);
   const [focus] = useState(() => jest.fn());
-  useImperativeHandle(ref, () => ({ focus }));
+  const [blur] = useState(() => jest.fn());
+  blur.mockImplementation(() => onFocusChanged?.(false));
+  useImperativeHandle(ref, () => ({ focus, blur }));
   return (
     <View>
       <RNTextInput
@@ -297,8 +302,11 @@ const Field = ({
           onValueChange?.(typed);
         }}
         onSubmitEditing={keyboardActions?.onNext ?? keyboardActions?.onDone}
+        onFocus={() => onFocusChanged?.(true)}
+        onBlur={() => onFocusChanged?.(false)}
         {...{
           focus,
+          blur,
           keyboardOptions,
           contentType: fromModifiers(modifiers).contentType,
         }}
