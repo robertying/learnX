@@ -1,25 +1,19 @@
 # Swipe the list with id LIST up until the element with id ID shows. Form rows
 # below the fold aren't in the hierarchy until then. On iPhone the tab bar
-# floats over the list's end, where a tap would land on a tab, so the row must
-# show above it.
+# lies over the list's end, where a tap would land on a tab even when the row's
+# top shows above it (iOS 17), so the row is scrolled up to the upper part of
+# the screen (Maestro's centerElement: its middle in the top 70%).
 appId: ${APP_ID}
 ---
 - runFlow:
     when:
       true: ${maestro.platform == 'ios' && IPAD != 'true'}
     commands:
-      - repeat:
-          times: 8
-          while:
-            notVisible:
-              id: ${ID}
-              above:
-                id: 'tab-notices|bell\.fill'
-          commands:
-            - swipe:
-                from:
-                  id: ${LIST}
-                direction: UP
+      - scrollUntilVisible:
+          element:
+            id: ${ID}
+          direction: DOWN
+          centerElement: true
 - runFlow:
     when:
       true: ${maestro.platform != 'ios' || IPAD == 'true'}

@@ -119,14 +119,25 @@ fi
 
 # IPAD=true on an iPad simulator (the booted one, or MAESTRO_DEVICE), whose
 # paged tab bar subflows/tab.yaml handles; other devices skip that check.
+# IOS_MAJOR is that simulator's iOS major version (0 on Android): before iOS 26
+# the flows go back with the back button instead of a swipe (subflows/back.yaml).
 ipad=false
+ios_major=0
 if [ "$platform" = ios ]; then
-  booted="$(xcrun simctl list devices booted 2>/dev/null || true)"
+  # Each device's line, after its runtime's "-- iOS <version> --" heading.
+  booted="$(xcrun simctl list devices booted 2>/dev/null |
+    awk '/^-- iOS / { version = $3; next } { print version " " $0 }' || true)"
   if [ -n "${MAESTRO_DEVICE:-}" ]; then
     booted="$(grep -F "$MAESTRO_DEVICE" <<<"$booted" || true)"
   fi
   if grep -q 'iPad' <<<"$booted"; then
     ipad=true
+  fi
+  version="$(head -n 1 <<<"$booted" | cut -d ' ' -f 1)"
+  ios_major="${version%%.*}"
+  if ! [[ "$ios_major" =~ ^[0-9]+$ ]]; then
+    echo "Couldn't read the simulator's iOS version" >&2
+    exit 1
   fi
 fi
 
@@ -214,6 +225,7 @@ test_args=(
   -e APP_LANGUAGE="${E2E_LANGUAGE:-}"
   -e STATE_CLEARED="${E2E_STATE_CLEARED:-}"
   -e IPAD="$ipad"
+  -e IOS_MAJOR="$ios_major"
   -e CALENDAR_URL="$calendar_url"
   -e SHOTS_DIR="${shots_dir:+shots}"
   "${env_args[@]}"
