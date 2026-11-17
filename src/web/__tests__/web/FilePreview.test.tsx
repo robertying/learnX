@@ -24,6 +24,11 @@ afterEach(() => {
 const download = `${roots.cache}downloads/c/Lecture%201.pdf`;
 
 it('maps the app’s files to the preview’s own origin', () => {
+  // Before the main process has said where the folders are (asked once).
+  jest
+    .mocked((globalThis as any).learnx.files.sync)
+    .mockReturnValueOnce({ error: 'no' });
+  expect(previewUrlOf(download)).toBeNull();
   expect(previewUrlOf(download)).toBe(
     'app://files/cache/downloads/c/Lecture%201.pdf',
   );
@@ -31,10 +36,6 @@ it('maps the app’s files to the preview’s own origin', () => {
     'app://files/document/drafts/a.png',
   );
   expect(previewUrlOf('file:///elsewhere/a.pdf')).toBeNull();
-  jest
-    .mocked((globalThis as any).learnx.files.sync)
-    .mockReturnValue({ error: 'no' });
-  expect(previewUrlOf(download)).toBeNull();
 });
 
 it('shows a PDF in Chromium’s viewer and a picture fitted', () => {
@@ -49,6 +50,7 @@ it('shows a PDF in Chromium’s viewer and a picture fitted', () => {
   const image = container.querySelector('img')!;
   expect(image.getAttribute('src')).toBe('app://files/cache/a/diagram.PNG');
   expect(image.style.objectFit).toBe('contain');
+  expect(image.getAttribute('alt')).toBe('diagram.PNG');
 
   rerender(<FilePreview uri="file:///elsewhere/a.pdf" />);
   expect(container.querySelector('iframe,img')).toBeNull();

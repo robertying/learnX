@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
-import { bridge } from 'web/bridge';
+import { Paths } from 'expo-file-system';
+import desktopFileTypes from 'constants/desktopFileTypes.json';
 
 /**
  * Where the preview loads one of learnX's own files from: `app://files/`, an
@@ -9,11 +10,17 @@ import { bridge } from 'web/bridge';
  * anything outside the app's folders.
  */
 export const previewUrlOf = (uri: string) => {
-  const answer = bridge().files.sync('roots');
-  if ('error' in answer) {
+  let roots: [string, string][];
+  try {
+    // expo-file-system's stand-in, which asks the main process once.
+    roots = [
+      ['cache', `${Paths.cache.uri.replace(/\/+$/, '')}/`],
+      ['document', `${Paths.document.uri.replace(/\/+$/, '')}/`],
+    ];
+  } catch {
     return null;
   }
-  for (const [name, root] of Object.entries(answer.result)) {
+  for (const [name, root] of roots) {
     if (uri.startsWith(root)) {
       return `app://files/${name}/${uri.slice(root.length)}`;
     }
@@ -21,8 +28,15 @@ export const previewUrlOf = (uri: string) => {
   return null;
 };
 
-const isImage = (uri: string) =>
-  /\.(png|jpe?g|gif|webp|bmp|avif|ico)$/i.test(uri);
+/** A picture of the types the main process serves (not a PDF). */
+const isImage = (uri: string) => {
+  const extension = /\.([^./]+)$/.exec(uri)?.[1]?.toLowerCase();
+  return (
+    !!extension &&
+    extension !== 'pdf' &&
+    Object.hasOwn(desktopFileTypes.preview, extension)
+  );
+};
 
 /**
  * A downloaded file shown in the Electron app: a PDF in Chromium's own
@@ -34,6 +48,7 @@ const FilePreview: React.FC<{
   testID?: string;
 }> = ({ uri, style, testID }) => {
   const src = previewUrlOf(uri);
+  const name = decodeURIComponent(uri.split('/').pop() ?? '');
   const fill = {
     position: 'absolute',
     inset: 0,
@@ -47,13 +62,13 @@ const FilePreview: React.FC<{
         ? isImage(uri)
           ? createElement('img', {
               src,
-              alt: '',
+              alt: name,
               draggable: false,
               style: { ...fill, objectFit: 'contain' },
             })
           : createElement('iframe', {
               src,
-              title: decodeURIComponent(uri.split('/').pop() ?? ''),
+              title: name,
               style: fill,
             })
         : null}
