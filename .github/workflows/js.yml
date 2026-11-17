@@ -10,11 +10,12 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# A new push to a PR cancels that PR's older run. Main pushes and manual runs
-# each get their own group, so another merge can't cancel them (and the cache
-# they save).
+# A newer push to the same pull request or to main cancels the older run: the
+# newest run checks everything the older one would have (its commits too) and
+# saves the caches. Manual runs each get their own group, so a push never
+# cancels them and they never cancel a push run.
 concurrency:
-  group: js-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
+  group: js-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 permissions:
