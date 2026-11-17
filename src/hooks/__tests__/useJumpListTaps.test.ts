@@ -34,6 +34,7 @@ it('labels the tray and opens what the Jump List asks for', async () => {
     quit: t('trayQuit'),
     today: t('today'),
     schedule: t('schedule'),
+    exportFolder: t('downloadsExportFolderElectron'),
   });
   // The launch's own, once.
   expect(open).toHaveBeenCalledWith({ type: 'schedule' });

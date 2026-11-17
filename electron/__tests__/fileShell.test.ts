@@ -202,9 +202,10 @@ it('lets the page export into a folder the user picked', async () => {
     canceled: false,
     filePaths: [elsewhere],
   });
-  const uri = await fileShell.pickDirectory(null);
+  const uri = await fileShell.pickDirectory(null, 'Choose Export Folder');
   expect(uri).toBe(pathToFileURL(elsewhere + path.sep).href);
   expect(dialog.showOpenDialog).toHaveBeenCalledWith({
+    title: 'Choose Export Folder',
     properties: ['openDirectory', 'createDirectory'],
   });
   const { file } = download('out.txt', 'exported');

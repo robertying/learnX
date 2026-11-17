@@ -501,6 +501,7 @@ export default {
   downloadsExportCaption:
     'Copies the files to a "learnX" folder in a place you choose, sorted by semester and course. Exporting again updates that folder.',
   downloadsExportCourse: 'Export',
+  downloadsExportFolderElectron: 'Choose Export Folder',
   downloadsExported: 'Exported {files}',
   downloadsExportedPartly: "Exported {files}; {failed} couldn't be copied",
   downloadsExportFailed: "Couldn't export: {error}",

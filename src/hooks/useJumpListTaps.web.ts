@@ -20,7 +20,8 @@ const listen = () => {
 /**
  * Opens what the Electron app's Jump List (Windows) asks for, Today or the
  * Schedule, from the launch that started learnX or a later one, and gives
- * the tray menu and the Jump List their labels in the app's language.
+ * the tray menu, the Jump List and the export folder picker their labels
+ * in the app's language.
  */
 const useJumpListTaps = () => {
   const open = useEffectEvent(useOpenTarget());
@@ -32,6 +33,7 @@ const useJumpListTaps = () => {
       quit: t('trayQuit'),
       today: t('today'),
       schedule: t('schedule'),
+      exportFolder: t('downloadsExportFolderElectron'),
     });
     listen();
     const listener: Listener = target => open({ type: target });

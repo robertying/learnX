@@ -32,8 +32,8 @@ const openTargetOf = argv => {
 };
 
 /**
- * The tray's and the Jump List's labels, in English until the page sends
- * them in the app's language.
+ * The tray's, the Jump List's and the export folder picker's labels, in
+ * English until the page sends them in the app's language.
  */
 const DEFAULT_LABELS = {
   open: 'Open learnX',
@@ -41,6 +41,7 @@ const DEFAULT_LABELS = {
   quit: 'Quit learnX',
   today: 'Today',
   schedule: 'Schedule',
+  exportFolder: 'Choose Export Folder',
 };
 
 /**
@@ -222,7 +223,7 @@ const setUpSystem = ({
   });
   ipcMain.handle('shell:pickDirectory', event => {
     fromApp(event);
-    return fileShell.pickDirectory(windowOf(event));
+    return fileShell.pickDirectory(windowOf(event), labels.exportFolder);
   });
   ipcMain.handle('shell:pickFiles', (event, options) => {
     fromApp(event);

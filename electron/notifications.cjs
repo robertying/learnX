@@ -41,7 +41,9 @@ const dueAt = (trigger, now) => {
 
 /**
  * What a notification shows. Windows and Linux have no subtitle, so the
- * course (the subtitle in the approved format) leads the body there.
+ * course (the subtitle in the approved format) leads the body there: on a
+ * line of its own on Windows, and before a " · " on Linux, where GNOME's
+ * banner shows the body as one line and would run the two together.
  * @param {NotificationRequest['content']} content
  * @param {string} platform
  */
@@ -53,7 +55,9 @@ const shownContent = (content, platform) => {
   }
   return {
     title,
-    body: [content.subtitle, body].filter(Boolean).join('\n'),
+    body: [content.subtitle, body]
+      .filter(Boolean)
+      .join(platform === 'linux' ? ' · ' : '\n'),
   };
 };
 

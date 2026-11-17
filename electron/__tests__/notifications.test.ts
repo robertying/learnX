@@ -69,6 +69,10 @@ describe('shownContent', () => {
       title: 'Homework 6',
       body: 'Probability\nDue in 1 hour',
     });
+    expect(shownContent(content, 'linux')).toEqual({
+      title: 'Homework 6',
+      body: 'Probability · Due in 1 hour',
+    });
     expect(shownContent({}, 'linux')).toEqual({ title: '', body: '' });
   });
 });

@@ -585,6 +585,17 @@ describe('files', () => {
     });
     electron.dialog.showSaveDialog.mockResolvedValue({ canceled: true });
     await expect(invoke('shell:pickDirectory')).resolves.toBeNull();
+    // Titled in the page's language once it says (GTK's own says "Open File").
+    expect(electron.dialog.showOpenDialog).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.objectContaining({ title: 'Choose Export Folder' }),
+    );
+    await invoke('system:setLabels', { exportFolder: '选择导出文件夹' });
+    await invoke('shell:pickDirectory');
+    expect(electron.dialog.showOpenDialog).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.objectContaining({ title: '选择导出文件夹' }),
+    );
     await expect(invoke('shell:pickFiles', {})).resolves.toBeNull();
     await expect(invoke('shell:saveText', 'a.ics', 'x')).resolves.toBeNull();
     await invoke('shell:copyText', 'https://learn.tsinghua.edu.cn/f');
@@ -592,7 +603,7 @@ describe('files', () => {
       'https://learn.tsinghua.edu.cn/f',
     );
     // Each checks that it comes from the app's window.
-    expect(fromApp).toHaveBeenCalledTimes(4);
+    expect(fromApp).toHaveBeenCalledTimes(6);
     await expect(invoke('shell:open', 'https://x')).rejects.toThrow('ENOENT');
     await expect(invoke('shell:showInFolder', 'https://x')).rejects.toThrow(
       'ENOENT',

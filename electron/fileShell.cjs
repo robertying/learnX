@@ -210,10 +210,15 @@ const createFileShell = ({
      * Asks for a folder (an export's destination) and lets the page write
      * in it. Resolves to its URI, or null when cancelled.
      * @param {Electron.BrowserWindow | null} win
+     * @param {string} [title] the dialog's title, in the app's language
+     *   (GTK's own says "Open File")
      */
-    pickDirectory: async win => {
+    pickDirectory: async (win, title) => {
       /** @type {Electron.OpenDialogOptions} */
-      const options = { properties: ['openDirectory', 'createDirectory'] };
+      const options = {
+        ...(title ? { title } : {}),
+        properties: ['openDirectory', 'createDirectory'],
+      };
       const result = win
         ? await dialog.showOpenDialog(win, options)
         : await dialog.showOpenDialog(options);

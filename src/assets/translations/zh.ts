@@ -478,6 +478,7 @@ const zh: typeof en = {
   downloadsExportCaption:
     '将文件复制到你选择的位置下的“learnX”文件夹，按学期和课程分类。再次导出会更新该文件夹。',
   downloadsExportCourse: '导出',
+  downloadsExportFolderElectron: '选择导出文件夹',
   downloadsExported: '已导出{files}',
   downloadsExportedPartly: '已导出{files}，{failed}个文件未能复制',
   downloadsExportFailed: '导出失败：{error}',

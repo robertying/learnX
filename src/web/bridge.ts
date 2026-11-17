@@ -134,6 +134,8 @@ export interface TrayLabels {
   quit: string;
   today: string;
   schedule: string;
+  /** The export folder picker's title. */
+  exportFolder: string;
 }
 
 /** A screen a Jump List task opens. */
