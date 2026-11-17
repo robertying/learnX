@@ -155,6 +155,38 @@ index b81f0e2f91e3638a3d2a40f4a05a853a1580e093..917593c6eea621ec84fcc06f170da6ad
          modifiers,
          ...modifiers ? createViewModifierEventListener(modifiers) : undefined,
          onButtonPress: onPress
+diff --git a/build/swift-ui/modifiers/index.d.ts b/build/swift-ui/modifiers/index.d.ts
+index 186073ea4722b5e58046bba393a905eeeff5a89c..d3e2de19f58e846135a6c0ad647afae1eaaeeaa6 100644
+--- a/build/swift-ui/modifiers/index.d.ts
++++ b/build/swift-ui/modifiers/index.d.ts
+@@ -930,7 +930,9 @@ export declare const listRowSpacing: (spacing?: number) => ModifierConfig;
+  * </HStack>
+  * ```
+  */
+-export declare const alignmentGuide: (guide: "leading" | "center" | "trailing" | "listRowSeparatorLeading" | "listRowSeparatorTrailing", value: number) => ModifierConfig;
++export declare const alignmentGuide: (guide: "leading" | "center" | "trailing" | "listRowSeparatorLeading" | "listRowSeparatorTrailing", value: number, options?: {
++    fromTrailing?: boolean;
++}) => ModifierConfig;
+ /**
+  * Sets the truncation mode for lines of text that are too long to fit in the available space.
+  * @param mode - The truncation mode that specifies where to truncate the text within the text view, if needed.
+diff --git a/build/swift-ui/modifiers/index.js b/build/swift-ui/modifiers/index.js
+index 253a9be9ee8c6c70f86edefbed21006fa953fda4..053aaa2ff031bdc1956cbd43c59aa11b55f288bd 100644
+--- a/build/swift-ui/modifiers/index.js
++++ b/build/swift-ui/modifiers/index.js
+@@ -859,9 +859,10 @@ export function frame(params) {
+  *   <Text>The separator starts 32 points from the leading edge</Text>
+  * </HStack>
+  * ```
+- */ export const alignmentGuide = (guide, value)=>createModifier('alignmentGuide', {
++ */ export const alignmentGuide = (guide, value, options)=>createModifier('alignmentGuide', {
+         guide,
+-        value
++        value,
++        fromTrailing: options?.fromTrailing ?? false
+     });
+ /**
+  * Sets the truncation mode for lines of text that are too long to fit in the available space.
 diff --git a/ios/Button/Button.swift b/ios/Button/Button.swift
 index 337bf4b91ca3f16de5ad3d264af3fe86c16584fe..8984aa1b816d564951c893181558f7135066b1f6 100644
 --- a/ios/Button/Button.swift
@@ -205,53 +237,8 @@ index 23a980a2a1cb9deb335d6e26f5ffbaf67b8afe2a..e057ed82dc6bb31c64e594495fa4381c
 +  }
    var onButtonPress = EventDispatcher()
  }
-diff --git a/src/jetpack-compose/modifiers/index.ts b/src/jetpack-compose/modifiers/index.ts
-index 91a0e72da596dd78b8301a11a94bd38f0d8beff1..e14554027afed3cc80484e56b7bd98a66f1c0ebd 100644
---- a/src/jetpack-compose/modifiers/index.ts
-+++ b/src/jetpack-compose/modifiers/index.ts
-@@ -488,6 +488,10 @@ export type SemanticsConfig = {
-    * content does not read well aloud, as with an abbreviation or a glyph.
-    */
-   contentDescription?: string;
-+  /**
-+   * Marks the element as a heading, which TalkBack announces as one and lets people jump between.
-+   */
-+  heading?: boolean;
- };
- 
- /**
-diff --git a/src/swift-ui/Button/index.tsx b/src/swift-ui/Button/index.tsx
-index 41df9325424c31c0c0eb728796bd835c4db2ba09..ad3c3db83913e39bc1d4ef75107005b1fa3393e7 100644
---- a/src/swift-ui/Button/index.tsx
-+++ b/src/swift-ui/Button/index.tsx
-@@ -44,7 +44,9 @@ export interface ButtonProps extends CommonViewModifierProps {
-   target?: string;
- }
- 
--type NativeButtonProps = Omit<ButtonProps, 'onPress'> & ViewEvent<'onButtonPress', void>;
-+type NativeButtonProps = Omit<ButtonProps, 'onPress' | 'role'> & {
-+  buttonRole?: ButtonRole;
-+} & ViewEvent<'onButtonPress', void>;
- 
- const ButtonNativeView: React.ComponentType<NativeButtonProps> = requireNativeView(
-   'ExpoUI',
-@@ -73,10 +75,13 @@ const ButtonNativeView: React.ComponentType<NativeButtonProps> = requireNativeVi
-  * ```
-  */
- export function Button(props: ButtonProps) {
--  const { label, children, onPress, modifiers, ...restProps } = props;
-+  const { label, children, onPress, modifiers, role, ...restProps } = props;
- 
-+  // learnX patch: sent as `buttonRole`, since React Native reads a host view's
-+  // `role` prop as its accessibility role and logs "Unsupported Role value".
-   const baseProps = {
-     ...restProps,
-+    buttonRole: role,
-     modifiers,
-     ...(modifiers ? createViewModifierEventListener(modifiers) : undefined),
-     onButtonPress: onPress,
 diff --git a/ios/Modifiers/FontModifier.swift b/ios/Modifiers/FontModifier.swift
-index a9e0dac..f5a6eb1 100644
+index a9e0dac9d371043fa9a99c1b7b6b9a0916dfbd50..f5a6eb13894f151bb700b25187f411dc7c3702a7 100644
 --- a/ios/Modifiers/FontModifier.swift
 +++ b/ios/Modifiers/FontModifier.swift
 @@ -27,6 +27,21 @@ internal enum FontWeight: String, Enumerable {
@@ -331,3 +318,85 @@ index a9e0dac..f5a6eb1 100644
 +    return UIFont.systemFont(ofSize: styled.pointSize, weight: weight.toUIKit())
 +  }
  }
+diff --git a/ios/Modifiers/ViewModifierRegistry.swift b/ios/Modifiers/ViewModifierRegistry.swift
+index 07a856574df36a69b802bd483caf4e33ae05a976..13140f1f7571c618ffaf1b99116acb2fe2863481 100644
+--- a/ios/Modifiers/ViewModifierRegistry.swift
++++ b/ios/Modifiers/ViewModifierRegistry.swift
+@@ -1098,10 +1098,15 @@ internal enum AlignmentGuideOptions: String, Enumerable {
+ internal struct AlignmentGuideModifier: ViewModifier, Record {
+   @Field var guide: AlignmentGuideOptions = .leading
+   @Field var value: Double = 0
++  // learnX: `value` counted back from the view's trailing edge, so a guide can
++  // follow the end of a view whose width isn't known (a row's separator).
++  @Field var fromTrailing: Bool = false
+ 
+   func body(content: Content) -> some View {
+     if let alignment = guide.horizontalAlignment {
+-      content.alignmentGuide(alignment) { _ in CGFloat(value) }
++      content.alignmentGuide(alignment) { d in
++        fromTrailing ? d.width - CGFloat(value) : CGFloat(value)
++      }
+     } else {
+       content
+     }
+diff --git a/src/jetpack-compose/modifiers/index.ts b/src/jetpack-compose/modifiers/index.ts
+index 91a0e72da596dd78b8301a11a94bd38f0d8beff1..e14554027afed3cc80484e56b7bd98a66f1c0ebd 100644
+--- a/src/jetpack-compose/modifiers/index.ts
++++ b/src/jetpack-compose/modifiers/index.ts
+@@ -488,6 +488,10 @@ export type SemanticsConfig = {
+    * content does not read well aloud, as with an abbreviation or a glyph.
+    */
+   contentDescription?: string;
++  /**
++   * Marks the element as a heading, which TalkBack announces as one and lets people jump between.
++   */
++  heading?: boolean;
+ };
+ 
+ /**
+diff --git a/src/swift-ui/Button/index.tsx b/src/swift-ui/Button/index.tsx
+index 41df9325424c31c0c0eb728796bd835c4db2ba09..ad3c3db83913e39bc1d4ef75107005b1fa3393e7 100644
+--- a/src/swift-ui/Button/index.tsx
++++ b/src/swift-ui/Button/index.tsx
+@@ -44,7 +44,9 @@ export interface ButtonProps extends CommonViewModifierProps {
+   target?: string;
+ }
+ 
+-type NativeButtonProps = Omit<ButtonProps, 'onPress'> & ViewEvent<'onButtonPress', void>;
++type NativeButtonProps = Omit<ButtonProps, 'onPress' | 'role'> & {
++  buttonRole?: ButtonRole;
++} & ViewEvent<'onButtonPress', void>;
+ 
+ const ButtonNativeView: React.ComponentType<NativeButtonProps> = requireNativeView(
+   'ExpoUI',
+@@ -73,10 +75,13 @@ const ButtonNativeView: React.ComponentType<NativeButtonProps> = requireNativeVi
+  * ```
+  */
+ export function Button(props: ButtonProps) {
+-  const { label, children, onPress, modifiers, ...restProps } = props;
++  const { label, children, onPress, modifiers, role, ...restProps } = props;
+ 
++  // learnX patch: sent as `buttonRole`, since React Native reads a host view's
++  // `role` prop as its accessibility role and logs "Unsupported Role value".
+   const baseProps = {
+     ...restProps,
++    buttonRole: role,
+     modifiers,
+     ...(modifiers ? createViewModifierEventListener(modifiers) : undefined),
+     onButtonPress: onPress,
+diff --git a/src/swift-ui/modifiers/index.ts b/src/swift-ui/modifiers/index.ts
+index 6e4bc76a1cb91cf589d0faf97afa178a267e0198..c0c246cf2a8a46149b646a63a8fca01c522360e0 100644
+--- a/src/swift-ui/modifiers/index.ts
++++ b/src/swift-ui/modifiers/index.ts
+@@ -1247,8 +1247,9 @@ export const listRowSpacing = (spacing?: number) => createModifier('listRowSpaci
+  */
+ export const alignmentGuide = (
+   guide: 'leading' | 'center' | 'trailing' | 'listRowSeparatorLeading' | 'listRowSeparatorTrailing',
+-  value: number
+-) => createModifier('alignmentGuide', { guide, value });
++  value: number,
++  options?: { fromTrailing?: boolean }
++) => createModifier('alignmentGuide', { guide, value, fromTrailing: options?.fromTrailing ?? false });
+ 
+ /**
+  * Sets the truncation mode for lines of text that are too long to fit in the available space.

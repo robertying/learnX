@@ -12,6 +12,7 @@ jest.mock('expo', () => ({
     mockNativeProps(props);
     return null;
   },
+  requireNativeModule: () => ({}),
 }));
 
 // Both of the package's entry points: `src` for Metro's `expo-source`
@@ -36,5 +37,32 @@ describe.each(entries)('%s', entry => {
   it('sends no role when there is none', async () => {
     await render(<Button label="Open" />);
     expect(mockNativeProps.mock.calls.at(-1)![0].buttonRole).toBeUndefined();
+  });
+});
+
+// The `alignmentGuide` modifier also takes `fromTrailing`: its value counts back
+// from the view's trailing edge (Form rows' separators end at the row's end).
+const modifierEntries = [
+  '../../node_modules/@expo/ui/src/swift-ui/modifiers/index.ts',
+  '../../node_modules/@expo/ui/build/swift-ui/modifiers/index.js',
+];
+
+describe.each(modifierEntries)('%s', entry => {
+  const { alignmentGuide } = jest.requireActual<{
+    alignmentGuide: (
+      guide: string,
+      value: number,
+      options?: { fromTrailing?: boolean },
+    ) => Record<string, unknown>;
+  }>(entry);
+
+  it('sends fromTrailing for a guide counted from the trailing edge', () => {
+    expect(
+      alignmentGuide('listRowSeparatorTrailing', 0, { fromTrailing: true }),
+    ).toMatchObject({ guide: 'listRowSeparatorTrailing', fromTrailing: true });
+    expect(alignmentGuide('listRowSeparatorLeading', 30)).toMatchObject({
+      value: 30,
+      fromTrailing: false,
+    });
   });
 });

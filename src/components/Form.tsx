@@ -40,6 +40,7 @@ import {
 } from '@expo/ui/swift-ui';
 import {
   accessibilityAddTraits,
+  alignmentGuide,
   accessibilityHidden,
   accessibilityLabel,
   buttonStyle,
@@ -279,9 +280,16 @@ const macRowBackground = listRowBackground(
 const macFirstSectionModifiers = [
   listSectionMargins({ edges: 'top', length: 20 }),
 ];
+// System Settings sets a row's symbol and text close to the group's edges.
+const macRowInset = 12;
 const macSectionModifiers = [
   macRowBackground,
-  listRowInsets({ top: 10, leading: 20, bottom: 10, trailing: 20 }),
+  listRowInsets({
+    top: 10,
+    leading: macRowInset,
+    bottom: 10,
+    trailing: macRowInset,
+  }),
 ];
 // System Settings on the Mac: bold titles in the label color above the
 // group. (Catalyst ignores headerProminence, so the title is our own Text.)
@@ -440,7 +448,7 @@ const RowLabel: React.FC<{
   // own text size: there the symbol gets a column of its own, at the rows'
   // text size, as in System Settings.
   return DeviceInfo.isMac() ? (
-    <HStack spacing={12}>
+    <HStack spacing={macIconSpacing} modifiers={macIconRowModifiers}>
       <Image
         systemName={systemIcons[icon].ios}
         size={textStyles.body.fontSize}
@@ -467,7 +475,22 @@ const RowLabel: React.FC<{
   );
 };
 
-const macIconModifiers = [frame({ width: 24 })];
+const macIconWidth = 20;
+const macIconSpacing = 14;
+const macIconModifiers = [frame({ width: macIconWidth })];
+// The separator under the row starts where its text does, past the symbol.
+const macIconRowModifiers = [
+  alignmentGuide('listRowSeparatorLeading', macIconWidth + macIconSpacing),
+];
+// Every row is as wide as the row, with its separator ending at the row's
+// end, past the chevron or switch, as in System Settings. (SwiftUI on the
+// Mac ends it short of what's at the end of the row.)
+const rowEnd = DeviceInfo.isMac()
+  ? [
+      frame({ maxWidth: 100_000, alignment: 'leading' }),
+      alignmentGuide('listRowSeparatorTrailing', 0, { fromTrailing: true }),
+    ]
+  : [];
 
 /** The row's subtitle and detail for the text size (`stackedDetail`). */
 const useStackedDetail = (subtitle?: string, detail?: string) =>
@@ -522,7 +545,12 @@ const ItemRow: React.FC<
 }) => {
   const { subtitle, detail } = useStackedDetail(rest.subtitle, rest.detail);
   const row = (
-    <HStack modifiers={done ? doneModifiers : undefined}>
+    <HStack
+      modifiers={[
+        ...(done ? doneModifiers : []),
+        ...(progress === undefined ? rowEnd : []),
+      ]}
+    >
       <RowLabel
         title={title}
         subtitle={subtitle}
@@ -541,7 +569,7 @@ const ItemRow: React.FC<
   return progress === undefined ? (
     row
   ) : (
-    <VStack alignment="leading" spacing={8}>
+    <VStack alignment="leading" spacing={8} modifiers={rowEnd}>
       {row}
       <ProgressView value={progress} />
     </VStack>
@@ -559,7 +587,7 @@ export const FormText: React.FC<FormTextProps> = ({
 }) => {
   const { subtitle, detail } = useStackedDetail(row.subtitle, row.detail);
   return row.done || row.progress !== undefined || action ? (
-    <VStack testID={testID}>
+    <VStack testID={testID} modifiers={rowEnd}>
       <ItemRow
         {...row}
         detailTint={detailTint}
@@ -588,6 +616,7 @@ export const FormText: React.FC<FormTextProps> = ({
         />
       }
       testID={testID}
+      modifiers={rowEnd}
     >
       <RowDetail detail={detail} tint={detailTint} />
     </LabeledContent>
@@ -653,7 +682,7 @@ export const FormButton: React.FC<FormButtonProps> = ({
         ...(selected ? selectedModifiers : []),
       ]}
     >
-      <HStack>
+      <HStack modifiers={rowEnd}>
         <RowLabel
           title={title}
           subtitle={subtitle}
@@ -740,7 +769,7 @@ export const FormFile: React.FC<FormFileProps> = ({
     testID={testID}
     modifiers={isDisabled ? [disabled(true)] : undefined}
   >
-    <HStack>
+    <HStack modifiers={rowEnd}>
       <RowLabel
         title={title}
         subtitle={subtitle}
@@ -795,6 +824,7 @@ export const FormTextField: React.FC<FormTextFieldProps> = props => {
         ...(plain ? plainTextModifiers : []),
         ...(isDisabled ? [disabled(true)] : []),
         ...(label ? [accessibilityLabel(label)] : []),
+        ...rowEnd,
       ]}
     />
   );
@@ -806,7 +836,7 @@ export const FormProgress: React.FC<FormProgressProps> = ({
   value,
   testID,
 }) => (
-  <ProgressView value={value} testID={testID}>
+  <ProgressView value={value} testID={testID} modifiers={rowEnd}>
     <Text>{title}</Text>
   </ProgressView>
 );
@@ -825,7 +855,10 @@ export const FormToggle: React.FC<FormToggleProps> = ({
   loading,
 }) =>
   loading ? (
-    <LabeledContent label={<RowLabel title={title} icon={icon} plain />}>
+    <LabeledContent
+      label={<RowLabel title={title} icon={icon} plain />}
+      modifiers={rowEnd}
+    >
       <ProgressView />
     </LabeledContent>
   ) : (
@@ -838,7 +871,11 @@ export const FormToggle: React.FC<FormToggleProps> = ({
         icon && !DeviceInfo.isMac() ? systemIcons[icon].ios : undefined
       }
       testID={testID}
-      modifiers={isDisabled ? [switchStyle, disabled(true)] : [switchStyle]}
+      modifiers={[
+        switchStyle,
+        ...(isDisabled ? [disabled(true)] : []),
+        ...rowEnd,
+      ]}
     >
       {DeviceInfo.isMac() ? <RowLabel title={title} icon={icon} plain /> : null}
     </Toggle>
@@ -854,7 +891,10 @@ export const FormNumberField: React.FC<FormNumberFieldProps> = ({
 }) => {
   const setFocused = useContext(NumberFocusContext);
   return (
-    <LabeledContent label={<RowLabel title={title} icon={icon} plain />}>
+    <LabeledContent
+      label={<RowLabel title={title} icon={icon} plain />}
+      modifiers={rowEnd}
+    >
       <TextInput
         defaultValue={String(value)}
         onChangeText={parseNumberInput(onValueChange)}
@@ -884,7 +924,10 @@ export const FormParagraph: React.FC<FormParagraphProps> = ({
   testID,
 }) => (
   <Text
-    modifiers={headline ? headlineModifiers : paragraphModifiers}
+    modifiers={[
+      ...(headline ? headlineModifiers : paragraphModifiers),
+      ...rowEnd,
+    ]}
     testID={testID}
   >
     {text}
@@ -904,7 +947,7 @@ export const FormTitle: React.FC<FormTitleProps> = ({
   subtitle,
   testID,
 }) => (
-  <VStack alignment="leading" spacing={4} testID={testID}>
+  <VStack alignment="leading" spacing={4} testID={testID} modifiers={rowEnd}>
     <Text modifiers={titleModifiers}>{title}</Text>
     {subtitle ? <Text modifiers={subtitleModifiers}>{subtitle}</Text> : null}
   </VStack>
@@ -918,7 +961,7 @@ const loadingModifiers = [frame({ maxWidth: Infinity, minHeight: 44 })];
  * The view stays mounted under the spinner while it loads.
  */
 export const FormView: React.FC<FormViewProps> = ({ children, loading }) => (
-  <VStack spacing={0}>
+  <VStack spacing={0} modifiers={rowEnd}>
     {loading ? <ProgressView modifiers={loadingModifiers} /> : null}
     <RNHostView matchContents={{ vertical: true }}>{children}</RNHostView>
   </VStack>
@@ -933,7 +976,7 @@ export const FormProfile: React.FC<FormProfileProps> = ({ name, detail }) => {
   // Title 2: 22 pt on iOS, 17 pt on the Mac, a step above its 13 pt rows.
   const nameFont = font({ textStyle: 'title2', weight: 'semibold' });
   return (
-    <HStack spacing={12}>
+    <HStack spacing={12} modifiers={rowEnd}>
       <ZStack modifiers={[frame({ width: avatarSize, height: avatarSize })]}>
         <Circle modifiers={[foregroundStyle(theme.colors.primary)]} />
         <Image

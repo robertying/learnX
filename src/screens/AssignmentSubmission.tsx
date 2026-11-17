@@ -7,7 +7,6 @@ import {
   Form,
   FormButton,
   FormFile,
-  FormProgress,
   FormScreen,
   FormSection,
   FormTextField,
@@ -32,6 +31,7 @@ import {
   useHasSubmissionDraft,
 } from 'data/submissionDrafts';
 import NotFound from 'components/NotFound';
+import PageProgressBar from 'components/PageProgressBar';
 import useHeaderTitle from 'hooks/useHeaderTitle';
 import {
   useAttachmentPicker,
@@ -48,10 +48,8 @@ type Props = NativeStackScreenProps<
 const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
   const assignment = useAssignment(route.params.id);
 
-  useHeaderTitle(navigation, t('assignmentSubmission'), assignment?.courseName);
-
   if (!assignment) {
-    return <NotFound />;
+    return <Missing navigation={navigation} />;
   }
 
   return (
@@ -60,6 +58,13 @@ const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
       navigation={navigation}
     />
   );
+};
+
+const Missing: React.FC<{ navigation: Props['navigation'] }> = ({
+  navigation,
+}) => {
+  useHeaderTitle(navigation, t('assignmentSubmission'));
+  return <NotFound />;
 };
 
 const AssignmentSubmissionContent: React.FC<{
@@ -135,6 +140,14 @@ const AssignmentSubmissionContent: React.FC<{
       stopSavingDraft();
       navigation.goBack();
     },
+  );
+
+  // The upload's progress stays in sight however far the form is scrolled:
+  // in the header's subtitle and a bar right below it.
+  useHeaderTitle(
+    navigation,
+    t('assignmentSubmission'),
+    uploading ? t('uploadingSubmission') : assignment.courseName,
   );
 
   // Not swiped away while uploading: back beside a list, or the sheet down.
@@ -241,15 +254,6 @@ const AssignmentSubmissionContent: React.FC<{
             testID="submissionTitle"
           />
         </FormSection>
-        {uploading ? (
-          <FormSection>
-            <FormProgress
-              title={t('uploadingSubmission')}
-              value={progress}
-              testID="uploadProgress"
-            />
-          </FormSection>
-        ) : null}
         <FormSection
           title={t('submissionContent')}
           footer={t('draftSaved')}
@@ -351,6 +355,9 @@ const AssignmentSubmissionContent: React.FC<{
           </FormSection>
         ) : null}
       </Form>
+      {uploading ? (
+        <PageProgressBar progress={progress} testID="uploadProgress" />
+      ) : null}
     </FormScreen>
   );
 };

@@ -203,9 +203,12 @@ describe('Search', () => {
     await type('midterm');
     expect(screen.getByText('Midterm room change')).toBeTruthy();
     expect(screen.queryByText('Midterm review problems')).toBeNull();
-    // A cleared field brings back the prompt alone
+    // A cleared field brings back the prompt, under the same tabs
     await type('');
-    expect(screen.queryByText('All')).toBeNull();
+    expect(
+      screen.getByText('Search Notices, Assignments and Files'),
+    ).toBeTruthy();
+    expect(screen.getByText('All')).toBeTruthy();
   });
 
   it('from iOS 26, lays the results out under floating tabs once their height is known', async () => {
