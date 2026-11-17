@@ -643,9 +643,18 @@ const updater =
         });
       })()
     : null;
+/**
+ * A packaged Linux run without Chromium's sandbox: the AppImage's AppRun
+ * passes --no-sandbox where unprivileged user namespaces are blocked (Ubuntu
+ * 24.04 and later). Settings then suggests the .deb, which is sandboxed.
+ */
+const unsandboxed =
+  !dev &&
+  process.platform === 'linux' &&
+  app.commandLine.hasSwitch('no-sandbox');
 ipcMain.on('app:info', event => {
   fromApp(event);
-  event.returnValue = buildInfo;
+  event.returnValue = { ...buildInfo, unsandboxed };
 });
 ipcMain.on('updates:pending', event => {
   fromApp(event);

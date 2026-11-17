@@ -15,6 +15,7 @@ import { isElectron } from 'helpers/platform';
 import useAvailableUpdate from 'hooks/useAvailableUpdate';
 import useUpdateInstaller from 'hooks/useUpdateInstaller';
 import useLoginItem from 'hooks/useLoginItem';
+import useSandboxNote from 'hooks/useSandboxNote';
 import { logout } from 'data/login';
 import { userQuery } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
@@ -59,6 +60,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
   const whatsNew = latestWhatsNew();
   // Electron on Windows (and a Mac dev run): off until the user turns it on.
   const loginItem = useLoginItem();
+  const sandboxNote = useSandboxNote();
 
   const handleLogout = () => {
     Alert.alert(
@@ -188,7 +190,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             onPress={() => show('CourseInformationSharing')}
           />
         </FormSection>
-        <FormSection>
+        <FormSection footer={sandboxNote ?? undefined}>
           {whatsNew && (
             <FormLink
               testID="settings-whats-new"

@@ -172,6 +172,8 @@ const zh: typeof en = {
   linkCopied: '已复制链接',
   fileOpensInDefaultApp: 'learnX无法显示此类文件，可用默认应用打开或另存一份。',
   startAtLogin: '登录时启动',
+  unsandboxedNote:
+    'learnX正在没有Chromium沙盒的情况下运行，Ubuntu 24.04及以上版本中的AppImage即是如此。请改为安装.deb包，让网页在沙盒中运行。',
   startAtLoginCaption:
     '登录电脑时在系统托盘中启动learnX，以便持续同步并发送提醒。关闭窗口后learnX仍在托盘中运行，可在托盘菜单中退出。',
   trayOpen: '打开learnX',

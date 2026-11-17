@@ -217,7 +217,7 @@ export interface Bridge {
     ) => Promise<boolean>;
   };
   /** The app's version and its build number (electron/buildInfo.cjs). */
-  appInfo: () => { version: string; build: string };
+  appInfo: () => { version: string; build: string; unsandboxed?: boolean };
   /** Updates of the packaged app (electron/updater.cjs). */
   updates: {
     /** The update downloaded and waiting for a restart, or null. */

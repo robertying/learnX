@@ -182,6 +182,8 @@ export default {
   fileOpensInDefaultApp:
     "learnX can't show this type of file. Open it in its default app, or save a copy.",
   startAtLogin: 'Start at Login',
+  unsandboxedNote:
+    "learnX is running without Chromium's sandbox, as the AppImage does on Ubuntu 24.04 and later. Install the .deb instead to keep web pages in the sandbox.",
   startAtLoginCaption:
     'learnX starts in the system tray when you sign in, so it keeps syncing and sends reminders. Closing its window keeps it there; Quit in the tray menu ends it.',
   trayOpen: 'Open learnX',

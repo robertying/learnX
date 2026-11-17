@@ -20,7 +20,10 @@ const fakeElectron = (dataDir: string, { packaged = false } = {}) => {
     setAppUserModelId: jest.fn(),
     getPath: (name: string) => paths.get(name) ?? path.join(dataDir, name),
     setPath: jest.fn((name: string, value: string) => paths.set(name, value)),
-    commandLine: { appendSwitch: jest.fn() },
+    commandLine: {
+      appendSwitch: jest.fn(),
+      hasSwitch: jest.fn((name: string) => name === 'no-sandbox'),
+    },
     requestSingleInstanceLock: () => true,
     quit: jest.fn(),
     whenReady: () => Promise.resolve(),
@@ -285,6 +288,7 @@ describe('IPC', () => {
     expect(event.returnValue).toEqual({
       version: expect.any(String),
       build: expect.any(String),
+      unsandboxed: false,
     });
     fake.handlers.get('files')!(event, 'roots');
     expect(event.returnValue).toEqual({
@@ -630,6 +634,17 @@ describe('the application menu', () => {
     expect(fake.app.commandLine.appendSwitch).toHaveBeenCalledWith(
       'use-mock-keychain',
     );
+  });
+
+  it('tells the page when a packaged Linux run has no sandbox', async () => {
+    jest.replaceProperty(process, 'env', {
+      ...process.env,
+      LEARNX_DATA_DIR: '',
+    });
+    await onPlatform('linux', () => loadMain({ packaged: true }));
+    const event = eventFrom('window', 'app://learnx/');
+    fake.handlers.get('app:info')!(event);
+    expect(event.returnValue).toMatchObject({ unsandboxed: true });
   });
 
   it('keeps a Linux dev run’s login out of the keyring', async () => {
