@@ -179,6 +179,8 @@ export interface Bridge {
       op: Op,
       ...args: Parameters<FileOps[Op]>
     ) => FileResult<ReturnType<FileOps[Op]>>;
+    /** Adds bytes to the end of a file, creating it. */
+    append: (uri: string, content: Uint8Array) => Promise<void>;
     /** Downloads into a file with the session's cookies. */
     download: (
       id: number,

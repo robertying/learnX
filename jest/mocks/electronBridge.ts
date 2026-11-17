@@ -31,6 +31,7 @@ export const installBridge = (overrides: Partial<Bridge> = {}): Bridge => {
     },
     files: {
       sync: jest.fn(),
+      append: jest.fn(async () => {}),
       download: jest.fn(async () => ({ status: 200 })),
       abortDownload: jest.fn(),
       onProgress: jest.fn(),

@@ -40,6 +40,22 @@ const webviewAllowedUrl = url => {
 };
 
 /**
+ * What a web view's page may do without asking: show a video full screen and
+ * write to the clipboard (a copy button), on the sites it may show. Nothing
+ * else (camera, microphone, location, notifications…), and nothing for the
+ * app's own window.
+ * @param {Electron.WebContents | null} contents the page asking
+ * @param {string} permission
+ * @param {string} url the page's URL
+ */
+const webviewPermission = (contents, permission, url) =>
+  !!contents &&
+  !contents.isDestroyed() &&
+  contents.getType() === 'webview' &&
+  ['fullscreen', 'clipboard-sanitized-write'].includes(permission) &&
+  webviewAllowedUrl(url);
+
+/**
  * Links a web view may hand to the system's browser or mail app.
  * @param {string} url
  */
@@ -379,4 +395,5 @@ module.exports = {
   externalUrl,
   hardenWebview,
   webviewAllowedUrl,
+  webviewPermission,
 };

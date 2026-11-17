@@ -5,11 +5,19 @@ import { Text as FluentText, tokens } from '@fluentui/react-components';
 import { fluentIcon } from 'web/fluentIcons';
 import { t } from 'helpers/i18n';
 import { sanitizeFileName } from 'helpers/filename';
+import { bridge } from 'web/bridge';
 import Spacing from 'constants/Spacing';
 import type { FileDropTargetProps } from './FileDropTarget.shared';
 
 /** Where dropped files are copied, under the cache, as picked ones are. */
 const DROP_DIR = 'picked';
+
+/**
+ * How much of a dropped file is read and sent at a time: a lecture
+ * recording of hundreds of MB never sits in the page whole, and the window
+ * keeps responding while it copies.
+ */
+export const DROP_CHUNK_BYTES = 4 * 1024 * 1024;
 
 const UploadIcon = fluentIcon('ArrowUploadRegular');
 
@@ -19,7 +27,7 @@ const hasFiles = (event: DragEvent) =>
 
 /**
  * Copies a dropped file into the app's cache, where the submission reads
- * it, as the file picker does (electron/fileShell.cjs).
+ * it, as the file picker does (electron/fileShell.cjs), a piece at a time.
  */
 export const copyDroppedFile = async (file: globalThis.File) => {
   const dir = new Directory(
@@ -30,7 +38,14 @@ export const copyDroppedFile = async (file: globalThis.File) => {
   dir.create({ intermediates: true, idempotent: true });
   const name = sanitizeFileName(file.name);
   const target = new File(dir, name);
-  target.writeSync(new Uint8Array(await file.arrayBuffer()));
+  target.writeSync(new Uint8Array());
+  for (let start = 0; start < file.size; start += DROP_CHUNK_BYTES) {
+    const piece = file.slice(start, start + DROP_CHUNK_BYTES);
+    await bridge().files.append(
+      target.uri,
+      new Uint8Array(await piece.arrayBuffer()),
+    );
+  }
   return {
     uri: target.uri,
     name,

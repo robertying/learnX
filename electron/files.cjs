@@ -2,7 +2,8 @@
 // which has no file system: expo-file-system's stand-in
 // (src/web/packages/fileSystem.ts) calls these over IPC. Every path must lie
 // in one of the app's folders under its data folder, `cache` and `document`,
-// as on the phone, or in a folder the user picked for an export (`grant`).
+// as on the phone, or, for what an export does, in a folder the user picked
+// for it (`grant`).
 // Downloads run here with the window session's cookies.
 const fs = require('node:fs');
 const path = require('node:path');
@@ -62,46 +63,82 @@ const markDownloaded = (file, url, platform) => {
 };
 
 /**
- * @param {{ cache: string, document: string }} roots absolute folder paths
- * @param {{ platform?: string }} [options]
+ * How long a folder picked for an export stays open to the page after its
+ * last use: an export runs right after the folder is picked.
  */
-const createFiles = (roots, { platform = process.platform } = {}) => {
+const GRANT_IDLE_MS = 10 * 60 * 1000;
+
+/**
+ * @param {{ cache: string, document: string }} roots absolute folder paths
+ * @param {{ platform?: string, now?: () => number }} [options]
+ */
+const createFiles = (
+  roots,
+  { platform = process.platform, now = Date.now } = {},
+) => {
   const rootPaths = Object.values(roots).map(root => path.resolve(root));
   for (const root of rootPaths) {
     fs.mkdirSync(root, { recursive: true });
   }
-  /** Folders the user picked in a folder dialog, which exports write into. */
-  const granted = new Set(/** @type {string[]} */ ([]));
-  const allowedRoots = () => [...rootPaths, ...granted];
+  /**
+   * Folders the user picked in a folder dialog for an export, with when each
+   * was last used. The page may only look in them, make folders and copy
+   * its own files in (`exporting`): never read, change or delete what's
+   * there, and only for a while.
+   * @type {Map<string, number>}
+   */
+  const granted = new Map();
+
+  /** @param {string} resolved @param {string} root */
+  const isIn = (resolved, root) =>
+    resolved === root || resolved.startsWith(root + path.sep);
+
+  /** The granted folder `resolved` lies in, if one still is. */
+  const grantOf = (/** @type {string} */ resolved) => {
+    for (const [root, used] of granted) {
+      if (now() - used > GRANT_IDLE_MS) {
+        granted.delete(root);
+      } else if (isIn(resolved, root)) {
+        granted.set(root, now());
+        return root;
+      }
+    }
+    return null;
+  };
 
   /**
-   * The path of a file URI inside the app's folders; throws for anything
-   * else, a folder itself included.
+   * The path of a file URI inside the app's folders, or with `exporting`
+   * inside a granted folder; throws for anything else.
    * @param {unknown} uri
+   * @param {{ exporting?: boolean }} [options]
    */
-  const pathOf = uri => {
+  const pathOf = (uri, { exporting = false } = {}) => {
     if (typeof uri !== 'string' || !uri.startsWith('file:')) {
       throw new Error('Not a file URI');
     }
     const resolved = path.resolve(fileURLToPath(uri));
     if (
-      !allowedRoots().some(
-        root => resolved === root || resolved.startsWith(root + path.sep),
-      )
+      !rootPaths.some(root => isIn(resolved, root)) &&
+      !(exporting && grantOf(resolved))
     ) {
       throw new Error('Outside the app folders');
     }
     return resolved;
   };
 
-  /** A path that may be changed: inside a folder, never a folder itself. */
-  const innerPathOf = (/** @type {unknown} */ uri) => {
-    const resolved = pathOf(uri);
-    if (allowedRoots().includes(resolved)) {
+  /**
+   * A path that may be changed: inside a folder, never a folder itself.
+   * @param {unknown} uri
+   * @param {{ exporting?: boolean }} [options]
+   */
+  const innerPathOf = (uri, options) => {
+    const resolved = pathOf(uri, options);
+    if (rootPaths.includes(resolved) || granted.has(resolved)) {
       throw new Error('The app folders themselves stay');
     }
     return resolved;
   };
+  const exporting = { exporting: true };
 
   return {
     /**
@@ -111,13 +148,14 @@ const createFiles = (roots, { platform = process.platform } = {}) => {
      */
     grant: dir => {
       const resolved = path.resolve(dir);
-      granted.add(resolved);
+      granted.set(resolved, now());
       return pathToFileURL(resolved + path.sep).href;
     },
 
     /**
-     * The path of a file URI in the app's folders (or a granted one), for
-     * the main process's own use; throws for anything else.
+     * The path of a file URI in the app's folders, for the main process's
+     * own use (opening, saving and previewing a download); throws for
+     * anything else.
      * @param {string} uri
      */
     localPath: uri => pathOf(uri),
@@ -134,7 +172,7 @@ const createFiles = (roots, { platform = process.platform } = {}) => {
      * @returns {EntryInfo}
      */
     info: uri => {
-      const target = pathOf(uri);
+      const target = pathOf(uri, exporting);
       let stat;
       try {
         stat = fs.statSync(target);
@@ -154,7 +192,7 @@ const createFiles = (roots, { platform = process.platform } = {}) => {
      */
     list: uri =>
       fs
-        .readdirSync(pathOf(uri), { withFileTypes: true })
+        .readdirSync(pathOf(uri, exporting), { withFileTypes: true })
         .map(entry => ({ name: entry.name, isDirectory: entry.isDirectory() })),
 
     /**
@@ -165,7 +203,7 @@ const createFiles = (roots, { platform = process.platform } = {}) => {
       uri,
       { intermediates = false, idempotent = false } = {},
     ) => {
-      const target = pathOf(uri);
+      const target = pathOf(uri, exporting);
       if (fs.existsSync(target)) {
         if (idempotent && fs.statSync(target).isDirectory()) {
           return;
@@ -201,7 +239,7 @@ const createFiles = (roots, { platform = process.platform } = {}) => {
      * @param {boolean} [overwrite]
      */
     copy: (from, to, overwrite = false) => {
-      fs.cpSync(pathOf(from), innerPathOf(to), {
+      fs.cpSync(pathOf(from), innerPathOf(to, exporting), {
         recursive: true,
         force: overwrite,
         errorOnExist: !overwrite,
@@ -214,6 +252,19 @@ const createFiles = (roots, { platform = process.platform } = {}) => {
      */
     write: (uri, content) => {
       fs.writeFileSync(innerPathOf(uri), content);
+    },
+
+    /**
+     * Adds bytes to the end of a file (creating it), so the page can copy a
+     * large one in pieces without holding it whole (a dropped file).
+     * @param {string} uri
+     * @param {Uint8Array} content
+     */
+    append: (uri, content) => {
+      if (!(content instanceof Uint8Array)) {
+        throw new Error('Not bytes');
+      }
+      fs.appendFileSync(innerPathOf(uri), content);
     },
 
     /**
@@ -320,4 +371,48 @@ const createFiles = (roots, { platform = process.platform } = {}) => {
   };
 };
 
-module.exports = { createFiles, downloadAllowedUrl, markDownloaded };
+/** What the page may ask of `createFiles` by name (the `files` channel). */
+const FILE_OPERATIONS = new Set([
+  'roots',
+  'info',
+  'list',
+  'makeDirectory',
+  'remove',
+  'move',
+  'copy',
+  'write',
+  'read',
+]);
+
+/**
+ * Runs one of the page's synchronous file operations: its result, or its
+ * error's message (an unknown operation's too), as the page's stand-in reads
+ * them (src/web/packages/fileSystem.ts).
+ * @param {ReturnType<typeof createFiles>} files
+ * @param {unknown} op
+ * @param {unknown[]} args
+ * @returns {{ result: unknown } | { error: string }}
+ */
+const runFileOperation = (files, op, args) => {
+  try {
+    if (typeof op !== 'string' || !FILE_OPERATIONS.has(op)) {
+      throw new Error(`Unknown file operation: ${String(op)}`);
+    }
+    return {
+      result: /** @type {(...args: unknown[]) => unknown} */ (
+        files[/** @type {keyof typeof files} */ (op)]
+      )(...args),
+    };
+  } catch (error) {
+    return { error: String(/** @type {Error} */ (error).message) };
+  }
+};
+
+module.exports = {
+  FILE_OPERATIONS,
+  GRANT_IDLE_MS,
+  createFiles,
+  downloadAllowedUrl,
+  markDownloaded,
+  runFileOperation,
+};

@@ -4,6 +4,7 @@
 // The test chooses the menu's items as a click would (mainProcess.ts).
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileName } from '../fileStore.cjs';
 import { expect, test } from './fixtures';
 import { exact } from './maestroEnv';
 import { byId } from './steps';
@@ -18,7 +19,7 @@ const syncRuns = (dataDir: string): SyncRun[] => {
   const file = fs
     .readdirSync(dataDir, { recursive: true })
     .map(String)
-    .find(name => path.basename(name) === 'syncLog');
+    .find(name => path.basename(name) === fileName('syncLog'));
   if (!file) {
     return [];
   }

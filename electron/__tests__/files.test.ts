@@ -8,7 +8,12 @@ import {
 } from 'test-utils/mocks/electronBridge';
 import type { Bridge, FileOps } from 'web/bridge';
 
-import { createFiles } from '../files.cjs';
+import {
+  FILE_OPERATIONS,
+  GRANT_IDLE_MS,
+  createFiles,
+  runFileOperation,
+} from '../files.cjs';
 
 let root: string;
 let bridge: Bridge;
@@ -456,5 +461,136 @@ describe('download in the main process', () => {
     });
     requests[0].emit('error', new Error('net::ERR_CONNECTION_RESET'));
     await expect(done).rejects.toThrow('ERR_CONNECTION_RESET');
+  });
+});
+
+it('appends bytes to a file in pieces, and only bytes', () => {
+  const files = createFiles({
+    cache: path.join(root, 'Caches'),
+    document: path.join(root, 'Documents'),
+  });
+  const uri = `${files.roots().cache}picked/x/a.bin`;
+  files.makeDirectory(`${files.roots().cache}picked/x`, {
+    intermediates: true,
+  });
+  files.append(uri, new Uint8Array([1, 2]));
+  files.append(uri, new Uint8Array([3]));
+  expect([
+    ...fs.readFileSync(path.join(root, 'Caches/picked/x/a.bin')),
+  ]).toEqual([1, 2, 3]);
+  expect(() => files.append(uri, 'text' as never)).toThrow('Not bytes');
+  expect(() => files.append('file:///etc/hosts', new Uint8Array([1]))).toThrow(
+    'Outside the app folders',
+  );
+});
+
+describe('a folder picked for an export', () => {
+  let clock: number;
+  let files: ReturnType<typeof createFiles>;
+  let picked: string;
+  let pickedUri: string;
+  beforeEach(() => {
+    clock = 0;
+    files = createFiles(
+      {
+        cache: path.join(root, 'Caches'),
+        document: path.join(root, 'Documents'),
+      },
+      { now: () => clock },
+    );
+    picked = path.join(root, 'Home');
+    fs.mkdirSync(picked);
+    fs.writeFileSync(path.join(picked, 'thesis.docx'), 'mine');
+    pickedUri = files.grant(picked);
+  });
+
+  it('takes what an export does: looking, making folders and copying in', () => {
+    const { cache } = files.roots();
+    files.write(`${cache}a.pdf`, 'pdf');
+    expect(files.list(pickedUri).map(entry => entry.name)).toEqual([
+      'thesis.docx',
+    ]);
+    files.makeDirectory(`${pickedUri}learnX`);
+    files.copy(`${cache}a.pdf`, `${pickedUri}learnX/a.pdf`, true);
+    expect(files.info(`${pickedUri}learnX/a.pdf`)).toMatchObject({
+      exists: true,
+      size: 3,
+    });
+  });
+
+  it('never lets the page read, change or delete what’s there', () => {
+    const theirs = `${pickedUri}thesis.docx`;
+    expect(() => files.read(theirs, 'utf8')).toThrow('Outside the app folders');
+    expect(() => files.write(theirs, 'x')).toThrow('Outside the app folders');
+    expect(() => files.remove(theirs)).toThrow('Outside the app folders');
+    expect(() => files.remove(pickedUri)).toThrow('Outside the app folders');
+    expect(() =>
+      files.move(theirs, `${files.roots().cache}stolen.docx`),
+    ).toThrow('Outside the app folders');
+    expect(() =>
+      files.copy(theirs, `${files.roots().cache}stolen.docx`),
+    ).toThrow('Outside the app folders');
+    expect(() => files.localPath(theirs)).toThrow('Outside the app folders');
+    expect(() => files.copy(`${files.roots().cache}`, pickedUri, true)).toThrow(
+      'The app folders themselves stay',
+    );
+    expect(fs.readFileSync(path.join(picked, 'thesis.docx'), 'utf8')).toBe(
+      'mine',
+    );
+  });
+
+  it('closes after a while unused', () => {
+    clock = GRANT_IDLE_MS;
+    expect(() => files.list(pickedUri)).not.toThrow();
+    clock += GRANT_IDLE_MS;
+    expect(() => files.list(pickedUri)).not.toThrow();
+    clock += GRANT_IDLE_MS + 1;
+    expect(() => files.list(pickedUri)).toThrow('Outside the app folders');
+  });
+});
+
+describe('runFileOperation', () => {
+  it('runs the page’s operations, and reports errors as messages', () => {
+    const files = createFiles({
+      cache: path.join(root, 'Caches'),
+      document: path.join(root, 'Documents'),
+    });
+    const { cache } = files.roots();
+    expect(runFileOperation(files, 'write', [`${cache}a.txt`, 'hi'])).toEqual({
+      result: undefined,
+    });
+    expect(runFileOperation(files, 'read', [`${cache}a.txt`, 'utf8'])).toEqual({
+      result: 'hi',
+    });
+    expect(
+      runFileOperation(files, 'read', ['file:///etc/hosts', 'utf8']),
+    ).toEqual({ error: 'Outside the app folders' });
+  });
+
+  it.each(['download', 'grant', 'localPath', 'constructor', '__proto__', 3])(
+    'refuses %j, which the page may not call this way',
+    op => {
+      const files = createFiles({
+        cache: path.join(root, 'Caches'),
+        document: path.join(root, 'Documents'),
+      });
+      expect(runFileOperation(files, op, ['/'])).toEqual({
+        error: `Unknown file operation: ${String(op)}`,
+      });
+    },
+  );
+
+  it('offers what the page’s stand-in asks for', () => {
+    expect([...FILE_OPERATIONS].sort()).toEqual([
+      'copy',
+      'info',
+      'list',
+      'makeDirectory',
+      'move',
+      'read',
+      'remove',
+      'roots',
+      'write',
+    ]);
   });
 });

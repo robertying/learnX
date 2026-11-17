@@ -1,24 +1,65 @@
 // Key-value storage as files: the stand-in for expo-sqlite's kv-store and
 // expo-secure-store in the Electron app. Each database is a folder under the
 // app's data folder and each key one file in it, written to a temporary file
-// first and renamed over the old one, so a crash mid-write leaves the old value.
+// first (and flushed to the disk) and renamed over the old one, so a crash
+// mid-write leaves the old value.
 const fs = require('node:fs');
 const path = require('node:path');
 
 // Names Windows reserves for devices, with or without an extension.
 const reserved = /^(con|prn|aux|nul|com\d|lpt\d)$/i;
 
+/** How long a rename waits before each retry while the target is busy. */
+const RENAME_RETRY_MS = [10, 20, 40, 80, 160, 320];
+
+/** Errors of a rename onto a file another program briefly holds (Windows). */
+const BUSY = new Set(['EPERM', 'EBUSY', 'EACCES']);
+
+/**
+ * Renames `from` over `to`, trying again for a moment while Windows reports
+ * the target busy (Defender, the search indexer or a backup tool reading it),
+ * as graceful-fs does.
+ * @param {string} from
+ * @param {string} to
+ * @param {{ rename?: typeof fs.renameSync, sleep?: (ms: number) => void }} [io]
+ */
+const renameRetrying = (
+  from,
+  to,
+  {
+    rename = fs.renameSync,
+    sleep = ms =>
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms),
+  } = {},
+) => {
+  for (const wait of RENAME_RETRY_MS) {
+    try {
+      rename(from, to);
+      return;
+    } catch (error) {
+      if (!BUSY.has(/** @type {NodeJS.ErrnoException} */ (error).code ?? '')) {
+        throw error;
+      }
+      sleep(wait);
+    }
+  }
+  rename(from, to);
+};
+
 /**
  * A key as a file name that's valid on Windows, macOS and Linux, and maps back
  * to the key: percent-encoded, with the characters Windows rejects or treats
- * specially (`*`, `.`) encoded too, and a device name's first letter escaped.
+ * specially (`*`, `.`) encoded too, and capital letters, so keys that differ
+ * only in case don't share a file where names ignore case (NTFS, APFS); a
+ * device name's first letter is escaped.
  * @param {string} key
  */
 const fileName = key => {
-  const encoded = encodeURIComponent(key).replace(
-    /[*.!'()~]/g,
-    c => `%${c.charCodeAt(0).toString(16).toUpperCase()}`,
-  );
+  const encoded = Array.from(key, c =>
+    /[A-Z*.!'()~]/.test(c)
+      ? `%${c.charCodeAt(0).toString(16).toUpperCase()}`
+      : encodeURIComponent(c),
+  ).join('');
   return reserved.test(encoded)
     ? `%${encoded.charCodeAt(0).toString(16).toUpperCase()}${encoded.slice(1)}`
     : encoded || '%';
@@ -83,8 +124,14 @@ const createFileStore = root => {
     fs.mkdirSync(dir(db), { recursive: true });
     const file = path.join(dir(db), fileName(key));
     const temp = `${file}.tmp`;
-    fs.writeFileSync(temp, value);
-    fs.renameSync(temp, file);
+    const fd = fs.openSync(temp, 'w');
+    try {
+      fs.writeFileSync(fd, value);
+      fs.fsyncSync(fd);
+    } finally {
+      fs.closeSync(fd);
+    }
+    renameRetrying(temp, file);
   };
 
   /**
@@ -103,4 +150,36 @@ const createFileStore = root => {
   return { readAll, getItem, setItem, removeItem, clear };
 };
 
-module.exports = { createFileStore, fileName };
+/**
+ * The page's writes (`storage:set`, `storage:remove`, `storage:clear`), which
+ * it sends without waiting: one that fails is logged, never thrown, which
+ * would be an uncaught error in the main process (Electron's error dialog).
+ * The page's copy keeps the value until the next launch reads the files.
+ * @param {ReturnType<typeof createFileStore>} store
+ * @param {(message: string) => void} log
+ */
+const loggedWrites = (store, log) => {
+  /**
+   * @template {unknown[]} A
+   * @param {string} name
+   * @param {(...args: A) => void} write
+   */
+  const logged =
+    (name, write) =>
+    (/** @type {A} */ ...args) => {
+      try {
+        write(...args);
+      } catch (error) {
+        log(
+          `${name}(${String(args[0])}) failed: ${/** @type {Error} */ (error).message}`,
+        );
+      }
+    };
+  return {
+    setItem: logged('setItem', store.setItem),
+    removeItem: logged('removeItem', store.removeItem),
+    clear: logged('clear', store.clear),
+  };
+};
+
+module.exports = { createFileStore, fileName, loggedWrites, renameRetrying };

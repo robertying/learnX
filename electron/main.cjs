@@ -10,7 +10,6 @@
 // only when the user turns Start at login on.
 const fs = require('node:fs');
 const path = require('node:path');
-const { pathToFileURL } = require('node:url');
 const {
   app,
   BrowserWindow,
@@ -24,16 +23,27 @@ const {
   shell,
   webContents,
 } = require('electron');
+const { ORIGIN, createServeApp, fromApp } = require('./appOrigin.cjs');
 const { aboutPanelOptions, readBuildInfo } = require('./buildInfo.cjs');
 const { claimSingleInstance, setUpDesktop } = require('./desktop.cjs');
-const { createFileStore } = require('./fileStore.cjs');
-const { createFiles } = require('./files.cjs');
+const { createFileStore, loggedWrites } = require('./fileStore.cjs');
+const { createFiles, runFileOperation } = require('./files.cjs');
 const { popupMenu } = require('./menus.cjs');
 const { mainFetch } = require('./net.cjs');
 const { createSecrets } = require('./secrets.cjs');
 const { createUpdater, updatesSupported } = require('./updater.cjs');
 const { signedProvider } = require('./updateSignature.cjs');
-const { PARTITION, createWebviews, hardenWebview } = require('./webviews.cjs');
+const {
+  PARTITION,
+  createWebviews,
+  hardenWebview,
+  webviewPermission,
+} = require('./webviews.cjs');
+const {
+  MIN_SIZE,
+  loadWindowState,
+  saveWindowState,
+} = require('./windowState.cjs');
 
 /**
  * A top-level app's id, named as the repo's other top-level targets are
@@ -41,7 +51,8 @@ const { PARTITION, createWebviews, hardenWebview } = require('./webviews.cjs');
  * app's extensions, and the iOS bundle id is the Mac Catalyst app's on a Mac.
  */
 const APP_ID = 'io.robertying.learnXElectron';
-const ORIGIN = 'app://learnx';
+/** The window's session: in memory, as the page keeps its data over IPC. */
+const APP_PARTITION = 'learnx-app';
 
 app.setName('learnX');
 if (process.platform === 'win32') {
@@ -120,58 +131,6 @@ protocol.registerSchemesAsPrivileged([
   },
 ]);
 
-// Scripts and styles only from the app itself (React Native Web sets styles
-// inline), images from anywhere over https (course pictures, avatars).
-const CONTENT_SECURITY_POLICY = [
-  "default-src 'self'",
-  "script-src 'self'",
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https: app://files",
-  // The file preview (desktop.cjs): downloads on an origin of their own.
-  'frame-src app://files',
-  "font-src 'self' data:",
-  "connect-src 'self'",
-  "object-src 'none'",
-  "base-uri 'none'",
-  "frame-ancestors 'none'",
-].join('; ');
-
-/** Serves the web build, and index.html for any path that isn't a file. */
-const serveWeb = async (/** @type {Request} */ request) => {
-  const { host, pathname } = new URL(request.url);
-  if (host === 'files') {
-    return desktop
-      ? desktop.servePreview(request)
-      : new Response('Not found', { status: 404 });
-  }
-  const file = path.join(webDir, decodeURIComponent(pathname));
-  const target =
-    file.startsWith(webDir + path.sep) &&
-    fs.existsSync(file) &&
-    fs.statSync(file).isFile()
-      ? file
-      : path.join(webDir, 'index.html');
-  const response = await net.fetch(pathToFileURL(target).toString());
-  const headers = new Headers(response.headers);
-  headers.set('Content-Security-Policy', CONTENT_SECURITY_POLICY);
-  return new Response(response.body, { status: response.status, headers });
-};
-
-/**
- * Only the app's own pages may call the main process: its window, never a
- * web view it shows.
- */
-const fromApp = (
-  /** @type {Electron.IpcMainEvent | Electron.IpcMainInvokeEvent} */ event,
-) => {
-  if (
-    event.sender.getType() !== 'window' ||
-    !event.senderFrame?.url.startsWith(`${ORIGIN}/`)
-  ) {
-    throw new Error('IPC from outside the app');
-  }
-};
-
 const webviews = createWebviews({
   openExternal: url => {
     shell.openExternal(url).catch(() => {});
@@ -194,17 +153,20 @@ const handleIpc = ses => {
     fromApp(event);
     event.returnValue = store.readAll(db);
   });
+  const writes = loggedWrites(store, message =>
+    console.error(`[storage] ${message}`),
+  );
   ipcMain.on('storage:set', (event, db, key, value) => {
     fromApp(event);
-    store.setItem(db, key, value);
+    writes.setItem(db, key, value);
   });
   ipcMain.on('storage:remove', (event, db, key) => {
     fromApp(event);
-    store.removeItem(db, key);
+    writes.removeItem(db, key);
   });
   ipcMain.on('storage:clear', (event, db) => {
     fromApp(event);
-    store.clear(db);
+    writes.clear(db);
   });
 
   ipcMain.handle('secrets:get', (event, key) => {
@@ -281,34 +243,14 @@ const handleIpc = ses => {
   });
   ipcMain.on('files', (event, op, ...args) => {
     fromApp(event);
-    try {
-      switch (op) {
-        case 'roots':
-          event.returnValue = { result: files.roots() };
-          return;
-        case 'info':
-        case 'list':
-        case 'makeDirectory':
-        case 'remove':
-        case 'move':
-        case 'copy':
-        case 'write':
-        case 'read':
-          event.returnValue = {
-            result: /** @type {any} */ (files[op])(...args),
-          };
-          return;
-        default:
-          throw new Error(`Unknown file operation: ${op}`);
-      }
-    } catch (error) {
-      event.returnValue = {
-        error: String(/** @type {Error} */ (error).message),
-      };
-    }
+    event.returnValue = runFileOperation(files, op, args);
   });
   /** Downloads in flight, by the renderer's id, so it can abort them. */
   const downloads = new Map();
+  ipcMain.handle('files:append', (event, uri, content) => {
+    fromApp(event);
+    files.append(uri, content);
+  });
   ipcMain.handle('files:download', async (event, id, req) => {
     fromApp(event);
     const controller = new AbortController();
@@ -404,12 +346,23 @@ const iconFile = path.join(
   process.platform === 'win32' ? 'icon.ico' : 'icon.png',
 );
 
+/** How many times a crashed page is loaded again before it's left. */
+const MAX_PAGE_RELOADS = 3;
+
+/**
+ * The window, on the app's own session (`ses`, which serves app://), where it
+ * was last time (windowState.cjs).
+ */
 const createWindow = (/** @type {Electron.Session} */ ses) => {
+  const stateFile = path.join(app.getPath('userData'), 'window-state.json');
+  const { screen } = require('electron');
+  const state = loadWindowState(
+    stateFile,
+    screen.getAllDisplays().map(display => display.workArea),
+  );
   const win = new BrowserWindow({
-    width: 1200,
-    height: 800,
-    minWidth: 360,
-    minHeight: 480,
+    ...state.bounds,
+    ...MIN_SIZE,
     title: 'learnX',
     icon: iconFile,
     show: false,
@@ -428,8 +381,22 @@ const createWindow = (/** @type {Electron.Session} */ ses) => {
       backgroundThrottling: !captureDir,
     },
   });
+  if (state.maximized) {
+    win.maximize();
+  }
+  win.on('close', () => saveWindowState(stateFile, win));
   // The window is learnX, whichever screen the app names in the page title.
   win.on('page-title-updated', event => event.preventDefault());
+  // A crashed page (out of memory, a GPU fault) is loaded again rather than
+  // left blank in the tray, a few times at most.
+  let reloads = 0;
+  win.webContents.on('render-process-gone', (_event, details) => {
+    console.error(`[window] page gone: ${details.reason}`);
+    if (details.reason !== 'clean-exit' && reloads < MAX_PAGE_RELOADS) {
+      reloads += 1;
+      void win.loadURL(`${ORIGIN}/`);
+    }
+  });
   // Start at login on Windows starts learnX in the tray.
   win.once('ready-to-show', () => desktop?.startsHidden() || win.show());
 
@@ -605,19 +572,41 @@ void app.whenReady().then(() => {
   if (!primaryInstance) {
     return;
   }
+  // The web views' session (PARTITION), whose cookies the app's requests use
+  // too, and the window's own, in memory, the only one that serves app://:
+  // a page in a web view (a notice's HTML) can't load the app's scripts or
+  // another download's preview.
   const ses = session.fromPartition(PARTITION);
-  ses.protocol.handle('app', serveWeb);
-  // No camera, microphone, location or notifications asked of the system yet.
-  ses.setPermissionRequestHandler((_webContents, _permission, callback) =>
+  const appSession = session.fromPartition(APP_PARTITION);
+  appSession.protocol.handle(
+    'app',
+    createServeApp({
+      webDir,
+      fetchFile: url => net.fetch(url),
+      servePreview: () => desktop?.servePreview,
+    }),
+  );
+  // No camera, microphone, location or notifications asked of the system;
+  // a web view's page may only go full screen and copy (webviews.cjs).
+  ses.setPermissionRequestHandler((contents, permission, callback, details) =>
+    callback(
+      webviewPermission(contents, permission, details.requestingUrl ?? ''),
+    ),
+  );
+  ses.setPermissionCheckHandler((contents, permission, requestingOrigin) =>
+    webviewPermission(contents, permission, requestingOrigin),
+  );
+  appSession.setPermissionRequestHandler((_contents, _permission, callback) =>
     callback(false),
   );
+  appSession.setPermissionCheckHandler(() => false);
   // The web views' top-level loads wait for the page to decide on them.
   ses.webRequest.onBeforeRequest(
     { urls: ['http://*/*', 'https://*/*'], types: ['mainFrame'] },
     webviews.onBeforeRequest,
   );
   handleIpc(ses);
-  createWindow(ses);
+  createWindow(appSession);
 });
 
 // Closing the window hides it (desktop.cjs); with the window gone, so is

@@ -8,6 +8,7 @@ import {
   DEFAULT_RUN_LABELS,
   PREVIEW_TYPES,
   RUNNABLE_TYPES,
+  clearPicked,
   createFileShell,
   safeName,
 } from '../fileShell.cjs';
@@ -54,6 +55,18 @@ beforeEach(() => {
 afterEach(() => {
   fs.rmSync(root, { recursive: true, force: true });
   fs.rmSync(elsewhere, { recursive: true, force: true });
+});
+
+it('clears the copies of picked files, and only those', () => {
+  const picked = path.join(root, 'Caches', 'picked', 'id1');
+  fs.mkdirSync(picked, { recursive: true });
+  fs.writeFileSync(path.join(picked, 'a.pdf'), 'x');
+  const { file } = download('kept.pdf');
+  clearPicked(path.join(root, 'Caches'));
+  expect(fs.existsSync(path.join(root, 'Caches', 'picked'))).toBe(false);
+  expect(fs.existsSync(file)).toBe(true);
+  // Nothing to clear.
+  expect(() => clearPicked(path.join(root, 'Caches'))).not.toThrow();
 });
 
 it('names saved files without folders or forbidden characters', () => {
@@ -183,7 +196,7 @@ it('saves text with a filter for its type', async () => {
   );
 });
 
-it('lets the page write in a folder the user picked', async () => {
+it('lets the page export into a folder the user picked', async () => {
   const fileShell = shellFor();
   dialog.showOpenDialog.mockResolvedValueOnce({
     canceled: false,
@@ -194,12 +207,13 @@ it('lets the page write in a folder the user picked', async () => {
   expect(dialog.showOpenDialog).toHaveBeenCalledWith({
     properties: ['openDirectory', 'createDirectory'],
   });
-  files.write(`${uri}out.txt`, 'exported');
+  const { file } = download('out.txt', 'exported');
+  files.copy(pathToFileURL(file).href, `${uri}out.txt`, true);
   expect(fs.readFileSync(path.join(elsewhere, 'out.txt'), 'utf8')).toBe(
     'exported',
   );
-  // The folder itself stays.
-  expect(() => files.remove(uri!)).toThrow('themselves');
+  // Nothing there is the page's to delete (files.test.ts).
+  expect(() => files.remove(uri!)).toThrow('Outside the app folders');
 
   dialog.showOpenDialog.mockResolvedValueOnce({
     canceled: true,

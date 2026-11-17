@@ -7,7 +7,10 @@ import {
 } from '@testing-library/react';
 import { Text } from 'react-native';
 // tsc reads the iOS file for 'components/FileDropTarget'; Jest picks this one.
-import FileDropTarget, { copyDroppedFile } from 'components/FileDropTarget.web';
+import FileDropTarget, {
+  DROP_CHUNK_BYTES,
+  copyDroppedFile,
+} from 'components/FileDropTarget.web';
 import FluentRoot from 'web/FluentRoot';
 import { t } from 'helpers/i18n';
 import {
@@ -86,10 +89,24 @@ it('copies a dropped file into the cache', async () => {
   expect(bridge.files.sync).toHaveBeenCalledWith(
     'write',
     picked.uri,
+    new Uint8Array(),
+  );
+  expect(bridge.files.append).toHaveBeenCalledWith(
+    picked.uri,
     new Uint8Array([37, 80, 68, 70]),
   );
   const untyped = await copyDroppedFile(new File([''], ''));
   expect(untyped).toMatchObject({ name: '_', type: null });
+});
+
+it('copies a large file a piece at a time', async () => {
+  const size = DROP_CHUNK_BYTES * 2 + 3;
+  await copyDroppedFile(new File([new Uint8Array(size)], 'lecture.mp4'));
+  expect(
+    jest
+      .mocked(bridge.files.append)
+      .mock.calls.map(([, bytes]) => bytes.length),
+  ).toEqual([DROP_CHUNK_BYTES, DROP_CHUNK_BYTES, 3]);
 });
 
 it('says where a dragged file goes, and attaches the first one dropped', async () => {

@@ -67,6 +67,12 @@ module.exports = {
     // runs that text instead.
     '!src/widgets/{Deadlines,UpNext}{,.android}.tsx',
     '!src/widgets/kit{,.android}.tsx',
+    // The Electron app's main process (the `tooling` project's tests). The
+    // dev runner, its Mac app, the packaging and clean-up scripts and the
+    // E2E tests' Electron download only run on a developer's machine.
+    'electron/*.{cjs,mjs}',
+    '!electron/{dev,clean,package,macDevApp,devTraces}.mjs',
+    '!electron/electronApp.cjs',
   ],
   // CI runs `pnpm test --coverage` and fails below these, so coverage can't
   // slip unnoticed. Keep them just under the current numbers; raise them as
@@ -74,7 +80,7 @@ module.exports = {
   // The totals in the log, and a browsable report in coverage/index.html
   coverageReporters: ['text-summary', 'html'],
   coverageThreshold: {
-    global: { statements: 99, branches: 96, functions: 97, lines: 99 },
+    global: { statements: 98.9, branches: 95.5, functions: 97, lines: 99.1 },
   },
   projects: [
     {

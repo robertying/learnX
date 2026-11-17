@@ -5,6 +5,7 @@ import {
   externalUrl,
   hardenWebview,
   webviewAllowedUrl,
+  webviewPermission,
 } from '../webviews.cjs';
 
 describe('webviewAllowedUrl', () => {
@@ -430,5 +431,31 @@ describe('loadHtml', () => {
       ),
     ).resolves.toBe(false);
     expect(loaded).toEqual([]);
+  });
+});
+
+describe('webviewPermission', () => {
+  const contents = (type: string, destroyed = false) =>
+    ({ getType: () => type, isDestroyed: () => destroyed }) as never;
+  const notice = 'https://learn.tsinghua.edu.cn/f/notice';
+
+  it.each(['fullscreen', 'clipboard-sanitized-write'])(
+    'lets a web view on an allowed site have %s',
+    permission => {
+      expect(webviewPermission(contents('webview'), permission, notice)).toBe(
+        true,
+      );
+    },
+  );
+
+  it.each([
+    ['another permission', contents('webview'), 'media', notice],
+    ['notifications', contents('webview'), 'notifications', notice],
+    ['another site', contents('webview'), 'fullscreen', 'https://example.com/'],
+    ['the app’s window', contents('window'), 'fullscreen', 'app://learnx/'],
+    ['a web view gone', contents('webview', true), 'fullscreen', notice],
+    ['no page', null, 'fullscreen', notice],
+  ])('refuses %s', (_name, from, permission, url) => {
+    expect(webviewPermission(from, permission, url)).toBe(false);
   });
 });

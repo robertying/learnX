@@ -27,6 +27,7 @@ contextBridge.exposeInMainWorld('learnx', {
   },
   files: {
     sync: (op, ...args) => ipcRenderer.sendSync('files', op, ...args),
+    append: (uri, content) => ipcRenderer.invoke('files:append', uri, content),
     download: (id, req) => ipcRenderer.invoke('files:download', id, req),
     abortDownload: id => ipcRenderer.send('files:abortDownload', id),
     onProgress: listener => {

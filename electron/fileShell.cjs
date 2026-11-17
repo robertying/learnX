@@ -313,7 +313,19 @@ const createFileShell = ({
   };
 };
 
+/**
+ * Empties the folder picked and dropped files are copied into, at launch:
+ * each copy is only needed until its submission draft keeps its own
+ * (data/submissionDrafts), and the desktop has no system that clears caches
+ * as the phones' do.
+ * @param {string} cacheDir
+ */
+const clearPicked = cacheDir => {
+  fs.rmSync(path.join(cacheDir, PICKED_DIR), { recursive: true, force: true });
+};
+
 module.exports = {
+  clearPicked,
   createFileShell,
   DEFAULT_RUN_LABELS,
   PICKED_DIR,

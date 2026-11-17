@@ -6,7 +6,7 @@
 // Nothing is registered with the system unless the user asks: Start at login
 // is written only when its switch in Settings changes, and never from a dev
 // run unless LEARNX_ALLOW_LOGIN_ITEM=1.
-const { createFileShell } = require('./fileShell.cjs');
+const { clearPicked, createFileShell } = require('./fileShell.cjs');
 const { createNotifier } = require('./notifications.cjs');
 
 /** How often the background sync runs while learnX is open, as on the phone. */
@@ -194,6 +194,7 @@ const setUpDesktop = ({
   });
 
   // Files.
+  clearPicked(cacheDir);
   const fileShell = createFileShell({
     dialog,
     shell,
