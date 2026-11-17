@@ -58,7 +58,7 @@ contextBridge.exposeInMainWorld('learnx', {
   },
   // Around the window (desktop.cjs).
   shell: {
-    open: uri => ipcRenderer.invoke('shell:open', uri),
+    open: (uri, labels) => ipcRenderer.invoke('shell:open', uri, labels),
     showInFolder: uri => ipcRenderer.invoke('shell:showInFolder', uri),
     saveAs: (uri, name) => ipcRenderer.invoke('shell:saveAs', uri, name),
     saveText: (name, content) =>

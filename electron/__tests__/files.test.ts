@@ -328,6 +328,55 @@ describe('download in the main process', () => {
     ]);
   });
 
+  it('marks a download as from the internet on Windows', async () => {
+    const windows = createFiles(
+      {
+        cache: path.join(root, 'Caches'),
+        document: path.join(root, 'Documents'),
+      },
+      { platform: 'win32' },
+    );
+    const { net, requests } = fakeNet();
+    const controller = new AbortController();
+    const done = windows.download(
+      net,
+      session,
+      { url: 'https://learn.tsinghua.edu.cn/b/download?id=1', uri: target },
+      { signal: controller.signal },
+    );
+    requests[0].emit(
+      'redirect',
+      302,
+      'GET',
+      'https://learn.tsinghua.edu.cn/f/x',
+    );
+    respond(requests[0], 200, ['MZ']);
+    await expect(done).resolves.toEqual({ status: 200 });
+    // On a Mac the stream is a file with a colon in its name.
+    expect(
+      fs.readFileSync(
+        path.join(root, 'Caches/file.pdf:Zone.Identifier'),
+        'utf8',
+      ),
+    ).toBe(
+      '[ZoneTransfer]\r\nZoneId=3\r\nHostUrl=https://learn.tsinghua.edu.cn/\r\n',
+    );
+    // Aborting after it finished does nothing.
+    controller.abort();
+    expect(fs.existsSync(path.join(root, 'Caches/file.pdf'))).toBe(true);
+  });
+
+  it('marks nothing elsewhere', async () => {
+    const { net, requests } = fakeNet();
+    const done = files.download(net, session, {
+      url: 'https://learn.tsinghua.edu.cn/b/download',
+      uri: target,
+    });
+    respond(requests[0], 200, ['x']);
+    await done;
+    expect(fs.readdirSync(path.join(root, 'Caches'))).toEqual(['file.pdf']);
+  });
+
   it("downloads the mock account's files", async () => {
     const { net, requests } = fakeNet();
     const done = files.download(net, session, {

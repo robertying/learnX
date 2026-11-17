@@ -23,7 +23,13 @@ afterEach(() => {
 
 it('opens a file in its default app, failing with the system’s message', async () => {
   await expect(openInDefaultApp(uri)).resolves.toBeUndefined();
-  expect(bridge.shell.open).toHaveBeenCalledWith(uri);
+  expect(bridge.shell.open).toHaveBeenCalledWith(uri, {
+    message: 'Open “{name}”?',
+    detail:
+      'This file can run programs on your computer. Open it only if you trust it.',
+    open: 'Open',
+    cancel: 'Cancel',
+  });
   jest.mocked(bridge.shell.open).mockResolvedValueOnce('No app for .xyz');
   await expect(openInDefaultApp(uri)).rejects.toThrow('No app for .xyz');
 });

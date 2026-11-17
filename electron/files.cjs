@@ -38,9 +38,34 @@ const sizeOf = dir => {
 };
 
 /**
- * @param {{ cache: string, document: string }} roots absolute folder paths
+ * Marks a finished download as one from the internet on Windows (the
+ * `Zone.Identifier` stream a browser writes), so Windows, SmartScreen and
+ * Office treat it as they would a browser's download: a warning before a
+ * program runs, Protected View for a document. Nothing elsewhere, or where
+ * the disk keeps no such streams.
+ * @param {string} file
+ * @param {string} url where it came from; only its origin is kept
+ * @param {string} platform
  */
-const createFiles = roots => {
+const markDownloaded = (file, url, platform) => {
+  if (platform !== 'win32') {
+    return;
+  }
+  try {
+    fs.writeFileSync(
+      `${file}:Zone.Identifier`,
+      `[ZoneTransfer]\r\nZoneId=3\r\nHostUrl=${new URL(url).origin}/\r\n`,
+    );
+  } catch {
+    // FAT32 and network drives have no alternate streams.
+  }
+};
+
+/**
+ * @param {{ cache: string, document: string }} roots absolute folder paths
+ * @param {{ platform?: string }} [options]
+ */
+const createFiles = (roots, { platform = process.platform } = {}) => {
   const rootPaths = Object.values(roots).map(root => path.resolve(root));
   for (const root of rootPaths) {
     fs.mkdirSync(root, { recursive: true });
@@ -228,22 +253,26 @@ const createFiles = roots => {
         /** @type {fs.WriteStream | undefined} */
         let out;
         let done = false;
+        let finalUrl = req.url;
+        const onAbort = () => fail(new Error('Aborted'));
         const fail = (/** @type {Error} */ error) => {
           if (done) {
             return;
           }
           done = true;
+          signal?.removeEventListener('abort', onAbort);
           request.abort();
           out?.destroy();
           fs.rmSync(target, { force: true });
           reject(error);
         };
-        signal?.addEventListener('abort', () => fail(new Error('Aborted')));
+        signal?.addEventListener('abort', onAbort, { once: true });
         for (const [name, value] of Object.entries(req.headers ?? {})) {
           request.setHeader(name, value);
         }
         request.on('redirect', (_status, _method, redirectUrl) => {
           if (downloadAllowedUrl(redirectUrl)) {
+            finalUrl = redirectUrl;
             request.followRedirect();
           } else {
             fail(new Error(`Redirected off the allowed sites: ${redirectUrl}`));
@@ -278,6 +307,8 @@ const createFiles = roots => {
             stream.end(() => {
               if (!done) {
                 done = true;
+                signal?.removeEventListener('abort', onAbort);
+                markDownloaded(target, finalUrl, platform);
                 resolve({ status });
               }
             });
@@ -289,4 +320,4 @@ const createFiles = roots => {
   };
 };
 
-module.exports = { createFiles, downloadAllowedUrl };
+module.exports = { createFiles, downloadAllowedUrl, markDownloaded };

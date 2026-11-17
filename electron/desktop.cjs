@@ -185,9 +185,9 @@ const setUpDesktop = ({
   });
   const windowOf = (/** @type {Electron.IpcMainInvokeEvent} */ event) =>
     BrowserWindow.fromWebContents(event.sender);
-  ipcMain.handle('shell:open', (event, uri) => {
+  ipcMain.handle('shell:open', (event, uri, labels) => {
     fromApp(event);
-    return fileShell.open(uri);
+    return fileShell.open(windowOf(event), uri, labels);
   });
   ipcMain.handle('shell:showInFolder', (event, uri) => {
     fromApp(event);

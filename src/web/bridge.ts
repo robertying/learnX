@@ -1,3 +1,14 @@
+/**
+ * The system's dialog before a file that would run a program opens
+ * (electron/fileShell.cjs); `{name}` in `message` is the file's name.
+ */
+export interface BridgeRunLabels {
+  message: string;
+  detail: string;
+  open: string;
+  cancel: string;
+}
+
 /** A cookie as Electron's session gives it (the fields the app reads). */
 export interface BridgeCookie {
   name: string;
@@ -209,8 +220,11 @@ export interface Bridge {
   };
   /** Files outside the app's folders, through dialogs and the system. */
   shell: {
-    /** Opens a file in its default app; resolves to an error message or ''. */
-    open: (uri: string) => Promise<string>;
+    /**
+     * Opens a file in its default app, after a system dialog with `labels`
+     * for one that would run a program; resolves to an error message or ''.
+     */
+    open: (uri: string, labels?: BridgeRunLabels) => Promise<string>;
     showInFolder: (uri: string) => Promise<void>;
     /** Saves a copy where the user picks; the path, or null if cancelled. */
     saveAs: (uri: string, name: string) => Promise<string | null>;

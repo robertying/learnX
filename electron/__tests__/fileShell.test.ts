@@ -3,7 +3,14 @@ import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createFiles } from '../files.cjs';
-import { createFileShell, safeName } from '../fileShell.cjs';
+import fileTypes from '../../src/constants/desktopFileTypes.json';
+import {
+  DEFAULT_RUN_LABELS,
+  PREVIEW_TYPES,
+  RUNNABLE_TYPES,
+  createFileShell,
+  safeName,
+} from '../fileShell.cjs';
 
 let root: string;
 let elsewhere: string;
@@ -12,6 +19,7 @@ let files: ReturnType<typeof createFiles>;
 const dialog = {
   showOpenDialog: jest.fn(),
   showSaveDialog: jest.fn(),
+  showMessageBox: jest.fn(),
 };
 const shell = { openPath: jest.fn(), showItemInFolder: jest.fn() };
 
@@ -54,17 +62,73 @@ it('names saved files without folders or forbidden characters', () => {
   expect(safeName(undefined)).toBe('learnX');
 });
 
+it('reads its file types from the list the page shares', () => {
+  expect(PREVIEW_TYPES).toEqual(fileTypes.preview);
+  expect([...RUNNABLE_TYPES]).toEqual(fileTypes.runnable);
+  for (const kind of ['exe', 'bat', 'ps1', 'lnk', 'desktop', 'sh']) {
+    expect(RUNNABLE_TYPES.has(kind)).toBe(true);
+  }
+});
+
+describe('a file that would run a program', () => {
+  const labels = {
+    message: '要打开“{name}”吗？',
+    detail: '此文件可在电脑上运行程序。',
+    open: '打开',
+    cancel: '取消',
+  };
+  const win = { id: 1 } as never;
+
+  it('opens only once the user says so, Cancel first', async () => {
+    const fileShell = shellFor();
+    const { file, uri } = download('作业说明.pdf.BAT');
+    shell.openPath.mockResolvedValue('');
+    dialog.showMessageBox.mockResolvedValueOnce({ response: 0 });
+    await expect(fileShell.open(win, uri, labels)).resolves.toBe('');
+    expect(shell.openPath).not.toHaveBeenCalled();
+    expect(dialog.showMessageBox).toHaveBeenCalledWith(win, {
+      type: 'warning',
+      message: '要打开“作业说明.pdf.BAT”吗？',
+      detail: labels.detail,
+      buttons: ['取消', '打开'],
+      defaultId: 0,
+      cancelId: 0,
+      noLink: true,
+    });
+
+    dialog.showMessageBox.mockResolvedValueOnce({ response: 1 });
+    await expect(fileShell.open(win, uri, labels)).resolves.toBe('');
+    expect(shell.openPath).toHaveBeenCalledWith(file);
+  });
+
+  it('asks in English when the page sends no labels', async () => {
+    const fileShell = shellFor();
+    const { uri } = download('setup.exe');
+    dialog.showMessageBox.mockResolvedValueOnce({ response: 0 });
+    await fileShell.open(null, uri, { message: 3, open: '' });
+    expect(dialog.showMessageBox).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'Open “setup.exe”?',
+        detail: DEFAULT_RUN_LABELS.detail,
+        buttons: ['Cancel', 'Open'],
+      }),
+    );
+    expect(shell.openPath).not.toHaveBeenCalled();
+  });
+});
+
 it('opens and shows only the app’s own files', async () => {
   const fileShell = shellFor();
   const { file, uri } = download('a.pdf');
   shell.openPath.mockResolvedValue('');
-  await expect(fileShell.open(uri)).resolves.toBe('');
+  await expect(fileShell.open(null, uri)).resolves.toBe('');
   expect(shell.openPath).toHaveBeenCalledWith(file);
+  expect(dialog.showMessageBox).not.toHaveBeenCalled();
   fileShell.showInFolder(uri);
   expect(shell.showItemInFolder).toHaveBeenCalledWith(file);
 
   const outside = pathToFileURL(path.join(elsewhere, 'x')).href;
-  await expect(fileShell.open(outside)).rejects.toThrow('Outside');
+  await expect(fileShell.open(null, outside)).rejects.toThrow('Outside');
   expect(() => fileShell.showInFolder('https://example.com')).toThrow(
     'Not a file URI',
   );

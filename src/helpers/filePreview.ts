@@ -2,6 +2,7 @@
 import mime from 'mime';
 import DeviceInfo from 'constants/DeviceInfo';
 import { isApple, isElectron } from 'helpers/platform';
+import desktopFileTypes from 'constants/desktopFileTypes.json';
 
 /** Word and Excel pages are drawn on white, also in dark mode. */
 export const needWhiteBackground = (ext?: string | null) =>
@@ -40,23 +41,12 @@ export const canRenderInIosWebview = (ext?: string | null) => {
 };
 
 /**
- * Pictures the Electron app shows inline; it serves nothing else to the
- * preview but PDFs (electron/fileShell.cjs). SVGs are left out: they can
- * carry scripts.
+ * PDFs and pictures, which the Electron app shows inline: the list its main
+ * process serves to the preview (electron/fileShell.cjs). SVGs are left out:
+ * they can carry scripts.
  */
-const electronImageTypes = new Set([
-  'png',
-  'jpg',
-  'jpeg',
-  'gif',
-  'webp',
-  'bmp',
-  'avif',
-  'ico',
-]);
-
 export const canRenderInElectron = (ext?: string | null) =>
-  !!ext && (ext === 'pdf' || electronImageTypes.has(ext.toLowerCase()));
+  !!ext && Object.hasOwn(desktopFileTypes.preview, ext.toLowerCase());
 
 /**
  * Whether File detail shows the downloaded file itself rather than its

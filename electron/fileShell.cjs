@@ -6,6 +6,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { pathToFileURL } = require('node:url');
+const fileTypes = require('../src/constants/desktopFileTypes.json');
 
 /** Where picked files are copied, under the cache folder. */
 const PICKED_DIR = 'picked';
@@ -13,19 +14,43 @@ const PICKED_DIR = 'picked';
 /**
  * What the file preview may show (`app://files/`), by extension: PDFs in
  * Chromium's viewer, and images. Anything else (a page, a script, an SVG
- * that could run one) is refused.
+ * that could run one) is refused. The page reads the same list.
  */
-const PREVIEW_TYPES = /** @type {Record<string, string>} */ ({
-  pdf: 'application/pdf',
-  png: 'image/png',
-  jpg: 'image/jpeg',
-  jpeg: 'image/jpeg',
-  gif: 'image/gif',
-  webp: 'image/webp',
-  bmp: 'image/bmp',
-  avif: 'image/avif',
-  ico: 'image/x-icon',
-});
+const PREVIEW_TYPES = /** @type {Record<string, string>} */ (fileTypes.preview);
+
+/**
+ * What opening in its default app would run as a program (an .exe, a
+ * script, a shortcut, a Linux .desktop file): asked about first.
+ */
+const RUNNABLE_TYPES = new Set(fileTypes.runnable);
+
+/**
+ * The confirmation before opening a file that would run, in the page's
+ * language (`shell:open`); English until it sends its own.
+ * @typedef {{ message: string; detail: string; open: string; cancel: string }} RunLabels
+ */
+/** @type {RunLabels} */
+const DEFAULT_RUN_LABELS = {
+  message: 'Open “{name}”?',
+  detail:
+    'This file can run programs on your computer. Open it only if you trust it.',
+  open: 'Open',
+  cancel: 'Cancel',
+};
+
+/** The labels the page sent, where they're text, over the defaults. */
+const runLabelsOf = (/** @type {unknown} */ given) => {
+  const labels = { ...DEFAULT_RUN_LABELS };
+  for (const key of /** @type {(keyof RunLabels)[]} */ (
+    Object.keys(DEFAULT_RUN_LABELS)
+  )) {
+    const value = /** @type {Record<string, unknown> | null} */ (given)?.[key];
+    if (typeof value === 'string' && value) {
+      labels[key] = value;
+    }
+  }
+  return labels;
+};
 
 /** Types a picked file is reported as, by extension; others are generic. */
 const PICKED_TYPES = /** @type {Record<string, string>} */ ({
@@ -54,7 +79,7 @@ const safeName = (/** @type {unknown} */ name) => {
 
 /**
  * @typedef {object} FileShellDeps
- * @property {Pick<Electron.Dialog, 'showOpenDialog' | 'showSaveDialog'>} dialog
+ * @property {Pick<Electron.Dialog, 'showOpenDialog' | 'showSaveDialog' | 'showMessageBox'>} dialog
  * @property {Pick<Electron.Shell, 'openPath' | 'showItemInFolder'>} shell
  * @property {{ grant: (dir: string) => string, localPath: (uri: string) => string, roots: () => { cache: string, document: string } }} files
  * @property {string} cacheDir the cache folder's path
@@ -98,11 +123,38 @@ const createFileShell = ({
 
   return {
     /**
-     * Opens a download in the system's default app for its type. Resolves to
-     * an error message, or '' when it opened.
+     * Opens a download in the system's default app for its type. One that
+     * would run as a program opens only once the user says so in a dialog of
+     * the system's (Cancel first), which the page can't answer for them;
+     * Windows also knows it came from the internet (`markDownloaded`).
+     * Resolves to an error message, or '' when it opened or was cancelled.
+     * @param {Electron.BrowserWindow | null} win
      * @param {unknown} uri
+     * @param {unknown} [labels] the dialog's text, `{name}` the file's
      */
-    open: async uri => shell.openPath(ownFile(uri)),
+    open: async (win, uri, labels) => {
+      const file = ownFile(uri);
+      if (RUNNABLE_TYPES.has(extensionOf(file))) {
+        const text = runLabelsOf(labels);
+        /** @type {Electron.MessageBoxOptions} */
+        const options = {
+          type: 'warning',
+          message: text.message.replace('{name}', path.basename(file)),
+          detail: text.detail,
+          buttons: [text.cancel, text.open],
+          defaultId: 0,
+          cancelId: 0,
+          noLink: true,
+        };
+        const { response } = win
+          ? await dialog.showMessageBox(win, options)
+          : await dialog.showMessageBox(options);
+        if (response !== 1) {
+          return '';
+        }
+      }
+      return shell.openPath(file);
+    },
 
     /** @param {unknown} uri */
     showInFolder: uri => {
@@ -263,7 +315,9 @@ const createFileShell = ({
 
 module.exports = {
   createFileShell,
+  DEFAULT_RUN_LABELS,
   PICKED_DIR,
   PREVIEW_TYPES,
+  RUNNABLE_TYPES,
   safeName,
 };

@@ -164,6 +164,8 @@ const zh: typeof en = {
   share: '分享',
   open: '打开',
   openInDefaultApp: '用默认应用打开',
+  openRunnableTitle: '要打开“{name}”吗？',
+  openRunnableMessage: '此文件可在电脑上运行程序，请仅在信任它时打开。',
   showInFolder: '在文件夹中显示',
   saveAs: '另存为',
   copyLink: '复制链接',

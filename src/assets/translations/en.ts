@@ -172,6 +172,9 @@ export default {
   share: 'Share',
   open: 'Open',
   openInDefaultApp: 'Open in Default App',
+  openRunnableTitle: 'Open “{name}”?',
+  openRunnableMessage:
+    'This file can run programs on your computer. Open it only if you trust it.',
   showInFolder: 'Show in Folder',
   saveAs: 'Save As',
   copyLink: 'Copy Link',
