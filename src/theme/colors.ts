@@ -2,12 +2,12 @@
 // colors on iOS, iPadOS and Mac, Material's on Android. The Electron app's
 // is in colors.web.ts, which Metro picks on web only, so the phones' bundles
 // never carry it. The theme passes its own builders in.
+import type { ThemeColors } from 'theme';
 import { isApple } from 'helpers/platform';
 
-export const buildPlatformColors = <Colors>(
+type Builder = (dark: boolean) => ThemeColors;
+
+export const buildPlatformColors = (
   dark: boolean,
-  builders: {
-    apple: (dark: boolean) => Colors;
-    material: (dark: boolean) => Colors;
-  },
-): Colors => (isApple() ? builders.apple(dark) : builders.material(dark));
+  builders: { apple: Builder; material: Builder },
+): ThemeColors => (isApple() ? builders.apple(dark) : builders.material(dark));

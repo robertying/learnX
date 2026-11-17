@@ -4,4 +4,4 @@ import type { buildPlatformColors as Native } from './colors';
 import { buildElectronColors } from './electron';
 
 export const buildPlatformColors: typeof Native = dark =>
-  buildElectronColors(dark) as never;
+  buildElectronColors(dark);
