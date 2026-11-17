@@ -11,6 +11,7 @@ import {
   Headline,
   Paragraph,
   Text,
+  TextVariant,
   textStyles,
   useTextIconSize,
 } from 'components/Text';
@@ -29,12 +30,18 @@ const android = isAndroid();
 const useTitleLines = () => (useWindowDimensions().fontScale >= 1.5 ? 3 : 1);
 // Mail's first line is Subheadline; a Material three-line item's overline is
 // small (bodySmall).
-const metaVariant = android ? 'footnote' : 'subheadline';
+const metaVariant: TextVariant = android ? 'footnote' : 'subheadline';
 
-// The unread dot, two thirds as tall as the subheadline text (10 pt on iOS,
-// 7 pt on the Mac's smaller text), centered where a 10 pt dot 6 pt down is.
-const dotSize = Math.round(((textStyles.subheadline.fontSize ?? 15) * 2) / 3);
-const dotTop = 6 + (10 - dotSize) / 2;
+// The unread dot, two thirds as tall as the first line's small text (10 pt on
+// iOS, 7 pt on the Mac's smaller text, 8 dp on Android).
+const dotSize = Math.round(((textStyles[metaVariant].fontSize ?? 15) * 2) / 3);
+// Where it sits: on iOS and Mac where a 10 pt dot 6 pt down is centered; on
+// Android centered on the row's first line, below the content's 2 dp of
+// padding, whose line is taller there when it is the title.
+const dotTop = (firstLine: TextVariant) =>
+  android
+    ? 2 + ((textStyles[firstLine].lineHeight ?? 0) - dotSize) / 2
+    : 6 + (10 - dotSize) / 2;
 
 export interface CardRowProps {
   /** Whose item this is (the course, or the publisher inside a course). */
@@ -93,9 +100,8 @@ const Highlighted: React.FC<{
  * three-line list item on Android: who it's from and when on a small first
  * line, then the title and a preview. Titles are medium weight, a step above
  * the secondary text around them. Unread items get a dot in a gutter on the
- * leading edge on iOS and Mac (Mail, Messages), and a bold title on Android
- * (Gmail). The gutter is there on every iOS and Mac row, so the text of all
- * lists lines up.
+ * leading edge (Mail, Messages), in the theme's primary color. The gutter is
+ * there on every row, so the text of all lists lines up.
  */
 const CardRow: React.FC<CardRowProps> = ({
   overline,
@@ -125,7 +131,10 @@ const CardRow: React.FC<CardRowProps> = ({
 
   return (
     <View style={styles.root}>
-      <CardGutter unread={unread} />
+      <CardGutter
+        unread={unread}
+        firstLine={overline ? metaVariant : 'headline'}
+      />
       <View style={styles.content}>
         {overline ? (
           <View style={styles.firstLine}>
@@ -140,10 +149,7 @@ const CardRow: React.FC<CardRowProps> = ({
           </View>
         ) : null}
         <View style={styles.firstLine}>
-          <Headline
-            numberOfLines={titleLines}
-            style={[styles.title, android && unread && styles.unread]}
-          >
+          <Headline numberOfLines={titleLines} style={styles.title}>
             <Highlighted text={title} words={highlight} inTitle />
           </Headline>
           {overline ? null : meta}
@@ -162,8 +168,8 @@ const previewLength = 120;
 
 /**
  * What a screen reader says for a row: its title first, then whose it is and
- * when, then the states and glyphs it shows only visually (the unread dot or
- * bold title, a flag, a paperclip), then the preview.
+ * when, then the states and glyphs it shows only visually (the unread dot, a
+ * flag, a paperclip), then the preview.
  */
 export const cardAccessibilityLabel = ({
   unread,
@@ -194,17 +200,18 @@ export const cardAccessibilityLabel = ({
     .join(', ');
 
 /**
- * The leading gutter of an iOS and Mac list row, with the unread dot in it.
- * Every row has one, so the text of all lists lines up. Nothing on Android.
- * Goes first in a row whose children are 10 apart.
+ * The leading gutter of a list row, with the unread dot in it. Every row has
+ * one, so the text of all lists lines up. Goes first in a row whose children
+ * are 10 apart; `firstLine` is the text style of the row's first line, which
+ * the dot lines up with on Android.
  */
-export const CardGutter: React.FC<{ unread?: boolean }> = ({ unread }) => {
+export const CardGutter: React.FC<{
+  unread?: boolean;
+  firstLine?: TextVariant;
+}> = ({ unread, firstLine = metaVariant }) => {
   const theme = useTheme();
-  if (android) {
-    return null;
-  }
   return (
-    <View style={styles.gutter}>
+    <View style={[styles.gutter, { paddingTop: dotTop(firstLine) }]}>
       {unread ? (
         <View
           testID="unread-dot"
@@ -307,7 +314,6 @@ const styles = StyleSheet.create({
   gutter: {
     width: 10,
     marginStart: -8,
-    paddingTop: dotTop,
   },
   dot: {
     width: dotSize,
@@ -337,9 +343,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   titleMatch: {
-    fontWeight: '700',
-  },
-  unread: {
     fontWeight: '700',
   },
   meta: {
