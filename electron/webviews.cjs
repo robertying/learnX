@@ -6,9 +6,12 @@
 // Native web view's `onShouldStartLoadWithRequest` does, and this process
 // keeps every page on the sites below whatever it decides.
 const { allowedHost } = require('./net.cjs');
-
-/** The session every web view shares with the window. */
-const PARTITION = 'persist:learnx';
+const { readShared } = require('./shared.cjs');
+/**
+ * The session every web view shares with the app's requests (the page names
+ * it too, from the same file).
+ */
+const { partition: PARTITION } = readShared('webviewPartition.json');
 
 /** How long a load waits for the page to decide before it's refused. */
 const DECISION_TIMEOUT_MS = 15_000;

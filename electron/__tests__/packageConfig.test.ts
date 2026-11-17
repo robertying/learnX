@@ -3,6 +3,7 @@ import path from 'node:path';
 import updateMirror from '../../src/constants/updateMirror.json';
 import electronPackage from '../package.json';
 import { packageConfig } from '../packageConfig.cjs';
+import { SHARED_FILES, readShared } from '../shared.cjs';
 
 it('updates from the TUNA mirror, as the Android app does', () => {
   expect(packageConfig().publish).toEqual({
@@ -92,4 +93,35 @@ it('installs for the current user, and uninstalling removes learnX’s data', ()
   expect(script).toContain(
     `RMDir /r "$LOCALAPPDATA\\${electronPackage.name}-updater"`,
   );
+});
+
+it('packages what the main process shares with the page', () => {
+  expect(packageConfig().files).toContainEqual({
+    from: '../src/constants',
+    to: 'constants',
+    filter: SHARED_FILES,
+  });
+  for (const name of SHARED_FILES) {
+    expect(readShared(name)).toEqual(
+      JSON.parse(
+        fs.readFileSync(
+          path.join(__dirname, '../../src/constants', name),
+          'utf8',
+        ),
+      ),
+    );
+  }
+  expect(() => readShared('updateMirror.json' as never)).toThrow(
+    'Not a shared file',
+  );
+  // Nothing in the main process reads src/ any other way.
+  const readingSrc = fs
+    .readdirSync(path.join(__dirname, '..'))
+    .filter(name => name.endsWith('.cjs') && name !== 'packageConfig.cjs')
+    .filter(name =>
+      fs
+        .readFileSync(path.join(__dirname, '..', name), 'utf8')
+        .includes("require('../src/"),
+    );
+  expect(readingSrc).toEqual([]);
 });

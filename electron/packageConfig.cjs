@@ -6,6 +6,7 @@
 const path = require('node:path');
 const updateMirror = require('../src/constants/updateMirror.json');
 const { readBuildInfo } = require('./buildInfo.cjs');
+const { SHARED_FILES } = require('./shared.cjs');
 
 const { version, build } = readBuildInfo(path.join(__dirname, '..'));
 
@@ -55,6 +56,8 @@ const config = (options = {}) => {
       'icons/icon.png',
       'icons/icon.ico',
       { from: '../build/electron/web', to: 'web' },
+      // What the main process shares with the page (shared.cjs).
+      { from: '../src/constants', to: 'constants', filter: SHARED_FILES },
       // The key update files are signed with (updateSignature.cjs).
       { from: '../certs', to: '.', filter: ['ota-certificate.pem'] },
     ],

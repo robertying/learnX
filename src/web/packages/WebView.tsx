@@ -17,6 +17,7 @@ import type {
 import { bridge, type WebviewLoadRequest } from 'web/bridge';
 import WebviewTag from 'web/packages/webviewTag';
 import FilePreview from 'web/FilePreview';
+import webviewPartition from 'constants/webviewPartition.json';
 
 /**
  * Stands in for react-native-webview in the Electron app: an Electron
@@ -70,7 +71,7 @@ const DEFAULT_ORIGIN_WHITELIST = [
 ];
 
 /** The session the main process lets web views use (webviews.cjs). */
-const PARTITION = 'persist:learnx';
+const PARTITION = webviewPartition.partition;
 
 /** The `<webview>` events the stand-in turns into React Native's. */
 export const WEBVIEW_EVENTS = [

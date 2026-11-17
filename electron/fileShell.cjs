@@ -6,7 +6,9 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { pathToFileURL } = require('node:url');
-const fileTypes = require('../src/constants/desktopFileTypes.json');
+const { readShared } = require('./shared.cjs');
+
+const fileTypes = readShared('desktopFileTypes.json');
 
 /** Where picked files are copied, under the cache folder. */
 const PICKED_DIR = 'picked';
