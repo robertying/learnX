@@ -70,7 +70,11 @@ name: Download a file, then delete it
 - tapOn:
     id: 'downloads-course-.*'
 - tapOn: '${T_deleteEllipsis}'
-- tapOn: '${T_delete}'
+# The alert's button, right of its Cancel: on iOS 17 the trash icons behind
+# the alert read Delete too.
+- tapOn:
+    text: '${T_delete}'
+    rightOf: '${T_cancel}'
 - extendedWaitUntil:
     notVisible:
       id: 'downloads-course-.*'
