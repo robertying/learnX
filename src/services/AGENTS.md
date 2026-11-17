@@ -2,6 +2,8 @@
 
 Code that talks to the system and to servers outside `data/source`: background sync, notifications and reminders, the system calendar, Spotlight and App Intents, the widgets' feed, downloaded files, crash reporting and courseX. How it's tested is under "Unit tests" in the root `AGENTS.md`.
 
+In the Electron app only the deadline and class reminders run among the surfaces (no widgets, Spotlight, App Intents or calendar sync); its own services are `services/files/electron.ts` (Open in Default App, Save As), `services/calendar/electronExport.ts` (the .ics export) and `services/electronUpdates.ts`. See `electron/AGENTS.md`.
+
 ## Surfaces
 
 - `services/surfaces` keeps what learnX shows outside the app in step with its data: the Deadlines and Next Up widgets, deadline and class reminders, Spotlight, the App Intents' data, the assignments written to the system calendar or Reminders, and the courses shared with courseX (Settings › Course Information Sharing). `watchSurfaces()` (from `index.js`, so it runs in every JS runtime: the app, the background task and Android's notification action task) follows the cached assignments, notices, courses and timetable, the user data it reads (the semester shown, hidden courses, archives) and the settings, and `refreshSurfaces()` updates each output whose inputs changed (compared like an effect's dependencies), one run at a time. Code the system may stop soon after (the background sync, notification actions) awaits `refreshSurfaces()`; logout calls `clearSurfaces()`.

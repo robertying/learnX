@@ -13,6 +13,7 @@
     "../*.config.js",
     "../electron/*.cjs",
     "../electron/*.mjs",
+    "../electron/icons/*.mjs",
     "../electron/__tests__/*.ts",
     "../electron/e2e/*.ts",
     "../electron/playwright.config.ts"
