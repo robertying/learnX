@@ -30,7 +30,7 @@ it('labels the tray and opens what the Jump List asks for', async () => {
   const { unmount } = await renderHook(() => useJumpListTaps());
   expect(bridge.system.setLabels).toHaveBeenCalledWith({
     open: t('trayOpen'),
-    refresh: t('refresh'),
+    checkForNewItems: t('trayCheckForNewItems'),
     quit: t('trayQuit'),
     today: t('today'),
     schedule: t('schedule'),

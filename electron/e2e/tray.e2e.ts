@@ -44,7 +44,7 @@ test('keeps running in the tray, and comes back from it', async ({
     .poll(() => main.trayLabels())
     .toEqual([
       expect.stringMatching(exact('T_trayOpen')),
-      expect.stringMatching(exact('T_refresh')),
+      expect.stringMatching(exact('T_trayCheckForNewItems')),
       '',
       expect.stringMatching(exact('T_trayQuit')),
     ]);
@@ -56,7 +56,7 @@ test('keeps running in the tray, and comes back from it', async ({
   await expect(byId(window, 'today')).toBeVisible();
 });
 
-test('syncs in the background from the tray’s Refresh', async ({
+test('syncs in the background from the tray’s Check for New Items', async ({
   main,
   dataDir,
   login,
@@ -66,9 +66,9 @@ test('syncs in the background from the tray’s Refresh', async ({
   await main.hideWindow();
   await expect.poll(() => main.windowVisible()).toBe(false);
 
-  // The timer's first run is 15 minutes away: this one is Refresh's.
+  // The timer's first run is 15 minutes away: this one is Check for New Items'.
   expect(syncRuns(dataDir)).toEqual([]);
-  await main.chooseTrayItem(exact('T_refresh'));
+  await main.chooseTrayItem(exact('T_trayCheckForNewItems'));
   await expect
     .poll(() => syncRuns(dataDir).length, { timeout: 30_000 })
     .toBe(1);
@@ -94,7 +94,7 @@ test('skips the background sync after logging out', async ({
   await window.getByRole('button', { name: exact('T_logout') }).click();
   await expect(byId(window, 'login-username')).toBeVisible();
 
-  await main.chooseTrayItem(exact('T_refresh'));
+  await main.chooseTrayItem(exact('T_trayCheckForNewItems'));
   await expect
     .poll(() => syncRuns(dataDir).map(run => run.status), { timeout: 30_000 })
     .toEqual(['skipped']);

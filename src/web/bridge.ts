@@ -135,7 +135,8 @@ export interface BridgePickedFile {
 /** The labels of the tray's menu and the Jump List, in the app's language. */
 export interface TrayLabels {
   open: string;
-  refresh: string;
+  /** Runs the background sync now. */
+  checkForNewItems: string;
   quit: string;
   today: string;
   schedule: string;

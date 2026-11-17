@@ -187,6 +187,7 @@ export default {
   startAtLoginCaption:
     'learnX starts in the system tray when you sign in, so it keeps syncing and sends reminders. Closing its window keeps it there; Quit in the tray menu ends it.',
   trayOpen: 'Open learnX',
+  trayCheckForNewItems: 'Check for New Items',
   trayQuit: 'Quit learnX',
   electronNotificationsCaption:
     "learnX sends notifications and reminders only while it's running.",

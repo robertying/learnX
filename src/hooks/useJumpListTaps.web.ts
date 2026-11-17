@@ -29,7 +29,7 @@ const useJumpListTaps = () => {
   useEffect(() => {
     void bridge().system.setLabels({
       open: t('trayOpen'),
-      refresh: t('refresh'),
+      checkForNewItems: t('trayCheckForNewItems'),
       quit: t('trayQuit'),
       today: t('today'),
       schedule: t('schedule'),

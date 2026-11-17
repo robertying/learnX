@@ -38,6 +38,9 @@ test.describe('in Chinese', () => {
       await expect
         .poll(async () => (await main.trayLabels())[0])
         .toMatch(chinese('T_trayOpen'));
+      expect((await main.trayLabels())[1]).toMatch(
+        chinese('T_trayCheckForNewItems'),
+      );
     }
 
     await openSettings(window);

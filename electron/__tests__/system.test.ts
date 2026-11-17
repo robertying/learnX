@@ -285,7 +285,7 @@ describe('the window', () => {
 });
 
 describe('the tray and the Jump List', () => {
-  it('offers Open, Refresh and Quit, in the page’s language once it says', async () => {
+  it('offers Open, Check for New Items and Quit, in the page’s language once it says', async () => {
     const { trays, invoke, createWindow, app } = setUp();
     const win = createWindow();
     win.visible = false;
@@ -293,7 +293,7 @@ describe('the tray and the Jump List', () => {
     const labels = () => trays[0].menu.map(item => item.label ?? item.type);
     expect(labels()).toEqual([
       DEFAULT_LABELS.open,
-      DEFAULT_LABELS.refresh,
+      DEFAULT_LABELS.checkForNewItems,
       'separator',
       DEFAULT_LABELS.quit,
     ]);
@@ -309,14 +309,14 @@ describe('the tray and the Jump List', () => {
 
     await invoke('system:setLabels', {
       open: '打开learnX',
-      refresh: '刷新',
+      checkForNewItems: '检查新内容',
       quit: '',
       today: '今天',
       bogus: 'x',
     });
     expect(labels()).toEqual([
       '打开learnX',
-      '刷新',
+      '检查新内容',
       'separator',
       'Quit learnX',
     ]);

@@ -37,7 +37,7 @@ const openTargetOf = argv => {
  */
 const DEFAULT_LABELS = {
   open: 'Open learnX',
-  refresh: 'Refresh',
+  checkForNewItems: 'Check for New Items',
   quit: 'Quit learnX',
   today: 'Today',
   schedule: 'Schedule',
@@ -419,7 +419,7 @@ const setUpSystem = ({
     }
     trayMenu = Menu.buildFromTemplate([
       { label: labels.open, click: showWindow },
-      { label: labels.refresh, click: () => runSync(true) },
+      { label: labels.checkForNewItems, click: () => runSync(true) },
       { type: 'separator' },
       { label: labels.quit, click: () => app.quit() },
     ]);
