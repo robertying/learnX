@@ -41,6 +41,7 @@ import { ClockWarningRegular } from '@fluentui/react-icons/svg/clock-warning';
 import { CloudOffRegular } from '@fluentui/react-icons/svg/cloud-off';
 import { CodeRegular } from '@fluentui/react-icons/svg/code';
 import { DeleteRegular } from '@fluentui/react-icons/svg/delete';
+import { DesktopRegular } from '@fluentui/react-icons/svg/desktop';
 import { DismissRegular } from '@fluentui/react-icons/svg/dismiss';
 import {
   DismissCircleFilled,
@@ -172,6 +173,7 @@ export const fluentIcons: Record<SystemIconWindowsName, FluentIcon> = {
   CloudOffRegular,
   CodeRegular,
   DeleteRegular,
+  DesktopRegular,
   DismissCircleRegular,
   DismissRegular,
   DocumentAddRegular,
