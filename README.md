@@ -56,10 +56,18 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 
 从 [TUNA 镜像（推荐）](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/)或 [GitHub Releases](https://github.com/robertying/learnX/releases) 下载，App 会自动更新。
 
-- Windows（x64、ARM64）：下载 .exe 安装程序。安装程序没有签名，如果 Windows 提示“Windows 已保护你的电脑”，请点按“更多信息”，再点按“仍要运行”。
-- Linux（x64、ARM64）：
-  - Ubuntu 和 Debian：按设备架构下载 .deb 包（x64 设备选文件名带 `amd64` 的，ARM64 设备选带 `arm64` 的），然后用 `sudo apt install ./文件名.deb` 安装。不建议在 Ubuntu 上用 AppImage：Ubuntu 24.04 起，AppImage 无法启用 Chromium 沙盒。
-  - 其他发行版：下载 AppImage，先用 `chmod +x` 加上执行权限，再直接运行。
+- **Windows**
+  - 下载 `learnX-windows-vX.X.X.exe`（x64 和 ARM64 通用）
+  - 安装程序没有签名，如果提示“Windows 已保护你的电脑”，请点按“更多信息”，再点按“仍要运行”
+
+- **Ubuntu / Debian**
+  - x64 下载 `learnX-linux-amd64-vX.X.X.deb`，ARM64 下载 `learnX-linux-arm64-vX.X.X.deb`
+  - 用 `sudo apt install ./learnX-linux-amd64-vX.X.X.deb` 安装（ARM64 换成对应文件名）
+
+- **其他 Linux 发行版**
+  - x64 下载 `learnX-linux-x86_64-vX.X.X.AppImage`，ARM64 下载 `learnX-linux-arm64-vX.X.X.AppImage`
+  - 先用 `chmod +x` 加上执行权限，再直接运行
+  - Ubuntu 上请用 .deb：Ubuntu 24.04 起，AppImage 无法启用 Chromium 沙盒
 
 ## 功能
 
@@ -70,6 +78,7 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 ### 今天
 
 - 打开就能看到今天的课程、快截止的作业和各门课的新内容
+- 课程表：查看未来七天的课
 
 ### 课程内容
 
@@ -81,6 +90,7 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 ### 通知与提醒
 
 - 有新公告、新文件、新作业或出了成绩，第一时间通知你
+- 截止时间变了、开放补交、老师写了评语，也会告诉你
 - 作业截止前、上课前提醒你
 - 课表和作业可同步到日历，在 iPhone、iPad 和 Mac 上作业也可同步到提醒事项
 
@@ -88,12 +98,15 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 
 - 小组件：作业截止、下一节课（iPhone、iPad 和 Android）
 - 用聚焦搜索查找公告、作业和文件，或直接问 Siri 下一节课是什么（iPhone、iPad 和 Mac）
+- 全局搜索
 - 收藏、归档公告、作业和文件，收藏与网络学堂同步
 - 屏蔽不需要的课程
+- 切换学期
+- courseX 课程信息共享计划
 
 ## 隐私
 
-你的账号和课程内容保存在你的设备上，除了清华大学的服务器，不会发到其他地方。唯一的例外是课程信息共享：开启后，learnX 会把本学期课程的公开信息上传到 courseX，但不会上传任何关于你本人的信息。详见[隐私政策](docs/PRIVACY_POLICY_CN.md)。
+除了清华大学的服务器，learnX 不会把你的账号和课程内容发到任何地方，它们只保存在你的设备上。唯一的例外是课程信息共享：开启后，learnX 会把本学期课程的公开信息上传到 courseX，但不会上传任何关于你本人的信息。详见[隐私政策](docs/PRIVACY_POLICY_CN.md)。
 
 ## 开发
 
@@ -123,24 +136,39 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 Requires iOS / iPadOS 17.6, macOS 14.6, Android 10 or Windows 10 and later, or Linux on x64 / ARM64.
 
 - **iPhone, iPad and Mac:** [App Store](https://apps.apple.com/cn/app/learnx-thu-web-learning/id1459073115)
-- **Android:** [Google Play](https://play.google.com/store/apps/details?id=io.robertying.learnx), the [TUNA Mirror (recommended)](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/) or [GitHub Releases](https://github.com/robertying/learnX/releases). From the mirror or GitHub, download `learnX-arm64-v8a-vX.X.X.apk`, or `learnX-universal-vX.X.X.apk` if it doesn't install; these versions update from inside the app.
-- **Windows and Linux:** the [TUNA Mirror (recommended)](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/) or [GitHub Releases](https://github.com/robertying/learnX/releases). The app updates itself.
-  - Windows (x64, ARM64): download the .exe installer. It's unsigned, so if Windows says "Windows protected your PC", choose "More info", then "Run anyway".
-  - Ubuntu and Debian (x64, ARM64): download the .deb for your device (`amd64` in the file name for x64, `arm64` for ARM64) and install it with `sudo apt install ./<file>.deb`. Don't use the AppImage on Ubuntu: since Ubuntu 24.04, it can't turn on Chromium's sandbox.
-  - Other Linux distributions (x64, ARM64): download the AppImage, make it executable with `chmod +x`, and run it.
+
+- **Android:** [Google Play](https://play.google.com/store/apps/details?id=io.robertying.learnx), the [TUNA Mirror (recommended)](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/) or [GitHub Releases](https://github.com/robertying/learnX/releases)
+  - From the mirror or GitHub, download `learnX-arm64-v8a-vX.X.X.apk`
+  - If it doesn't install, use `learnX-universal-vX.X.X.apk` instead
+  - Versions from the mirror or GitHub let you update from inside the app
+
+- **Windows and Linux:** the [TUNA Mirror (recommended)](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/) or [GitHub Releases](https://github.com/robertying/learnX/releases), and the app updates itself
+
+- **Windows**
+  - Download `learnX-windows-vX.X.X.exe` (one installer for x64 and ARM64)
+  - The installer is unsigned: if Windows says "Windows protected your PC", choose "More info", then "Run anyway"
+
+- **Ubuntu / Debian**
+  - On x64, download `learnX-linux-amd64-vX.X.X.deb`; on ARM64, `learnX-linux-arm64-vX.X.X.deb`
+  - Install it with `sudo apt install ./learnX-linux-amd64-vX.X.X.deb` (use the ARM64 file name on ARM64)
+
+- **Other Linux distributions**
+  - On x64, download `learnX-linux-x86_64-vX.X.X.AppImage`; on ARM64, `learnX-linux-arm64-vX.X.X.AppImage`
+  - Make it executable with `chmod +x`, then run it
+  - On Ubuntu, use the .deb: since Ubuntu 24.04, the AppImage can't turn on Chromium's sandbox
 
 ### Features
 
 learnX brings your Web Learning notices, assignments and files together, and tells you when something new is posted or a deadline is near.
 
-- **Today:** the day's classes, upcoming deadlines and new items in every course
+- **Today:** the day's classes, upcoming deadlines and new items in every course, and a schedule of the next seven days
 - **Course content:** notices with their attachments, file previews and downloads, assignment details, grading and submission, and offline reading
-- **Notifications and reminders:** new notices, files, assignments and grades, deadline and class reminders, and calendar sync (plus Reminders on iPhone, iPad and Mac)
-- **More:** widgets (iPhone, iPad and Android), Spotlight and Siri (iPhone, iPad and Mac), favorites synced with Web Learning, archiving, and hiding courses
+- **Notifications and reminders:** new notices, files, assignments and grades, moved deadlines, late submission windows and grader comments, deadline and class reminders, and calendar sync (plus Reminders on iPhone, iPad and Mac)
+- **More:** widgets (iPhone, iPad and Android), Spotlight and Siri (iPhone, iPad and Mac), global search, favorites synced with Web Learning, archiving, hiding courses, switching semesters, and courseX Course Information Sharing
 
 ### Privacy
 
-Your account and course content stay on your device and are sent nowhere except Tsinghua's servers. The one exception is Course Information Sharing: when you turn it on, learnX uploads public information about your courses this semester to courseX, and nothing about you. See the [privacy policy](docs/PRIVACY_POLICY_EN.md).
+Except for Tsinghua's servers, learnX sends your account and course content nowhere; they stay on your device. The one exception is Course Information Sharing: when you turn it on, learnX uploads public information about your courses this semester to courseX, and nothing about you. See the [privacy policy](docs/PRIVACY_POLICY_EN.md).
 
 ### Development
 
