@@ -18,7 +18,7 @@ jobs:
     # (.maestro/AGENTS.md). No iOS E2E in CI. The emulator runs in Chinese
     # (its system language: a per-app language doesn't survive the flows'
     # clearState); the local devices cover English.
-    name: Android E2E tests
+    name: Maestro flows
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
