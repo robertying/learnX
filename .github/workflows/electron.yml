@@ -1,13 +1,13 @@
 name: Electron
 
-# The Windows and Linux app (electron/). Web build and E2E tests (Linux) are
-# required: they bundle the web build and run the Playwright E2E tests on
-# Linux, under X11 and Wayland, on every pull request; one that changes
-# nothing the app uses (only native code, Maestro flows, fastlane, docs or
-# the other workflows) skips their steps and passes. Manual runs also run the
-# tests on Windows (E2E tests (Windows), not required) and check that the
-# installers still build on Windows and Linux (Installers); those builds are
-# never released: releases are built, signed and uploaded by hand with
+# The Windows and Linux app (electron/). Web build, E2E tests (Linux) and
+# E2E tests (Windows) are required: they bundle the web build and run the
+# Playwright E2E tests on Linux (under X11, then the window test under
+# Wayland) and on Windows, side by side, on every pull request; one that
+# changes nothing the app uses (only native code, Maestro flows, fastlane,
+# docs or the other workflows) skips their steps and passes. Manual runs
+# also check that the installers still build on Windows and Linux
+# (Installers); those builds are never released: releases are built, signed and uploaded by hand with
 # fastlane (the release skill). js.yml's Checks run the `web` Jest project.
 on:
   pull_request:
@@ -112,7 +112,7 @@ jobs:
     #   Weston's headless backend is a real Wayland compositor without a
     #   screen; with no X display, Electron can only use it, as Ubuntu's and
     #   Fedora's desktops run it.
-    # - Windows (not required): manual runs only, the same way.
+    # - Windows (required): the same way, on its own runner at the same time.
     # A static name: rows show as "E2E tests (Linux)" and "E2E tests
     # (Windows)", and a skipped job would show a raw expression instead.
     name: E2E tests
@@ -120,7 +120,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        run: ${{ fromJSON(github.event_name == 'workflow_dispatch' && '["Linux","Windows"]' || '["Linux"]') }}
+        run: [Linux, Windows]
     runs-on: ${{ matrix.run == 'Windows' && 'windows-latest' || 'ubuntu-latest' }}
     timeout-minutes: 20
     env:
