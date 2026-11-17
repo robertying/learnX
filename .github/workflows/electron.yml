@@ -105,29 +105,27 @@ jobs:
     # export, updates against updateServer.mjs, the SSO page). It needs the
     # network, as the flows do: the mock files download from GitHub and the
     # SSO test opens id.tsinghua.edu.cn.
-    # - Linux (required): the suite split in two (Playwright's --shard, by
-    #   test), each half on its own runner under a virtual X display, about
-    #   3 minutes each instead of 5. The second half then runs the window
-    #   test once more under Wayland (window.e2e.ts): under X11 a window
+    # - Linux (required): under a virtual X display, three apps at a time
+    #   (--workers=3 on the runner's 4 cores; each test has its own data
+    #   folder and ports). Then the window test once more under Wayland
+    #   (window.e2e.ts): under X11 a window
     #   draws whether it shows or not, so only Wayland can tell a window
     #   that never appears. Weston's headless backend is a real Wayland
     #   compositor without a screen; with no X display, Electron can only
     #   use it, as Ubuntu's and Fedora's desktops run it.
     # - Windows (not required, much slower): manual runs only.
-    # A static name: rows show as "E2E tests (Linux 1)", "E2E tests (Linux
-    # 2)" and "E2E tests (Windows)", and a skipped job would show a raw
-    # expression instead.
+    # A static name: rows show as "E2E tests (Linux)" and "E2E tests
+    # (Windows)", and a skipped job would show a raw expression instead.
     name: E2E tests
     needs: web
     strategy:
       fail-fast: false
       matrix:
-        run: ${{ fromJSON(github.event_name == 'workflow_dispatch' && '["Linux 1","Linux 2","Windows"]' || '["Linux 1","Linux 2"]') }}
+        run: ${{ fromJSON(github.event_name == 'workflow_dispatch' && '["Linux","Windows"]' || '["Linux"]') }}
     runs-on: ${{ matrix.run == 'Windows' && 'windows-latest' || 'ubuntu-latest' }}
     timeout-minutes: 20
     env:
       CHANGED: ${{ needs.web.outputs.changed }}
-      RUN: ${{ matrix.run }}
     steps:
       - name: Checkout repository
         if: env.CHANGED == 'true'
@@ -145,7 +143,7 @@ jobs:
           path: build/electron/web
 
       - name: Install Weston
-        if: env.CHANGED == 'true' && matrix.run == 'Linux 2'
+        if: env.CHANGED == 'true' && matrix.run == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends weston
@@ -166,7 +164,7 @@ jobs:
         run: |
           bash scripts/write-e2e-env.sh
           if [ "$RUNNER_OS" = Linux ]; then
-            xvfb-run --auto-servernum pnpm e2e:electron --fully-parallel --shard="${RUN#Linux }/2" --workers=2
+            xvfb-run --auto-servernum pnpm e2e:electron --workers=3
           else
             pnpm e2e:electron
           fi
@@ -175,7 +173,7 @@ jobs:
       # results go in a folder of their own, beside the X11 run's.
       - name: E2E test on Wayland
         id: wayland
-        if: ${{ !cancelled() && env.CHANGED == 'true' && matrix.run == 'Linux 2' && steps.electron-cache.outcome == 'success' }}
+        if: ${{ !cancelled() && env.CHANGED == 'true' && matrix.run == 'Linux' && steps.electron-cache.outcome == 'success' }}
         run: |
           export XDG_RUNTIME_DIR="$RUNNER_TEMP/xdg"
           mkdir -m 700 "$XDG_RUNTIME_DIR"

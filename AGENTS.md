@@ -72,4 +72,4 @@ learnX is a React Native app (iOS, iPadOS, Mac Catalyst, Android, and an Electro
 
 ## Pull requests
 
-- One change per pull request, squash-merged once the required checks (`JS / Checks`, `JS / Release bundles`, `Android / Build`, `Electron / Web build`, `Electron / E2E tests (Linux 1)` and `Electron / E2E tests (Linux 2)`) pass. The title and description say what the change does compared with `main` and why, for a reader who hasn't seen how it came about: no history of earlier attempts or review rounds. The squash commit message follows the same rule.
+- One change per pull request, squash-merged once the required checks (`JS / Checks`, `JS / Release bundles`, `Android / Build`, `Electron / Web build` and `Electron / E2E tests (Linux)`) pass. The title and description say what the change does compared with `main` and why, for a reader who hasn't seen how it came about: no history of earlier attempts or review rounds. The squash commit message follows the same rule.
