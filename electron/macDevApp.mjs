@@ -15,7 +15,7 @@ import path from 'node:path';
 export const APP_NAME = 'learnX';
 export const APP_ID = 'io.robertying.learnXElectron';
 /** Bumped when the way the copy is made changes, so it's made again. */
-const RECIPE = 1;
+const RECIPE = 2;
 
 /** Electron's helper apps, by the suffix after "<name> Helper". */
 const HELPER_SUFFIXES = ['', ' (GPU)', ' (Renderer)', ' (Plugin)'];
@@ -33,6 +33,9 @@ export const renames = () => ({
     CFBundleIdentifier: APP_ID,
     CFBundleIconFile: 'AppIcon',
     CFBundleIconName: 'AppIcon',
+    // Starts as an accessory, with no Dock icon, so an E2E run never shows
+    // one even for a moment; main.cjs makes other dev runs regular apps.
+    LSUIElement: '1',
   },
   helpers: HELPER_SUFFIXES.map(suffix => ({
     from: `Frameworks/Electron Helper${suffix}.app`,

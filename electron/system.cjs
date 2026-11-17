@@ -91,6 +91,9 @@ const claimSingleInstance = app => {
  * @property {string} cacheDir
  * @property {string} iconFile
  * @property {boolean} dev
+ * @property {boolean} [background] an E2E run: never show or focus a
+ *   window (it only records that it would have), so the tests never take
+ *   the foreground
  * @property {Record<string, string | undefined>} [env]
  * @property {string} [platform]
  * @property {readonly string[]} [argv] this launch's arguments
@@ -104,6 +107,7 @@ const setUpSystem = ({
   cacheDir,
   iconFile,
   dev,
+  background = false,
   env = process.env,
   platform = process.platform,
   argv = process.argv,
@@ -137,16 +141,47 @@ const setUpSystem = ({
     }
   };
 
-  const showWindow = () => {
-    const win = appWindow();
-    if (!win) {
+  /**
+   * Whether the app means its window to show: what it last asked for, which
+   * an E2E run reads (`learnxDev.windowShown`) since its window never shows.
+   */
+  let windowShown = false;
+
+  /**
+   * Shows the window (maximized when asked), and with `focus` brings it to
+   * the front. In an E2E run (`background`) it only records that it would
+   * (on Linux it shows the window behind the others).
+   * @param {Electron.BrowserWindow} win
+   * @param {{ maximize?: boolean; focus?: boolean }} [options]
+   */
+  const present = (win, { maximize = false, focus = true } = {}) => {
+    windowShown = true;
+    if (background) {
+      // Under Wayland a window that was never shown gets no frames, so its
+      // page never draws: Linux shows it, without taking the focus.
+      if (platform === 'linux' && !win.isVisible()) {
+        win.showInactive();
+      }
       return;
     }
     if (win.isMinimized()) {
       win.restore();
     }
-    win.show();
-    win.focus();
+    if (maximize) {
+      win.maximize();
+    } else {
+      win.show();
+    }
+    if (focus) {
+      win.focus();
+    }
+  };
+
+  const showWindow = () => {
+    const win = appWindow();
+    if (win) {
+      present(win);
+    }
   };
 
   let quitting = false;
@@ -174,6 +209,7 @@ const setUpSystem = ({
     win.on('close', event => {
       if (!quitting) {
         event.preventDefault();
+        windowShown = false;
         win.hide();
       }
     });
@@ -282,6 +318,11 @@ const setUpSystem = ({
         notifications: devShown,
         tray: () => tray,
         trayMenu: () => trayMenu,
+        windowShown: () => windowShown,
+        hideWindow: () => {
+          windowShown = false;
+          appWindow()?.hide();
+        },
       },
     });
   }
@@ -444,6 +485,7 @@ const setUpSystem = ({
      * else always shows the window).
      */
     startsHidden: () => platform === 'win32' && argv.includes(HIDDEN_ARG),
+    present,
     /** A dev run's logged notifications, for its inspector. */
     devShown,
     /**

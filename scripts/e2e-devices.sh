@@ -29,8 +29,10 @@
 # script build and install it on each device it uses (one iOS build for every
 # simulator; DERIVED_DATA as in e2e-build.sh). The script
 # boots a device that isn't running and shuts down only the devices it
-# booted. It refuses to boot one while E2E_MAX_BOOTED (3) simulators and
-# emulators are already running.
+# booted, in the background: simulators with simctl (Simulator.app stays
+# closed) and emulators with -no-window, so a run never comes to the front.
+# It refuses to boot one while E2E_MAX_BOOTED (3) simulators and emulators
+# are already running.
 #
 # Devices, by simulator name or UDID and by AVD name, each needed only by the
 # profiles that use it (a profile whose device isn't set fails):
@@ -315,7 +317,7 @@ use_emulator() {
     check_room || return 1
     log "Booting $1"
     mkdir -p "$out_root"
-    "$sdk/emulator/emulator" -avd "$1" -no-snapshot-save -no-boot-anim \
+    "$sdk/emulator/emulator" -avd "$1" -no-snapshot-save -no-boot-anim -no-window \
       >"$out_root/emulator.log" 2>&1 &
     while [ -z "$serial" ]; do
       if [ "$waited" -ge 180 ]; then

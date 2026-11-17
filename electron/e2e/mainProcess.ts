@@ -46,6 +46,8 @@ interface State {
     notifications: { options: ShownNotification; click: () => void }[];
     tray: () => Electron.Tray | null;
     trayMenu: () => Electron.Menu | null;
+    windowShown: () => boolean;
+    hideWindow: () => void;
   };
 }
 
@@ -237,10 +239,13 @@ export const mainProcess = (app: ElectronApplication) => ({
       notification.click();
     }, index),
 
-  /** Whether the window is showing. */
+  /**
+   * Whether the app means its window to show: an E2E run never shows it
+   * (system.cjs, `present`), so this is what the app asked for, not the OS.
+   */
   windowVisible: () =>
-    app.evaluate(({ BrowserWindow }) =>
-      BrowserWindow.getAllWindows().some(win => win.isVisible()),
+    app.evaluate(() =>
+      (globalThis as unknown as Required<State>).learnxDev.windowShown(),
     ),
 
   /** Closes the window with its close button, as the user would. */
@@ -251,8 +256,8 @@ export const mainProcess = (app: ElectronApplication) => ({
 
   /** Hides the window, as closing it does where learnX keeps running. */
   hideWindow: () =>
-    app.evaluate(({ BrowserWindow }) => {
-      BrowserWindow.getAllWindows()[0]?.hide();
+    app.evaluate(() => {
+      (globalThis as unknown as Required<State>).learnxDev.hideWindow();
     }),
 
   /**

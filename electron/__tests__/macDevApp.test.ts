@@ -15,6 +15,8 @@ describe('renames', () => {
       CFBundleDisplayName: 'learnX',
       CFBundleExecutable: 'learnX',
       CFBundleIdentifier: APP_ID,
+      // No Dock icon until main.cjs says (E2E runs never get one).
+      LSUIElement: '1',
     });
     expect(plan.helpers.map(helper => helper.to)).toEqual([
       'Frameworks/learnX Helper.app',

@@ -108,6 +108,9 @@ const launchApp = async (
     env: {
       ...process.env,
       LEARNX_DATA_DIR: dataDir,
+      // Never in front: no Dock icon on a Mac, and no window shown
+      // (electron/main.cjs, system.cjs).
+      LEARNX_E2E: '1',
       LEARNX_WEB_DIR: path.join(outDir, 'web'),
       LEARNX_LAUNCH_OPTIONS: JSON.stringify(launchOptions),
       // No update checks while testing (updater.cjs), unless a test serves
