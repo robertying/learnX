@@ -4,12 +4,11 @@ name: Electron
 # required: they bundle the web build and run the Playwright E2E tests on
 # Linux, under X11 and Wayland, on every pull request; one that changes
 # nothing the app uses (only native code, Maestro flows, fastlane, docs or
-# the other workflows) skips their steps and passes. Main pushes and manual
-# runs also run the tests on Windows (E2E tests (Windows), not required).
-# Manual runs also check that the installers still build on Windows and Linux
-# (Package); those builds are never released: releases are built, signed and
-# uploaded by hand with fastlane (the release skill). js.yml's Checks run the
-# `web` Jest project.
+# the other workflows) skips their steps and passes. Manual runs also run the
+# tests on Windows (E2E tests (Windows), not required) and check that the
+# installers still build on Windows and Linux (Package); those builds are
+# never released: releases are built, signed and uploaded by hand with
+# fastlane (the release skill). js.yml's Checks run the `web` Jest project.
 on:
   pull_request:
   push:
@@ -87,7 +86,7 @@ jobs:
     #   that never appears. Weston's headless backend is a real Wayland
     #   compositor without a screen; with no X display, Electron can only
     #   use it, as Ubuntu's and Fedora's desktops run it.
-    # - Windows (not required, much slower): main pushes and manual runs.
+    # - Windows (not required, much slower): manual runs only.
     # A static name: rows show as "E2E tests (Linux)" and "E2E tests
     # (Windows)", and a skipped job would show a raw expression instead.
     name: E2E tests
@@ -95,7 +94,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: ${{ fromJSON(github.event_name == 'pull_request' && '["Linux"]' || '["Linux","Windows"]') }}
+        platform: ${{ fromJSON(github.event_name == 'workflow_dispatch' && '["Linux","Windows"]' || '["Linux"]') }}
     runs-on: ${{ matrix.platform == 'Windows' && 'windows-latest' || 'ubuntu-latest' }}
     timeout-minutes: 20
     env:

@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   prune:
-    name: Prune
+    name: Cleanup
     if: github.event.workflow_run.event != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 10
