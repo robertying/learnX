@@ -32,13 +32,20 @@ public enum AppCommands {
   static let nextItem = Command(
     id: "nextItem", title: "Next Item", systemImage: "chevron.down",
     input: UIKeyCommand.inputDownArrow, modifiers: [.command, .alternate])
+  static let quickLook = Command(
+    id: "quickLook", title: "Quick Look", systemImage: "eye.circle",
+    input: "y", modifiers: .command)
 
   /// Call from the app delegate's `buildMenu(with:)`, after `super`.
   public static func buildMenu(with builder: UIMenuBuilder) {
     buildMenu(in: SystemMenuBuilder(builder: builder))
   }
 
-  static func buildMenu(in builder: some MenuBuilding) {
+  /// `quickLook` adds Quick Look's command, which only the Mac has (`modules/quicklook`'s panel).
+  static func buildMenu(
+    in builder: some MenuBuilding,
+    quickLook: Bool = ProcessInfo.processInfo.isMacCatalystApp
+  ) {
     guard builder.system == .main else {
       return
     }
@@ -63,6 +70,11 @@ public enum AppCommands {
         UIMenu(options: .displayInline, children: [keyCommand(search)]),
         atEndOfMenu: .edit
       )
+    }
+
+    // ⌘Y opens a file in Quick Look, where Finder has it: the File menu.
+    if quickLook, builder.menu(for: .file) != nil {
+      builder.insertChild(UIMenu(options: .displayInline, children: [keyCommand(Self.quickLook)]), atEndOfMenu: .file)
     }
 
     if builder.menu(for: .view) != nil {

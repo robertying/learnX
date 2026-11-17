@@ -12,6 +12,13 @@ public final class QuickLookModule: Module {
       MacPreviewPlugin.isAvailable
     }
 
+    // Opens Quick Look's floating panel on a downloaded file (a `file:` URI), or closes it, as Space does in Finder.
+    AsyncFunction("showQuickLookPanel") { (uri: String) in
+      MainActor.assumeIsolated {
+        QuickLookPanel.toggle(uri)
+      }
+    }.runOnQueue(.main)
+
     View(QuickLookView.self) {
       Events("onUnavailable")
 
@@ -167,6 +174,26 @@ private final class DisplayLinkTarget: NSObject {
 
   @objc func tick() {
     view?.followView()
+  }
+}
+
+/// Quick Look's floating panel, from the Mac's preview plugin.
+@MainActor
+enum QuickLookPanel {
+  private static var host: (any MacPreviewHosting)?
+
+  /// Opens the panel on `uri` (a `file:` URI), or closes it if it shows that file. Nothing without the plugin.
+  static func toggle(_ uri: String) {
+    guard let url = URL(string: uri), url.isFileURL else {
+      return
+    }
+    host = host ?? QuickLookView.makeHost()
+    host?.togglePanel(for: url)
+  }
+
+  /// Forgets the host, for tests.
+  static func reset() {
+    host = nil
   }
 }
 

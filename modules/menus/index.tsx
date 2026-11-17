@@ -16,7 +16,9 @@ export type AppCommand =
   /** ⌥⌘↑ */
   | 'previousItem'
   /** ⌥⌘↓ */
-  | 'nextItem';
+  | 'nextItem'
+  /** ⌘Y (Mac) */
+  | 'quickLook';
 
 type MenusEvents = {
   onCommand: (event: { command: AppCommand }) => void;

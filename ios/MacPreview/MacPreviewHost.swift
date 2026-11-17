@@ -42,6 +42,10 @@ final class MacPreviewHost: NSObject, MacPreviewHosting {
     preview?.isHidden = true
   }
 
+  func togglePanel(for url: URL) {
+    PanelController.shared.toggle(url)
+  }
+
   func detach() {
     preview?.close()
     preview?.removeFromSuperview()
@@ -89,5 +93,69 @@ final class MacPreviewHost: NSObject, MacPreviewHosting {
       }
       return uiWindows.contains { $0 === uiWindow }
     }
+  }
+}
+
+/// Quick Look's floating panel, as Space opens it in Finder. The panel asks the responder chain of the key window for
+/// a controller, which supplies its items: this one joins the chain after the window.
+@MainActor
+private final class PanelController: NSResponder, QLPreviewPanelDataSource {
+  static let shared = PanelController()
+
+  private var url: URL?
+
+  func toggle(_ url: URL) {
+    guard let panel = QLPreviewPanel.shared() else {
+      return
+    }
+    if panel.isVisible, url == self.url {
+      panel.orderOut(nil)
+      return
+    }
+    self.url = url
+    if let window = NSApp.keyWindow ?? NSApp.mainWindow, window !== panel, !isInChain(of: window) {
+      nextResponder = window.nextResponder
+      window.nextResponder = self
+    }
+    panel.updateController()
+    if (panel.currentController as AnyObject?) === self {
+      panel.reloadData()
+    }
+    panel.makeKeyAndOrderFront(nil)
+  }
+
+  private func isInChain(of window: NSWindow) -> Bool {
+    var responder: NSResponder? = window
+    while let current = responder {
+      if current === self {
+        return true
+      }
+      responder = current.nextResponder
+    }
+    return false
+  }
+
+  override func acceptsPreviewPanelControl(_ panel: QLPreviewPanel!) -> Bool {
+    true
+  }
+
+  override func beginPreviewPanelControl(_ panel: QLPreviewPanel!) {
+    MainActor.assumeIsolated {
+      panel.dataSource = self
+    }
+  }
+
+  override func endPreviewPanelControl(_ panel: QLPreviewPanel!) {
+    MainActor.assumeIsolated {
+      panel.dataSource = nil
+    }
+  }
+
+  nonisolated func numberOfPreviewItems(in panel: QLPreviewPanel!) -> Int {
+    MainActor.assumeIsolated { url == nil ? 0 : 1 }
+  }
+
+  nonisolated func previewPanel(_ panel: QLPreviewPanel!, previewItemAt index: Int) -> (any QLPreviewItem)! {
+    MainActor.assumeIsolated { url as NSURL? }
   }
 }

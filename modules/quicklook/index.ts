@@ -13,9 +13,21 @@ export interface QuickLookViewProps extends ViewProps {
  * Whether the Mac's Quick Look preview loaded (the app's MacPreview plugin).
  * False off the Mac.
  */
+const QuickLookModule = requireOptionalNativeModule<{
+  isAvailable: boolean;
+  showQuickLookPanel: (uri: string) => Promise<void>;
+}>('LearnXQuickLook');
+
 export const isQuickLookAvailable: boolean =
-  requireOptionalNativeModule<{ isAvailable: boolean }>('LearnXQuickLook')
-    ?.isAvailable ?? false;
+  QuickLookModule?.isAvailable ?? false;
+
+/**
+ * Opens Quick Look's floating panel on a downloaded file (a `file:` URI), or
+ * closes it if it shows that file, as Space does in Finder. Mac only, where
+ * `isQuickLookAvailable`.
+ */
+export const showQuickLookPanel = (uri: string) =>
+  QuickLookModule?.showQuickLookPanel(uri) ?? Promise.resolve();
 
 /**
  * AppKit's Quick Look preview of a downloaded file, which File detail shows on

@@ -131,6 +131,8 @@ export const systemIcons = {
   // An option that's on in a menu of toggles
   checked: { ios: 'checkmark', android: 'check' },
   preview: { ios: 'eye', android: 'visibility' },
+  // Quick Look's floating panel (Mac), as Space opens it in Finder
+  quickLook: { ios: 'eye.circle', android: 'visibility' },
   reorder: { ios: 'arrow.up.and.down', android: 'swap_vert' },
   // A header's menu of its less used actions
   more: { ios: 'ellipsis.circle', android: 'more_vert' },

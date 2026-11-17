@@ -7,6 +7,7 @@ import type { File } from 'data/types/state';
 import { t } from 'helpers/i18n';
 import useFileDetailHeader from 'hooks/useFileDetailHeader';
 import useFileDownload from 'hooks/useFileDownload';
+import type { AppCommand } from 'modules/menus';
 import * as quickLook from 'modules/quicklook';
 import FileDetail from 'screens/FileDetail';
 import { screenProps } from 'test-utils/screenProps';
@@ -17,6 +18,25 @@ jest.mock('data/content', () => ({
   markFileSeen: jest.fn(),
 }));
 jest.mock('hooks/useFileDownload', () => jest.fn());
+jest.mock('@react-navigation/native', () => ({
+  ...jest.requireActual('@react-navigation/native'),
+  useIsFocused: () => true,
+}));
+// The native module's events, as AppCommands.swift sends them.
+const mockListeners = new Set<(event: { command: AppCommand }) => void>();
+jest.mock('modules/menus', () => ({
+  Menus: {
+    addListener: (
+      _event: 'onCommand',
+      listener: (event: { command: AppCommand }) => void,
+    ) => {
+      mockListeners.add(listener);
+      return { remove: () => mockListeners.delete(listener) };
+    },
+  },
+}));
+const choose = (command: AppCommand) =>
+  act(() => mockListeners.forEach(l => l({ command })));
 jest.mock('hooks/useFileDetailHeader', () => jest.fn());
 jest.mock('react-native-webview', () => {
   const { View } = require('react-native');
@@ -264,6 +284,39 @@ it("shows an Office document's info when Quick Look has nowhere to show it", asy
   expect(jest.mocked(useFileDetailHeader).mock.lastCall![0].canRender).toBe(
     false,
   );
+});
+
+it('opens Quick Look from the header and the info page on the Mac', async () => {
+  jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+  const quickLookModule =
+    jest.requireMock<typeof quickLook>('modules/quicklook');
+  jest.replaceProperty(quickLookModule, 'isQuickLookAvailable', true);
+  downloaded({ path: 'file:///a.zip' });
+  await renderScreen({
+    attachment: { ...zip, downloadUrl: 'https://x' },
+  });
+  jest.mocked(useFileDetailHeader).mock.lastCall![0].onQuickLook();
+  expect(quickLookModule.showQuickLookPanel).toHaveBeenCalledWith(
+    'file:///a.zip',
+  );
+  await userEvent.press(screen.getByText(t('quickLook')));
+  expect(quickLookModule.showQuickLookPanel).toHaveBeenCalledTimes(2);
+  // ⌘Y
+  await choose('quickLook');
+  expect(quickLookModule.showQuickLookPanel).toHaveBeenCalledTimes(3);
+});
+
+it('has no Quick Look row or command without its plugin', async () => {
+  jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+  downloaded({ path: 'file:///a.zip' });
+  await renderScreen({
+    attachment: { ...zip, downloadUrl: 'https://x' },
+  });
+  expect(screen.queryByText(t('quickLook'))).toBeNull();
+  await choose('quickLook');
+  expect(
+    jest.requireMock<typeof quickLook>('modules/quicklook').showQuickLookPanel,
+  ).not.toHaveBeenCalled();
 });
 
 it('lists only what is known of a file', async () => {
