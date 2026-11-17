@@ -186,6 +186,15 @@ export interface Bridge {
     ) => Promise<boolean>;
     onAsk: (listener: (request: WebviewLoadRequest) => void) => void;
     answer: (requestId: number, allow: boolean) => void;
+    /**
+     * Shows HTML too large for a data URL at its base URL; false when it
+     * can't.
+     */
+    loadHtml: (
+      guestId: number,
+      html: string,
+      baseUrl: string,
+    ) => Promise<boolean>;
   };
   /** The app's version and its build number (electron/buildInfo.cjs). */
   appInfo: () => { version: string; build: string };

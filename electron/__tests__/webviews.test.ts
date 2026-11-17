@@ -1,5 +1,6 @@
 import { EventEmitter } from 'node:events';
 import {
+  HTML_LOAD_TIMEOUT_MS,
   createWebviews,
   externalUrl,
   hardenWebview,
@@ -264,5 +265,170 @@ describe('createWebviews', () => {
     expect(navigate('file:///etc/hosts')).toBe(true);
     expect(navigate('mailto:a@b.c')).toBe(true);
     expect(openExternal).toHaveBeenLastCalledWith('mailto:a@b.c');
+  });
+});
+
+describe('loadHtml', () => {
+  afterEach(() => jest.useRealTimers());
+
+  /** A web view's DevTools protocol, as `webContents.debugger` is. */
+  const fakeDebugger = ({ attachFails = false } = {}) =>
+    Object.assign(new EventEmitter(), {
+      attached: false,
+      commands: [] as [string, Record<string, unknown>?][],
+      attach() {
+        if (attachFails) {
+          throw new Error('Another debugger is already attached');
+        }
+        this.attached = true;
+      },
+      detach() {
+        this.attached = false;
+      },
+      isAttached() {
+        return this.attached;
+      },
+      sendCommand: jest.fn(async function (
+        this: { commands: unknown[] },
+        method: string,
+        params?: Record<string, unknown>,
+      ) {
+        this.commands.push([method, params]);
+        return {};
+      }),
+    });
+
+  const setupHtml = (options?: { attachFails?: boolean }) => {
+    const all = setup();
+    const devtools = fakeDebugger(options);
+    const loaded: string[] = [];
+    Object.assign(all.guest, {
+      debugger: devtools,
+      loadURL: async (url: string) => {
+        loaded.push(url);
+      },
+    });
+    return { ...all, devtools, loaded };
+  };
+
+  /** The web view asking for a document, as the Fetch domain reports it. */
+  const paused = (
+    devtools: ReturnType<typeof fakeDebugger>,
+    requestId: string,
+    url: string,
+    method = 'GET',
+  ) =>
+    devtools.emit('message', {}, 'Fetch.requestPaused', {
+      requestId,
+      resourceType: 'Document',
+      request: { url, method },
+    });
+
+  const flush = () => new Promise(resolve => setImmediate(resolve));
+
+  it('serves the HTML at its base URL, past the size of a data URL', async () => {
+    const { webviews, host, guest, devtools, loaded } = setupHtml();
+    const html = `<p>${'公告'.repeat(400_000)}</p>`;
+    await expect(
+      webviews.loadHtml(
+        host as never,
+        guest as never,
+        html,
+        'https://learn.tsinghua.edu.cn',
+      ),
+    ).resolves.toBe(true);
+    expect(loaded).toEqual(['https://learn.tsinghua.edu.cn/']);
+    // The app's own load: the page isn't asked about it.
+    await expect(
+      load(webviews, guest, 'https://learn.tsinghua.edu.cn/'),
+    ).resolves.toEqual({});
+    expect(host.sent).toEqual([]);
+
+    // Another document (a frame) goes on to the network.
+    paused(devtools, 'a', 'https://learn.tsinghua.edu.cn/frame');
+    paused(devtools, 'b', 'https://learn.tsinghua.edu.cn/');
+    await flush();
+    expect(devtools.commands).toEqual([
+      [
+        'Fetch.enable',
+        {
+          patterns: [
+            {
+              urlPattern: '*',
+              resourceType: 'Document',
+              requestStage: 'Request',
+            },
+          ],
+        },
+      ],
+      ['Fetch.continueRequest', { requestId: 'a' }],
+      [
+        'Fetch.fulfillRequest',
+        {
+          requestId: 'b',
+          responseCode: 200,
+          responseHeaders: [
+            { name: 'Content-Type', value: 'text/html; charset=utf-8' },
+          ],
+          body: Buffer.from(html).toString('base64'),
+        },
+      ],
+    ]);
+    // Done: nothing of the web view's is intercepted any more.
+    expect(devtools.attached).toBe(false);
+    expect(devtools.listenerCount('message')).toBe(0);
+    const later = load(webviews, guest, 'https://learn.tsinghua.edu.cn/');
+    expect(lastAsk(host)[0]).toBe('webview:ask');
+    webviews.answer(host as never, lastAsk(host)[1].requestId, false);
+    await expect(later).resolves.toEqual({ cancel: true });
+  });
+
+  it('gives up after a while, or when the web view goes', async () => {
+    jest.useFakeTimers();
+    const { webviews, host, guest, devtools } = setupHtml();
+    await webviews.loadHtml(
+      host as never,
+      guest as never,
+      '<p>x</p>',
+      'https://learn.tsinghua.edu.cn/',
+    );
+    jest.advanceTimersByTime(HTML_LOAD_TIMEOUT_MS);
+    expect(devtools.attached).toBe(false);
+
+    await webviews.loadHtml(
+      host as never,
+      guest as never,
+      '<p>x</p>',
+      'https://learn.tsinghua.edu.cn/',
+    );
+    guest.emit('destroyed');
+    expect(devtools.attached).toBe(false);
+  });
+
+  it.each([
+    ['another page’s web view', 'other host', 'https://learn.tsinghua.edu.cn/'],
+    ['a base URL off the allowed sites', 'host', 'https://example.com/'],
+    ['a base URL that isn’t the web', 'host', 'about:blank'],
+  ])('refuses %s', async (_name, which, baseUrl) => {
+    const { webviews, host, guest, devtools, loaded } = setupHtml();
+    const asker = which === 'host' ? host : fakeContents(3, 'window');
+    await expect(
+      webviews.loadHtml(asker as never, guest as never, '<p>x</p>', baseUrl),
+    ).resolves.toBe(false);
+    expect(devtools.attached).toBe(false);
+    expect(loaded).toEqual([]);
+  });
+
+  it('refuses when a debugger is already attached', async () => {
+    const { webviews, host, guest, loaded } = setupHtml({ attachFails: true });
+    await expect(
+      webviews.loadHtml(
+        host as never,
+        guest as never,
+        '<p>x</p>',
+        'https://learn.tsinghua.edu.cn/',
+      ),
+    ).resolves.toBe(false);
+    expect(loaded).toEqual([]);
   });
 });

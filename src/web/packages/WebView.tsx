@@ -132,8 +132,17 @@ export const extraHeadersOf = (headers: Record<string, string> = {}) =>
     .join('');
 
 /**
- * Loads a source: HTML as a data URL at its base URL, or an http(s) URI.
- * Anything else stays blank (files show in `FilePreview`).
+ * The longest data URL an HTML source loads as. Chromium refuses URLs over
+ * 2 MB; longer HTML (a notice with a pasted picture, or a long Chinese one
+ * with math, since every character is encoded) loads through the main
+ * process instead.
+ */
+export const MAX_DATA_URL_LENGTH = 1_500_000;
+
+/**
+ * Loads a source: HTML as a data URL at its base URL (or, too long for one,
+ * served at the base URL by the main process, electron/webviews.cjs), or an
+ * http(s) URI. Anything else stays blank (files show in `FilePreview`).
  * A load the app's rules refuse rejects (ERR_ABORTED), which the page's own
  * events report.
  */
@@ -141,11 +150,27 @@ export const loadSource = (view: WebviewElement, source?: WebViewSource) => {
   const { html, baseUrl } = (source ?? {}) as Partial<WebViewSourceHtml>;
   const { uri, headers } = (source ?? {}) as Partial<WebViewSourceUri>;
   if (html !== undefined) {
-    view
-      .loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`, {
-        baseURLForDataURL: baseUrl || 'about:blank',
-      })
-      .catch(() => {});
+    const dataUrl = `data:text/html;charset=utf-8,${encodeURIComponent(html)}`;
+    const asDataUrl = () =>
+      view
+        .loadURL(dataUrl, { baseURLForDataURL: baseUrl || 'about:blank' })
+        .catch(() => {});
+    if (
+      dataUrl.length > MAX_DATA_URL_LENGTH &&
+      baseUrl &&
+      /^https?:/i.test(baseUrl)
+    ) {
+      void bridge()
+        .webviews.loadHtml(view.getWebContentsId(), html, baseUrl)
+        .catch(() => false)
+        .then(loaded => {
+          if (!loaded) {
+            void asDataUrl();
+          }
+        });
+    } else {
+      void asDataUrl();
+    }
   } else if (uri && /^https?:/i.test(uri)) {
     const extraHeaders = extraHeadersOf(
       headers as Record<string, string> | undefined,

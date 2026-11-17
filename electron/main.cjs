@@ -327,6 +327,15 @@ const handleIpc = ses => {
       scripts,
     );
   });
+  ipcMain.handle('webview:loadHtml', (event, guestId, html, baseUrl) => {
+    fromApp(event);
+    return webviews.loadHtml(
+      event.sender,
+      webContents.fromId(guestId),
+      html,
+      baseUrl,
+    );
+  });
   ipcMain.on('webview:answer', (event, requestId, allow) => {
     fromApp(event);
     webviews.answer(event.sender, requestId, allow);

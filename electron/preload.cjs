@@ -43,6 +43,8 @@ contextBridge.exposeInMainWorld('learnx', {
     },
     answer: (requestId, allow) =>
       ipcRenderer.send('webview:answer', requestId, allow),
+    loadHtml: (guestId, html, baseUrl) =>
+      ipcRenderer.invoke('webview:loadHtml', guestId, html, baseUrl),
   },
   // The app's version and build number, and the update waiting for a
   // restart (updater.cjs): null until one has downloaded.

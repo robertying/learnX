@@ -13,6 +13,9 @@ const PARTITION = 'persist:learnx';
 /** How long a load waits for the page to decide before it's refused. */
 const DECISION_TIMEOUT_MS = 15_000;
 
+/** How long an HTML load (`loadHtml`) may take before it's given up. */
+const HTML_LOAD_TIMEOUT_MS = 30_000;
+
 /**
  * Whether a web view may show `url`: Tsinghua's sites and courseX, as the
  * app's requests (net.cjs), and learnX's GitHub pages for the changelog.
@@ -113,6 +116,12 @@ const createWebviews = ({ openExternal, timeoutMs = DECISION_TIMEOUT_MS }) => {
    */
   const pending = new Map();
   let nextRequestId = 1;
+  /**
+   * Loads `loadHtml` started, by web view and URL: the app's own, so they
+   * aren't asked about.
+   * @type {Set<string>}
+   */
+  const htmlLoads = new Set();
 
   /**
    * Whether `guest` is a web view that `host` shows.
@@ -182,6 +191,108 @@ const createWebviews = ({ openExternal, timeoutMs = DECISION_TIMEOUT_MS }) => {
       guest.getType() === 'webview' ? (scripts.get(guest.id) ?? {}) : {},
 
     /**
+     * Shows HTML in a web view at its base URL, as the phones'
+     * `loadHTMLString` does, for HTML too large for a data URL (Chromium
+     * refuses URLs over 2 MB): the web view loads the base URL, and its
+     * document request is answered with the HTML through that web view's own
+     * DevTools protocol (`Fetch`), so nothing else's requests are touched and
+     * the page has the base URL's origin. Resolves to false when it can't
+     * (not the page's web view, a base URL off the allowed sites, or a
+     * debugger already attached).
+     *
+     * @param {Electron.WebContents} host
+     * @param {Electron.WebContents | undefined} guest
+     * @param {string} html
+     * @param {string} baseUrl
+     * @returns {Promise<boolean>}
+     */
+    loadHtml: async (host, guest, html, baseUrl) => {
+      if (
+        !guest ||
+        !isGuestOf(guest, host) ||
+        typeof html !== 'string' ||
+        !webviewAllowedUrl(baseUrl)
+      ) {
+        return false;
+      }
+      const url = new URL(baseUrl).href;
+      const { debugger: devtools } = guest;
+      try {
+        devtools.attach('1.3');
+      } catch {
+        return false;
+      }
+      const key = `${guest.id} ${url}`;
+      let finished = false;
+      const finish = () => {
+        if (finished) {
+          return;
+        }
+        finished = true;
+        clearTimeout(timer);
+        htmlLoads.delete(key);
+        devtools.removeListener('message', onMessage);
+        if (devtools.isAttached()) {
+          devtools.detach();
+        }
+      };
+      const timer = setTimeout(finish, HTML_LOAD_TIMEOUT_MS);
+      /**
+       * @param {unknown} _event
+       * @param {string} method
+       * @param {{ requestId: string; request: { url: string; method: string }; resourceType: string }} params
+       */
+      const onMessage = (_event, method, params) => {
+        if (method !== 'Fetch.requestPaused') {
+          return;
+        }
+        const ours =
+          params.resourceType === 'Document' &&
+          params.request.method === 'GET' &&
+          params.request.url === url;
+        void (
+          ours
+            ? devtools.sendCommand('Fetch.fulfillRequest', {
+                requestId: params.requestId,
+                responseCode: 200,
+                responseHeaders: [
+                  { name: 'Content-Type', value: 'text/html; charset=utf-8' },
+                ],
+                body: Buffer.from(html, 'utf8').toString('base64'),
+              })
+            : devtools.sendCommand('Fetch.continueRequest', {
+                requestId: params.requestId,
+              })
+        )
+          .catch(() => {})
+          .finally(() => {
+            if (ours) {
+              finish();
+            }
+          });
+      };
+      devtools.on('message', onMessage);
+      guest.once('destroyed', finish);
+      try {
+        await devtools.sendCommand('Fetch.enable', {
+          patterns: [
+            {
+              urlPattern: '*',
+              resourceType: 'Document',
+              requestStage: 'Request',
+            },
+          ],
+        });
+      } catch {
+        finish();
+        return false;
+      }
+      htmlLoads.add(key);
+      guest.loadURL(url).catch(() => {});
+      return true;
+    },
+
+    /**
      * The page's answer to a load it was asked about; ignored unless it
      * comes from the page that was asked.
      * @param {Electron.WebContents} host
@@ -212,6 +323,11 @@ const createWebviews = ({ openExternal, timeoutMs = DECISION_TIMEOUT_MS }) => {
         guest.isDestroyed() ||
         guest.getType() !== 'webview'
       ) {
+        callback({});
+        return;
+      }
+      // HTML the app is showing (loadHtml): already its own decision.
+      if (htmlLoads.has(`${guest.id} ${details.url}`)) {
         callback({});
         return;
       }
@@ -257,6 +373,7 @@ const createWebviews = ({ openExternal, timeoutMs = DECISION_TIMEOUT_MS }) => {
 };
 
 module.exports = {
+  HTML_LOAD_TIMEOUT_MS,
   PARTITION,
   createWebviews,
   externalUrl,

@@ -232,6 +232,44 @@ describe('loadSource', () => {
     ]);
   });
 
+  it('has the main process load HTML too long for a data URL', async () => {
+    const view = Object.assign(new MockWebview(), { id: 7 });
+    const html = `<p>${'公告'.repeat(webView.MAX_DATA_URL_LENGTH / 9)}</p>`;
+    webView.loadSource(view as never, {
+      html,
+      baseUrl: 'https://learn.tsinghua.edu.cn',
+    });
+    await Promise.resolve();
+    expect(bridge.webviews.loadHtml).toHaveBeenCalledWith(
+      7,
+      html,
+      'https://learn.tsinghua.edu.cn',
+    );
+    expect(view.loads).toEqual([]);
+  });
+
+  it('falls back to a data URL when the main process can’t', async () => {
+    const view = Object.assign(new MockWebview(), { id: 7 });
+    const html = 'x'.repeat(webView.MAX_DATA_URL_LENGTH + 1);
+    jest.mocked(bridge.webviews.loadHtml).mockResolvedValueOnce(false);
+    webView.loadSource(view as never, {
+      html,
+      baseUrl: 'https://learn.tsinghua.edu.cn',
+    });
+    await act(async () => {});
+    expect(view.loads).toEqual([
+      [
+        `data:text/html;charset=utf-8,${html}`,
+        { baseURLForDataURL: 'https://learn.tsinghua.edu.cn' },
+      ],
+    ]);
+    // With no web base URL to serve it at, it can only be a data URL.
+    jest.mocked(bridge.webviews.loadHtml).mockClear();
+    webView.loadSource(view as never, { html });
+    expect(bridge.webviews.loadHtml).not.toHaveBeenCalled();
+    expect(view.loads).toHaveLength(2);
+  });
+
   it('loads web URIs with their headers, the cookies left to the session', () => {
     const view = new MockWebview();
     webView.loadSource(view as never, {
