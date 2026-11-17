@@ -2,23 +2,20 @@ name: Apple
 
 # Builds the app for iOS and Mac Catalyst, so a broken patch, Podfile or native
 # module change shows up in CI rather than on a Mac later, and runs the native
-# iOS tests. By hand only (Actions > Apple > Run workflow), for the boxes
-# ticked; not required checks. No signing secrets, no uploads.
+# iOS tests. By hand only (Actions > Apple > Run workflow), for the platforms
+# picked; not required checks. No signing secrets, no uploads.
 # - iOS, build + native tests (~47 min cold): run it on main to refresh the
 #   compilation cache, or on a branch to check it.
 # - Mac, build (~35 min, uncached).
-# Android builds and E2E are in ci.yml.
+# Android builds and E2E are in android.yml.
 on:
   workflow_dispatch:
     inputs:
-      ios:
-        description: 'iOS: build and native tests'
-        type: boolean
-        default: true
-      mac:
-        description: 'Mac: build'
-        type: boolean
-        default: false
+      platforms:
+        description: 'Platforms: iOS (build and native tests), Mac (build) or both'
+        type: choice
+        options: [iOS, Mac, iOS and Mac]
+        default: iOS
 
 permissions:
   contents: read
@@ -31,17 +28,16 @@ env:
 
 jobs:
   apple:
-    # A static name: a skipped matrix job can't expand ${{ matrix.name }}, so
-    # GitHub would show the raw expression. Rows show as "Apple (iOS)" (build
-    # and native tests) and "Apple (Mac)" (build).
-    name: Apple
-    if: inputs.ios || inputs.mac
+    # One row per platform picked, named "iOS" and "Mac". A choice input
+    # always picks at least one, so the job never shows as skipped (with a
+    # raw ${{ matrix.name }}).
+    name: ${{ matrix.name }}
     runs-on: macos-26
     timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:
-        name: ${{ fromJSON(inputs.ios && (inputs.mac && '["iOS","Mac"]' || '["iOS"]') || '["Mac"]') }}
+        name: ${{ fromJSON(inputs.platforms == 'iOS and Mac' && '["iOS","Mac"]' || format('["{0}"]', inputs.platforms)) }}
     env:
       # Only iOS keeps a compilation cache (see the top of this file).
       CACHE_CAS: ${{ matrix.name == 'iOS' }}
