@@ -71,6 +71,24 @@ if (process.platform === 'win32') {
  */
 const dev = !app.isPackaged || Boolean(process.defaultApp);
 
+/**
+ * An E2E run (electron/e2e sets LEARNX_E2E): it must never take the
+ * foreground. On macOS the app starts as an accessory, with no Dock icon, and
+ * no run shows or focuses its window (system.cjs, `present`).
+ */
+const background = dev && process.env.LEARNX_E2E === '1';
+if (process.platform === 'darwin') {
+  if (background) {
+    app.setActivationPolicy('accessory');
+    app.dock?.hide();
+  } else if (dev) {
+    // The Mac dev app starts as an accessory (LSUIElement, macDevApp.mjs),
+    // so an E2E run never flashes a Dock icon; any other dev run is a
+    // regular app, in the Dock.
+    app.setActivationPolicy('regular');
+  }
+}
+
 // On Windows, everything learnX keeps (the saved login, settings, cached
 // data, downloads, the browser profile) is in the local profile,
 // %LOCALAPPDATA%\learnX, not Electron's default %APPDATA%\learnX: that one
@@ -253,6 +271,7 @@ const handleIpc = ses => {
     cacheDir: path.join(app.getPath('userData'), 'Files', 'Caches'),
     iconFile,
     dev,
+    background,
   });
   ipcMain.on('files', (event, op, ...args) => {
     fromApp(event);
@@ -390,8 +409,9 @@ const createWindow = (/** @type {Electron.Session} */ ses) => {
       // The page's web views (webviews.cjs), hardened as they attach.
       webviewTag: true,
       spellcheck: false,
-      // Captures need frames drawn while the window is in the background.
-      backgroundThrottling: !captureDir,
+      // Captures, and E2E runs whose window never shows, need frames drawn
+      // while it's in the background.
+      backgroundThrottling: !captureDir && !background,
     },
   });
   win.on('close', () => saveWindowState(stateFile, win));
@@ -435,11 +455,7 @@ const createWindow = (/** @type {Electron.Session} */ ses) => {
       }
       return;
     }
-    if (state.maximized) {
-      win.maximize();
-    } else {
-      win.show();
-    }
+    system?.present(win, { maximize: state.maximized, focus: false });
   });
 
   // Links open in the browser; the window itself never leaves the app.
@@ -460,7 +476,7 @@ const createWindow = (/** @type {Electron.Session} */ ses) => {
         webPreferences,
         params,
         path.join(__dirname, 'webviewPreload.cjs'),
-        { backgroundThrottling: !captureDir },
+        { backgroundThrottling: !captureDir && !background },
       )
     ) {
       event.preventDefault();

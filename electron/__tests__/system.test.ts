@@ -156,9 +156,11 @@ const setUp = ({
   dev = false,
   env = {},
   argv = ['learnX'],
+  background = false,
 }: {
   platform?: string;
   dev?: boolean;
+  background?: boolean;
   env?: Record<string, string>;
   argv?: string[];
 } = {}) => {
@@ -171,6 +173,7 @@ const setUp = ({
     cacheDir: '/data/Caches',
     iconFile: '/repo/electron/icons/icon.png',
     dev,
+    background,
     env,
     platform,
     argv,
@@ -599,5 +602,43 @@ describe('files', () => {
       new Request('app://files/cache/a.txt'),
     );
     expect(response.status).toBe(404);
+  });
+});
+
+describe('an E2E run in the background', () => {
+  afterEach(() => {
+    delete (globalThis as Record<string, unknown>).learnxDev;
+  });
+
+  it('never shows or focuses the window, only records that it would', () => {
+    const { system, createWindow, app } = setUp({
+      dev: true,
+      background: true,
+    });
+    const win = createWindow();
+    const dev = (
+      globalThis as unknown as {
+        learnxDev: { windowShown: () => boolean; hideWindow: () => void };
+      }
+    ).learnxDev;
+    expect(dev.windowShown()).toBe(false);
+    system.present(win as never, { maximize: true });
+    app.emit('second-instance', {}, ['learnX']);
+    expect(win.show).not.toHaveBeenCalled();
+    expect(win.focus).not.toHaveBeenCalled();
+    expect(win.restore).not.toHaveBeenCalled();
+    expect(dev.windowShown()).toBe(true);
+    dev.hideWindow();
+    expect(dev.windowShown()).toBe(false);
+    expect(win.hide).toHaveBeenCalled();
+  });
+
+  it('shows and focuses it otherwise', () => {
+    const { system, createWindow } = setUp();
+    const win = createWindow();
+    system.present(win as never);
+    expect(win.restore).toHaveBeenCalled();
+    expect(win.show).toHaveBeenCalled();
+    expect(win.focus).toHaveBeenCalled();
   });
 });

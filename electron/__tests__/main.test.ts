@@ -30,6 +30,8 @@ const fakeElectron = (dataDir: string, { packaged = false } = {}) => {
     setUserTasks: jest.fn(),
     getLoginItemSettings: () => ({ openAtLogin: false }),
     setLoginItemSettings: jest.fn(),
+    setActivationPolicy: jest.fn(),
+    dock: { hide: jest.fn() },
   });
   const handlers = new Map<string, Handler>();
   const ipcMain = {
@@ -649,5 +651,33 @@ describe('updates', () => {
       jest.clearAllTimers();
       jest.useRealTimers();
     }
+  });
+});
+
+describe('an E2E run', () => {
+  it('keeps out of the foreground: no Dock icon, no window shown', async () => {
+    jest.replaceProperty(process, 'env', {
+      ...process.env,
+      LEARNX_E2E: '1',
+    });
+    await loadMain();
+    const [win] = fake.windows;
+    win.emit('ready-to-show');
+    expect(win.show).not.toHaveBeenCalled();
+    expect(win.maximize).not.toHaveBeenCalled();
+    expect(win.options.webPreferences.backgroundThrottling).toBe(false);
+    const mac = process.platform === 'darwin';
+    expect(fake.app.setActivationPolicy.mock.calls).toEqual(
+      mac ? [['accessory']] : [],
+    );
+    expect(fake.app.dock.hide).toHaveBeenCalledTimes(mac ? 1 : 0);
+  });
+
+  it('leaves another Mac dev run a regular app, in the Dock', async () => {
+    await loadMain();
+    expect(fake.app.setActivationPolicy.mock.calls).toEqual(
+      process.platform === 'darwin' ? [['regular']] : [],
+    );
+    expect(fake.app.dock.hide).not.toHaveBeenCalled();
   });
 });
