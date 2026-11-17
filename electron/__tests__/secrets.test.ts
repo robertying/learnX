@@ -128,13 +128,16 @@ it.each([
 
 it('saves with the fallback key on Linux when a dev run allows it', async () => {
   const store = createFileStore(root);
-  const secrets = createSecrets(
-    store,
-    fakeSafeStorage({ backend: 'basic_text' }),
-    { platform: 'linux', allowFallbackKey: true },
-  );
+  const safeStorage = fakeSafeStorage({ backend: 'basic_text' });
+  const secrets = createSecrets(store, safeStorage, {
+    platform: 'linux',
+    allowFallbackKey: true,
+  });
   await secrets.set('credentials', 'x');
   await expect(secrets.get('credentials')).resolves.toBe('x');
+  // OSCrypt reports no encryption with Chromium's own key: the async APIs.
+  expect(safeStorage.encryptStringAsync).toHaveBeenCalledWith('x');
+  expect(safeStorage.isEncryptionAvailable).not.toHaveBeenCalled();
 });
 
 it.each(['gnome_libsecret', 'kwallet6'])(

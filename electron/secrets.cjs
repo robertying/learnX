@@ -38,17 +38,18 @@ const SAVE_WAIT_MS = 1_000;
  * Elsewhere, the asynchronous APIs, as Electron 45 recommends.
  * @param {SafeStorage} safeStorage
  * @param {string} platform
+ * A dev run's (`allowFallbackKey`), on Chromium's own key (`--password-store=
+ * basic`), uses the asynchronous APIs on Linux too: OSCrypt reports no
+ * encryption with that key.
  * @param {boolean} allowFallbackKey whether Chromium's fallback key will do
- *   (a dev run's, kept out of the system's keyring)
  */
 const encryptionOf = (safeStorage, platform, allowFallbackKey) =>
-  platform === 'linux'
+  platform === 'linux' && !allowFallbackKey
     ? {
         ready: () => safeStorage.isAsyncEncryptionAvailable(),
         canEncrypt: async () =>
           safeStorage.isEncryptionAvailable() &&
-          (allowFallbackKey ||
-            safeStorage.getSelectedStorageBackend() !== 'basic_text'),
+          safeStorage.getSelectedStorageBackend() !== 'basic_text',
         encrypt: async (/** @type {string} */ text) =>
           safeStorage.encryptString(text),
         decrypt: async (/** @type {Buffer} */ data) => ({
