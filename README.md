@@ -70,6 +70,7 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 ### 今天
 
 - 打开就能看到今天的课程、快截止的作业和各门课的新内容
+- 课程表：查看未来七天的课
 
 ### 课程内容
 
@@ -133,7 +134,7 @@ Requires iOS / iPadOS 17.6, macOS 14.6, Android 10 or Windows 10 and later, or L
 
 learnX brings your Web Learning notices, assignments and files together, and tells you when something new is posted or a deadline is near.
 
-- **Today:** the day's classes, upcoming deadlines and new items in every course
+- **Today:** the day's classes, upcoming deadlines and new items in every course, and a schedule of the next seven days
 - **Course content:** notices with their attachments, file previews and downloads, assignment details, grading and submission, and offline reading
 - **Notifications and reminders:** new notices, files, assignments and grades, deadline and class reminders, and calendar sync (plus Reminders on iPhone, iPad and Mac)
 - **More:** widgets (iPhone, iPad and Android), Spotlight and Siri (iPhone, iPad and Mac), favorites synced with Web Learning, archiving, and hiding courses
