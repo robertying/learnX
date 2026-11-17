@@ -5,6 +5,10 @@ appId: com.apple.reminders
 ---
 - launchApp:
     stopApp: true
+- runFlow:
+    file: system-app-start.yaml
+    env:
+      READY: '(All|全部), .*'
 - tapOn: '(All|全部), .*'
 - runFlow:
     when:

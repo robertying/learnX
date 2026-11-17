@@ -32,7 +32,11 @@ tags:
     when:
       true: ${ACCOUNT == 'mock'}
     commands:
-      - assertVisible: '.*(${MOCK_ASSIGNMENT_ATTACHMENT}).*'
+      # Below the description, past the bottom of a short screen (the closed
+      # iPhone Duo).
+      - scrollUntilVisible:
+          element: '.*(${MOCK_ASSIGNMENT_ATTACHMENT}).*'
+          direction: DOWN
 - runFlow:
     file: subflows/back.yaml
     env:

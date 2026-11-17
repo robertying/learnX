@@ -5,8 +5,13 @@ appId: com.apple.mobilecal
 ---
 - launchApp:
     stopApp: true
-- tapOn:
-    id: searchbar-button
+- runFlow:
+    file: system-app-start.yaml
+    env:
+      READY: 'Search|搜索'
+# By its label: the closed iPhone Duo moves it to the bar at the side, where
+# it has no id.
+- tapOn: 'Search|搜索'
 - inputText: ${QUERY}
 - runFlow:
     when:

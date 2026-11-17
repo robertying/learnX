@@ -1,0 +1,54 @@
+From de9a3518aa97a17034577f9a6cce46c764d80430 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 17 Nov 2026 03:12:02 -0800
+Subject: [PATCH] fix(ios): add a SpringBoard alert over the app to its
+ hierarchy
+
+An alert SpringBoard shows over an app (an app asking to send
+notifications, Save Password after a login) isn't in the app's
+accessibility tree, and the app stays the foreground app while it shows,
+so flows couldn't see or answer it and their taps landed under it. Add
+it to the hierarchy on top of the app, and answer a notifications
+request there as the flow's permissions say.
+---
+ .../Handlers/ViewHierarchyHandler.swift       | 24 +++++++++++++++++++
+ 1 file changed, 24 insertions(+)
+
+diff --git a/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/ViewHierarchyHandler.swift b/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/ViewHierarchyHandler.swift
+index 9d426781..66dc0f88 100644
+--- a/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/ViewHierarchyHandler.swift
++++ b/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/ViewHierarchyHandler.swift
+@@ -45,6 +45,30 @@ struct ViewHierarchyHandler: HTTPHandler {
+     }
+ 
+     func getAppViewHierarchy(foregroundApp: XCUIApplication, excludeKeyboardElements: Bool) async throws -> AXElement {
++        let hierarchy = try await getAppAndBarsHierarchy(foregroundApp: foregroundApp, excludeKeyboardElements: excludeKeyboardElements)
++        guard let alert = springboardAlert(over: foregroundApp) else {
++            return hierarchy
++        }
++        // An alert SpringBoard shows over the app (an app asking to send notifications, Save
++        // Password) isn't in the app's tree, and the app stays the foreground app meanwhile. Add
++        // it last, on top, as it is on screen, and answer a permission request as the flow set.
++        NSLog("Adding the SpringBoard alert over \(foregroundApp.bundleID)")
++        await SystemPermissionHelper.handleSystemPermissionAlertIfNeeded(appHierarchy: alert, foregroundApp: springboardApplication)
++        return AXElement(children: [hierarchy, alert])
++    }
++
++    private func springboardAlert(over app: XCUIApplication) -> AXElement? {
++        guard app.bundleID != RunningApp.springboardBundleId else {
++            return nil
++        }
++        let alert = springboardApplication.alerts.firstMatch
++        guard alert.exists else {
++            return nil
++        }
++        return try? elementHierarchy(xcuiElement: alert)
++    }
++
++    private func getAppAndBarsHierarchy(foregroundApp: XCUIApplication, excludeKeyboardElements: Bool) async throws -> AXElement {
+         // On iOS 26 iPad, com.apple.DocumentManager.DockFolderViewService is reported as the
+         // foreground process on the home screen, but its AX hierarchy is empty. The actual
+         // home screen content lives in SpringBoard. Fall back to SpringBoard when detected.
+-- 
+2.56.1
+
