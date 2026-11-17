@@ -7,7 +7,7 @@ import {
 } from '@testing-library/react-native';
 import { useState } from 'react';
 import type * as ReactNative from 'react-native';
-import { Keyboard, StyleSheet, Text, View } from 'react-native';
+import { Appearance, Keyboard, StyleSheet, Text, View } from 'react-native';
 import { NavigationContext } from '@react-navigation/native';
 import { showChoices } from 'components/choiceSheet';
 import { playHaptic } from 'services/haptics';
@@ -386,6 +386,27 @@ describe('Form (Android)', () => {
     );
     expect(padding()).toBe(200);
     await act(() => keyboardEvent('keyboardDidHide'));
+    expect(padding()).toBe(0);
+
+    // A switch between light and dark can close the keyboard with no
+    // keyboardDidHide: the padding goes with it.
+    const appearance = jest.spyOn(Appearance, 'addChangeListener');
+    jest.spyOn(Keyboard, 'isVisible').mockReturnValue(false);
+    await screen.rerender(
+      <Form key="again">
+        <FormSection>
+          <FormText title="Row" />
+        </FormSection>
+      </Form>,
+    );
+    await act(() =>
+      keyboardEvent('keyboardDidShow', { endCoordinates: { screenY: 600 } }),
+    );
+    expect(padding()).toBe(200);
+    jest.useFakeTimers();
+    await act(() => (appearance.mock.calls.at(-1)![0] as () => void)());
+    expect(padding()).toBe(0);
+    await act(() => jest.advanceTimersByTime(300));
     expect(padding()).toBe(0);
   });
 

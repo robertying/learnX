@@ -20,7 +20,8 @@ describe('HeaderTitle (Android)', () => {
     const bar = screen.getByText('Notices').parent!;
     expect(style(bar)).toMatchObject({
       maxWidth: 250,
-      height: 56,
+      // Material 3's bar height, which the back button is centered in.
+      height: 64,
       alignItems: 'flex-start',
     });
     expect(style(screen.getByText('Fall 2026')).textAlign).toBe('left');
@@ -36,7 +37,7 @@ describe('HeaderTitle (Android)', () => {
     expect(screen.getByText('Calculus (1)').props.ellipsizeMode).toBe('middle');
   });
 
-  it('gets the roomy bar on a wide window', async () => {
+  it('is uncapped in width on a wide window', async () => {
     atWidth(1200);
     await render(<HeaderTitle title="Notices" />);
     expect(style(screen.getByText('Notices').parent!)).toMatchObject({

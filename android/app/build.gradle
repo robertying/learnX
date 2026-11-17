@@ -205,3 +205,14 @@ def checkPatches = tasks.register("checkPatches", Exec) {
     commandLine "${rootDir}/../scripts/check-patches.sh"
 }
 tasks.named("preBuild").configure { dependsOn checkPatches }
+
+// expo-updates writes the embedded update's manifest (assets/app.manifest,
+// the bundle's assets) in create<Variant>UpdatesResources, whose only inputs
+// are strings, so Gradle took it as up to date after the JS changed: a release
+// built after adding an asset (an icon) kept the old list, and the app couldn't
+// find the new asset. Run it on every build, as the JS bundle is.
+tasks.configureEach { task ->
+    if (task.name ==~ /create\w+UpdatesResources/) {
+        task.outputs.upToDateWhen { false }
+    }
+}

@@ -1,5 +1,5 @@
 import { type ComponentRef, useEffect, useRef, useState } from 'react';
-import { Keyboard, Platform, View } from 'react-native';
+import { Appearance, Keyboard, Platform, View } from 'react-native';
 
 /**
  * How much of a view the Android keyboard covers, for padding the view's
@@ -32,10 +32,25 @@ const useKeyboardOverlap = () => {
       timers.push(setTimeout(() => measure(keyboardTop), 300));
     });
     const hide = Keyboard.addListener('keyboardDidHide', () => setOverlap(0));
+    // Switching between light and dark restarts the keyboard without a
+    // keyboardDidHide, which left the padding behind with no keyboard: start
+    // over, and measure again if it's still up.
+    const appearance = Appearance.addChangeListener(() => {
+      setOverlap(0);
+      timers.push(
+        setTimeout(() => {
+          const metrics = Keyboard.metrics();
+          if (Keyboard.isVisible() && metrics) {
+            measure(metrics.screenY);
+          }
+        }, 300),
+      );
+    });
     return () => {
       timers.forEach(clearTimeout);
       show.remove();
       hide.remove();
+      appearance.remove();
     };
   }, []);
 
