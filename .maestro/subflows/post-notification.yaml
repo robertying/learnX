@@ -1,0 +1,19 @@
+# Relaunch the app (logged in) with the postNotification launch argument, so
+# it posts the notification NOTIFICATION describes once its lists have loaded
+# (services/launchOptions.ts; E2E builds only), and go to the notices.
+appId: ${APP_ID}
+---
+- launchApp:
+    permissions:
+      notifications: allow
+    arguments:
+      mockLatency: none
+      postNotification: ${NOTIFICATION}
+- extendedWaitUntil:
+    visible:
+      id: 'tab-notices|bell\.fill'
+    timeout: 30000
+- runFlow:
+    file: tab.yaml
+    env:
+      TAB: 'tab-notices|bell\.fill'

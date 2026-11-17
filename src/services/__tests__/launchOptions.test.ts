@@ -9,6 +9,7 @@ import {
 import {
   applyLaunchOptions,
   getLiveLogin,
+  takeLaunchNotification,
   withLaunchOptions,
 } from 'services/launchOptions';
 import env from 'test-utils/mocks/env';
@@ -152,6 +153,43 @@ describe('live login', () => {
     (env as { TEST_LOGIN?: boolean }).TEST_LOGIN = true;
     applyLaunchOptions(live);
     expect(getLiveLogin()).toEqual({ username: 'student', fingerPrint: 'fp' });
+  });
+});
+
+describe('postNotification', () => {
+  const dev = __DEV__;
+
+  beforeEach(() => {
+    jest.replaceProperty(Platform, 'OS', 'android');
+  });
+
+  afterEach(() => {
+    (globalThis as unknown as { __DEV__: boolean }).__DEV__ = dev;
+    delete (env as { TEST_LOGIN?: boolean }).TEST_LOGIN;
+    applyLaunchOptions();
+  });
+
+  it('hands it over once', () => {
+    applyLaunchOptions({ postNotification: 'notice:n1' });
+    expect(takeLaunchNotification()).toBe('notice:n1');
+    expect(takeLaunchNotification()).toBeUndefined();
+  });
+
+  it('ignores an empty or odd value', () => {
+    applyLaunchOptions({ postNotification: '' });
+    expect(takeLaunchNotification()).toBeUndefined();
+    applyLaunchOptions({ postNotification: 1 });
+    expect(takeLaunchNotification()).toBeUndefined();
+  });
+
+  it('is ignored by release builds other than E2E builds', () => {
+    (globalThis as unknown as { __DEV__: boolean }).__DEV__ = false;
+    applyLaunchOptions({ postNotification: 'notice:n1' });
+    expect(takeLaunchNotification()).toBeUndefined();
+
+    (env as { TEST_LOGIN?: boolean }).TEST_LOGIN = true;
+    applyLaunchOptions({ postNotification: 'notice:n1' });
+    expect(takeLaunchNotification()).toBe('notice:n1');
   });
 });
 

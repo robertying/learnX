@@ -1,7 +1,8 @@
 // Flows that open mock items by their learnx:// links: 11-links.yaml, and the
 // iPhone Duo posture flows (.maestro/postures), since Maestro can't tap on the
-// Duo's inner display. Keep those links pointing at items the mock account
-// has.
+// Duo's inner display; and 12-notification-actions.yaml, whose launches post
+// notifications about mock items by id. Keep them pointing at items the mock
+// account has.
 import { mockAssignments, mockFiles, mockNotices } from 'data/mock';
 import { getUrlTarget } from 'helpers/openTarget';
 import { readdirSync, readFileSync } from 'node:fs';
@@ -51,4 +52,21 @@ it('11-links.yaml opens each kind of item and Today', () => {
     'today',
   ]);
   found.forEach(expectMockItem);
+});
+
+it('12-notification-actions.yaml posts notifications about mock items', () => {
+  const specs = (
+    readFileSync('.maestro/12-notification-actions.yaml', 'utf8').match(
+      /NOTIFICATION: '([^']+)'/g,
+    ) ?? []
+  ).map(line => line.slice("NOTIFICATION: '".length, -1));
+  expect(specs.length).toBeGreaterThan(0);
+  for (const spec of specs) {
+    const [kind, list] = spec.split(':');
+    const type = kind === 'reminder' ? 'assignment' : kind;
+    const known = (items[type as keyof typeof items] ?? []).map(i => i.id);
+    for (const id of list.split(',')) {
+      expect(known).toContain(id);
+    }
+  }
 });

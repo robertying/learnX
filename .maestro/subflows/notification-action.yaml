@@ -1,0 +1,19 @@
+# Android: open the notification shade, wait for learnX's notification and
+# press its action button labelled ACTION. Android dismisses the notification
+# once the app has handled it (services/notificationActions), which the flow
+# waits for, then closes the shade.
+appId: ${APP_ID}
+---
+# Off center: on a large screen (the unfolded Fold) the top center holds the
+# app's handle, which a swipe there pulls instead of the shade.
+- swipe:
+    start: 25%, 0%
+    end: 25%, 70%
+- extendedWaitUntil:
+    visible: ${ACTION}
+    timeout: 15000
+- tapOn: ${ACTION}
+- extendedWaitUntil:
+    notVisible: ${ACTION}
+    timeout: 15000
+- pressKey: Back

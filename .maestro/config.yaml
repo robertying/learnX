@@ -26,4 +26,5 @@ executionOrder:
     - Download a file, then delete it
     - Show no results and failures
     - Open items from links
+    - Press notification action buttons
     - Open settings pages and log out

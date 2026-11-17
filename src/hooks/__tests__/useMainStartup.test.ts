@@ -1,5 +1,5 @@
 import { AppState } from 'react-native';
-import { renderHook } from '@testing-library/react-native';
+import { act, renderHook } from '@testing-library/react-native';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'components/Toast';
 import { initialAuth, useAuthStore } from 'data/auth';
@@ -8,6 +8,8 @@ import { applyLatestSemester } from 'data/userData';
 import { setUpBackgroundFetch } from 'services/background';
 import { removeLegacyDownloads } from 'services/files/downloads';
 import { configureNotifications } from 'services/notifications';
+import { takeLaunchNotification } from 'services/launchOptions';
+import { postLaunchNotification } from 'services/notificationSamples';
 import { subscribeSurfaceErrors } from 'services/surfaces';
 import useMainStartup from 'hooks/useMainStartup';
 
@@ -29,6 +31,12 @@ jest.mock('services/files/downloads', () => ({
 }));
 jest.mock('services/notifications', () => ({
   configureNotifications: jest.fn(async () => {}),
+}));
+jest.mock('services/launchOptions', () => ({
+  takeLaunchNotification: jest.fn(),
+}));
+jest.mock('services/notificationSamples', () => ({
+  postLaunchNotification: jest.fn(async () => true),
 }));
 const mockUnsubscribe = jest.fn();
 jest.mock('services/surfaces', () => ({
@@ -90,4 +98,23 @@ it('shows calendar write failures as toasts until unmounted', async () => {
   });
   await hook.unmount();
   expect(mockUnsubscribe).toHaveBeenCalled();
+});
+
+it('posts the notification a test launch asks for once logged in', async () => {
+  jest.mocked(takeLaunchNotification).mockReturnValueOnce('notice:n1');
+  const hook = await renderHook(() => useMainStartup());
+  expect(takeLaunchNotification).not.toHaveBeenCalled();
+  await act(async () => {
+    useAuthStore.setState({ loggedIn: true });
+  });
+  await hook.rerender({});
+  expect(postLaunchNotification).toHaveBeenCalledTimes(1);
+  expect(postLaunchNotification).toHaveBeenCalledWith('notice:n1');
+});
+
+it('posts nothing on a normal launch', async () => {
+  useAuthStore.setState({ loggedIn: true });
+  await renderHook(() => useMainStartup());
+  expect(takeLaunchNotification).toHaveBeenCalled();
+  expect(postLaunchNotification).not.toHaveBeenCalled();
 });

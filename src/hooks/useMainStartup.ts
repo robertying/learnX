@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { setUpBackgroundFetch } from 'services/background';
 import { removeLegacyDownloads } from 'services/files/downloads';
 import { configureNotifications } from 'services/notifications';
+import { takeLaunchNotification } from 'services/launchOptions';
+import { postLaunchNotification } from 'services/notificationSamples';
 import { subscribeSurfaceErrors } from 'services/surfaces';
 import { toast } from 'components/Toast';
 import { useLoggedIn } from 'data/auth';
@@ -23,8 +25,8 @@ import useJumpListTaps from 'hooks/useJumpListTaps';
  * What the main UI starts once logged in: picks the semester and keeps its
  * courses and timetable fetched, schedules the background sync, sends the
  * waiting server actions once logged in, opens what was tapped outside the app,
- * sets up notifications, and deletes the downloads 18.x kept in its old folder
- * layout. The widgets, reminders and Spotlight follow the data by themselves
+ * sets up notifications (and posts the one a test launch asks for), and
+ * deletes the downloads 18.x kept in its old folder layout. The widgets, reminders and Spotlight follow the data by themselves
  * (services/surfaces).
  */
 const useMainStartup = () => {
@@ -69,6 +71,15 @@ const useMainStartup = () => {
   useEffect(() => {
     if (loggedIn) {
       void flushServerActions();
+    }
+  }, [loggedIn]);
+
+  // Debug and E2E builds: the notification the launch arguments ask for,
+  // once its items have loaded.
+  useEffect(() => {
+    const spec = loggedIn ? takeLaunchNotification() : undefined;
+    if (spec) {
+      void postLaunchNotification(spec);
     }
   }, [loggedIn]);
 
