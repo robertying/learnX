@@ -382,6 +382,37 @@ describe('download in the main process', () => {
     expect(fs.readdirSync(path.join(root, 'Caches'))).toEqual(['file.pdf']);
   });
 
+  it('fails when the server says nothing for a while, leaving no file', async () => {
+    jest.useFakeTimers();
+    try {
+      const { net, requests } = fakeNet();
+      const done = files.download(
+        net,
+        session,
+        { url: 'https://learn.tsinghua.edu.cn/b/download', uri: target },
+        { idleMs: 1000 },
+      );
+      const response = Object.assign(new EventEmitter(), {
+        statusCode: 200,
+        headers: {},
+      });
+      requests[0].emit('response', response);
+      // Each piece gives it another while.
+      for (let piece = 0; piece < 3; piece += 1) {
+        jest.advanceTimersByTime(999);
+        response.emit('data', Buffer.from('x'));
+      }
+      jest.advanceTimersByTime(1000);
+      await expect(done).rejects.toThrow(
+        'Timed out: no answer from learn.tsinghua.edu.cn',
+      );
+      expect(requests[0].aborted).toBe(true);
+      expect(fs.existsSync(path.join(root, 'Caches/file.pdf'))).toBe(false);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it("downloads the mock account's files", async () => {
     const { net, requests } = fakeNet();
     const done = files.download(net, session, {

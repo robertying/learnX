@@ -8,7 +8,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { fileURLToPath, pathToFileURL } = require('node:url');
-const { allowedUrl } = require('./net.cjs');
+const { TIMEOUT_MS, allowedUrl } = require('./net.cjs');
 
 /** Where the mock account's files come from (src/data/mock.ts). */
 const MOCK_FILES =
@@ -285,10 +285,17 @@ const createFiles = (
      * @param {Pick<typeof import('electron').net, 'request'>} net
      * @param {Electron.Session} session
      * @param {{ url: string, uri: string, headers?: Record<string, string> }} req
-     * @param {{ signal?: AbortSignal, onProgress?: (written: number, total: number) => void }} [options]
+     * A download that hears nothing from the server for a minute (before the
+     * response or between its pieces) fails, as a request does (net.cjs).
+     * @param {{ signal?: AbortSignal, onProgress?: (written: number, total: number) => void, idleMs?: number }} [options]
      * @returns {Promise<{ status: number }>}
      */
-    download: (net, session, req, { signal, onProgress } = {}) =>
+    download: (
+      net,
+      session,
+      req,
+      { signal, onProgress, idleMs = TIMEOUT_MS.idle } = {},
+    ) =>
       new Promise((resolve, reject) => {
         const target = innerPathOf(req.uri);
         if (!downloadAllowedUrl(req.url)) {
@@ -306,11 +313,26 @@ const createFiles = (
         let done = false;
         let finalUrl = req.url;
         const onAbort = () => fail(new Error('Aborted'));
+        /** @type {ReturnType<typeof setTimeout> | undefined} */
+        let timer;
+        const wait = () => {
+          clearTimeout(timer);
+          timer = setTimeout(
+            () =>
+              fail(
+                new Error(
+                  `Timed out: no answer from ${new URL(finalUrl).host}`,
+                ),
+              ),
+            idleMs,
+          );
+        };
         const fail = (/** @type {Error} */ error) => {
           if (done) {
             return;
           }
           done = true;
+          clearTimeout(timer);
           signal?.removeEventListener('abort', onAbort);
           request.abort();
           out?.destroy();
@@ -324,6 +346,7 @@ const createFiles = (
         request.on('redirect', (_status, _method, redirectUrl) => {
           if (downloadAllowedUrl(redirectUrl)) {
             finalUrl = redirectUrl;
+            wait();
             request.followRedirect();
           } else {
             fail(new Error(`Redirected off the allowed sites: ${redirectUrl}`));
@@ -342,6 +365,7 @@ const createFiles = (
           const length = [response.headers['content-length']].flat()[0];
           const total = Number(length) || 0;
           let written = 0;
+          wait();
           const stream = fs.createWriteStream(target);
           out = stream;
           stream.on('error', fail);
@@ -350,11 +374,13 @@ const createFiles = (
               return;
             }
             written += chunk.length;
+            wait();
             stream.write(chunk);
             onProgress?.(written, total);
           });
           response.on('error', fail);
           response.on('end', () => {
+            clearTimeout(timer);
             stream.end(() => {
               if (!done) {
                 done = true;
@@ -366,6 +392,7 @@ const createFiles = (
           });
         });
         request.on('error', fail);
+        wait();
         request.end();
       }),
   };
