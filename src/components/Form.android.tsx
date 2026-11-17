@@ -1,11 +1,6 @@
 import { Fragment, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import {
-  StyleSheet,
-  useWindowDimensions,
-  View,
-  type ViewProps,
-} from 'react-native';
+import { StyleSheet, useWindowDimensions, type ViewProps } from 'react-native';
 import {
   Badge,
   CircularProgressIndicator,
@@ -42,11 +37,11 @@ import {
   width,
 } from '@expo/ui/jetpack-compose/modifiers';
 import type { ModifierConfig } from '@expo/ui/jetpack-compose/modifiers';
+import KeyboardInsetView from 'components/KeyboardInsetView';
 import SafeArea from 'components/SafeArea';
 import { useMaterialTheme } from 'theme';
 import { t } from 'helpers/i18n';
 import { useFieldText } from 'hooks/useFieldText';
-import useKeyboardOverlap from 'hooks/useKeyboardOverlap';
 import useNumberFieldDone, {
   NumberFieldFocusContext,
   useNumberFieldFocus,
@@ -142,7 +137,7 @@ const FormContent: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
       // A section's spacing below the last one, as on iOS, so it doesn't
       // end right at the navigation bar.
       contentPadding={{ start: 16, end: 16, top: 16, bottom: 40 }}
-      // The Form ends above the keyboard (useKeyboardOverlap), so the list
+      // The Form ends above the keyboard (KeyboardInsetView), so the list
       // keeps a focused number field in view as it shrinks.
       modifiers={[fillMaxSize(), ...withTestID(testID)]}
     >
@@ -182,13 +177,8 @@ const FormContent: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
 export const Form: React.FC<FormProps> = props => {
   const theme = useMaterialTheme();
   const reportNumberFocus = useNumberFieldDone();
-  const { ref, overlap } = useKeyboardOverlap();
   return (
-    <View
-      ref={ref}
-      style={[styles.fill, { paddingBottom: overlap }]}
-      collapsable={false}
-    >
+    <KeyboardInsetView style={styles.fill}>
       <ThemedHost
         style={[styles.fill, { backgroundColor: theme.colors.surface }]}
       >
@@ -196,7 +186,7 @@ export const Form: React.FC<FormProps> = props => {
           <FormContent {...props} />
         </NumberFieldFocusContext>
       </ThemedHost>
-    </View>
+    </KeyboardInsetView>
   );
 };
 

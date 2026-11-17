@@ -1,17 +1,14 @@
 import {
   createContext,
   useContext,
-  useEffect,
-  useEffectEvent,
   useLayoutEffect,
   useRef,
   useState,
 } from 'react';
-import { Keyboard } from 'react-native';
 import { NavigationContext } from '@react-navigation/native';
 import { t } from 'helpers/i18n';
 import { headerButtons } from 'navigation/headerButtons';
-import { isAndroid } from 'helpers/platform';
+import useAndroidKeyboard from 'hooks/useAndroidKeyboard';
 
 /**
  * How a focused number field lets go of the keyboard, or null when none is
@@ -43,16 +40,7 @@ const useNumberFieldDone = () => {
 
   // On Android the back gesture puts the keyboard away and leaves the field
   // focused: it lets go then too, so Done doesn't stay behind.
-  const onKeyboardHidden = useEffectEvent(() => release.current?.());
-  useEffect(() => {
-    if (!isAndroid()) {
-      return;
-    }
-    const subscription = Keyboard.addListener('keyboardDidHide', () =>
-      onKeyboardHidden(),
-    );
-    return () => subscription.remove();
-  }, []);
+  useAndroidKeyboard({ onHide: () => release.current?.() });
 
   const shown = useRef(false);
   useLayoutEffect(() => {

@@ -11,8 +11,12 @@ it('follows the keyboard on Android', async () => {
   jest.replaceProperty(Platform, 'OS', 'android');
   const hook = await renderHook(() => useKeyboardShown());
   const listener = (name: string) =>
-    addListener.mock.calls.find(([event]) => event === name)![1] as () => void;
-  await act(() => listener('keyboardDidShow')());
+    addListener.mock.calls.find(([event]) => event === name)![1] as (
+      event?: object,
+    ) => void;
+  await act(() =>
+    listener('keyboardDidShow')({ endCoordinates: { screenY: 600 } }),
+  );
   expect(hook.result.current).toBe(true);
   await act(() => listener('keyboardDidHide')());
   expect(hook.result.current).toBe(false);

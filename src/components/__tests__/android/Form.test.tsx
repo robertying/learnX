@@ -404,7 +404,9 @@ describe('Form (Android)', () => {
     );
     expect(padding()).toBe(200);
     jest.useFakeTimers();
-    await act(() => (appearance.mock.calls.at(-1)![0] as () => void)());
+    await act(() =>
+      appearance.mock.calls.forEach(([listener]) => (listener as () => void)()),
+    );
     expect(padding()).toBe(0);
     await act(() => jest.advanceTimersByTime(300));
     expect(padding()).toBe(0);
