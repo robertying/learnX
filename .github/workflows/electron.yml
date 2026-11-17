@@ -107,7 +107,8 @@ jobs:
     # SSO test opens id.tsinghua.edu.cn.
     # - Linux (required): under a virtual X display, three apps at a time
     #   (--workers=3 on the runner's 4 cores; each test has its own data
-    #   folder and ports). Then the window test once more under Wayland
+    #   folder and ports), split by test rather than by file
+    #   (--fully-parallel), so the long files don't end up on one worker. Then the window test once more under Wayland
     #   (window.e2e.ts): under X11 a window
     #   draws whether it shows or not, so only Wayland can tell a window
     #   that never appears. Weston's headless backend is a real Wayland
@@ -164,7 +165,7 @@ jobs:
         run: |
           bash scripts/write-e2e-env.sh
           if [ "$RUNNER_OS" = Linux ]; then
-            xvfb-run --auto-servernum pnpm e2e:electron --workers=3
+            xvfb-run --auto-servernum pnpm e2e:electron --workers=3 --fully-parallel
           else
             pnpm e2e:electron
           fi

@@ -7,10 +7,13 @@ export default defineConfig({
   testDir: 'e2e',
   testMatch: '*.e2e.ts',
   outputDir: '../build/electron/e2e/results',
+  globalSetup: './e2e/setup.ts',
   globalTeardown: './e2e/teardown.ts',
   timeout: 90_000,
   expect: { timeout: 15_000 },
-  // One Electron app at a time: each is a whole app with its own window.
+  // One Electron app at a time by default: each is a whole app with its own
+  // window. Every test has its own data folder and ports, so CI runs several
+  // (--workers, .github/workflows/electron.yml).
   workers: 1,
   fullyParallel: false,
   // One retry on CI, for a trace of the failure; a test that passes only on
