@@ -43,6 +43,11 @@ const fakeElectron = (dataDir: string, { packaged = false } = {}) => {
     send = jest.fn();
     windowOpenHandler?: (details: { url: string }) => { action: string };
     isDestroyed = () => false;
+    zoomLevel = 0;
+    getZoomLevel = () => this.zoomLevel;
+    setZoomLevel = jest.fn((level: number) => {
+      this.zoomLevel = level;
+    });
     setWindowOpenHandler(handler: FakeWebContents['windowOpenHandler']) {
       this.windowOpenHandler = handler;
     }
@@ -390,7 +395,7 @@ describe('the window', () => {
     await loadMain();
     const [win] = fake.windows;
     expect(win.webContents.loadURL).toHaveBeenCalledWith('app://learnx/');
-    const appSession = fake.sessions.get('learnx-app')!;
+    const appSession = fake.sessions.get('persist:learnx-app')!;
     const webviewSession = fake.sessions.get('persist:learnx')!;
     expect(win.options.webPreferences).toMatchObject({
       session: appSession,
@@ -434,7 +439,9 @@ describe('the window', () => {
       true,
     );
     await expect(ask('persist:learnx', 'media', notice)).resolves.toBe(false);
-    await expect(ask('learnx-app', 'fullscreen', notice)).resolves.toBe(false);
+    await expect(ask('persist:learnx-app', 'fullscreen', notice)).resolves.toBe(
+      false,
+    );
     const check = (session: string) =>
       fake.sessions
         .get(session)!
@@ -444,7 +451,7 @@ describe('the window', () => {
           notice,
         );
     expect(check('persist:learnx')).toBe(true);
-    expect(check('learnx-app')).toBe(false);
+    expect(check('persist:learnx-app')).toBe(false);
   });
 
   it('stays on the app, and opens links in the browser', async () => {
@@ -506,6 +513,7 @@ describe('the window', () => {
     ).toEqual({
       bounds: { x: 10, y: 20, width: 900, height: 700 },
       maximized: false,
+      zoom: 0,
     });
     await loadMain();
     expect(fake.windows[0].options).toMatchObject({
@@ -515,6 +523,73 @@ describe('the window', () => {
       height: 700,
       minWidth: 360,
     });
+  });
+
+  const saveState = (state: object) => {
+    fs.mkdirSync(path.join(dataDir, 'userData'), { recursive: true });
+    fs.writeFileSync(
+      path.join(dataDir, 'userData', 'window-state.json'),
+      JSON.stringify({
+        bounds: { x: 10, y: 20, width: 900, height: 700 },
+        ...state,
+      }),
+    );
+  };
+
+  it('shows a window saved maximized maximized, once it’s ready', async () => {
+    saveState({ maximized: true });
+    await loadMain();
+    const [win] = fake.windows;
+    expect(win.maximize).not.toHaveBeenCalled();
+    win.emit('ready-to-show');
+    expect(win.maximize).toHaveBeenCalled();
+    expect(win.show).not.toHaveBeenCalled();
+  });
+
+  it('keeps a window saved maximized in the tray at Start at login, maximized when it comes out', async () => {
+    saveState({ maximized: true });
+    jest.replaceProperty(process, 'argv', [...process.argv, '--hidden']);
+    await loadMain();
+    const [win] = fake.windows;
+    win.emit('ready-to-show');
+    expect(win.maximize).not.toHaveBeenCalled();
+    expect(win.show).not.toHaveBeenCalled();
+    win.emit('show');
+    expect(win.maximize).toHaveBeenCalledTimes(1);
+  });
+
+  it('zooms from the keyboard, and keeps the zoom', async () => {
+    saveState({ maximized: false, zoom: 1 });
+    await loadMain();
+    const [win] = fake.windows;
+    win.webContents.emit('did-finish-load');
+    expect(win.webContents.setZoomLevel).toHaveBeenLastCalledWith(1);
+    const key = (input: object) => {
+      const event = { preventDefault: jest.fn() };
+      win.webContents.emit('before-input-event', event, {
+        type: 'keyDown',
+        control: process.platform !== 'darwin',
+        meta: process.platform === 'darwin',
+        alt: false,
+        ...input,
+      });
+      return event.preventDefault.mock.calls.length > 0;
+    };
+    expect(key({ key: '=' })).toBe(true);
+    expect(win.webContents.zoomLevel).toBe(1.5);
+    expect(key({ key: 'a' })).toBe(false);
+    // A reload (after a crash) keeps it.
+    win.webContents.emit('did-finish-load');
+    expect(win.webContents.setZoomLevel).toHaveBeenLastCalledWith(1.5);
+    win.emit('close', { preventDefault: () => {} });
+    expect(
+      JSON.parse(
+        fs.readFileSync(
+          path.join(dataDir, 'userData', 'window-state.json'),
+          'utf8',
+        ),
+      ).zoom,
+    ).toBe(1.5);
   });
 });
 

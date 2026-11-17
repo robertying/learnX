@@ -43,6 +43,7 @@ const {
   MIN_SIZE,
   loadWindowState,
   saveWindowState,
+  zoomForKey,
 } = require('./windowState.cjs');
 
 /**
@@ -51,8 +52,11 @@ const {
  * app's extensions, and the iOS bundle id is the Mac Catalyst app's on a Mac.
  */
 const APP_ID = 'io.robertying.learnXElectron';
-/** The window's session: in memory, as the page keeps its data over IPC. */
-const APP_PARTITION = 'learnx-app';
+/**
+ * The window's session, its own: saved, so Chromium keeps the compiled web
+ * build between launches (code cache), and apart from the web views'.
+ */
+const APP_PARTITION = 'persist:learnx-app';
 
 app.setName('learnX');
 if (process.platform === 'win32') {
@@ -388,10 +392,25 @@ const createWindow = (/** @type {Electron.Session} */ ses) => {
       backgroundThrottling: !captureDir,
     },
   });
-  if (state.maximized) {
-    win.maximize();
-  }
   win.on('close', () => saveWindowState(stateFile, win));
+  // Zoom from the keyboard, kept with the window's state, and again after
+  // the page loads anew (a crash's reload).
+  let zoom = state.zoom;
+  win.webContents.on('before-input-event', (event, input) => {
+    const level = zoomForKey(
+      input,
+      win.webContents.getZoomLevel(),
+      process.platform,
+    );
+    if (level !== null) {
+      event.preventDefault();
+      zoom = level;
+      win.webContents.setZoomLevel(level);
+    }
+  });
+  win.webContents.on('did-finish-load', () => {
+    win.webContents.setZoomLevel(zoom);
+  });
   // The window is learnX, whichever screen the app names in the page title.
   win.on('page-title-updated', event => event.preventDefault());
   // A crashed page (out of memory, a GPU fault) is loaded again rather than
@@ -405,7 +424,21 @@ const createWindow = (/** @type {Electron.Session} */ ses) => {
     }
   });
   // Start at login on Windows starts learnX in the tray.
-  win.once('ready-to-show', () => system?.startsHidden() || win.show());
+  // A window saved maximized is maximized as it's shown (`maximize()` shows
+  // it): at once, or when it first leaves the tray after Start at login.
+  win.once('ready-to-show', () => {
+    if (system?.startsHidden()) {
+      if (state.maximized) {
+        win.once('show', () => win.maximize());
+      }
+      return;
+    }
+    if (state.maximized) {
+      win.maximize();
+    } else {
+      win.show();
+    }
+  });
 
   // Links open in the browser; the window itself never leaves the app.
   win.webContents.setWindowOpenHandler(({ url }) => {
@@ -581,7 +614,7 @@ void app.whenReady().then(() => {
     return;
   }
   // The web views' session (PARTITION), whose cookies the app's requests use
-  // too, and the window's own, in memory, the only one that serves app://:
+  // too, and the window's own, the only one that serves app://:
   // a page in a web view (a notice's HTML) can't load the app's scripts or
   // another download's preview.
   const ses = session.fromPartition(PARTITION);
