@@ -151,6 +151,17 @@ describe('useAttachmentPicker', () => {
       type: 'image/png',
       name: 'HW1 Submission.png',
     });
+    // Taken: another assignment's screen doesn't attach it too.
+    expect(usePendingAssignmentStore.getState().data).toBeNull();
+  });
+
+  it('attaches a file shared before the screen opened, to that screen only', async () => {
+    setPendingAssignmentData({ data: 'file:///shared.png', mimeType: 'x' });
+    const first = await setup();
+    expect(first.result.current.picked?.uri).toBe('file:///shared.png');
+    const second = await setup();
+    expect(second.result.current.picked).toBeNull();
+    expect(second.result.current.isShared).toBe(false);
   });
 
   it('replaces a shared file with a picked one', async () => {
@@ -168,7 +179,6 @@ describe('useAttachmentPicker', () => {
 
     await act(() => result.current.pickDocument());
     expect(result.current.isShared).toBe(false);
-    expect(usePendingAssignmentStore.getState().data).toBeNull();
     expect(result.current.picked?.uri).toBe('file:///doc.pdf');
   });
 
@@ -259,13 +269,6 @@ describe('useSubmitAssignment', () => {
     expect(result.current.uploading).toBe(false);
   });
 
-  it('clears shared data after a successful submit', async () => {
-    setPendingAssignmentData({ data: 'file:///shared.png', mimeType: 'x' });
-    const { result } = await setup();
-    await confirm(result.current.confirmSubmit);
-    expect(usePendingAssignmentStore.getState().data).toBeNull();
-  });
-
   it('removes the uploaded attachment when asked', async () => {
     const { result } = await setup({ removeAttachment: true });
     await confirm(result.current.confirmSubmit);
@@ -312,7 +315,6 @@ describe('useSubmitAssignment', () => {
     jest
       .mocked(dataSource.submitAssignment)
       .mockRejectedValueOnce(new Error('Network'));
-    setPendingAssignmentData({ data: 'file:///shared.png', mimeType: 'x' });
     const { result, onSubmitted } = await setup();
     await confirm(result.current.confirmSubmit);
 
@@ -325,7 +327,6 @@ describe('useSubmitAssignment', () => {
     expect(result.current.progress).toBe(0);
     expect(onSubmitted).not.toHaveBeenCalled();
     expect(refreshCourseAssignments).not.toHaveBeenCalled();
-    expect(usePendingAssignmentStore.getState().data).not.toBeNull();
   });
 
   it('skips the refresh without a current semester', async () => {
