@@ -1,4 +1,4 @@
-import * as SecureStore from 'web/secureStore';
+import * as SecureStore from 'web/packages/secureStore';
 import type { Bridge } from 'web/bridge';
 import {
   installBridge,

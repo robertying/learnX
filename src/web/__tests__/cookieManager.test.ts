@@ -1,4 +1,4 @@
-import CookieManager, { parseSetCookie } from 'web/cookieManager';
+import CookieManager, { parseSetCookie } from 'web/packages/cookieManager';
 import type { Bridge } from 'web/bridge';
 import {
   installBridge,

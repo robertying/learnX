@@ -1,4 +1,4 @@
-import Storage, { SQLiteStorage } from 'web/kvStore';
+import Storage, { SQLiteStorage } from 'web/packages/kvStore';
 import type { Bridge } from 'web/bridge';
 import {
   installBridge,

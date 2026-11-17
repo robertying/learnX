@@ -2,7 +2,7 @@ import { useImperativeHandle, type Ref } from 'react';
 import { View } from 'react-native';
 
 /**
- * A stand-in for Electron's `<webview>` element (src/web/packages/
+ * A stand-in for Electron's `<webview>` element (src/web/
  * webviewTag.tsx): an event target with the element's methods, attached once
  * a test calls `attach`.
  */

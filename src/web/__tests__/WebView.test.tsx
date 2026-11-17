@@ -5,9 +5,7 @@ import * as webView from 'web/packages/WebView';
 import { installBridge } from 'test-utils/mocks/electronBridge';
 import { MockWebview, mockViews } from 'test-utils/mocks/webviewTag';
 
-jest.mock('web/packages/webviewTag', () =>
-  require('test-utils/mocks/webviewTag'),
-);
+jest.mock('web/webviewTag', () => require('test-utils/mocks/webviewTag'));
 
 // One bridge for the file: the module starts answering the main process's
 // questions once, on the bridge it finds then.

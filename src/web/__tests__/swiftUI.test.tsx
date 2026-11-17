@@ -41,7 +41,7 @@ import {
   ZStack,
   type SecureFieldRef,
 } from 'web/packages/swiftUI';
-import { ToastBackground, ToastSymbol } from 'web/packages/toast';
+import { ToastBackground, ToastSymbol } from 'web/toast';
 
 // The stand-in modifiers, untyped: they record whatever they're given.
 type ModifierFactory = ((...args: unknown[]) => unknown) &

@@ -15,7 +15,7 @@ import type {
   WebViewSourceUri,
 } from 'react-native-webview/lib/WebViewTypes';
 import { bridge, type WebviewLoadRequest } from 'web/bridge';
-import WebviewTag from 'web/packages/webviewTag';
+import WebviewTag from 'web/webviewTag';
 import FilePreview from 'web/FilePreview';
 import webviewPartition from 'constants/webviewPartition.json';
 
