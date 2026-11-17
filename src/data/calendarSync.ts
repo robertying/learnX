@@ -103,10 +103,23 @@ export const setLastSynced = (kind: SyncKind, time = Date.now()) => {
   }));
 };
 
-/** Notes what a week's classes in the calendar were just written from. */
-export const setClassWeekWritten = (weekStart: string, key: string) => {
+/**
+ * Notes what a week's classes in the calendar were just written from, and
+ * forgets the weeks before `thisWeek` (its Monday): the sync only follows
+ * this week and later ones, so the record doesn't keep growing.
+ */
+export const setClassWeekWritten = (
+  weekStart: string,
+  key: string,
+  thisWeek: string,
+) => {
   useCalendarSyncStore.setState(state => ({
-    writtenClassWeeks: { ...state.writtenClassWeeks, [weekStart]: key },
+    writtenClassWeeks: Object.fromEntries(
+      Object.entries({
+        ...state.writtenClassWeeks,
+        [weekStart]: key,
+      }).filter(([week]) => week >= thisWeek),
+    ),
   }));
 };
 

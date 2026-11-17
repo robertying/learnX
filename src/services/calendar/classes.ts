@@ -12,7 +12,11 @@ import {
 import { getCachedCourses } from 'data/queries';
 import { queryClient } from 'data/queryClient';
 import { queryKeys } from 'data/queryKeys';
-import { calendarWeekQuery, type FailedRange } from 'data/schedule';
+import {
+  calendarWeekQuery,
+  currentWeekStart,
+  type FailedRange,
+} from 'data/schedule';
 import { getSettings } from 'data/settings';
 import { SettingsState } from 'data/types/state';
 import { buildCourseEventDetails } from 'helpers/calendar/details';
@@ -135,10 +139,11 @@ export const saveClassesToCalendar = (
       settings,
       failed,
     );
-    for (const week of weeksOf(range.first, range.last)) {
+    const thisWeek = currentWeekStart();
+    for (const week of weeksOf(later(range.first, thisWeek), range.last)) {
       const weekClasses = cachedWeek(week, range.graduate);
       if (weekClasses && !failed(later(week, range.first))) {
-        setClassWeekWritten(week, weekKey(weekClasses, settings));
+        setClassWeekWritten(week, weekKey(weekClasses, settings), thisWeek);
       }
     }
   });
@@ -152,7 +157,7 @@ const followedWeeks = (now: number) => {
   if (!courseCalendarSync) {
     return [];
   }
-  const thisWeek = startOfWeek(beijingDate(now)).format('YYYY-MM-DD');
+  const thisWeek = currentWeekStart(now);
   const kind = graduate ? 'graduate' : 'undergraduate';
   return queryClient
     .getQueriesData<CalendarClass[]>({ queryKey: queryKeys.calendarAll })
@@ -223,6 +228,7 @@ export const updateSyncedClasses = (now = Date.now()) =>
       return;
     }
     const today = beijingDate(now);
+    const thisWeek = currentWeekStart(now);
     const settings = getSettings();
     const calendar = await getCourseCalendar();
     for (const { week, classes, key } of weeks) {
@@ -233,7 +239,7 @@ export const updateSyncedClasses = (now = Date.now()) =>
         addDays(week, 6),
         settings,
       );
-      setClassWeekWritten(week, key);
+      setClassWeekWritten(week, key, thisWeek);
     }
     setLastSynced('courseSchedule');
   });
