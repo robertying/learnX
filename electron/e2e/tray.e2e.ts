@@ -5,7 +5,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileName } from '../fileStore.cjs';
-import { expect, test } from './fixtures';
+import { expect, packagedApp, test } from './fixtures';
 import { exact } from './maestroEnv';
 import { byId } from './steps';
 
@@ -15,6 +15,9 @@ interface SyncRun {
 }
 
 /** The background syncs the app saved (data/syncLog), oldest first. */
+/** Why a packaged app skips a test that uses the tray's menu. */
+const TRAY_MENU = 'only a dev run lets the test reach the tray’s menu';
+
 const syncRuns = (dataDir: string): SyncRun[] => {
   const file = fs
     .readdirSync(dataDir, { recursive: true })
@@ -34,6 +37,7 @@ test('keeps running in the tray, and comes back from it', async ({
   main,
   login,
 }) => {
+  test.skip(!!packagedApp, TRAY_MENU);
   test.skip(process.platform === 'linux', 'closing quits on Linux');
   await login();
   await expect
@@ -57,6 +61,7 @@ test('syncs in the background from the tray’s Refresh', async ({
   dataDir,
   login,
 }) => {
+  test.skip(!!packagedApp, TRAY_MENU);
   await login();
   await main.hideWindow();
   await expect.poll(() => main.windowVisible()).toBe(false);
@@ -82,6 +87,7 @@ test('skips the background sync after logging out', async ({
   dataDir,
   login,
 }) => {
+  test.skip(!!packagedApp, TRAY_MENU);
   await login();
   await byId(window, 'tab-settings').click();
   await byId(window, 'settings-logout').click();
@@ -105,6 +111,7 @@ test('quits when its window closes on Linux', async ({ app, main, login }) => {
 });
 
 test('quits from the tray', async ({ app, main, login }) => {
+  test.skip(!!packagedApp, TRAY_MENU);
   await login();
   const closed = app.waitForEvent('close');
   await main.chooseTrayItem(exact('T_trayQuit')).catch(() => {

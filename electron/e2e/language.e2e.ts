@@ -1,7 +1,7 @@
 // The app's language follows the system's (`--lang` here), as the Maestro
 // flows run in English on the local devices and in Chinese on CI: the mock
 // data, the screens, dialogs and the tray menu all switch with it.
-import { expect, test } from './fixtures';
+import { expect, packagedApp, test } from './fixtures';
 import { exact } from './maestroEnv';
 import { byId, card, openCard, openSettings, openTab, shown } from './steps';
 
@@ -33,9 +33,12 @@ test.describe('in Chinese', () => {
     await openTab(window, 'courses');
     await expect(card(window, 'MOCK_COURSE')).toBeVisible();
 
-    await expect
-      .poll(async () => (await main.trayLabels())[0])
-      .toMatch(chinese('T_trayOpen'));
+    // Only a dev run lets the test reach the tray's menu.
+    if (!packagedApp) {
+      await expect
+        .poll(async () => (await main.trayLabels())[0])
+        .toMatch(chinese('T_trayOpen'));
+    }
 
     await openSettings(window);
     await byId(window, 'settings-logout').click();

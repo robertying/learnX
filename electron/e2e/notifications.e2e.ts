@@ -4,7 +4,7 @@
 // a system notification: it logs it, and the page shows it as a toast
 // (system.cjs), which the test reads back and clicks through the same path.
 import type { Page } from '@playwright/test';
-import { expect, test } from './fixtures';
+import { expect, packagedApp, test } from './fixtures';
 import { text } from './maestroEnv';
 import {
   byId,
@@ -14,6 +14,11 @@ import {
   shown,
   toggle,
 } from './steps';
+
+test.skip(
+  !!packagedApp,
+  'a packaged app posts system notifications, which only a dev run logs',
+);
 
 interface Scheduled {
   identifier: string;
