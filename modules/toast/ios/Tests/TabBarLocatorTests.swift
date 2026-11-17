@@ -5,9 +5,11 @@ import UIKit
 
 @MainActor
 @Suite struct TabBarLocatorTests {
-  /// A shown window around `root`, laid out.
+  /// A shown iPhone-sized window around `root`, laid out. Compact width, so the tab bar sits along the bottom on an
+  /// iPad simulator too, where a regular width floats it at the top and hides the bar itself.
   private func window(_ root: UIViewController) -> UIWindow {
     let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 402, height: 874))
+    window.traitOverrides.horizontalSizeClass = .compact
     window.rootViewController = root
     window.isHidden = false
     window.layoutIfNeeded()
@@ -31,12 +33,16 @@ import UIKit
 
     let frame = try #require(TabBarLocator.frame(in: window))
     let bar = tabs.tabBar.convert(tabs.tabBar.bounds, to: window)
-    #expect(frame["x"] == bar.minX)
-    #expect(frame["y"] == bar.minY)
-    #expect(frame["width"] == bar.width)
-    #expect(frame["height"] == bar.height)
-    #expect(frame["windowWidth"] == 402)
-    #expect(frame["windowHeight"] == 874)
+    #expect(
+      frame == [
+        "x": Double(bar.minX),
+        "y": Double(bar.minY),
+        "width": Double(bar.width),
+        "height": Double(bar.height),
+        "windowWidth": 402,
+        "windowHeight": 874,
+      ])
+    #expect(bar.minY > 437, "along the bottom")
   }
 
   @Test func skipsAHiddenTabBar() {
