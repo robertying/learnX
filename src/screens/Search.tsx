@@ -219,7 +219,9 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
   // A kind's tab with none of the results: No Results under the tabs, as
   // when nothing matches at all.
   const scopeEmpty = scope !== 'all' && byKind[scope].length === 0;
-  const noResults = scopeEmpty || (!hasResults && !!settledQuery.trim());
+  // Only for a query: with the field empty (cleared on a kind's tab too),
+  // the prompt.
+  const noResults = !!settledQuery.trim() && (scopeEmpty || !hasResults);
 
   // The overview: the top hits, when some kind has more than it shows, then
   // the first few of each kind not among them, each with See All.
@@ -258,10 +260,6 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
   const tabTitles = tabs.map(tab =>
     tab === 'all' ? t('all') : t(titles[tab]),
   );
-  // The tabs (Android: chips and the filter menu) stay up while there's a
-  // query, whether or not it matches yet, so they don't come and go as
-  // typing pauses on a partial query.
-  const showTabs = !!searchQuery.trim();
   // The floating tabs' height, which the results scroll clear of.
   const [tabsHeight, setTabsHeight] = useState(0);
 
@@ -360,32 +358,34 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
             )}
           </KeyboardAvoidingView>
         </View>
+        {/* The tabs (Android: chips and the filter menu) are always up, as
+            the system's scope bars are while searching, so they don't come
+            and go with the query: the prompt, No Results and the results all
+            show under them. */}
         {Platform.OS === 'android' ? (
           // The menu also brings back what it leaves out when nothing
           // matches.
-          showTabs ? (
-            <View style={Styles.flex1}>
-              <View
-                testID="search-tabs"
-                collapsable={false}
-                style={styles.androidBar}
-              >
-                <ScopeChips
-                  titles={tabTitles}
-                  selectedIndex={tabs.indexOf(scope)}
-                  onSelect={i => setScope(tabs[i])}
-                />
-                <ToggleMenu
-                  label={t('filter')}
-                  options={filterOptions}
-                  active={filtered}
-                  onToggle={toggleFilter}
-                />
-              </View>
-              {hasResults ? renderList(0) : null}
+          <View style={Styles.flex1}>
+            <View
+              testID="search-tabs"
+              collapsable={false}
+              style={styles.androidBar}
+            >
+              <ScopeChips
+                titles={tabTitles}
+                selectedIndex={tabs.indexOf(scope)}
+                onSelect={i => setScope(tabs[i])}
+              />
+              <ToggleMenu
+                label={t('filter')}
+                options={filterOptions}
+                active={filtered}
+                onToggle={toggleFilter}
+              />
             </View>
-          ) : null
-        ) : !showTabs ? null : hasGlassHeader ? (
+            {hasResults ? renderList(0) : null}
+          </View>
+        ) : hasGlassHeader ? (
           // iPhone and iPad from iOS 26: the tabs float in glass under the
           // header, as in a course's detail, and the results scroll under
           // them once their height is known.

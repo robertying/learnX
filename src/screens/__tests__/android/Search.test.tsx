@@ -66,7 +66,8 @@ describe('Search (Android)', () => {
   it('shows chips for the kinds and the filter menu beside them, not in the toolbar', async () => {
     await act(() => setArchived('notice', ['n1'], true));
     const { navigation, type } = await setup();
-    expect(screen.queryByTestId('filter')).toBeNull();
+    // Up before anything is typed, beside the prompt
+    expect(screen.getByTestId('filter')).toBeTruthy();
     await type('midterm');
     expect(screen.getByRole('checkbox', { name: 'All' })).toBeChecked();
     expect(

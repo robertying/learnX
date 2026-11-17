@@ -203,8 +203,8 @@ it("shows What's New in a sheet, with the changelog a push away", async () => {
     expect.objectContaining({
       name: 'WhatsNew',
       options: {
-        headerShown: false,
         headerTitle: '',
+        headerShadowVisible: false,
         title: t('whatsNew'),
       },
     }),
