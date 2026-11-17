@@ -173,7 +173,7 @@ const zh: typeof en = {
   fileOpensInDefaultApp: 'learnX无法显示此类文件，可用默认应用打开或另存一份。',
   startAtLogin: '登录时启动',
   unsandboxedNote:
-    'AppImage版learnX在Ubuntu 24.04及更高版本上无法启用Chromium沙盒，安全性较低，建议改用deb安装包（.deb）。',
+    'AppImage版learnX在Ubuntu 24.04及更高版本上无法启用Chromium沙盒。为提高运行时安全，建议改用deb安装包（.deb）。',
   startAtLoginCaption:
     '登录电脑时在系统托盘中启动learnX，以便持续同步并发送提醒。关闭窗口后learnX仍在托盘中运行，可在托盘菜单中退出。',
   trayOpen: '打开learnX',
