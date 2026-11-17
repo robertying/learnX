@@ -13,18 +13,18 @@ import { isAndroid, isApple, isElectron } from 'helpers/platform';
 /**
  * The platform's own text styles: Apple's Dynamic Type styles on iOS, iPadOS
  * and Mac, the Material 3 type scale on Android, and Fluent 2's type ramp in
- * the Electron app (Windows).
+ * the Electron app (Windows and Linux).
  *
- * | variant       | iOS / Mac (default size)  | Android (M3)   | Fluent 2    |
- * | ------------- | ------------------------- | -------------- | ----------- |
- * | `largeTitle`  | Large Title, 34/41 bold   | headlineMedium | Title 2     |
- * | `title`       | Title 3, 20/25 semibold   | titleLarge     | Subtitle 1  |
- * | `headline`    | Headline, 17/22 semibold  | titleMedium    | Subtitle 2  |
- * | `body`        | Body, 17/22               | bodyLarge      | Body 1      |
- * | `subheadline` | Subheadline, 15/20        | bodyMedium     | Body 1      |
+ * | variant       | iOS / Mac (default size)  | Android (M3)   | Fluent 2      |
+ * | ------------- | ------------------------- | -------------- | ------------- |
+ * | `largeTitle`  | Large Title, 34/41 bold   | headlineMedium | Title 2       |
+ * | `title`       | Title 3, 20/25 semibold   | titleLarge     | Subtitle 1    |
+ * | `headline`    | Headline, 17/22 semibold  | titleMedium    | Subtitle 2    |
+ * | `body`        | Body, 17/22               | bodyLarge      | Body 1        |
+ * | `subheadline` | Subheadline, 15/20        | bodyMedium     | Body 1        |
  * | `label`       | Subheadline, 15/20 medium | labelLarge     | Body 1 Strong |
- * | `footnote`    | Footnote, 13/18           | bodySmall      | Caption 1   |
- * | `caption`     | Caption 2, 11/13          | labelSmall     | Caption 2   |
+ * | `footnote`    | Footnote, 13/18           | bodySmall      | Caption 1     |
+ * | `caption`     | Caption 2, 11/13          | labelSmall     | Caption 2     |
  *
  * On iOS each variant scales with the user's text size along its own Dynamic
  * Type curve (`dynamicTypeRamp`), as UIKit's text styles do. Mac Catalyst
@@ -99,7 +99,8 @@ const androidStyles: Record<TextVariant, TextStyle> = {
   },
 };
 
-// Fluent 2's type ramp (Segoe UI Variable on Windows).
+// Fluent 2's type ramp (Segoe UI Variable on Windows, the system's sans-serif
+// on Linux).
 const fluentStyles: Record<TextVariant, TextStyle> = {
   largeTitle: { fontSize: 28, lineHeight: 36, fontWeight: '600' },
   title: { fontSize: 20, lineHeight: 28, fontWeight: '600' },

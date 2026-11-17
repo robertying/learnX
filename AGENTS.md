@@ -15,7 +15,7 @@ learnX is a React Native app (iOS, iPadOS, Mac Catalyst, Android, and an Electro
 | `modules/AGENTS.md`                   | Local Expo modules: native tests, Spotlight and App Intents, crash reporting, sharing files to learnX, the Android APK updater and build flavors                  |
 | `patches/README.md`                   | Patched dependencies: what each patch fixes and how to change one (`pnpm patch`)                                                                                  |
 | `.maestro/AGENTS.md`                  | End-to-end flows                                                                                                                                                  |
-| `electron/AGENTS.md`                  | The Electron app (Windows, later Linux): running it, the main process, and the web variants and stand-ins in `src/web`                                            |
+| `electron/AGENTS.md`                  | The Electron app (Windows and Linux): running it, the main process, packaging and updates, and the web variants and stand-ins in `src/web`                        |
 | `.claude/skills/release`              | Version bumps, release builds and uploads (fastlane)                                                                                                              |
 | `.claude/skills/release-notes`        | Release notes for the stores and GitHub                                                                                                                           |
 | `.claude/skills/upgrade-dependencies` | Upgrading every declared dependency (npm, patches, pods, gems, Gradle, Node, Actions) and verifying the app                                                       |
