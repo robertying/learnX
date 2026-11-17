@@ -1,5 +1,5 @@
-// Flows that open mock items by their learnx:// links: 11-links.yaml, and the
-// iPhone Duo posture flows (.maestro/postures), since Maestro can't tap on the
+// Flows that open mock items by their learnx:// links: 11-links.yaml (and the
+// Mac app's LinksUITests), and the iPhone Duo posture flows (.maestro/postures), since Maestro can't tap on the
 // Duo's inner display; and 12-notification-actions.yaml, whose launches post
 // notifications about mock items by id. Keep them pointing at items the mock
 // account has.
@@ -69,4 +69,19 @@ it('12-notification-actions.yaml posts notifications about mock items', () => {
       expect(known).toContain(id);
     }
   }
+});
+
+it("the Mac app's LinksUITests opens each kind of item and Today", () => {
+  const found = (
+    readFileSync('ios/learnXUITests/Mac/LinksUITests.swift', 'utf8').match(
+      /"learnx:\/\/[^"]+"/g,
+    ) ?? []
+  ).map(link => link.slice(1, -1));
+  expect(found.map(link => getUrlTarget(link)?.type)).toEqual([
+    'notice',
+    'assignment',
+    'file',
+    'today',
+  ]);
+  found.forEach(expectMockItem);
 });
