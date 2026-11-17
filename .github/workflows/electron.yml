@@ -106,6 +106,59 @@ jobs:
           path: build/electron/e2e
           if-no-files-found: ignore
 
+  wayland:
+    # The window under Wayland, as Ubuntu's and Fedora's desktops run it
+    # (window.e2e.ts): under xvfb's X11 a window draws whether it shows or
+    # not, so the E2E job can't tell a window that never appears. Weston's
+    # headless backend is a real Wayland compositor without a screen; with no
+    # X display, Electron can only use it.
+    name: Electron window on Wayland (not required)
+    needs: web
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up JS
+        uses: ./.github/actions/setup-js
+
+      - name: Download web build
+        uses: actions/download-artifact@v8
+        with:
+          name: electron-web
+          path: build/electron/web
+
+      - name: Install Weston
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends weston
+
+      - name: E2E test
+        run: |
+          printf 'DUMMY_USERNAME=e2e\nDUMMY_PASSWORD=e2e\n' > .env
+          export XDG_RUNTIME_DIR="$RUNNER_TEMP/xdg"
+          mkdir -m 700 "$XDG_RUNTIME_DIR"
+          weston --backend=headless --renderer=pixman --width=1280 --height=800 \
+            --socket=wayland-learnx --idle-time=0 > "$RUNNER_TEMP/weston.log" 2>&1 &
+          for _ in $(seq 50); do
+            [ -S "$XDG_RUNTIME_DIR/wayland-learnx" ] && break
+            sleep 0.2
+          done
+          if [ ! -S "$XDG_RUNTIME_DIR/wayland-learnx" ]; then
+            cat "$RUNNER_TEMP/weston.log"
+            exit 1
+          fi
+          env -u DISPLAY WAYLAND_DISPLAY=wayland-learnx XDG_SESSION_TYPE=wayland pnpm e2e:electron window.e2e.ts
+
+      - name: Upload results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: electron-e2e-wayland
+          path: build/electron/e2e
+          if-no-files-found: ignore
+
   package:
     # Each platform on its own runner, so Windows builds get their icon and
     # version info (which electron-builder can't write from Linux without
