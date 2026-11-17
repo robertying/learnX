@@ -27,8 +27,8 @@ beforeEach(() => {
     'latest.yml',
     'latest-linux.yml',
     'latest-linux-arm64.yml',
-    'learnX-Setup-19.0.0.exe',
-    'learnX-Setup-19.0.0.exe.blockmap',
+    'learnX-windows-v19.0.0.exe',
+    'learnX-windows-v19.0.0.exe.blockmap',
   ]) {
     fs.writeFileSync(
       path.join(dir, name),
@@ -103,7 +103,7 @@ it('reads an update file’s version', () => {
 it('refuses an update file for another version, writing nothing', () => {
   fs.writeFileSync(
     path.join(dir, 'latest-linux.yml'),
-    'version: 18.9.0\npath: learnX-18.9.0-x86_64.AppImage\n',
+    'version: 18.9.0\npath: learnX-linux-x86_64-v18.9.0.AppImage\n',
   );
   expect(() =>
     signUpdateFiles(dir, keys.privateKey, keys.publicKey, '19.0.0'),

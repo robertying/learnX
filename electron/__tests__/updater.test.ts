@@ -52,10 +52,10 @@ describe('updateMode', () => {
 });
 
 it('names the .deb as the build does', () => {
-  expect(debFileName('19.1.0', 'x64')).toBe('learnX-19.1.0-amd64.deb');
-  expect(debFileName('19.1.0', 'arm64')).toBe('learnX-19.1.0-arm64.deb');
+  expect(debFileName('19.1.0', 'x64')).toBe('learnX-linux-amd64-v19.1.0.deb');
+  expect(debFileName('19.1.0', 'arm64')).toBe('learnX-linux-arm64-v19.1.0.deb');
   expect(packageConfig().deb?.artifactName).toBe(
-    'learnX-${version}-${arch}.${ext}',
+    'learnX-linux-${arch}-v${version}.${ext}',
   );
 });
 
@@ -67,7 +67,8 @@ describe('in notify mode (a .deb)', () => {
       autoUpdater,
       feed,
       mode: 'notify',
-      downloadUrl: version => `https://mirror.test/learnX-${version}-amd64.deb`,
+      downloadUrl: version =>
+        `https://mirror.test/learnX-linux-amd64-v${version}.deb`,
       onReady,
     });
     return { autoUpdater, onReady, updater };
@@ -86,7 +87,7 @@ describe('in notify mode (a .deb)', () => {
     autoUpdater.emit('update-available', { version: '19.1.0' });
     const ready = {
       version: '19.1.0',
-      download: 'https://mirror.test/learnX-19.1.0-amd64.deb',
+      download: 'https://mirror.test/learnX-linux-amd64-v19.1.0.deb',
     };
     expect(onReady).toHaveBeenCalledWith(ready);
     expect(updater.ready()).toEqual(ready);
