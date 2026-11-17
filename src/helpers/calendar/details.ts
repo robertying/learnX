@@ -10,7 +10,7 @@ import type { CalendarSyncState } from 'data/calendarSync';
 import { hash, removeTags } from 'helpers/text';
 import { ICSEvent } from './ics';
 import locationMappings from '../../assets/locationMappings.json';
-import { t } from 'helpers/i18n';
+import { formatDate, t } from 'helpers/i18n';
 import { isApple } from 'helpers/platform';
 
 /** Settings › Calendar's name: Reminders sync is only on iOS, iPadOS and Mac. */
@@ -118,10 +118,11 @@ export interface AssignmentEventInput {
 
 /**
  * iOS reminder for an assignment, due at the deadline. With the alert on, it
- * alerts then and the chosen minutes before, unless that time has passed. Reminders lists a reminder at its
- * earliest alert (apps can't set Early Reminder), while the due date stays
- * the deadline. Its link, at the end of its notes, opens the assignment in
- * learnX.
+ * alerts then and the chosen minutes before, unless that time has passed.
+ * Reminders lists and shows a reminder at its earliest alert (apps can't set
+ * Early Reminder), while the due date stays the deadline, so its notes start
+ * with the deadline. Its link, at the end of its notes, opens the assignment
+ * in learnX.
  */
 export const buildAssignmentReminderDetails = (
   settings: SettingsState,
@@ -157,9 +158,12 @@ export const buildAssignmentReminderDetails = (
     timeZone: deviceTimeZone(),
     completed,
     completionDate: completionDate?.toDate(),
-    // Reminders doesn't show the url field that apps can set, so the link
-    // also ends the notes, where it can be tapped.
-    notes: [note, url].filter(Boolean).join('\n\n'),
+    // Reminders shows the earliest alert's time, not the due date, so the
+    // deadline opens the notes. Reminders doesn't show the url field that
+    // apps can set, so the link also ends the notes, where it can be tapped.
+    notes: [formatDate(dueDate, 'reminderDeadlineFormat'), note, url]
+      .filter(Boolean)
+      .join('\n\n'),
     url,
   };
 };
