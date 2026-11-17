@@ -10,6 +10,7 @@ import {
   useAttachmentPicker,
   useSubmitAssignment,
 } from 'hooks/useAssignmentSubmission';
+import useHeaderTitle from 'hooks/useHeaderTitle';
 import useSaveSubmissionDraft from 'hooks/useSaveSubmissionDraft';
 import AssignmentSubmission from 'screens/AssignmentSubmission';
 import { screenProps } from 'test-utils/screenProps';
@@ -22,6 +23,7 @@ jest.mock('hooks/useAssignmentSubmission', () => ({
   useSubmitAssignment: jest.fn(),
 }));
 jest.mock('hooks/useSaveSubmissionDraft', () => jest.fn());
+jest.mock('hooks/useHeaderTitle', () => jest.fn());
 
 const picker = {
   picked: null as null | { uri: string; type: string; name: string },
@@ -244,7 +246,13 @@ it('shows progress while uploading', async () => {
       () => ({ ...submit, uploading: true, progress: 0.5 }) as never,
     );
   await renderScreen();
-  expect(screen.getByText(t('uploadingSubmission'))).toBeTruthy();
+  // In the header, with the bar under it, wherever the form is scrolled
+  expect(jest.mocked(useHeaderTitle).mock.lastCall).toEqual([
+    navigation,
+    t('assignmentSubmission'),
+    t('uploadingSubmission'),
+  ]);
+  expect(screen.getByTestId('uploadProgress')).toBeTruthy();
   expect(submitItem().disabled).toBe(true);
 });
 

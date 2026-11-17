@@ -40,6 +40,7 @@ import {
 } from '@expo/ui/swift-ui';
 import {
   accessibilityAddTraits,
+  alignmentGuide,
   accessibilityHidden,
   accessibilityLabel,
   buttonStyle,
@@ -279,9 +280,16 @@ const macRowBackground = listRowBackground(
 const macFirstSectionModifiers = [
   listSectionMargins({ edges: 'top', length: 20 }),
 ];
+// System Settings sets a row's symbol and text close to the group's edges.
+const macRowInset = 14;
 const macSectionModifiers = [
   macRowBackground,
-  listRowInsets({ top: 10, leading: 20, bottom: 10, trailing: 20 }),
+  listRowInsets({
+    top: 10,
+    leading: macRowInset,
+    bottom: 10,
+    trailing: macRowInset,
+  }),
 ];
 // System Settings on the Mac: bold titles in the label color above the
 // group. (Catalyst ignores headerProminence, so the title is our own Text.)
@@ -440,7 +448,7 @@ const RowLabel: React.FC<{
   // own text size: there the symbol gets a column of its own, at the rows'
   // text size, as in System Settings.
   return DeviceInfo.isMac() ? (
-    <HStack spacing={12}>
+    <HStack spacing={macIconSpacing} modifiers={macIconRowModifiers}>
       <Image
         systemName={systemIcons[icon].ios}
         size={textStyles.body.fontSize}
@@ -467,7 +475,14 @@ const RowLabel: React.FC<{
   );
 };
 
-const macIconModifiers = [frame({ width: 24 })];
+const macIconWidth = 20;
+const macIconSpacing = 10;
+const macIconModifiers = [frame({ width: macIconWidth })];
+// The separator under the row starts where its text does, past the symbol,
+// as in System Settings.
+const macIconRowModifiers = [
+  alignmentGuide('listRowSeparatorLeading', macIconWidth + macIconSpacing),
+];
 
 /** The row's subtitle and detail for the text size (`stackedDetail`). */
 const useStackedDetail = (subtitle?: string, detail?: string) =>

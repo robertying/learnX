@@ -4,21 +4,25 @@ import ProgressBar from 'components/ProgressBar';
 import { underHeader } from 'constants/scrollInsetBehavior';
 
 /**
- * A web page's loading progress, over the top of the page and right below the
- * header: on iPhone and iPad, where the page is under the header, it keeps
+ * A web page's loading progress (or an upload's), over the top of the screen
+ * and right below the header: on iPhone and iPad, where the page is under the header, it keeps
  * clear of the top safe area, which includes the header (`underHeader`).
  */
-const PageProgressBar: React.FC<{ progress: number }> = ({ progress }) =>
+const PageProgressBar: React.FC<{ progress: number; testID?: string }> = ({
+  progress,
+  testID,
+}) =>
   Platform.OS === 'ios' && underHeader() ? (
     <SafeAreaView
       edges={{ top: true }}
       style={styles.overlay}
       pointerEvents="none"
+      testID={testID}
     >
       <ProgressBar progress={progress} />
     </SafeAreaView>
   ) : (
-    <View style={styles.overlay} pointerEvents="none">
+    <View style={styles.overlay} pointerEvents="none" testID={testID}>
       <ProgressBar progress={progress} />
     </View>
   );

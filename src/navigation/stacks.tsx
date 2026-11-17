@@ -54,7 +54,6 @@ import {
   getItemDetailOptions,
   getModalScreenOptions,
   getTitleOptions,
-  hasGlassHeader,
   debugTitle,
   mockNetworkTitle,
   stackScreenOptions,
@@ -304,12 +303,13 @@ export const WhatsNewStack = () => (
     <WhatsNewNavigator.Screen
       name="WhatsNew"
       component={WhatsNew}
-      // The title is Changelog's back button. With the glass header the bar
-      // stays, empty and clear: a bar that only appears for Changelog is laid
-      // out too high in the sheet while it slides in, then drops into place.
+      // The title is Changelog's back button. The bar is there, empty, with
+      // no line under it on the opaque headers (Mac, before iOS 26): a bar
+      // that only appears for Changelog is laid out too high in the sheet
+      // while it slides in, then drops into place.
       options={{
-        headerShown: hasGlassHeader,
         headerTitle: '',
+        headerShadowVisible: false,
         title: t('whatsNew'),
       }}
     />
