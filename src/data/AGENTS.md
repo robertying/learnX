@@ -19,7 +19,7 @@
 
 ### Submissions
 
-- A file shared to learnX that is waiting to be attached to a submission lives in `data/pendingAssignment` (not persisted).
+- A file shared to learnX that is waiting to be attached to a submission lives in `data/pendingAssignment` (not persisted). The first submission screen that takes it (the one open, or the next one opened) clears it there, so it attaches to that assignment only (`useAttachmentPicker`).
 - A submission is sent the way the website's submit page sends it (`sendSubmission`, `submitAssignment`: thu-learn-lib's `submitHomework`, which reports the upload progress): the whole answer as HTML every time (`homeworkContentHtml`), since the server replaces the submitted one with it (an unedited answer goes back as the submitted HTML; removing the attachment keeps the text), and `fileupload` is the text `undefined` when no file is picked.
 
 ## Favorites and server actions

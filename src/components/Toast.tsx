@@ -6,26 +6,21 @@ import {
   PanResponder,
   PlatformColor,
   StyleSheet,
-  Text,
   useWindowDimensions,
   View,
 } from 'react-native';
 import Animated, {
-  interpolate,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  withTiming,
 } from 'react-native-reanimated';
-import { scheduleOnRN } from 'react-native-worklets';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FullWindowOverlay } from 'react-native-screens';
 import { create } from 'zustand';
 import DeviceInfo from 'constants/DeviceInfo';
 import Spacing from 'constants/Spacing';
-import { textStyles } from 'components/Text';
-import { useTheme } from 'theme';
-import { ToastBackground, ToastSymbol } from 'modules/toast';
+import { Text, type TextVariant } from 'components/Text';
+import { ToastHUD, ToastSymbol } from 'modules/toast';
 
 import { playHaptic } from 'services/haptics';
 import { toastHaptic, type ToastOptions, type ToastType } from './Toast.shared';
@@ -111,12 +106,64 @@ const remove = (id: number) => {
   }
 };
 
-const cornerRadius = 25;
+interface HUDMetrics {
+  text: TextVariant;
+  symbolSize: number;
+  symbolBox: number;
+  gap: number;
+  paddingHorizontal: number;
+  paddingVertical: number;
+  cornerRadius: number;
+  maxWidth: number;
+}
 
-const maxToastWidth = 420;
+// The HUD's size around its text: Subheadline (15 pt) on iOS and iPadOS. The
+// Mac draws text at macOS's sizes, so there the toast takes Body (13 pt, the
+// size of macOS's own notifications and HUDs) in a pill scaled down to match.
+const iosMetrics: HUDMetrics = {
+  text: 'subheadline',
+  symbolSize: 20,
+  symbolBox: 24,
+  gap: 10,
+  paddingHorizontal: 20,
+  paddingVertical: 12,
+  cornerRadius: 25,
+  maxWidth: 420,
+};
+const macMetrics: HUDMetrics = {
+  text: 'body',
+  symbolSize: 16,
+  symbolBox: 20,
+  gap: 8,
+  paddingHorizontal: 16,
+  paddingVertical: 10,
+  cornerRadius: 20,
+  maxWidth: 360,
+};
 
-// Slides up into place.
-const hiddenOffset = 24;
+const hudStyles = (metrics: HUDMetrics) =>
+  StyleSheet.create({
+    toast: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      minHeight: metrics.cornerRadius * 2,
+      paddingHorizontal: metrics.paddingHorizontal,
+      paddingVertical: metrics.paddingVertical,
+    },
+    icon: {
+      width: metrics.symbolBox,
+      height: metrics.symbolBox,
+      marginRight: metrics.gap,
+    },
+    text: {
+      flexShrink: 1,
+      fontWeight: '600',
+      textAlign: 'center',
+    },
+  });
+
+const iosStyles = hudStyles(iosMetrics);
+const macStyles = hudStyles(macMetrics);
 
 // From iOS 26 the toast floats like the iPhone's tab bar: as far from the
 // screen's sides and bottom as the tab bar is (21 pt, measured: UIKit doesn't
@@ -168,29 +215,11 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
   type,
   visible,
 }) => {
-  const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { width: windowWidth } = useWindowDimensions();
   const keyboardHeight = useKeyboardHeight();
   const margins = toastInsets(insets);
-  const progress = useSharedValue(0);
   const drag = useSharedValue(0);
-
-  useEffect(() => {
-    if (visible) {
-      // Nearly critically damped: it settles without overshooting, as the
-      // system's HUDs do.
-      progress.set(withSpring(1, { duration: 350, dampingRatio: 0.9 }));
-    } else {
-      progress.set(
-        withTiming(0, { duration: 200 }, finished => {
-          if (finished) {
-            scheduleOnRN(remove, id);
-          }
-        }),
-      );
-    }
-  }, [id, progress, visible]);
 
   // Tap or swipe down to dismiss; pulling up stretches a little and springs
   // back.
@@ -214,24 +243,16 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
     }),
   );
 
-  // The backdrop fades itself (see ToastBackground); only the content fades
-  // here.
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        translateY:
-          interpolate(progress.get(), [0, 1], [hiddenOffset, 0]) +
-          (visible ? drag.get() : Math.max(drag.get(), 0)),
-      },
-      { scale: interpolate(progress.get(), [0, 1], [0.9, 1]) },
-    ],
-  }));
-
-  const contentStyle = useAnimatedStyle(() => ({
-    opacity: progress.get(),
+  // The HUD animates itself in and out (see ToastHUD); only the drag moves
+  // it here.
+  const dragStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: visible ? drag.get() : Math.max(drag.get(), 0) }],
   }));
 
   const symbol = symbols[type];
+  const mac = DeviceInfo.isMac();
+  const metrics = mac ? macMetrics : iosMetrics;
+  const hud = mac ? macStyles : iosStyles;
 
   return (
     <View
@@ -253,41 +274,36 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
         accessibilityLabel={text}
         accessibilityHint=""
         style={[
-          styles.toast,
           // The overlay's window doesn't hold its content to the screen's
           // width, so the wrapper's side padding alone lets a long toast run
           // edge to edge.
           {
             maxWidth: Math.min(
-              maxToastWidth,
+              metrics.maxWidth,
               windowWidth - margins.left - margins.right,
             ),
           },
-          animatedStyle,
+          dragStyle,
         ]}
       >
-        <ToastBackground
-          cornerRadius={cornerRadius}
+        <ToastHUD
+          cornerRadius={metrics.cornerRadius}
           visible={visible}
-          style={StyleSheet.absoluteFill}
-        />
-        <Animated.View style={[styles.content, contentStyle]}>
+          onHidden={() => remove(id)}
+          style={hud.toast}
+        >
           {symbol ? (
             <ToastSymbol
               name={symbol.name}
-              size={20}
+              size={metrics.symbolSize}
               color={symbol.color}
-              style={styles.icon}
+              style={hud.icon}
             />
           ) : null}
-          <Text
-            dynamicTypeRamp="subheadline"
-            style={[styles.text, { color: theme.colors.onSurface }]}
-            numberOfLines={3}
-          >
+          <Text variant={metrics.text} style={hud.text} numberOfLines={3}>
             {text}
           </Text>
-        </Animated.View>
+        </ToastHUD>
       </Animated.View>
     </View>
   );
@@ -330,27 +346,5 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'flex-end',
-  },
-  toast: {
-    justifyContent: 'center',
-    minHeight: cornerRadius * 2,
-  },
-  content: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexShrink: 1,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-  },
-  icon: {
-    width: 24,
-    height: 24,
-    marginRight: 10,
-  },
-  text: {
-    flexShrink: 1,
-    ...textStyles.subheadline,
-    fontWeight: '600',
-    textAlign: 'center',
   },
 });
