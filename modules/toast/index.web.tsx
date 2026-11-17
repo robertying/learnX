@@ -1,8 +1,10 @@
 import { View } from 'react-native';
 import { Image } from 'web/packages/swiftUI';
-import type { ToastBackgroundProps, ToastSymbolProps } from 'modules/toast';
+import type { ToastBackgroundProps, ToastSymbolProps } from './index';
 
-export type { ToastBackgroundProps, ToastSymbolProps } from 'modules/toast';
+export type { ToastBackgroundProps, ToastSymbolProps } from './index';
+
+// The Electron app has no UIKit: the toast's parts are drawn here.
 
 /** The toast's backdrop in the Electron app: a dark rounded panel. */
 export const ToastBackground = ({
