@@ -634,10 +634,11 @@ describe('an E2E run in the background', () => {
     delete (globalThis as Record<string, unknown>).learnxDev;
   });
 
-  it('never shows or focuses the window, only records that it would', () => {
+  it('never shows or focuses the window on a Mac, only records that it would', () => {
     const { system, createWindow, app } = setUp({
       dev: true,
       background: true,
+      platform: 'darwin',
     });
     const win = createWindow();
     const dev = (
@@ -649,6 +650,7 @@ describe('an E2E run in the background', () => {
     system.present(win as never, { maximize: true });
     app.emit('second-instance', {}, ['learnX']);
     expect(win.show).not.toHaveBeenCalled();
+    expect(win.showInactive).not.toHaveBeenCalled();
     expect(win.focus).not.toHaveBeenCalled();
     expect(win.restore).not.toHaveBeenCalled();
     expect(dev.windowShown()).toBe(true);
@@ -657,20 +659,23 @@ describe('an E2E run in the background', () => {
     expect(win.hide).toHaveBeenCalled();
   });
 
-  it('shows it behind the others on Linux, where Wayland draws no hidden window', () => {
-    const { system, createWindow } = setUp({
-      dev: true,
-      background: true,
-      platform: 'linux',
-    });
-    const win = createWindow();
-    win.visible = false;
-    system.present(win as never);
-    system.present(win as never);
-    expect(win.showInactive).toHaveBeenCalledTimes(1);
-    expect(win.show).not.toHaveBeenCalled();
-    expect(win.focus).not.toHaveBeenCalled();
-  });
+  it.each(['win32', 'linux'])(
+    'shows it behind the others on %s, where a hidden window hardly draws',
+    platform => {
+      const { system, createWindow } = setUp({
+        dev: true,
+        background: true,
+        platform,
+      });
+      const win = createWindow();
+      win.visible = false;
+      system.present(win as never);
+      system.present(win as never);
+      expect(win.showInactive).toHaveBeenCalledTimes(1);
+      expect(win.show).not.toHaveBeenCalled();
+      expect(win.focus).not.toHaveBeenCalled();
+    },
+  );
 
   it('shows and focuses it otherwise', () => {
     const { system, createWindow } = setUp();

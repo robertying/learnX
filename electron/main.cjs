@@ -74,7 +74,8 @@ const dev = !app.isPackaged || Boolean(process.defaultApp);
 /**
  * An E2E run (electron/e2e sets LEARNX_E2E): it must never take the
  * foreground. On macOS the app starts as an accessory, with no Dock icon, and
- * no run shows or focuses its window (system.cjs, `present`).
+ * no run focuses its window or brings it to the front: Windows and Linux show
+ * it behind the others, a Mac not at all (system.cjs, `present`).
  */
 const background = dev && process.env.LEARNX_E2E === '1';
 if (process.platform === 'darwin') {
@@ -416,8 +417,8 @@ const createWindow = (/** @type {Electron.Session} */ ses) => {
       // The page's web views (webviews.cjs), hardened as they attach.
       webviewTag: true,
       spellcheck: false,
-      // Captures, and E2E runs whose window never shows, need frames drawn
-      // while it's in the background.
+      // Captures, and E2E runs, whose window stays behind the others (or
+      // hidden, on a Mac), need frames drawn while it's in the background.
       backgroundThrottling: !captureDir && !background,
     },
   });
