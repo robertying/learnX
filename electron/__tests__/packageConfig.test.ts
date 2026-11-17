@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { createPublicKey } from 'node:crypto';
 import path from 'node:path';
 import updateMirror from '../../src/constants/updateMirror.json';
 import electronPackage from '../package.json';
@@ -137,9 +138,7 @@ describe('placeholderKeyProblem', () => {
   const real = '-----BEGIN PUBLIC KEY-----\n';
 
   it('refuses installers while the update key is the placeholder', () => {
-    expect(placeholderKeyProblem({}, placeholder)).toMatch(
-      /still the placeholder/,
-    );
+    expect(placeholderKeyProblem({}, placeholder)).toMatch(/is a placeholder/);
     expect(placeholderKeyProblem({}, real)).toBeNull();
   });
 
@@ -158,18 +157,17 @@ describe('placeholderKeyProblem', () => {
     'not a url',
   ])('refuses a test build for %s, which could pass for a release', url => {
     expect(placeholderKeyProblem({ updateUrl: url }, placeholder)).toMatch(
-      /still the placeholder/,
+      /is a placeholder/,
     );
   });
 
-  it('refuses the committed key until the real one is made', () => {
+  it('takes the committed key, a real Ed25519 public key', () => {
     const committed = fs.readFileSync(
       path.join(__dirname, '../../certs/electron-update.pem'),
       'utf8',
     );
-    expect(placeholderKeyProblem({}, committed) === null).toBe(
-      !committed.startsWith('PLACEHOLDER'),
-    );
+    expect(placeholderKeyProblem({}, committed)).toBeNull();
+    expect(createPublicKey(committed).asymmetricKeyType).toBe('ed25519');
   });
 });
 

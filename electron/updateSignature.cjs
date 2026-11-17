@@ -13,8 +13,9 @@ const { createPublicKey, sign, verify } = require('node:crypto');
 const SIGNATURE_SUFFIX = '.sig';
 
 /**
- * Whether a public key PEM is the placeholder committed until the real key
- * is (its first line says so), which no one holds the private half of.
+ * Whether a public key PEM is a placeholder (its first line says so), whose
+ * private half no one holds: packaging and signing refuse one, so a
+ * placeholder can't take the real key's place unnoticed.
  * @param {string | Buffer} publicKey
  */
 const isPlaceholderKey = publicKey =>

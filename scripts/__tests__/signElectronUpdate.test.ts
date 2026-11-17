@@ -66,11 +66,10 @@ it('refuses a key that isn’t the committed public key’s pair, writing nothin
   expect(signatures()).toEqual([]);
 });
 
-it('refuses while the committed public key is the placeholder', () => {
-  // As certs/electron-update.pem has it until the real key is committed.
+it('refuses a placeholder public key', () => {
   const placeholder = `PLACEHOLDER: not learnX's update key.\n${keys.publicKey}`;
   expect(() => signUpdateFiles(dir, keys.privateKey, placeholder)).toThrow(
-    'still the placeholder',
+    'is a placeholder',
   );
   expect(signatures()).toEqual([]);
 });

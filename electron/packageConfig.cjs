@@ -134,9 +134,9 @@ const isLocalUrl = (/** @type {string | undefined} */ url) => {
 };
 
 /**
- * Why installers can't be built yet, or null: while the committed update key
- * (certs/electron-update.pem) is still the placeholder, nobody can sign an
- * update those installs would take, so they could never update. An unpacked
+ * Why installers can't be built, or null: if the committed update key
+ * (certs/electron-update.pem) is a placeholder, nobody can sign an update
+ * those installs would take, so they could never update. An unpacked
  * build (`--dir`), a test build for an update server on this computer
  * (`--update-url` on localhost or 127.0.0.1: any other could pass for a
  * release) and a build that says so (`--allow-placeholder-key`) may go ahead.
@@ -150,7 +150,7 @@ const placeholderKeyProblem = (options, publicKey) =>
   !options.dir &&
   !isLocalUrl(options.updateUrl) &&
   !options.allowPlaceholderKey
-    ? 'certs/electron-update.pem is still the placeholder, so these installs could never update: make the key first (electron/AGENTS.md, "Signing updates"), or pass --allow-placeholder-key for a build that will never be released'
+    ? 'certs/electron-update.pem is a placeholder, so these installs could never update: commit the update key\'s public half (electron/AGENTS.md, "Signing updates"), or pass --allow-placeholder-key for a build that will never be released'
     : null;
 
 module.exports = { packageConfig: config, placeholderKeyProblem };

@@ -58,12 +58,12 @@ it.each([
   expect(signatureProblem(YML, signature, trusted.publicKey)).toBe(problem);
 });
 
-it('knows the placeholder key, which nothing it signs can match', () => {
+it('trusts only the committed key, and knows a placeholder', () => {
   const committed = readFileSync(
     path.join(__dirname, '..', '..', 'certs', 'electron-update.pem'),
     'utf8',
   );
-  // A real key or the placeholder, either an Ed25519 public key.
+  // Nothing a throwaway key signs passes the committed key.
   expect(signatureProblem(YML, signed(YML), committed)).toBe(
     'signature doesn’t match',
   );

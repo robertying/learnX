@@ -11,8 +11,8 @@
 // LEARNX_UPDATE_SIGNING_KEY names (Rui keeps it in 1Password; a process
 // substitution such as `--key <(op read …)` keeps it off the disk). Each
 // signature is checked against the committed public key, so a wrong key
-// fails here and not on every user's update check, and the placeholder key
-// (before the real one is committed) is refused.
+// fails here and not on every user's update check, and a placeholder key is
+// refused.
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
@@ -38,7 +38,7 @@ export const updateFiles = (/** @type {string} */ dir) =>
 export const signUpdateFiles = (dir, privateKey, publicKey) => {
   if (isPlaceholderKey(publicKey)) {
     throw new Error(
-      'certs/electron-update.pem is still the placeholder: commit the real public key first (electron/AGENTS.md)',
+      'certs/electron-update.pem is a placeholder, not the update key: commit its real public key (electron/AGENTS.md)',
     );
   }
   const files = updateFiles(dir);
