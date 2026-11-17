@@ -240,9 +240,10 @@ export const mainProcess = (app: ElectronApplication) => ({
     }, index),
 
   /**
-   * Whether the app means its window to show: an E2E run shows it only on
-   * Linux, behind the others (system.cjs, `present`), so this is what the
-   * app asked for, not the OS (window.e2e.ts checks the OS on Linux).
+   * Whether the app means its window to show: an E2E run shows it behind
+   * the others on Windows and Linux and never on a Mac (system.cjs,
+   * `present`), so this is what the app asked for, not the OS (window.e2e.ts
+   * checks the OS on Windows and Linux).
    */
   windowVisible: () =>
     app.evaluate(() =>

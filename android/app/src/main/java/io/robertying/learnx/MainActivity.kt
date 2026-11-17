@@ -1,8 +1,10 @@
 package io.robertying.learnx
 
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewGroupCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
@@ -25,6 +27,26 @@ class MainActivity : ReactActivity() {
         // the Android 11 way instead: every view sees the insets its parent
         // passes down, whatever its siblings did. A no-op on Android 11+.
         ViewGroupCompat.installCompatInsetsDispatch(window.decorView)
+        matchNavigationButtonsToAppearance()
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        matchNavigationButtonsToAppearance()
+    }
+
+    // The navigation bar is see-through (edge to edge), so its buttons draw
+    // on the app: dark on the light theme, light on the dark one. React Native
+    // sets them only when the theme asks for a contrast scrim behind them,
+    // which Material 3's doesn't, so 3-button navigation kept white buttons
+    // on a light screen (Android 10). Set here, and again when the appearance
+    // changes while the app runs (the activity handles uiMode itself).
+    private fun matchNavigationButtonsToAppearance() {
+        val night =
+            resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
+                Configuration.UI_MODE_NIGHT_YES
+        WindowInsetsControllerCompat(window, window.decorView)
+            .isAppearanceLightNavigationBars = !night
     }
 
     override fun createReactActivityDelegate(): ReactActivityDelegate =

@@ -164,6 +164,9 @@ export type RootStackParams = {
 /** The root on Android, where the split view is drawn in JS. */
 export type AndroidRootStackParams = {
   Main: undefined;
+  CourseXStack: NavigatorScreenParams<CourseXStackParams> | undefined;
+  SearchStack: NavigatorScreenParams<SearchStackParams> | undefined;
+  AssignmentSubmissionStack: NavigatorScreenParams<AssignmentSubmissionStackParams>;
   LoginStack: NavigatorScreenParams<LoginStackParams>;
   Setup: SetupParams | undefined;
   WhatsNewStack: NavigatorScreenParams<WhatsNewStackParams>;

@@ -20,11 +20,11 @@
 // The installers need NSIS's and the AppImage tools, which electron-builder
 // downloads; on an Apple silicon Mac those run only with Rosetta, so build
 // them on Windows or in CI there, and use --dir on the Mac.
-import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
+import { exportWeb } from './webExport.mjs';
 
 const electronDir = import.meta.dirname;
 const root = path.join(electronDir, '..');
@@ -60,14 +60,7 @@ if (keyProblem) {
 }
 
 if (!values['skip-export']) {
-  const result = spawnSync(
-    'pnpm',
-    ['exec', 'expo', 'export', '--platform', 'web', '--output-dir', webDir],
-    { cwd: root, stdio: 'inherit', env: { ...process.env, CI: '1' } },
-  );
-  if (result.status !== 0) {
-    process.exit(result.status ?? 1);
-  }
+  exportWeb(webDir);
 }
 
 // electron-builder's tools (NSIS, AppImage) go to build/electron/cache, with

@@ -1,3 +1,20 @@
+diff --git a/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfig.kt b/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfig.kt
+index 68b8d852b8433a05e02372356d00a10530ccb8c9..87aab9aa54efb6d31002bcdfe4d7ad4432acffc1 100644
+--- a/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfig.kt
++++ b/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfig.kt
+@@ -360,7 +360,11 @@ class ScreenStackHeaderConfig(
+         while (i < size) {
+             val view = configSubviews[i]
+             val type = view.type
+-            if (type !== ScreenStackHeaderSubview.Type.SEARCH_BAR && view.isHiddenBySearchBar != isSearchBarExpanded) {
++            // The left item stays beside the open field (see SearchBarView).
++            if (type !== ScreenStackHeaderSubview.Type.SEARCH_BAR &&
++                type !== ScreenStackHeaderSubview.Type.LEFT &&
++                view.isHiddenBySearchBar != isSearchBarExpanded
++            ) {
+                 view.setHiddenBySearchBar(isSearchBarExpanded)
+             }
+             if (type === ScreenStackHeaderSubview.Type.BACK) {
 diff --git a/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.kt b/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.kt
 index fa1b77317f609983ae2434764174072e51130550..accd2ad385dc7935d1cdd1c73d027faed5605084 100644
 --- a/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.kt
@@ -15,7 +32,7 @@ index fa1b77317f609983ae2434764174072e51130550..accd2ad385dc7935d1cdd1c73d027fae
          config: ScreenStackHeaderConfig,
          titleFontFamily: String?,
 diff --git a/android/src/main/java/com/swmansion/rnscreens/SearchBarView.kt b/android/src/main/java/com/swmansion/rnscreens/SearchBarView.kt
-index 48d9567e05f4f124e742c442bbf9673145fb4f57..ed9a1708d9766ef37a6287599a8687bb0ce74d25 100644
+index 48d9567e05f4f124e742c442bbf9673145fb4f57..ac09c682b457b04dcc8384cb4249bd182002dfb7 100644
 --- a/android/src/main/java/com/swmansion/rnscreens/SearchBarView.kt
 +++ b/android/src/main/java/com/swmansion/rnscreens/SearchBarView.kt
 @@ -2,6 +2,7 @@ package com.swmansion.rnscreens
@@ -26,7 +43,15 @@ index 48d9567e05f4f124e742c442bbf9673145fb4f57..ed9a1708d9766ef37a6287599a8687bb
  import androidx.appcompat.widget.SearchView
  import com.facebook.react.bridge.ReactContext
  import com.facebook.react.uimanager.UIManagerHelper
-@@ -163,13 +164,63 @@ class SearchBarView(
+@@ -71,6 +72,7 @@ class SearchBarView(
+ 
+     override fun onAttachedToWindow() {
+         super.onAttachedToWindow()
++        viewTreeObserver.addOnGlobalLayoutListener(headerLayoutListener)
+ 
+         screenStackFragment?.onSearchViewCreate = { newSearchView ->
+             if (searchViewFormatter == null) {
+@@ -163,13 +165,64 @@ class SearchBarView(
      private fun setToolbarElementsVisibility(visibility: Int) {
          for (i in 0..(headerConfig?.configSubviewsCount?.minus(1) ?: 0)) {
              val subview = headerConfig?.getConfigSubview(i)
@@ -43,14 +68,7 @@ index 48d9567e05f4f124e742c442bbf9673145fb4f57..ed9a1708d9766ef37a6287599a8687bb
                  subview?.setHiddenBySearchBar(visibility == GONE)
              }
          }
-+        val left = leftSubview()
-+        if (visibility == GONE) {
-+            left?.addOnLayoutChangeListener(leftItemLayoutListener)
-+            fitSearchViewBesideLeftItem()
-+        } else {
-+            left?.removeOnLayoutChangeListener(leftItemLayoutListener)
-+            screenStackFragment?.searchView?.maxWidth = Integer.MAX_VALUE
-+        }
++        fitSearchViewBesideLeftItem()
 +    }
 +
 +    private fun leftSubview(): ScreenStackHeaderSubview? {
@@ -60,8 +78,16 @@ index 48d9567e05f4f124e742c442bbf9673145fb4f57..ed9a1708d9766ef37a6287599a8687bb
 +            .firstOrNull { it.type == ScreenStackHeaderSubview.Type.LEFT }
 +    }
 +
-+    private val leftItemLayoutListener =
-+        View.OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> fitSearchViewBesideLeftItem() }
++    // Fits the field again whenever the header lays out: once the left item's
++    // content has its size, after the header is rebuilt (coming back from a
++    // pushed screen), and when the window changes size.
++    private val headerLayoutListener =
++        android.view.ViewTreeObserver.OnGlobalLayoutListener { fitSearchViewBesideLeftItem() }
++
++    override fun onDetachedFromWindow() {
++        viewTreeObserver.removeOnGlobalLayoutListener(headerLayoutListener)
++        super.onDetachedFromWindow()
++    }
 +
 +    // The open field fills the toolbar from its end; it ends where the left
 +    // item's content does instead of covering it (the item itself is laid out
@@ -79,7 +105,7 @@ index 48d9567e05f4f124e742c442bbf9673145fb4f57..ed9a1708d9766ef37a6287599a8687bb
 +                    ?.let { item.left + it }
 +            }
 +        val room =
-+            if (contentEnd != null && toolbar != null) {
++            if (!searchView.isIconified && contentEnd != null && toolbar != null) {
 +                toolbar.width - contentEnd - toolbar.paddingEnd
 +            } else {
 +                Integer.MAX_VALUE

@@ -91,9 +91,9 @@ const claimSingleInstance = app => {
  * @property {string} cacheDir
  * @property {string} iconFile
  * @property {boolean} dev
- * @property {boolean} [background] an E2E run: never show or focus a
- *   window (it only records that it would have), so the tests never take
- *   the foreground
+ * @property {boolean} [background] an E2E run: never focus a window or
+ *   bring it to the front (it only records that it would have), so the
+ *   tests never take the foreground
  * @property {Record<string, string | undefined>} [env]
  * @property {string} [platform]
  * @property {readonly string[]} [argv] this launch's arguments
@@ -143,23 +143,27 @@ const setUpSystem = ({
 
   /**
    * Whether the app means its window to show: what it last asked for, which
-   * an E2E run reads (`learnxDev.windowShown`) since its window never shows.
+   * an E2E run reads (`learnxDev.windowShown`), since its window shows only
+   * behind the others, or not at all on a Mac.
    */
   let windowShown = false;
 
   /**
    * Shows the window (maximized when asked), and with `focus` brings it to
    * the front. In an E2E run (`background`) it only records that it would
-   * (on Linux it shows the window behind the others).
+   * (on Windows and Linux it shows the window behind the others).
    * @param {Electron.BrowserWindow} win
    * @param {{ maximize?: boolean; focus?: boolean }} [options]
    */
   const present = (win, { maximize = false, focus = true } = {}) => {
     windowShown = true;
     if (background) {
-      // Under Wayland a window that was never shown gets no frames, so its
-      // page never draws: Linux shows it, without taking the focus.
-      if (platform === 'linux' && !win.isVisible()) {
+      // A window that was never shown hardly draws: under Wayland it gets no
+      // frames, so its page never draws, and on Windows about two a second,
+      // so animations and Playwright's waits for a still element crawl
+      // (each test took several times as long). Windows and Linux show it
+      // without taking the focus; a Mac app draws its hidden window.
+      if (platform !== 'darwin' && !win.isVisible()) {
         win.showInactive();
       }
       return;

@@ -11,6 +11,10 @@ export default defineConfig({
   globalSetup: './e2e/setup.ts',
   globalTeardown: './e2e/teardown.ts',
   timeout: 90_000,
+  // On CI the whole run stops after 15 minutes, before its job's own limit
+  // (electron.yml), so a run that crawls still ends with its report and the
+  // traces of what failed, which a cancelled job never uploads.
+  globalTimeout: process.env.CI ? 15 * 60_000 : undefined,
   expect: { timeout: 15_000 },
   // On CI, one app per core: every test has its own data folder and ports,
   // and tests are spread one by one rather than by file, so the long files
