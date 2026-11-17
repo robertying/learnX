@@ -94,7 +94,8 @@ name: Search and open a result
       id: notice-detail
     timeout: 10000
 
-# Android: Close stays beside the open search field, so one tap leaves
+# Android: Close stays beside the open search field, also after coming back
+# from a result, so one tap leaves
 # Search with a query still in it.
 - runFlow:
     when:
