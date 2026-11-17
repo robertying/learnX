@@ -59,7 +59,6 @@ import {
   type FormNumberFieldProps,
   type FormParagraphProps,
   type FormProfileProps,
-  type FormProgressProps,
   type FormProps,
   type FormRowPosition,
   type FormSectionProps,
@@ -568,28 +567,6 @@ export const FormTextField: React.FC<FormTextFieldProps> = props => {
         </TextField.Placeholder>
       ) : null}
     </TextField>
-  );
-};
-
-/** A bar under its title. */
-export const FormProgress: React.FC<FormProgressProps> = ({
-  title,
-  value,
-  testID,
-  position,
-}) => {
-  return (
-    <SectionItem position={position} testID={testID}>
-      <ListItem.HeadlineContent>
-        <Text>{title}</Text>
-      </ListItem.HeadlineContent>
-      <ListItem.SupportingContent>
-        <LinearProgressIndicator
-          progress={value}
-          modifiers={[fillMaxWidth(), padding(0, 8, 0, 0)]}
-        />
-      </ListItem.SupportingContent>
-    </SectionItem>
   );
 };
 

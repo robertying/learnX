@@ -278,7 +278,7 @@ const FileInfo: React.FC<{
       <FormParagraph text={file.description || t('noFileDescription')} />
     </FormSection>
     <FormSection>
-      {DeviceInfo.isMac() && isQuickLookAvailable ? (
+      {isQuickLookAvailable ? (
         <FormButton
           title={t('quickLook')}
           icon="quickLook"

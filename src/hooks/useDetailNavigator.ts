@@ -61,6 +61,10 @@ export interface DetailRoot {
   id?: string;
 }
 
+/** Whether two detail roots are the same screen and item (or both none). */
+export const sameDetailRoot = (a?: DetailRoot, b?: DetailRoot) =>
+  a?.name === b?.name && a?.id === b?.id;
+
 // What each detail container shows at the bottom of its stack, as its
 // `onStateChange` reports it.
 const detailRoots = new Map<DetailNavigationContainerRef, DetailRoot>();
@@ -80,7 +84,7 @@ export const reportDetailState = (
         id: typeof id === 'string' ? id : undefined,
       }
     : undefined;
-  if (previous?.name === root?.name && previous?.id === root?.id) {
+  if (sameDetailRoot(previous, root)) {
     return;
   }
   if (root) {

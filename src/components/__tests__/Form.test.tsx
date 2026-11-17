@@ -15,7 +15,6 @@ import {
   FormLink,
   FormNumberField,
   FormParagraph,
-  FormProgress,
   FormScreen,
   FormSection,
   FormText,
@@ -115,7 +114,7 @@ describe('Form', () => {
     isMac.mockRestore();
   });
 
-  it('draws the Mac rows at iOS text sizes, padded, with tinted actions', async () => {
+  it('draws the Mac rows padded, with tinted actions', async () => {
     jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
     const onToggle = jest.fn();
     await render(
@@ -136,7 +135,7 @@ describe('Form', () => {
     expect(onToggle).toHaveBeenCalledWith(true);
     // An action in the tint: no label color on its title
     expect(screen.getByText('Sync').props.modifiers).toBeUndefined();
-    // The footer at iOS's footnote size, its lines spaced apart
+    // The footer in the footnote style, its lines spaced apart
     expect(screen.getByText('Synced weekly').props.modifiers).toHaveLength(2);
   });
 
@@ -406,14 +405,6 @@ describe('Form', () => {
     expect(screen.getByTestId('icon-doc')).toBeTruthy();
     await userEvent.setup().press(screen.getByText('report.pdf'));
     expect(onPress).toHaveBeenCalledTimes(1);
-  });
-
-  it('shows progress under its title', async () => {
-    await render(<FormProgress title="Uploading" value={0.4} />);
-    expect(screen.getByText('Uploading')).toBeTruthy();
-    expect(screen.getByRole('progressbar')).toHaveAccessibilityValue({
-      now: 40,
-    });
   });
 
   it('shows a detail page title, a tinted detail and a hosted view', async () => {

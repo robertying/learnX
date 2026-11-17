@@ -19,7 +19,6 @@ import {
   FormNumberField,
   FormParagraph,
   FormProfile,
-  FormProgress,
   FormView,
   FormSection,
   FormText,
@@ -264,14 +263,13 @@ describe('Form (Android)', () => {
     await render(
       <FormSection>
         <FormText title="Downloading" progress={0.4} />
-        <FormProgress title="Storage" value={0.25} />
       </FormSection>,
     );
     expect(
       screen
         .getAllByTestId('progress')
         .map(bar => bar.props.accessibilityValue.now),
-    ).toEqual([40, 25]);
+    ).toEqual([40]);
   });
 
   it('opens a file unless it is disabled', async () => {

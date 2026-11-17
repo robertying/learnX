@@ -68,14 +68,14 @@ const useFileDetailHeader = ({
       onPress: onRefresh,
       disabled: !!progress,
     },
-    DeviceInfo.isMac() &&
-      isQuickLookAvailable && {
-        id: 'quickLook',
-        label: t('quickLook'),
-        icon: 'quickLook',
-        onPress: onQuickLook,
-        disabled: unavailable,
-      },
+    // Only the Mac has Quick Look's plugin.
+    isQuickLookAvailable && {
+      id: 'quickLook',
+      label: t('quickLook'),
+      icon: 'quickLook',
+      onPress: onQuickLook,
+      disabled: unavailable,
+    },
     {
       id: 'share',
       label: t('share'),

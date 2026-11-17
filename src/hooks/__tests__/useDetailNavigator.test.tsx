@@ -13,6 +13,7 @@ import SplitSizes from 'constants/SplitSizes';
 import useDetailNavigator, {
   reportDetailReady,
   reportDetailState,
+  sameDetailRoot,
   useDetailRoot,
   useShowDetail,
 } from 'hooks/useDetailNavigator';
@@ -125,6 +126,15 @@ describe('what the pane shows', () => {
   it('is nothing without a pane', async () => {
     const hook = await renderHook(() => useDetailRoot());
     expect(hook.result.current).toBeUndefined();
+  });
+
+  it('is the same root for the same screen and item', () => {
+    const notice = { name: 'NoticeDetail', id: 'n1' } as const;
+    expect(sameDetailRoot(notice, { ...notice })).toBe(true);
+    expect(sameDetailRoot(notice, { ...notice, id: 'n2' })).toBe(false);
+    expect(sameDetailRoot({ name: 'About' }, { name: 'About' })).toBe(true);
+    expect(sameDetailRoot(undefined, { name: 'About' })).toBe(false);
+    expect(sameDetailRoot(undefined, undefined)).toBe(true);
   });
 });
 

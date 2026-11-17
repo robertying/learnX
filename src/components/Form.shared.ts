@@ -234,16 +234,6 @@ export interface FormTextFieldProps {
   position?: FormRowPosition;
 }
 
-/** A labeled bar, for an upload or another task that takes a while. */
-export interface FormProgressProps {
-  title: string;
-  /** Between 0 and 1. */
-  value: number;
-  testID?: string;
-  /** Set by `FormSection` on Android, for the row's corners. */
-  position?: FormRowPosition;
-}
-
 export interface FormProfileProps {
   name: string;
   detail?: string;
