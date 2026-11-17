@@ -7,10 +7,11 @@ import Pdf from 'react-native-pdf';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
 import {
-  canPreviewInline,
   isPreviewLoad,
   needWhiteBackground,
+  previewKind,
 } from 'helpers/filePreview';
+import { QuickLookView } from 'modules/quicklook';
 import { formatDate, t } from 'helpers/i18n';
 import { displayFileSize } from 'helpers/filename';
 import Spinner from 'components/Spinner';
@@ -87,13 +88,18 @@ const FileDetailContent: React.FC<{
   const [previewFailed, setPreviewFailed] = useState(false);
 
   const handlePreviewError = () => setPreviewFailed(true);
+  // The Mac's Quick Look preview had no window to show in: the file's info
+  // shows instead, as for a file it can't preview.
+  const [quickLookUnavailable, setQuickLookUnavailable] = useState(false);
 
   const handleRedownload = () => {
     setPreviewFailed(false);
     redownload();
   };
 
-  const canRender = !!path && canPreviewInline(file.fileType);
+  const kind = previewKind(file.fileType);
+  const canRender =
+    !!path && !!kind && !(kind === 'quickLook' && quickLookUnavailable);
 
   const handleShowInfo = () => setShowInfo(shown => !shown);
 
@@ -142,12 +148,19 @@ const FileDetailContent: React.FC<{
           actions={[{ label: t('downloadAgain'), onPress: handleRedownload }]}
         />
       ) : !showInfo && canRender ? (
-        file.fileType === 'pdf' ? (
+        kind === 'pdf' ? (
           <Pdf
             style={Styles.flex1}
             source={{ uri: path }}
             fitPolicy={0}
             onError={handlePreviewError}
+          />
+        ) : kind === 'quickLook' ? (
+          <QuickLookView
+            testID="quick-look"
+            style={Styles.flex1}
+            uri={path}
+            onUnavailable={() => setQuickLookUnavailable(true)}
           />
         ) : (
           <WebView
