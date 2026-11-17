@@ -81,13 +81,10 @@ name: Change every setting
             checked: true
 - runFlow: subflows/back-to-settings.yaml
 
-# Notifications: each on, then each off. Android only: on iOS, Maestro holds
-# the notification permission alert back until some later tap, which it then
-# spends on the alert, so which tap is lost isn't known. The page itself is
-# opened on iOS by 07-screens.
+# Notifications: each on, then each off. The first one asks for the
+# permission, which launchApp allows: on iOS the patched Maestro answers the
+# system's alert (scripts/maestro/maestro-springboard-alerts.patch).
 - runFlow:
-    when:
-      platform: Android
     commands:
       - tapOn:
           id: settings-notifications

@@ -10,10 +10,9 @@
 #                               the hierarchy of an app whose accessibility
 #                               tree is too deep for one snapshot (only the
 #                               status bar came back)
-#   maestro-thin-elements.patch  no taps on an element one point wide or
-#                               tall, which UIKit leaves where a bar button
-#                               was before a compact layout moved it (the
-#                               iPhone Duo closed)
+#   maestro-tiny-elements.patch  no taps on an element under 8 points
+#                               across or high, such as the copies of a
+#                               sheet's bar buttons UIKit leaves outside it
 #   maestro-springboard-alerts.patch
 #                               SpringBoard's alerts over an app (a
 #                               notifications request, Save Password) in its
@@ -54,7 +53,7 @@ if [ "${MAESTRO_KEEP:-}" != 1 ]; then
   git -c commit.gpgsign=false am -q "$here/maestro-display.patch" \
     "$here/maestro-fold-posture.patch" \
     "$here/maestro-hierarchy-fallback.patch" \
-    "$here/maestro-thin-elements.patch" \
+    "$here/maestro-tiny-elements.patch" \
     "$here/maestro-springboard-alerts.patch" >&2
 fi
 

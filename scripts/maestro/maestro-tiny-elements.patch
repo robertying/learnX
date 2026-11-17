@@ -1,0 +1,101 @@
+From 3cb93953a7161899e372d0400238add42c3740b6 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 17 Nov 2026 01:50:15 -0800
+Subject: [PATCH] fix: treat an element under 8 points across or high as not
+ visible
+
+UIKit leaves copies of a sheet's bar buttons outside the sheet, too small
+to see or tap: the file picker's Cancel is 7x7 points on an iPhone and
+one point wide on the closed iPhone Duo, whose bars sit at the side.
+Maestro matched the copy first, and the tap did nothing.
+---
+ .../src/main/java/maestro/UiElement.kt        |  9 +++-
+ .../src/test/java/maestro/UiElementTest.kt    | 47 ++++++++++++++++++-
+ 2 files changed, 54 insertions(+), 2 deletions(-)
+
+diff --git a/maestro-client/src/main/java/maestro/UiElement.kt b/maestro-client/src/main/java/maestro/UiElement.kt
+index 36b148d6..b9166dbf 100644
+--- a/maestro-client/src/main/java/maestro/UiElement.kt
++++ b/maestro-client/src/main/java/maestro/UiElement.kt
+@@ -29,7 +29,12 @@ data class UiElement(
+     }
+ 
+     fun getVisiblePercentage(screenWidth: Int, screenHeight: Int): Double {
+-        if (bounds.width == 0 && bounds.height == 0) {
++        // A view under 8 points across or high is smaller than anything that
++        // can be read or tapped: UIKit leaves such copies of a sheet's bar
++        // buttons outside the sheet (the file picker's Cancel, 7×7 on an
++        // iPhone, one point wide on the closed iPhone Duo, whose bars sit at
++        // the side), and Maestro matched them first.
++        if (bounds.width < MIN_VISIBLE_SIZE || bounds.height < MIN_VISIBLE_SIZE) {
+             return 0.0
+         }
+ 
+@@ -81,6 +86,8 @@ data class UiElement(
+ 
+     companion object {
+ 
++        private const val MIN_VISIBLE_SIZE = 8
++
+         fun TreeNode.toUiElement(): UiElement {
+             return toUiElementOrNull()
+                 ?: throw IllegalStateException("Node has no bounds")
+diff --git a/maestro-client/src/test/java/maestro/UiElementTest.kt b/maestro-client/src/test/java/maestro/UiElementTest.kt
+index 6c1d694f..1559106c 100644
+--- a/maestro-client/src/test/java/maestro/UiElementTest.kt
++++ b/maestro-client/src/test/java/maestro/UiElementTest.kt
+@@ -68,4 +68,49 @@ internal class UiElementTest {
+         val percent = element.getVisiblePercentage(screenWidth, screenHeight)
+         assertThat(percent).isEqualTo(0)
+     }
+-}
+\ No newline at end of file
++
++    @Test
++    internal fun `check visible percentage on screen - a line is not visible`() {
++        val element = UiElement(
++            TreeNode(),
++            bounds = Bounds(
++                x = 358,
++                y = 24,
++                width = 1,
++                height = 58
++            )
++        )
++        val percent = element.getVisiblePercentage(screenWidth, screenHeight)
++        assertThat(percent).isEqualTo(0)
++    }
++
++    @Test
++    internal fun `check visible percentage on screen - a speck is not visible`() {
++        val element = UiElement(
++            TreeNode(),
++            bounds = Bounds(
++                x = 88,
++                y = 96,
++                width = 7,
++                height = 7
++            )
++        )
++        val percent = element.getVisiblePercentage(screenWidth, screenHeight)
++        assertThat(percent).isEqualTo(0)
++    }
++
++    @Test
++    internal fun `check visible percentage on screen - a small dot is visible`() {
++        val element = UiElement(
++            TreeNode(),
++            bounds = Bounds(
++                x = 8,
++                y = 100,
++                width = 10,
++                height = 10
++            )
++        )
++        val percent = element.getVisiblePercentage(screenWidth, screenHeight)
++        assertThat(percent).isEqualTo(1)
++    }
++}
+-- 
+2.56.1
+
