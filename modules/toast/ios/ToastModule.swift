@@ -7,11 +7,13 @@ public final class ToastModule: Module {
   public func definition() -> ModuleDefinition {
     Name("LearnXToast")
 
-    View(ToastBackgroundView.self) {
-      Prop("cornerRadius") { (view: ToastBackgroundView, radius: Double) in
+    View(ToastView.self) {
+      Events("onHidden")
+
+      Prop("cornerRadius") { (view: ToastView, radius: Double) in
         view.cornerRadius = radius
       }
-      Prop("visible") { (view: ToastBackgroundView, visible: Bool) in
+      Prop("visible") { (view: ToastView, visible: Bool) in
         view.visible = visible
       }
     }
@@ -30,23 +32,31 @@ public final class ToastModule: Module {
   }
 }
 
-/// Liquid Glass on iOS 26 and later; the thick blur material system HUDs used before that. It fades itself in and
-/// out by animating the effect, because a glass effect view under an ancestor with alpha below 1 never renders: JS
-/// must not fade this view or its ancestors.
-final class ToastBackgroundView: ExpoView {
+/// The toast HUD: its backdrop (Liquid Glass on iOS 26 and later, the thick blur material system HUDs used before
+/// that) with the React children on top. It animates itself in and out, the backdrop, the content and the motion
+/// in one animation, so they arrive and leave together. A glass effect view under an ancestor with alpha below 1
+/// never renders, so the backdrop fades by animating its effect, and JS must not fade this view or its ancestors.
+final class ToastView: ExpoView {
+  /// Sent once the toast has animated away.
+  let onHidden = EventDispatcher()
+
+  /// Moves with the animation; holds the backdrop and the content.
+  private let hud = UIView()
   private let effectView = UIVisualEffectView(effect: nil)
+  /// Where the React children mount.
+  private let contentView = UIView()
   /// Set once, from the OS version; tests turn it off to see the blur.
   var usesGlass: Bool
+
+  /// Slides up into place from a little smaller.
+  static let hiddenTransform = CGAffineTransform(translationX: 0, y: 24).scaledBy(x: 0.9, y: 0.9)
 
   var visible = false {
     didSet {
       guard visible != oldValue else { return }
       // Once in a window, so the change animates instead of applying with the first layout.
       DispatchQueue.main.async { [weak self] in
-        guard let self else { return }
-        UIView.animate(withDuration: self.visible ? 0.3 : 0.2) {
-          self.effectView.effect = self.visible ? self.makeEffect() : nil
-        }
+        self?.animate()
       }
     }
   }
@@ -60,11 +70,14 @@ final class ToastBackgroundView: ExpoView {
   required init(appContext: AppContext? = nil) {
     usesGlass = Self.glassAvailable
     super.init(appContext: appContext)
-    isUserInteractionEnabled = false
     effectView.layer.cornerCurve = .continuous
+    effectView.isUserInteractionEnabled = false
     // Glass draws its own rim and shadow outside its shape; only the blur needs clipping.
     effectView.clipsToBounds = !usesGlass
-    addSubview(effectView)
+    hud.addSubview(effectView)
+    hud.addSubview(contentView)
+    addSubview(hud)
+    setHidden()
   }
 
   private static var glassAvailable: Bool {
@@ -81,9 +94,57 @@ final class ToastBackgroundView: ExpoView {
     return UIBlurEffect(style: .systemThickMaterial)
   }
 
+  private func setHidden() {
+    effectView.effect = nil
+    contentView.alpha = 0
+    hud.transform = Self.hiddenTransform
+  }
+
+  private func animate() {
+    if visible {
+      // Nearly critically damped: it settles without overshooting, as the system's HUDs do. The backdrop's
+      // effect comes in slower than a linear fade (glass materializes late), so the content starts a little after
+      // it and arrives with it.
+      UIView.animate(springDuration: 0.35, bounce: 0, options: .beginFromCurrentState) {
+        self.effectView.effect = self.makeEffect()
+        self.hud.transform = .identity
+      }
+      UIView.animate(withDuration: 0.25, delay: 0.08, options: [.beginFromCurrentState, .curveEaseOut]) {
+        self.contentView.alpha = 1
+      }
+    } else {
+      // The backdrop's effect goes out faster than a linear fade (glass dematerializes early), so the content
+      // fades over the first part of the same animation and is gone with it.
+      UIView.animateKeyframes(withDuration: 0.2, delay: 0, options: [.beginFromCurrentState]) {
+        UIView.addKeyframe(withRelativeStartTime: 0, relativeDuration: 1) {
+          self.effectView.effect = nil
+          self.hud.transform = Self.hiddenTransform
+        }
+        UIView.addKeyframe(withRelativeStartTime: 0, relativeDuration: 0.6) {
+          self.contentView.alpha = 0
+        }
+      } completion: { [weak self] _ in
+        guard let self, !self.visible else { return }
+        self.onHidden()
+      }
+    }
+  }
+
+  override func mountChildComponentView(_ childComponentView: UIView, index: Int) {
+    contentView.insertSubview(childComponentView, at: index)
+  }
+
+  override func unmountChildComponentView(_ childComponentView: UIView, index: Int) {
+    childComponentView.removeFromSuperview()
+  }
+
   override func layoutSubviews() {
     super.layoutSubviews()
-    effectView.frame = bounds
+    // Bounds and center, not frame, which is undefined under a transform.
+    hud.bounds = bounds
+    hud.center = CGPoint(x: bounds.midX, y: bounds.midY)
+    effectView.frame = hud.bounds
+    contentView.frame = hud.bounds
   }
 }
 

@@ -6,6 +6,8 @@ import {
 } from 'react-native';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import * as Haptics from 'expo-haptics';
+import DeviceInfo from 'constants/DeviceInfo';
+import { textStyles } from 'components/Text';
 import { Toast, toast } from 'components/Toast';
 import { toast as androidToast } from 'components/Toast.android';
 
@@ -153,6 +155,23 @@ describe('Toast (iOS)', () => {
     expect(screen.getByTestId('icon-xmark.circle.fill')).toBeTruthy();
     await act(() => toast('Note', 'none'));
     expect(screen.queryAllByTestId(/^icon-/)).toHaveLength(0);
+  });
+
+  it('draws a smaller pill around Body text on the Mac', async () => {
+    const style = () => ({
+      text: StyleSheet.flatten(screen.getByText('Saved').props.style),
+      hud: StyleSheet.flatten(screen.getByTestId('toast-hud').props.style),
+    });
+    await render(<Toast />);
+    await act(() => toast('Saved', 'success'));
+    expect(style().text.fontSize).toBe(textStyles.subheadline.fontSize);
+    expect(style().hud.minHeight).toBe(50);
+
+    jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+    await act(() => toast('Saved', 'success'));
+    expect(style().text.fontSize).toBe(textStyles.body.fontSize);
+    expect(style().text.fontWeight).toBe('600');
+    expect(style().hud.minHeight).toBe(40);
   });
 
   it('announces the text to VoiceOver', () => {
