@@ -34,6 +34,7 @@ module.exports = {
     'ios/learnXUITests/**/*',
     'modules/*/ios/Tests/**/*',
     'modules/*/android/src/test/**/*',
+    'android/app/src/test/**/*',
     'android/patch-tests/**/*',
     // Git-ignored files a local build or setup leaves behind, so a local check
     // matches CI's clean checkout.

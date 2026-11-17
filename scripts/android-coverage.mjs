@@ -3,9 +3,12 @@
 // modules') that no report has. Run from the repo root by
 // scripts/test-android.sh.
 //
-//   node scripts/android-coverage.mjs [--min=<percent>] <report.xml>...
+//   node scripts/android-coverage.mjs [--min=<percent>] <report.xml>[#<package>]...
 //
 // With --min, it fails when the total line coverage is below that percent.
+// A report followed by #<package> (io/robertying/learnx/dialog) counts only
+// that package and the ones in it: the app module's report also covers its
+// startup code, which no test runs.
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { coverageTable } from './lib/coverage-table.mjs';
@@ -15,11 +18,13 @@ const minArg = args.find(arg => arg.startsWith('--min='));
 const min = minArg ? Number(minArg.slice('--min='.length)) : 0;
 
 const files = [];
-for (const path of args.filter(arg => arg !== minArg)) {
+for (const arg of args.filter(a => a !== minArg)) {
+  const [path, only] = arg.split('#');
   const xml = readFileSync(path, 'utf8');
   for (const pkg of xml.matchAll(
     /<package name="([^"]*)">([\s\S]*?)<\/package>/g,
   )) {
+    if (only && pkg[1] !== only && !pkg[1].startsWith(`${only}/`)) continue;
     for (const file of pkg[2].matchAll(
       /<sourcefile name="([^"]*)">([\s\S]*?)<\/sourcefile>/g,
     )) {

@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import {
   act,
   fireEvent,
@@ -119,6 +120,36 @@ afterEach(async () => {
 });
 
 describe('Search', () => {
+  it('puts a search box in the header on Windows and Linux, and searches what is typed', async () => {
+    jest.replaceProperty(Platform, 'OS', 'web');
+    const navigation = {
+      setOptions: jest.fn(),
+      push: jest.fn(),
+      addListener: jest.fn(() => jest.fn()),
+      getParent: jest.fn(),
+    };
+    await render(
+      <Search
+        {...screenProps({
+          navigation,
+          route: { key: 'Search', name: 'Search', params: { query: 'mid' } },
+        })}
+      />,
+    );
+    const [options] = navigation.setOptions.mock.calls.findLast(
+      ([o]) => o.headerTitle,
+    )!;
+    expect(options.headerSearchBarOptions).toBeUndefined();
+    const box = options.headerTitle() as React.ReactElement<{
+      defaultValue: string;
+      onChangeText: (text: string) => void;
+    }>;
+    expect(box.props.defaultValue).toBe('mid');
+    await act(() => box.props.onChangeText('midterm'));
+    await act(() => jest.advanceTimersByTime(600));
+    expect(screen.getByText('Midterm room change')).toBeTruthy();
+  });
+
   it('starts with a prompt and the system search bar in the header', async () => {
     const { options } = await setup();
     expect(options().placeholder).toBe('Notices, assignments and files');
