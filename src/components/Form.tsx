@@ -327,6 +327,11 @@ const macFooterModifiers = [font({ textStyle: 'footnote' }), lineSpacing(3)];
 // A footer that keeps its place while hidden (`footerHidden`)
 const hiddenFooterModifiers = [opacity(0), accessibilityHidden(true)];
 
+// A row's title and detail set the body style themselves: on the Mac, text
+// left to the Form's default draws smaller in some rows (a link's or
+// button's label in the list column) than body's 13 pt.
+const bodyFont = font({ textStyle: 'body' });
+const itemTitleFont = font({ textStyle: 'body', weight: 'medium' });
 const secondaryText = foregroundStyle(PlatformColor('secondaryLabel'));
 const subtitleModifiers = [font({ textStyle: 'subheadline' }), secondaryText];
 const struckText = [
@@ -377,16 +382,7 @@ const RowLabel: React.FC<{
           : [primaryText]
         : undefined;
   const text = (
-    <Text
-      modifiers={
-        item
-          ? [
-              font({ textStyle: 'body', weight: 'medium' }),
-              ...(modifiers ?? []),
-            ]
-          : modifiers
-      }
-    >
+    <Text modifiers={[item ? itemTitleFont : bodyFont, ...(modifiers ?? [])]}>
       {title}
     </Text>
   );
@@ -488,9 +484,11 @@ const RowDetail: React.FC<{
             // The text shade of the hue, readable on the row
             foregroundStyle(theme.colors.onStatusContainer[tint]),
           ]
-        : [secondaryText];
+        : detailModifiers;
   return <Text modifiers={modifiers}>{detail}</Text>;
 };
+
+const detailModifiers = [bodyFont, secondaryText];
 
 const doneModifiers = [opacity(0.5)];
 

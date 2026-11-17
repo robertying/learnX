@@ -134,8 +134,11 @@ describe('Form', () => {
     expect(screen.getByTestId('icon-calendar')).toBeTruthy();
     await fireEvent(screen.getByRole('switch'), 'valueChange', true);
     expect(onToggle).toHaveBeenCalledWith(true);
-    // An action in the tint: no label color on its title
-    expect(screen.getByText('Sync').props.modifiers).toBeUndefined();
+    // An action in the tint: no label color on its title, at body's size
+    // as every row's title (a button's label is smaller on its own)
+    expect(screen.getByText('Sync').props.modifiers).toEqual([
+      font({ textStyle: 'body' }),
+    ]);
     // The footer in the footnote style, its lines spaced apart
     expect(screen.getByText('Synced weekly').props.modifiers).toHaveLength(2);
   });
@@ -596,19 +599,25 @@ describe('Form (iOS details)', () => {
         <FormLink item title="Essay" onPress={jest.fn()} />
       </FormSection>,
     );
-    expect(font).toHaveBeenCalledTimes(2);
-    expect(font).toHaveBeenCalledWith({ textStyle: 'body', weight: 'medium' });
-    jest.mocked(font).mockClear();
+    const medium = font({ textStyle: 'body', weight: 'medium' });
+    const regular = font({ textStyle: 'body' });
+    for (const title of ['Linear Algebra', 'Essay']) {
+      expect(screen.getByText(title).props.modifiers[0]).toEqual(medium);
+    }
+    // At the default text size, with each detail at the row's end
+    jest
+      .spyOn(RN, 'useWindowDimensions')
+      .mockReturnValue({ width: 400, height: 800, scale: 2, fontScale: 1 });
     await render(
       <FormSection>
-        <FormText title="Schedule" />
-        <FormLink title="Settings" onPress={jest.fn()} />
+        <FormText title="Schedule" detail="4 classes" />
+        <FormLink title="Settings" detail="New" onPress={jest.fn()} />
       </FormSection>,
     );
-    expect(font).not.toHaveBeenCalledWith({
-      textStyle: 'body',
-      weight: 'medium',
-    });
+    // Titles and details in body, set on each (`bodyFont`)
+    for (const text of ['Schedule', '4 classes', 'Settings', 'New']) {
+      expect(screen.getByText(text).props.modifiers[0]).toEqual(regular);
+    }
   });
 
   it('ends the last section clear of the window edge on Mac, as on iOS', async () => {
