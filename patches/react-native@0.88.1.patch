@@ -1,5 +1,26 @@
+diff --git a/Libraries/Alert/Alert.js b/Libraries/Alert/Alert.js
+index 4130ec5114389a888e00b0a8afaf29077684fe16..967700b84b81f8a384f415b8678352238641dbdc 100644
+--- a/Libraries/Alert/Alert.js
++++ b/Libraries/Alert/Alert.js
+@@ -143,6 +143,16 @@ class Alert {
+       if (buttonPositive) {
+         config.buttonPositive = buttonPositive.text || defaultPositiveText;
+       }
++      // learnX: the app's Material 3 dialog (MaterialDialogModule) shows
++      // these buttons in the error color.
++      // $FlowFixMe[prop-missing]
++      config.destructiveButtons = [
++        ['positive', buttonPositive],
++        ['negative', buttonNegative],
++        ['neutral', buttonNeutral],
++      ]
++        .filter(([, button]) => button?.style === 'destructive')
++        .map(([key]) => key);
+ 
+       /* $FlowFixMe[missing-local-annot] The type annotation(s) required by
+        * Flow's LTI update could not be added via codemod */
 diff --git a/Libraries/Network/FormData.js b/Libraries/Network/FormData.js
-index 3e7b02e..dd8e9c6 100644
+index 3e7b02e669dcd3ad5241022d385db7121e2b0fb6..dd8e9c69e412ecbc91f78442106aedd915c11335 100644
 --- a/Libraries/Network/FormData.js
 +++ b/Libraries/Network/FormData.js
 @@ -91,8 +91,19 @@ class FormData {

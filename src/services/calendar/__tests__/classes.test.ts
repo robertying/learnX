@@ -79,6 +79,10 @@ const setWeek = (week: string, classes: CalendarClass[], graduate = false) =>
   queryClient.setQueryData(calendarWeekQuery(week, graduate).queryKey, classes);
 
 beforeEach(() => {
+  // During week1, unless a test passes its own time.
+  jest
+    .spyOn(Date, 'now')
+    .mockReturnValue(Date.parse('2026-03-09T07:00:00+08:00'));
   clearQueryCache();
   resetSettings();
   resetCalendarSync();
@@ -141,6 +145,28 @@ describe('saveClassesToCalendar', () => {
     expect(calendar.createEvent).not.toHaveBeenCalled();
     // The failed week is written once the timetable has it.
     expect(Object.keys(getCalendarSync().writtenClassWeeks)).toEqual([week2]);
+  });
+
+  it('records only the weeks from this one on', async () => {
+    const calendar = fakeCalendar();
+    mocked.getCalendars.mockResolvedValue([calendar]);
+    useCalendarSyncStore.setState({
+      writtenClassWeeks: { '2026-02-23': 'old', '2026-03-02': 'old' },
+    });
+    const past = [cls('2026-03-03T08:00:00+08:00')];
+    const current = [cls('2026-03-10T08:00:00+08:00')];
+    setWeek('2026-03-02', past);
+    setWeek(week1, current);
+
+    // A range from last week into this one: both are written to the
+    // calendar, only this week is remembered.
+    await saveClassesToCalendar([...past, ...current], {
+      first: '2026-03-02',
+      last: '2026-03-15',
+      graduate: false,
+    });
+    expect(calendar.createEvent).toHaveBeenCalledTimes(2);
+    expect(Object.keys(getCalendarSync().writtenClassWeeks)).toEqual([week1]);
   });
 
   it('needs the calendar permission, and asks for it', async () => {
@@ -246,6 +272,14 @@ describe('updateSyncedClasses', () => {
       new Date('2026-03-16T00:00:00+08:00'),
       new Date('2026-03-23T00:00:00+08:00'),
     );
+  });
+
+  it('forgets the weeks that are over as it writes', async () => {
+    useCalendarSyncStore.setState({
+      writtenClassWeeks: { '2026-02-23': 'old', '2026-03-02': 'old' },
+    });
+    await updateSyncedClasses(now);
+    expect(Object.keys(getCalendarSync().writtenClassWeeks)).toEqual([week1]);
   });
 
   it('writes a week again when its events were deleted in Calendar', async () => {

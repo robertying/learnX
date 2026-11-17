@@ -38,7 +38,7 @@ it('shows an action sheet on iOS, with Cancel last and Delete in red', () => {
   expect(onCancel).toHaveBeenCalled();
 });
 
-it('shows a dialog on Android, the first choice as its main button', () => {
+it('shows a dialog on Android, the first choice as its main button and none in red', () => {
   jest.replaceProperty(Platform, 'OS', 'android');
   const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   show();
@@ -46,7 +46,7 @@ it('shows a dialog on Android, the first choice as its main button', () => {
   expect([title, message]).toEqual(['Course', '2 files']);
   expect(buttons!.map(b => [b.text, b.style])).toEqual([
     [t('cancel'), 'cancel'],
-    ['Delete', 'destructive'],
+    ['Delete', undefined],
     ['Export', undefined],
   ]);
   buttons![2].onPress!();

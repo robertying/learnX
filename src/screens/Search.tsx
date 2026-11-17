@@ -373,30 +373,34 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
     />
   );
 
+  // Behind the results and always mounted, so it never comes and goes with
+  // the query.
+  const status =
+    hasResults && !scopeEmpty ? null : noResults ? (
+      <StatusView
+        icon="noResults"
+        title={t('noResults')}
+        description={t('noResultsDescription')}
+      />
+    ) : (
+      <StatusView icon="search" title={t('searchPrompt')} />
+    );
+
   return (
     <SafeArea>
-      {/* Android: the results end above the keyboard, so all of them
-          scroll into view. */}
+      {/* Android: everything ends above the keyboard, so all the results
+          scroll into view and the prompt centers in what is left. */}
       <KeyboardInsetView style={Styles.flex1}>
-        {/* Behind the results and always mounted: a KeyboardAvoidingView
-            that mounts while the keyboard is up (after the query is cleared)
-            never learns its height, so the prompt would sit behind it. */}
-        <View style={StyleSheet.absoluteFill} pointerEvents="none">
-          <KeyboardAvoidingView
-            behavior={isApple() ? 'padding' : 'height'}
-            style={Styles.flex1}
-          >
-            {hasResults && !scopeEmpty ? null : noResults ? (
-              <StatusView
-                icon="noResults"
-                title={t('noResults')}
-                description={t('noResultsDescription')}
-              />
-            ) : (
-              <StatusView icon="search" title={t('searchPrompt')} />
-            )}
-          </KeyboardAvoidingView>
-        </View>
+        {isApple() || isElectron() ? (
+          // iOS: a KeyboardAvoidingView that mounts while the keyboard is up
+          // (after the query is cleared) never learns its height, so the
+          // prompt would sit behind it. A plain view in the Electron app.
+          <View style={StyleSheet.absoluteFill} pointerEvents="none">
+            <KeyboardAvoidingView behavior="padding" style={Styles.flex1}>
+              {status}
+            </KeyboardAvoidingView>
+          </View>
+        ) : null}
         {/* The tabs (Android: chips and the filter menu) are always up, as
             the system's scope bars are while searching, so they don't come
             and go with the query: the prompt, No Results and the results all
@@ -422,7 +426,13 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
                 onToggle={toggleFilter}
               />
             </View>
-            {hasResults ? renderList(0) : null}
+            {/* Inside the padding, so it ends above the keyboard. */}
+            <View style={Styles.flex1}>
+              <View style={StyleSheet.absoluteFill} pointerEvents="none">
+                {status}
+              </View>
+              {hasResults ? renderList(0) : null}
+            </View>
           </View>
         ) : hasGlassHeader ? (
           // iPhone and iPad from iOS 26: the tabs float in glass under the

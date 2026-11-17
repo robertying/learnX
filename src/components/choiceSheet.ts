@@ -5,7 +5,11 @@ import { isApple } from 'helpers/platform';
 export interface Choice {
   label: string;
   onPress: () => void;
-  /** Deletes or discards something: red on iOS, iPadOS and Mac. */
+  /**
+   * Deletes or discards something: red on iOS, iPadOS and Mac. Android's
+   * dialog shows only a button that does it at once in red, so a choice that
+   * asks first (Delete…) stays plain there.
+   */
   destructive?: boolean;
 }
 
@@ -54,11 +58,7 @@ export const showChoices = ({
     [
       { text: t('cancel'), style: 'cancel', onPress: onCancel },
       ...choices
-        .map(choice => ({
-          text: choice.label,
-          style: choice.destructive ? ('destructive' as const) : undefined,
-          onPress: choice.onPress,
-        }))
+        .map(choice => ({ text: choice.label, onPress: choice.onPress }))
         .reverse(),
     ],
     { cancelable: true, onDismiss: onCancel },

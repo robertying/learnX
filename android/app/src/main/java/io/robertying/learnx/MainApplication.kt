@@ -9,6 +9,7 @@ import com.facebook.react.ReactNativeApplicationEntryPoint.loadReactNative
 import com.facebook.react.ReactHost
 
 import expo.modules.ApplicationLifecycleDispatcher
+import io.robertying.learnx.dialog.MaterialDialogPackage
 import expo.modules.ExpoReactHostFactory
 
 class MainApplication : Application(), ReactApplication {
@@ -17,7 +18,8 @@ class MainApplication : Application(), ReactApplication {
         ExpoReactHostFactory.getDefaultReactHost(
             context = applicationContext,
             jsMainModulePath = "index",
-            packageList = PackageList(this).packages
+            // Alert.alert shows a Material 3 dialog (dialog/MaterialDialogModule).
+            packageList = PackageList(this).packages + MaterialDialogPackage()
         )
     }
 

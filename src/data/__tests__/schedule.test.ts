@@ -47,6 +47,14 @@ const courses = [
 const termStart = '2026-09-14';
 const week3 = '2026-09-28';
 
+/** A class on `date` (YYYY-MM-DD). */
+const day = (date: string): CalendarClass => ({
+  courseName: '物理',
+  location: '四教4102',
+  start: `${date}T13:30:00+08:00`,
+  end: `${date}T15:05:00+08:00`,
+});
+
 const calendar: CalendarClass[] = [
   {
     courseName: '物理',
@@ -119,6 +127,57 @@ describe('calendarWeekQuery', () => {
     expect(classes).toEqual(calendar);
   });
 
+  it('forgets the saved weeks that are over as a week arrives, of either timetable', async () => {
+    // Wednesday of the week of Sep 21, in Beijing.
+    jest
+      .spyOn(Date, 'now')
+      .mockReturnValue(Date.parse('2026-09-23T07:00:00+08:00'));
+    const saved = (monday: string, graduate = false) =>
+      queryClient.getQueryData(calendarWeekQuery(monday, graduate).queryKey);
+    for (const [monday, graduate] of [
+      ['2026-09-07', false],
+      ['2026-09-14', true],
+      ['2026-09-21', false],
+      ['2026-09-21', true],
+    ] as const) {
+      queryClient.setQueryData(calendarWeekQuery(monday, graduate).queryKey, [
+        day(monday),
+      ]);
+    }
+    getCalendar.mockResolvedValue({ events: [], failedRanges: [] } as never);
+
+    await queryClient.fetchQuery(calendarWeekQuery('2026-09-28', false));
+
+    expect(saved('2026-09-07')).toBeUndefined();
+    expect(saved('2026-09-14', true)).toBeUndefined();
+    expect(saved('2026-09-21')).toEqual([day('2026-09-21')]);
+    expect(saved('2026-09-21', true)).toEqual([day('2026-09-21')]);
+    expect(saved('2026-09-28')).toEqual([]);
+  });
+
+  it('keeps the saved weeks when a week fails', async () => {
+    jest
+      .spyOn(Date, 'now')
+      .mockReturnValue(Date.parse('2026-09-23T07:00:00+08:00'));
+    queryClient.setQueryData(calendarWeekQuery('2026-09-14', false).queryKey, [
+      day('2026-09-14'),
+    ]);
+    getCalendar.mockResolvedValue({
+      events: [],
+      failedRanges: [['20260928', '20261004']],
+    } as never);
+
+    await expect(
+      queryClient.fetchQuery({
+        ...calendarWeekQuery('2026-09-28', false),
+        retry: false,
+      }),
+    ).rejects.toThrow('Calendar unavailable for 20260928–20261004');
+    expect(
+      queryClient.getQueryData(calendarWeekQuery('2026-09-14', false).queryKey),
+    ).toEqual([day('2026-09-14')]);
+  });
+
   it('fails a week the registrar could not list, never counting it as empty', async () => {
     getCalendar.mockResolvedValue({
       events: [],
@@ -164,14 +223,12 @@ describe('fetchCalendarRange', () => {
     reason: FailReason.NETWORK_ERROR,
     extra: new TypeError('Network request failed'),
   };
-  const day = (date: string): CalendarClass => ({
-    courseName: '物理',
-    location: '四教4102',
-    start: `${date}T13:30:00+08:00`,
-    end: `${date}T15:05:00+08:00`,
-  });
 
   beforeEach(() => {
+    // The ranges below start in the week under way.
+    jest
+      .spyOn(Date, 'now')
+      .mockReturnValue(Date.parse('2026-09-14T07:00:00+08:00'));
     clearQueryCache();
     getCalendar.mockReset();
   });
