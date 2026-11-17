@@ -74,6 +74,9 @@ const config = (options = {}) => {
     nsis: {
       oneClick: false,
       perMachine: false,
+      // Per user only, and what uninstalling removes (installer.nsh).
+      include: 'installer.nsh',
+      deleteAppDataOnUninstall: true,
       allowToChangeInstallationDirectory: true,
       shortcutName: 'learnX',
       uninstallDisplayName: 'learnX',

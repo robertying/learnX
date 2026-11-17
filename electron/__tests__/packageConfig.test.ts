@@ -1,4 +1,7 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import updateMirror from '../../src/constants/updateMirror.json';
+import electronPackage from '../package.json';
 import { packageConfig } from '../packageConfig.cjs';
 
 it('updates from the TUNA mirror, as the Android app does', () => {
@@ -61,4 +64,32 @@ it("carries the checkout's version and build number", () => {
     buildNumber: '4550',
   });
   expect(config.buildVersion).toBe('19.0.1.4550');
+});
+
+it('installs for the current user, and uninstalling removes learnX’s data', () => {
+  const { nsis } = packageConfig();
+  expect(nsis).toMatchObject({
+    oneClick: false,
+    perMachine: false,
+    include: 'installer.nsh',
+    deleteAppDataOnUninstall: true,
+  });
+  const script = fs.readFileSync(
+    path.join(__dirname, '..', 'installer.nsh'),
+    'utf8',
+  );
+  expect(script).toContain('StrCpy $isForceCurrentInstall "1"');
+  // Start at login's Run entry is named after the app id (main.cjs), and
+  // electron-updater's cache after the package's name.
+  const appId = packageConfig().appId!;
+  expect(script).toContain(
+    `DeleteRegValue HKCU "Software\\Microsoft\\Windows\\CurrentVersion\\Run" "${appId}"`,
+  );
+  expect(
+    fs.readFileSync(path.join(__dirname, '..', 'main.cjs'), 'utf8'),
+  ).toContain(`const APP_ID = '${appId}';`);
+  expect(script).toContain('RMDir /r "$LOCALAPPDATA\\learnX"');
+  expect(script).toContain(
+    `RMDir /r "$LOCALAPPDATA\\${electronPackage.name}-updater"`,
+  );
 });
