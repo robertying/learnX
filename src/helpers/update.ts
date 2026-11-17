@@ -1,8 +1,12 @@
 import DeviceInfo from 'constants/DeviceInfo';
+import updateMirror from 'constants/updateMirror.json';
 import env from 'helpers/env';
 
-const tunaMirrorUrl =
-  'https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease';
+/**
+ * The TUNA mirror's copy of the latest GitHub release, which the Electron
+ * app updates from too (electron/packageConfig.cjs reads the same file).
+ */
+const tunaMirrorUrl = updateMirror.latestRelease;
 
 /**
  * Where E2E builds look for updates instead: `scripts/updater-e2e-server.mjs`,

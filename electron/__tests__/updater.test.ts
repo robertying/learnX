@@ -2,6 +2,7 @@ import { EventEmitter } from 'node:events';
 import {
   CHECK_INTERVAL,
   FIRST_CHECK_DELAY,
+  RETRY_DELAY,
   createUpdater,
   updatesSupported,
 } from '../updater.cjs';
@@ -112,6 +113,21 @@ it('logs a failed check and tries again later', async () => {
   expect(log).toHaveBeenCalledTimes(3);
   await updater.check();
   expect(autoUpdater.checkForUpdates).toHaveBeenCalledTimes(2);
+});
+
+it('tries again half an hour after the mirror had only part of a release', async () => {
+  const autoUpdater = fakeAutoUpdater();
+  const onReady = jest.fn();
+  createUpdater({ autoUpdater, onReady }).start();
+  await jest.advanceTimersByTimeAsync(FIRST_CHECK_DELAY);
+  expect(autoUpdater.checkForUpdates).toHaveBeenCalledTimes(1);
+  // latest.yml is there, the installer not yet: the download fails.
+  autoUpdater.emit('error', new Error('Cannot download: status 404'));
+  autoUpdater.emit('error', new Error('Cannot download: status 404'));
+  await jest.advanceTimersByTimeAsync(RETRY_DELAY);
+  expect(autoUpdater.checkForUpdates).toHaveBeenCalledTimes(2);
+  expect(onReady).not.toHaveBeenCalled();
+  expect(RETRY_DELAY).toBeLessThan(CHECK_INTERVAL);
 });
 
 it('restarts into the installer only when an update is waiting', () => {

@@ -453,20 +453,20 @@ const createWindow = (/** @type {Electron.Session} */ ses) => {
 // packaged build carries its build number in its package.json (written by
 // packageConfig.cjs) and where it looks for updates in app-update.yml; a dev
 // run reads the checkout's, and checks for updates only on a local test
-// server named by `LEARNX_UPDATE_HOST` (updateServer.mjs).
+// server at `LEARNX_UPDATE_URL` (updateServer.mjs).
 const packaged = /** @type {{ buildNumber?: string }} */ (
   require('./package.json')
 );
 const buildInfo = dev
   ? readBuildInfo(path.join(__dirname, '..'))
   : { version: app.getVersion(), build: packaged.buildNumber ?? '' };
-const devUpdateHost = dev ? process.env.LEARNX_UPDATE_HOST : undefined;
+const devUpdateUrl = dev ? process.env.LEARNX_UPDATE_URL : undefined;
 const updater =
   // E2E runs (electron/e2e) turn checks off with LEARNX_NO_UPDATES, and a
   // second launch only hands its arguments over.
   !process.env.LEARNX_NO_UPDATES &&
   primaryInstance &&
-  (devUpdateHost ||
+  (devUpdateUrl ||
     updatesSupported({
       dev,
       platform: process.platform,
@@ -477,19 +477,16 @@ const updater =
     }))
     ? (() => {
         const { autoUpdater } = require('electron-updater');
-        if (devUpdateHost && devDataDir) {
+        if (devUpdateUrl && devDataDir) {
           // What electron-builder writes into a packaged build's
-          // app-update.yml: the GitHub releases, here on the test server,
+          // app-update.yml: where updates come from, here the test server,
           // and the cache folder's name.
           const config = path.join(devDataDir, 'app-update.yml');
           fs.writeFileSync(
             config,
             [
-              'provider: github',
-              'owner: robertying',
-              'repo: learnX',
-              `host: ${devUpdateHost}`,
-              'protocol: http',
+              'provider: generic',
+              `url: ${devUpdateUrl}`,
               'updaterCacheDirName: learnX',
               '',
             ].join('\n'),

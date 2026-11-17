@@ -11,7 +11,8 @@
 //                                            arm64), no installers
 //
 // A test build for trying updates against electron/updateServer.mjs:
-//   pnpm electron:package --win --version 19.0.1 --update-host localhost:8299
+//   pnpm electron:package --win --version 19.0.1 \
+//     --update-url http://localhost:8299/
 //
 // The installers need NSIS's and the AppImage tools, which electron-builder
 // downloads; on an Apple silicon Mac those run only with Rosetta, so build
@@ -33,7 +34,7 @@ const { values } = parseArgs({
     'skip-export': { type: 'boolean', default: false },
     version: { type: 'string' },
     build: { type: 'string' },
-    'update-host': { type: 'string' },
+    'update-url': { type: 'string' },
     dir: { type: 'boolean', default: false },
   },
 });
@@ -73,7 +74,7 @@ await build({
   config: packageConfig({
     version: values.version,
     build: values.build,
-    updateHost: values['update-host'],
+    updateUrl: values['update-url'],
   }),
   publish: 'never',
 });

@@ -1,57 +1,25 @@
 #!/usr/bin/env node
-// A local stand-in for learnX's GitHub releases, to try the Electron app's
-// updates (updater.cjs) without publishing anything. It serves the paths
-// electron-updater's GitHub provider reads, for github.com/robertying/learnX
-// on a test host:
+// A local stand-in for the TUNA mirror's LatestRelease/ folder, to try the
+// Electron app's updates (updater.cjs) without publishing anything, as
+// scripts/updater-e2e-server.mjs does for the Android APKs. It serves the
+// files in <dir> as they are, byte ranges too (differential downloads read
+// the .blockmap files):
 //
-//   GET /robertying/learnX/releases.atom
-//       the release feed, one entry per folder in <dir> (named as its tag,
-//       v19.0.1), newest first
-//   GET /api/v3/repos/robertying/learnX/releases/latest
-//   GET /robertying/learnX/releases/latest
-//       the latest release's tag, as JSON (the newest folder): the first is
-//       what the provider asks a host other than github.com
-//   GET /robertying/learnX/releases/download/<tag>/<file>
-//       a file in that folder (byte ranges too, for differential downloads)
+//   GET /<file>    latest.yml, latest-linux.yml, an installer, a .blockmap
 //
 //   node electron/updateServer.mjs <dir> [--port 8299]
 //
-// Point an app at it with `pnpm electron:package --update-host
-// localhost:8299` (a test build), or a dev run with LEARNX_UPDATE_HOST set to
-// the same. "Publish" a release by copying a build's installer, its
-// latest*.yml and .blockmap into a new folder named v<version>.
-import { createReadStream, existsSync, readdirSync, statSync } from 'node:fs';
+// Point an app at it with `pnpm electron:package --update-url
+// http://localhost:8299/` (a test build), or a dev run with LEARNX_UPDATE_URL
+// set to the same. "Release" a version by copying its build's installer,
+// latest*.yml and .blockmap into <dir>, as the mirror copies them from the
+// GitHub release.
+import { createReadStream, existsSync, statSync } from 'node:fs';
 import { createServer } from 'node:http';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 
 export const DEFAULT_PORT = 8299;
-const REPO = '/robertying/learnX/';
-
-/** The release folders in `dir`, newest first (by modification time). */
-const releases = (/** @type {string} */ dir) =>
-  readdirSync(dir, { withFileTypes: true })
-    .filter(entry => entry.isDirectory() && !entry.name.startsWith('.'))
-    .map(entry => ({
-      tag: entry.name,
-      time: statSync(path.join(dir, entry.name)).mtime,
-    }))
-    .sort((a, b) => b.time.getTime() - a.time.getTime());
-
-/** The release feed GitHub serves (the parts electron-updater reads). */
-export const releaseFeed = (/** @type {string} */ dir) =>
-  [
-    '<?xml version="1.0" encoding="UTF-8"?>',
-    '<feed xmlns="http://www.w3.org/2005/Atom">',
-    ...releases(dir).map(
-      ({ tag, time }) =>
-        `<entry><id>tag:github.com,2008:Repository/release/${tag}</id>` +
-        `<updated>${time.toISOString()}</updated>` +
-        `<link rel="alternate" type="text/html" href="https://github.com${REPO}releases/tag/${tag}"/>` +
-        `<title>${tag}</title></entry>`,
-    ),
-    '</feed>',
-  ].join('\n');
 
 /**
  * A byte range of a file of `size` bytes from a Range header, or null for
@@ -77,7 +45,7 @@ export const byteRange = (
     : { start, end: Math.min(end, size - 1) };
 };
 
-/** A server for the releases in `dir`. */
+/** A server for the files in `dir`. */
 export const createUpdateServer = (
   /** @type {string} */ dir,
   /** @type {(line: string) => void} */ log = () => {},
@@ -87,36 +55,10 @@ export const createUpdateServer = (
     log(
       `${req.method} ${url.pathname}${req.headers.range ? ` ${req.headers.range}` : ''}`,
     );
-    if (
-      url.pathname === `${REPO}releases/latest` ||
-      url.pathname === `/api/v3/repos${REPO}releases/latest`
-    ) {
-      const latest = releases(dir)[0];
-      if (!latest) {
-        res.writeHead(404).end();
-        return;
-      }
-      res.writeHead(200, { 'content-type': 'application/json' });
-      res.end(JSON.stringify({ tag_name: latest.tag }));
-      return;
-    }
-    if (url.pathname === `${REPO}releases.atom`) {
-      res.writeHead(200, { 'content-type': 'application/atom+xml' });
-      res.end(releaseFeed(dir));
-      return;
-    }
-    const download = url.pathname.startsWith(`${REPO}releases/download/`)
-      ? url.pathname
-          .slice(`${REPO}releases/download/`.length)
-          .split('/')
-          .map(decodeURIComponent)
-      : [];
+    const name = decodeURIComponent(url.pathname.slice(1));
     const file =
-      download.length === 2 &&
-      download.every(
-        part => part && part !== '.' && part !== '..' && !/[\\/]/.test(part),
-      )
-        ? path.join(dir, ...download)
+      name && name !== '.' && name !== '..' && !/[\\/]/.test(name)
+        ? path.join(dir, name)
         : null;
     if (!file || !existsSync(file) || !statSync(file).isFile()) {
       res.writeHead(404).end();
@@ -158,8 +100,6 @@ if (process.argv[1]?.endsWith(`${path.sep}updateServer.mjs`)) {
     port,
     '127.0.0.1',
     () =>
-      console.log(
-        `Serving ${path.resolve(dir)} as http://localhost:${port}${REPO.slice(0, -1)}`,
-      ),
+      console.log(`Serving ${path.resolve(dir)} as http://localhost:${port}/`),
   );
 }

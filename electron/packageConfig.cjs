@@ -4,16 +4,17 @@
 // itself. Builds are unsigned, and never for macOS, which has the Mac
 // Catalyst app. Installers go to build/electron/dist.
 const path = require('node:path');
+const updateMirror = require('../src/constants/updateMirror.json');
 const { readBuildInfo } = require('./buildInfo.cjs');
 
 const { version, build } = readBuildInfo(path.join(__dirname, '..'));
 
 /**
  * The config for a version and build number (the checkout's unless a test
- * build sets them, package.mjs), and `updateHost`, a test server standing in
- * for github.com (updateServer.mjs, over http).
+ * build sets them, package.mjs), and `updateUrl`, a test server standing in
+ * for the mirror (updateServer.mjs).
  *
- * @param {{ version?: string; build?: string; updateHost?: string }} [options]
+ * @param {{ version?: string; build?: string; updateUrl?: string }} [options]
  * @returns {import('electron-builder').Configuration}
  */
 const config = (options = {}) => {
@@ -51,17 +52,15 @@ const config = (options = {}) => {
       'icons/icon.ico',
       { from: '../build/electron/web', to: 'web' },
     ],
-    // Where the packaged app finds updates (app-update.yml): the repo's
-    // latest GitHub release, which has the mobile and desktop builds of a
-    // version (`v<version>`). Also makes electron-builder write the update
-    // files (latest.yml, latest-linux.yml); nothing is published from here.
+    // Where the packaged app finds updates (app-update.yml): the TUNA
+    // mirror's copy of the latest GitHub release (`v<version>`, with the
+    // mobile and desktop builds of a version), as the Android app's updater
+    // reads it (src/helpers/update.ts). Also makes electron-builder write the
+    // update files (latest.yml, latest-linux.yml, latest-linux-arm64.yml);
+    // nothing is published from here.
     publish: {
-      provider: 'github',
-      owner: 'robertying',
-      repo: 'learnX',
-      ...(options.updateHost
-        ? { host: options.updateHost, protocol: 'http' }
-        : {}),
+      provider: 'generic',
+      url: options.updateUrl ?? `${updateMirror.latestRelease}/`,
     },
     win: {
       // One installer for both: Windows installs the one for its CPU.
