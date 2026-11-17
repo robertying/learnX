@@ -575,6 +575,15 @@ ipcMain.on('updates:install', event => {
   fromApp(event);
   updater?.install();
 });
+// No application menu in a packaged build: Electron's default one (shown with
+// Alt) is English-only and has Developer Tools, Force Reload and Electron's
+// help links, and its shortcuts work even hidden. Windows and Linux keep the
+// text fields' editing shortcuts without one, and the page has its own
+// (modules/menus). Dev runs keep it, for Developer Tools.
+if (!dev) {
+  Menu.setApplicationMenu(null);
+}
+
 void app.whenReady().then(() => {
   app.setAboutPanelOptions(aboutPanelOptions(buildInfo, iconFile));
   updater?.start();
