@@ -1,6 +1,6 @@
 {
   "runtimeVersion": "19.0.0",
-  "ios": "01a2fc2ec438dc852fc3fc74d98532590d52672c",
+  "ios": "0790a5820ec933a8e9df0312423e283eb63cdb63",
   "android": "5159304c7e3a2e05a5608bda0fddc08e42c9c7ec",
   "sources": {
     "ios": {
@@ -13,7 +13,7 @@
       "dir modules/shortcuts/ios": "77f8113c1737ea6fef56118e978807bcf4eac572",
       "dir modules/sidebar/ios": "fccb11ed85e5c41d7b26c2a0c6986681585888b9",
       "dir modules/spotlight/ios": "0c556f33bb595592925a631602f7e4289090cff0",
-      "dir modules/toast/ios": "1d008f9278460caf6f84650d4813cb11420c08a5",
+      "dir modules/toast/ios": "5c9da7d8d78c8aa1dd8518438cb057dd90ad6373",
       "dir patches": "a6b64affdfcb12ff79fb88fcb06e2bf814e22003",
       "contents expoAutolinkingConfig:ios": "cebe854f21b4c34aae9517713046f684e27988d8",
       "contents rncoreAutolinkingConfig:ios": "53f91f1da5ba2e0750d3f51c4a4c4dbcc7c0c09b",

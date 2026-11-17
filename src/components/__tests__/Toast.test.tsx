@@ -10,6 +10,7 @@ import DeviceInfo from 'constants/DeviceInfo';
 import { textStyles } from 'components/Text';
 import { Toast, toast } from 'components/Toast';
 import { toast as androidToast } from 'components/Toast.android';
+import { tabBarFrame } from 'modules/toast';
 
 // How long a toast takes to animate away once its time is up.
 const exitDuration = 300;
@@ -113,13 +114,13 @@ describe('Toast (iOS)', () => {
     const padding = () =>
       StyleSheet.flatten(screen.getByRole('alert').parent!.props.style)
         .paddingBottom;
-    expect(padding()).toBe(72);
+    expect(padding()).toBe(16);
     await act(() =>
       listeners.keyboardWillShow({ endCoordinates: { height: 300 } }),
     );
     expect(padding()).toBe(316);
     await act(() => listeners.keyboardWillHide({}));
-    expect(padding()).toBe(72);
+    expect(padding()).toBe(16);
     await screen.unmount();
     expect(remove).toHaveBeenCalledTimes(2);
   });
@@ -140,7 +141,95 @@ describe('Toast (iOS)', () => {
     metrics.mockReturnValue(undefined);
     await screen.unmount();
     await render(<Toast />);
-    expect(padding()).toBe(72);
+    expect(padding()).toBe(16);
+  });
+
+  describe('placement', () => {
+    afterEach(() => {
+      (tabBarFrame as jest.Mock).mockImplementation(() =>
+        Promise.resolve(null),
+      );
+    });
+
+    const window = { windowWidth: 402, windowHeight: 874 };
+    const margins = () => {
+      const style = StyleSheet.flatten(
+        screen.getByRole('alert').parent!.props.style,
+      );
+      return {
+        bottom: style.paddingBottom,
+        left: style.paddingLeft,
+        right: style.paddingRight,
+      };
+    };
+    const show = async (bar: Parameters<typeof frame>[0]) => {
+      frame(bar);
+      await render(<Toast />);
+      await act(() => toast('Saved', 'success'));
+    };
+    const frame = (
+      bar: { x: number; y: number; width: number; height: number } | null,
+    ) =>
+      (tabBarFrame as jest.Mock).mockResolvedValue(
+        bar && { ...bar, ...window },
+      );
+
+    it('sits a gap above a tab bar along the bottom', async () => {
+      await show({ x: 0, y: 791, width: 402, height: 83 });
+      expect(margins()).toEqual({ bottom: 83 + 16, left: 16, right: 16 });
+    });
+
+    it('keeps clear of a tab bar along a side', async () => {
+      await show({ x: 330, y: 0, width: 72, height: 874 });
+      expect(margins()).toEqual({ bottom: 16, left: 16, right: 72 + 16 });
+
+      await act(() => toast('', 'none'));
+      await show({ x: 0, y: 0, width: 72, height: 874 });
+      expect(margins()).toEqual({ bottom: 16, left: 72 + 16, right: 16 });
+    });
+
+    it('sits at the bottom with no tab bar, or one at the top', async () => {
+      await show({ x: 0, y: 24, width: 402, height: 50 });
+      expect(margins().bottom).toBe(16);
+
+      await act(() => toast('', 'none'));
+      await show(null);
+      expect(margins().bottom).toBe(16);
+    });
+
+    it('floats as far from the edges as the tab bar does with Liquid Glass', async () => {
+      jest.spyOn(DeviceInfo, 'hasLiquidGlass').mockReturnValue(true);
+      await show(null);
+      expect(margins()).toEqual({ bottom: 21, left: 21, right: 21 });
+    });
+
+    it('waits for the tab bar before it shows, and takes none if asking fails', async () => {
+      let fail: (error: Error) => void = () => {};
+      (tabBarFrame as jest.Mock).mockReturnValue(
+        new Promise((_, reject) => {
+          fail = reject;
+        }),
+      );
+      await render(<Toast />);
+      await act(() => toast('Saved', 'success'));
+      expect(screen.queryByText('Saved')).toBeNull();
+      await act(() => fail(new Error('No window')));
+      expect(margins().bottom).toBe(16);
+    });
+
+    it('ignores an answer that comes after the toast is gone', async () => {
+      let answer: (value: null) => void = () => {};
+      (tabBarFrame as jest.Mock).mockReturnValue(
+        new Promise(resolve => {
+          answer = resolve;
+        }),
+      );
+      await render(<Toast />);
+      await act(() => toast('Saved', 'success'));
+      await act(() => toast('', 'none'));
+      await act(() => answer(null));
+      expect(screen.queryByText('Saved')).toBeNull();
+    });
   });
 
   it('shows the symbol for the type and none for plain toasts', async () => {

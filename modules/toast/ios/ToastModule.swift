@@ -7,6 +7,13 @@ public final class ToastModule: Module {
   public func definition() -> ModuleDefinition {
     Name("LearnXToast")
 
+    // Where the tab bar is, so the toast keeps clear of it wherever UIKit put it.
+    AsyncFunction("tabBarFrame") { () -> [String: Double]? in
+      MainActor.assumeIsolated {
+        TabBarLocator.frame()
+      }
+    }.runOnQueue(.main)
+
     View(ToastView.self) {
       Events("onHidden")
 
@@ -175,5 +182,66 @@ final class ToastSymbolView: ExpoView {
   override func layoutSubviews() {
     super.layoutSubviews()
     imageView.frame = bounds
+  }
+}
+
+/// Finds the tab bar the person sees: along the bottom on iPhone, but UIKit can put it elsewhere (at a side on a
+/// small display, at the top on iPad, where it floats and the bar itself is hidden), and nothing shows it on the
+/// login, under a sheet or on the Mac.
+enum TabBarLocator {
+  /// The visible tab bar's frame in its window, with the window's size, or nil when none shows.
+  @MainActor static func frame() -> [String: Double]? {
+    let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+    for window in scenes.flatMap(\.windows) {
+      if let frame = frame(in: window) {
+        return frame
+      }
+    }
+    return nil
+  }
+
+  @MainActor static func frame(in window: UIWindow) -> [String: Double]? {
+    guard let root = window.rootViewController,
+      // A sheet or a full screen modal covers the tab bar.
+      root.presentedViewController == nil,
+      let bar = tabBar(under: root),
+      isShowing(bar, in: window)
+    else { return nil }
+    let frame = bar.convert(bar.bounds, to: window)
+    guard frame.intersects(window.bounds) else { return nil }
+    return [
+      "x": frame.minX,
+      "y": frame.minY,
+      "width": frame.width,
+      "height": frame.height,
+      "windowWidth": window.bounds.width,
+      "windowHeight": window.bounds.height,
+    ]
+  }
+
+  /// The tab bar of the first tab bar controller among `controller` and its children.
+  @MainActor static func tabBar(under controller: UIViewController) -> UITabBar? {
+    if let tabs = controller as? UITabBarController {
+      return tabs.tabBar
+    }
+    for child in controller.children {
+      if let bar = tabBar(under: child) {
+        return bar
+      }
+    }
+    return nil
+  }
+
+  /// In the window, with neither it nor any view above it hidden or transparent.
+  @MainActor static func isShowing(_ view: UIView, in window: UIWindow) -> Bool {
+    guard view.window === window, !view.bounds.isEmpty else { return false }
+    var current: UIView? = view
+    while let shown = current {
+      if shown.isHidden || shown.alpha < 0.01 {
+        return false
+      }
+      current = shown.superview
+    }
+    return true
   }
 }
