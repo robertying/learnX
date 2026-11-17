@@ -181,7 +181,7 @@ export const addNotificationResponseReceivedListener = (
 };
 
 /**
- * A notification a dev run only logged (electron/desktop.cjs), shown as a
+ * A notification a dev run only logged (electron/system.cjs), shown as a
  * toast so it can be seen without posting one to the system.
  */
 const showDevNotification = ({

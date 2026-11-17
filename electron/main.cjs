@@ -3,7 +3,7 @@
 // (preload.cjs): requests to Tsinghua's servers, their cookies, key-value
 // storage, the saved login, the app's own files and downloads, native menus
 // and the web views the page shows (webviews.cjs), and what's around the
-// window (desktop.cjs): the tray, notifications, the background sync's timer,
+// window (system.cjs): the tray, notifications, the background sync's timer,
 // opening, saving and picking files.
 //
 // It registers nothing with the system: no protocol handler, and a login item
@@ -25,7 +25,7 @@ const {
 } = require('electron');
 const { ORIGIN, createServeApp, fromApp } = require('./appOrigin.cjs');
 const { aboutPanelOptions, readBuildInfo } = require('./buildInfo.cjs');
-const { claimSingleInstance, setUpDesktop } = require('./desktop.cjs');
+const { claimSingleInstance, setUpSystem } = require('./system.cjs');
 const { createFileStore, loggedWrites } = require('./fileStore.cjs');
 const { createFiles, runFileOperation } = require('./files.cjs');
 const { popupMenu } = require('./menus.cjs');
@@ -101,8 +101,8 @@ if (devDataDir) {
  * lock is in the data folder, so after a dev run has moved that.
  */
 const primaryInstance = claimSingleInstance(app);
-/** @type {ReturnType<typeof setUpDesktop> | undefined} */
-let desktop;
+/** @type {ReturnType<typeof setUpSystem> | undefined} */
+let system;
 /**
  * Launch options for a test run (src/services/launchOptions), as JSON: the
  * app's root props, as Android's launch extras are. Development only.
@@ -240,7 +240,7 @@ const handleIpc = ses => {
     cache: path.join(app.getPath('userData'), 'Files', 'Caches'),
     document: path.join(app.getPath('userData'), 'Files', 'Documents'),
   });
-  desktop = setUpDesktop({
+  system = setUpSystem({
     electron: require('electron'),
     fromApp,
     files,
@@ -405,7 +405,7 @@ const createWindow = (/** @type {Electron.Session} */ ses) => {
     }
   });
   // Start at login on Windows starts learnX in the tray.
-  win.once('ready-to-show', () => desktop?.startsHidden() || win.show());
+  win.once('ready-to-show', () => system?.startsHidden() || win.show());
 
   // Links open in the browser; the window itself never leaves the app.
   win.webContents.setWindowOpenHandler(({ url }) => {
@@ -592,7 +592,7 @@ void app.whenReady().then(() => {
     createServeApp({
       webDir,
       fetchFile: url => net.fetch(url),
-      servePreview: () => desktop?.servePreview,
+      servePreview: () => system?.servePreview,
     }),
   );
   // No camera, microphone, location or notifications asked of the system;
@@ -618,6 +618,6 @@ void app.whenReady().then(() => {
   createWindow(appSession);
 });
 
-// Closing the window hides it (desktop.cjs); with the window gone, so is
+// Closing the window hides it (system.cjs); with the window gone, so is
 // learnX.
 app.on('window-all-closed', () => app.quit());

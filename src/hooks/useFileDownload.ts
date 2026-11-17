@@ -9,12 +9,12 @@ import { t } from 'helpers/i18n';
 import { isAndroid, isElectron } from 'helpers/platform';
 
 /**
- * The Electron app's file actions (services/files/desktop), required only
+ * The Electron app's file actions (services/files/electron), required only
  * there, so the phones' bundles leave them out; null elsewhere.
  */
-const desktop = () =>
+const electron = () =>
   isElectron()
-    ? (require('services/files/desktop') as typeof import('services/files/desktop'))
+    ? (require('services/files/electron') as typeof import('services/files/electron'))
     : null;
 
 /**
@@ -90,9 +90,9 @@ const useFileDownload = (file: DownloadableFile) => {
 
   const save = async () => {
     try {
-      const electron = desktop();
-      const saved = electron
-        ? await electron.saveFileAs(downloadable, path)
+      const actions = electron();
+      const saved = actions
+        ? await actions.saveFileAs(downloadable, path)
         : await saveFileOnMac(downloadable, path);
       if (saved) {
         toast(
@@ -111,9 +111,9 @@ const useFileDownload = (file: DownloadableFile) => {
    */
   const open = async () => {
     try {
-      const electron = desktop();
-      if (electron) {
-        await electron.openInDefaultApp(path);
+      const actions = electron();
+      if (actions) {
+        await actions.openInDefaultApp(path);
       } else {
         await openFile(path, downloadable.fileType);
       }
@@ -124,14 +124,14 @@ const useFileDownload = (file: DownloadableFile) => {
 
   /** Shows the downloaded file in the file manager (Electron). */
   const showInFolder = () => {
-    desktop()
+    electron()
       ?.showInFolder(path)
       .catch(() => toast(t('openFileFailed'), 'error'));
   };
 
   /** Copies the file's link on Web Learning (Electron). */
   const copyLink = () => {
-    desktop()
+    electron()
       ?.copyText(downloadable.downloadUrl)
       .then(
         () => toast(t('linkCopied'), 'success'),

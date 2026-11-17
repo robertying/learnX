@@ -2,7 +2,7 @@
 import mime from 'mime';
 import DeviceInfo from 'constants/DeviceInfo';
 import { isApple, isElectron } from 'helpers/platform';
-import desktopFileTypes from 'constants/desktopFileTypes.json';
+import electronFileTypes from 'constants/electronFileTypes.json';
 
 /** Word and Excel pages are drawn on white, also in dark mode. */
 export const needWhiteBackground = (ext?: string | null) =>
@@ -46,7 +46,7 @@ export const canRenderInIosWebview = (ext?: string | null) => {
  * they can carry scripts.
  */
 export const canRenderInElectron = (ext?: string | null) =>
-  !!ext && Object.hasOwn(desktopFileTypes.preview, ext.toLowerCase());
+  !!ext && Object.hasOwn(electronFileTypes.preview, ext.toLowerCase());
 
 /**
  * Whether File detail shows the downloaded file itself rather than its

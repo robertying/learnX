@@ -143,14 +143,14 @@ describe('platforms', () => {
       'whatsNew19WidgetsTitle',
       'whatsNew19NotificationsTitle',
       'whatsNew19SpotlightTitle',
-      'whatsNew19DesktopTitle',
+      'whatsNew19ElectronTitle',
     ]);
     // The Mac has no widgets.
     expect(titles('mac')).toEqual([
       'whatsNew19TodayTitle',
       'whatsNew19NotificationsTitle',
       'whatsNew19SpotlightTitle',
-      'whatsNew19DesktopTitle',
+      'whatsNew19ElectronTitle',
     ]);
     // Android has no Spotlight or Siri.
     expect(titles('android')).toEqual([
@@ -158,7 +158,7 @@ describe('platforms', () => {
       'whatsNew19WidgetsTitle',
       'whatsNew19NotificationsTitle',
       'whatsNew19DesignTitle',
-      'whatsNew19DesktopTitle',
+      'whatsNew19ElectronTitle',
     ]);
     // The Electron app has no widgets, Spotlight or Android design, and
     // doesn't announce itself.

@@ -71,7 +71,7 @@ export const calendarExportErrorToast = (err: unknown): ToastMessage => {
     case 'noEvents':
       return {
         text: isElectron()
-          ? t('calendarExportNoEventDesktop')
+          ? t('calendarExportNoEventElectron')
           : t('calendarExportNoEvent'),
         type: 'warning',
       };
@@ -215,8 +215,8 @@ export const exportCalendars = async (): Promise<ToastMessage | undefined> => {
   const build = isElectron()
     ? // Required only here, so the phones' bundles leave it out.
       (
-        require('services/calendar/desktopExport') as typeof import('services/calendar/desktopExport')
-      ).buildDesktopICS
+        require('services/calendar/electronExport') as typeof import('services/calendar/electronExport')
+      ).buildElectronICS
     : async () => ({
         ics: await exportSyncedCalendarsToICS(),
         withoutClasses: false,

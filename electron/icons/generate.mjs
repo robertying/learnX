@@ -2,7 +2,7 @@
 // Makes the Electron app's icons from the app's Icon Composer source
 // (ios/learnX/AppIcon.icon): icon.ico for Windows and icon.png (512) for
 // Linux, from which electron-builder makes the hicolor sizes; the window and
-// the tray use them too (main.cjs, desktop.cjs). The outputs are committed:
+// the tray use them too (main.cjs, system.cjs). The outputs are committed:
 // only a Mac with Xcode can make them.
 //
 //   node electron/icons/generate.mjs

@@ -128,7 +128,7 @@ export interface BridgePickedFile {
 }
 
 /** The labels of the tray's menu and the Jump List, in the app's language. */
-export interface DesktopLabels {
+export interface TrayLabels {
   open: string;
   refresh: string;
   quit: string;
@@ -137,7 +137,7 @@ export interface DesktopLabels {
 }
 
 /** A screen a Jump List task opens. */
-export type DesktopOpenTarget = 'today' | 'schedule';
+export type LaunchTarget = 'today' | 'schedule';
 
 /**
  * What the Electron app's main process offers the page, as `window.learnx`
@@ -268,11 +268,11 @@ export interface Bridge {
     /** Resolves to whether it was changed. */
     set: (enabled: boolean) => Promise<boolean>;
   };
-  desktop: {
-    setLabels: (labels: DesktopLabels) => Promise<void>;
+  system: {
+    setLabels: (labels: TrayLabels) => Promise<void>;
     /** The screen the launch asked for, once. */
-    takeOpen: () => Promise<DesktopOpenTarget | null>;
-    onOpen: (listener: (target: DesktopOpenTarget) => void) => void;
+    takeOpen: () => Promise<LaunchTarget | null>;
+    onOpen: (listener: (target: LaunchTarget) => void) => void;
   };
   /** A test run's launch options in development; empty elsewhere. */
   launchOptions: () => Record<string, unknown>;

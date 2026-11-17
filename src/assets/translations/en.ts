@@ -186,16 +186,16 @@ export default {
     'learnX starts in the system tray when you sign in, so it keeps syncing and sends reminders. Closing its window keeps it there; Quit in the tray menu ends it.',
   trayOpen: 'Open learnX',
   trayQuit: 'Quit learnX',
-  desktopNotificationsCaption:
+  electronNotificationsCaption:
     "learnX sends notifications and reminders only while it's running.",
   exportCalendar: 'Export Calendar (.ics)',
   exportCalendarDescription:
     'Saves your classes for the rest of the semester and your open assignments as an .ics file, which calendar apps such as Outlook can import.',
   dropToAttach: 'Drop a File to Attach',
   dropFailed: "Couldn't attach the file",
-  calendarExportNoEventDesktop:
+  calendarExportNoEventElectron:
     'Nothing to export: no classes or open assignments are left this semester.',
-  notifyDeadlineRemindersCaptionDesktop:
+  notifyDeadlineRemindersCaptionElectron:
     "Reminds you of unsubmitted assignments before they're due, and when they can still be submitted late.",
   missingUsername: 'Enter your username or student ID',
   missingPassword: 'Enter your password',
@@ -588,7 +588,7 @@ export default {
   whatsNew19DesignTitle: 'New Design',
   whatsNew19DesignBody:
     'A cleaner look that follows Android, in Tsinghua purple.',
-  whatsNew19DesktopTitle: 'Windows & Linux',
-  whatsNew19DesktopBody:
+  whatsNew19ElectronTitle: 'Windows & Linux',
+  whatsNew19ElectronBody:
     'Try the experimental desktop app for Windows and Linux, from the TUNA mirror or GitHub Releases.',
 };

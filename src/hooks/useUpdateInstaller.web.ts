@@ -2,7 +2,7 @@ import { Alert } from 'react-native';
 import type { Release } from 'helpers/update';
 import { t } from 'helpers/i18n';
 import type { UpdateStep } from 'services/update';
-import { installUpdate } from 'web/updates';
+import { installUpdate } from 'services/electronUpdates';
 
 /**
  * Installs the Electron app's update from the update row in Settings: it has

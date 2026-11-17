@@ -85,8 +85,8 @@ export const releases: Release[] = [
       {
         // For the phone and the Mac; the desktop app needn't announce itself.
         icon: 'desktop',
-        title: 'whatsNew19DesktopTitle',
-        body: 'whatsNew19DesktopBody',
+        title: 'whatsNew19ElectronTitle',
+        body: 'whatsNew19ElectronBody',
         platforms: ['ios', 'mac', 'android'],
       },
     ],

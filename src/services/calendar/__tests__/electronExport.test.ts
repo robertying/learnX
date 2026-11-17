@@ -5,7 +5,7 @@ import { queryClient } from 'data/queryClient';
 import { assignmentsQuery } from 'data/content';
 import { coursesQuery, schoolSemesterQuery } from 'data/queries';
 import { setCurrentSemester, setArchived, resetUserData } from 'data/userData';
-import { buildDesktopICS } from 'services/calendar/desktopExport';
+import { buildElectronICS } from 'services/calendar/electronExport';
 import { CalendarError } from 'services/calendar/errors';
 import type { Assignment, Course } from 'data/types/state';
 
@@ -59,7 +59,7 @@ it("exports the semester's remaining classes and the open assignments", async ()
     ],
     failedRanges: [],
   } as never);
-  const { ics, withoutClasses } = await buildDesktopICS(now);
+  const { ics, withoutClasses } = await buildElectronICS(now);
   expect(withoutClasses).toBe(false);
   expect(fetchCalendarRange).toHaveBeenCalledWith(
     now,
@@ -79,13 +79,13 @@ it("exports the semester's remaining classes and the open assignments", async ()
 
 it('exports the assignments when the timetable fails', async () => {
   jest.mocked(fetchCalendarRange).mockRejectedValueOnce(new Error('offline'));
-  const { ics, withoutClasses } = await buildDesktopICS(now);
+  const { ics, withoutClasses } = await buildElectronICS(now);
   expect(ics).toContain('Homework 1');
   expect(withoutClasses).toBe(true);
 });
 
 it('skips the classes after the semester has ended', async () => {
-  await expect(buildDesktopICS(dayjs('2027-02-01'))).rejects.toBeInstanceOf(
+  await expect(buildElectronICS(dayjs('2027-02-01'))).rejects.toBeInstanceOf(
     CalendarError,
   );
   expect(fetchCalendarRange).not.toHaveBeenCalled();
@@ -93,13 +93,13 @@ it('skips the classes after the semester has ended', async () => {
 
 it('fails when there is nothing to export or the login fails', async () => {
   queryClient.setQueryData(assignmentsQuery(semester.id).queryKey, []);
-  await expect(buildDesktopICS(now)).rejects.toMatchObject({
+  await expect(buildElectronICS(now)).rejects.toMatchObject({
     code: 'noEvents',
   });
   jest.mocked(ensureSession).mockRejectedValueOnce(new Error('login'));
-  await expect(buildDesktopICS(now)).rejects.toThrow('login');
+  await expect(buildElectronICS(now)).rejects.toThrow('login');
   resetUserData();
-  await expect(buildDesktopICS(now)).rejects.toMatchObject({
+  await expect(buildElectronICS(now)).rejects.toMatchObject({
     code: 'noEvents',
   });
 });

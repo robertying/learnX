@@ -43,9 +43,9 @@ jest.mock('services/calendar/classes', () => ({
   saveClassesToCalendar: jest.fn(),
 }));
 jest.mock('services/files/share', () => ({ exportTextFile: jest.fn() }));
-jest.mock('services/calendar/desktopExport', () => ({
-  buildDesktopICS: jest.fn(async () => ({
-    ics: 'DESKTOP ICS',
+jest.mock('services/calendar/electronExport', () => ({
+  buildElectronICS: jest.fn(async () => ({
+    ics: 'ELECTRON ICS',
     withoutClasses: false,
   })),
 }));
@@ -302,7 +302,7 @@ describe('exportCalendars', () => {
     });
     expect(exportTextFile).toHaveBeenCalledWith(
       'learnX.ics',
-      'DESKTOP ICS',
+      'ELECTRON ICS',
       'text/calendar',
     );
     expect(exportSyncedCalendarsToICS).not.toHaveBeenCalled();
@@ -310,11 +310,11 @@ describe('exportCalendars', () => {
 
   it('says when the Electron app saved it without the classes', async () => {
     jest.replaceProperty(Platform, 'OS', 'web');
-    const { buildDesktopICS } = jest.requireMock(
-      'services/calendar/desktopExport',
+    const { buildElectronICS } = jest.requireMock(
+      'services/calendar/electronExport',
     );
     jest
-      .mocked(buildDesktopICS)
+      .mocked(buildElectronICS)
       .mockResolvedValueOnce({ ics: 'ICS', withoutClasses: true });
     jest.mocked(exportTextFile).mockResolvedValueOnce(true);
     await expect(exportCalendars()).resolves.toEqual({
@@ -326,7 +326,7 @@ describe('exportCalendars', () => {
   it('says what the Electron app had nothing to export', () => {
     jest.replaceProperty(Platform, 'OS', 'web');
     expect(calendarExportErrorToast(new CalendarError('noEvents'))).toEqual({
-      text: t('calendarExportNoEventDesktop'),
+      text: t('calendarExportNoEventElectron'),
       type: 'warning',
     });
   });

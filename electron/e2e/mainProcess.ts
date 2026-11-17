@@ -29,7 +29,7 @@ export interface DialogAnswers {
   messageBox?: number;
 }
 
-/** A notification the app showed: on a dev run, logged instead (desktop.cjs). */
+/** A notification the app showed: on a dev run, logged instead (system.cjs). */
 export interface ShownNotification {
   title?: string;
   subtitle?: string;
@@ -210,7 +210,7 @@ export const mainProcess = (app: ElectronApplication) => ({
 
   /**
    * The notifications the app showed, oldest first: a dev run logs them
-   * instead of showing them (desktop.cjs). Dev runs only.
+   * instead of showing them (system.cjs). Dev runs only.
    */
   shownNotifications: () =>
     app.evaluate(() =>

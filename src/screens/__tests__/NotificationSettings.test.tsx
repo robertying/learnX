@@ -177,9 +177,9 @@ it('says when the Electron app notifies, with no system settings to open', async
     deadlineReminders: true,
   });
   await renderScreen();
-  expect(screen.getByText(t('desktopNotificationsCaption'))).toBeTruthy();
+  expect(screen.getByText(t('electronNotificationsCaption'))).toBeTruthy();
   expect(
-    screen.getByText(t('notifyDeadlineRemindersCaptionDesktop')),
+    screen.getByText(t('notifyDeadlineRemindersCaptionElectron')),
   ).toBeTruthy();
   expect(screen.queryByText(t('openSystemSettings'))).toBeNull();
 });

@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react-native';
-import useDesktopTapsNative from 'hooks/useDesktopTaps';
-import useDesktopTaps from 'hooks/useDesktopTaps.web';
+import useJumpListTapsNative from 'hooks/useJumpListTaps';
+import useJumpListTaps from 'hooks/useJumpListTaps.web';
 import useOpenTarget from 'hooks/useOpenTarget';
 import { t } from 'helpers/i18n';
 import {
@@ -19,16 +19,16 @@ afterEach(() => {
 });
 
 it('does nothing on the phone', async () => {
-  await renderHook(() => useDesktopTapsNative());
+  await renderHook(() => useJumpListTapsNative());
   expect(open).not.toHaveBeenCalled();
 });
 
 it('labels the tray and opens what the Jump List asks for', async () => {
   const bridge = installBridge();
-  jest.mocked(bridge.desktop.takeOpen).mockResolvedValueOnce('schedule');
+  jest.mocked(bridge.system.takeOpen).mockResolvedValueOnce('schedule');
 
-  const { unmount } = await renderHook(() => useDesktopTaps());
-  expect(bridge.desktop.setLabels).toHaveBeenCalledWith({
+  const { unmount } = await renderHook(() => useJumpListTaps());
+  expect(bridge.system.setLabels).toHaveBeenCalledWith({
     open: t('trayOpen'),
     refresh: t('refresh'),
     quit: t('trayQuit'),
@@ -39,14 +39,14 @@ it('labels the tray and opens what the Jump List asks for', async () => {
   expect(open).toHaveBeenCalledWith({ type: 'schedule' });
 
   // A second launch's.
-  const opened = jest.mocked(bridge.desktop.onOpen).mock.calls[0][0];
+  const opened = jest.mocked(bridge.system.onOpen).mock.calls[0][0];
   await act(async () => opened('today'));
   expect(open).toHaveBeenLastCalledWith({ type: 'today' });
 
   // Listening once, for whichever hook is mounted.
   await unmount();
-  await renderHook(() => useDesktopTaps());
-  expect(bridge.desktop.onOpen).toHaveBeenCalledTimes(1);
+  await renderHook(() => useJumpListTaps());
+  expect(bridge.system.onOpen).toHaveBeenCalledTimes(1);
   open.mockClear();
   await act(async () => opened('today'));
   expect(open).toHaveBeenCalledTimes(1);

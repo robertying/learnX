@@ -3,7 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createFiles } from '../files.cjs';
-import fileTypes from '../../src/constants/desktopFileTypes.json';
+import fileTypes from '../../src/constants/electronFileTypes.json';
 import {
   DEFAULT_RUN_LABELS,
   PREVIEW_TYPES,

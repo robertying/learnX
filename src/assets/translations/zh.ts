@@ -176,15 +176,15 @@ const zh: typeof en = {
     '登录电脑时在系统托盘中启动learnX，以便持续同步并发送提醒。关闭窗口后learnX仍在托盘中运行，可在托盘菜单中退出。',
   trayOpen: '打开learnX',
   trayQuit: '退出learnX',
-  desktopNotificationsCaption: 'learnX仅在运行时发送通知和提醒。',
+  electronNotificationsCaption: 'learnX仅在运行时发送通知和提醒。',
   exportCalendar: '导出日历（.ics）',
   exportCalendarDescription:
     '将本学期剩余的课程和未截止的作业保存为.ics文件，可导入Outlook等日历应用。',
   dropToAttach: '拖放文件以添加附件',
   dropFailed: '附件添加失败',
-  calendarExportNoEventDesktop:
+  calendarExportNoEventElectron:
     '没有可导出的内容：本学期已没有剩余的课程或未截止的作业。',
-  notifyDeadlineRemindersCaptionDesktop:
+  notifyDeadlineRemindersCaptionElectron:
     '在未提交的作业截止前提醒你，截止后仍可补交时也会提醒。',
   missingUsername: '请输入用户名或学号',
   missingPassword: '请输入密码',
@@ -559,8 +559,8 @@ const zh: typeof en = {
     '在聚焦搜索中查找公告、作业和文件，或问Siri下一节课和作业截止。',
   whatsNew19DesignTitle: '全新设计',
   whatsNew19DesignBody: '更简洁的界面，遵循Android设计风格，换上清华紫。',
-  whatsNew19DesktopTitle: 'Windows与Linux',
-  whatsNew19DesktopBody:
+  whatsNew19ElectronTitle: 'Windows与Linux',
+  whatsNew19ElectronBody:
     '试用实验性的Windows和Linux桌面版，可从TUNA镜像或GitHub Releases下载。',
 };
 

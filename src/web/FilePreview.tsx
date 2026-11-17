@@ -1,7 +1,7 @@
 import { createElement } from 'react';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { Paths } from 'expo-file-system';
-import desktopFileTypes from 'constants/desktopFileTypes.json';
+import electronFileTypes from 'constants/electronFileTypes.json';
 
 /**
  * Where the preview loads one of learnX's own files from: `app://files/`, an
@@ -34,7 +34,7 @@ const isImage = (uri: string) => {
   return (
     !!extension &&
     extension !== 'pdf' &&
-    Object.hasOwn(desktopFileTypes.preview, extension)
+    Object.hasOwn(electronFileTypes.preview, extension)
   );
 };
 

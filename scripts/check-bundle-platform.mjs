@@ -18,9 +18,9 @@ export const MARKERS = {
     // theme/electron
     'buildElectronColors',
     'electronSystemColors',
-    // services/calendar/desktopExport
-    'buildDesktopICS',
-    // services/files/desktop
+    // services/calendar/electronExport
+    'buildElectronICS',
+    // services/files/electron
     'saveTextAs',
   ],
   // @expo/ui/jetpack-compose (Android's widget layouts and components).

@@ -10,7 +10,7 @@ import { Button, Tooltip } from '@fluentui/react-components';
 import SystemIcon from 'components/SystemIcon';
 import { systemIcons, type SystemIconName } from 'helpers/systemIcons';
 import { useTheme } from 'theme';
-import { showMenu } from 'web/menu';
+import { showMenu } from 'modules/menus/electronMenu';
 import type { AppCommand, ContextMenuViewProps } from './index';
 
 export type {

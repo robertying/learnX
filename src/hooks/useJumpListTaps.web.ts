@@ -1,9 +1,9 @@
 import { useEffect, useEffectEvent } from 'react';
 import { t } from 'helpers/i18n';
 import useOpenTarget from 'hooks/useOpenTarget';
-import { bridge, type DesktopOpenTarget } from 'web/bridge';
+import { bridge, type LaunchTarget } from 'web/bridge';
 
-type Listener = (target: DesktopOpenTarget) => void;
+type Listener = (target: LaunchTarget) => void;
 const listeners = new Set<Listener>();
 let listening = false;
 
@@ -11,7 +11,7 @@ let listening = false;
 const listen = () => {
   if (!listening) {
     listening = true;
-    bridge().desktop.onOpen(target =>
+    bridge().system.onOpen(target =>
       listeners.forEach(listener => listener(target)),
     );
   }
@@ -22,11 +22,11 @@ const listen = () => {
  * Schedule, from the launch that started learnX or a later one, and gives
  * the tray menu and the Jump List their labels in the app's language.
  */
-const useDesktopTaps = () => {
+const useJumpListTaps = () => {
   const open = useEffectEvent(useOpenTarget());
 
   useEffect(() => {
-    void bridge().desktop.setLabels({
+    void bridge().system.setLabels({
       open: t('trayOpen'),
       refresh: t('refresh'),
       quit: t('trayQuit'),
@@ -37,7 +37,7 @@ const useDesktopTaps = () => {
     const listener: Listener = target => open({ type: target });
     listeners.add(listener);
     void bridge()
-      .desktop.takeOpen()
+      .system.takeOpen()
       .then(target => {
         if (target) {
           listener(target);
@@ -49,4 +49,4 @@ const useDesktopTaps = () => {
   }, []);
 };
 
-export default useDesktopTaps;
+export default useJumpListTaps;

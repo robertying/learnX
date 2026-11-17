@@ -17,7 +17,7 @@ import useUpNext from 'hooks/useUpNext';
 import useLinkTaps from 'hooks/useLinkTaps';
 import useNotificationTaps from 'hooks/useNotificationTaps';
 import useSpotlightTaps from 'hooks/useSpotlightTaps';
-import useDesktopTaps from 'hooks/useDesktopTaps';
+import useJumpListTaps from 'hooks/useJumpListTaps';
 
 /**
  * What the main UI starts once logged in: picks the semester and keeps its
@@ -79,7 +79,7 @@ const useMainStartup = () => {
   useNotificationTaps();
   useLinkTaps();
   useSpotlightTaps();
-  useDesktopTaps();
+  useJumpListTaps();
 
   useEffect(() => {
     void configureNotifications();

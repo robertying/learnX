@@ -2,7 +2,7 @@ import {
   installBridge,
   uninstallBridge,
 } from 'test-utils/mocks/electronBridge';
-import { menuPosition, showMenu } from 'web/menu';
+import { menuPosition, showMenu } from 'modules/menus/electronMenu';
 
 afterEach(uninstallBridge);
 

@@ -117,21 +117,21 @@ const realRequests: Omit<AppSource, keyof DataSource> = {
     // which takes the file's bytes, not a URI, and reports no upload
     // progress: XMLHttpRequest would go from the page, where Tsinghua's
     // cookies and cross-origin rules don't allow it.
-    const desktop = isElectron();
+    const electron = isElectron();
     // thu-learn-lib sends it as every request (an expired session logs in
     // again and it goes once more), with XMLHttpRequest for the progress.
     await helper.submitHomework(studentHomeworkId, {
       content,
       attachment: attachment && {
         filename: attachment.name,
-        content: desktop
+        content: electron
           ? await fileBlob(attachment.uri, type)
           : { uri: attachment.uri, type },
       },
       removeAttachment: remove,
       // Two decimals are plenty for a progress bar.
       onProgress:
-        onProgress && !desktop
+        onProgress && !electron
           ? p => onProgress(Math.round(p * 100) / 100)
           : undefined,
     });

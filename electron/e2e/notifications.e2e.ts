@@ -2,7 +2,7 @@
 // in the main process (notifications.cjs), and a click on one shows the
 // window and opens its assignment, from the tray too. A dev run never posts
 // a system notification: it logs it, and the page shows it as a toast
-// (desktop.cjs), which the test reads back and clicks through the same path.
+// (system.cjs), which the test reads back and clicks through the same path.
 import type { Page } from '@playwright/test';
 import { expect, test } from './fixtures';
 import { text } from './maestroEnv';

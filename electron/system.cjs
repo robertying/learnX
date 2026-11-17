@@ -1,4 +1,4 @@
-// learnX on the desktop around its window: the tray icon, closing to the tray,
+// learnX around its window on Windows and Linux: the tray icon, closing to the tray,
 // the background sync's timer, notifications (notifications.cjs), files
 // opened, saved and picked (fileShell.cjs), Start at login and the Windows
 // Jump List. main.cjs sets it up; the page reaches it through preload.cjs.
@@ -82,7 +82,7 @@ const claimSingleInstance = app => {
 };
 
 /**
- * @typedef {object} DesktopDeps
+ * @typedef {object} SystemDeps
  * @property {typeof import('electron')} electron
  * @property {(event: Electron.IpcMainEvent | Electron.IpcMainInvokeEvent) => void} fromApp
  *   throws for IPC from anywhere but the app's window
@@ -95,8 +95,8 @@ const claimSingleInstance = app => {
  * @property {readonly string[]} [argv] this launch's arguments
  */
 
-/** @param {DesktopDeps} deps */
-const setUpDesktop = ({
+/** @param {SystemDeps} deps */
+const setUpSystem = ({
   electron,
   fromApp,
   files,
@@ -397,7 +397,7 @@ const setUpDesktop = ({
       );
     }
   };
-  ipcMain.handle('desktop:setLabels', (event, next) => {
+  ipcMain.handle('system:setLabels', (event, next) => {
     fromApp(event);
     labels = { ...DEFAULT_LABELS };
     for (const key of /** @type {(keyof typeof DEFAULT_LABELS)[]} */ (
@@ -413,7 +413,7 @@ const setUpDesktop = ({
   // A screen to open from a launch's arguments: this one's, kept until the
   // page asks, or a second launch's, sent right away.
   let pendingOpen = openTargetOf(argv);
-  ipcMain.handle('desktop:takeOpen', event => {
+  ipcMain.handle('system:takeOpen', event => {
     fromApp(event);
     const target = pendingOpen;
     pendingOpen = null;
@@ -423,7 +423,7 @@ const setUpDesktop = ({
     showWindow();
     const target = openTargetOf(secondArgv);
     if (target) {
-      send('desktop:open', target);
+      send('system:open', target);
     }
   });
 
@@ -451,7 +451,7 @@ const setUpDesktop = ({
 };
 
 module.exports = {
-  setUpDesktop,
+  setUpSystem,
   claimSingleInstance,
   closesToTray,
   openTargetOf,

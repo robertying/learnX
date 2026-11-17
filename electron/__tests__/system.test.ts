@@ -7,13 +7,13 @@ import {
   claimSingleInstance,
   loginItemSupported,
   openTargetOf,
-  setUpDesktop,
-} from '../desktop.cjs';
+  setUpSystem,
+} from '../system.cjs';
 
 type Handler = (event: unknown, ...args: unknown[]) => unknown;
 type MenuItem = { label?: string; type?: string; click?: () => void };
 
-/** A window as desktop.cjs uses one. */
+/** A window as system.cjs uses one. */
 class FakeWindow extends EventEmitter {
   visible = true;
   minimized = true;
@@ -32,7 +32,7 @@ class FakeWindow extends EventEmitter {
   focus = jest.fn();
 }
 
-/** Just enough of Electron for desktop.cjs, recording what it's asked. */
+/** Just enough of Electron for system.cjs, recording what it's asked. */
 const fakeElectron = () => {
   const app = Object.assign(new EventEmitter(), {
     getPath: jest.fn(() => '/Users/me/Downloads'),
@@ -164,7 +164,7 @@ const setUp = ({
 } = {}) => {
   const fake = fakeElectron();
   const fromApp = jest.fn();
-  const desktop = setUpDesktop({
+  const system = setUpSystem({
     electron: fake.electron as never,
     fromApp,
     files,
@@ -175,7 +175,7 @@ const setUp = ({
     platform,
     argv,
   });
-  return { ...fake, desktop, fromApp };
+  return { ...fake, system, fromApp };
 };
 
 beforeEach(() => {
@@ -261,8 +261,8 @@ describe('the window', () => {
   });
 
   it('starts hidden when Start at login launched it', () => {
-    expect(setUp().desktop.startsHidden()).toBe(false);
-    expect(setUp({ argv: ['learnX', HIDDEN_ARG] }).desktop.startsHidden()).toBe(
+    expect(setUp().system.startsHidden()).toBe(false);
+    expect(setUp({ argv: ['learnX', HIDDEN_ARG] }).system.startsHidden()).toBe(
       true,
     );
   });
@@ -291,7 +291,7 @@ describe('the tray and the Jump List', () => {
     trays[0].menu[3].click!();
     expect(app.quit).toHaveBeenCalled();
 
-    await invoke('desktop:setLabels', {
+    await invoke('system:setLabels', {
       open: '打开learnX',
       refresh: '刷新',
       quit: '',
@@ -327,7 +327,7 @@ describe('the tray and the Jump List', () => {
         title: 'Schedule',
       }),
     ]);
-    await invoke('desktop:setLabels', { schedule: '课表' });
+    await invoke('system:setLabels', { schedule: '课表' });
     expect(app.setUserTasks).toHaveBeenLastCalledWith([
       expect.anything(),
       expect.objectContaining({ title: '课表' }),
@@ -347,14 +347,14 @@ describe('the tray and the Jump List', () => {
     const { invoke, app, createWindow } = setUp({
       argv: ['learnX', `${OPEN_ARG}schedule`],
     });
-    await expect(invoke('desktop:takeOpen')).resolves.toBe('schedule');
-    await expect(invoke('desktop:takeOpen')).resolves.toBeNull();
+    await expect(invoke('system:takeOpen')).resolves.toBe('schedule');
+    await expect(invoke('system:takeOpen')).resolves.toBeNull();
 
     const win = createWindow();
     win.visible = false;
     app.emit('second-instance', {}, ['learnX', `${OPEN_ARG}today`]);
     expect(win.show).toHaveBeenCalled();
-    expect(win.webContents.send).toHaveBeenCalledWith('desktop:open', 'today');
+    expect(win.webContents.send).toHaveBeenCalledWith('system:open', 'today');
     app.emit('second-instance', {}, ['learnX']);
     expect(win.webContents.send).toHaveBeenCalledTimes(1);
   });
@@ -594,8 +594,8 @@ describe('files', () => {
   });
 
   it('serves previews through Electron’s fetch', async () => {
-    const { desktop } = setUp();
-    const response = await desktop.servePreview(
+    const { system } = setUp();
+    const response = await system.servePreview(
       new Request('app://files/cache/a.txt'),
     );
     expect(response.status).toBe(404);

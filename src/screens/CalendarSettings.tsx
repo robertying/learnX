@@ -33,7 +33,7 @@ type Props = NativeStackScreenProps<SettingsStackParams, 'CalendarSettings'>;
  * on the device to sync to, so learnX only exports its classes and
  * assignments as an .ics file, which a calendar app imports.
  */
-const DesktopCalendarSettings: React.FC = () => {
+const ElectronCalendarSettings: React.FC = () => {
   const { exporting, exportToICS } = useCalendarExport();
   return (
     <FormScreen>
@@ -54,7 +54,7 @@ const DesktopCalendarSettings: React.FC = () => {
 
 const CalendarSettings: React.FC<Props> = props =>
   isElectron() ? (
-    <DesktopCalendarSettings />
+    <ElectronCalendarSettings />
   ) : (
     <SyncCalendarSettings {...props} />
   );

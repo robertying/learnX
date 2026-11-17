@@ -1,4 +1,4 @@
-// The tray (desktop.cjs): closing the window keeps learnX running there, its
+// The tray (system.cjs): closing the window keeps learnX running there, its
 // menu brings the window back, runs the background sync now (services/
 // background, as the main process's timer does every 15 minutes) and quits.
 // The test chooses the menu's items as a click would (mainProcess.ts).

@@ -79,7 +79,7 @@ export const exportTextFile = async (
   if (isElectron()) {
     // Required only here, so the phones' bundles leave it out.
     const { saveTextAs } =
-      require('services/files/desktop') as typeof import('services/files/desktop');
+      require('services/files/electron') as typeof import('services/files/electron');
     return await saveTextAs(name, content);
   }
   if (DeviceInfo.isMac()) {

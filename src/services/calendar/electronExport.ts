@@ -75,7 +75,7 @@ const classEvents = async (now: dayjs.Dayjs): Promise<ICSEvent[]> => {
  * timetable can't be fetched the classes are left out, which `withoutClasses`
  * says.
  */
-export const buildDesktopICS = async (
+export const buildElectronICS = async (
   now = dayjs(),
 ): Promise<{ ics: string; withoutClasses: boolean }> => {
   const assignments = assignmentEvents(now);

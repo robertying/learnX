@@ -7,8 +7,8 @@ const src = (file: string) =>
 
 it('finds the Electron app’s modules in either phone’s bundle', () => {
   for (const platform of ['ios', 'android']) {
-    expect(problems(platform, 'a buildDesktopICS b')).toEqual([
-      'buildDesktopICS',
+    expect(problems(platform, 'a buildElectronICS b')).toEqual([
+      'buildElectronICS',
     ]);
   }
   expect(problems('ios', 'x')).toEqual([]);
@@ -25,8 +25,8 @@ it.each([
   ['web/bridge.ts', MARKERS.electron[0]],
   ['theme/electron.ts', 'buildElectronColors'],
   ['theme/electron.ts', 'electronSystemColors'],
-  ['services/calendar/desktopExport.ts', 'buildDesktopICS'],
-  ['services/files/desktop.ts', 'saveTextAs'],
+  ['services/calendar/electronExport.ts', 'buildElectronICS'],
+  ['services/files/electron.ts', 'saveTextAs'],
 ])('%s still has %s', (file, marker) => {
   expect(src(file)).toContain(marker);
 });

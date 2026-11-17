@@ -57,7 +57,7 @@ contextBridge.exposeInMainWorld('learnx', {
     },
     install: () => ipcRenderer.send('updates:install'),
   },
-  // Around the window (desktop.cjs).
+  // Around the window (system.cjs).
   shell: {
     open: (uri, labels) => ipcRenderer.invoke('shell:open', uri, labels),
     showInFolder: uri => ipcRenderer.invoke('shell:showInFolder', uri),
@@ -95,11 +95,11 @@ contextBridge.exposeInMainWorld('learnx', {
     get: () => ipcRenderer.invoke('loginItem:get'),
     set: enabled => ipcRenderer.invoke('loginItem:set', enabled),
   },
-  desktop: {
-    setLabels: labels => ipcRenderer.invoke('desktop:setLabels', labels),
-    takeOpen: () => ipcRenderer.invoke('desktop:takeOpen'),
+  system: {
+    setLabels: labels => ipcRenderer.invoke('system:setLabels', labels),
+    takeOpen: () => ipcRenderer.invoke('system:takeOpen'),
     onOpen: listener => {
-      ipcRenderer.on('desktop:open', (_event, target) => listener(target));
+      ipcRenderer.on('system:open', (_event, target) => listener(target));
     },
   },
   // Development only: the dev runner's launch options (empty otherwise), and

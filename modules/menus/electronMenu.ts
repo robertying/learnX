@@ -1,4 +1,4 @@
-import { bridge, type BridgeMenuItem } from './bridge';
+import { bridge, type BridgeMenuItem } from 'web/bridge';
 
 export type MenuItem = BridgeMenuItem;
 

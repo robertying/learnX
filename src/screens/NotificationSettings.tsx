@@ -99,7 +99,7 @@ const NotificationSettings: React.FC<Props> = () => {
           title={t('setupNewContent')}
           footer={
             isElectron()
-              ? t('desktopNotificationsCaption')
+              ? t('electronNotificationsCaption')
               : t('notificationsCaption')
           }
         >
@@ -125,7 +125,7 @@ const NotificationSettings: React.FC<Props> = () => {
             isApple()
               ? t('notifyDeadlineRemindersCaption')
               : isElectron()
-                ? t('notifyDeadlineRemindersCaptionDesktop')
+                ? t('notifyDeadlineRemindersCaptionElectron')
                 : t('notifyDeadlineRemindersCaptionAndroid'),
             showExact && t('exactRemindersCaption'),
           ]

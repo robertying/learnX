@@ -73,7 +73,7 @@ export const installBridge = (overrides: Partial<Bridge> = {}): Bridge => {
       get: jest.fn(async () => ({ supported: true, enabled: false })),
       set: jest.fn(async () => true),
     },
-    desktop: {
+    system: {
       setLabels: jest.fn(async () => {}),
       takeOpen: jest.fn(async () => null),
       onOpen: jest.fn(),

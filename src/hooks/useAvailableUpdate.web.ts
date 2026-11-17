@@ -1,6 +1,10 @@
 import { useSyncExternalStore } from 'react';
 import type { Release } from 'helpers/update';
-import { pendingUpdate, releaseUrl, subscribeToUpdates } from 'web/updates';
+import {
+  pendingUpdate,
+  releaseUrl,
+  subscribeToUpdates,
+} from 'services/electronUpdates';
 
 /**
  * The Electron app's update, once it has downloaded in the background

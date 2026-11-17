@@ -12,7 +12,7 @@ import {
   openInDefaultApp,
   saveFileAs,
   showInFolder,
-} from 'services/files/desktop';
+} from 'services/files/electron';
 
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
 jest.mock('services/files/downloads', () => ({ downloadFile: jest.fn() }));
@@ -21,7 +21,7 @@ jest.mock('services/files/share', () => ({
   saveFileOnMac: jest.fn(),
   shareFile: jest.fn(),
 }));
-jest.mock('services/files/desktop', () => ({
+jest.mock('services/files/electron', () => ({
   copyText: jest.fn(async () => {}),
   openInDefaultApp: jest.fn(async () => {}),
   saveFileAs: jest.fn(async () => true),

@@ -4,7 +4,7 @@ import {
   saveFileAs,
   saveTextAs,
   showInFolder,
-} from 'services/files/desktop';
+} from 'services/files/electron';
 import {
   installBridge,
   uninstallBridge,

@@ -6,7 +6,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 /** The files, by name, in src/constants. */
-const SHARED_FILES = ['desktopFileTypes.json', 'webviewPartition.json'];
+const SHARED_FILES = ['electronFileTypes.json', 'webviewPartition.json'];
 
 const packagedDir = path.join(__dirname, 'constants');
 const sharedDir = fs.existsSync(packagedDir)

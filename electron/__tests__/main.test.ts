@@ -8,7 +8,7 @@ import path from 'node:path';
 
 type Handler = (event: unknown, ...args: unknown[]) => unknown;
 
-/** Just enough of Electron for main.cjs, desktop.cjs and preload.cjs. */
+/** Just enough of Electron for main.cjs, system.cjs and preload.cjs. */
 const fakeElectron = (dataDir: string, { packaged = false } = {}) => {
   const paths = new Map<string, string>([
     ['userData', dataDir],
@@ -541,10 +541,10 @@ it('exposes the page’s API with nothing it doesn’t handle', async () => {
   // What the main process sends the page.
   expect([...listened].sort((a, b) => a.localeCompare(b))).toEqual([
     'background:run',
-    'desktop:open',
     'files:progress',
     'notifications:devShown',
     'notifications:response',
+    'system:open',
     'updates:ready',
     'webview:ask',
   ]);
