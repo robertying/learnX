@@ -105,16 +105,14 @@ jobs:
     # export, updates against updateServer.mjs, the SSO page). It needs the
     # network, as the flows do: the mock files download from GitHub and the
     # SSO test opens id.tsinghua.edu.cn.
-    # - Linux (required): under a virtual X display, three apps at a time
-    #   (--workers=3 on the runner's 4 cores; each test has its own data
-    #   folder and ports), split by test rather than by file
-    #   (--fully-parallel), so the long files don't end up on one worker. Then the window test once more under Wayland
-    #   (window.e2e.ts): under X11 a window
-    #   draws whether it shows or not, so only Wayland can tell a window
-    #   that never appears. Weston's headless backend is a real Wayland
-    #   compositor without a screen; with no X display, Electron can only
-    #   use it, as Ubuntu's and Fedora's desktops run it.
-    # - Windows (not required, much slower): manual runs only.
+    # - Linux (required): under a virtual X display, one app per core
+    #   (playwright.config.ts). Then the window test once more under
+    #   Wayland (window.e2e.ts): under X11 a window draws whether it shows
+    #   or not, so only Wayland can tell a window that never appears.
+    #   Weston's headless backend is a real Wayland compositor without a
+    #   screen; with no X display, Electron can only use it, as Ubuntu's and
+    #   Fedora's desktops run it.
+    # - Windows (not required): manual runs only, the same way.
     # A static name: rows show as "E2E tests (Linux)" and "E2E tests
     # (Windows)", and a skipped job would show a raw expression instead.
     name: E2E tests
@@ -165,7 +163,7 @@ jobs:
         run: |
           bash scripts/write-e2e-env.sh
           if [ "$RUNNER_OS" = Linux ]; then
-            xvfb-run --auto-servernum pnpm e2e:electron --workers=4 --fully-parallel
+            xvfb-run --auto-servernum pnpm e2e:electron
           else
             pnpm e2e:electron
           fi
