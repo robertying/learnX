@@ -1,4 +1,4 @@
-From de9a3518aa97a17034577f9a6cce46c764d80430 Mon Sep 17 00:00:00 2001
+From d4f64ee3451ac2d3e8456706d27efb347c4a63c0 Mon Sep 17 00:00:00 2001
 From: Claude <noreply@anthropic.com>
 Date: Tue, 17 Nov 2026 03:12:02 -0800
 Subject: [PATCH] fix(ios): add a SpringBoard alert over the app to its

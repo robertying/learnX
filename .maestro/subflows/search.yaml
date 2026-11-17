@@ -11,13 +11,21 @@ appId: ${APP_ID}
       platform: Android
     commands:
       - pressKey: Enter
-# Maestro can drop a CJK character while typing: retype until the field
-# holds all of TERM.
+# Maestro can drop a CJK character while typing, and on iOS the field can
+# lose focus after the first letter (seen on the closed iPhone Duo, where
+# what comes after, erasing included, then goes nowhere): retype until the
+# field holds all of TERM, on iOS after tapping the field again, which reads
+# as its placeholder whatever it holds.
 - repeat:
     times: 2
     while:
       notVisible: ${TERM}
     commands:
+      - runFlow:
+          when:
+            platform: iOS
+          commands:
+            - tapOn: '${T_searchPlaceholder}'
       - eraseText
       - inputText: ${TERM}
       - runFlow:

@@ -24,11 +24,11 @@ fallback view, so an app with one window came back with only the status bar.
 After a login the keyboard's window happened to hide this, so it showed up
 only when a flow started with the app already logged in.
 
-`maestro-thin-elements.patch` makes Maestro skip an element no wider or
-taller than a point. On the closed iPhone Duo, whose bars sit at the right,
-UIKit moves a sheet's bar buttons to the side bar and leaves each one where it
-was, one point wide: Maestro matched that first, and the tap did nothing (the
-file picker's Cancel stayed open).
+`maestro-tiny-elements.patch` makes Maestro skip an element under 8 points
+across or high. UIKit leaves copies of a sheet's bar buttons outside the
+sheet, too small to see or tap: the file picker's Cancel is 7×7 points on an
+iPhone and one point wide on the closed iPhone Duo, whose bars sit at the
+side. Maestro matched the copy first, and the tap did nothing.
 
 `maestro-springboard-alerts.patch` adds an alert SpringBoard shows over the
 app to the hierarchy, on top. Such an alert (an app asking to send
