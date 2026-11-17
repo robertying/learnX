@@ -9,6 +9,9 @@
 //   pnpm electron:package --skip-export      reuse the last web export
 //   pnpm electron:package --dir              the unpacked apps only (x64 and
 //                                            arm64), no installers
+//   pnpm electron:package --allow-placeholder-key
+//                                            installers while the update key
+//                                            is the placeholder: never release
 //
 // A test build for trying updates against electron/updateServer.mjs:
 //   pnpm electron:package --win --version 19.0.1 \
@@ -18,6 +21,7 @@
 // downloads; on an Apple silicon Mac those run only with Rosetta, so build
 // them on Windows or in CI there, and use --dir on the Mac.
 import { spawnSync } from 'node:child_process';
+import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
@@ -36,8 +40,24 @@ const { values } = parseArgs({
     build: { type: 'string' },
     'update-url': { type: 'string' },
     dir: { type: 'boolean', default: false },
+    'allow-placeholder-key': { type: 'boolean', default: false },
   },
 });
+
+// Installers that could never update aren't built (packageConfig.cjs).
+const { packageConfig, placeholderKeyProblem } = require('./packageConfig.cjs');
+const keyProblem = placeholderKeyProblem(
+  {
+    dir: values.dir,
+    updateUrl: values['update-url'],
+    allowPlaceholderKey: values['allow-placeholder-key'],
+  },
+  fs.readFileSync(path.join(root, 'certs', 'electron-update.pem')),
+);
+if (keyProblem) {
+  console.error(keyProblem);
+  process.exit(1);
+}
 
 if (!values['skip-export']) {
   const result = spawnSync(
@@ -61,7 +81,6 @@ process.env.ELECTRON_BUILDER_CACHE ??= path.join(
 );
 
 const { build } = require('electron-builder');
-const { packageConfig } = require('./packageConfig.cjs');
 const both = !values.win && !values.linux;
 
 await build({

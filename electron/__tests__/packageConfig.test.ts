@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import updateMirror from '../../src/constants/updateMirror.json';
 import electronPackage from '../package.json';
-import { packageConfig } from '../packageConfig.cjs';
+import { packageConfig, placeholderKeyProblem } from '../packageConfig.cjs';
 import { SHARED_FILES, readShared } from '../shared.cjs';
 
 it('updates from the TUNA mirror, as the Android app does', () => {
@@ -124,4 +124,34 @@ it('packages what the main process shares with the page', () => {
         .includes("require('../src/"),
     );
   expect(readingSrc).toEqual([]);
+});
+
+describe('placeholderKeyProblem', () => {
+  const placeholder = `PLACEHOLDER: not learnX's key.\n-----BEGIN PUBLIC KEY-----\n`;
+  const real = '-----BEGIN PUBLIC KEY-----\n';
+
+  it('refuses installers while the update key is the placeholder', () => {
+    expect(placeholderKeyProblem({}, placeholder)).toMatch(
+      /still the placeholder/,
+    );
+    expect(placeholderKeyProblem({}, real)).toBeNull();
+  });
+
+  it.each([
+    { dir: true },
+    { updateUrl: 'http://localhost:8299/' },
+    { allowPlaceholderKey: true },
+  ])('lets %j through, as no release', options => {
+    expect(placeholderKeyProblem(options, placeholder)).toBeNull();
+  });
+
+  it('refuses the committed key until the real one is made', () => {
+    const committed = fs.readFileSync(
+      path.join(__dirname, '../../certs/electron-update.pem'),
+      'utf8',
+    );
+    expect(placeholderKeyProblem({}, committed) === null).toBe(
+      !committed.startsWith('PLACEHOLDER'),
+    );
+  });
 });

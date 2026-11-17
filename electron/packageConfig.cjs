@@ -7,6 +7,7 @@ const path = require('node:path');
 const updateMirror = require('../src/constants/updateMirror.json');
 const { readBuildInfo } = require('./buildInfo.cjs');
 const { SHARED_FILES } = require('./shared.cjs');
+const { isPlaceholderKey } = require('./updateSignature.cjs');
 
 const { version, build } = readBuildInfo(path.join(__dirname, '..'));
 
@@ -114,4 +115,23 @@ const config = (options = {}) => {
   };
 };
 
-module.exports = { packageConfig: config };
+/**
+ * Why installers can't be built yet, or null: while the committed update key
+ * (certs/electron-update.pem) is still the placeholder, nobody can sign an
+ * update those installs would take, so they could never update. An unpacked
+ * build (`--dir`), a test build for a local update server (`--update-url`)
+ * and a build that says so (`--allow-placeholder-key`) may go ahead.
+ *
+ * @param {{ dir?: boolean; updateUrl?: string; allowPlaceholderKey?: boolean }} options
+ * @param {string | Buffer} publicKey the committed key
+ * @returns {string | null}
+ */
+const placeholderKeyProblem = (options, publicKey) =>
+  isPlaceholderKey(publicKey) &&
+  !options.dir &&
+  !options.updateUrl &&
+  !options.allowPlaceholderKey
+    ? 'certs/electron-update.pem is still the placeholder, so these installs could never update: make the key first (electron/AGENTS.md, "Signing updates"), or pass --allow-placeholder-key for a build that will never be released'
+    : null;
+
+module.exports = { packageConfig: config, placeholderKeyProblem };

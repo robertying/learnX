@@ -131,6 +131,8 @@ jobs:
       - name: Set up JS
         uses: ./.github/actions/setup-js
 
+      # Fails while certs/electron-update.pem is the placeholder: installers
+      # that could never update aren't built (electron/packageConfig.cjs).
       # Its own web build, never the E2E tests' (their made-up mock login
       # would let anyone in with it): the mock login from the repository's
       # DUMMY_USERNAME and DUMMY_PASSWORD secrets, as the mobile release
