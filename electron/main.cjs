@@ -56,6 +56,18 @@ if (process.platform === 'win32') {
  */
 const dev = !app.isPackaged || Boolean(process.defaultApp);
 
+// On Windows, everything learnX keeps (the saved login, settings, cached
+// data, downloads, the browser profile) is in the local profile,
+// %LOCALAPPDATA%\learnX, not Electron's default %APPDATA%\learnX: that one
+// roams, copied to other PCs at every sign-in on a domain with roaming
+// profiles (labs, some laptops), downloads and all. The uninstaller removes
+// it (installer.nsh).
+if (!dev && process.platform === 'win32' && process.env.LOCALAPPDATA) {
+  const localData = path.join(process.env.LOCALAPPDATA, 'learnX');
+  app.setPath('userData', localData);
+  app.setPath('sessionData', localData);
+}
+
 // The dev runner (dev.mjs) keeps everything Electron writes in one folder
 // and out of the system's keychain.
 const devDataDir = dev ? process.env.LEARNX_DATA_DIR : undefined;
