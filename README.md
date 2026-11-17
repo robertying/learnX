@@ -90,6 +90,7 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 ### 通知与提醒
 
 - 有新公告、新文件、新作业或出了成绩，第一时间通知你
+- 截止时间变了、开放补交、老师写了评语，也会告诉你
 - 作业截止前、上课前提醒你
 - 课表和作业可同步到日历，在 iPhone、iPad 和 Mac 上作业也可同步到提醒事项
 
@@ -97,12 +98,15 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 
 - 小组件：作业截止、下一节课（iPhone、iPad 和 Android）
 - 用聚焦搜索查找公告、作业和文件，或直接问 Siri 下一节课是什么（iPhone、iPad 和 Mac）
+- 全局搜索
 - 收藏、归档公告、作业和文件，收藏与网络学堂同步
 - 屏蔽不需要的课程
+- 切换学期
+- courseX 课程信息共享计划
 
 ## 隐私
 
-你的账号和课程内容保存在你的设备上，除了清华大学的服务器，不会发到其他地方。唯一的例外是课程信息共享：开启后，learnX 会把本学期课程的公开信息上传到 courseX，但不会上传任何关于你本人的信息。详见[隐私政策](docs/PRIVACY_POLICY_CN.md)。
+除了清华大学的服务器，learnX 不会把你的账号和课程内容发到任何地方，它们只保存在你的设备上。唯一的例外是课程信息共享：开启后，learnX 会把本学期课程的公开信息上传到 courseX，但不会上传任何关于你本人的信息。详见[隐私政策](docs/PRIVACY_POLICY_CN.md)。
 
 ## 开发
 
@@ -144,12 +148,12 @@ learnX brings your Web Learning notices, assignments and files together, and tel
 
 - **Today:** the day's classes, upcoming deadlines and new items in every course, and a schedule of the next seven days
 - **Course content:** notices with their attachments, file previews and downloads, assignment details, grading and submission, and offline reading
-- **Notifications and reminders:** new notices, files, assignments and grades, deadline and class reminders, and calendar sync (plus Reminders on iPhone, iPad and Mac)
-- **More:** widgets (iPhone, iPad and Android), Spotlight and Siri (iPhone, iPad and Mac), favorites synced with Web Learning, archiving, and hiding courses
+- **Notifications and reminders:** new notices, files, assignments and grades, moved deadlines, late submission windows and grader comments, deadline and class reminders, and calendar sync (plus Reminders on iPhone, iPad and Mac)
+- **More:** widgets (iPhone, iPad and Android), Spotlight and Siri (iPhone, iPad and Mac), global search, favorites synced with Web Learning, archiving, hiding courses, switching semesters, and courseX Course Information Sharing
 
 ### Privacy
 
-Your account and course content stay on your device and are sent nowhere except Tsinghua's servers. The one exception is Course Information Sharing: when you turn it on, learnX uploads public information about your courses this semester to courseX, and nothing about you. See the [privacy policy](docs/PRIVACY_POLICY_EN.md).
+Except for Tsinghua's servers, learnX sends your account and course content nowhere; they stay on your device. The one exception is Course Information Sharing: when you turn it on, learnX uploads public information about your courses this semester to courseX, and nothing about you. See the [privacy policy](docs/PRIVACY_POLICY_EN.md).
 
 ### Development
 
