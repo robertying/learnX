@@ -114,7 +114,11 @@ const config = (options = {}) => {
     // drops Chromium's sandbox only where the system blocks unprivileged
     // user namespaces (Ubuntu 24.04 and later), which an AppImage can't
     // change, rather than always, as the legacy one did.
-    toolsets: { appimage: '1.0.3' },
+    // NSIS: the 3.12 bundle, which has a makensis for Apple silicon (the
+    // legacy 3.0.4.1 one is Intel-only), so a Mac packages both platforms
+    // without Rosetta. Every tool these toolsets and the .deb's fpm bring has
+    // an arm64 macOS build.
+    toolsets: { appimage: '1.0.3', nsis: '1.2.1' },
     deb: {
       packageName: 'learnx',
       // AppImages update themselves; a .deb is updated by installing the

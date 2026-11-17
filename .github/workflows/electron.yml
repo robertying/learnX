@@ -265,6 +265,26 @@ jobs:
           if-no-files-found: error
           retention-days: 3
 
+      # The installer installs and uninstalls silently, as the current user
+      # (installer.nsh): whatever NSIS built it, it still runs on Windows.
+      - name: Install and uninstall
+        if: matrix.platform == 'Windows'
+        shell: pwsh
+        run: |
+          $setup = (Get-ChildItem build/electron/dist/learnX-Setup-*.exe).FullName
+          Start-Process -FilePath $setup -ArgumentList '/S' -Wait
+          $dir = Join-Path $env:LOCALAPPDATA 'Programs\learnX'
+          $exe = Join-Path $dir 'learnX.exe'
+          if (-not (Test-Path $exe)) { throw "Not installed: $exe" }
+          $entry = Get-ChildItem 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall' |
+            Where-Object { (Get-ItemProperty $_.PSPath).DisplayName -eq 'learnX' }
+          if (-not $entry) { throw 'No uninstall entry for learnX' }
+          Write-Output "Installed $((Get-Item $exe).VersionInfo.FileVersion) in $dir"
+          # The uninstaller copies itself to the temp folder and returns at once.
+          Start-Process -FilePath (Join-Path $dir 'Uninstall learnX.exe') -ArgumentList '/S' -Wait
+          for ($i = 0; $i -lt 60 -and (Test-Path $exe); $i++) { Start-Sleep -Seconds 1 }
+          if (Test-Path $exe) { throw "Not uninstalled: $exe" }
+
       - name: Save Electron download cache
         if: env.SAVE_CACHE == 'true' && steps.package.outcome == 'success' && steps.electron-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v6
