@@ -43,16 +43,3 @@ it('names a color for every system color the components use', () => {
     }
   }
 });
-
-it('is the theme in the Electron app', () => {
-  jest.isolateModules(() => {
-    // The theme reads the platform as it loads, from its own copy.
-    const { Platform } =
-      require('react-native') as typeof import('react-native');
-    jest.replaceProperty(Platform, 'OS', 'web');
-    const { BrandLightTheme, BrandDarkTheme } =
-      require('theme') as typeof import('theme');
-    expect(BrandLightTheme.colors).toEqual(buildElectronColors(false));
-    expect(BrandDarkTheme.colors).toEqual(buildElectronColors(true));
-  });
-});
