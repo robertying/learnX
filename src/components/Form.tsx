@@ -281,7 +281,7 @@ const macFirstSectionModifiers = [
   listSectionMargins({ edges: 'top', length: 20 }),
 ];
 // System Settings sets a row's symbol and text close to the group's edges.
-const macRowInset = 14;
+const macRowInset = 12;
 const macSectionModifiers = [
   macRowBackground,
   listRowInsets({
@@ -476,13 +476,11 @@ const RowLabel: React.FC<{
 };
 
 const macIconWidth = 20;
-const macIconSpacing = 10;
+const macIconSpacing = 14;
 const macIconModifiers = [frame({ width: macIconWidth })];
-// The separator under the row starts where its text does, past the symbol,
-// as in System Settings.
-const macIconRowModifiers = [
-  alignmentGuide('listRowSeparatorLeading', macIconWidth + macIconSpacing),
-];
+// The separator under the row starts at the row's edge, under the symbol, as
+// System Settings draws it. (SwiftUI would start it past a leading image.)
+const macIconRowModifiers = [alignmentGuide('listRowSeparatorLeading', 0)];
 
 /** The row's subtitle and detail for the text size (`stackedDetail`). */
 const useStackedDetail = (subtitle?: string, detail?: string) =>
