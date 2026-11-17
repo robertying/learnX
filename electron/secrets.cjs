@@ -6,8 +6,47 @@
 const DB = 'secrets';
 
 /**
+ * @typedef {Pick<import('electron').SafeStorage,
+ *   'isAsyncEncryptionAvailable' | 'encryptStringAsync' | 'decryptStringAsync'
+ *   | 'isEncryptionAvailable' | 'encryptString' | 'decryptString'
+ *   | 'getSelectedStorageBackend'>} SafeStorage
+ */
+
+/**
+ * The encryption to use. On Linux, the one whose key store
+ * `getSelectedStorageBackend` reports: Chromium's synchronous OSCrypt, which
+ * that report describes (the asynchronous encryptor picks its own provider,
+ * which nothing reports), so the check that refuses Chromium's fallback key
+ * (`basic_text`) is about the key the value is actually encrypted with. The
+ * report is read after `isEncryptionAvailable()`, which initializes it.
+ * Elsewhere, the asynchronous APIs, as Electron 45 recommends.
+ * @param {SafeStorage} safeStorage
+ * @param {string} platform
+ */
+const encryptionOf = (safeStorage, platform) =>
+  platform === 'linux'
+    ? {
+        canEncrypt: async () =>
+          safeStorage.isEncryptionAvailable() &&
+          safeStorage.getSelectedStorageBackend() !== 'basic_text',
+        encrypt: async (/** @type {string} */ text) =>
+          safeStorage.encryptString(text),
+        decrypt: async (/** @type {Buffer} */ data) => ({
+          result: safeStorage.decryptString(data),
+          shouldReEncrypt: false,
+        }),
+      }
+    : {
+        canEncrypt: () => safeStorage.isAsyncEncryptionAvailable(),
+        encrypt: (/** @type {string} */ text) =>
+          safeStorage.encryptStringAsync(text),
+        decrypt: (/** @type {Buffer} */ data) =>
+          safeStorage.decryptStringAsync(data),
+      };
+
+/**
  * @param {ReturnType<typeof import('./fileStore.cjs').createFileStore>} store
- * @param {Pick<import('electron').SafeStorage, 'isAsyncEncryptionAvailable' | 'encryptStringAsync' | 'decryptStringAsync' | 'getSelectedStorageBackend'>} safeStorage
+ * @param {SafeStorage} safeStorage
  * @param {{ platform?: string }} [options]
  */
 const createSecrets = (
@@ -15,24 +54,14 @@ const createSecrets = (
   safeStorage,
   { platform = process.platform } = {},
 ) => {
-  /**
-   * Whether the system keeps a key to encrypt with. On Linux without a
-   * Secret Service or KWallet, Chromium falls back to a key written in its
-   * own code (`basic_text`), which would only obscure the password.
-   */
-  const canEncrypt = async () =>
-    (await safeStorage.isAsyncEncryptionAvailable()) &&
-    !(
-      platform === 'linux' &&
-      safeStorage.getSelectedStorageBackend() === 'basic_text'
-    );
+  const encryption = encryptionOf(safeStorage, platform);
 
   /** @param {string} key @param {string} value */
   const save = async (key, value) =>
     store.setItem(
       DB,
       key,
-      (await safeStorage.encryptStringAsync(value)).toString('base64'),
+      (await encryption.encrypt(value)).toString('base64'),
     );
 
   return {
@@ -49,8 +78,9 @@ const createSecrets = (
         return null;
       }
       try {
-        const { result, shouldReEncrypt } =
-          await safeStorage.decryptStringAsync(Buffer.from(saved, 'base64'));
+        const { result, shouldReEncrypt } = await encryption.decrypt(
+          Buffer.from(saved, 'base64'),
+        );
         if (shouldReEncrypt) {
           await save(key, result).catch(() => {});
         }
@@ -60,14 +90,15 @@ const createSecrets = (
       }
     },
     /**
-     * Refuses when the system has no key to encrypt with (a Linux desktop
-     * without a keyring), rather than writing the password where anyone who
-     * reads the file could read it.
+     * Refuses when the system has no key of its own to encrypt with (a
+     * Linux desktop without a Secret Service or KWallet, where Chromium
+     * would use a key written in its own code), rather than writing the
+     * password where anyone who reads the file could read it.
      * @param {string} key
      * @param {string} value
      */
     set: async (key, value) => {
-      if (!(await canEncrypt())) {
+      if (!(await encryption.canEncrypt())) {
         throw new Error('Encryption is not available');
       }
       await save(key, value);
