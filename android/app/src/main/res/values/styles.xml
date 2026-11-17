@@ -2,10 +2,6 @@
 <resources>
 
     <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- learnX draws its own dark theme. Without this, a system that also
-             darkens apps itself (Xiaomi's dark mode) recolors the already dark
-             views: the navigation bar's selected pill came out almost white. -->
-        <item name="android:forceDarkAllowed">false</item>
         <item name="colorPrimary">@color/md_theme_primary</item>
         <item name="colorOnPrimary">@color/md_theme_onPrimary</item>
         <item name="colorPrimaryContainer">@color/md_theme_primaryContainer</item>

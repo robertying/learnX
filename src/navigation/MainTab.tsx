@@ -220,10 +220,11 @@ const MainTab = () => {
       // it can't do with system colors: secondaryLabel on iOS, and Material's
       // onSurfaceVariant for an inactive navigation bar item
       tabBarInactiveTintColor={theme.colors.onSurfaceVariant as string}
-      // Android: given too, so the selected item's pill follows the app's
-      // appearance, not the native theme's. A system that darkens apps
-      // itself (Xiaomi's dark mode) leaves the native theme light, which
-      // drew the light pill, almost white, in the dark bar.
+      // Android: given too, so the selected item's pill follows a switch
+      // between light and dark while the app runs. The native bar reads it
+      // from the theme only when it's created (the activity handles uiMode
+      // changes itself), and kept the light pill, almost white, in the dark
+      // bar until a restart.
       activeIndicatorColor={theme.colors.secondaryContainer}
       tabBarHidden={keyboardShown}
     >
