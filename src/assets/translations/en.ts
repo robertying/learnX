@@ -187,7 +187,7 @@ export default {
   trayOpen: 'Open learnX',
   trayQuit: 'Quit learnX',
   desktopNotificationsCaption:
-    'learnX sends notifications and reminders only while it runs, also in the system tray.',
+    "learnX sends notifications and reminders only while it's running.",
   exportCalendar: 'Export Calendar (.ics)',
   exportCalendarDescription:
     'Saves your classes for the rest of the semester and your open assignments as an .ics file, which calendar apps such as Outlook can import.',

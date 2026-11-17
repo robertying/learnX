@@ -223,6 +223,15 @@ describe('the window', () => {
     expect(quitting.preventDefault).not.toHaveBeenCalled();
   });
 
+  it('quits on close on Linux, where there may be no tray', () => {
+    const { createWindow } = setUp({ platform: 'linux' });
+    const win = createWindow();
+    const event = { preventDefault: jest.fn() };
+    win.emit('close', event);
+    expect(event.preventDefault).not.toHaveBeenCalled();
+    expect(win.hide).not.toHaveBeenCalled();
+  });
+
   it('comes back from the Dock once it has been shown', () => {
     const { app, createWindow } = setUp({ platform: 'darwin' });
     const win = createWindow();

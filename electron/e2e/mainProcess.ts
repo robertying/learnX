@@ -249,6 +249,12 @@ export const mainProcess = (app: ElectronApplication) => ({
       BrowserWindow.getAllWindows()[0]?.close();
     }),
 
+  /** Hides the window, as closing it does where learnX keeps running. */
+  hideWindow: () =>
+    app.evaluate(({ BrowserWindow }) => {
+      BrowserWindow.getAllWindows()[0]?.hide();
+    }),
+
   /**
    * Hands a second launch's arguments to this one, as a Jump List task does
    * (Windows starts a second learnX, which passes them on and quits).

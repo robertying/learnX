@@ -72,9 +72,9 @@ test('reminds of a deadline and opens the assignment from it', async ({
   expect(reminder!.trigger.value).toBeGreaterThan(Date.now());
   expect(reminder!.content.data).toMatchObject({ type: 'assignment' });
 
-  // Its time comes while the window is closed to the tray.
+  // Its time comes while the window is hidden (closed to the tray).
   await openTab(window, 'notices');
-  await main.closeWindow();
+  await main.hideWindow();
   await expect.poll(() => main.windowVisible()).toBe(false);
   await fireNow(window, reminder!);
   await expect

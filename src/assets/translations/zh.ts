@@ -176,8 +176,7 @@ const zh: typeof en = {
     '登录电脑时在系统托盘中启动learnX，以便持续同步并发送提醒。关闭窗口后learnX仍在托盘中运行，可在托盘菜单中退出。',
   trayOpen: '打开learnX',
   trayQuit: '退出learnX',
-  desktopNotificationsCaption:
-    'learnX仅在运行时（包括在系统托盘中）发送通知和提醒。',
+  desktopNotificationsCaption: 'learnX仅在运行时发送通知和提醒。',
   exportCalendar: '导出日历（.ics）',
   exportCalendarDescription:
     '将本学期剩余的课程和未截止的作业保存为.ics文件，可导入Outlook等日历应用。',

@@ -61,6 +61,13 @@ const loginItemOptions = platform =>
   platform === 'win32' ? { args: [HIDDEN_ARG] } : {};
 
 /**
+ * Whether closing the window keeps learnX running (in the tray on Windows,
+ * the Dock on macOS); on Linux it quits.
+ * @param {string} platform
+ */
+const closesToTray = platform => platform !== 'linux';
+
+/**
  * Claims the single instance before the app is ready: a second launch (a
  * Jump List task, or opening learnX again) quits and hands its arguments to
  * this one. Returns false in the second launch.
@@ -147,12 +154,17 @@ const setUpDesktop = ({
   });
 
   /**
-   * Closing the window hides it: learnX stays in the tray on Windows and
-   * Linux (and in the Dock on macOS, where Quit ends it, as Mac apps do), so
-   * the sync and the reminders keep going.
+   * Closing the window hides it: learnX stays in the tray on Windows (and in
+   * the Dock on macOS, where Quit ends it, as Mac apps do), so the sync and
+   * the reminders keep going. On Linux it quits: GNOME shows no tray icons
+   * without an extension, and nothing tells whether one would show, so a
+   * hidden window could have no way back.
    * @param {Electron.BrowserWindow} win
    */
   const keepOnClose = win => {
+    if (!closesToTray(platform)) {
+      return;
+    }
     win.on('close', event => {
       if (!quitting) {
         event.preventDefault();
@@ -434,6 +446,7 @@ const setUpDesktop = ({
 module.exports = {
   setUpDesktop,
   claimSingleInstance,
+  closesToTray,
   openTargetOf,
   loginItemSupported,
   loginItemOptions,

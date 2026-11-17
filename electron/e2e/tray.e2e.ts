@@ -33,6 +33,7 @@ test('keeps running in the tray, and comes back from it', async ({
   main,
   login,
 }) => {
+  test.skip(process.platform === 'linux', 'closing quits on Linux');
   await login();
   await expect
     .poll(() => main.trayLabels())
@@ -56,7 +57,7 @@ test('syncs in the background from the tray’s Refresh', async ({
   login,
 }) => {
   await login();
-  await main.closeWindow();
+  await main.hideWindow();
   await expect.poll(() => main.windowVisible()).toBe(false);
 
   // The timer's first run is 15 minutes away: this one is Refresh's.
@@ -90,6 +91,16 @@ test('skips the background sync after logging out', async ({
   await expect
     .poll(() => syncRuns(dataDir).map(run => run.status), { timeout: 30_000 })
     .toEqual(['skipped']);
+});
+
+test('quits when its window closes on Linux', async ({ app, main, login }) => {
+  test.skip(process.platform !== 'linux', 'it stays in the tray elsewhere');
+  await login();
+  const closed = app.waitForEvent('close');
+  await main.closeWindow().catch(() => {
+    // The app can quit before the call returns.
+  });
+  await closed;
 });
 
 test('quits from the tray', async ({ app, main, login }) => {
