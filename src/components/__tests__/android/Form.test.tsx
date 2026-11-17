@@ -7,7 +7,8 @@ import {
 } from '@testing-library/react-native';
 import { useState } from 'react';
 import type * as ReactNative from 'react-native';
-import { Keyboard, StyleSheet, Text } from 'react-native';
+import { Keyboard, StyleSheet, Text, View } from 'react-native';
+import { NavigationContext } from '@react-navigation/native';
 import { showChoices } from 'components/choiceSheet';
 import { playHaptic } from 'services/haptics';
 import {
@@ -29,6 +30,16 @@ import {
 
 jest.mock('components/choiceSheet', () => ({ showChoices: jest.fn() }));
 jest.mock('services/haptics', () => ({ playHaptic: jest.fn() }));
+
+let addListener: jest.SpiedFunction<typeof Keyboard.addListener>;
+beforeEach(() => {
+  addListener = jest.spyOn(Keyboard, 'addListener');
+});
+/** Sends a keyboard event to every listener the Form added. */
+const keyboardEvent = (name: string, event?: object) =>
+  addListener.mock.calls
+    .filter(([added]) => added === name)
+    .forEach(([, listener]) => (listener as (event?: object) => void)(event));
 
 describe('Form (Android)', () => {
   it('asks from a row with a dialog', async () => {
@@ -304,10 +315,78 @@ describe('Form (Android)', () => {
     expect(onValueChange).not.toHaveBeenCalled();
     await fireEvent.changeText(field, '30');
     expect(onValueChange).toHaveBeenCalledWith(30);
-    // The keyboard's done key puts the keyboard away.
-    const dismiss = jest.spyOn(Keyboard, 'dismiss');
+  });
+
+  it('shows Done in the header while a number is typed, and lets go of the field with it or the keyboard', async () => {
+    const navigation = { setOptions: jest.fn() };
+    await render(
+      <NavigationContext.Provider value={navigation as never}>
+        <Form>
+          <FormSection>
+            <FormNumberField
+              title="Minutes"
+              value={15}
+              onValueChange={jest.fn()}
+            />
+          </FormSection>
+        </Form>
+      </NavigationContext.Provider>,
+    );
+    // The buttons the header shows on the right.
+    const headerButtons = (): { props: { onPress: () => void } }[] =>
+      navigation.setOptions.mock.calls
+        .map(([options]) => options)
+        .findLast(options => 'headerRight' in options)
+        ?.headerRight().props.children ?? [];
+    const field = screen.getByDisplayValue('15');
+    expect(headerButtons()).toHaveLength(0);
+
+    // Done in the header lets go of the field, which puts the keyboard away.
+    await fireEvent(field, 'focus');
+    expect(headerButtons()).toHaveLength(1);
+    await act(() => headerButtons()[0].props.onPress());
+    expect(field.props.blur).toHaveBeenCalled();
+    expect(headerButtons()).toHaveLength(0);
+
+    // So does the keyboard's ✓ key.
+    await fireEvent(field, 'focus');
     await fireEvent(field, 'submitEditing');
-    expect(dismiss).toHaveBeenCalled();
+    expect(field.props.blur).toHaveBeenCalledTimes(2);
+    expect(headerButtons()).toHaveLength(0);
+
+    // And Back putting the keyboard away.
+    await fireEvent(field, 'focus');
+    await act(() => keyboardEvent('keyboardDidHide'));
+    expect(field.props.blur).toHaveBeenCalledTimes(3);
+    expect(headerButtons()).toHaveLength(0);
+  });
+
+  it('ends above the keyboard, by as much of it as covers the form', async () => {
+    jest
+      .spyOn(View.prototype, 'measureInWindow')
+      .mockImplementation(callback =>
+        (callback as (...frame: number[]) => void)(0, 100, 400, 700),
+      );
+    await render(
+      <Form>
+        <FormSection>
+          <FormText title="Row" />
+        </FormSection>
+      </Form>,
+    );
+    // The Form's outermost view.
+    const padding = () =>
+      StyleSheet.flatten(
+        (screen.toJSON() as { props: { style?: unknown } }).props
+          .style as never,
+      ).paddingBottom;
+    // The form ends at 800; the keyboard starts at 600.
+    await act(() =>
+      keyboardEvent('keyboardDidShow', { endCoordinates: { screenY: 600 } }),
+    );
+    expect(padding()).toBe(200);
+    await act(() => keyboardEvent('keyboardDidHide'));
+    expect(padding()).toBe(0);
   });
 
   it('shows paragraphs, the profile and React Native views in rows', async () => {
@@ -374,7 +453,7 @@ describe('Form (Android)', () => {
     expect(style('Today').color).not.toMatch(/^[a-zA-Z]+$/);
     expect(style('Today').color).not.toBe(style('Tomorrow').color);
     expect(style('2 MB').color).toBe('onSurfaceVariant');
-    expect(screen.getByText('2 MB').props.typography).toBeUndefined();
+    expect(screen.getByText('2 MB').props.typography).toBe('bodyMedium');
     for (const text of ['Submitted', 'On time', 'Mon']) {
       expect(style(text).color).toBe('outline');
     }
@@ -383,15 +462,15 @@ describe('Form (Android)', () => {
     expect(screen.queryByTestId('icon-check')).toBeNull();
   });
 
-  it("sets an item's title in medium weight, and other rows' in the default", async () => {
+  it("sets an item's title as a list card's, and other rows' in the list's own", async () => {
     await render(
       <FormSection>
         <FormLink item title="Essay" onPress={jest.fn()} />
         <FormText title="Schedule" />
       </FormSection>,
     );
-    expect(style('Essay').fontWeight).toBe('500');
-    expect(style('Schedule').fontWeight).toBeUndefined();
+    expect(screen.getByText('Essay').props.typography).toBe('titleMedium');
+    expect(screen.getByText('Schedule').props.typography).toBeUndefined();
   });
 
   it('puts the detail under the subtitle at large font sizes', async () => {

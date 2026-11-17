@@ -42,6 +42,7 @@ import { t } from 'helpers/i18n';
 import { SearchStackParams } from 'navigation/types';
 import { Paragraph } from 'components/Text';
 import { useTheme } from 'theme';
+import useKeyboardOverlap from 'hooks/useKeyboardOverlap';
 
 type Props = NativeStackScreenProps<SearchStackParams, 'Search'>;
 
@@ -83,6 +84,9 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
   // The system search bar in the header (UISearchController on iOS and Mac,
   // the toolbar search view on Android).
   const searchBarRef = useRef<SearchBarCommands>(null);
+  // Android: the results end above the keyboard, so all of them scroll into
+  // view.
+  const { ref: keyboardRef, overlap: keyboardOverlap } = useKeyboardOverlap();
   useLayoutEffect(() => {
     navigation.setOptions({
       headerSearchBarOptions: {
@@ -95,13 +99,23 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
         obscureBackground: false,
         tintColor: theme.colors.primary,
         onChangeText: e => setSearchQuery(e.nativeEvent.text),
-        // Android's close button doesn't always send a text change. iOS and
-        // Mac have no cancel button (patched out): it only did what the clear
-        // button in the field does, and the modal has its own Close button.
-        onClose: () => setSearchQuery(''),
+        // Android: the field's ✕ (once the query is cleared) or Back closes
+        // the search, and so Search, as in Android's own apps: the open field
+        // covers the header's Close button. iOS and Mac have no cancel button
+        // (patched out): it only did what the clear button in the field does,
+        // and the modal has its own Close button.
+        onClose: () => {
+          setSearchQuery('');
+          if (Platform.OS === 'android' && navigation.isFocused()) {
+            navigation.goBack();
+          }
+        },
         onFocus: () => {
           searchBarFocused.current = true;
         },
+        // The results follow typing, so the keyboard's search key only puts
+        // the keyboard away, to see all of them (as in Mail and Gmail).
+        onSearchButtonPress: () => searchBarRef.current?.blur(),
       },
     });
   }, [navigation, theme.colors.primary]);
@@ -338,7 +352,11 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
 
   return (
     <SafeArea>
-      <View style={Styles.flex1}>
+      <View
+        ref={keyboardRef}
+        collapsable={false}
+        style={[Styles.flex1, { paddingBottom: keyboardOverlap }]}
+      >
         {/* Behind the results and always mounted: a KeyboardAvoidingView
             that mounts while the keyboard is up (after the query is cleared)
             never learns its height, so the prompt would sit behind it. */}

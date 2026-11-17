@@ -39,7 +39,6 @@ import {
 } from '@expo/ui/swift-ui/modifiers';
 import { FormProfile } from 'components/Form';
 import DeviceInfo from 'constants/DeviceInfo';
-import { t } from 'helpers/i18n';
 import { BrandLightTheme } from 'theme';
 
 describe('Form', () => {
@@ -316,14 +315,14 @@ describe('Form', () => {
 
     await fireEvent(screen.getByLabelText('Minutes'), 'focus');
     await render(<>{headerRight()()}</>);
-    await userEvent.setup().press(screen.getByText(t('done')));
+    await userEvent.setup().press(screen.getByTestId('keyboard-done'));
     expect(dismiss).toHaveBeenCalled();
 
     await render(numberForm);
     await fireEvent(screen.getByLabelText('Minutes'), 'focus');
     await fireEvent(screen.getByLabelText('Minutes'), 'blur');
     await render(<>{headerRight()()}</>);
-    expect(screen.queryByText(t('done'))).toBeNull();
+    expect(screen.queryByTestId('keyboard-done')).toBeNull();
 
     jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
     navigation.setOptions.mockClear();

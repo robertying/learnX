@@ -38,6 +38,7 @@ import FilterListRow, {
 import FlatList from './FlatList';
 import ListBackground from './ListBackground';
 import { playHaptic } from 'services/haptics';
+import { useTheme } from 'theme';
 
 export type { ItemComponentProps };
 
@@ -98,6 +99,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   onRefresh,
   updatedAt,
 }: FilterListProps<T>) => {
+  const theme = useTheme();
   const detailNavigator = useDetailNavigator();
   // The item open beside the list, which its row shows as selected.
   const detailRoot = useDetailRoot();
@@ -309,7 +311,14 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     // drag in reorder mode), nor on the Mac, which has no pull.
     refreshControl:
       selectionMode || reorderMode || DeviceInfo.isMac() ? undefined : (
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          // Android: Material 3's colors, as Compose's pull to refresh
+          // (Today) draws them; iOS keeps the system spinner.
+          colors={[theme.colors.primary]}
+          progressBackgroundColor={theme.colors.surfaceContainer}
+        />
       ),
   };
 

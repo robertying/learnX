@@ -130,6 +130,8 @@ export const systemIcons = {
   unselected: { ios: 'circle', android: 'radio_button_unchecked' },
   // An option that's on in a menu of toggles
   checked: { ios: 'checkmark', android: 'check' },
+  // Finishing what's being typed (Done in the header)
+  confirm: { ios: 'checkmark', android: 'check' },
   preview: { ios: 'eye', android: 'visibility' },
   // Quick Look's floating panel (Mac), as Space opens it in Finder
   quickLook: { ios: 'eye.circle', android: 'visibility' },

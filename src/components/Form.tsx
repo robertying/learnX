@@ -1,6 +1,5 @@
 import {
   cloneElement,
-  createContext,
   useContext,
   useLayoutEffect,
   useRef,
@@ -73,8 +72,11 @@ import { BADGE_COLOR, DOT_SIZE } from 'components/Badge';
 import DeviceInfo from 'constants/DeviceInfo';
 import Spacing from 'constants/Spacing';
 import { t } from 'helpers/i18n';
-import { headerButtons } from 'navigation/headerButtons';
 import { useFieldText } from 'hooks/useFieldText';
+import useNumberFieldDone, {
+  NumberFieldFocusContext,
+  useNumberFieldFocus,
+} from 'hooks/useNumberFieldDone';
 import { systemIcons } from 'helpers/systemIcons';
 import { useTheme } from 'theme';
 import {
@@ -194,39 +196,13 @@ export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
       });
   }, [navigation]);
 
-  // Done in the header while a number is typed: the number pad has no
-  // return key. (SwiftUI's keyboard toolbar shows only inside a SwiftUI
-  // navigation stack.) The Mac's keyboard has one.
-  const [numberFocused, setNumberFocused] = useState(false);
-  const doneShown = useRef(false);
-  useLayoutEffect(() => {
-    if (!numberFocused && !doneShown.current) {
-      return;
-    }
-    doneShown.current = numberFocused;
-    navigation?.setOptions(
-      headerButtons(
-        'right',
-        numberFocused
-          ? [
-              {
-                id: 'keyboard-done',
-                label: t('done'),
-                icon: 'checkAll',
-                sfSymbol: 'checkmark',
-                text: true,
-                onPress: () => Keyboard.dismiss(),
-                testID: 'keyboard-done',
-              },
-            ]
-          : [],
-      ),
-    );
-  }, [navigation, numberFocused]);
+  const reportNumberFocus = useNumberFieldDone();
 
   return (
     <ThemedHost style={styles.fill} testID={testID}>
-      <NumberFocusContext value={DeviceInfo.isMac() ? null : setNumberFocused}>
+      <NumberFieldFocusContext
+        value={DeviceInfo.isMac() ? null : reportNumberFocus}
+      >
         <SwiftUIForm
           modifiers={[
             // Dragging the form down pulls the keyboard away, as in Notes.
@@ -237,15 +213,10 @@ export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
         >
           {sectionsMarked(children)}
         </SwiftUIForm>
-      </NumberFocusContext>
+      </NumberFieldFocusContext>
     </ThemedHost>
   );
 };
-
-/** Tells the Form a number field took or lost the focus. */
-const NumberFocusContext = createContext<((focused: boolean) => void) | null>(
-  null,
-);
 
 /**
  * The root view of a screen that is a Form, in place of `SafeArea`. A SwiftUI
@@ -877,7 +848,7 @@ export const FormNumberField: React.FC<FormNumberFieldProps> = ({
   value,
   onValueChange,
 }) => {
-  const setFocused = useContext(NumberFocusContext);
+  const reportFocus = useNumberFieldFocus();
   return (
     <LabeledContent
       label={<RowLabel title={title} icon={icon} plain />}
@@ -888,8 +859,8 @@ export const FormNumberField: React.FC<FormNumberFieldProps> = ({
         onChangeText={parseNumberInput(onValueChange)}
         keyboardType="number-pad"
         textAlign="right"
-        onFocus={() => setFocused?.(true)}
-        onBlur={() => setFocused?.(false)}
+        onFocus={() => reportFocus?.(() => Keyboard.dismiss())}
+        onBlur={() => reportFocus?.(null)}
         // Narrow, so the label keeps the rest of the row.
         style={styles.numberField}
         accessibilityLabel={title}

@@ -218,12 +218,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  // A little more room under the logo than between the rest. Android's logo
-  // carries its own space below, and is pulled back so the X lines up with
-  // the fields' start, as on the welcome page.
-  logo: android
-    ? { alignSelf: 'flex-start', marginBottom: -24, marginStart: -28 }
-    : { marginBottom: Spacing.s },
+  // A little more room under the logo than between the rest. Android's X
+  // starts where the fields do, as on the welcome page.
+  logo: {
+    alignSelf: android ? 'flex-start' : 'auto',
+    marginBottom: Spacing.s,
+  },
   inputs: {
     flex: 1,
     alignItems: android ? 'stretch' : 'center',
