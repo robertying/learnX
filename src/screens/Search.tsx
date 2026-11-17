@@ -115,9 +115,8 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
         onChangeText: e => setSearchQuery(e.nativeEvent.text),
         // Android: the field's ✕ (once the query is cleared) or Back closes
         // the search, and so Search, as in Android's own apps. iOS and Mac
-        // have no cancel button
-        // (patched out): it only did what the clear button in the field does,
-        // and the modal has its own Close button.
+        // have no cancel button (patched out): it would only do what the
+        // field's clear button does, and the modal has its own Close button.
         onClose: () => {
           setSearchQuery('');
           if (isAndroid() && navigation.isFocused()) {
