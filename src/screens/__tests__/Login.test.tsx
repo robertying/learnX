@@ -177,7 +177,7 @@ describe('Login', () => {
 
   it('turns the graduate setting on and off', async () => {
     await setup();
-    const toggle = screen.getByRole('switch', { name: 'Graduate' });
+    const toggle = screen.getByRole('switch', { name: t('graduate') });
     expect(toggle).not.toBeChecked();
     await fireEvent(toggle, 'valueChange', true);
     expect(getSettings().graduate).toBe(true);

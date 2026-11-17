@@ -10,7 +10,7 @@ struct UpNext: Widget {
       WidgetsEntryView(entry: entry)
     }
     .configurationDisplayName("Next Up")
-    .description("Your class on now or next, and the ones after it.")
+    .description("Your current or next class, and the ones after it.")
     .supportedFamilies([.systemSmall, .systemMedium, .systemLarge, .accessoryRectangular])
   }
 }

@@ -10,6 +10,6 @@
   <string name="deadlines_display_name">Deadlines</string>
   <string name="deadlines_description">Your upcoming assignment deadlines.</string>
   <string name="up_next_display_name">Next Up</string>
-  <string name="up_next_description">Your class on now or next, and the ones after it.</string>
+  <string name="up_next_description">Your current or next class, and the ones after it.</string>
 </resources>
 
