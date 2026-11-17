@@ -450,6 +450,7 @@ export default {
   time12HourFormat: 'h:mm A',
   lateDeadlineFormat: '[Late Deadline] ddd, MMM D, YYYY {time}',
   dateTimeFormat: 'ddd, MMM D, YYYY {time}',
+  reminderDeadlineFormat: '[Deadline:] ddd, MMM D, YYYY {time}',
   shortDateTimeFormat: 'MMM D {time}',
   widgetDateTimeFormat: 'MMM D, {time}',
   noticeExpireTimeFormat: '[Expires] ddd, MMM D, YYYY {time}',

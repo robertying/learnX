@@ -428,6 +428,7 @@ const zh: typeof en = {
   time12HourFormat: 'Ah:mm',
   lateDeadlineFormat: '[补交截止]YYYY年M月D日 dddd {time}',
   dateTimeFormat: 'YYYY年M月D日 dddd {time}',
+  reminderDeadlineFormat: '[截止时间：]YYYY年M月D日 dddd {time}',
   shortDateTimeFormat: 'M月D日 {time}',
   widgetDateTimeFormat: 'M月D日 {time}',
   noticeExpireTimeFormat: 'YYYY年M月D日 dddd {time}[过期]',
