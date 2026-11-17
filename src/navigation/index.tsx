@@ -69,27 +69,38 @@ const renderSheets = () => (
   </Sheets.Group>
 );
 
+// Typed against the modals' own params, which both roots include.
+const Modals =
+  createNativeStackNavigator<
+    Pick<
+      RootStackParams,
+      'CourseXStack' | 'SearchStack' | 'AssignmentSubmissionStack'
+    >
+  >();
+
+/**
+ * Search, CourseX and a submission, over the whole window: page sheets on
+ * iOS, iPadOS and Mac, and on Android above the split view (the root
+ * navigator there), not inside the list's pane.
+ */
+const renderModals = () => (
+  <Modals.Group screenOptions={sheetOptions}>
+    <Modals.Screen name="CourseXStack" component={CourseXStack} />
+    <Modals.Screen name="SearchStack" component={SearchStack} />
+    {/* A sheet like Search; the draft is saved as it's written, so a swipe
+        down loses nothing (the screen holds it while uploading). */}
+    <Modals.Screen
+      name="AssignmentSubmissionStack"
+      component={AssignmentSubmissionStack}
+    />
+  </Modals.Group>
+);
+
 const renderMainScreens = () => (
   <>
     <RootNavigator.Screen name="MainTab" component={MainTab} />
-    <RootNavigator.Screen
-      name="CourseXStack"
-      component={CourseXStack}
-      options={sheetOptions}
-    />
-    <RootNavigator.Screen
-      name="SearchStack"
-      component={SearchStack}
-      options={sheetOptions}
-    />
-    <RootNavigator.Screen
-      name="AssignmentSubmissionStack"
-      component={AssignmentSubmissionStack}
-      // A sheet like Search; the draft is saved as it's written, so a swipe
-      // down loses nothing (the screen holds it while uploading).
-      options={sheetOptions}
-    />
     {/* Android shows these above its split view (AndroidRootNavigator). */}
+    {nativeSplit && renderModals()}
     {nativeSplit && renderSheets()}
   </>
 );
@@ -148,6 +159,7 @@ const Navigation: React.FC<{ showMain: boolean }> = ({ showMain }) => {
                 options={{ animationTypeForReplace: 'pop' }}
               />
               {/* Over the whole window, not inside the list's pane */}
+              {renderModals()}
               {renderSheets()}
             </>
           ) : (
