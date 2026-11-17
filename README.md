@@ -56,10 +56,18 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 
 从 [TUNA 镜像（推荐）](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/)或 [GitHub Releases](https://github.com/robertying/learnX/releases) 下载，App 会自动更新。
 
-- Windows（x64、ARM64）：下载 .exe 安装程序。安装程序没有签名，如果 Windows 提示“Windows 已保护你的电脑”，请点按“更多信息”，再点按“仍要运行”。
-- Linux（x64、ARM64）：
-  - Ubuntu 和 Debian：按设备架构下载 .deb 包（x64 设备选文件名带 `amd64` 的，ARM64 设备选带 `arm64` 的），然后用 `sudo apt install ./文件名.deb` 安装。不建议在 Ubuntu 上用 AppImage：Ubuntu 24.04 起，AppImage 无法启用 Chromium 沙盒。
-  - 其他发行版：下载 AppImage，先用 `chmod +x` 加上执行权限，再直接运行。
+- **Windows**
+  - 下载 `learnX-windows-vX.X.X.exe`（x64 和 ARM64 通用）
+  - 安装程序没有签名，如果提示“Windows 已保护你的电脑”，请点按“更多信息”，再点按“仍要运行”
+
+- **Ubuntu / Debian**
+  - x64 下载 `learnX-linux-amd64-vX.X.X.deb`，ARM64 下载 `learnX-linux-arm64-vX.X.X.deb`
+  - 用 `sudo apt install ./learnX-linux-amd64-vX.X.X.deb` 安装（ARM64 换成对应文件名）
+
+- **其他 Linux 发行版**
+  - x64 下载 `learnX-linux-x86_64-vX.X.X.AppImage`，ARM64 下载 `learnX-linux-arm64-vX.X.X.AppImage`
+  - 先用 `chmod +x` 加上执行权限，再直接运行
+  - Ubuntu 上请用 .deb：Ubuntu 24.04 起，AppImage 无法启用 Chromium 沙盒
 
 ## 功能
 
@@ -126,9 +134,9 @@ Requires iOS / iPadOS 17.6, macOS 14.6, Android 10 or Windows 10 and later, or L
 - **iPhone, iPad and Mac:** [App Store](https://apps.apple.com/cn/app/learnx-thu-web-learning/id1459073115)
 - **Android:** [Google Play](https://play.google.com/store/apps/details?id=io.robertying.learnx), the [TUNA Mirror (recommended)](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/) or [GitHub Releases](https://github.com/robertying/learnX/releases). From the mirror or GitHub, download `learnX-arm64-v8a-vX.X.X.apk`, or `learnX-universal-vX.X.X.apk` if it doesn't install; these versions update from inside the app.
 - **Windows and Linux:** the [TUNA Mirror (recommended)](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/) or [GitHub Releases](https://github.com/robertying/learnX/releases). The app updates itself.
-  - Windows (x64, ARM64): download the .exe installer. It's unsigned, so if Windows says "Windows protected your PC", choose "More info", then "Run anyway".
-  - Ubuntu and Debian (x64, ARM64): download the .deb for your device (`amd64` in the file name for x64, `arm64` for ARM64) and install it with `sudo apt install ./<file>.deb`. Don't use the AppImage on Ubuntu: since Ubuntu 24.04, it can't turn on Chromium's sandbox.
-  - Other Linux distributions (x64, ARM64): download the AppImage, make it executable with `chmod +x`, and run it.
+  - Windows: download `learnX-windows-vX.X.X.exe` (one installer for x64 and ARM64). It's unsigned, so if Windows says "Windows protected your PC", choose "More info", then "Run anyway".
+  - Ubuntu and Debian: download `learnX-linux-amd64-vX.X.X.deb` (x64) or `learnX-linux-arm64-vX.X.X.deb` (ARM64) and install it with `sudo apt install ./<file>.deb`.
+  - Other Linux distributions: download `learnX-linux-x86_64-vX.X.X.AppImage` (x64) or `learnX-linux-arm64-vX.X.X.AppImage` (ARM64), make it executable with `chmod +x`, and run it. On Ubuntu, use the .deb: since Ubuntu 24.04, the AppImage can't turn on Chromium's sandbox.
 
 ### Features
 
