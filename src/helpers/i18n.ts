@@ -173,6 +173,19 @@ export const relativeTime = (
 ) => spaceCjk(inAppLanguage(from).to(to, withoutSuffix));
 
 /**
+ * How long ago `past` was from `now` ("3 minutes ago" / "3分钟前"), for times
+ * that can't be ahead, such as when data was fetched. A time ahead of `now`
+ * reads "a few seconds ago" / "几秒前": `now` is usually the minute from
+ * `useMinute`, so data fetched since then is up to a minute ahead of it, and
+ * would otherwise read "in a few seconds" / "几秒后".
+ */
+export const timeAgo = (now: dayjs.ConfigType, past: dayjs.ConfigType) => {
+  const from = dayjs(now);
+  const to = dayjs(past);
+  return relativeTime(from, to.isAfter(from) ? from : to);
+};
+
+/**
  * A start–end range of times. On a 12-hour clock, AM or PM is written once
  * when both times share it, as Calendar does ("4:00–5:35 PM", "下午4:00–5:35"),
  * so the range fits where space is tight (the lock screen widget).

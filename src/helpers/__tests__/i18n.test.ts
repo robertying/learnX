@@ -13,6 +13,7 @@ import {
   spaceCjk,
   t,
   tCount,
+  timeAgo,
   timeRange,
 } from 'helpers/i18n';
 import { mockClock, mockLocale } from 'test-utils/locale';
@@ -97,6 +98,35 @@ describe('times of day', () => {
     expect(relativeTime(evening, evening.add(3, 'hour'))).toBe('3小时后');
     expect(relativeTime(evening, evening.subtract(2, 'day'))).toBe('2天前');
     expect(relativeTime(evening, evening.add(2, 'month'), true)).toBe('2个月');
+  });
+});
+
+describe('timeAgo', () => {
+  const now = dayjs('2026-11-12T21:30:00');
+
+  afterEach(() => {
+    dayjs.locale('en');
+  });
+
+  it('says how long ago a time was', () => {
+    expect(timeAgo(now, now.subtract(3, 'minute'))).toBe('3 minutes ago');
+    expect(timeAgo(now.valueOf(), now.subtract(2, 'day').valueOf())).toBe(
+      '2 days ago',
+    );
+  });
+
+  // Data fetched after the minute that `useMinute` gives as now.
+  it('reads a time ahead of now as just now, not in a few seconds', () => {
+    expect(timeAgo(now, now.add(20, 'second'))).toBe('a few seconds ago');
+    expect(timeAgo(now, now.add(5, 'minute'))).toBe('a few seconds ago');
+    expect(timeAgo(now, now)).toBe('a few seconds ago');
+  });
+
+  it('says it in Chinese, never 几秒后', () => {
+    mockLocale.current = 'zh-CN';
+    dayjs.locale('zh-cn');
+    expect(timeAgo(now, now.add(20, 'second'))).toBe('几秒前');
+    expect(timeAgo(now, now.subtract(3, 'hour'))).toBe('3小时前');
   });
 });
 
