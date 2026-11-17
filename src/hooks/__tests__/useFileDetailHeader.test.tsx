@@ -15,6 +15,7 @@ const navigation = (routeNames = ['Files', 'FileDetail']) =>
 
 const handlers = {
   onRefresh: jest.fn(),
+  onQuickLook: jest.fn(),
   onShare: jest.fn(),
   onSave: jest.fn(),
   onOpen: jest.fn(),
@@ -93,6 +94,33 @@ it('adds download on the Mac and open on Android, info only when shown inline', 
     'open',
   ]);
   isMac.mockRestore();
+});
+
+it("adds Quick Look before share on a Mac with Quick Look's plugin", async () => {
+  jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+  jest.replaceProperty(
+    jest.requireMock<typeof import('modules/quicklook')>('modules/quicklook'),
+    'isQuickLookAvailable',
+    true,
+  );
+  await renderHook(() =>
+    useFileDetailHeader({ navigation: navigation(), ...props }),
+  );
+  expect(items().map(i => [i.identifier, !!i.disabled])).toEqual([
+    ['refresh', false],
+    ['quickLook', false],
+    ['share', false],
+    ['download', false],
+    ['info', false],
+  ]);
+  expect(items()[1].label).toBe(t('quickLook'));
+  items()[1].onPress();
+  expect(handlers.onQuickLook).toHaveBeenCalled();
+
+  await renderHook(() =>
+    useFileDetailHeader({ navigation: navigation(), ...props, path: '' }),
+  );
+  expect(items()[1]).toMatchObject({ identifier: 'quickLook', disabled: true });
 });
 
 it('toggles full screen in a split view, but not in search', async () => {

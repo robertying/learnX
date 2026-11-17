@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { scrollInsetBehavior } from 'constants/scrollInsetBehavior';
 import { Linking, Platform, StyleSheet, View, ViewProps } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useIsFocused } from '@react-navigation/native';
 import WebView from 'react-native-webview';
 import Pdf from 'react-native-pdf';
 import Styles from 'constants/Styles';
@@ -11,7 +12,11 @@ import {
   needWhiteBackground,
   previewKind,
 } from 'helpers/filePreview';
-import { QuickLookView } from 'modules/quicklook';
+import {
+  isQuickLookAvailable,
+  QuickLookView,
+  showQuickLookPanel,
+} from 'modules/quicklook';
 import { formatDate, t } from 'helpers/i18n';
 import { displayFileSize } from 'helpers/filename';
 import Spinner from 'components/Spinner';
@@ -20,6 +25,7 @@ import { FileDetailParamList } from 'navigation/types';
 import { markFileSeen, useFile } from 'data/content';
 import { DownloadableFile, File } from 'data/types/state';
 import NotFound from 'components/NotFound';
+import useAppCommand from 'hooks/useAppCommand';
 import useFileDetailHeader from 'hooks/useFileDetailHeader';
 import useFileDownload from 'hooks/useFileDownload';
 import useHeaderTitle from 'hooks/useHeaderTitle';
@@ -103,6 +109,19 @@ const FileDetailContent: React.FC<{
 
   const handleShowInfo = () => setShowInfo(shown => !shown);
 
+  const handleQuickLook = () => {
+    if (path) {
+      void showQuickLookPanel(path);
+    }
+  };
+  // ⌘Y, as in Finder (the Mac's File menu).
+  const isFocused = useIsFocused();
+  useAppCommand(
+    'quickLook',
+    handleQuickLook,
+    isFocused && !!path && isQuickLookAvailable,
+  );
+
   useFileDetailHeader({
     navigation,
     path,
@@ -111,6 +130,7 @@ const FileDetailContent: React.FC<{
     canRender,
     showInfo,
     onRefresh: handleRedownload,
+    onQuickLook: handleQuickLook,
     onShare: share,
     onSave: save,
     onOpen: open,
@@ -201,7 +221,13 @@ const FileDetailContent: React.FC<{
           />
         )
       ) : (
-        <FileInfo file={file} onShare={share} onSave={save} onOpen={open} />
+        <FileInfo
+          file={file}
+          onQuickLook={handleQuickLook}
+          onShare={share}
+          onSave={save}
+          onOpen={open}
+        />
       )}
     </Root>
   );
@@ -219,10 +245,11 @@ const PreviewRoot: React.FC<ViewProps> = props => (
 /** The file's details, and what to do with it, when it isn't previewed. */
 const FileInfo: React.FC<{
   file: DownloadableFile & Partial<File>;
+  onQuickLook: () => void;
   onShare: () => void;
   onSave: () => void;
   onOpen: () => void;
-}> = ({ file, onShare, onSave, onOpen }) => (
+}> = ({ file, onQuickLook, onShare, onSave, onOpen }) => (
   <Form testID="file-info">
     <FormSection>
       <FormParagraph text={file.title} headline />
@@ -251,6 +278,13 @@ const FileInfo: React.FC<{
       <FormParagraph text={file.description || t('noFileDescription')} />
     </FormSection>
     <FormSection>
+      {DeviceInfo.isMac() && isQuickLookAvailable ? (
+        <FormButton
+          title={t('quickLook')}
+          icon="quickLook"
+          onPress={onQuickLook}
+        />
+      ) : null}
       <FormButton title={t('share')} icon="share" onPress={onShare} />
       {DeviceInfo.isMac() ? (
         <FormButton title={t('download')} icon="download" onPress={onSave} />

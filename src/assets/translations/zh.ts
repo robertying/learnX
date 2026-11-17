@@ -314,6 +314,7 @@ const zh: typeof en = {
   exitFullscreen: '退出全屏',
   info: '详情',
   preview: '预览',
+  quickLook: '快速查看',
   unknownFileType: '未知',
   fileType: '类型',
   fileSize: '大小',

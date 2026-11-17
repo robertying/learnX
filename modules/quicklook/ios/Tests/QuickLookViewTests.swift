@@ -23,6 +23,7 @@ private final class FakeHost: NSObject, MacPreviewHosting {
   var shown: (frame: CGRect, windowSize: CGSize, holes: [CGRect])?
   var hidden = false
   var detached = false
+  var panelURLs: [URL] = []
 
   func attach(toWindowOf uiWindow: AnyObject) -> Bool {
     attachedTo = uiWindow
@@ -44,6 +45,10 @@ private final class FakeHost: NSObject, MacPreviewHosting {
 
   func detach() {
     detached = true
+  }
+
+  func togglePanel(for url: URL) {
+    panelURLs.append(url)
   }
 }
 
@@ -257,5 +262,39 @@ private final class FakeHost: NSObject, MacPreviewHosting {
       flipped: false
     )
     #expect(frame == .zero)
+  }
+}
+
+@MainActor
+@Suite(.serialized) struct QuickLookPanelTests {
+  @Test func togglesThePanelForAFile() {
+    let host = FakeHost()
+    let makeHost = QuickLookView.makeHost
+    QuickLookView.makeHost = { host }
+    QuickLookPanel.reset()
+    defer {
+      QuickLookView.makeHost = makeHost
+      QuickLookPanel.reset()
+    }
+    QuickLookPanel.toggle("file:///tmp/a.docx")
+    QuickLookPanel.toggle("https://example.com/a.docx")
+    QuickLookPanel.toggle("file:///tmp/b.pptx")
+    #expect(host.panelURLs == [URL(fileURLWithPath: "/tmp/a.docx"), URL(fileURLWithPath: "/tmp/b.pptx")])
+  }
+
+  @Test func doesNothingWithoutThePlugin() {
+    QuickLookPanel.reset()
+    let makeHost = QuickLookView.makeHost
+    QuickLookView.makeHost = { nil }
+    defer {
+      QuickLookView.makeHost = makeHost
+      QuickLookPanel.reset()
+    }
+    QuickLookPanel.toggle("file:///tmp/a.docx")
+  }
+
+  @Test func isAFunctionOfTheModule() {
+    let functions = QuickLookModule(appContext: AppContext()).definition().functions
+    #expect(functions["showQuickLookPanel"] != nil)
   }
 }

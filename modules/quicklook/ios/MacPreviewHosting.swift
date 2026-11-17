@@ -23,6 +23,9 @@ protocol MacPreviewHosting: NSObjectProtocol {
 
   /// Removes the preview from the window.
   func detach()
+
+  /// Opens Quick Look's floating panel on `url`, as Space does in Finder, or closes it if it already shows that file.
+  func togglePanel(for url: URL)
 }
 
 enum MacPreviewGeometry {

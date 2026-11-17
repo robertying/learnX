@@ -6,11 +6,12 @@ import { SplitViewContext } from 'navigation/SplitView';
 import DeviceInfo from 'constants/DeviceInfo';
 import { t } from 'helpers/i18n';
 import useHeaderButtons from 'hooks/useHeaderButtons';
+import { isQuickLookAvailable } from 'modules/quicklook';
 
 /**
  * File detail's header buttons: full screen (split view, outside search),
- * refresh, share, download (Mac), open (Android) and info/preview (when the
- * file shows inline).
+ * refresh, Quick Look (Mac), share, download (Mac), open (Android) and
+ * info/preview (when the file shows inline).
  */
 const useFileDetailHeader = ({
   navigation,
@@ -20,6 +21,7 @@ const useFileDetailHeader = ({
   canRender,
   showInfo,
   onRefresh,
+  onQuickLook,
   onShare,
   onSave,
   onOpen,
@@ -32,6 +34,7 @@ const useFileDetailHeader = ({
   canRender: boolean;
   showInfo: boolean;
   onRefresh: () => void;
+  onQuickLook: () => void;
   onShare: () => void;
   onSave: () => void;
   onOpen: () => void;
@@ -65,6 +68,14 @@ const useFileDetailHeader = ({
       onPress: onRefresh,
       disabled: !!progress,
     },
+    DeviceInfo.isMac() &&
+      isQuickLookAvailable && {
+        id: 'quickLook',
+        label: t('quickLook'),
+        icon: 'quickLook',
+        onPress: onQuickLook,
+        disabled: unavailable,
+      },
     {
       id: 'share',
       label: t('share'),
