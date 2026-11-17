@@ -3,16 +3,18 @@
 // Mac, and prints each thing it removed:
 //
 // - the dev app's data folder (build/electron/data), unless --keep-data;
-// - the preferences of io.robertying.learnXElectron, and of
-//   com.github.Electron, which runs of the stock Electron.app wrote;
-// - folders and files under ~/Library named after either id (or starting
-//   with it and a dot, like `.savedState`) or named learnX, in Application
+// - the preferences of io.robertying.learnXElectron;
+// - folders and files under ~/Library named after that id (or starting with
+//   it and a dot, like `.savedState`) or named learnX, in Application
 //   Support, Caches, HTTPStorages, Saved Application State, Logs and WebKit;
 // - LaunchServices' entries for this checkout's learnX.app and Electron.app;
-// - keychain items for "learnX Safe Storage" or "Electron Safe Storage".
+// - keychain items for "learnX Safe Storage".
 //
 // It never touches the Mac Catalyst app's io.robertying.learnX (its
-// container, preferences or anything else named exactly that). It leaves
+// container, preferences or anything else named exactly that), nor what the
+// stock Electron.app keeps for every unpackaged Electron app on the Mac
+// (com.github.Electron, "Electron Safe Storage"): dev runs open learnX.app,
+// and with --use-mock-keychain never write the keychain. It leaves
 // build/electron/learnX.app itself, which the next run reuses.
 import { execFileSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -31,7 +33,7 @@ const LIBRARY_FOLDERS = [
 ];
 const LSREGISTER =
   '/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister';
-const KEYCHAIN_SERVICES = [`${APP_NAME} Safe Storage`, 'Electron Safe Storage'];
+const KEYCHAIN_SERVICES = [`${APP_NAME} Safe Storage`];
 
 const main = () => {
   if (process.platform !== 'darwin') {

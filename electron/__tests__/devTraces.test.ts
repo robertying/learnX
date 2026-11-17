@@ -6,9 +6,6 @@ describe('isDevRunName', () => {
     'io.robertying.learnXElectron.plist',
     'io.robertying.learnXElectron.savedState',
     'io.robertying.learnXElectron.helper',
-    'com.github.Electron',
-    'com.github.Electron.plist',
-    'com.github.Electron.ShipIt',
     'learnX',
   ])('takes %s', name => {
     expect(isDevRunName(name)).toBe(true);
@@ -20,6 +17,10 @@ describe('isDevRunName', () => {
     'io.robertying.learnX.ShareExtension',
     'io.robertying.learnXTests',
     'io.robertying.learnXElectronOther',
+    // Every unpackaged Electron app's, not learnX's alone.
+    'com.github.Electron',
+    'com.github.Electron.plist',
+    'com.github.Electron.ShipIt',
     'com.github.ElectronOther',
     'learnX-e2e',
     'Electron',

@@ -3,8 +3,12 @@
 import path from 'node:path';
 import { APP_ID, APP_NAME } from './macDevApp.mjs';
 
-const STOCK_ID = 'com.github.Electron';
-export const IDS = [APP_ID, STOCK_ID];
+/**
+ * learnX's dev app's id. Not the stock Electron.app's, com.github.Electron,
+ * which every unpackaged Electron app on this Mac shares: dev runs open
+ * learnX.app (macDevApp.mjs), never it.
+ */
+export const IDS = [APP_ID];
 /** Never removed, whatever the patterns say: the Mac Catalyst app's id. */
 const CATALYST_ID = 'io.robertying.learnX';
 
