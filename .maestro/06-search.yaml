@@ -93,3 +93,20 @@ name: Search and open a result
     visible:
       id: notice-detail
     timeout: 10000
+
+# Android: Close stays beside the open search field, so one tap leaves
+# Search with a query still in it.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+      - extendedWaitUntil:
+          visible:
+            id: search-tabs
+          timeout: 5000
+      - tapOn: '${T_close}'
+      - extendedWaitUntil:
+          notVisible:
+            id: search-tabs
+          timeout: 5000
