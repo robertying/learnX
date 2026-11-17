@@ -39,7 +39,6 @@ concurrency:
 # from main, as ci.yml's caches are; caches.yml prunes superseded ones.
 env:
   SAVE_CACHE: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
-  ELECTRON_CACHE_KEY: ${{ hashFiles('electron/package.json', 'electron/packageConfig.cjs') }}
 
 permissions:
   contents: read
@@ -113,7 +112,7 @@ jobs:
         uses: actions/cache/restore@v6
         with:
           path: build/electron/cache
-          key: electron-e2e-${{ runner.os }}-${{ env.ELECTRON_CACHE_KEY }}
+          key: electron-e2e-${{ runner.os }}-${{ hashFiles('electron/package.json', 'electron/packageConfig.cjs') }}
 
       # The same mock login as the web build's.
       - name: E2E tests
@@ -177,7 +176,7 @@ jobs:
         uses: actions/cache/restore@v6
         with:
           path: build/electron/cache
-          key: electron-e2e-${{ runner.os }}-${{ env.ELECTRON_CACHE_KEY }}
+          key: electron-e2e-${{ runner.os }}-${{ hashFiles('electron/package.json', 'electron/packageConfig.cjs') }}
 
       - name: E2E test
         run: |
@@ -236,7 +235,7 @@ jobs:
         uses: actions/cache/restore@v6
         with:
           path: build/electron/cache
-          key: electron-package-${{ runner.os }}-${{ env.ELECTRON_CACHE_KEY }}
+          key: electron-package-${{ runner.os }}-${{ hashFiles('electron/package.json', 'electron/packageConfig.cjs') }}
 
       # Its own web build with the mock login from the repository's
       # DUMMY_USERNAME and DUMMY_PASSWORD secrets (none without them),
