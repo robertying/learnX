@@ -1,4 +1,10 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import { Alert as ReactNativeAlert } from 'react-native';
 import { t } from 'helpers/i18n';
 import { Alert, orderedButtons } from 'web/alert';
@@ -33,6 +39,23 @@ it('shows an alert as a dialog and runs the button pressed', () => {
   expect(screen.getByText('Your data is removed.')).toBeTruthy();
   fireEvent.click(screen.getByRole('button', { name: 'Log Out' }));
   expect(onLogout).toHaveBeenCalled();
+  expect(screen.queryByRole('dialog')).toBeNull();
+});
+
+it('starts a destructive confirmation on Cancel, so Enter doesn’t confirm it', async () => {
+  renderRoot();
+  act(() =>
+    Alert.alert('Delete All Downloads?', undefined, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', style: 'destructive' },
+    ]),
+  );
+  const cancel = screen.getByRole('button', { name: 'Cancel' });
+  await waitFor(() => expect(document.activeElement).toBe(cancel));
+  expect(screen.getByRole('button', { name: 'Delete' }).className).not.toMatch(
+    /primary/i,
+  );
+  fireEvent.click(cancel);
   expect(screen.queryByRole('dialog')).toBeNull();
 });
 

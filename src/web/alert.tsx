@@ -8,7 +8,7 @@ import {
   DialogSurface,
   DialogTitle,
 } from '@fluentui/react-components';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { create } from 'zustand';
 import { t } from 'helpers/i18n';
 import { useTheme } from 'theme';
@@ -118,11 +118,23 @@ export const AlertHost = () => {
   const theme = useTheme();
   const alert = useAlertStore(state => state.queue[0]);
   useIgnoredKeys(alert);
+  const cancelButton = useRef<HTMLButtonElement>(null);
+  const cancel = alert?.buttons.find(button => button.style === 'cancel');
+  // A destructive confirmation (Log Out?, Delete All Downloads?) starts on
+  // Cancel, as Windows' do, so Enter doesn't confirm it; its action isn't
+  // the primary button. This effect runs after the dialog's own, which
+  // focuses its first button.
+  const startsOnCancel =
+    !!cancel && !!alert?.buttons.some(button => button.style === 'destructive');
+  useEffect(() => {
+    if (startsOnCancel) {
+      cancelButton.current?.focus();
+    }
+  }, [alert?.id, startsOnCancel]);
   if (!alert) {
     return null;
   }
   const buttons = orderedButtons(alert.buttons);
-  const cancel = alert.buttons.find(button => button.style === 'cancel');
   const dismiss = () => {
     close(alert.id);
     cancel?.onPress?.();
@@ -150,13 +162,14 @@ export const AlertHost = () => {
               <Button
                 key={button.text}
                 appearance={
-                  index === 0 && button.style !== 'cancel'
+                  index === 0 && button.style !== 'cancel' && !startsOnCancel
                     ? 'primary'
                     : 'secondary'
                 }
+                ref={button === cancel ? cancelButton : undefined}
                 style={
                   button.style === 'destructive'
-                    ? index === 0
+                    ? index === 0 && !startsOnCancel
                       ? { backgroundColor: theme.colors.error as string }
                       : { color: theme.colors.onStatusContainer.red as string }
                     : undefined
