@@ -122,7 +122,7 @@ const zh: typeof en = {
   calendarAndReminderAccessCaption:
     '如果learnX无法访问日历或提醒事项，请在系统设置中允许。',
   exportSyncedCalendarsDescription:
-    '将已同步到日历的课表与作业导出为.ics文件，可导入其他日历应用；不包含提醒事项。',
+    '将已同步到日历的课表和作业导出为日历文件（.ics），可导入其他日历应用，但不包含提醒事项。',
   calendarExportNoCalendarPermission:
     '导出失败：请在系统设置中允许learnX完全访问日历；如已允许，请重启learnX。',
   calendarExportNoCalendarPermissionAndroid:
@@ -173,7 +173,7 @@ const zh: typeof en = {
   fileOpensInDefaultApp: 'learnX无法显示此类文件，可用默认应用打开或另存一份。',
   startAtLogin: '登录时启动',
   unsandboxedNote:
-    'learnX当前未启用Chromium沙盒（Ubuntu 24.04及更高版本上的AppImage均是如此）。请改为安装.deb包，让网页在沙盒中运行。',
+    'AppImage版learnX在Ubuntu 24.04及更高版本上无法启用Chromium沙盒。如需让网页在沙盒中运行，请改用deb安装包（.deb）。',
   startAtLoginCaption:
     '登录电脑时在系统托盘中启动learnX，以便持续同步并发送提醒。关闭窗口后learnX仍在托盘中运行，可在托盘菜单中退出。',
   trayOpen: '打开learnX',
@@ -182,7 +182,7 @@ const zh: typeof en = {
   electronNotificationsCaption: 'learnX仅在运行时发送通知和提醒。',
   exportCalendar: '导出日历（.ics）',
   exportCalendarDescription:
-    '将本学期剩余的课程和未截止的作业保存为.ics文件，可导入Outlook等日历应用。',
+    '将本学期剩余的课程和未截止的作业保存为日历文件（.ics），可导入Outlook等日历应用。',
   dropToAttach: '拖放文件以添加附件',
   dropFailed: '附件添加失败',
   calendarExportNoEventElectron:
@@ -217,7 +217,7 @@ const zh: typeof en = {
     'learnX将重新启动以安装更新。如果不重新启动，更新将在下次退出learnX时安装。',
   restart: '重新启动',
   updateDebMessage:
-    '下载新的.deb安装包，然后打开它进行安装，或在终端中用sudo apt install安装。',
+    '请下载新的deb安装包（.deb）并打开安装，也可以在终端中用sudo apt install安装。',
   updateInstalling: '正在安装',
   updateFailed: '更新失败',
   updateDownloadFailed: '更新下载失败。请检查网络连接后重试。',
