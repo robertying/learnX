@@ -129,6 +129,8 @@ pnpm electron          # Windows / Linux 版
 
 ## English
 
+[中文](#下载) · **English**
+
 > Note: learnX is for Tsinghua University students only.
 
 ### Download
