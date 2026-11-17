@@ -71,6 +71,7 @@ const fakeElectron = (dataDir: string, { packaged = false } = {}) => {
     protocol: { handle: jest.fn() },
     setPermissionRequestHandler: jest.fn(),
     setPermissionCheckHandler: jest.fn(),
+    setCodeCachePath: jest.fn(),
     webRequest: { onBeforeRequest: jest.fn() },
     cookies: {
       get: jest.fn(async () => [{ name: 'JSESSIONID', value: 'x' }]),
@@ -403,6 +404,14 @@ describe('the window', () => {
       expect.any(Function),
     );
     expect(webviewSession.protocol.handle).not.toHaveBeenCalled();
+    // The web build's compiled code is kept for the next launch.
+    expect(appSession.setCodeCachePath).toHaveBeenCalledWith(
+      path.join(dataDir, 'userData', 'Code Cache'),
+    );
+    expect(
+      fake.electron.protocol.registerSchemesAsPrivileged.mock.calls[0][0][0]
+        .privileges,
+    ).toMatchObject({ standard: true, codeCache: true });
     expect(webviewSession.webRequest.onBeforeRequest).toHaveBeenCalled();
   });
 

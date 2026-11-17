@@ -127,7 +127,14 @@ const webDir = path.resolve(
 protocol.registerSchemesAsPrivileged([
   {
     scheme: 'app',
-    privileges: { standard: true, secure: true, supportFetchAPI: true },
+    // `codeCache`: the web build (one large script) is compiled once and
+    // kept, so later launches don't parse all of it again.
+    privileges: {
+      standard: true,
+      secure: true,
+      supportFetchAPI: true,
+      codeCache: true,
+    },
   },
 ]);
 
@@ -578,6 +585,7 @@ void app.whenReady().then(() => {
   // another download's preview.
   const ses = session.fromPartition(PARTITION);
   const appSession = session.fromPartition(APP_PARTITION);
+  appSession.setCodeCachePath(path.join(app.getPath('userData'), 'Code Cache'));
   appSession.protocol.handle(
     'app',
     createServeApp({
