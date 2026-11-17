@@ -161,7 +161,7 @@ Mock data details, and how to add to it, are in [src/data/AGENTS.md](src/data/AG
 
 ## Checks
 
-The pull request checks (`CI / JS checks` and `CI / Release bundles` in `.github/workflows/ci.yml`) run these, and all of them must pass. `pnpm check` runs the first six in one go:
+The pull request checks `JS / Checks` and `JS / Release bundles` (`.github/workflows/js.yml`) run these, and all of them must pass. `pnpm check` runs the first six in one go:
 
 ```sh
 pnpm typecheck                   # TypeScript (tsc)
@@ -179,10 +179,10 @@ End-to-end flows use [Maestro](https://docs.maestro.dev) against a Release build
 
 Other CI jobs (none of them build a signed app or run on a device, so still build and try the app yourself on each platform your change touches, and say in the pull request what you checked):
 
-- `CI / Android` (required) runs `scripts/test-android.sh` and builds a release APK (R8 and the JS bundle included, debug-signed) when a pull request touches Android paths; otherwise it skips its steps and passes.
-- `CI / Android E2E tests` runs the Maestro flows in an emulator on that APK after every push to `main`, and saves a screenshot of each screen they reach with the results. To run it on a branch: Actions › CI › Run workflow.
-- `Apple / Apple (iOS)` builds the app and runs the native iOS tests (`scripts/test-ios.sh`), by hand only: Actions › Apple › Run workflow, on `main` (which also refreshes its compilation cache) or on a branch. Tick "Mac: build" to also build Mac Catalyst (`Apple / Apple (Mac)`).
-- `Electron / …` (not required, `.github/workflows/electron.yml`) exports the web build and runs the Playwright tests on Windows, Linux and under Wayland on pull requests that can affect the Windows and Linux app, and on pushes to `main`. When run by hand (or weekly) it also checks that the installers still build; those builds are never released (releases are built by hand, see the release skill).
+- `Android / Build` (required, `.github/workflows/android.yml`) runs `scripts/test-android.sh` and builds a release APK (R8 and the JS bundle included, debug-signed) when a pull request touches Android paths; otherwise it skips its steps and passes.
+- `Android / E2E tests` runs the Maestro flows in an emulator on that APK, by hand only, and saves a screenshot of each screen they reach with the results: Actions › Android › Run workflow, on `main` or a branch.
+- `Apple / iOS` builds the app and runs the native iOS tests (`scripts/test-ios.sh`), by hand only: Actions › Apple › Run workflow, on `main` (which also refreshes its compilation cache) or on a branch. Pick Mac, or iOS and Mac, to build Mac Catalyst (`Apple / Mac`).
+- `Electron / Web build`, `Electron / E2E tests (Linux)` and `Electron / E2E tests (Windows)` (required, `.github/workflows/electron.yml`) export the web build and run the Playwright tests, one app per core, on Linux (under X11, then the window test under Wayland) and on Windows at the same time; a pull request that can't affect the Windows and Linux app (only native code, Maestro flows, fastlane, docs or the other workflows) skips their steps and passes. By hand only (Actions › Electron › Run workflow), `Electron / Installers` checks that the installers still build; those builds are never released (releases are built by hand, see the release skill).
 
 ## Pull requests
 
@@ -192,7 +192,7 @@ Other CI jobs (none of them build a signed app or run on a device, so still buil
 4. Open the pull request against `main`. Describe what changed and why, how you tested it (platforms, simulators or devices, mock or real account), and add screenshots for visible changes.
 5. Changing a patched dependency? Follow [patches/README.md](patches/README.md) (`pnpm patch` / `pnpm patch-commit`) rather than editing `node_modules` by hand.
 
-Pull requests are squash-merged once `CI / JS checks`, `CI / Release bundles` and `CI / Android` pass and the change has been reviewed. For bugs and feature ideas, open an issue with one of the templates first.
+Pull requests are squash-merged once `JS / Checks`, `JS / Release bundles`, `Android / Build`, `Electron / Web build`, `Electron / E2E tests (Linux)` and `Electron / E2E tests (Windows)` pass and the change has been reviewed. For bugs and feature ideas, open an issue with one of the templates first.
 
 ## Troubleshooting
 

@@ -1,12 +1,14 @@
 // Playwright's config for the Electron app's E2E tests (`pnpm e2e:electron`),
 // the base for porting the Maestro flows. Each test launches its own app
-// (e2e/fixtures.ts), so tests run one at a time. Jest leaves e2e/ alone.
+// (e2e/fixtures.ts). Jest leaves e2e/ alone.
+import { availableParallelism } from 'node:os';
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
   testDir: 'e2e',
   testMatch: '*.e2e.ts',
   outputDir: '../build/electron/e2e/results',
+  globalSetup: './e2e/setup.ts',
   globalTeardown: './e2e/teardown.ts',
   timeout: 90_000,
   // On CI the whole run stops after 15 minutes, before its job's own limit
@@ -14,9 +16,12 @@ export default defineConfig({
   // traces of what failed, which a cancelled job never uploads.
   globalTimeout: process.env.CI ? 15 * 60_000 : undefined,
   expect: { timeout: 15_000 },
-  // One Electron app at a time: each is a whole app with its own window.
-  workers: 1,
-  fullyParallel: false,
+  // On CI, one app per core: every test has its own data folder and ports,
+  // and tests are spread one by one rather than by file, so the long files
+  // (updates, errors) don't end up on one worker. Locally one app at a time,
+  // so the windows don't pile up on the desktop you're using.
+  workers: process.env.CI ? availableParallelism() : 1,
+  fullyParallel: true,
   // One retry on CI, for a trace of the failure; a test that passes only on
   // its retry still fails the run, so flakes don't pass as green.
   retries: process.env.CI ? 1 : 0,
