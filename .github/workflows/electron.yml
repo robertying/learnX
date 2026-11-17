@@ -6,7 +6,7 @@ name: Electron
 # nothing the app uses (only native code, Maestro flows, fastlane, docs or
 # the other workflows) skips their steps and passes. Manual runs also run the
 # tests on Windows (E2E tests (Windows), not required) and check that the
-# installers still build on Windows and Linux (Package); those builds are
+# installers still build on Windows and Linux (Installers); those builds are
 # never released: releases are built, signed and uploaded by hand with
 # fastlane (the release skill). js.yml's Checks run the `web` Jest project.
 on:
@@ -53,8 +53,24 @@ jobs:
         if: steps.changes.outputs.changed == 'true'
         uses: ./.github/actions/setup-js
 
+      # Metro's transform cache: an export from a warm cache takes seconds
+      # instead of most of a minute. Metro keys each file by its contents and
+      # the inputs metro.config.js hashes (.env, preval, babel/); the key's
+      # hash adds what can change a transform without changing a source file
+      # (packages, patches, Babel and Metro config), so a change there starts
+      # cold. Hash and commit are written as one run of hex, so
+      # prune-caches.sh groups every entry as `metro-web-` and keeps 2.
+      - name: Restore Metro cache
+        id: metro-cache
+        if: steps.changes.outputs.changed == 'true'
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ runner.temp }}/metro-cache
+          key: metro-web-${{ hashFiles('pnpm-lock.yaml', 'patches/**', 'babel.config.js', 'babel/**', 'metro.config.js') }}${{ github.sha }}
+          restore-keys: metro-web-${{ hashFiles('pnpm-lock.yaml', 'patches/**', 'babel.config.js', 'babel/**', 'metro.config.js') }}
+
       # A made-up mock login, so the E2E tests can log in; the web build
-      # inlines it as the mobile bundles do. For the E2E tests only: Package
+      # inlines it as the mobile bundles do. For the E2E tests only: Installers
       # exports its own.
       - name: Export web build
         id: export
@@ -64,6 +80,15 @@ jobs:
           pnpm exec expo export --platform web --output-dir build/electron/web
         env:
           CI: '1'
+          # Metro keeps its cache in the temp folder.
+          TMPDIR: ${{ runner.temp }}
+
+      - name: Save Metro cache
+        if: env.SAVE_CACHE == 'true' && steps.export.outcome == 'success'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ runner.temp }}/metro-cache
+          key: ${{ steps.metro-cache.outputs.cache-primary-key }}
 
       - name: Upload web build
         if: ${{ !cancelled() && steps.export.outcome == 'success' }}
@@ -80,25 +105,29 @@ jobs:
     # export, updates against updateServer.mjs, the SSO page). It needs the
     # network, as the flows do: the mock files download from GitHub and the
     # SSO test opens id.tsinghua.edu.cn.
-    # - Linux (required, ~5 min): under a virtual X display, then the window
+    # - Linux (required): the suite split in two (Playwright's --shard, by
+    #   test), each half on its own runner under a virtual X display, about
+    #   3 minutes each instead of 5. The second half then runs the window
     #   test once more under Wayland (window.e2e.ts): under X11 a window
     #   draws whether it shows or not, so only Wayland can tell a window
     #   that never appears. Weston's headless backend is a real Wayland
     #   compositor without a screen; with no X display, Electron can only
     #   use it, as Ubuntu's and Fedora's desktops run it.
     # - Windows (not required, much slower): manual runs only.
-    # A static name: rows show as "E2E tests (Linux)" and "E2E tests
-    # (Windows)", and a skipped job would show a raw expression instead.
+    # A static name: rows show as "E2E tests (Linux 1)", "E2E tests (Linux
+    # 2)" and "E2E tests (Windows)", and a skipped job would show a raw
+    # expression instead.
     name: E2E tests
     needs: web
     strategy:
       fail-fast: false
       matrix:
-        platform: ${{ fromJSON(github.event_name == 'workflow_dispatch' && '["Linux","Windows"]' || '["Linux"]') }}
-    runs-on: ${{ matrix.platform == 'Windows' && 'windows-latest' || 'ubuntu-latest' }}
+        run: ${{ fromJSON(github.event_name == 'workflow_dispatch' && '["Linux 1","Linux 2","Windows"]' || '["Linux 1","Linux 2"]') }}
+    runs-on: ${{ matrix.run == 'Windows' && 'windows-latest' || 'ubuntu-latest' }}
     timeout-minutes: 20
     env:
       CHANGED: ${{ needs.web.outputs.changed }}
+      RUN: ${{ matrix.run }}
     steps:
       - name: Checkout repository
         if: env.CHANGED == 'true'
@@ -116,7 +145,7 @@ jobs:
           path: build/electron/web
 
       - name: Install Weston
-        if: env.CHANGED == 'true' && runner.os == 'Linux'
+        if: env.CHANGED == 'true' && matrix.run == 'Linux 2'
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends weston
@@ -137,7 +166,7 @@ jobs:
         run: |
           bash scripts/write-e2e-env.sh
           if [ "$RUNNER_OS" = Linux ]; then
-            xvfb-run --auto-servernum pnpm e2e:electron
+            xvfb-run --auto-servernum pnpm e2e:electron --fully-parallel --shard="${RUN#Linux }/2"
           else
             pnpm e2e:electron
           fi
@@ -146,7 +175,7 @@ jobs:
       # results go in a folder of their own, beside the X11 run's.
       - name: E2E test on Wayland
         id: wayland
-        if: ${{ !cancelled() && env.CHANGED == 'true' && runner.os == 'Linux' && steps.electron-cache.outcome == 'success' }}
+        if: ${{ !cancelled() && env.CHANGED == 'true' && matrix.run == 'Linux 2' && steps.electron-cache.outcome == 'success' }}
         run: |
           export XDG_RUNTIME_DIR="$RUNNER_TEMP/xdg"
           mkdir -m 700 "$XDG_RUNTIME_DIR"
@@ -168,7 +197,7 @@ jobs:
         if: ${{ !cancelled() && env.CHANGED == 'true' }}
         uses: actions/upload-artifact@v7
         with:
-          name: electron-e2e-${{ matrix.platform }}
+          name: electron-e2e-${{ matrix.run }}
           path: build/electron/e2e
           if-no-files-found: ignore
           retention-days: 14
@@ -180,12 +209,12 @@ jobs:
           path: build/electron/cache
           key: ${{ steps.electron-cache.outputs.cache-primary-key }}
 
-  package:
+  installers:
     # Checks that the installers still build: each platform on its own
     # runner, both CPU architectures per platform. By hand only; never
-    # released. A static name: rows show as "Package (Windows)" and
-    # "Package (Linux)", and the job skipped on other runs as "Package".
-    name: Package
+    # released. A static name: rows show as "Installers (Windows)" and
+    # "Installers (Linux)", and the job skipped on other runs as "Installers".
+    name: Installers
     if: github.event_name == 'workflow_dispatch'
     strategy:
       fail-fast: false
