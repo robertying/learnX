@@ -42,6 +42,8 @@ const config = (options = {}) => {
       // WM_CLASS), which links it to learnx.desktop (syncDesktopName).
       desktopName: 'learnx.desktop',
       author: { name: 'Rui Ying', email: 'learnX@ruiying.io' },
+      // The .deb's Homepage field, which electron-builder requires.
+      homepage: 'https://github.com/robertying/learnX',
     },
     // Windows' file version: the version and the build number.
     buildVersion: `${appVersion}.${buildNumber}`,
@@ -106,6 +108,13 @@ const config = (options = {}) => {
         entry: { Name: 'learnX', Comment: 'Tsinghua Web Learning' },
       },
     },
+    // The AppImage's runtime: the static one (type2-runtime), which needs
+    // neither libfuse2 (gone from Ubuntu since 22.04) nor libz.so (only in
+    // zlib1g-dev, which the legacy arm64 runtime links against). Its AppRun
+    // drops Chromium's sandbox only where the system blocks unprivileged
+    // user namespaces (Ubuntu 24.04 and later), which an AppImage can't
+    // change, rather than always, as the legacy one did.
+    toolsets: { appimage: '1.0.3' },
     deb: {
       packageName: 'learnx',
       // AppImages update themselves; a .deb is updated by installing the

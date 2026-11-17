@@ -58,6 +58,12 @@ it('ships the update key’s public half, and where updates come from', () => {
   ).toMatchObject({ updateUrl: 'http://localhost:8299/' });
 });
 
+it('gives the .deb the homepage it requires', () => {
+  expect(packageConfig().extraMetadata).toMatchObject({
+    homepage: 'https://github.com/robertying/learnX',
+  });
+});
+
 it("carries the checkout's version and build number", () => {
   const config = packageConfig({ version: '19.0.1', build: '4550' });
   expect(config.extraMetadata).toMatchObject({

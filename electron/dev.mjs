@@ -47,7 +47,13 @@ if (!values['skip-export']) {
 }
 
 const electron = electronExecutable();
-const child = spawn(electron, [electronDir, ...positionals], {
+// Linux: the downloaded Electron's chrome-sandbox isn't setuid root, and
+// Ubuntu 24.04 and later block the user namespaces Chromium's sandbox uses
+// otherwise, so a dev run would abort. Dev runs only: the .deb installs an
+// AppArmor profile that allows them, and the AppImage drops the sandbox only
+// where it must.
+const sandboxArgs = process.platform === 'linux' ? ['--no-sandbox'] : [];
+const child = spawn(electron, [electronDir, ...sandboxArgs, ...positionals], {
   stdio: 'inherit',
   env: {
     ...process.env,
