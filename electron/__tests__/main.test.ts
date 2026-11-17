@@ -63,7 +63,9 @@ const fakeElectron = (dataDir: string, { packaged = false } = {}) => {
     webContents = new FakeWebContents();
     maximize = jest.fn();
     show = jest.fn();
+    showInactive = jest.fn();
     hide = jest.fn();
+    isVisible = () => this.show.mock.calls.length > 0;
     focus = jest.fn();
     isDestroyed = () => false;
     isMinimized = () => false;
@@ -561,7 +563,7 @@ describe('the window', () => {
 
   it('shows a window saved maximized maximized, once it’s ready', async () => {
     saveState({ maximized: true });
-    await loadMain();
+    await onPlatform('win32', () => loadMain());
     const [win] = fake.windows;
     expect(win.maximize).not.toHaveBeenCalled();
     win.emit('ready-to-show');
@@ -687,7 +689,8 @@ describe('updates', () => {
         LEARNX_NO_UPDATES: '',
         LEARNX_UPDATE_URL: 'http://127.0.0.1:1/',
       });
-      await loadMain();
+      // A dev run tries the Windows updater (NSIS) against the test server.
+      await onPlatform('win32', () => loadMain());
       // electron-updater's config for the test server, in the data folder.
       expect(
         fs.readFileSync(path.join(dataDir, 'app-update.yml'), 'utf8'),
@@ -706,29 +709,41 @@ describe('updates', () => {
 });
 
 describe('an E2E run', () => {
-  it('keeps out of the foreground: no Dock icon, no window shown', async () => {
-    jest.replaceProperty(process, 'env', {
-      ...process.env,
-      LEARNX_E2E: '1',
-    });
-    await loadMain();
-    const [win] = fake.windows;
-    win.emit('ready-to-show');
-    expect(win.show).not.toHaveBeenCalled();
-    expect(win.maximize).not.toHaveBeenCalled();
-    expect(win.options.webPreferences.backgroundThrottling).toBe(false);
-    const mac = process.platform === 'darwin';
-    expect(fake.app.setActivationPolicy.mock.calls).toEqual(
-      mac ? [['accessory']] : [],
-    );
-    expect(fake.app.dock.hide).toHaveBeenCalledTimes(mac ? 1 : 0);
+  beforeEach(() => {
+    jest.replaceProperty(process, 'env', { ...process.env, LEARNX_E2E: '1' });
   });
 
-  it('leaves another Mac dev run a regular app, in the Dock', async () => {
-    await loadMain();
-    expect(fake.app.setActivationPolicy.mock.calls).toEqual(
-      process.platform === 'darwin' ? [['regular']] : [],
-    );
+  it.each(['darwin', 'win32'] as const)(
+    'keeps out of the foreground on %s: no Dock icon, no window shown',
+    async platform => {
+      await onPlatform(platform, () => loadMain());
+      const [win] = fake.windows;
+      win.emit('ready-to-show');
+      expect(win.show).not.toHaveBeenCalled();
+      expect(win.showInactive).not.toHaveBeenCalled();
+      expect(win.maximize).not.toHaveBeenCalled();
+      expect(win.options.webPreferences.backgroundThrottling).toBe(false);
+      const mac = platform === 'darwin';
+      expect(fake.app.setActivationPolicy.mock.calls).toEqual(
+        mac ? [['accessory']] : [],
+      );
+      expect(fake.app.dock.hide).toHaveBeenCalledTimes(mac ? 1 : 0);
+    },
+  );
+
+  it('shows the window behind the others on Linux, where Wayland draws no hidden window', async () => {
+    await onPlatform('linux', () => loadMain());
+    const [win] = fake.windows;
+    expect(win.showInactive).toHaveBeenCalledTimes(1);
+    expect(win.show).not.toHaveBeenCalled();
+    expect(win.focus).not.toHaveBeenCalled();
+  });
+});
+
+describe('a dev run on a Mac', () => {
+  it('stays a regular app, in the Dock', async () => {
+    await onPlatform('darwin', () => loadMain());
+    expect(fake.app.setActivationPolicy.mock.calls).toEqual([['regular']]);
     expect(fake.app.dock.hide).not.toHaveBeenCalled();
   });
 });
