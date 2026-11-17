@@ -15,9 +15,12 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# A newer run of the same pull request or branch replaces an older one.
+# A newer push to the same pull request or to main cancels the older run: the
+# newest run checks everything the older one would have (its commits too) and
+# saves the caches. Manual runs each get their own group, so a push never
+# cancels them and they never cancel a push run.
 concurrency:
-  group: electron-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref }}
+  group: electron-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 # Electron's downloads (build/electron/cache: Electron for each platform and
