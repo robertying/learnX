@@ -201,11 +201,11 @@ const handleIpc = ses => {
   });
   ipcMain.handle('secrets:set', (event, key, value) => {
     fromApp(event);
-    secrets.set(key, value);
+    return secrets.set(key, value);
   });
   ipcMain.handle('secrets:remove', (event, key) => {
     fromApp(event);
-    secrets.remove(key);
+    return secrets.remove(key);
   });
 
   /** Requests in flight, by the renderer's id, so it can abort them. */

@@ -5,14 +5,24 @@ import { createFileStore } from '../fileStore.cjs';
 import { createSecrets } from '../secrets.cjs';
 
 /** Reverses the bytes, so a saved value never reads as the value. */
-const fakeSafeStorage = (available = true) => ({
-  isEncryptionAvailable: () => available,
-  encryptString: (text: string) => Buffer.from(text).reverse(),
-  decryptString: (data: Buffer) => {
+const fakeSafeStorage = ({
+  available = true,
+  backend = 'gnome_libsecret',
+  rotated = false,
+} = {}) => ({
+  isAsyncEncryptionAvailable: async () => available,
+  getSelectedStorageBackend: () => backend as never,
+  encryptStringAsync: jest.fn(async (text: string) =>
+    Buffer.from(text).reverse(),
+  ),
+  decryptStringAsync: async (data: Buffer) => {
     if (data.length === 0) {
       throw new Error('Error while decrypting the ciphertext');
     }
-    return Buffer.from(data).reverse().toString();
+    return {
+      result: Buffer.from(data).reverse().toString(),
+      shouldReEncrypt: rotated,
+    };
   },
 });
 
@@ -26,28 +36,55 @@ afterEach(() => {
   fs.rmSync(root, { recursive: true, force: true });
 });
 
-it('keeps a value encrypted', () => {
+it('keeps a value encrypted', async () => {
   const store = createFileStore(root);
   const secrets = createSecrets(store, fakeSafeStorage());
-  expect(secrets.get('credentials')).toBeNull();
-  secrets.set('credentials', '{"password":"secret"}');
-  expect(secrets.get('credentials')).toBe('{"password":"secret"}');
+  await expect(secrets.get('credentials')).resolves.toBeNull();
+  await secrets.set('credentials', '{"password":"secret"}');
+  await expect(secrets.get('credentials')).resolves.toBe(
+    '{"password":"secret"}',
+  );
   expect(store.getItem('secrets', 'credentials')).not.toContain('secret');
-  secrets.remove('credentials');
-  expect(secrets.get('credentials')).toBeNull();
+  await secrets.remove('credentials');
+  await expect(secrets.get('credentials')).resolves.toBeNull();
 });
 
-it('forgets a value it can no longer decrypt', () => {
+it('forgets a value it can no longer decrypt', async () => {
   const store = createFileStore(root);
   store.setItem('secrets', 'credentials', '');
-  expect(createSecrets(store, fakeSafeStorage()).get('credentials')).toBeNull();
+  await expect(
+    createSecrets(store, fakeSafeStorage()).get('credentials'),
+  ).resolves.toBeNull();
 });
 
-it('refuses to save without encryption', () => {
+it('saves a value again when its key has been rotated', async () => {
   const store = createFileStore(root);
-  const secrets = createSecrets(store, fakeSafeStorage(false));
-  expect(() => secrets.set('credentials', 'x')).toThrow(
+  const safeStorage = fakeSafeStorage({ rotated: true });
+  const secrets = createSecrets(store, safeStorage);
+  await secrets.set('credentials', 'x');
+  safeStorage.encryptStringAsync.mockClear();
+  await expect(secrets.get('credentials')).resolves.toBe('x');
+  expect(safeStorage.encryptStringAsync).toHaveBeenCalledWith('x');
+});
+
+it.each([
+  ['without encryption', { available: false }, 'win32'],
+  // Chromium's fallback key on Linux without a keyring only obscures it.
+  ['with only the fallback key on Linux', { backend: 'basic_text' }, 'linux'],
+])('refuses to save %s', async (_name, storage, platform) => {
+  const store = createFileStore(root);
+  const secrets = createSecrets(store, fakeSafeStorage(storage), { platform });
+  await expect(secrets.set('credentials', 'x')).rejects.toThrow(
     'Encryption is not available',
   );
   expect(store.getItem('secrets', 'credentials')).toBeNull();
+});
+
+it('saves with a keyring on Linux', async () => {
+  const store = createFileStore(root);
+  const secrets = createSecrets(store, fakeSafeStorage(), {
+    platform: 'linux',
+  });
+  await secrets.set('credentials', 'x');
+  await expect(secrets.get('credentials')).resolves.toBe('x');
 });
