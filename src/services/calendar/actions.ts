@@ -16,8 +16,8 @@ import { saveClassesToCalendar } from 'services/calendar/classes';
 import { setLastSynced } from 'data/calendarSync';
 import { calendarErrorCode } from 'services/calendar/errors';
 import { exportTextFile } from 'services/files/share';
-import { Platform } from 'react-native';
 import { t, TextKey } from 'helpers/i18n';
+import { isAndroid, isElectron } from 'helpers/platform';
 
 export interface ToastMessage {
   text: string;
@@ -35,7 +35,7 @@ const noCalendarPermission = (
     | 'deleteFailedNoCalendarPermission'
     | 'calendarExportNoCalendarPermission',
 ): ToastMessage => ({
-  text: t(Platform.OS === 'android' ? (`${key}Android` as TextKey) : key),
+  text: t(isAndroid() ? (`${key}Android` as TextKey) : key),
   type: 'error',
 });
 
@@ -69,7 +69,12 @@ export const calendarExportErrorToast = (err: unknown): ToastMessage => {
     case 'calendarPermission':
       return noCalendarPermission('calendarExportNoCalendarPermission');
     case 'noEvents':
-      return { text: t('calendarExportNoEvent'), type: 'warning' };
+      return {
+        text: isElectron()
+          ? t('calendarExportNoEventElectron')
+          : t('calendarExportNoEvent'),
+        type: 'warning',
+      };
     default:
       return {
         text: t('calendarExportFailed', { error: messageOf(err) }),
@@ -201,13 +206,28 @@ export const allowAssignmentSync = async (
   }
 };
 
-/** Shares (or on Mac, saves where people pick) the synced calendars as learnX.ics */
+/**
+ * Shares (or on Mac, saves where people pick) the synced calendars as
+ * learnX.ics. The Electron app, which has no calendar to sync, saves the
+ * classes and assignments themselves.
+ */
 export const exportCalendars = async (): Promise<ToastMessage | undefined> => {
+  const build = isElectron()
+    ? // Required only here, so the phones' bundles leave it out.
+      (
+        require('services/calendar/electronExport') as typeof import('services/calendar/electronExport')
+      ).buildElectronICS
+    : async () => ({
+        ics: await exportSyncedCalendarsToICS(),
+        withoutClasses: false,
+      });
   try {
-    const ics = await exportSyncedCalendarsToICS();
+    const { ics, withoutClasses } = await build();
     const name = 'learnX.ics';
     if (await exportTextFile(name, ics, 'text/calendar')) {
-      return { text: t('saveFileSucceeded', { name }), type: 'success' };
+      return withoutClasses
+        ? { text: t('calendarExportWithoutClasses', { name }), type: 'warning' }
+        : { text: t('saveFileSucceeded', { name }), type: 'success' };
     }
   } catch (err) {
     return calendarExportErrorToast(err);

@@ -1,4 +1,3 @@
-import { Platform } from 'react-native';
 import { Learn2018Helper, type Credential } from '@robertying/thu-learn-lib';
 import mime from 'mime';
 import CookieManager from '@preeternal/react-native-cookie-manager';
@@ -12,6 +11,7 @@ import {
   assertServerWritesAllowed,
   getServerWritesAllowed,
 } from 'helpers/serverWrites';
+import { isAndroid, isApple, isElectron } from 'helpers/platform';
 
 /** The part of thu-learn-lib the app calls. */
 export type DataSource = Pick<
@@ -86,6 +86,14 @@ export const endSession = () => {
   sessionServer = null;
 };
 
+/** A file's bytes, for an upload in the Electron app. */
+const fileBlob = async (uri: string, type: string) => {
+  const { File } =
+    require('expo-file-system') as typeof import('expo-file-system');
+  const bytes = await new File(uri).bytes();
+  return new Blob([bytes as BlobPart], { type });
+};
+
 /** The requests the app wraps: thu-learn-lib's calls, with what the app adds. */
 const realRequests: Omit<AppSource, keyof DataSource> = {
   markNoticeRead: async url => {
@@ -102,20 +110,30 @@ const realRequests: Omit<AppSource, keyof DataSource> = {
   ) => {
     assertServerWritesAllowed('Assignment submission');
 
+    const type = attachment
+      ? mime.getType(attachment.uri) || 'application/octet-stream'
+      : '';
+    // The Electron app's requests go through the main process (web/fetch),
+    // which takes the file's bytes, not a URI, and reports no upload
+    // progress: XMLHttpRequest would go from the page, where Tsinghua's
+    // cookies and cross-origin rules don't allow it.
+    const electron = isElectron();
     // thu-learn-lib sends it as every request (an expired session logs in
     // again and it goes once more), with XMLHttpRequest for the progress.
     await helper.submitHomework(studentHomeworkId, {
       content,
       attachment: attachment && {
         filename: attachment.name,
-        content: {
-          uri: attachment.uri,
-          type: mime.getType(attachment.uri) || 'application/octet-stream',
-        },
+        content: electron
+          ? await fileBlob(attachment.uri, type)
+          : { uri: attachment.uri, type },
       },
       removeAttachment: remove,
       // Two decimals are plenty for a progress bar.
-      onProgress: onProgress && (p => onProgress(Math.round(p * 100) / 100)),
+      onProgress:
+        onProgress && !electron
+          ? p => onProgress(Math.round(p * 100) / 100)
+          : undefined,
     });
   },
 };
@@ -174,10 +192,11 @@ export const serverWritesBlocked = () =>
  * form without an SSO session: the SSO page has just signed in there, and a
  * login sent with that session isn't answered with a ticket. On iOS the web
  * views keep their cookies in WebKit's store and fetch in Foundation's, so
- * both are cleared; Android has one store, where each cookie is emptied.
+ * both are cleared; Android has one store, where each cookie is emptied, and
+ * the Electron app one session, where each is removed.
  */
 export const clearLoginCookies = async () => {
-  if (Platform.OS === 'ios') {
+  if (isApple()) {
     await Promise.all(
       (['foundation', 'webKit'] as const).map(async iosCookieStore => {
         const cookies = await CookieManager.get(Urls.id, { iosCookieStore });
@@ -187,6 +206,13 @@ export const clearLoginCookies = async () => {
           ),
         );
       }),
+    );
+  } else if (isElectron()) {
+    const cookies = await CookieManager.get(Urls.id);
+    await Promise.all(
+      Object.keys(cookies).map(name =>
+        CookieManager.clearByName(Urls.id, name),
+      ),
     );
   } else {
     const cookies = await CookieManager.get(Urls.id);
@@ -249,8 +275,7 @@ const helper = new Learn2018Helper({
   clearLoginCookies: () => clearLoginCookies(),
   // Android's download client has no cookie jar, so downloads carry the
   // Web Learning cookies in a header; iOS sends them from the shared store.
-  cookieHeader: () =>
-    Platform.OS === 'android' ? learnCookieHeader() : undefined,
+  cookieHeader: () => (isAndroid() ? learnCookieHeader() : undefined),
   provider: () => {
     const credentials = getCredentials();
     return {

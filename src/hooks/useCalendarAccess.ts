@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { AppState, Platform } from 'react-native';
+import { AppState } from 'react-native';
 import * as Calendar from 'expo-calendar';
 import { getAndRequestPermission } from 'services/calendar/calendars';
+import { isApple } from 'helpers/platform';
 
 export type CalendarAccess = 'granted' | 'undetermined' | 'denied';
 
@@ -24,7 +25,7 @@ const useCalendarAccess = () => {
     Calendar.getCalendarPermissions()
       .then(response => setCalendar(toAccess(response)))
       .catch(() => {});
-    if (Platform.OS === 'ios') {
+    if (isApple()) {
       Calendar.getRemindersPermissions()
         .then(response => setReminders(toAccess(response)))
         .catch(() => {});

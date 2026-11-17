@@ -1,6 +1,7 @@
-// The Maestro flows match labels and mock texts through env values that
-// scripts/e2e-env.mjs reads from the translations and the mock data, and they
-// only run on a device. This catches a mock data or translation edit that
+// The Maestro flows (and the Electron app's Playwright tests) match labels
+// and mock texts through env values that scripts/e2e-env.mjs reads from the
+// translations and the mock data, and they only run on a device (or in
+// Electron). This catches a mock data or translation edit that
 // would leave a flow without its value.
 import { execFileSync } from 'node:child_process';
 import { readdirSync, readFileSync } from 'node:fs';
@@ -15,15 +16,32 @@ const flows = readdirSync(maestroDir, {
   encoding: 'utf8',
 }).filter(name => name.endsWith('.yaml'));
 
-const used = new Set(
-  flows.flatMap(name =>
+// The Electron app's Playwright tests name them as `text('MOCK_NOTICE')`.
+const electronE2EDir = join(root, 'electron/e2e');
+const specs = readdirSync(electronE2EDir).filter(name => name.endsWith('.ts'));
+
+const used = new Set([
+  ...flows.flatMap(name =>
     [
       ...readFileSync(join(maestroDir, name), 'utf8').matchAll(
         /\$\{((?:T|MOCK)_\w+)\}/g,
       ),
     ].map(match => match[1]),
   ),
-);
+  ...specs.flatMap(name =>
+    [
+      ...readFileSync(join(electronE2EDir, name), 'utf8').matchAll(
+        /'((?:T|MOCK)_\w+)'/g,
+      ),
+    ].map(match => match[1]),
+  ),
+]);
+
+/**
+ * Values the same in both languages: the search term, and a file of the
+ * course taught in English, whose title isn't translated.
+ */
+const sameInBoth = new Set(['MOCK_SEARCH_TERM', 'MOCK_OTHER_FILE']);
 
 const env = new Map(
   execFileSync(
@@ -51,7 +69,11 @@ it('has an ASCII search term', () => {
   expect(env.get('MOCK_SEARCH_TERM')).toMatch(/^[\x20-\x7e]+$/);
 });
 
-it.each([...used].filter(key => key !== 'MOCK_SEARCH_TERM'))(
+it('prints every value the flows and tests use', () => {
+  expect([...used].filter(key => !env.has(key))).toEqual([]);
+});
+
+it.each([...used].filter(key => !sameInBoth.has(key)))(
   '%s has an English and a Chinese value',
   key => {
     expect(env.get(key)).toMatch(/^[^|\p{Script=Han}]+\|.*\p{Script=Han}/u);

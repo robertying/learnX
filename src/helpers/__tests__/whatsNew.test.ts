@@ -130,7 +130,7 @@ describe('platforms', () => {
   });
 
   it('gives each platform only the 19 highlights it has', () => {
-    const titles = (platform: 'ios' | 'mac' | 'android') =>
+    const titles = (platform: 'ios' | 'mac' | 'android' | 'electron') =>
       applicableHighlights(
         releases.find(r => r.version === '19.0.0')!,
         {
@@ -143,12 +143,14 @@ describe('platforms', () => {
       'whatsNew19WidgetsTitle',
       'whatsNew19NotificationsTitle',
       'whatsNew19SpotlightTitle',
+      'whatsNew19ElectronTitle',
     ]);
     // The Mac has no widgets.
     expect(titles('mac')).toEqual([
       'whatsNew19TodayTitle',
       'whatsNew19NotificationsTitle',
       'whatsNew19SpotlightTitle',
+      'whatsNew19ElectronTitle',
     ]);
     // Android has no Spotlight or Siri.
     expect(titles('android')).toEqual([
@@ -156,6 +158,13 @@ describe('platforms', () => {
       'whatsNew19WidgetsTitle',
       'whatsNew19NotificationsTitle',
       'whatsNew19DesignTitle',
+      'whatsNew19ElectronTitle',
+    ]);
+    // The Electron app has no widgets, Spotlight or Android design, and
+    // doesn't announce itself.
+    expect(titles('electron')).toEqual([
+      'whatsNew19TodayTitle',
+      'whatsNew19NotificationsTitle',
     ]);
   });
 
@@ -169,6 +178,11 @@ describe('platforms', () => {
     isMac.mockRestore();
     jest.replaceProperty(Platform, 'OS', 'android');
     expect(whatsNewContext().platform).toBe('android');
+  });
+
+  it('describes the Electron app as itself, not as Android', () => {
+    jest.replaceProperty(Platform, 'OS', 'web');
+    expect(whatsNewContext().platform).toBe('electron');
   });
 });
 
@@ -227,7 +241,7 @@ describe('releases', () => {
     for (const release of releases) {
       const { highlights } = release;
       expect(highlights.length).toBeGreaterThan(0);
-      for (const platform of ['ios', 'mac', 'android'] as const) {
+      for (const platform of ['ios', 'mac', 'android', 'electron'] as const) {
         const shown = applicableHighlights(release, {
           nativeVersion: release.version,
           platform,

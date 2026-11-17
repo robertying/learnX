@@ -2,7 +2,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Calendar from 'expo-calendar';
 import * as SecureStore from 'expo-secure-store';
 import { Directory, Paths } from 'expo-file-system';
-import { Platform } from 'react-native';
 import { useAppStateStore } from 'data/appState';
 import { getCalendarSync } from 'data/calendarSync';
 import { getCredentials, LEGACY_AUTH_KEY } from 'data/credentials';
@@ -23,6 +22,7 @@ import {
 } from 'helpers/calendar/details';
 import { hasPermission } from 'services/calendar/calendars';
 import { whatsNewContext, whatsNewSince } from 'helpers/whatsNew';
+import { isApple } from 'helpers/platform';
 
 /** A synced calendar as the phone has it. */
 interface CalendarReport {
@@ -143,14 +143,13 @@ export const buildStoreReport = async () => {
       ),
       // Android has no Reminders: its reminder sync writes to the
       // assignment calendar.
-      reminder:
-        Platform.OS === 'ios'
-          ? await calendarReport(
-              calendarSync.assignmentReminderId,
-              assignmentCalendarReminderName,
-              Calendar.EntityTypes.REMINDER,
-            )
-          : null,
+      reminder: isApple()
+        ? await calendarReport(
+            calendarSync.assignmentReminderId,
+            assignmentCalendarReminderName,
+            Calendar.EntityTypes.REMINDER,
+          )
+        : null,
     },
   };
 };

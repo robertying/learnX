@@ -1,7 +1,6 @@
 // Pure builders for the calendar events, reminders and ICS entries that
 // services/calendar/calendars writes. Nothing here touches the calendar or the
 // settings store, so it can be tested without native modules.
-import { Platform } from 'react-native';
 import * as Calendar from 'expo-calendar';
 import dayjs, { Dayjs } from 'dayjs';
 import { type CalendarClass, matchCourse } from 'helpers/schedule';
@@ -12,12 +11,11 @@ import { hash, removeTags } from 'helpers/text';
 import { ICSEvent } from './ics';
 import locationMappings from '../../assets/locationMappings.json';
 import { t } from 'helpers/i18n';
+import { isApple } from 'helpers/platform';
 
 /** Settings › Calendar's name: Reminders sync is only on iOS, iPadOS and Mac. */
 export const calendarSettingsTitle = () =>
-  Platform.OS === 'ios'
-    ? t('calendarsAndReminders')
-    : t('setupCalendarSection');
+  isApple() ? t('calendarsAndReminders') : t('setupCalendarSection');
 
 // Calendars are found by name, so translating these would orphan the ones
 // users already have.
@@ -173,10 +171,9 @@ export const buildAssignmentReminderDetails = (
  * event is long goes off at the start.
  */
 export const alertBeforeDeadline = (minutes: number, eventLength: number) => ({
-  relativeOffset:
-    Platform.OS === 'android'
-      ? Math.min(eventLength - minutes, 0)
-      : eventLength - minutes,
+  relativeOffset: isApple()
+    ? eventLength - minutes
+    : Math.min(eventLength - minutes, 0),
   method: Calendar.AlarmMethod.DEFAULT,
 });
 

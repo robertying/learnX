@@ -1,7 +1,8 @@
-import { Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import DeviceInfo from 'constants/DeviceInfo';
 import SplitSizes from 'constants/SplitSizes';
 import { Text } from 'components/Text';
+import { isAndroid, isApple } from 'helpers/platform';
 
 export interface HeaderTitleProps {
   title: string;
@@ -18,7 +19,7 @@ export interface HeaderTitleProps {
 // Navigation bar titles keep their size on iOS, as UIKit's do. Android's
 // top app bar titles follow the font scale, up to 1.3x so they fit the bar
 // beside its buttons.
-const allowFontScaling = Platform.OS !== 'ios';
+const allowFontScaling = !isApple();
 const maxFontSizeMultiplier = 1.3;
 
 const HeaderTitle: React.FC<HeaderTitleProps> = ({
@@ -33,16 +34,16 @@ const HeaderTitle: React.FC<HeaderTitleProps> = ({
   return (
     <View
       style={{
-        maxWidth: Platform.OS === 'android' && !isWide ? 250 : undefined,
+        maxWidth: isAndroid() && !isWide ? 250 : undefined,
         // As tall as the bar (Material 3's 64 dp), so the title's middle
         // lines up with the back button's.
-        height: Platform.OS === 'android' ? 64 : 44,
+        height: isAndroid() ? 64 : 44,
         justifyContent: 'center',
-        alignItems: Platform.OS === 'android' ? 'flex-start' : 'center',
+        alignItems: isAndroid() ? 'flex-start' : 'center',
       }}
     >
       <Text
-        variant={Platform.OS === 'ios' ? 'headline' : 'title'}
+        variant={isApple() ? 'headline' : 'title'}
         allowFontScaling={allowFontScaling}
         maxFontSizeMultiplier={maxFontSizeMultiplier}
         numberOfLines={1}
@@ -70,7 +71,7 @@ const styles = StyleSheet.create({
   subtitle: {
     marginTop: 2,
     width: '100%',
-    textAlign: Platform.OS === 'android' ? 'left' : 'center',
+    textAlign: isAndroid() ? 'left' : 'center',
   },
 });
 

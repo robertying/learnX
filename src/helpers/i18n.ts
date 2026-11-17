@@ -1,4 +1,4 @@
-import { AppState, Platform } from 'react-native';
+import { AppState } from 'react-native';
 import { getCalendars, getLocales } from 'expo-localization';
 import dayjs from 'dayjs';
 import relativeTimePlugin from 'dayjs/plugin/relativeTime';
@@ -7,6 +7,7 @@ import zhCn from 'dayjs/locale/zh-cn';
 import en from 'assets/translations/en';
 import zh from 'assets/translations/zh';
 import { addCjkGaps, joinWithCjkGaps } from './cjk';
+import { isAndroid } from 'helpers/platform';
 
 let locale: string | undefined;
 
@@ -114,7 +115,7 @@ export const interpolate = (
  * Whether Chinese next to Latin letters or digits needs its gap typed in:
  * only on Android, as iOS and macOS draw it themselves (helpers/cjk).
  */
-const typesCjkGap = () => Platform.OS === 'android';
+const typesCjkGap = () => isAndroid();
 
 /**
  * `text` with a gap between Chinese and Latin letters or digits on Android

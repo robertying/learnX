@@ -2,6 +2,8 @@
 
 Local Expo modules (`expo-module.config.json` in each): `crashlytics`, `menus`, `quicklook`, `share`, `shortcuts`, `sidebar`, `spotlight`, `toast` and `updater`. They have no JS-only fallback, so a change to their native code needs a rebuild.
 
+A module may have an `index.web.ts(x)` for the Electron app beside its `index.ts(x)` (`modules/menus`), with the same extension, since Metro tries a `.ts` base file before a `.web.tsx` variant.
+
 ## Native tests (iOS)
 
 - Each module's Swift is tested in `modules/<name>/ios/Tests` with Swift Testing, as a CocoaPods test spec (the `Tests` test spec every podspec gets from `modules/learnx_module.rb`, which holds their shared settings, hosted in an app CocoaPods makes, since some UIKit APIs need one). The Podfile adds every local module with its `Tests` spec before `use_expo_modules!`, so a new module's tests need only a `Tests` folder and a `pod install`. The app's own Swift (App Intents, app delegate) is tested in `ios/learnXTests`, a target hosted in learnX (a synchronized folder: new files need no project change); the share extension's file handling is `SharedFileInbox` in `modules/share`, compiled into both, and tested there.
@@ -14,7 +16,7 @@ Local Expo modules (`expo-module.config.json` in each): `crashlytics`, `menus`, 
 ## Native tests (Android)
 
 - `modules/<name>/android/src/test` holds each module's JVM unit tests: JUnit 4, Robolectric (an `Intent` or `Uri` needs it; `src/test/resources/robolectric.properties` sets the newest Android it runs) and MockK (a module's `appContext`, `FirebaseCrashlytics.getInstance()`). Their versions are in `android/build.gradle`'s `ext`. The module's logic is in plain functions (`ShareModule.take`, `JavaScriptError.from`) that its definition calls. The tests run on Java 21 with two JDK internals opened, which Robolectric needs for Android 15 and 16. All of that is in `modules/unit-tests.gradle`, which each module's `build.gradle` applies.
-- `scripts/test-android.sh` runs them with JaCoCo and prints line coverage, followed by the app's and the modules' Kotlin that no test reaches (marked `untested`), and fails when the modules' line coverage drops below the minimum at its end (kept just under the current total); CI runs it in the "Android" job in `ci.yml`, a required check that skips its steps (and passes) when nothing Android changed. `apple.yml` runs `scripts/test-ios.sh` by hand ("Apple (iOS)"). The app module's Kotlin (`MainActivity`, `MainApplication`, the widget providers) is the React Native template's startup code and is left untested.
+- `scripts/test-android.sh` runs them with JaCoCo and prints line coverage, followed by the app's and the modules' Kotlin that no test reaches (marked `untested`), and fails when the modules' line coverage drops below the minimum at its end (kept just under the current total); CI runs it in `Android / Build` (`android.yml`), a required check that skips its steps (and passes) when nothing Android changed. `apple.yml` runs `scripts/test-ios.sh` by hand (`Apple / iOS`). The app module's Kotlin (`MainActivity`, `MainApplication`, the widget providers) is the React Native template's startup code and is left untested.
 
 ## Spotlight and App Intents
 

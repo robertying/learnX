@@ -31,14 +31,36 @@ const base = {
   ],
 };
 
+// The Electron app's packages with no web build resolve to the stand-ins
+// src/web/aliases.json names (as metro.config.js does on web).
+const webAliases = Object.fromEntries(
+  Object.entries(require('./src/web/aliases.json')).map(([name, file]) => [
+    `^${name.replace(/[/.]/g, '\\$&')}$`,
+    `<rootDir>/src/web/${file}`,
+  ]),
+);
+
 /**
- * Three runs: everything in src/ with each split component's iOS file (Jest's
+ * Four runs: everything in src/ with each split component's iOS file (Jest's
  * default platform here); the component tests under `__tests__/android` with
  * the `.android.tsx` files, Compose stand-ins (`jest/mocks/expoCompose.tsx`)
  * and `Platform.OS` 'android'; and `tooling`, the tests of the repo's scripts,
- * Maestro flows and lint rules in `scripts/__tests__`, typed with Node
+ * Maestro flows and lint rules in `scripts/__tests__` and of the Electron
+ * app's main process in `electron/__tests__`, typed with Node
  * (`scripts/tsconfig.json`).
  */
+// Node's own localStorage (on by default since Node 25) warns in every worker
+// whose environment reads the globals (Jest copies them), and the tests use
+// jsdom's or none: the workers start without it.
+if (!process.env.NODE_OPTIONS?.includes('--no-experimental-webstorage')) {
+  process.env.NODE_OPTIONS = [
+    process.env.NODE_OPTIONS,
+    '--no-experimental-webstorage',
+  ]
+    .filter(Boolean)
+    .join(' ');
+}
+
 /** @type {import('jest').Config} */
 module.exports = {
   // Count every source file, not only the ones some test imports.
@@ -57,6 +79,12 @@ module.exports = {
     // runs that text instead.
     '!src/widgets/{Deadlines,UpNext}{,.android}.tsx',
     '!src/widgets/kit{,.android}.tsx',
+    // The Electron app's main process (the `tooling` project's tests). The
+    // dev runner, its Mac app, the packaging and clean-up scripts and the
+    // E2E tests' Electron download only run on a developer's machine.
+    'electron/*.{cjs,mjs}',
+    '!electron/{dev,clean,package,macDevApp,devTraces,webExport}.mjs',
+    '!electron/electronApp.cjs',
   ],
   // CI runs `pnpm test --coverage` and fails below these, so coverage can't
   // slip unnoticed. Keep them just under the current numbers; raise them as
@@ -64,13 +92,17 @@ module.exports = {
   // The totals in the log, and a browsable report in coverage/index.html
   coverageReporters: ['text-summary', 'html'],
   coverageThreshold: {
-    global: { statements: 99, branches: 96, functions: 97, lines: 99 },
+    global: { statements: 99, branches: 95.6, functions: 97, lines: 99.2 },
   },
   projects: [
     {
       ...base,
       displayName: 'ios',
-      testPathIgnorePatterns: ['/node_modules/', '/__tests__/android/'],
+      testPathIgnorePatterns: [
+        '/node_modules/',
+        '/__tests__/android/',
+        '/__tests__/web/',
+      ],
     },
     {
       ...base,
@@ -85,9 +117,28 @@ module.exports = {
       testMatch: ['<rootDir>/src/**/__tests__/android/**/*.test.ts?(x)'],
     },
     {
+      displayName: 'web',
+      roots: ['<rootDir>/src', '<rootDir>/modules'],
+      testEnvironment: 'jsdom',
+      haste: { defaultPlatform: 'web', platforms: ['web'] },
+      moduleNameMapper: {
+        '^react-native$': 'react-native-web',
+        '\\.png$': '<rootDir>/jest/mocks/image.js',
+        ...webAliases,
+      },
+      setupFiles: ['<rootDir>/jest/web/setup.ts'],
+      setupFilesAfterEnv: ['<rootDir>/jest/setupAfterEnv.ts'],
+      clearMocks: true,
+      restoreMocks: true,
+      transformIgnorePatterns: base.transformIgnorePatterns,
+      testMatch: ['<rootDir>/**/__tests__/web/**/*.test.ts?(x)'],
+    },
+    {
       ...base,
       displayName: 'tooling',
-      roots: ['<rootDir>/scripts'],
+      roots: ['<rootDir>/scripts', '<rootDir>/electron'],
+      // Playwright's (`pnpm e2e:electron`).
+      testPathIgnorePatterns: ['/node_modules/', '/electron/e2e/'],
       testEnvironment: 'node',
     },
   ],

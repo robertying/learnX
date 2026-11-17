@@ -1,0 +1,50 @@
+// Settings › Calendar in the Electron app: Windows and Linux have no
+// calendar on the device to sync to, so it exports an .ics file instead,
+// saved where the save dialog (the main process's stand-in) says. The file
+// has what 08-settings looks for in the phone's calendar: the mock course's
+// classes in room 6A118 and the mock assignment's deadline.
+import fs from 'node:fs';
+import path from 'node:path';
+import { expect, test } from './fixtures';
+import { text } from './maestroEnv';
+import { byId, openSettings, openSettingsPage } from './steps';
+
+test('exports the classes and deadlines as an .ics file', async ({
+  window,
+  main,
+  dataDir,
+  login,
+}) => {
+  await login();
+  await openSettings(window);
+  await openSettingsPage(window, 'settings-calendar', 'calendar-settings');
+  // No calendar sync on the desktop: only the export.
+  await expect(window.getByTestId('calendar-course-sync')).toHaveCount(0);
+
+  // Cancelled: nothing saved.
+  await byId(window, 'calendar-export').click();
+  await expect.poll(async () => (await main.record()).dialogs.length).toBe(1);
+  const [cancelled] = (await main.record()).dialogs;
+  expect(cancelled).toMatchObject({
+    type: 'save',
+    options: { defaultPath: expect.stringMatching(/\.ics$/) },
+  });
+
+  const saved = path.join(dataDir, 'learnX.ics');
+  await main.stub({ save: saved });
+  await byId(window, 'calendar-export').click();
+  await expect.poll(() => fs.existsSync(saved)).toBe(true);
+  const ics = fs.readFileSync(saved, 'utf8');
+  expect(ics).toMatch(/^BEGIN:VCALENDAR\r?\n/);
+  expect(ics).toMatch(/END:VCALENDAR\s*$/);
+  const events = ics.split('BEGIN:VEVENT').slice(1);
+  const unfold = (event: string) => event.replace(/\r?\n[ \t]/g, '');
+  expect(
+    events.some(
+      event => text('MOCK_COURSE').test(unfold(event)) && /6A118/.test(event),
+    ),
+  ).toBe(true);
+  expect(
+    events.some(event => text('MOCK_ASSIGNMENT').test(unfold(event))),
+  ).toBe(true);
+});

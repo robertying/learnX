@@ -30,7 +30,9 @@ import { accessibilityValue } from '@expo/ui/swift-ui/modifiers';
 import type * as ReactNative from 'react-native';
 import { NavigationContext } from '@react-navigation/native';
 import {
+  accessibilityElement,
   accessibilityHidden,
+  accessibilityIdentifier,
   font,
   foregroundStyle,
   listRowBackground,
@@ -136,6 +138,25 @@ describe('Form', () => {
     expect(screen.getByText('Sync').props.modifiers).toBeUndefined();
     // The footer in the footnote style, its lines spaced apart
     expect(screen.getByText('Synced weekly').props.modifiers).toHaveLength(2);
+  });
+
+  it("keeps a row's id off its action, which has its own", async () => {
+    const onPress = jest.fn();
+    await render(
+      <FormSection>
+        <FormText
+          title="Couldn't log in"
+          testID="status"
+          action={{ title: 'Log In', onPress, testID: 'status-relogin' }}
+        />
+      </FormSection>,
+    );
+    // The row is a container element with the id, not a stack that hands
+    // it to every element in it.
+    expect(accessibilityElement).toHaveBeenCalledWith('contain');
+    expect(accessibilityIdentifier).toHaveBeenCalledWith('status');
+    await userEvent.setup().press(screen.getByTestId('status-relogin'));
+    expect(onPress).toHaveBeenCalledTimes(1);
   });
 
   it('shows a detail at the end of a row', async () => {

@@ -1,6 +1,6 @@
 import { QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Platform, StatusBar, useColorScheme } from 'react-native';
+import { StatusBar, useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import ErrorBoundary from 'components/ErrorBoundary';
 import { Toast } from 'components/Toast';
@@ -12,6 +12,7 @@ import useReLogin from 'hooks/useReLogin';
 import useShareHandler from 'hooks/useShareHandler';
 import useStoresLoaded from 'hooks/useStoresLoaded';
 import Navigation from 'navigation';
+import { isApple } from 'helpers/platform';
 
 const Container = () => {
   const reloginRequested = useReloginRequested();
@@ -41,7 +42,7 @@ const App = () => {
       <StatusBar
         // iOS's default style follows the appearance by itself.
         barStyle={
-          Platform.OS === 'ios'
+          isApple()
             ? 'default'
             : colorScheme === 'dark'
               ? 'light-content'

@@ -17,6 +17,7 @@ import useUpNext from 'hooks/useUpNext';
 import useLinkTaps from 'hooks/useLinkTaps';
 import useNotificationTaps from 'hooks/useNotificationTaps';
 import useSpotlightTaps from 'hooks/useSpotlightTaps';
+import useJumpListTaps from 'hooks/useJumpListTaps';
 
 /**
  * What the main UI starts once logged in: picks the semester and keeps its
@@ -72,12 +73,13 @@ const useMainStartup = () => {
   }, [loggedIn]);
 
   // What the user tapped outside the app (a notification, a widget row or
-  // another learnx:// link, or a Spotlight result), including the one that
-  // launched it. Each goes through `useOpenTarget`, which shows the item's
+  // another learnx:// link, a Spotlight result, or the Electron app's Jump
+  // List), including the one that launched it. Each goes through `useOpenTarget`, which shows the item's
   // list and leaves the item to it (`usePendingTarget`).
   useNotificationTaps();
   useLinkTaps();
   useSpotlightTaps();
+  useJumpListTaps();
 
   useEffect(() => {
     void configureNotifications();

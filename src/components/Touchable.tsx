@@ -1,5 +1,4 @@
 import {
-  Platform,
   PlatformColor,
   Pressable,
   PressableProps,
@@ -7,6 +6,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import { MaterialColors, useTheme, withAlpha } from 'theme';
+import { isAndroid, isApple } from 'helpers/platform';
 
 export interface TouchableProps extends Omit<PressableProps, 'style'> {
   /**
@@ -23,8 +23,7 @@ export interface TouchableProps extends Omit<PressableProps, 'style'> {
  * UITableViewCell's selected background (iOS and Mac): a pressed row, and a
  * row that stays selected (`CardWrapper`'s `opened`).
  */
-export const rowHighlight =
-  Platform.OS === 'ios' ? PlatformColor('systemGray4') : null;
+export const rowHighlight = isApple() ? PlatformColor('systemGray4') : null;
 
 /** A pressable area with the platform's own press feedback. */
 const Touchable: React.FC<TouchableProps> = ({
@@ -34,7 +33,7 @@ const Touchable: React.FC<TouchableProps> = ({
 }) => {
   const theme = useTheme();
 
-  if (Platform.OS === 'android') {
+  if (isAndroid()) {
     return (
       <Pressable
         android_ripple={{

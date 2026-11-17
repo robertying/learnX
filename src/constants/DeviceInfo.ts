@@ -9,13 +9,13 @@ import {
   supportedCpuArchitectures,
 } from 'expo-device';
 import packageJson from '../../package.json';
+import { isApple } from 'helpers/platform';
 
 // iOS 26 and later: Liquid Glass, native header subtitles
-const ios26 =
-  Platform.OS === 'ios' && parseInt(String(Platform.Version), 10) >= 26;
+const ios26 = isApple() && parseInt(String(Platform.Version), 10) >= 26;
 
 // Mac Catalyst, and the iPad app on Apple silicon Macs
-const isMac = Platform.OS === 'ios' && deviceType === DeviceType.DESKTOP;
+const isMac = isApple() && deviceType === DeviceType.DESKTOP;
 
 export default {
   /**

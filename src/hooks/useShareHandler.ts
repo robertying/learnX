@@ -1,10 +1,10 @@
 import { useEffect, useEffectEvent } from 'react';
-import { Platform } from 'react-native';
 import Share, { type SharedItem } from '../../modules/share';
 import { t } from 'helpers/i18n';
 import { copyFileToCache } from 'services/files/share';
 import { toast } from 'components/Toast';
 import { setPendingAssignmentData } from 'data/pendingAssignment';
+import { isAndroid } from 'helpers/platform';
 
 /**
  * Keeps a file shared to learnX, at launch or while running, so that it can be
@@ -21,7 +21,7 @@ const useShareHandler = () => {
     // Android hands over a content URI that may stop working once the sharing
     // app is done; iOS's share extension already copied the file to the app
     // group.
-    if (Platform.OS === 'android') {
+    if (isAndroid()) {
       try {
         uri = await copyFileToCache(uri);
       } catch {

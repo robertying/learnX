@@ -1,0 +1,275 @@
+name: Electron
+
+# The Windows and Linux app (electron/). Web build, E2E tests (Linux) and
+# E2E tests (Windows) are required: they bundle the web build and run the
+# Playwright E2E tests on Linux (under X11, then the window test under
+# Wayland) and on Windows, side by side, on every pull request; one that
+# changes nothing the app uses (only native code, Maestro flows, fastlane,
+# docs or the other workflows) skips their steps and passes. Manual runs
+# also check that the installers still build on Windows and Linux
+# (Installers); those builds are never released: releases are built, signed and uploaded by hand with
+# fastlane (the release skill). js.yml's Checks run the `web` Jest project.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# A newer run of the same pull request or branch replaces an older one.
+concurrency:
+  group: electron-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+# Electron's downloads (build/electron/cache: Electron for each platform and
+# CPU, and electron-builder's NSIS and AppImage tools) are cached, saved only
+# from main, as the other workflows' caches are; caches.yml prunes superseded
+# ones.
+env:
+  SAVE_CACHE: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    name: Web build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      changed: ${{ steps.changes.outputs.changed }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+
+      # Pull requests only: the steps below, and E2E tests' run, skip
+      # themselves when nothing the app uses changed.
+      - name: Detect changed files
+        id: changes
+        run: scripts/changed-files.sh electron >> "$GITHUB_OUTPUT"
+
+      - name: Set up JS
+        if: steps.changes.outputs.changed == 'true'
+        uses: ./.github/actions/setup-js
+
+      # Metro's transform cache: an export from a warm cache takes seconds
+      # instead of most of a minute. Metro keys each file by its contents and
+      # the inputs metro.config.js hashes (.env, preval, babel/); the key's
+      # hash adds what can change a transform without changing a source file
+      # (packages, patches, Babel and Metro config), so a change there starts
+      # cold. Hash and commit are written as one run of hex, so
+      # prune-caches.sh groups every entry as `metro-web-` and keeps 2.
+      - name: Restore Metro cache
+        id: metro-cache
+        if: steps.changes.outputs.changed == 'true'
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ runner.temp }}/metro-cache
+          key: metro-web-${{ hashFiles('pnpm-lock.yaml', 'patches/**', 'babel.config.js', 'babel/**', 'metro.config.js') }}${{ github.sha }}
+          restore-keys: metro-web-${{ hashFiles('pnpm-lock.yaml', 'patches/**', 'babel.config.js', 'babel/**', 'metro.config.js') }}
+
+      # A made-up mock login, so the E2E tests can log in; the web build
+      # inlines it as the mobile bundles do. For the E2E tests only: Installers
+      # exports its own.
+      - name: Export web build
+        id: export
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          bash scripts/write-e2e-env.sh
+          pnpm exec expo export --platform web --output-dir build/electron/web
+        env:
+          CI: '1'
+          # Metro keeps its cache in the temp folder.
+          TMPDIR: ${{ runner.temp }}
+
+      - name: Save Metro cache
+        if: env.SAVE_CACHE == 'true' && steps.export.outcome == 'success'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ runner.temp }}/metro-cache
+          key: ${{ steps.metro-cache.outputs.cache-primary-key }}
+
+      - name: Upload web build
+        if: ${{ !cancelled() && steps.export.outcome == 'success' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: electron-web
+          path: build/electron/web
+          retention-days: 1
+
+  e2e:
+    # The whole Playwright E2E suite (electron/e2e) in a dev run of the app
+    # on the web build: the Maestro flows that apply to the desktop and what
+    # only it does (files, submissions, notifications, the tray, the .ics
+    # export, updates against updateServer.mjs, the SSO page). It needs the
+    # network, as the flows do: the mock files download from GitHub and the
+    # SSO test opens id.tsinghua.edu.cn.
+    # - Linux (required): under a virtual X display, one app per core
+    #   (playwright.config.ts). Then the window test once more under
+    #   Wayland (window.e2e.ts): under X11 a window draws whether it shows
+    #   or not, so only Wayland can tell a window that never appears.
+    #   Weston's headless backend is a real Wayland compositor without a
+    #   screen; with no X display, Electron can only use it, as Ubuntu's and
+    #   Fedora's desktops run it.
+    # - Windows (required): the same way, on its own runner at the same time.
+    # A static name: rows show as "E2E tests (Linux)" and "E2E tests
+    # (Windows)", and a skipped job would show a raw expression instead.
+    name: E2E tests
+    needs: web
+    strategy:
+      fail-fast: false
+      matrix:
+        run: [Linux, Windows]
+    runs-on: ${{ matrix.run == 'Windows' && 'windows-latest' || 'ubuntu-latest' }}
+    timeout-minutes: 20
+    env:
+      CHANGED: ${{ needs.web.outputs.changed }}
+    steps:
+      - name: Checkout repository
+        if: env.CHANGED == 'true'
+        uses: actions/checkout@v7
+
+      - name: Set up JS
+        if: env.CHANGED == 'true'
+        uses: ./.github/actions/setup-js
+
+      - name: Download web build
+        if: env.CHANGED == 'true'
+        uses: actions/download-artifact@v8
+        with:
+          name: electron-web
+          path: build/electron/web
+
+      - name: Install Weston
+        if: env.CHANGED == 'true' && matrix.run == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends weston
+
+      - name: Restore Electron download cache
+        id: electron-cache
+        if: env.CHANGED == 'true'
+        uses: actions/cache/restore@v6
+        with:
+          path: build/electron/cache
+          key: electron-e2e-${{ runner.os }}-${{ hashFiles('electron/package.json', 'electron/packageConfig.cjs') }}
+
+      # The same mock login as the web build's.
+      - name: E2E tests
+        id: e2e
+        if: env.CHANGED == 'true'
+        shell: bash
+        run: |
+          bash scripts/write-e2e-env.sh
+          if [ "$RUNNER_OS" = Linux ]; then
+            xvfb-run --auto-servernum pnpm e2e:electron
+          else
+            pnpm e2e:electron
+          fi
+
+      # Runs even if the tests above failed, so one push shows both. Its
+      # results go in a folder of their own, beside the X11 run's.
+      - name: E2E test on Wayland
+        id: wayland
+        if: ${{ !cancelled() && env.CHANGED == 'true' && matrix.run == 'Linux' && steps.electron-cache.outcome == 'success' }}
+        run: |
+          export XDG_RUNTIME_DIR="$RUNNER_TEMP/xdg"
+          mkdir -m 700 "$XDG_RUNTIME_DIR"
+          weston --backend=headless --renderer=pixman --width=1280 --height=800 \
+            --socket=wayland-learnx --idle-time=0 > "$RUNNER_TEMP/weston.log" 2>&1 &
+          for _ in $(seq 50); do
+            [ -S "$XDG_RUNTIME_DIR/wayland-learnx" ] && break
+            sleep 0.2
+          done
+          if [ ! -S "$XDG_RUNTIME_DIR/wayland-learnx" ]; then
+            cat "$RUNNER_TEMP/weston.log"
+            exit 1
+          fi
+          env -u DISPLAY WAYLAND_DISPLAY=wayland-learnx XDG_SESSION_TYPE=wayland \
+            pnpm e2e:electron window.e2e.ts --reporter=list --output build/electron/e2e/wayland
+
+      # Traces and screenshots of failed tests, and the HTML report.
+      - name: Upload results
+        if: ${{ !cancelled() && env.CHANGED == 'true' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: electron-e2e-${{ matrix.run }}
+          path: build/electron/e2e
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Save Electron download cache
+        if: env.SAVE_CACHE == 'true' && steps.e2e.outcome == 'success' && steps.electron-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: build/electron/cache
+          key: ${{ steps.electron-cache.outputs.cache-primary-key }}
+
+  installers:
+    # Checks that the installers still build: each platform on its own
+    # runner, both CPU architectures per platform. By hand only; never
+    # released. A static name: rows show as "Installers (Windows)" and
+    # "Installers (Linux)", and the job skipped on other runs as "Installers".
+    name: Installers
+    if: github.event_name == 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [Windows, Linux]
+    runs-on: ${{ matrix.platform == 'Windows' && 'windows-latest' || 'ubuntu-latest' }}
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up JS
+        uses: ./.github/actions/setup-js
+
+      - name: Restore Electron download cache
+        id: electron-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: build/electron/cache
+          key: electron-package-${{ runner.os }}-${{ hashFiles('electron/package.json', 'electron/packageConfig.cjs') }}
+
+      # Its own web build with the mock login from the repository's
+      # DUMMY_USERNAME and DUMMY_PASSWORD secrets (none without them),
+      # checked for other .env values, so packaging runs as a release's
+      # would. These builds are never released.
+      - name: Package
+        id: package
+        shell: bash
+        run: |
+          rm -f .env
+          if [ -n "$DUMMY_USERNAME" ] && [ -n "$DUMMY_PASSWORD" ]; then
+            printf 'DUMMY_USERNAME=%s\nDUMMY_PASSWORD=%s\n' "$DUMMY_USERNAME" "$DUMMY_PASSWORD" > .env
+          fi
+          pnpm electron:package --${{ matrix.platform == 'Windows' && 'win' || 'linux' }}
+          if [ -f .env ]; then
+            node scripts/check-bundle-env.mjs build/electron/web/_expo/static/js/web/*.js
+          fi
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+          DUMMY_USERNAME: ${{ secrets.DUMMY_USERNAME }}
+          DUMMY_PASSWORD: ${{ secrets.DUMMY_PASSWORD }}
+
+      - name: Upload installers
+        uses: actions/upload-artifact@v7
+        with:
+          name: electron-${{ matrix.platform }}-check
+          path: |
+            build/electron/dist/*.exe
+            build/electron/dist/*.blockmap
+            build/electron/dist/*.AppImage
+            build/electron/dist/*.deb
+            build/electron/dist/latest*.yml
+          if-no-files-found: error
+          retention-days: 3
+
+      - name: Save Electron download cache
+        if: env.SAVE_CACHE == 'true' && steps.package.outcome == 'success' && steps.electron-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: build/electron/cache
+          key: ${{ steps.electron-cache.outputs.cache-primary-key }}

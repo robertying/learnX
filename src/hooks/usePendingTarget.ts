@@ -2,17 +2,23 @@ import { useContext, useEffect, useEffectEvent } from 'react';
 import { create } from 'zustand';
 import { SplitViewContext } from 'navigation/SplitView';
 import { ListTarget } from 'helpers/openTarget';
+
+/**
+ * What waits for its screen to open it: an item, which its list opens, or
+ * the week's Schedule, which Today opens (the Electron app's Jump List).
+ */
+export type PendingTarget = ListTarget | { type: 'schedule'; id: 'week' };
 import useDetailNavigator from 'hooks/useDetailNavigator';
 
 /**
  * The item a tapped notification, widget row, learnx:// link or Spotlight
  * result points to, until its list screen opens it (`useOpenTarget`).
  */
-const usePendingTargetStore = create<{ target: ListTarget | null }>(() => ({
+const usePendingTargetStore = create<{ target: PendingTarget | null }>(() => ({
   target: null,
 }));
 
-export const setPendingTarget = (target: ListTarget | null) =>
+export const setPendingTarget = (target: PendingTarget | null) =>
   usePendingTargetStore.setState({ target });
 
 /**
@@ -22,7 +28,7 @@ export const setPendingTarget = (target: ListTarget | null) =>
  * on the list.
  */
 const usePendingTarget = (
-  type: ListTarget['type'],
+  type: PendingTarget['type'],
   open: (id: string) => void,
 ) => {
   const target = usePendingTargetStore(state => state.target);

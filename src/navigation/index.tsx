@@ -1,5 +1,4 @@
 import DeviceInfo from 'constants/DeviceInfo';
-import { Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import {
   createNativeStackNavigator,
@@ -13,6 +12,7 @@ import { trackScreen } from 'services/crashReporting';
 import { useNavigationTheme } from 'theme';
 import { renderDetailContainer } from './DetailStack';
 import MainTab from './MainTab';
+import WindowFrame from './WindowFrame';
 import { initialTab, nativeSplit } from './layout';
 import Setup from 'screens/Setup';
 import {
@@ -22,15 +22,15 @@ import {
   SearchStack,
   WhatsNewStack,
 } from './stacks';
+import { isAndroid, isApple } from 'helpers/platform';
 
 const RootNavigator = createNativeStackNavigator<RootStackParams>();
 
 // A page sheet on iOS, iPadOS and Mac, which a swipe down closes, as the
 // system's own apps present search and web pages. Android covers the window.
-const sheetOptions: NativeStackNavigationOptions =
-  Platform.OS === 'ios'
-    ? { presentation: 'pageSheet' }
-    : { gestureEnabled: false };
+const sheetOptions: NativeStackNavigationOptions = isApple()
+  ? { presentation: 'pageSheet' }
+  : { gestureEnabled: false };
 
 const rootScreenOptions = {
   headerShown: false,
@@ -60,7 +60,7 @@ const renderSheets = () => (
             presentation: 'formSheet',
             sheetAllowedDetents: [1],
             // Material 3's extra-large shape; iOS keeps the system's.
-            sheetCornerRadius: Platform.OS === 'android' ? 28 : undefined,
+            sheetCornerRadius: isAndroid() ? 28 : undefined,
           }
     }
   >
@@ -69,46 +69,62 @@ const renderSheets = () => (
   </Sheets.Group>
 );
 
+// Typed against the modals' own params, which both roots include.
+const Modals =
+  createNativeStackNavigator<
+    Pick<
+      RootStackParams,
+      'CourseXStack' | 'SearchStack' | 'AssignmentSubmissionStack'
+    >
+  >();
+
+/**
+ * Search, CourseX and a submission, over the whole window: page sheets on
+ * iOS, iPadOS and Mac, and on Android above the split view (the root
+ * navigator there), not inside the list's pane.
+ */
+const renderModals = () => (
+  <Modals.Group screenOptions={sheetOptions}>
+    <Modals.Screen name="CourseXStack" component={CourseXStack} />
+    <Modals.Screen name="SearchStack" component={SearchStack} />
+    {/* A sheet like Search; the draft is saved as it's written, so a swipe
+        down loses nothing (the screen holds it while uploading). */}
+    <Modals.Screen
+      name="AssignmentSubmissionStack"
+      component={AssignmentSubmissionStack}
+    />
+  </Modals.Group>
+);
+
 const renderMainScreens = () => (
   <>
     <RootNavigator.Screen name="MainTab" component={MainTab} />
-    <RootNavigator.Screen
-      name="CourseXStack"
-      component={CourseXStack}
-      options={sheetOptions}
-    />
-    <RootNavigator.Screen
-      name="SearchStack"
-      component={SearchStack}
-      options={sheetOptions}
-    />
-    <RootNavigator.Screen
-      name="AssignmentSubmissionStack"
-      component={AssignmentSubmissionStack}
-      // A sheet like Search; the draft is saved as it's written, so a swipe
-      // down loses nothing (the screen holds it while uploading).
-      options={sheetOptions}
-    />
     {/* Android shows these above its split view (AndroidRootNavigator). */}
+    {nativeSplit && renderModals()}
     {nativeSplit && renderSheets()}
   </>
 );
 
-/** Android's main UI, in the split view drawn in JS (`SplitViewProvider`). */
+/**
+ * Android's main UI, in the split view drawn in JS (`SplitViewProvider`); the
+ * Electron app's too, with its navigation pane beside it (`WindowFrame`).
+ */
 const AndroidMain = () => {
   const frame = useSafeAreaFrame();
   const showDetail = frame.width > SplitSizes.maxCollapsedWidth;
 
   return (
-    <SplitViewProvider
-      showDetail={showDetail}
-      initialTab={initialTab}
-      renderDetail={renderDetailContainer}
-    >
-      <RootNavigator.Navigator screenOptions={rootScreenOptions}>
-        {renderMainScreens()}
-      </RootNavigator.Navigator>
-    </SplitViewProvider>
+    <WindowFrame>
+      <SplitViewProvider
+        showDetail={showDetail}
+        initialTab={initialTab}
+        renderDetail={renderDetailContainer}
+      >
+        <RootNavigator.Navigator screenOptions={rootScreenOptions}>
+          {renderMainScreens()}
+        </RootNavigator.Navigator>
+      </SplitViewProvider>
+    </WindowFrame>
   );
 };
 
@@ -143,6 +159,7 @@ const Navigation: React.FC<{ showMain: boolean }> = ({ showMain }) => {
                 options={{ animationTypeForReplace: 'pop' }}
               />
               {/* Over the whole window, not inside the list's pane */}
+              {renderModals()}
               {renderSheets()}
             </>
           ) : (

@@ -1,6 +1,5 @@
 import { ReactNode } from 'react';
 import {
-  Platform,
   StyleSheet,
   Text as NativeText,
   View,
@@ -19,8 +18,9 @@ import { t } from 'helpers/i18n';
 import { matchRanges } from 'helpers/search';
 import { truncate } from 'helpers/text';
 import { StatusTone, statusContainerOpacity, useTheme } from 'theme';
+import { isAndroid } from 'helpers/platform';
 
-const isAndroid = Platform.OS === 'android';
+const android = isAndroid();
 
 /**
  * Titles get one line, as in Mail, except at accessibility text sizes, where
@@ -29,7 +29,7 @@ const isAndroid = Platform.OS === 'android';
 const useTitleLines = () => (useWindowDimensions().fontScale >= 1.5 ? 3 : 1);
 // Mail's first line is Subheadline; a Material three-line item's overline is
 // small (bodySmall).
-const metaVariant = isAndroid ? 'footnote' : 'subheadline';
+const metaVariant = android ? 'footnote' : 'subheadline';
 
 // The unread dot, two thirds as tall as the subheadline text (10 pt on iOS,
 // 7 pt on the Mac's smaller text), centered where a 10 pt dot 6 pt down is.
@@ -142,7 +142,7 @@ const CardRow: React.FC<CardRowProps> = ({
         <View style={styles.firstLine}>
           <Headline
             numberOfLines={titleLines}
-            style={[styles.title, isAndroid && unread && styles.unread]}
+            style={[styles.title, android && unread && styles.unread]}
           >
             <Highlighted text={title} words={highlight} inTitle />
           </Headline>
@@ -200,7 +200,7 @@ export const cardAccessibilityLabel = ({
  */
 export const CardGutter: React.FC<{ unread?: boolean }> = ({ unread }) => {
   const theme = useTheme();
-  if (isAndroid) {
+  if (android) {
     return null;
   }
   return (
@@ -273,7 +273,7 @@ export const CardPill: React.FC<{
       ? [colors.primaryContainer, colors.onPrimaryContainer]
       : [colors.statusContainer[tone], colors.onStatusContainer[tone]];
   // iOS tints with the brand color itself, as with the status hues.
-  const tint = tone === 'primary' && !isAndroid ? colors.primary : container;
+  const tint = tone === 'primary' && !android ? colors.primary : container;
   return (
     <View testID={testID} style={styles.pill}>
       <View
@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
-    borderRadius: isAndroid ? 8 : 999,
+    borderRadius: android ? 8 : 999,
     paddingHorizontal: 8,
     paddingVertical: 1,
   },

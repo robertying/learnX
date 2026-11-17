@@ -1,0 +1,119 @@
+name: JS
+
+# The JS checks every pull request must pass: Checks (typecheck, lint, format,
+# runtime version, ShellCheck, Jest) and Release bundles. Both are required.
+# Android is in android.yml, the Apple builds in apple.yml and the Windows and
+# Linux app in electron.yml.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# A new push to a PR cancels that PR's older run. Main pushes and manual runs
+# each get their own group, so another merge can't cancel them (and the cache
+# they save).
+concurrency:
+  group: js-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+# Only main saves the Jest cache, so other refs start from main's and can't
+# evict or poison it. caches.yml prunes superseded ones after each main run.
+env:
+  SAVE_CACHE: ${{ github.ref == 'refs/heads/main' }}
+  JEST_CACHE_DIR: ${{ github.workspace }}/.jest-cache
+
+jobs:
+  checks:
+    # Typecheck, lint, format, the over-the-air runtime version, ShellCheck
+    # and Jest (with its coverage thresholds)
+    name: Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up JS
+        id: install
+        uses: ./.github/actions/setup-js
+
+      # The checks below run even if an earlier one fails, so one push shows
+      # every failure. They're skipped only when setup failed.
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: pnpm lint --deny-warnings
+
+      - name: Format
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: pnpm format --check
+
+      # The over-the-air runtime version changes exactly when native code does
+      # (scripts/check-ota-runtime.mjs); on failure it prints what to record.
+      - name: Runtime version
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: node scripts/check-ota-runtime.mjs
+
+      # Catches shell mistakes before a script only runs on main
+      - name: Shell scripts
+        if: ${{ !cancelled() }}
+        run: shellcheck --version | head -2 && git ls-files -z '*.sh' | xargs -0 shellcheck
+
+      # Jest's cache holds Babel output, mostly for node_modules. Its key
+      # follows what changes that output (the Babel plugins in babel/ too,
+      # which babel-jest's own per-file key leaves out); source files that
+      # changed since are just transformed again, and the preval files'
+      # inputs are in their per-file key (jest/transformer.js).
+      - name: Restore Jest cache
+        id: jest-cache
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ env.JEST_CACHE_DIR }}
+          key: jest-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'patches/**', 'babel.config.js', 'babel/**', 'jest.config.js', 'jest/transformer.js') }}
+
+      - name: Test
+        id: test
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: pnpm test --coverage --cacheDirectory "$JEST_CACHE_DIR"
+
+      - name: Save Jest cache
+        if: env.SAVE_CACHE == 'true' && steps.test.outcome == 'success' && steps.jest-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ env.JEST_CACHE_DIR }}
+          key: ${{ steps.jest-cache.outputs.cache-primary-key }}
+
+  release-bundles:
+    # A job of its own, as it takes longer than every other check together.
+    name: Release bundles
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up JS
+        uses: ./.github/actions/setup-js
+
+      # Builds the Android and iOS release JS bundles (production Babel and
+      # Metro, which Jest doesn't run) and fails if one contains a .env value
+      # other than the mock login. The .env has a made-up value for every key,
+      # and one babel/inline-env.js doesn't know, so any leak shows up.
+      - name: Release bundles
+        run: |
+          cat > .env <<'ENV'
+          DUMMY_USERNAME=ci-mock-user
+          DUMMY_PASSWORD=ci-mock-password
+          LIVE_USERNAME=ci-canary-live-username
+          LIVE_PASSWORD=ci-canary-live-password
+          LIVE_FINGERPRINT=ci-canary-live-fingerprint
+          UNLISTED_KEY=ci-canary-unlisted-key
+          ENV
+          scripts/check-release-bundle.sh

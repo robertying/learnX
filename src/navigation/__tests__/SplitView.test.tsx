@@ -64,7 +64,8 @@ it('shows the list alone in a narrow window', async () => {
 it('puts the detail beside the list in a wide window, and can hide the list', async () => {
   await renderSplit(true);
   expect(screen.getByTestId('split-master')).toHaveStyle({
-    flex: 0,
+    flexGrow: 0,
+    flexShrink: 0,
     width: 320,
   });
   expect(

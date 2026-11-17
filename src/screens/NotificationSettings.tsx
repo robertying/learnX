@@ -1,4 +1,3 @@
-import { Platform } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   Form,
@@ -20,6 +19,7 @@ import {
 import { openSystemSettings } from 'helpers/systemSettings';
 import useNotificationPermission from 'hooks/useNotificationPermission';
 import { SettingsStackParams } from 'navigation/types';
+import { isApple, isElectron } from 'helpers/platform';
 
 type Props = NativeStackScreenProps<
   SettingsStackParams,
@@ -97,7 +97,11 @@ const NotificationSettings: React.FC<Props> = () => {
         )}
         <FormSection
           title={t('setupNewContent')}
-          footer={t('notificationsCaption')}
+          footer={
+            isElectron()
+              ? t('electronNotificationsCaption')
+              : t('notificationsCaption')
+          }
         >
           {newContentToggles.map(renderToggle)}
         </FormSection>
@@ -118,9 +122,11 @@ const NotificationSettings: React.FC<Props> = () => {
         <FormSection
           title={t('assignments')}
           footer={[
-            Platform.OS === 'ios'
+            isApple()
               ? t('notifyDeadlineRemindersCaption')
-              : t('notifyDeadlineRemindersCaptionAndroid'),
+              : isElectron()
+                ? t('notifyDeadlineRemindersCaptionElectron')
+                : t('notifyDeadlineRemindersCaptionAndroid'),
             showExact && t('exactRemindersCaption'),
           ]
             .filter(Boolean)
@@ -143,13 +149,16 @@ const NotificationSettings: React.FC<Props> = () => {
           )}
           {assignmentToggles.map(renderToggle)}
         </FormSection>
-        <FormSection footer={t('notificationAccessCaption')}>
-          <FormButton
-            icon="settings"
-            title={t('openSystemSettings')}
-            onPress={() => openSystemSettings('notifications')}
-          />
-        </FormSection>
+        {/* Windows and Linux ask learnX for no permission to notify. */}
+        {!isElectron() && (
+          <FormSection footer={t('notificationAccessCaption')}>
+            <FormButton
+              icon="settings"
+              title={t('openSystemSettings')}
+              onPress={() => openSystemSettings('notifications')}
+            />
+          </FormSection>
+        )}
       </Form>
     </FormScreen>
   );

@@ -1,9 +1,10 @@
 import { useIsFocused, useNavigation } from '@react-navigation/native';
 import useAppCommand from 'hooks/useAppCommand';
-import { sidebarSplit } from 'navigation/layout';
+import { settingsTab } from 'navigation/layout';
 
 /**
- * Search (⌘F) and Settings… (⌘,) from the menu bar on iPad and Mac. Only
+ * Search (⌘F) and Settings… (⌘,) from the menu bar on iPad and Mac, and
+ * their shortcuts in the Electron app (Ctrl+F, Ctrl+,). Only
  * while the main UI is on top, so that a sheet such as a submission in
  * progress isn't closed for them.
  */
@@ -19,7 +20,7 @@ const useMainCommands = () => {
   useAppCommand(
     'settings',
     () =>
-      sidebarSplit
+      settingsTab
         ? navigation.navigate('MainTab', {
             screen: 'SettingStack',
             params: { screen: 'Settings' },
