@@ -314,7 +314,7 @@ const zh: typeof en = {
   on: '开',
   off: '关',
   // An alert's button when it gives none (Windows)
-  ok: '好',
+  ok: '确定',
   // The navigation pane's menu button (Windows)
   collapseSidebar: '收起导航',
   expandSidebar: '展开导航',
