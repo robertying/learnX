@@ -1,5 +1,60 @@
+diff --git a/lib/module/PagerViewAdapter.js b/lib/module/PagerViewAdapter.js
+index 398a63d05ed279e9fc5b55a69f4104742d4379c2..23bbb10b576cfa3ea94c50586cf797bf982dd969 100644
+--- a/lib/module/PagerViewAdapter.js
++++ b/lib/module/PagerViewAdapter.js
+@@ -26,7 +26,11 @@ export function PagerViewAdapter({
+   } = navigationState;
+   const listenersRef = React.useRef([]);
+   const pagerRef = React.useRef(null);
++  // The page the pager shows, or is headed for.
+   const indexRef = React.useRef(index);
++  // The page a jump sent the pager to, until the pager reports it. A slide cut short by a newer
++  // jump still reports the page it stopped on (Android), which is no longer the index.
++  const jumpRef = React.useRef(null);
+   const navigationStateRef = React.useRef(navigationState);
+   const position = useAnimatedValue(index);
+   const offset = useAnimatedValue(0);
+@@ -35,6 +39,9 @@ export function PagerViewAdapter({
+   });
+   const jumpTo = useLatestCallback(key => {
+     const index = navigationStateRef.current.routes.findIndex(route => route.key === key);
++    // Sent once: the effect below finds the pager already headed there.
++    indexRef.current = index;
++    jumpRef.current = index;
+     if (animationEnabled) {
+       pagerRef.current?.setPage(index);
+     } else {
+@@ -48,6 +55,8 @@ export function PagerViewAdapter({
+       Keyboard.dismiss();
+     }
+     if (indexRef.current !== index) {
++      indexRef.current = index;
++      jumpRef.current = index;
+       if (animationEnabled) {
+         pagerRef.current?.setPage(index);
+       } else {
+@@ -66,6 +75,8 @@ export function PagerViewAdapter({
+         return;
+       case 'dragging':
+         {
++          // The user takes over from a jump.
++          jumpRef.current = null;
+           const subscription = offset.addListener(({
+             value
+           }) => {
+@@ -110,6 +121,10 @@ export function PagerViewAdapter({
+       }),
+       onPageSelected: e => {
+         const index = e.nativeEvent.position;
++        if (jumpRef.current !== null && jumpRef.current !== index) {
++          return;
++        }
++        jumpRef.current = null;
+         indexRef.current = index;
+         onIndexChange(index);
+         onTabSelect?.({
 diff --git a/lib/module/SceneView.js b/lib/module/SceneView.js
-index 4880e9b..cde5db9 100644
+index 4880e9bbeda4e626129b746bb53c2b682abfbc94..cde5db9ec77489a0df0597dcea7dd5517eb77dd8 100644
 --- a/lib/module/SceneView.js
 +++ b/lib/module/SceneView.js
 @@ -1,7 +1,7 @@
@@ -26,8 +81,64 @@ index 4880e9b..cde5db9 100644
      children:
      // Only render the route only if it's either focused or layout is available
      // When layout is not available, we must not render unfocused routes
+diff --git a/src/PagerViewAdapter.tsx b/src/PagerViewAdapter.tsx
+index d4a0a0efaaa142c9193a00a4ae5743457194409f..e9921deeadd781834bc3bd51cf3257f0defbe59e 100644
+--- a/src/PagerViewAdapter.tsx
++++ b/src/PagerViewAdapter.tsx
+@@ -55,7 +55,11 @@ export function PagerViewAdapter<T extends Route>({
+   const listenersRef = React.useRef<Listener[]>([]);
+ 
+   const pagerRef = React.useRef<ViewPager>(null);
++  // The page the pager shows, or is headed for.
+   const indexRef = React.useRef<number>(index);
++  // The page a jump sent the pager to, until the pager reports it. A slide cut short by a newer
++  // jump still reports the page it stopped on (Android), which is no longer the index.
++  const jumpRef = React.useRef<number | null>(null);
+   const navigationStateRef = React.useRef(navigationState);
+ 
+   const position = useAnimatedValue(index);
+@@ -70,6 +74,10 @@ export function PagerViewAdapter<T extends Route>({
+       (route: { key: string }) => route.key === key
+     );
+ 
++    // Sent once: the effect below finds the pager already headed there.
++    indexRef.current = index;
++    jumpRef.current = index;
++
+     if (animationEnabled) {
+       pagerRef.current?.setPage(index);
+     } else {
+@@ -86,6 +94,8 @@ export function PagerViewAdapter<T extends Route>({
+     }
+ 
+     if (indexRef.current !== index) {
++      indexRef.current = index;
++      jumpRef.current = index;
+       if (animationEnabled) {
+         pagerRef.current?.setPage(index);
+       } else {
+@@ -105,6 +115,8 @@ export function PagerViewAdapter<T extends Route>({
+         onSwipeEnd?.();
+         return;
+       case 'dragging': {
++        // The user takes over from a jump.
++        jumpRef.current = null;
+         const subscription = offset.addListener(({ value }) => {
+           const next =
+             index + (value > 0 ? Math.ceil(value) : Math.floor(value));
+@@ -165,6 +177,10 @@ export function PagerViewAdapter<T extends Route>({
+         )}
+         onPageSelected={(e) => {
+           const index = e.nativeEvent.position;
++          if (jumpRef.current !== null && jumpRef.current !== index) {
++            return;
++          }
++          jumpRef.current = null;
+           indexRef.current = index;
+           onIndexChange(index);
+           onTabSelect?.({ index });
 diff --git a/src/SceneView.tsx b/src/SceneView.tsx
-index f03cc96..81875a0 100644
+index f03cc966cf2b0b7a97bd9045e3a4fa742604cd99..81875a0ae6dab864da527ad04882154a3098f7e8 100644
 --- a/src/SceneView.tsx
 +++ b/src/SceneView.tsx
 @@ -1,5 +1,11 @@
