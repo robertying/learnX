@@ -186,7 +186,9 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
           testID="split-master"
           style={[
             styles.master,
-            { flex: showDetail ? 0 : 1 },
+            // Its own width beside the detail. (Not `flex: 0`, which React
+            // Native Web reads as a zero basis.)
+            showDetail ? styles.masterBeside : styles.masterAlone,
             // Not `display: 'none'`: Fabric doesn't mount the children of hidden views, so
             // every toggle would destroy and recreate the whole master pane natively.
             masterHidden && styles.masterHidden,
@@ -223,6 +225,13 @@ const styles = StyleSheet.create({
   master: {
     width: SplitSizes.masterWidth,
     zIndex: 2,
+  },
+  masterBeside: {
+    flexGrow: 0,
+    flexShrink: 0,
+  },
+  masterAlone: {
+    flex: 1,
   },
   masterHidden: {
     position: 'absolute',

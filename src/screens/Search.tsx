@@ -1,7 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
-  Platform,
   SectionList,
   StyleSheet,
   View,
@@ -42,6 +41,8 @@ import { t } from 'helpers/i18n';
 import { SearchStackParams } from 'navigation/types';
 import { Paragraph } from 'components/Text';
 import { useTheme } from 'theme';
+import { isAndroid, isApple, isElectron } from 'helpers/platform';
+import HeaderSearch from 'components/HeaderSearch';
 import useKeyboardOverlap from 'hooks/useKeyboardOverlap';
 
 type Props = NativeStackScreenProps<SearchStackParams, 'Search'>;
@@ -88,9 +89,23 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
   // view.
   const { ref: keyboardRef, overlap: keyboardOverlap } = useKeyboardOverlap();
   useLayoutEffect(() => {
+    // The Electron app has no system search bar: a search box takes the
+    // header's title.
+    if (isElectron()) {
+      navigation.setOptions({
+        headerTitle: () => (
+          <HeaderSearch
+            defaultValue={initialQuery}
+            placeholder={t('searchPlaceholder')}
+            onChangeText={setSearchQuery}
+          />
+        ),
+      });
+      return;
+    }
     navigation.setOptions({
       // Android: the open field takes the title's place, beside Close.
-      ...(Platform.OS === 'android' ? { headerTitle: () => null } : {}),
+      ...(isAndroid() ? { headerTitle: () => null } : {}),
       headerSearchBarOptions: {
         ref: searchBarRef,
         placeholder: t('searchPlaceholder'),
@@ -108,7 +123,7 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
         // and the modal has its own Close button.
         onClose: () => {
           setSearchQuery('');
-          if (Platform.OS === 'android' && navigation.isFocused()) {
+          if (isAndroid() && navigation.isFocused()) {
             navigation.goBack();
           }
         },
@@ -120,7 +135,7 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
         onSearchButtonPress: () => searchBarRef.current?.blur(),
       },
     });
-  }, [navigation, theme.colors.primary]);
+  }, [navigation, theme.colors.primary, initialQuery]);
 
   const toggleFilter = (name: string) =>
     name === 'archived'
@@ -128,10 +143,11 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
       : setIncludeHidden(on => !on);
   const filterOptions = searchFilterOptions(includeArchived, includeHidden);
   const filtered = !includeArchived || includeHidden;
-  // iOS and Mac: a native menu of toggles across from Close. Android's open
+  // iOS and Mac: a native menu of toggles across from Close (the Electron
+  // app's too, from a header button). Android's open
   // search bar takes the whole toolbar, so its menu sits beside the tabs.
   useLayoutEffect(() => {
-    if (Platform.OS === 'android') {
+    if (isAndroid()) {
       return;
     }
     const options = searchFilterOptions(includeArchived, includeHidden);
@@ -162,6 +178,15 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
               })),
             },
           } satisfies NativeStackHeaderItem,
+          // The Electron app's header button and native menu (nothing on iOS)
+          element: (
+            <ToggleMenu
+              label={t('filter')}
+              options={options}
+              active={!includeArchived || includeHidden}
+              onToggle={toggleFilter}
+            />
+          ),
         },
       ]),
     );
@@ -364,7 +389,7 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
             never learns its height, so the prompt would sit behind it. */}
         <View style={StyleSheet.absoluteFill} pointerEvents="none">
           <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            behavior={isApple() ? 'padding' : 'height'}
             style={Styles.flex1}
           >
             {hasResults && !scopeEmpty ? null : noResults ? (
@@ -382,7 +407,7 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
             the system's scope bars are while searching, so they don't come
             and go with the query: the prompt, No Results and the results all
             show under them. */}
-        {Platform.OS === 'android' ? (
+        {isAndroid() ? (
           // The menu also brings back what it leaves out when nothing
           // matches.
           <View style={Styles.flex1}>

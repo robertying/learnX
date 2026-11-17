@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Alert, Platform } from 'react-native';
+import { Alert } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
@@ -23,6 +23,7 @@ import {
 } from 'components/Form';
 import { setSetting, useSettings } from 'data/settings';
 import { SettingsStackParams } from 'navigation/types';
+import { isAndroid } from 'helpers/platform';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'Downloads'>;
 
@@ -117,7 +118,7 @@ const Downloads: React.FC<Props> = () => {
   return (
     <FormScreen>
       <Form testID="downloads">
-        {Platform.OS === 'android' && (
+        {isAndroid() && (
           <FormSection>
             <FormToggle
               icon="open"

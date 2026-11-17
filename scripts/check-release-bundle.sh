@@ -2,7 +2,9 @@
 # Build the release JS bundles (Android and iOS) as the release builds do, and
 # fail if either contains a .env value it must not: anything but the mock
 # login (DUMMY_*), with scripts/check-bundle-env.mjs, which fastlane's build
-# lanes also run. It catches what Jest can't: a Babel or Metro config change
+# lanes also run; or another platform's code (the Electron app's, or
+# Android's Compose components in the iOS bundle), with
+# scripts/check-bundle-platform.mjs. It catches what Jest can't: a Babel or Metro config change
 # that breaks the production build, a broken import in a file no test loads,
 # and a .env value leaking into a release bundle (babel/inline-env.js).
 #
@@ -44,3 +46,6 @@ for platform in android ios; do
 done
 
 node scripts/check-bundle-env.mjs "$out/android.bundle" "$out/ios.bundle"
+for platform in android ios; do
+  node scripts/check-bundle-platform.mjs "$platform" "$out/$platform.bundle"
+done

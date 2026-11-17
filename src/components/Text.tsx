@@ -2,7 +2,6 @@ import { useSyncExternalStore } from 'react';
 import {
   Dimensions,
   I18nManager,
-  Platform,
   StyleSheet,
   Text as NativeText,
   TextProps as NativeTextProps,
@@ -10,21 +9,23 @@ import {
 } from 'react-native';
 import DeviceInfo from 'constants/DeviceInfo';
 import { useTheme } from 'theme';
+import { isAndroid, isApple, isElectron } from 'helpers/platform';
 
 /**
  * The platform's own text styles: Apple's Dynamic Type styles on iOS, iPadOS
- * and Mac, and the Material 3 type scale on Android.
+ * and Mac, the Material 3 type scale on Android, and Fluent 2's type ramp in
+ * the Electron app (Windows and Linux).
  *
- * | variant       | iOS / Mac (default size)  | Android (M3)   |
- * | ------------- | ------------------------- | -------------- |
- * | `largeTitle`  | Large Title, 34/41 bold   | headlineMedium |
- * | `title`       | Title 3, 20/25 semibold   | titleLarge     |
- * | `headline`    | Headline, 17/22 semibold  | titleMedium    |
- * | `body`        | Body, 17/22               | bodyLarge      |
- * | `subheadline` | Subheadline, 15/20        | bodyMedium     |
- * | `label`       | Subheadline, 15/20 medium | labelLarge     |
- * | `footnote`    | Footnote, 13/18           | bodySmall      |
- * | `caption`     | Caption 2, 11/13          | labelSmall     |
+ * | variant       | iOS / Mac (default size)  | Android (M3)   | Fluent 2      |
+ * | ------------- | ------------------------- | -------------- | ------------- |
+ * | `largeTitle`  | Large Title, 34/41 bold   | headlineMedium | Title 2       |
+ * | `title`       | Title 3, 20/25 semibold   | titleLarge     | Subtitle 1    |
+ * | `headline`    | Headline, 17/22 semibold  | titleMedium    | Subtitle 2    |
+ * | `body`        | Body, 17/22               | bodyLarge      | Body 1        |
+ * | `subheadline` | Subheadline, 15/20        | bodyMedium     | Body 1        |
+ * | `label`       | Subheadline, 15/20 medium | labelLarge     | Body 1 Strong |
+ * | `footnote`    | Footnote, 13/18           | bodySmall      | Caption 1     |
+ * | `caption`     | Caption 2, 11/13          | labelSmall     | Caption 2     |
  *
  * On iOS each variant scales with the user's text size along its own Dynamic
  * Type curve (`dynamicTypeRamp`), as UIKit's text styles do. The Mac
@@ -46,7 +47,7 @@ type Ramp = NonNullable<NativeTextProps['dynamicTypeRamp']>;
 
 // Android uses the default typeface: with a named family, React Native only
 // picks between normal and bold, so a medium or semibold weight draws regular.
-const fontFamily = Platform.select({ ios: 'System', default: undefined });
+const fontFamily = isApple() ? 'System' : undefined;
 
 const iosStyles: Record<TextVariant, TextStyle> = {
   largeTitle: { fontSize: 34, lineHeight: 41, fontWeight: '700' },
@@ -113,6 +114,19 @@ const androidStyles: Record<TextVariant, TextStyle> = {
   },
 };
 
+// Fluent 2's type ramp (Segoe UI Variable on Windows, the system's sans-serif
+// on Linux).
+const fluentStyles: Record<TextVariant, TextStyle> = {
+  largeTitle: { fontSize: 28, lineHeight: 36, fontWeight: '600' },
+  title: { fontSize: 20, lineHeight: 28, fontWeight: '600' },
+  headline: { fontSize: 16, lineHeight: 22, fontWeight: '600' },
+  body: { fontSize: 14, lineHeight: 20, fontWeight: '400' },
+  subheadline: { fontSize: 14, lineHeight: 20, fontWeight: '400' },
+  label: { fontSize: 14, lineHeight: 20, fontWeight: '600' },
+  footnote: { fontSize: 12, lineHeight: 16, fontWeight: '400' },
+  caption: { fontSize: 10, lineHeight: 14, fontWeight: '400' },
+};
+
 const ramps: Record<TextVariant, Ramp> = {
   largeTitle: 'largeTitle',
   title: 'title3',
@@ -131,11 +145,13 @@ const ramps: Record<TextVariant, Ramp> = {
 export const textStyles: Record<TextVariant, TextStyle> = StyleSheet.create(
   Object.fromEntries(
     Object.entries(
-      Platform.OS !== 'ios'
-        ? androidStyles
-        : DeviceInfo.isMac()
+      isApple()
+        ? DeviceInfo.isMac()
           ? macStyles
-          : iosStyles,
+          : iosStyles
+        : isElectron()
+          ? fluentStyles
+          : androidStyles,
     ).map(([variant, style]) => [variant, { fontFamily, ...style }]),
   ) as Record<TextVariant, TextStyle>,
 );
@@ -188,8 +204,7 @@ export const useTextIconSize = (variant: TextVariant) =>
 const StyledText = ({ color, variant, style, ...rest }: StyledTextProps) => {
   const theme = useTheme();
   const fontScale = useFontScale();
-  const fontLineHeight =
-    Platform.OS === 'android' && fontScale > nonlinearFontScale;
+  const fontLineHeight = isAndroid() && fontScale > nonlinearFontScale;
   return (
     <NativeText
       // A new text view for a new text size: React Native lays out a text

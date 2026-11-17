@@ -1,4 +1,3 @@
-import { Platform } from 'react-native';
 import { nativeApplicationVersion } from 'expo-application';
 import semverGt from 'semver/functions/gt';
 import semverLte from 'semver/functions/lte';
@@ -6,8 +5,10 @@ import semverValid from 'semver/functions/valid';
 import DeviceInfo from 'constants/DeviceInfo';
 import type { TextKey } from 'helpers/i18n';
 import type { SystemIconName } from 'helpers/systemIcons';
+import { isApple, isElectron } from 'helpers/platform';
 
-export type WhatsNewPlatform = 'ios' | 'mac' | 'android';
+/** The app's builds: iOS and iPadOS, the Mac, Android and the Electron app. */
+export type WhatsNewPlatform = 'ios' | 'mac' | 'android' | 'electron';
 
 /** One row of a release's What's New. */
 export interface Highlight {
@@ -37,7 +38,7 @@ export interface Release {
  * The most rows a What's New lists on one platform, as in Apple's own sheets,
  * so it stays short enough to read at a glance.
  */
-export const maxHighlights = 4;
+export const maxHighlights = 5;
 
 /**
  * Hand-written highlights of feature releases, newest first. A release with
@@ -80,6 +81,13 @@ export const releases: Release[] = [
         body: 'whatsNew19DesignBody',
         minNative: '19.0.0',
         platforms: ['android'],
+      },
+      {
+        // For the phone and the Mac; the desktop app needn't announce itself.
+        icon: 'desktop',
+        title: 'whatsNew19ElectronTitle',
+        body: 'whatsNew19ElectronBody',
+        platforms: ['ios', 'mac', 'android'],
       },
     ],
   },
@@ -162,11 +170,13 @@ export const whatsNewSince = (
 export const whatsNewContext = (): WhatsNewContext => ({
   version: DeviceInfo.appVersion(),
   nativeVersion: nativeApplicationVersion,
-  platform: DeviceInfo.isMac()
-    ? 'mac'
-    : Platform.OS === 'android'
-      ? 'android'
-      : 'ios',
+  platform: isElectron()
+    ? 'electron'
+    : DeviceInfo.isMac()
+      ? 'mac'
+      : isApple()
+        ? 'ios'
+        : 'android',
 });
 
 /** The title's version: "19" for 19.0.0, "19.1" for 19.1.0, else as is. */

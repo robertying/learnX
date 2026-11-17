@@ -1,7 +1,7 @@
 // What deadline and class reminders share: keeping a set of scheduled local
 // notifications in step with a plan, and the triggers they go off by.
-import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
+import { isAndroid } from 'helpers/platform';
 
 /** A notification to have scheduled, by an identifier that names it. */
 export interface PlannedNotification {
@@ -17,7 +17,7 @@ export const dateTrigger = (
 ): Notifications.DateTriggerInput => ({
   type: Notifications.SchedulableTriggerInputTypes.DATE,
   date,
-  ...(Platform.OS === 'android' ? { channelId } : {}),
+  ...(isAndroid() ? { channelId } : {}),
 });
 
 /** Goes off `seconds` from now, on `channelId` on Android. */
@@ -27,14 +27,14 @@ export const intervalTrigger = (
 ): Notifications.TimeIntervalTriggerInput => ({
   type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
   seconds,
-  ...(Platform.OS === 'android' ? { channelId } : {}),
+  ...(isAndroid() ? { channelId } : {}),
 });
 
 /** Shows right away, on `channelId` on Android. */
 export const immediateTrigger = (
   channelId: string,
 ): Notifications.NotificationTriggerInput =>
-  Platform.OS === 'android' ? { channelId } : null;
+  isAndroid() ? { channelId } : null;
 
 /** The scheduled notifications whose identifiers `matches` accepts. */
 export const getScheduled = async (matches: (identifier: string) => boolean) =>

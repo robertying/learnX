@@ -1,5 +1,6 @@
 import { type ComponentRef, useEffect, useRef, useState } from 'react';
-import { Appearance, Keyboard, Platform, View } from 'react-native';
+import { Appearance, Keyboard, View } from 'react-native';
+import { isAndroid } from 'helpers/platform';
 
 /**
  * How much of a view the Android keyboard covers, for padding the view's
@@ -15,7 +16,7 @@ const useKeyboardOverlap = () => {
   const [overlap, setOverlap] = useState(0);
 
   useEffect(() => {
-    if (Platform.OS !== 'android') {
+    if (!isAndroid()) {
       return;
     }
     // The view's bottom moves once the navigation bar hides for the

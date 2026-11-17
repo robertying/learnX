@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import dayjs from 'dayjs';
 import { resetCalendarSync, useCalendarSyncStore } from 'data/calendarSync';
 import { ensureSession } from 'data/source';
@@ -42,6 +43,12 @@ jest.mock('services/calendar/classes', () => ({
   saveClassesToCalendar: jest.fn(),
 }));
 jest.mock('services/files/share', () => ({ exportTextFile: jest.fn() }));
+jest.mock('services/calendar/electronExport', () => ({
+  buildElectronICS: jest.fn(async () => ({
+    ics: 'ELECTRON ICS',
+    withoutClasses: false,
+  })),
+}));
 
 const fail = (code: CalendarErrorCode) => async () => {
   throw new CalendarError(code);
@@ -286,6 +293,44 @@ describe('allowCourseCalendarSync', () => {
 });
 
 describe('exportCalendars', () => {
+  it("saves learnX's own classes and assignments in the Electron app", async () => {
+    jest.replaceProperty(Platform, 'OS', 'web');
+    jest.mocked(exportTextFile).mockResolvedValueOnce(true);
+    await expect(exportCalendars()).resolves.toEqual({
+      text: t('saveFileSucceeded', { name: 'learnX.ics' }),
+      type: 'success',
+    });
+    expect(exportTextFile).toHaveBeenCalledWith(
+      'learnX.ics',
+      'ELECTRON ICS',
+      'text/calendar',
+    );
+    expect(exportSyncedCalendarsToICS).not.toHaveBeenCalled();
+  });
+
+  it('says when the Electron app saved it without the classes', async () => {
+    jest.replaceProperty(Platform, 'OS', 'web');
+    const { buildElectronICS } = jest.requireMock(
+      'services/calendar/electronExport',
+    );
+    jest
+      .mocked(buildElectronICS)
+      .mockResolvedValueOnce({ ics: 'ICS', withoutClasses: true });
+    jest.mocked(exportTextFile).mockResolvedValueOnce(true);
+    await expect(exportCalendars()).resolves.toEqual({
+      text: t('calendarExportWithoutClasses', { name: 'learnX.ics' }),
+      type: 'warning',
+    });
+  });
+
+  it('says what the Electron app had nothing to export', () => {
+    jest.replaceProperty(Platform, 'OS', 'web');
+    expect(calendarExportErrorToast(new CalendarError('noEvents'))).toEqual({
+      text: t('calendarExportNoEventElectron'),
+      type: 'warning',
+    });
+  });
+
   it('says when learnX.ics was saved on Mac', async () => {
     jest.mocked(exportSyncedCalendarsToICS).mockResolvedValue('ICS');
     jest.mocked(exportTextFile).mockResolvedValueOnce(true);

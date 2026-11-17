@@ -1,3 +1,4 @@
+import { setPendingTarget } from 'hooks/usePendingTarget';
 import { act, render, screen, userEvent } from '@testing-library/react-native';
 import { StackActions } from '@react-navigation/native';
 import dayjs from 'dayjs';
@@ -161,6 +162,14 @@ it("counts the day's classes and opens the schedule", async () => {
   await userEvent
     .setup({ advanceTimers: jest.advanceTimersByTime })
     .press(screen.getByText('2 classes today'));
+  expect(navigation.dispatch).toHaveBeenCalledWith(
+    StackActions.push('Schedule'),
+  );
+});
+
+it('opens the schedule a Jump List task asked for', async () => {
+  setPendingTarget({ type: 'schedule', id: 'week' });
+  const { navigation } = await setup();
   expect(navigation.dispatch).toHaveBeenCalledWith(
     StackActions.push('Schedule'),
   );

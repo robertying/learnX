@@ -1,5 +1,5 @@
 import { type ComponentType, createElement } from 'react';
-import { Platform, Settings } from 'react-native';
+import { Settings } from 'react-native';
 import {
   type MockFailure,
   type MockLatency,
@@ -7,6 +7,7 @@ import {
   setMockNetworkConfig,
 } from 'data/mockSource';
 import env from 'helpers/env';
+import { isApple } from 'helpers/platform';
 
 /**
  * Launch arguments that set up the app for a test run, e.g. Maestro's
@@ -98,7 +99,7 @@ const readLoginFails = (value: unknown): boolean | number | undefined => {
 };
 
 const read = (key: keyof LaunchOptions, initialProps?: LaunchOptions) =>
-  Platform.OS === 'ios' ? (Settings.get(key) as unknown) : initialProps?.[key];
+  isApple() ? (Settings.get(key) as unknown) : initialProps?.[key];
 
 /**
  * Applies the launch arguments; unknown values are ignored. Returns whether

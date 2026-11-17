@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, Platform } from 'react-native';
+import { Alert } from 'react-native';
 import dayjs from 'dayjs';
 import { toast } from 'components/Toast';
 import { setSetting, useSettings } from 'data/settings';
@@ -13,6 +13,7 @@ import {
 } from 'services/calendar/actions';
 import { refreshSurfaces } from 'services/surfaces';
 import { t } from 'helpers/i18n';
+import { isApple } from 'helpers/platform';
 
 const show = (message?: ToastMessage) => {
   if (message) {
@@ -152,10 +153,10 @@ export const useCalendarExport = () => {
 export const confirmDeleteCalendars = () => {
   Alert.alert(
     // Reminders sync is only on iOS, iPadOS and Mac.
-    Platform.OS === 'ios'
+    isApple()
       ? t('deleteSyncedCalendarsAndReminders')
       : t('deleteSyncedCalendars'),
-    Platform.OS === 'ios'
+    isApple()
       ? t('deleteSyncedCalendarsAndRemindersConfirmation')
       : t('deleteSyncedCalendarsConfirmation'),
     [

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Platform, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import ActionBar from 'components/ActionBar';
 import { Form, FormScreen, FormSection, FormToggle } from 'components/Form';
@@ -20,6 +20,7 @@ import {
 } from 'hooks/useCalendarSync';
 import useNotificationPermission from 'hooks/useNotificationPermission';
 import { RootStackParams } from 'navigation/types';
+import { isAndroid, isApple, isElectron } from 'helpers/platform';
 
 type Props = NativeStackScreenProps<RootStackParams, 'Setup'>;
 
@@ -137,34 +138,43 @@ const Setup: React.FC<Props> = ({ navigation, route }) => {
         <FormSection title={t('schedule')}>
           {toggle('classReminders')}
         </FormSection>
-        <FormSection title={t('assignments')}>
+        <FormSection
+          title={t('assignments')}
+          footer={isElectron() ? t('setupCaption') : undefined}
+        >
           {toggle('deadlineReminders')}
           {toggle('grades')}
         </FormSection>
-        {/* Reminders sync is only on iOS, iPadOS and Mac. Classes before
-            assignments, as in Settings › Calendar. */}
-        <FormSection title={calendarSettingsTitle()} footer={t('setupCaption')}>
-          <FormToggle
-            icon="calendar"
-            title={t('setupCourseCalendar')}
-            value={choices.schedule}
-            onValueChange={choose('schedule')}
-          />
-          <FormToggle
-            icon="assignmentCalendar"
-            title={t('setupCalendar')}
-            value={choices.calendar}
-            onValueChange={choose('calendar')}
-          />
-          {Platform.OS === 'ios' && (
+        {/* Reminders sync is only on iOS, iPadOS and Mac, and the Electron
+            app has no calendar to sync to. Classes before assignments, as in
+            Settings › Calendar. */}
+        {!isElectron() && (
+          <FormSection
+            title={calendarSettingsTitle()}
+            footer={t('setupCaption')}
+          >
             <FormToggle
-              icon="reminders"
-              title={t('setupReminders')}
-              value={choices.reminders}
-              onValueChange={choose('reminders')}
+              icon="calendar"
+              title={t('setupCourseCalendar')}
+              value={choices.schedule}
+              onValueChange={choose('schedule')}
             />
-          )}
-        </FormSection>
+            <FormToggle
+              icon="assignmentCalendar"
+              title={t('setupCalendar')}
+              value={choices.calendar}
+              onValueChange={choose('calendar')}
+            />
+            {isApple() && (
+              <FormToggle
+                icon="reminders"
+                title={t('setupReminders')}
+                value={choices.reminders}
+                onValueChange={choose('reminders')}
+              />
+            )}
+          </FormSection>
+        )}
       </Form>
       <ActionBar
         action={{
@@ -185,7 +195,7 @@ const Setup: React.FC<Props> = ({ navigation, route }) => {
 
 const styles = StyleSheet.create({
   title: {
-    textAlign: Platform.OS === 'android' ? 'auto' : 'center',
+    textAlign: isAndroid() ? 'auto' : 'center',
     paddingHorizontal: 24,
     paddingTop: 34,
     paddingBottom: 10,

@@ -1,4 +1,3 @@
-import { Platform } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { t } from 'helpers/i18n';
 import Notices from 'screens/Notices';
@@ -61,6 +60,7 @@ import {
   tabRootOptions,
 } from './options';
 import { screenLayout } from './screenLayout';
+import { isApple } from 'helpers/platform';
 
 const TodayStackNavigator = createNativeStackNavigator<TodayStackParams>();
 const NoticeStackNavigator = createNativeStackNavigator<NoticeStackParams>();
@@ -315,7 +315,7 @@ export const WhatsNewStack = () => (
       // high in the sheet while it slides in, then drops into place. Android
       // pushes Changelog with its own bar, so What's New has none, as Setup.
       options={{
-        headerShown: Platform.OS !== 'android',
+        headerShown: isApple(),
         headerTitle: '',
         headerShadowVisible: false,
         title: t('whatsNew'),

@@ -102,3 +102,10 @@ it('opens at once in an expanded split, whatever the device', async () => {
   await renderHook(() => usePendingTarget('file', open), { wrapper });
   expect(open.mock.calls).toEqual([['f1']]);
 });
+
+it('lets Today open a pending Schedule', async () => {
+  const open = jest.fn();
+  setPendingTarget({ type: 'schedule', id: 'week' });
+  await renderHook(() => usePendingTarget('schedule', open));
+  expect(open).toHaveBeenCalledWith('week');
+});

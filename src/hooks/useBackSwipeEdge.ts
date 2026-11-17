@@ -4,7 +4,7 @@ import {
   NavigationRouteContext,
 } from '@react-navigation/native';
 import DeviceInfo from 'constants/DeviceInfo';
-import { Platform } from 'react-native';
+import { isApple } from 'helpers/platform';
 
 /** The strip along a screen's leading edge that iOS's swipe back starts in */
 export const backSwipeEdgeWidth = 20;
@@ -19,7 +19,7 @@ export const backSwipeEdgeWidth = 20;
 const useBackSwipeEdge = () => {
   const navigation = useContext(NavigationContext);
   const route = useContext(NavigationRouteContext);
-  if (Platform.OS !== 'ios' || DeviceInfo.isMac() || !navigation || !route) {
+  if (!isApple() || DeviceInfo.isMac() || !navigation || !route) {
     return false;
   }
   const state = navigation.getState();

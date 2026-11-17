@@ -9,15 +9,18 @@ import { setPendingTarget } from 'hooks/usePendingTarget';
 
 /**
  * Opens what a tapped notification, widget row or Spotlight result points
- * to: the item's detail, its list, or Today.
+ * to: the item's detail, its list, or Today; or the Schedule (the Electron
+ * app's Jump List), which Today opens once it's shown.
  */
 const useOpenTarget = () => {
   const navigation = useNavigation();
 
   return (target: OpenTarget) => {
     noteOpenedFromOutside();
-    if (target.type === 'today') {
-      setPendingTarget(null);
+    if (target.type === 'today' || target.type === 'schedule') {
+      setPendingTarget(
+        target.type === 'schedule' ? { type: 'schedule', id: 'week' } : null,
+      );
       return navigation.navigate('MainTab', {
         screen: 'TodayStack',
         params: { screen: 'Today', pop: true },

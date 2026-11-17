@@ -36,13 +36,14 @@ import useDetailNavigator, {
   useShowDetail,
 } from 'hooks/useDetailNavigator';
 import useItemStepping from 'hooks/useItemStepping';
+import usePendingTarget from 'hooks/usePendingTarget';
 import { useMinute } from 'hooks/useClock';
 import usePullToRefresh from 'hooks/usePullToRefresh';
 import useRefreshCommand from 'hooks/useRefreshCommand';
 import useSettingsBadge from 'hooks/useSettingsBadge';
 import { debugTitle, getTitleOptions } from 'navigation/options';
 import useHeaderButtons from 'hooks/useHeaderButtons';
-import { sidebarSplit } from 'navigation/layout';
+import { settingsTab } from 'navigation/layout';
 import {
   DetailStackParams,
   MainStackScreenProps,
@@ -54,6 +55,8 @@ type Props = MainStackScreenProps<TodayStackParams, 'Today'>;
 const Today: React.FC<Props> = ({ navigation }) => {
   const show = useShowDetail(navigation);
   const now = useMinute();
+  // The Schedule a Jump List task asked for (Electron).
+  usePendingTarget('schedule', () => show('Schedule'));
 
   // the timetable follows Beijing days, also on a phone in another time zone
   const schedule = useWeekSchedule(beijingDate(now));
@@ -164,8 +167,9 @@ const Today: React.FC<Props> = ({ navigation }) => {
       ? `${dateText} · ${t('todayWeek', { week: schedule.week })}`
       : dateText;
 
-  // Settings sits in the sidebar on Mac, and behind this button elsewhere.
-  const showSettings = !sidebarSplit;
+  // Settings sits in the sidebar on Mac and in the Electron app's navigation
+  // pane, and behind this button elsewhere.
+  const showSettings = !settingsTab;
   const openSettings = () => navigation.push('Settings');
   const refreshButton = useRefreshCommand(pullToRefresh);
   useLayoutEffect(() => {

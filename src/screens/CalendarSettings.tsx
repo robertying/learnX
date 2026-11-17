@@ -1,4 +1,3 @@
-import { Platform } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import DateRangePicker from 'components/DateRangePicker';
 import {
@@ -25,10 +24,42 @@ import {
 } from 'hooks/useCalendarSync';
 import useCalendarAccess, { CalendarAccess } from 'hooks/useCalendarAccess';
 import { SettingsStackParams } from 'navigation/types';
+import { isApple, isElectron } from 'helpers/platform';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'CalendarSettings'>;
 
-const CalendarSettings: React.FC<Props> = () => {
+/**
+ * The Electron app's calendar settings: Windows and Linux have no calendar
+ * on the device to sync to, so learnX only exports its classes and
+ * assignments as an .ics file, which a calendar app imports.
+ */
+const ElectronCalendarSettings: React.FC = () => {
+  const { exporting, exportToICS } = useCalendarExport();
+  return (
+    <FormScreen>
+      <Form testID="calendar-settings">
+        <FormSection footer={t('exportCalendarDescription')}>
+          <FormButton
+            testID="calendar-export"
+            icon="export"
+            title={t('exportCalendar')}
+            onPress={exportToICS}
+            loading={exporting}
+          />
+        </FormSection>
+      </Form>
+    </FormScreen>
+  );
+};
+
+const CalendarSettings: React.FC<Props> = props =>
+  isElectron() ? (
+    <ElectronCalendarSettings />
+  ) : (
+    <SyncCalendarSettings {...props} />
+  );
+
+const SyncCalendarSettings: React.FC<Props> = () => {
   const assignmentCalendarSync = useSettings(
     settings => settings.assignmentCalendarSync,
   );
@@ -102,7 +133,7 @@ const CalendarSettings: React.FC<Props> = () => {
     access.calendar,
   );
   const remindersBlocked =
-    Platform.OS === 'ios' && blocked(assignmentReminderSync, access.reminders);
+    isApple() && blocked(assignmentReminderSync, access.reminders);
   const allow = (type: 'calendar' | 'reminder', state: CalendarAccess | null) =>
     state === 'denied' ? openSystemSettings('security') : access.request(type);
 
@@ -203,9 +234,7 @@ const CalendarSettings: React.FC<Props> = () => {
             the schedule's does. */}
         <FormSection
           title={
-            Platform.OS === 'ios'
-              ? t('assignmentsInCalendarSection')
-              : t('assignments')
+            isApple() ? t('assignmentsInCalendarSection') : t('assignments')
           }
           footer={
             assignmentCalendarSync
@@ -290,7 +319,7 @@ const CalendarSettings: React.FC<Props> = () => {
             />
           )}
         </FormSection>
-        {Platform.OS === 'ios' && (
+        {isApple() && (
           <FormSection
             title={t('assignmentsInRemindersSection')}
             footer={
@@ -354,7 +383,7 @@ const CalendarSettings: React.FC<Props> = () => {
         </FormSection>
         <FormSection
           footer={
-            Platform.OS === 'ios'
+            isApple()
               ? t('calendarAndReminderAccessCaption')
               : t('calendarAccessCaption')
           }
@@ -372,7 +401,7 @@ const CalendarSettings: React.FC<Props> = () => {
             testID="calendar-delete"
             icon="delete"
             title={
-              Platform.OS === 'ios'
+              isApple()
                 ? t('deleteSyncedCalendarsAndRemindersEllipsis')
                 : t('deleteSyncedCalendarsEllipsis')
             }

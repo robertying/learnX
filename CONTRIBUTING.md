@@ -1,6 +1,6 @@
 # Contributing to learnX
 
-Thanks for helping out. This guide takes you from a fresh clone to running the app on a simulator or emulator, testing it without a Tsinghua account, and opening a pull request. Most of the trouble people hit is in the native setup (Xcode signing, CocoaPods, the Android SDK), so those parts go step by step.
+Thanks for helping out. This guide takes you from a fresh clone to running the app on a simulator or emulator (or as the Windows and Linux app), testing it without a Tsinghua account, and opening a pull request. Most of the trouble people hit is in the native setup (Xcode signing, CocoaPods, the Android SDK), so those parts go step by step.
 
 Once you're set up, the code conventions and architecture are in [AGENTS.md](AGENTS.md) and the `AGENTS.md` files in the folders it lists. They're written for people and coding agents alike.
 
@@ -14,10 +14,11 @@ Once you're set up, the code conventions and architecture are in [AGENTS.md](AGE
 | Ruby + Bundler       | Ruby 4 (`.ruby-version`), from Homebrew                             | Only for iOS and Mac. CocoaPods (1.17, locked in `Gemfile.lock`) runs through Bundler.                                   |
 | Android Studio + SDK | SDK Platform 37, Build-Tools 37.0.0, NDK 30.0.16248370, CMake 4.1.2 | Only for Android. Versions are in `android/build.gradle`.                                                                |
 | JDK                  | 17 or newer to run Gradle                                           | Android Studio's bundled JDK works. The build compiles with a JDK 17 toolchain, which Gradle downloads if missing.       |
+| Electron             | Downloaded by `pnpm electron`                                       | Only for the Windows and Linux app. Nothing else to install; a Mac dev run also needs Xcode.                             |
 
 The app supports iOS / iPadOS 17.6, macOS 14.6 (Mac Catalyst) and Android 10 (API 29) and later, so use a simulator or emulator at least that new.
 
-You can build Android on macOS or Linux. iOS and Mac builds need a Mac.
+You can build Android on macOS or Linux, and run the Windows and Linux app on any of the three. iOS and Mac builds need a Mac.
 
 ## 1. Install JavaScript dependencies
 
@@ -137,6 +138,19 @@ pnpm android --active-arch-only   # builds Debug (the github flavor) for the run
 
 As on iOS, JS changes only need a reload. Rebuild after changes under `android/`, in a native package or in a patch.
 
+## 5. Windows and Linux (Electron)
+
+The Windows and Linux app is an Electron app around a web build of the same code (`electron/`, with its own [AGENTS.md](electron/AGENTS.md)). You can run it on Windows, Linux or a Mac; it needs only Node and pnpm, and a `.env` with the mock login (step 2).
+
+```sh
+pnpm electron          # exports the web build, downloads Electron on the first run, and opens the app
+pnpm e2e:electron      # the Playwright tests, on the last web build (run `pnpm electron` once first)
+```
+
+- On a Mac the dev run opens a renamed copy of Electron, `build/electron/learnX.app`, whose icon is compiled with Xcode's `actool`, so it needs Xcode too. Afterwards, `pnpm electron:clean` removes what dev runs leave on the Mac.
+- On Linux the dev run turns Chromium's sandbox off, which Ubuntu 24.04 and later would block, and keeps the saved login out of your keyring. Running the E2E tests without a desktop needs a virtual display: `xvfb-run pnpm e2e:electron`.
+- Installers: `pnpm electron:package --win` on Windows, `--linux` on Linux. On an Apple silicon Mac only `--dir` (the unpacked apps) works without Rosetta.
+
 ## Testing without a Tsinghua account
 
 - **Mock login:** on the login screen, enter `DUMMY_USERNAME` / `DUMMY_PASSWORD` from your `.env`. The app loads `src/data/mock.ts` and answers every request from an emulated server with a realistic delay, so refreshes, spinners, file downloads and errors behave as they would with a real account. The login is saved like a real one, so the app stays logged in across relaunches. Typing it again starts over from the mock data. The data comes in Chinese or English, whichever language the app asks the emulated server for; the English texts are in `src/data/mockEnglish.ts`, and a new item in `mock.ts` needs its English texts there.
@@ -154,9 +168,9 @@ pnpm typecheck                   # TypeScript (tsc)
 pnpm lint --deny-warnings        # Oxlint, type-aware; config in .oxlintrc.json and lint/plugin.mjs
 pnpm format --check              # Oxfmt; run `pnpm format` to fix
 node scripts/check-ota-runtime.mjs   # The over-the-air runtime version changes when native code does (AGENTS.md)
-pnpm test --coverage             # Jest, iOS and Android projects; fails below the coverage thresholds in jest.config.js
+pnpm test --coverage             # Jest: the iOS, Android, web (Electron) and tooling projects; fails below the coverage thresholds in jest.config.js
 git ls-files -z '*.sh' | xargs -0 shellcheck   # ShellCheck, for every shell script
-scripts/check-release-bundle.sh  # The Android and iOS release JS bundles, with no .env value but the mock login in them
+scripts/check-release-bundle.sh  # The Android and iOS release JS bundles, with no .env value but the mock login and no other platform's code in them
 ```
 
 The first six need neither `.env` nor any native setup, so you can run them anywhere Node runs (ShellCheck comes from your package manager, for example `brew install shellcheck`). The bundle check needs a `.env` with the mock login and takes about two minutes. Lint is strict about a few project rules: Chinese text belongs in `src/assets/translations` (`en.ts` and `zh.ts`), and an intentionally unawaited promise is marked with `void`.
@@ -168,6 +182,7 @@ Other CI jobs (none of them build a signed app or run on a device, so still buil
 - `CI / Android` (required) runs `scripts/test-android.sh` and builds a release APK (R8 and the JS bundle included, debug-signed) when a pull request touches Android paths; otherwise it skips its steps and passes.
 - `CI / Android E2E tests` runs the Maestro flows in an emulator on that APK after every push to `main`, and saves a screenshot of each screen they reach with the results. To run it on a branch: Actions › CI › Run workflow.
 - `Apple / Apple (iOS)` builds the app and runs the native iOS tests (`scripts/test-ios.sh`), by hand only: Actions › Apple › Run workflow, on `main` (which also refreshes its compilation cache) or on a branch. Tick "Mac: build" to also build Mac Catalyst (`Apple / Apple (Mac)`).
+- `Electron / …` (not required, `.github/workflows/electron.yml`) exports the web build and runs the Playwright tests on Windows, Linux and under Wayland on pull requests that can affect the Windows and Linux app, and on pushes to `main`. When run by hand (or weekly) it also checks that the installers still build; those builds are never released (releases are built by hand, see the release skill).
 
 ## Pull requests
 

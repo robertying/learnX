@@ -8,4 +8,9 @@ export interface SystemIconProps {
   color: ColorValue;
   style?: StyleProp<ViewStyle>;
   testID?: string;
+  /**
+   * The Electron app: the icon's filled variant where it has one (a selected
+   * tab, a toast's outcome). Other platforms pick theirs by name.
+   */
+  filled?: boolean;
 }

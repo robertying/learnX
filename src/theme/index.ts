@@ -1,7 +1,6 @@
 import {
   ColorValue,
   DynamicColorIOS,
-  Platform,
   PlatformColor,
   useColorScheme,
 } from 'react-native';
@@ -9,6 +8,8 @@ import {
   DefaultTheme as NavigationDefaultTheme,
   DarkTheme as NavigationDarkTheme,
 } from '@react-navigation/native';
+import { isApple } from 'helpers/platform';
+import { buildPlatformColors } from './colors';
 
 /**
  * The brand color: Tsinghua purple, and the lighter tone of it used in dark
@@ -34,13 +35,12 @@ export const brandColors = {
  * that take one color (a dynamic color on iOS, the light one on Android).
  * Inside components, prefer `useTheme().colors.primary`.
  */
-export const brandColor =
-  Platform.OS === 'ios'
-    ? (DynamicColorIOS({
-        light: brandColors.light,
-        dark: brandColors.dark,
-      }) as unknown as string)
-    : brandColors.light;
+export const brandColor = isApple()
+  ? (DynamicColorIOS({
+      light: brandColors.light,
+      dark: brandColors.dark,
+    }) as unknown as string)
+  : brandColors.light;
 
 // Material 3 tokens from `@material/material-color-utilities`
 // (`SchemeTonalSpot`, seed #660874), with the primary roles set to the brand
@@ -171,7 +171,7 @@ const materialCustom = {
  * as they are; iOS and Mac lay the system color itself over the surface at
  * this opacity, as Apple's own tinted capsules do.
  */
-export const statusContainerOpacity = Platform.OS === 'ios' ? 0.15 : 1;
+export const statusContainerOpacity = isApple() ? 0.15 : 1;
 
 /** Adds an alpha channel to an `rgb(r, g, b)` color (Material colors only). */
 export const withAlpha = (rgb: string, alpha: number) =>
@@ -337,7 +337,10 @@ const buildAppleColors = (dark: boolean): ColorRoles => {
 };
 
 const buildColors = (dark: boolean): ColorRoles =>
-  Platform.OS === 'ios' ? buildAppleColors(dark) : buildMaterialColors(dark);
+  buildPlatformColors(dark, {
+    apple: buildAppleColors,
+    material: buildMaterialColors,
+  });
 
 export type ThemeColors = ColorRoles;
 
@@ -371,12 +374,11 @@ export const BrandDarkNavigationTheme = {
  * Material role on Android, and the brand color for links.
  */
 export const webContentColors = (dark: boolean) => ({
-  textColor:
-    Platform.OS === 'ios'
-      ? 'CanvasText'
-      : (dark ? materialDark : materialLight).onSurface,
+  textColor: isApple()
+    ? 'CanvasText'
+    : (dark ? materialDark : materialLight).onSurface,
   linkColor: dark
-    ? Platform.OS === 'ios'
+    ? isApple()
       ? brandColors.dark
       : brandColors.materialDark
     : brandColors.light,

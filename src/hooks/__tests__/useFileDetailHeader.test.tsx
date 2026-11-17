@@ -176,3 +176,21 @@ it('brings the list back from full screen, and the preview back from the info', 
     t('preview'),
   );
 });
+
+it('opens and saves instead of sharing in the Electron app', async () => {
+  jest.replaceProperty(Platform, 'OS', 'web');
+  await renderHook(() =>
+    useFileDetailHeader({ navigation: navigation(), ...props }),
+  );
+  const shown = items();
+  expect(shown.map(i => [i.identifier, i.label])).toEqual([
+    ['refresh', t('refresh')],
+    ['open', t('openInDefaultApp')],
+    ['saveAs', t('saveAs')],
+    ['info', t('info')],
+  ]);
+  shown[1].onPress();
+  expect(handlers.onOpen).toHaveBeenCalled();
+  shown[2].onPress();
+  expect(handlers.onSave).toHaveBeenCalled();
+});

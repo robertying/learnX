@@ -42,7 +42,11 @@ jest.mock('hooks/useLaunchSheet', () => jest.fn());
 jest.mock('hooks/useMainStartup', () => jest.fn());
 jest.mock('hooks/useSettingsBadge', () => jest.fn(() => false));
 
-let mockLayout = { nativeSplit: true, sidebarSplit: false };
+let mockLayout = {
+  nativeSplit: true,
+  sidebarSplit: false,
+  settingsTab: false,
+};
 jest.mock('navigation/layout', () => ({
   initialTab: 'TodayStack',
   get nativeSplit() {
@@ -50,6 +54,9 @@ jest.mock('navigation/layout', () => ({
   },
   get sidebarSplit() {
     return mockLayout.sidebarSplit;
+  },
+  get settingsTab() {
+    return mockLayout.settingsTab;
   },
 }));
 
@@ -98,9 +105,11 @@ const tabBarIcon = (index: number, focused = false) =>
 
 const runIdle = () => act(() => idle.shift()!());
 
-const iPhone = { nativeSplit: true, sidebarSplit: false };
-const mac = { nativeSplit: true, sidebarSplit: true };
-const android = { nativeSplit: false, sidebarSplit: false };
+const iPhone = { nativeSplit: true, sidebarSplit: false, settingsTab: false };
+const mac = { nativeSplit: true, sidebarSplit: true, settingsTab: true };
+const android = { nativeSplit: false, sidebarSplit: false, settingsTab: false };
+// The Electron app: Android's JS split, with Settings in its navigation pane
+const electron = { nativeSplit: false, sidebarSplit: false, settingsTab: true };
 
 it('shows five tabs in the tab bar, mounting the first and then the rest one by one', async () => {
   const MainTab = loadMainTab(iPhone);
@@ -203,6 +212,20 @@ it('uses Material Symbols, filled on the selected tab, and the card color on And
     ),
   );
   expect(tabBarIcon(1, true)).toEqual({ uri: 'tab_notifications_filled' });
+});
+
+it("puts Settings, with its badge, in the Electron app's navigation pane", async () => {
+  jest.mocked(useSettingsBadge).mockReturnValue(true);
+  const MainTab = loadMainTab(electron);
+  await render(<MainTab />);
+  const { screens } = config();
+  expect(screens.map(s => s.name)).toContain('SettingStack');
+  expect(screens[5].options).toMatchObject({
+    title: t('settings'),
+    tabBarButtonTestID: 'tab-settings',
+    tabBarBadge: '',
+  });
+  expect(screens[0].options?.tabBarBadge).toBeUndefined();
 });
 
 it('puts six tabs, Settings with its badge, in the sidebar on Mac', async () => {

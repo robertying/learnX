@@ -91,13 +91,31 @@ describe('the page policy and link taps', () => {
     );
   });
 
-  it('reports link taps with the nonce on Android only', () => {
-    expect(getWebViewTemplate('<a href="https://x">x</a>')).not.toContain(
-      'reportLinkTaps',
-    );
-    jest.replaceProperty(Platform, 'OS', 'android');
-    const html = getWebViewTemplate('<a href="https://x">x</a>');
-    expect(html).toContain('function reportLinkTaps');
-    expect(html).toContain(`"${getScriptNonce()}"`);
+  it.each([
+    ['ios', 'font: -apple-system-body;'],
+    ['android', undefined],
+    ['web', 'font-family: system-ui, sans-serif;'],
+  ] as const)('sets the body font on %s', (os, font) => {
+    jest.replaceProperty(Platform, 'OS', os);
+    const html = getWebViewTemplate('x');
+    for (const candidate of [
+      'font: -apple-system-body;',
+      'font-family: system-ui, sans-serif;',
+    ]) {
+      expect(html.includes(candidate)).toBe(candidate === font);
+    }
   });
+
+  it.each(['android', 'web'] as const)(
+    'reports link taps with the nonce on %s, not on iOS',
+    os => {
+      expect(getWebViewTemplate('<a href="https://x">x</a>')).not.toContain(
+        'reportLinkTaps',
+      );
+      jest.replaceProperty(Platform, 'OS', os);
+      const html = getWebViewTemplate('<a href="https://x">x</a>');
+      expect(html).toContain('function reportLinkTaps');
+      expect(html).toContain(`"${getScriptNonce()}"`);
+    },
+  );
 });

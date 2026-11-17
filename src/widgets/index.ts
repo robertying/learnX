@@ -1,4 +1,3 @@
-import { Platform } from 'react-native';
 import type { Widget } from 'expo-widgets';
 import { Assignment } from 'data/types/state';
 import { formatDate, formatTime, isLocaleChinese, t } from 'helpers/i18n';
@@ -13,19 +12,20 @@ import {
   UpcomingDeadlines,
 } from 'helpers/widgetDeadlines';
 import type { DeadlineWidgetProps, UpNextWidgetProps } from 'widgets/props';
+import { isAndroid, isApple } from 'helpers/platform';
 
 // Each layout imports only its own platform's @expo/ui components.
 const deadlinesWidget = (): Widget<DeadlineWidgetProps> | undefined =>
-  Platform.OS === 'ios'
+  isApple()
     ? require('./Deadlines').default
-    : Platform.OS === 'android'
+    : isAndroid()
       ? require('./Deadlines.android').default
       : undefined;
 
 const upNextWidget = (): Widget<UpNextWidgetProps> | undefined =>
-  Platform.OS === 'ios'
+  isApple()
     ? require('./UpNext').default
-    : Platform.OS === 'android'
+    : isAndroid()
       ? require('./UpNext.android').default
       : undefined;
 
@@ -69,7 +69,7 @@ export function updateDeadlineWidget(
     return;
   }
   const timeline = deadlineTimeline(assignments, { hiddenCourses, archived });
-  if (Platform.OS === 'ios') {
+  if (isApple()) {
     widget.updateTimeline(
       timeline.map(entry => ({
         date: new Date(entry.date),
@@ -142,7 +142,7 @@ export function updateUpNextWidget(classes: UpcomingClass[] = []) {
   if (key === lastUpNext) {
     return;
   }
-  if (Platform.OS === 'ios') {
+  if (isApple()) {
     widget.updateTimeline(
       upNextTimes(classes).map(date => ({ date: new Date(date), props })),
     );
