@@ -149,6 +149,7 @@ pnpm e2e:electron      # the Playwright tests, on the last web build (run `pnpm 
 
 - On a Mac the dev run opens a renamed copy of Electron, `build/electron/learnX.app`, whose icon is compiled with Xcode's `actool`, so it needs Xcode too. Afterwards, `pnpm electron:clean` removes what dev runs leave on the Mac.
 - On Linux the dev run turns Chromium's sandbox off, which Ubuntu 24.04 and later would block, and keeps the saved login out of your keyring. Running the E2E tests without a desktop needs a virtual display: `xvfb-run pnpm e2e:electron`.
+- The E2E tests' windows open behind your other windows without taking focus (on a Mac they don't show at all), so you can keep working while they run. Append a file name or `-g <title>` to run some of them (`pnpm e2e:electron tray`).
 - Installers: `pnpm electron:package --win` on Windows, `--linux` on Linux. On an Apple silicon Mac only `--dir` (the unpacked apps) works without Rosetta.
 
 ## Testing without a Tsinghua account
