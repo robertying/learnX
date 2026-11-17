@@ -13,10 +13,11 @@ import { createSecrets } from '../secrets.cjs';
 const fakeSafeStorage = ({
   available = true,
   fallback = false,
+  keyringTag = 'v11',
   rotated = false,
   unlocked = Promise.resolve(),
 } = {}) => {
-  const tag = fallback ? 'v10' : 'v11';
+  const tag = fallback ? 'v10' : keyringTag;
   return {
     // Resolves once the keyring is unlocked (or its unlock cancelled), as
     // Chromium's async encryptor's initialization waits for the prompt.
@@ -182,7 +183,7 @@ describe('a locked keyring on Linux', () => {
     answer();
     await settle();
     expect(error).toHaveBeenCalledWith(
-      '[secrets] not saved: Encryption is not available',
+      "[secrets] not saved: Encryption is not available (v10: Chromium's own key)",
     );
     expect(store.getItem('secrets', 'credentials')).toBeNull();
     await expect(secrets.get('credentials')).resolves.toBeNull();
@@ -190,4 +191,13 @@ describe('a locked keyring on Linux', () => {
     await expect(secrets.get('persist_auth')).resolves.toBeNull();
     expect(store.getItem('secrets', 'persist_auth')).toBe(saved('a'));
   });
+});
+
+it('saves with a keyring key of another tag on Linux (the Secret portal’s)', async () => {
+  const store = createFileStore(root);
+  const secrets = createSecrets(store, fakeSafeStorage({ keyringTag: 'v12' }), {
+    platform: 'linux',
+  });
+  await secrets.set('credentials', 'x');
+  await expect(secrets.get('credentials')).resolves.toBe('x');
 });

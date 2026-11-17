@@ -23,20 +23,21 @@ const SAVE_WAIT_MS = 1_000;
  */
 
 /**
- * The tag Chromium starts a value with when a key from the system's keyring
- * (the Secret Service or KWallet) encrypted it, on Linux; `v10` is its own
- * fallback key, written in its code.
+ * The tag Chromium starts a value with on Linux when its own fallback key,
+ * written in its code, encrypted it. A key from the system's keyring (the
+ * Secret Service, KWallet, or the Secret portal for sandboxed installs)
+ * tags it otherwise (`v11` for the first two).
  */
-const KEYRING_KEY_TAG = 'v11';
+const FALLBACK_KEY_TAG = 'v10';
 
 /**
  * The encryption: safeStorage's asynchronous APIs, as Electron 45
  * recommends, which never ask the keyring on the main process's thread (the
- * synchronous ones held it, the window frozen, while GNOME's unlock prompt
- * was up, and asked again after Cancel). `ready` waits for that prompt. On
- * Linux a value is saved only if the keyring's key encrypted it (tagged
- * `v11`): without a Secret Service or KWallet, or with its unlock cancelled,
- * Chromium falls back to its own key, which only obscures the value. A dev
+ * synchronous ones block it, and the window, for as long as GNOME's unlock
+ * prompt is up). `ready` waits for that prompt. On
+ * Linux a value isn't saved when Chromium's own key encrypted it (tagged
+ * `v10`), as it does without a Secret Service or KWallet, or with the
+ * keyring's unlock cancelled: that key only obscures the value. A dev
  * run (`allowFallbackKey`) takes that key, on purpose (`--password-store=
  * basic`), to keep its login out of the system's keyring.
  * @param {SafeStorage} safeStorage
@@ -47,13 +48,11 @@ const encryptionOf = (safeStorage, platform, allowFallbackKey) => ({
   ready: () => safeStorage.isAsyncEncryptionAvailable(),
   encrypt: async (/** @type {string} */ text) => {
     const encrypted = await safeStorage.encryptStringAsync(text);
-    if (
-      platform === 'linux' &&
-      !allowFallbackKey &&
-      encrypted.subarray(0, KEYRING_KEY_TAG.length).toString() !==
-        KEYRING_KEY_TAG
-    ) {
-      throw new Error('Encryption is not available');
+    const tag = encrypted.subarray(0, FALLBACK_KEY_TAG.length).toString();
+    if (platform === 'linux' && !allowFallbackKey && tag === FALLBACK_KEY_TAG) {
+      throw new Error(
+        `Encryption is not available (${tag}: Chromium's own key)`,
+      );
     }
     return encrypted;
   },
