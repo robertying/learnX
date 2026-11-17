@@ -1,7 +1,10 @@
 // The fixtures every Electron E2E test uses: `app`, a learnX launched for
-// this test alone with a throwaway data folder (deleted afterwards), `window`,
-// its window, `main`, the main-process stand-ins (mainProcess.ts), and
-// `login`, the mock login of the Maestro flows' subflows/login-form.yaml.
+// this test alone with a throwaway data folder (`dataDir`, deleted
+// afterwards), `window`, its window, `main`, the main-process stand-ins
+// (mainProcess.ts), installed before the test starts, `login`, the mock login
+// of the Maestro flows' subflows/login-form.yaml, and `relaunch`, which quits
+// the app and starts it again on the same data folder, as a flow's
+// `launchApp` does.
 //
 // By default it runs this checkout in Electron (a dev run, as `pnpm
 // electron` does, on the web build in build/electron/web). Set
@@ -18,10 +21,14 @@ import {
 } from '@playwright/test';
 import { parse } from 'dotenv';
 import { electronExecutable, outDir } from '../electronApp.cjs';
+import { text } from './maestroEnv';
 import { mainProcess, type MainProcess } from './mainProcess';
 
 const electronDir = path.join(__dirname, '..');
 const root = path.join(electronDir, '..');
+
+/** The packaged app under test, if any (LEARNX_E2E_APP). */
+export const packagedApp = process.env.LEARNX_E2E_APP;
 
 /** The mock login, from .env as the web build inlined it. */
 const mockLogin = () => {
@@ -32,84 +39,173 @@ const mockLogin = () => {
   return { username: env.DUMMY_USERNAME, password: env.DUMMY_PASSWORD };
 };
 
-interface Fixtures {
+/** How a test launches learnX. */
+export interface Launch {
   /**
    * The test run's launch options (src/services/launchOptions), as the
-   * Maestro flows pass them to `launchApp`: `{ mockLatency: 'none' }` unless
-   * a test sets others with `test.use({ appLaunchOptions })` (Playwright's
-   * own `launchOptions` is for browsers). A packaged app
-   * ignores them.
+   * Maestro flows pass them to `launchApp`. A packaged app ignores them.
+   */
+  launchOptions?: Record<string, unknown>;
+  /** More arguments for the app, such as `--learnx-open=schedule`. */
+  args?: string[];
+  /** More environment variables, such as LEARNX_UPDATE_URL. */
+  env?: Record<string, string>;
+}
+
+/** A running learnX: the app, its window and its main-process stand-ins. */
+export interface Running {
+  app: ElectronApplication;
+  window: Page;
+  main: MainProcess;
+}
+
+interface Fixtures {
+  /**
+   * The launch options of the test's first launch: `{ mockLatency: 'none' }`
+   * unless a test sets others with `test.use({ appLaunchOptions })`
+   * (Playwright's own `launchOptions` is for browsers).
    */
   appLaunchOptions: Record<string, unknown>;
+  /** More arguments and environment for the first launch (`Launch`). */
+  appLaunch: Omit<Launch, 'launchOptions'>;
   /** The app's language (`--lang`), English unless a test sets one. */
   language: string;
+  /** The test's own data folder, deleted after it. */
+  dataDir: string;
+  /** Every app the test launched, closed after it. */
+  launched: Running[];
   app: ElectronApplication;
   window: Page;
   main: MainProcess;
   /** Logs in with the mock account and closes the set-up page. */
-  login: () => Promise<void>;
+  login: (window?: Page) => Promise<void>;
+  /**
+   * Quits the app and launches it again on the same data folder, with these
+   * launch options (`{ mockLatency: 'none' }` unless given) and arguments.
+   */
+  relaunch: (launch?: Launch) => Promise<Running>;
 }
+
+/** Launches learnX on `dataDir`, with the stand-ins installed. */
+const launchApp = async (
+  dataDir: string,
+  language: string,
+  { launchOptions = { mockLatency: 'none' }, args = [], env = {} }: Launch,
+): Promise<Running> => {
+  const app = await electron.launch({
+    executablePath: packagedApp || electronExecutable(),
+    // A packaged app reads no dev settings: Chromium's own switches keep
+    // its data in the throwaway folder and its secrets out of the system's
+    // keychain.
+    args: packagedApp
+      ? [
+          `--user-data-dir=${dataDir}`,
+          '--use-mock-keychain',
+          `--lang=${language}`,
+          ...args,
+        ]
+      : [electronDir, `--lang=${language}`, ...args],
+    env: {
+      ...process.env,
+      LEARNX_DATA_DIR: dataDir,
+      LEARNX_WEB_DIR: path.join(outDir, 'web'),
+      LEARNX_LAUNCH_OPTIONS: JSON.stringify(launchOptions),
+      // No update checks while testing (updater.cjs), unless a test serves
+      // one (LEARNX_UPDATE_URL).
+      ...(env.LEARNX_UPDATE_URL ? {} : { LEARNX_NO_UPDATES: '1' }),
+      ...env,
+    },
+  });
+  // Nothing reaches the system from here on: dialogs, notifications, the
+  // shell, menus and the clipboard are stand-ins.
+  const main = mainProcess(app);
+  await main.stub();
+  return { app, window: await app.firstWindow(), main };
+};
 
 export const test = base.extend<Fixtures>({
   appLaunchOptions: [{ mockLatency: 'none' }, { option: true }],
+  appLaunch: [{}, { option: true }],
   language: ['en-US', { option: true }],
 
-  app: async ({ appLaunchOptions, language }, provide) => {
+  // oxlint-disable-next-line no-empty-pattern -- Playwright reads fixtures' dependencies from the pattern
+  dataDir: async ({}, provide) => {
     const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'learnx-e2e-'));
-    const packaged = process.env.LEARNX_E2E_APP;
-    const app = await electron.launch({
-      executablePath: packaged || electronExecutable(),
-      // A packaged app reads no dev settings: Chromium's own switches keep
-      // its data in the throwaway folder and its secrets out of the system's
-      // keychain.
-      args: packaged
-        ? [
-            `--user-data-dir=${dataDir}`,
-            '--use-mock-keychain',
-            `--lang=${language}`,
-          ]
-        : [electronDir, `--lang=${language}`],
-      env: {
-        ...process.env,
-        LEARNX_DATA_DIR: dataDir,
-        LEARNX_WEB_DIR: path.join(outDir, 'web'),
-        LEARNX_LAUNCH_OPTIONS: JSON.stringify(appLaunchOptions),
-        // No update checks while testing (updater.cjs).
-        LEARNX_NO_UPDATES: '1',
-      },
-    });
     try {
-      await provide(app);
+      await provide(dataDir);
     } finally {
-      await app.close().catch(() => {});
-      fs.rmSync(dataDir, { recursive: true, force: true });
+      // Windows can hold a file of a just-closed app for a moment.
+      fs.rmSync(dataDir, {
+        recursive: true,
+        force: true,
+        maxRetries: 10,
+        retryDelay: 200,
+      });
     }
   },
 
-  window: async ({ app }, provide) => {
-    await provide(await app.firstWindow());
+  // Closed before the data folder is deleted: Playwright tears a fixture
+  // down before what it depends on.
+  // oxlint-disable-next-line no-unused-vars -- a dependency only
+  launched: async ({ dataDir: _ }, provide) => {
+    const launched: Running[] = [];
+    try {
+      await provide(launched);
+    } finally {
+      for (const { app } of launched) {
+        await app.close().catch(() => {});
+      }
+    }
   },
 
-  main: async ({ app }, provide) => {
-    const main = mainProcess(app);
-    await main.stub();
-    await provide(main);
+  app: async (
+    { appLaunchOptions, appLaunch, language, dataDir, launched },
+    provide,
+  ) => {
+    const running = await launchApp(dataDir, language, {
+      launchOptions: appLaunchOptions,
+      ...appLaunch,
+    });
+    launched.push(running);
+    await provide(running.app);
+  },
+
+  window: async ({ app, launched }, provide) => {
+    await provide(launched.find(running => running.app === app)!.window);
+  },
+
+  main: async ({ app, launched }, provide) => {
+    await provide(launched.find(running => running.app === app)!.main);
   },
 
   login: async ({ window }, provide) => {
-    await provide(async () => {
+    await provide(async (page = window) => {
       const { username, password } = mockLogin();
       // A new install opens on the welcome page, then the login page.
-      const welcome = window.getByRole('button', { name: 'Continue' });
-      const usernameField = window.getByTestId('login-username');
+      const welcome = page.getByTestId('welcome-continue');
+      const usernameField = page.getByTestId('login-username');
       await welcome.or(usernameField).first().waitFor();
       if (await welcome.isVisible()) {
         await welcome.click();
       }
       await usernameField.fill(username);
-      await window.getByTestId('login-password').fill(password);
-      await window.getByTestId('login-password').press('Enter');
-      await window.getByRole('button', { name: 'Not Now' }).click();
+      await page.getByTestId('login-password').fill(password);
+      await page.getByTestId('login-password').press('Enter');
+      await page.getByRole('button', { name: text('T_notNow') }).click();
+      await page.getByTestId('today').waitFor();
+    });
+  },
+
+  relaunch: async ({ language, dataDir, launched }, provide) => {
+    await provide(async (launch = {}) => {
+      // The single-instance lock lives in the data folder: the old app must
+      // be gone before the new one starts.
+      for (const running of launched) {
+        await running.app.close().catch(() => {});
+      }
+      const running = await launchApp(dataDir, language, launch);
+      launched.push(running);
+      return running;
     });
   },
 });

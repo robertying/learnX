@@ -1,0 +1,119 @@
+// What the Electron app does with a downloaded file instead of the phone's
+// share sheet: previews PDFs and pictures on app://files/, opens a file in
+// its default app, saves a copy with Save As, shows it in its folder and
+// copies its link, all through the main process's stand-ins (mainProcess.ts).
+// Exporting every download is in downloads.e2e.ts.
+import fs from 'node:fs';
+import path from 'node:path';
+import type { ElectronApplication } from '@playwright/test';
+import { expect, test } from './fixtures';
+import { exact, text } from './maestroEnv';
+import { byId, openCard, openTab, shown } from './steps';
+
+/** The URLs of the window's frames: the PDF preview is one of them. */
+const frameUrls = (app: ElectronApplication) =>
+  app.evaluate(({ BrowserWindow }) =>
+    BrowserWindow.getAllWindows()[0].webContents.mainFrame.framesInSubtree.map(
+      frame => frame.url,
+    ),
+  );
+
+const downloaded = async (window: import('@playwright/test').Page) => {
+  await expect(byId(window, 'file-loading')).toBeHidden({ timeout: 60_000 });
+  await expect(
+    window
+      .getByTestId('file-error')
+      .or(window.getByTestId('file-preview-failed')),
+  ).toHaveCount(0);
+};
+
+test('previews a PDF and a picture, and shows details for the rest', async ({
+  app,
+  window,
+  login,
+}) => {
+  await login();
+  await openTab(window, 'files');
+
+  await openCard(window, 'MOCK_FILE', 'file-detail');
+  await downloaded(window);
+  await expect
+    .poll(async () =>
+      (await frameUrls(app)).some(url =>
+        /^app:\/\/files\/cache\/.+\.pdf$/.test(url),
+      ),
+    )
+    .toBe(true);
+
+  await openCard(window, 'MOCK_IMAGE_FILE', 'file-detail');
+  await downloaded(window);
+  const image = byId(window, 'file-detail').locator('img[src^="app://files/"]');
+  await expect(image).toBeVisible();
+  await expect
+    .poll(() => image.evaluate(img => (img as HTMLImageElement).naturalWidth))
+    .toBeGreaterThan(0);
+
+  // Not previewable: its details, with Open in Default App first.
+  await openCard(window, 'MOCK_OTHER_FILE', 'file-detail');
+  await downloaded(window);
+  await expect(byId(window, 'file-info')).toBeVisible();
+  await expect(
+    shown(window.getByText(text('T_fileOpensInDefaultApp'))),
+  ).toBeVisible();
+});
+
+test('opens, saves, shows and copies the link of a file', async ({
+  window,
+  main,
+  dataDir,
+  login,
+}) => {
+  await login();
+  await openTab(window, 'files');
+  await openCard(window, 'MOCK_FILE', 'file-detail');
+  await downloaded(window);
+  /** A button of the detail pane's header. */
+  const header = (name: string) =>
+    shown(window.getByRole('button', { name: exact(name) }));
+
+  await header('T_openInDefaultApp').click();
+  await expect
+    .poll(async () => (await main.record()).openedPaths)
+    .toHaveLength(1);
+  const [opened] = (await main.record()).openedPaths;
+  // In the test's data folder (as the system names it: Windows' temporary
+  // folder can be a short 8.3 path, macOS's a link into /private).
+  expect(
+    fs.realpathSync.native(opened).startsWith(fs.realpathSync.native(dataDir)),
+  ).toBe(true);
+  expect(opened).toMatch(/\.pdf$/);
+
+  const saved = path.join(dataDir, 'Saved.pdf');
+  await main.stub({ save: saved });
+  await header('T_saveAs').click();
+  await expect.poll(() => fs.existsSync(saved)).toBe(true);
+  expect(fs.statSync(saved).size).toBe(fs.statSync(opened).size);
+  const save = (await main.record()).dialogs.find(d => d.type === 'save');
+  expect(save?.options).toMatchObject({
+    defaultPath: expect.stringMatching(/\.pdf$/),
+  });
+
+  // The details' buttons.
+  await header('T_info').click();
+  await expect(byId(window, 'file-info')).toBeVisible();
+  await byId(window, 'file-info')
+    .getByRole('button', { name: exact('T_showInFolder') })
+    .click();
+  await expect
+    .poll(async () => (await main.record()).shownInFolder)
+    .toEqual([opened]);
+  await byId(window, 'file-info')
+    .getByRole('button', { name: exact('T_copyLink') })
+    .click();
+  await expect(
+    shown(window.getByTestId('toast').getByText(exact('T_linkCopied'))),
+  ).toBeVisible();
+  const { clipboard } = await main.record();
+  expect(clipboard).toHaveLength(1);
+  expect(clipboard[0]).toMatch(/^https:\/\//);
+});

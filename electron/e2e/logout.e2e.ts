@@ -1,0 +1,61 @@
+// .maestro/12-settings-logout.yaml: opens the Changelog and About from
+// Settings, then logs out (confirmed in a dialog) back to the login page,
+// which the next launch shows too.
+import fs from 'node:fs';
+import path from 'node:path';
+import { expect, test } from './fixtures';
+import { exact } from './maestroEnv';
+import { backToSettings, byId, openSettings, shown } from './steps';
+
+test('opens settings pages and logs out', async ({
+  window,
+  dataDir,
+  login,
+  relaunch,
+}) => {
+  await login();
+  await openSettings(window);
+
+  await byId(window, 'settings-changelog').click();
+  await expect(
+    shown(window.getByRole('heading', { name: exact('T_changelog') })),
+  ).toBeVisible();
+  await backToSettings(window);
+  await byId(window, 'settings-about').click();
+  await expect(shown(window.getByText(/© \d+ Rui Ying/))).toBeVisible();
+  await backToSettings(window);
+
+  await byId(window, 'settings-logout').click();
+  await window.getByRole('button', { name: exact('T_logout') }).click();
+  await expect(byId(window, 'login-username')).toBeVisible();
+
+  // The saved login is gone: the next launch asks again.
+  await expect
+    .poll(() =>
+      fs.existsSync(path.join(dataDir, 'userData', 'secrets', 'credentials')),
+    )
+    .toBe(false);
+  const relaunched = await relaunch();
+  await expect(byId(relaunched.window, 'login-username')).toBeVisible();
+});
+
+test('leaves the login page in the accessibility tree after logging out', async ({
+  window,
+  login,
+}) => {
+  // Known bug: the logout confirmation hides the app from assistive
+  // technology while it's open (aria-hidden on #root) and never gives it
+  // back, since logging out replaces what's under it. Passes (and fails
+  // here) once that's fixed.
+  test.fail();
+  await login();
+  await openSettings(window);
+  await byId(window, 'settings-logout').click();
+  await window.getByRole('button', { name: exact('T_logout') }).click();
+  await expect(byId(window, 'login-username')).toBeVisible();
+  await expect(window.locator('#root')).not.toHaveAttribute(
+    'aria-hidden',
+    'true',
+    { timeout: 5_000 },
+  );
+});

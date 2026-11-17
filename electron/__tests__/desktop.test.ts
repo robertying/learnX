@@ -415,12 +415,15 @@ describe('notifications', () => {
     const dev = (
       globalThis as unknown as {
         learnxDev: {
-          notifications: { click: () => void }[];
+          notifications: { options: unknown; click: () => void }[];
           tray: () => unknown;
+          trayMenu: () => unknown;
         };
       }
     ).learnxDev;
     expect(dev.tray()).toBeTruthy();
+    expect(dev.trayMenu()).toBeTruthy();
+    expect(dev.notifications[0].options).toEqual({ title: 'T', body: 'B\nC' });
     dev.notifications[0].click();
     expect(win.webContents.send).toHaveBeenCalledWith(
       'notifications:response',

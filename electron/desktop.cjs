@@ -234,6 +234,8 @@ const setUpDesktop = ({
           ) => {
             listeners.set(event, listener);
           },
+          /** For a dev run's inspector and E2E tests: what was shown. */
+          options,
           /** For a dev run's inspector: what a click on it would do. */
           click: () => listeners.get('click')?.(),
         };
@@ -241,12 +243,17 @@ const setUpDesktop = ({
         return notification;
       };
   /** A dev run's logged notifications, newest last (`--inspect` can click one). */
-  const devShown = /** @type {{ click: () => void }[]} */ ([]);
+  const devShown = /** @type {{ options: object; click: () => void }[]} */ ([]);
   if (dev) {
-    // For a dev run's inspector (`--inspect`): its logged notifications, to
-    // click one, and the tray.
+    // For a dev run's inspector (`--inspect`) and the E2E tests (which drive
+    // the main process the same way): its logged notifications, to click
+    // one, the tray and the tray's menu, whose items have no other way in.
     Object.assign(globalThis, {
-      learnxDev: { notifications: devShown, tray: () => tray },
+      learnxDev: {
+        notifications: devShown,
+        tray: () => tray,
+        trayMenu: () => trayMenu,
+      },
     });
   }
   const notifier = createNotifier({
@@ -323,6 +330,8 @@ const setUpDesktop = ({
   let labels = DEFAULT_LABELS;
   /** @type {Electron.Tray | null} */
   let tray = null;
+  /** @type {Electron.Menu | null} */
+  let trayMenu = null;
   const updateMenus = () => {
     if (!tray) {
       const image = nativeImage.createFromPath(iconFile);
@@ -337,14 +346,13 @@ const setUpDesktop = ({
         }
       });
     }
-    tray.setContextMenu(
-      Menu.buildFromTemplate([
-        { label: labels.open, click: showWindow },
-        { label: labels.refresh, click: () => runSync(true) },
-        { type: 'separator' },
-        { label: labels.quit, click: () => app.quit() },
-      ]),
-    );
+    trayMenu = Menu.buildFromTemplate([
+      { label: labels.open, click: showWindow },
+      { label: labels.refresh, click: () => runSync(true) },
+      { type: 'separator' },
+      { label: labels.quit, click: () => app.quit() },
+    ]);
+    tray.setContextMenu(trayMenu);
     if (platform === 'win32') {
       // A dev run starts Electron with the app's folder first.
       const appArgs = dev ? `"${app.getAppPath()}" ` : '';

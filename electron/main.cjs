@@ -493,6 +493,16 @@ const updater =
           );
           autoUpdater.updateConfigPath = config;
           autoUpdater.forceDevUpdateConfig = true;
+          // Its downloads stay in the data folder too, not in the system's
+          // caches (~/Library/Caches/learnX, %LOCALAPPDATA%, ~/.cache): the
+          // app adapter's (protected) cache folder, which it reads them under.
+          Object.defineProperty(
+            /** @type {any} */ (autoUpdater).app,
+            'baseCachePath',
+            {
+              value: path.join(devDataDir, 'updates'),
+            },
+          );
           // The checkout's version, not this folder's package.json's (0.0.0),
           // as electron-updater's own copy of semver parses it.
           const semver = require(

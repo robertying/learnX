@@ -13,7 +13,10 @@ export const maestroEnv = (): Record<string, string> => {
   cached ??= Object.fromEntries(
     execFileSync(
       process.execPath,
-      [path.join(root, 'scripts', 'e2e-env.mjs')],
+      [
+        '--disable-warning=MODULE_TYPELESS_PACKAGE_JSON',
+        path.join(root, 'scripts', 'e2e-env.mjs'),
+      ],
       {
         encoding: 'utf8',
         stdio: ['ignore', 'pipe', 'ignore'],
@@ -29,14 +32,25 @@ export const maestroEnv = (): Record<string, string> => {
   return cached;
 };
 
-/**
- * A value as the regular expression a flow uses: `'.*(${MOCK_NOTICE}).*'`
- * is `text('MOCK_NOTICE')` with `getByText`.
- */
-export const text = (key: string) => {
-  const value = maestroEnv()[key];
-  if (value === undefined) {
+const value = (key: string) => {
+  const found = maestroEnv()[key];
+  if (found === undefined) {
     throw new Error(`scripts/e2e-env.mjs prints no ${key}`);
   }
-  return new RegExp(value);
+  // A translation's `{param}` placeholders (escaped for a regex, as every
+  // value is) match whatever fills them in.
+  return found.replace(/\\\{\w+\\\}/g, '.+');
 };
+
+/**
+ * A value as the regular expression a flow uses: `'.*(${MOCK_NOTICE}).*'`
+ * is `text('MOCK_NOTICE')` with `getByText`. Any `T_<key>` a test names this
+ * way is printed (scripts/e2e-env.mjs reads the tests for them).
+ */
+export const text = (key: string) => new RegExp(value(key));
+
+/**
+ * A value matching a whole label, as a flow's `'${T_delete}'` does: a
+ * button named `Delete`, not `Delete…`.
+ */
+export const exact = (key: string) => new RegExp(`^(${value(key)})$`);

@@ -3,8 +3,8 @@
 // follow every translation or mock data edit:
 //
 // - `T_<key>`: the translation `<key>` in English and Chinese, as a regex
-//   alternation (`T_search` = `Search|搜索`). Only keys the flows use are
-//   printed.
+//   alternation (`T_search` = `Search|搜索`). Only keys the flows (and the
+//   Electron app's Playwright tests, electron/e2e) use are printed.
 // - `MOCK_*`: mock items (`data/mock.ts`, `data/mockEnglish.ts`) the flows
 //   open, as an alternation of their English and Chinese texts. A flow matches
 //   one inside a card's label as `'.*(${MOCK_NOTICE}).*'`.
@@ -70,6 +70,10 @@ const course = item(zhMock.mockCourses, notice.courseId);
 // with a Chinese title (file 1 belongs to the English-taught course).
 const assignment = zhMock.assignmentId(1);
 const file = zhMock.fileId(2);
+// The Electron app's file tests (electron/e2e): file 3, a PNG it previews as
+// a picture, and file 1, a PPTX it can't preview.
+const imageFile = zhMock.fileId(3);
+const otherFile = zhMock.fileId(1);
 // Search: SEARCH_TERM is ASCII (Maestro can't type CJK on Android) and finds
 // notice 15 and assignment 13 in both languages.
 const searchTerm = 'AutoCAD';
@@ -98,6 +102,8 @@ const mock = {
     a => a.attachment.name,
   ),
   MOCK_FILE: both('mockFiles', file),
+  MOCK_IMAGE_FILE: both('mockFiles', imageFile),
+  MOCK_OTHER_FILE: both('mockFiles', otherFile),
   MOCK_SEARCH_TERM: searchTerm,
   MOCK_SEARCH_NOTICE: both('mockNotices', searchNotice),
   MOCK_SEARCH_ASSIGNMENT: both('mockAssignments', searchAssignment),
@@ -135,16 +141,24 @@ if (
   );
 }
 
-// The translation keys the flows use, in every folder of .maestro/.
+// The translation keys the flows use, in every folder of .maestro/, and the
+// Electron app's Playwright tests (electron/e2e, `text('T_<key>')`).
 const maestro = join(root, '.maestro');
 const flows = readdirSync(maestro, { recursive: true })
   .map(name => join(maestro, name))
   .filter(path => path.endsWith('.yaml'));
-const keys = new Set(
-  flows.flatMap(path =>
+const electronE2E = join(root, 'electron', 'e2e');
+const specs = readdirSync(electronE2E)
+  .map(name => join(electronE2E, name))
+  .filter(path => path.endsWith('.ts'));
+const keys = new Set([
+  ...flows.flatMap(path =>
     [...readFileSync(path, 'utf8').matchAll(/\$\{T_(\w+)\}/g)].map(m => m[1]),
   ),
-);
+  ...specs.flatMap(path =>
+    [...readFileSync(path, 'utf8').matchAll(/'T_(\w+)'/g)].map(m => m[1]),
+  ),
+]);
 
 const lines = Object.entries(mock).map(([key, value]) => `${key}=${value}`);
 lines.push(`STORE_SEARCH_TERM=${storeSearchTerm}`);

@@ -57,9 +57,13 @@ jobs:
           retention-days: 1
 
   e2e:
-    # The Playwright E2E tests (electron/e2e) in a dev run of the app on the
-    # web build: mock login, Today, every tab. Linux runs them under a
-    # virtual display.
+    # The whole Playwright E2E suite (electron/e2e) in a dev run of the app
+    # on the web build: the Maestro flows that apply to the desktop and what
+    # only it does (files, submissions, notifications, the tray, the .ics
+    # export, updates against updateServer.mjs, the SSO page). Linux runs it
+    # under a virtual display. It needs the network, as the flows do: the
+    # mock files download from GitHub and the SSO test opens
+    # id.tsinghua.edu.cn.
     name: Electron E2E ${{ matrix.name }} (not required)
     needs: web
     strategy:
