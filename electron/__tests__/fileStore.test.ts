@@ -2,10 +2,10 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {
+  RENAME_RETRY_MS,
   createFileStore,
   fileName,
   loggedWrites,
-  renameRetrying,
 } from '../fileStore.cjs';
 
 let root: string;
@@ -77,60 +77,68 @@ it('skips a write left unfinished', () => {
   expect(store.readAll('db')).toEqual({ k: 'saved' });
 });
 
-describe('renameRetrying', () => {
+describe('a rename Windows refuses while the file is busy', () => {
   const busy = (code: string) =>
     Object.assign(new Error(`${code}: operation not permitted`), { code });
 
-  it('tries again while the target is busy', () => {
-    const rename = jest
-      .fn()
-      .mockImplementationOnce(() => {
-        throw busy('EPERM');
-      })
-      .mockImplementationOnce(() => {
-        throw busy('EBUSY');
-      })
-      .mockImplementationOnce(() => {});
-    const sleep = jest.fn();
-    renameRetrying('a.tmp', 'a', { rename, sleep });
+  /** A store whose renames fail with `codes`, one per try, then work. */
+  const busyStore = (codes: string[]) => {
+    jest.useFakeTimers();
+    const log = jest.fn();
+    const rename = jest.fn((from: string, to: string) => {
+      const code = codes.shift();
+      if (code) {
+        throw busy(code);
+      }
+      fs.renameSync(from, to);
+    });
+    const store = createFileStore(root, {
+      rename,
+      timers: { setTimeout, clearTimeout },
+      log,
+    });
+    return { store, rename, log };
+  };
+  afterEach(() => jest.useRealTimers());
+
+  it('is tried again later, without blocking, with the newest value', () => {
+    const { store, rename } = busyStore(['EPERM', 'EBUSY']);
+    store.setItem('settings', 'theme', 'dark');
+    // Returned at once; the old value (none) stays until the rename works.
+    expect(store.getItem('settings', 'theme')).toBeNull();
+    store.setItem('settings', 'theme', 'light');
+    expect(rename).toHaveBeenCalledTimes(1);
+    jest.advanceTimersByTime(RENAME_RETRY_MS[0]);
+    expect(store.getItem('settings', 'theme')).toBeNull();
+    jest.advanceTimersByTime(RENAME_RETRY_MS[1]);
+    expect(store.getItem('settings', 'theme')).toBe('light');
     expect(rename).toHaveBeenCalledTimes(3);
-    expect(sleep.mock.calls).toEqual([[10], [20]]);
   });
 
-  it('gives up after a while, and at once on another error', () => {
-    const sleep = jest.fn();
-    expect(() =>
-      renameRetrying('a.tmp', 'a', {
-        rename: () => {
-          throw busy('EACCES');
-        },
-        sleep,
-      }),
-    ).toThrow('EACCES');
-    expect(sleep).toHaveBeenCalledTimes(6);
-
-    sleep.mockClear();
-    expect(() =>
-      renameRetrying('a.tmp', 'a', {
-        rename: () => {
-          throw busy('ENOSPC');
-        },
-        sleep,
-      }),
-    ).toThrow('ENOSPC');
-    expect(sleep).not.toHaveBeenCalled();
+  it('gives up after a while, and says so', () => {
+    const { store, log } = busyStore(
+      Array.from({ length: RENAME_RETRY_MS.length + 1 }, () => 'EACCES'),
+    );
+    store.setItem('settings', 'theme', 'dark');
+    jest.runAllTimers();
+    expect(store.getItem('settings', 'theme')).toBeNull();
+    expect(log).toHaveBeenCalledWith('theme not saved: EACCES');
   });
 
-  it('waits for real by default', () => {
-    const rename = jest
-      .fn()
-      .mockImplementationOnce(() => {
-        throw busy('EPERM');
-      })
-      .mockImplementationOnce(() => {});
-    const started = Date.now();
-    renameRetrying('a.tmp', 'a', { rename });
-    expect(Date.now() - started).toBeGreaterThanOrEqual(9);
+  it('throws at once on another error', () => {
+    const { store } = busyStore(['ENOSPC']);
+    expect(() => store.setItem('settings', 'theme', 'dark')).toThrow('ENOSPC');
+  });
+
+  it('stops when the key is removed or its database cleared', () => {
+    const { store, rename } = busyStore(['EPERM', 'EPERM']);
+    store.setItem('settings', 'theme', 'dark');
+    store.removeItem('settings', 'theme');
+    store.setItem('settings', 'font', 'big');
+    store.clear('settings');
+    jest.runAllTimers();
+    expect(rename).toHaveBeenCalledTimes(2);
+    expect(store.readAll('settings')).toEqual({});
   });
 });
 

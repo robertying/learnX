@@ -152,9 +152,13 @@ const webviews = createWebviews({
  * @param {Electron.Session} ses
  */
 const handleIpc = ses => {
-  const store = createFileStore(path.join(app.getPath('userData'), 'storage'));
+  const logStorage = (/** @type {string} */ message) =>
+    console.error(`[storage] ${message}`);
+  const store = createFileStore(path.join(app.getPath('userData'), 'storage'), {
+    log: logStorage,
+  });
   const secrets = createSecrets(
-    createFileStore(app.getPath('userData')),
+    createFileStore(app.getPath('userData'), { log: logStorage }),
     safeStorage,
   );
 
@@ -164,9 +168,7 @@ const handleIpc = ses => {
     fromApp(event);
     event.returnValue = store.readAll(db);
   });
-  const writes = loggedWrites(store, message =>
-    console.error(`[storage] ${message}`),
-  );
+  const writes = loggedWrites(store, logStorage);
   ipcMain.on('storage:set', (event, db, key, value) => {
     fromApp(event);
     writes.setItem(db, key, value);

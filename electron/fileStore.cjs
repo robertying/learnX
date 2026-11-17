@@ -9,42 +9,14 @@ const path = require('node:path');
 // Names Windows reserves for devices, with or without an extension.
 const reserved = /^(con|prn|aux|nul|com\d|lpt\d)$/i;
 
-/** How long a rename waits before each retry while the target is busy. */
-const RENAME_RETRY_MS = [10, 20, 40, 80, 160, 320];
+/**
+ * How long a rename waits before each retry while the target is busy: about
+ * five seconds in all, without blocking anything meanwhile.
+ */
+const RENAME_RETRY_MS = [20, 40, 80, 160, 320, 640, 1280, 2560];
 
 /** Errors of a rename onto a file another program briefly holds (Windows). */
 const BUSY = new Set(['EPERM', 'EBUSY', 'EACCES']);
-
-/**
- * Renames `from` over `to`, trying again for a moment while Windows reports
- * the target busy (Defender, the search indexer or a backup tool reading it),
- * as graceful-fs does.
- * @param {string} from
- * @param {string} to
- * @param {{ rename?: typeof fs.renameSync, sleep?: (ms: number) => void }} [io]
- */
-const renameRetrying = (
-  from,
-  to,
-  {
-    rename = fs.renameSync,
-    sleep = ms =>
-      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms),
-  } = {},
-) => {
-  for (const wait of RENAME_RETRY_MS) {
-    try {
-      rename(from, to);
-      return;
-    } catch (error) {
-      if (!BUSY.has(/** @type {NodeJS.ErrnoException} */ (error).code ?? '')) {
-        throw error;
-      }
-      sleep(wait);
-    }
-  }
-  rename(from, to);
-};
 
 /**
  * A key as a file name that's valid on Windows, macOS and Linux, and maps back
@@ -72,10 +44,26 @@ const keyOf = name => (name === '%' ? '' : decodeURIComponent(name));
 const folderName = fileName;
 
 /**
- * The databases under `root`.
+ * The databases under `root`. A write's rename that Windows refuses while
+ * another program briefly holds the file (Defender, the search indexer, a
+ * backup tool) is tried again later, as graceful-fs does, without holding up
+ * the main process; a newer write of the same key while it waits is what the
+ * retry renames, and one given up on is logged.
  * @param {string} root
+ * @param {{
+ *   rename?: (from: string, to: string) => void;
+ *   timers?: { setTimeout: typeof setTimeout; clearTimeout: typeof clearTimeout };
+ *   log?: (message: string) => void;
+ * }} [options]
  */
-const createFileStore = root => {
+const createFileStore = (
+  root,
+  {
+    rename = fs.renameSync,
+    timers = { setTimeout, clearTimeout },
+    log = () => {},
+  } = {},
+) => {
   /** @param {string} db */
   const dir = db => path.join(root, folderName(db));
 
@@ -116,6 +104,48 @@ const createFileStore = root => {
   };
 
   /**
+   * Renames waiting to be tried again, by the file they'd replace.
+   * @type {Map<string, ReturnType<typeof setTimeout>>}
+   */
+  const retrying = new Map();
+
+  /** Stops a waiting rename, leaving its temporary file to whoever's next. */
+  const stopRetrying = (/** @type {string} */ file) => {
+    timers.clearTimeout(retrying.get(file));
+    retrying.delete(file);
+  };
+
+  /**
+   * Renames `file`'s temporary file over it, now or, while it's busy, later.
+   * @param {string} file
+   * @param {number} attempt
+   */
+  const commit = (file, attempt) => {
+    const temp = `${file}.tmp`;
+    try {
+      rename(temp, file);
+      retrying.delete(file);
+    } catch (error) {
+      const code = /** @type {NodeJS.ErrnoException} */ (error).code ?? '';
+      if (!BUSY.has(code) || attempt >= RENAME_RETRY_MS.length) {
+        retrying.delete(file);
+        if (attempt === 0) {
+          throw error;
+        }
+        log(`${path.basename(file)} not saved: ${code || String(error)}`);
+        return;
+      }
+      retrying.set(
+        file,
+        timers.setTimeout(
+          () => commit(file, attempt + 1),
+          RENAME_RETRY_MS[attempt],
+        ),
+      );
+    }
+  };
+
+  /**
    * @param {string} db
    * @param {string} key
    * @param {string | Buffer} value
@@ -131,7 +161,10 @@ const createFileStore = root => {
     } finally {
       fs.closeSync(fd);
     }
-    renameRetrying(temp, file);
+    // A rename already waiting takes this value with it.
+    if (!retrying.has(file)) {
+      commit(file, 0);
+    }
   };
 
   /**
@@ -139,11 +172,19 @@ const createFileStore = root => {
    * @param {string} key
    */
   const removeItem = (db, key) => {
-    fs.rmSync(path.join(dir(db), fileName(key)), { force: true });
+    const file = path.join(dir(db), fileName(key));
+    stopRetrying(file);
+    fs.rmSync(`${file}.tmp`, { force: true });
+    fs.rmSync(file, { force: true });
   };
 
   /** @param {string} db */
   const clear = db => {
+    for (const file of retrying.keys()) {
+      if (path.dirname(file) === dir(db)) {
+        stopRetrying(file);
+      }
+    }
     fs.rmSync(dir(db), { recursive: true, force: true });
   };
 
@@ -182,4 +223,9 @@ const loggedWrites = (store, log) => {
   };
 };
 
-module.exports = { createFileStore, fileName, loggedWrites, renameRetrying };
+module.exports = {
+  RENAME_RETRY_MS,
+  createFileStore,
+  fileName,
+  loggedWrites,
+};
