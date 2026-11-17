@@ -254,6 +254,32 @@ describe('postLaunchNotification', () => {
     expect(postNotification).not.toHaveBeenCalled();
   });
 
+  it('posts a new file', async () => {
+    const { files } = lists as unknown as Record<string, { id: string }[]>;
+    queryClient.setQueryData(queryKeys.content('files', 's'), files);
+    await expect(postLaunchNotification(`file:${files[0].id}`)).resolves.toBe(
+      true,
+    );
+    expect(postNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        target: { type: 'file', id: files[0].id },
+      }),
+    );
+  });
+
+  it.each(['reminder:a9', 'notice:n9', 'assignment:a9'])(
+    'gives up on %s, which never loads',
+    async spec => {
+      jest.useFakeTimers();
+      put();
+      const posted = postLaunchNotification(spec);
+      await jest.advanceTimersByTimeAsync(60_000);
+      await expect(posted).resolves.toBe(false);
+      expect(postNotification).not.toHaveBeenCalled();
+      expect(Notifications.scheduleNotificationAsync).not.toHaveBeenCalled();
+    },
+  );
+
   it("ignores what it doesn't know", async () => {
     await expect(postLaunchNotification('course:c1')).resolves.toBe(false);
     await expect(postLaunchNotification('reminder')).resolves.toBe(false);
