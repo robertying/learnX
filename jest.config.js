@@ -49,6 +49,18 @@ const webAliases = Object.fromEntries(
  * app's main process in `electron/__tests__`, typed with Node
  * (`scripts/tsconfig.json`).
  */
+// Node's own localStorage (on by default since Node 25) warns in every worker
+// whose environment reads the globals (Jest copies them), and the tests use
+// jsdom's or none: the workers start without it.
+if (!process.env.NODE_OPTIONS?.includes('--no-experimental-webstorage')) {
+  process.env.NODE_OPTIONS = [
+    process.env.NODE_OPTIONS,
+    '--no-experimental-webstorage',
+  ]
+    .filter(Boolean)
+    .join(' ');
+}
+
 /** @type {import('jest').Config} */
 module.exports = {
   // Count every source file, not only the ones some test imports.
