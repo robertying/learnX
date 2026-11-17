@@ -14,6 +14,7 @@ const fakeSafeStorage = ({
   available = true,
   backend = 'gnome_libsecret',
   rotated = false,
+  unlocked = Promise.resolve(),
 } = {}) => {
   let initialized = false;
   const fail = (data: Buffer) => {
@@ -22,7 +23,12 @@ const fakeSafeStorage = ({
     }
   };
   return {
-    isAsyncEncryptionAvailable: async () => available,
+    // Resolves once the keyring is unlocked, as Chromium's async encryptor's
+    // initialization waits for the unlock prompt.
+    isAsyncEncryptionAvailable: jest.fn(async () => {
+      await unlocked;
+      return available;
+    }),
     encryptStringAsync: jest.fn(async (text: string) =>
       Buffer.from(text).reverse(),
     ),
@@ -33,10 +39,10 @@ const fakeSafeStorage = ({
         shouldReEncrypt: rotated,
       };
     },
-    isEncryptionAvailable: () => {
+    isEncryptionAvailable: jest.fn(() => {
       initialized = true;
       return available;
-    },
+    }),
     encryptString: jest.fn((text: string) =>
       Buffer.from(Buffer.from(text).map(byte => byte + 1)),
     ),
@@ -131,3 +137,100 @@ it.each(['gnome_libsecret', 'kwallet6'])(
     await expect(secrets.get('credentials')).resolves.toBe('x');
   },
 );
+
+describe('a locked keyring on Linux', () => {
+  /** A keyring whose unlock prompt is up until `unlock()`. */
+  const locked = () => {
+    let unlock!: () => void;
+    const unlocked = new Promise<void>(resolve => {
+      unlock = resolve;
+    });
+    return { safeStorage: fakeSafeStorage({ unlocked }), unlock };
+  };
+  const options = { platform: 'linux', unlockWaitMs: 50, saveWaitMs: 10 };
+
+  it('never asks OSCrypt (on the main thread) while it’s locked', async () => {
+    const store = createFileStore(root);
+    store.setItem(
+      'secrets',
+      'credentials',
+      Buffer.from('y').toString('base64'),
+    );
+    const { safeStorage } = locked();
+    const secrets = createSecrets(store, safeStorage, options);
+    await expect(secrets.get('credentials')).resolves.toBeNull();
+    await secrets.set('credentials', 'x');
+    expect(safeStorage.isEncryptionAvailable).not.toHaveBeenCalled();
+    expect(safeStorage.encryptString).not.toHaveBeenCalled();
+    // The saved login stays for a later launch.
+    expect(store.getItem('secrets', 'credentials')).toBe(
+      Buffer.from('y').toString('base64'),
+    );
+  });
+
+  it('logs in at once, and saves the login once it’s unlocked', async () => {
+    const store = createFileStore(root);
+    const { safeStorage, unlock } = locked();
+    const secrets = createSecrets(store, safeStorage, options);
+    await secrets.set('credentials', 'x');
+    await expect(secrets.get('credentials')).resolves.toBe('x');
+    expect(store.getItem('secrets', 'credentials')).toBeNull();
+    unlock();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(store.getItem('secrets', 'credentials')).toBe(
+      Buffer.from('y').toString('base64'),
+    );
+    await expect(secrets.get('credentials')).resolves.toBe('x');
+  });
+
+  it('reads a saved login once it’s unlocked in time', async () => {
+    const store = createFileStore(root);
+    store.setItem(
+      'secrets',
+      'credentials',
+      Buffer.from('y').toString('base64'),
+    );
+    const { safeStorage, unlock } = locked();
+    const secrets = createSecrets(store, safeStorage, options);
+    const value = secrets.get('credentials');
+    unlock();
+    await expect(value).resolves.toBe('x');
+  });
+
+  it('drops a value removed or replaced before it’s unlocked', async () => {
+    const store = createFileStore(root);
+    const { safeStorage, unlock } = locked();
+    const secrets = createSecrets(store, safeStorage, options);
+    await secrets.set('credentials', 'x');
+    await secrets.remove('credentials');
+    await secrets.set('persist_auth', 'a');
+    await secrets.set('persist_auth', 'b');
+    unlock();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(store.getItem('secrets', 'credentials')).toBeNull();
+    expect(safeStorage.encryptString).toHaveBeenCalledTimes(1);
+    await expect(secrets.get('persist_auth')).resolves.toBe('b');
+  });
+
+  it('logs a value it couldn’t save after all', async () => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const store = createFileStore(root);
+    let unlock!: () => void;
+    const unlocked = new Promise<void>(resolve => {
+      unlock = resolve;
+    });
+    const secrets = createSecrets(
+      store,
+      fakeSafeStorage({ unlocked, backend: 'basic_text' }),
+      options,
+    );
+    await secrets.set('credentials', 'x');
+    unlock();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(error).toHaveBeenCalledWith(
+      '[secrets] not saved: Encryption is not available',
+    );
+    expect(store.getItem('secrets', 'credentials')).toBeNull();
+    await expect(secrets.get('credentials')).resolves.toBeNull();
+  });
+});
