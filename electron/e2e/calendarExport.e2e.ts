@@ -33,10 +33,13 @@ test('exports the classes and deadlines as an .ics file', async ({
   const saved = path.join(dataDir, 'learnX.ics');
   await main.stub({ save: saved });
   await byId(window, 'calendar-export').click();
-  await expect.poll(() => fs.existsSync(saved)).toBe(true);
-  const ics = fs.readFileSync(saved, 'utf8');
+  // Read once it's all there: writeFile creates the file before it writes
+  // to it, and Windows runners caught it empty in between.
+  const read = () =>
+    fs.existsSync(saved) ? fs.readFileSync(saved, 'utf8') : '';
+  await expect.poll(read).toMatch(/END:VCALENDAR\s*$/);
+  const ics = read();
   expect(ics).toMatch(/^BEGIN:VCALENDAR\r?\n/);
-  expect(ics).toMatch(/END:VCALENDAR\s*$/);
   const events = ics.split('BEGIN:VEVENT').slice(1);
   const unfold = (event: string) => event.replace(/\r?\n[ \t]/g, '');
   expect(

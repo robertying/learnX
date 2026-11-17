@@ -43,7 +43,7 @@ import { Paragraph } from 'components/Text';
 import { useTheme } from 'theme';
 import { isAndroid, isApple, isElectron } from 'helpers/platform';
 import HeaderSearch from 'components/HeaderSearch';
-import useKeyboardOverlap from 'hooks/useKeyboardOverlap';
+import KeyboardInsetView from 'components/KeyboardInsetView';
 
 type Props = NativeStackScreenProps<SearchStackParams, 'Search'>;
 
@@ -85,9 +85,6 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
   // The system search bar in the header (UISearchController on iOS and Mac,
   // the toolbar search view on Android).
   const searchBarRef = useRef<SearchBarCommands>(null);
-  // Android: the results end above the keyboard, so all of them scroll into
-  // view.
-  const { ref: keyboardRef, overlap: keyboardOverlap } = useKeyboardOverlap();
   useLayoutEffect(() => {
     // The Electron app has no system search bar: a search box takes the
     // header's title.
@@ -379,11 +376,9 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
 
   return (
     <SafeArea>
-      <View
-        ref={keyboardRef}
-        collapsable={false}
-        style={[Styles.flex1, { paddingBottom: keyboardOverlap }]}
-      >
+      {/* Android: the results end above the keyboard, so all of them
+          scroll into view. */}
+      <KeyboardInsetView style={Styles.flex1}>
         {/* Behind the results and always mounted: a KeyboardAvoidingView
             that mounts while the keyboard is up (after the query is cleared)
             never learns its height, so the prompt would sit behind it. */}
@@ -468,7 +463,7 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
             {hasResults ? renderList(0) : null}
           </SafeAreaView>
         )}
-      </View>
+      </KeyboardInsetView>
     </SafeArea>
   );
 };

@@ -1,12 +1,14 @@
 import { Fragment, type ReactElement } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import type {
   NativeStackHeaderItem,
   NativeStackNavigationOptions,
 } from '@react-navigation/native-stack';
 import type { SFSymbol } from 'sf-symbols-typescript';
+import { headerBarHeight } from 'components/HeaderTitle';
 import IconButton, { type IconButtonIcon } from 'components/IconButton';
 import TextButton from 'components/TextButton';
+import { isAndroid } from 'helpers/platform';
 import { systemIcons } from 'helpers/systemIcons';
 
 /**
@@ -140,14 +142,13 @@ export const headerButtons = (
 
 const styles = StyleSheet.create({
   // Android: a gap between the last button and the title, and the bar's
-  // height (Material 3's 64 dp, as HeaderTitle's), so the buttons sit in its
-  // middle, level with the search field's clear button, rather than at its
-  // top.
+  // height, so the buttons sit in its middle, level with the search field's
+  // clear button, rather than at its top.
   left: {
     flexDirection: 'row',
     alignItems: 'center',
     marginEnd: 4,
-    ...(Platform.OS === 'android' ? { height: 64 } : {}),
+    ...(isAndroid() ? { height: headerBarHeight() } : {}),
   },
   right: {
     flexDirection: 'row',

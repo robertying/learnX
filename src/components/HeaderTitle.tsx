@@ -22,6 +22,14 @@ export interface HeaderTitleProps {
 const allowFontScaling = !isApple();
 const maxFontSizeMultiplier = 1.3;
 
+/**
+ * The header bar's height: Material 3's top app bar (64 dp) on Android, the
+ * navigation bar's elsewhere. The title and Android's header buttons are as
+ * tall, so their middles line up with the back button's and the search
+ * field's.
+ */
+export const headerBarHeight = () => (isAndroid() ? 64 : 44);
+
 const HeaderTitle: React.FC<HeaderTitleProps> = ({
   title,
   subtitle,
@@ -35,9 +43,7 @@ const HeaderTitle: React.FC<HeaderTitleProps> = ({
     <View
       style={{
         maxWidth: isAndroid() && !isWide ? 250 : undefined,
-        // As tall as the bar (Material 3's 64 dp), so the title's middle
-        // lines up with the back button's.
-        height: isAndroid() ? 64 : 44,
+        height: headerBarHeight(),
         justifyContent: 'center',
         alignItems: isAndroid() ? 'flex-start' : 'center',
       }}
