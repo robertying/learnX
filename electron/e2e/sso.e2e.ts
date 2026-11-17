@@ -3,12 +3,28 @@
 // the mock account's opens Tsinghua's login page in a web view, after the
 // confirmation, and the page's script fills in learnX's form there. Nothing
 // is sent to Tsinghua: the made-up account is never submitted. Needs
-// id.tsinghua.edu.cn to be reachable, as the flow does.
+// id.tsinghua.edu.cn, which CI's runners abroad can't always reach: tagged
+// @network, and skipped (not failed) when it doesn't answer.
 import type { Page } from '@playwright/test';
 import { expect, test } from './fixtures';
 import { exact } from './maestroEnv';
 
 const NOBODY = 'learnx-e2e-nobody';
+const SSO = 'https://id.tsinghua.edu.cn/';
+
+/** Whether Tsinghua's login site answers within a few seconds. */
+const reachable = async () => {
+  try {
+    await fetch(SSO, { method: 'HEAD', signal: AbortSignal.timeout(10_000) });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+test.beforeEach(async () => {
+  test.skip(!(await reachable()), `${SSO} doesn't answer from here`);
+});
 
 /**
  * Runs `script` in the SSO screen's web view, as the page can: null until
@@ -32,50 +48,56 @@ const fillLogin = async (window: Page) => {
   await window.getByTestId('login-password').fill('not-a-password');
 };
 
-test('opens Tsinghua’s login page for an account that isn’t the mock', async ({
-  window,
-}) => {
-  await fillLogin(window);
-  await window.getByRole('button', { name: exact('T_login') }).click();
-  await window.getByRole('button', { name: exact('T_continue') }).click();
+test(
+  'opens Tsinghua’s login page for an account that isn’t the mock',
+  { tag: '@network' },
+  async ({ window }) => {
+    await fillLogin(window);
+    await window.getByRole('button', { name: exact('T_login') }).click();
+    await window.getByRole('button', { name: exact('T_continue') }).click();
 
-  await expect
-    .poll(() => guest(window, 'location.hostname'), { timeout: 30_000 })
-    .toBe('id.tsinghua.edu.cn');
-  // learnX's script filled in the form, which stays unsent.
-  await expect
-    .poll(
-      () => guest(window, "document.querySelector('#i_user')?.value ?? null"),
-      { timeout: 30_000 },
-    )
-    .toBe(NOBODY);
-});
+    await expect
+      .poll(() => guest(window, 'location.hostname'), { timeout: 30_000 })
+      .toBe('id.tsinghua.edu.cn');
+    // learnX's script filled in the form, which stays unsent.
+    await expect
+      .poll(
+        () => guest(window, "document.querySelector('#i_user')?.value ?? null"),
+        { timeout: 30_000 },
+      )
+      .toBe(NOBODY);
+  },
+);
 
-test('stays on the login page when the confirmation is cancelled', async ({
-  window,
-}) => {
-  await fillLogin(window);
-  await window.getByRole('button', { name: exact('T_login') }).click();
-  await window.getByRole('button', { name: exact('T_cancel') }).click();
-  await expect(window.getByTestId('login-username')).toBeVisible();
-  await expect(window.locator('webview')).toHaveCount(0);
-});
+test(
+  'stays on the login page when the confirmation is cancelled',
+  { tag: '@network' },
+  async ({ window }) => {
+    await fillLogin(window);
+    await window.getByRole('button', { name: exact('T_login') }).click();
+    await window.getByRole('button', { name: exact('T_cancel') }).click();
+    await expect(window.getByTestId('login-username')).toBeVisible();
+    await expect(window.locator('webview')).toHaveCount(0);
+  },
+);
 
-test('asks before opening Tsinghua’s page when Enter logs in', async ({
-  window,
-}) => {
-  // The Enter that logs in from the password field opens the confirmation,
-  // which focuses Continue: that same press mustn't answer it (web/alert).
-  await fillLogin(window);
-  await window.getByTestId('login-password').press('Enter');
-  const dialog = window.getByRole('dialog');
-  await expect(
-    dialog.getByRole('button', { name: exact('T_continue') }),
-  ).toBeFocused();
-  await expect(window.locator('webview')).toHaveCount(0);
-  // Its own press does.
-  await window.keyboard.press('Enter');
-  await expect
-    .poll(() => guest(window, 'location.hostname'), { timeout: 30_000 })
-    .toBe('id.tsinghua.edu.cn');
-});
+test(
+  'asks before opening Tsinghua’s page when Enter logs in',
+  { tag: '@network' },
+  async ({ window }) => {
+    // The Enter that logs in from the password field opens the confirmation,
+    // which focuses Continue: that same press mustn't answer it (web/alert).
+    await fillLogin(window);
+    await window.getByTestId('login-password').press('Enter');
+    const dialog = window.getByRole('dialog');
+    await expect(
+      dialog.getByRole('button', { name: exact('T_continue') }),
+    ).toBeFocused();
+    await expect(window.locator('webview')).toHaveCount(0);
+    // Its own press does.
+    await window.keyboard.press('Enter');
+    await expect
+      .poll(() => guest(window, 'location.hostname'), { timeout: 30_000 })
+      .toBe('id.tsinghua.edu.cn');
+  },
+);

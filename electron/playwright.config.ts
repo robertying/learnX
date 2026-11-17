@@ -13,7 +13,10 @@ export default defineConfig({
   // One Electron app at a time: each is a whole app with its own window.
   workers: 1,
   fullyParallel: false,
+  // One retry on CI, for a trace of the failure; a test that passes only on
+  // its retry still fails the run, so flakes don't pass as green.
   retries: process.env.CI ? 1 : 0,
+  failOnFlakyTests: !!process.env.CI,
   forbidOnly: !!process.env.CI,
   reporter: process.env.CI
     ? [
