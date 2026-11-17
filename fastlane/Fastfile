@@ -411,21 +411,57 @@ def upload_apple(platform, path, notes)
 end
 
 # TestFlight's What to Test for a build that App Store Connect has processed:
-# the same notes as the store's What's New.
-def set_testflight_notes(platform, notes, build)
-  UI.user_error!("No release notes for v#{app_version}: pass notes:<file> or run `bundle exec fastlane notes`") unless notes
+# the same notes as the store's What's New, or what_to_test: (one text for
+# both languages) for a build between releases, which has no notes yet.
+def what_to_test(options, section)
+  text = options[:what_to_test].to_s.strip
+  return { en: text, zh: text } unless text.empty?
+
+  notes = release_notes(notes_path(options))
+  UI.user_error!("No release notes for v#{app_version}: pass notes:<file> or what_to_test:<text>, or run `bundle exec fastlane notes`") unless notes
+  notes[section]
+end
+
+# Sets What to Test on an uploaded build. With groups, also submits it for
+# Beta App Review and adds it to those external groups, whose testers get it
+# once Apple approves it (a build of a version Apple has already approved
+# may go out at once).
+def distribute_testflight(platform, build, notes, groups: nil)
   app_store_connect_api_key if asc_api_key?
-  upload_to_testflight(
+  options = {
     distribute_only: true,
     app_platform: platform == "macos" ? "osx" : "ios",
     app_version: app_version,
     build_number: build.to_s,
-    skip_submission: true,
     localized_build_info: {
       "en-US" => { whats_new: notes[:en] },
       "zh-Hans" => { whats_new: notes[:zh] },
     },
-  )
+  }
+  if groups
+    options.merge!(distribute_external: true, submit_beta_review: true, groups: groups)
+  else
+    options[:skip_submission] = true
+  end
+  upload_to_testflight(options)
+end
+
+# groups: if given, else TESTFLIGHT_EXTERNAL_GROUPS in fastlane/.env
+# (comma-separated names of the app's external TestFlight groups).
+def external_groups(options)
+  groups = (options[:groups] || ENV["TESTFLIGHT_EXTERNAL_GROUPS"]).to_s.split(",").map(&:strip).reject(&:empty?)
+  UI.user_error!("No external TestFlight groups: pass groups:<name,...> or set TESTFLIGHT_EXTERNAL_GROUPS in fastlane/.env") if groups.empty?
+  groups
+end
+
+def submit_for_beta_review(platform, section, options)
+  build = options[:build] || build_number
+  notes = what_to_test(options, section)
+  groups = external_groups(options)
+  label = platform == "macos" ? "Mac" : "iOS"
+  UI.important("Submitting #{label} build #{build} (v#{app_version}) for Beta App Review, for the external groups #{groups.join(', ')}.")
+  UI.user_error!("Stopped before submitting.") if UI.interactive? && !UI.confirm("Submit?")
+  distribute_testflight(platform, build, notes, groups: groups)
 end
 
 # ---------------------------------------------------------------------------
@@ -834,10 +870,16 @@ platform :ios do
   end
 
   desc "Set a processed build's TestFlight What to Test to the App Store notes (no upload, nothing sent to testers)."
-  desc "Usage: bundle exec fastlane ios testflight_notes [build:<number>] [notes:/path/to/notes.md]   (build: this version's build number)"
+  desc "Usage: bundle exec fastlane ios testflight_notes [build:<number>] [notes:/path/to/notes.md | what_to_test:<text>]   (build: this version's build number)"
   lane :testflight_notes do |options|
-    notes = release_notes(notes_path(options))
-    set_testflight_notes("ios", notes && notes[:ios], options[:build] || build_number)
+    distribute_testflight("ios", options[:build] || build_number, what_to_test(options, :ios))
+  end
+
+  desc "Submit a processed build for Beta App Review and add it to the external TestFlight groups; testers get it once Apple approves it."
+  desc "Sets What to Test first, as testflight_notes does. Asks before submitting when run in a terminal."
+  desc "Usage: bundle exec fastlane ios beta_review [build:<number>] [notes:/path/to/notes.md | what_to_test:<text>] [groups:<name,...>]"
+  lane :beta_review do |options|
+    submit_for_beta_review("ios", :ios, options)
   end
 end
 
@@ -856,10 +898,16 @@ platform :mac do
   end
 
   desc "Set a processed build's TestFlight What to Test to the Mac App Store notes (no upload, nothing sent to testers)."
-  desc "Usage: bundle exec fastlane mac testflight_notes [build:<number>] [notes:/path/to/notes.md]   (build: this version's build number)"
+  desc "Usage: bundle exec fastlane mac testflight_notes [build:<number>] [notes:/path/to/notes.md | what_to_test:<text>]   (build: this version's build number)"
   lane :testflight_notes do |options|
-    notes = release_notes(notes_path(options))
-    set_testflight_notes("macos", notes && notes[:mac], options[:build] || build_number)
+    distribute_testflight("macos", options[:build] || build_number, what_to_test(options, :mac))
+  end
+
+  desc "Submit a processed build for Beta App Review and add it to the external TestFlight groups; testers get it once Apple approves it."
+  desc "Sets What to Test first, as testflight_notes does. Asks before submitting when run in a terminal."
+  desc "Usage: bundle exec fastlane mac beta_review [build:<number>] [notes:/path/to/notes.md | what_to_test:<text>] [groups:<name,...>]"
+  lane :beta_review do |options|
+    submit_for_beta_review("macos", :mac, options)
   end
 end
 
