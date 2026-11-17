@@ -10,16 +10,19 @@ const {
 
 // babel/inline-env.js inlines .env and babel-plugin-preval inlines the files
 // in src/helpers/preval at transform time, and Metro's cache only tracks the
-// file being transformed. Hashing them into the cache version makes a change
-// take effect on the next Metro start, without --reset-cache.
+// file being transformed, not the repo's own Babel plugins (babel/) either.
+// Hashing them all into the cache version makes a change take effect on the
+// next Metro start, without --reset-cache.
 const inlinedInputsHash = () => {
-  const prevalDir = path.join(__dirname, 'src/helpers/preval');
+  const folderFiles = (/** @type {string} */ dir) =>
+    fs
+      .readdirSync(path.join(__dirname, dir))
+      .sort()
+      .map(name => path.join(__dirname, dir, name));
   const files = [
     path.join(__dirname, '.env'),
-    ...fs
-      .readdirSync(prevalDir)
-      .sort()
-      .map(name => path.join(prevalDir, name)),
+    ...folderFiles('src/helpers/preval'),
+    ...folderFiles('babel'),
   ];
   const hash = crypto.createHash('sha256');
   // babel/inline-env.js reads it too (E2E builds).
