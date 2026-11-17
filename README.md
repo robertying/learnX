@@ -136,11 +136,26 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 Requires iOS / iPadOS 17.6, macOS 14.6, Android 10 or Windows 10 and later, or Linux on x64 / ARM64.
 
 - **iPhone, iPad and Mac:** [App Store](https://apps.apple.com/cn/app/learnx-thu-web-learning/id1459073115)
-- **Android:** [Google Play](https://play.google.com/store/apps/details?id=io.robertying.learnx), the [TUNA Mirror (recommended)](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/) or [GitHub Releases](https://github.com/robertying/learnX/releases). From the mirror or GitHub, download `learnX-arm64-v8a-vX.X.X.apk`, or `learnX-universal-vX.X.X.apk` if it doesn't install; these versions update from inside the app.
-- **Windows and Linux:** the [TUNA Mirror (recommended)](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/) or [GitHub Releases](https://github.com/robertying/learnX/releases). The app updates itself.
-  - Windows: download `learnX-windows-vX.X.X.exe` (one installer for x64 and ARM64). It's unsigned, so if Windows says "Windows protected your PC", choose "More info", then "Run anyway".
-  - Ubuntu and Debian: download `learnX-linux-amd64-vX.X.X.deb` (x64) or `learnX-linux-arm64-vX.X.X.deb` (ARM64) and install it with `sudo apt install ./<file>.deb`.
-  - Other Linux distributions: download `learnX-linux-x86_64-vX.X.X.AppImage` (x64) or `learnX-linux-arm64-vX.X.X.AppImage` (ARM64), make it executable with `chmod +x`, and run it. On Ubuntu, use the .deb: since Ubuntu 24.04, the AppImage can't turn on Chromium's sandbox.
+
+- **Android:** [Google Play](https://play.google.com/store/apps/details?id=io.robertying.learnx), the [TUNA Mirror (recommended)](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/) or [GitHub Releases](https://github.com/robertying/learnX/releases)
+  - From the mirror or GitHub, download `learnX-arm64-v8a-vX.X.X.apk`
+  - If it doesn't install, use `learnX-universal-vX.X.X.apk` instead
+  - Versions from the mirror or GitHub let you update from inside the app
+
+- **Windows and Linux:** the [TUNA Mirror (recommended)](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/) or [GitHub Releases](https://github.com/robertying/learnX/releases), and the app updates itself
+
+- **Windows**
+  - Download `learnX-windows-vX.X.X.exe` (one installer for x64 and ARM64)
+  - The installer is unsigned: if Windows says "Windows protected your PC", choose "More info", then "Run anyway"
+
+- **Ubuntu / Debian**
+  - On x64, download `learnX-linux-amd64-vX.X.X.deb`; on ARM64, `learnX-linux-arm64-vX.X.X.deb`
+  - Install it with `sudo apt install ./learnX-linux-amd64-vX.X.X.deb` (use the ARM64 file name on ARM64)
+
+- **Other Linux distributions**
+  - On x64, download `learnX-linux-x86_64-vX.X.X.AppImage`; on ARM64, `learnX-linux-arm64-vX.X.X.AppImage`
+  - Make it executable with `chmod +x`, then run it
+  - On Ubuntu, use the .deb: since Ubuntu 24.04, the AppImage can't turn on Chromium's sandbox
 
 ### Features
 
