@@ -1,4 +1,4 @@
-import { requireNativeView } from 'expo';
+import { requireNativeModule, requireNativeView } from 'expo';
 import type { ColorValue, ViewProps } from 'react-native';
 
 export interface ToastHUDProps extends ViewProps {
@@ -36,3 +36,24 @@ export const ToastSymbol = requireNativeView<ToastSymbolProps>(
   'LearnXToast',
   'ToastSymbolView',
 );
+
+/** A tab bar's frame in its window, in points, with the window's size. */
+export interface TabBarFrame {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  windowWidth: number;
+  windowHeight: number;
+}
+
+const ToastModule = requireNativeModule<{
+  tabBarFrame: () => Promise<TabBarFrame | null>;
+}>('LearnXToast');
+
+/**
+ * Where the tab bar the person sees is, wherever UIKit put it, or null when
+ * none shows: on the login, under a sheet, at the top on iPad (where it
+ * floats and the bar itself is hidden) and on the Mac. iOS only.
+ */
+export const tabBarFrame = () => ToastModule.tabBarFrame();

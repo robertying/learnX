@@ -20,7 +20,12 @@ import { create } from 'zustand';
 import DeviceInfo from 'constants/DeviceInfo';
 import Spacing from 'constants/Spacing';
 import { Text, type TextVariant } from 'components/Text';
-import { ToastHUD, ToastSymbol } from 'modules/toast';
+import {
+  tabBarFrame,
+  ToastHUD,
+  ToastSymbol,
+  type TabBarFrame,
+} from 'modules/toast';
 
 import { playHaptic } from 'services/haptics';
 import { toastHaptic, type ToastOptions, type ToastType } from './Toast.shared';
@@ -166,30 +171,77 @@ const iosStyles = hudStyles(iosMetrics);
 const macStyles = hudStyles(macMetrics);
 
 // From iOS 26 the toast floats like the iPhone's tab bar: as far from the
-// screen's sides and bottom as the tab bar is (21 pt, measured: UIKit doesn't
-// expose it), and on iPhone a gap above the tab bar (62 pt tall). Before iOS 26
-// it keeps the side margin and sits the same gap above the docked tab bar
-// (about 56 pt over the home indicator inset). iPad's tab bar is at the top
-// and the Mac has a sidebar, so there the toast sits at the bottom.
+// window's edges as the tab bar is (21 pt, measured: UIKit doesn't expose it).
+// Before iOS 26 it keeps a standard margin inside the safe area.
 const floatingInset = 21;
-const floatingTabBarHeight = 62;
-const hasTabBarBelow = !DeviceInfo.isTablet() && !DeviceInfo.isMac();
 const tabBarGap = Spacing.m;
 
-const toastInsets = (insets: { bottom: number; left: number; right: number }) =>
-  DeviceInfo.hasLiquidGlass()
-    ? {
-        bottom: hasTabBarBelow
-          ? floatingInset + floatingTabBarHeight + tabBarGap
-          : Math.max(insets.bottom, floatingInset),
-        left: Math.max(insets.left, floatingInset),
-        right: Math.max(insets.right, floatingInset),
+interface Margins {
+  bottom: number;
+  left: number;
+  right: number;
+}
+
+/**
+ * The room the tab bar takes along the window's bottom or sides. It goes where
+ * UIKit puts it, not by device: along the bottom on iPhone, but along a side on
+ * a small, wide display. A bar at the top (iPad's, which UIKit hides anyway)
+ * takes none at the bottom.
+ */
+const tabBarRoom = (bar: TabBarFrame | null): Margins => {
+  const room = { bottom: 0, left: 0, right: 0 };
+  if (!bar) {
+    return room;
+  }
+  if (bar.width >= bar.height) {
+    if (bar.y + bar.height / 2 > bar.windowHeight / 2) {
+      room.bottom = bar.windowHeight - bar.y;
+    }
+  } else if (bar.x + bar.width / 2 < bar.windowWidth / 2) {
+    room.left = bar.x + bar.width;
+  } else {
+    room.right = bar.windowWidth - bar.x;
+  }
+  return room;
+};
+
+/**
+ * The toast's distance from each edge: a gap clear of the tab bar along the
+ * edge it takes, the floating (or standard) margin inside the safe area
+ * along the others.
+ */
+const toastInsets = (insets: Margins, bar: TabBarFrame | null): Margins => {
+  const room = tabBarRoom(bar);
+  const margin = (inset: number) =>
+    DeviceInfo.hasLiquidGlass()
+      ? Math.max(inset, floatingInset)
+      : inset + Spacing.m;
+  const edge = (side: keyof Margins) =>
+    room[side] > 0 ? room[side] + tabBarGap : margin(insets[side]);
+  return { bottom: edge('bottom'), left: edge('left'), right: edge('right') };
+};
+
+/**
+ * Where the tab bar is while the toast shows, asked again when the window
+ * changes size. Undefined until UIKit answers, a moment after the toast mounts.
+ */
+const useTabBarFrame = () => {
+  const { width, height } = useWindowDimensions();
+  const [frame, setFrame] = useState<TabBarFrame | null>();
+  useEffect(() => {
+    let current = true;
+    const answer = (value: TabBarFrame | null) => {
+      if (current) {
+        setFrame(value);
       }
-    : {
-        bottom: insets.bottom + (hasTabBarBelow ? 56 + tabBarGap : Spacing.m),
-        left: insets.left + Spacing.m,
-        right: insets.right + Spacing.m,
-      };
+    };
+    tabBarFrame().then(answer, () => answer(null));
+    return () => {
+      current = false;
+    };
+  }, [width, height]);
+  return frame;
+};
 
 /** The height of the keyboard while it is up, so the toast can sit above it. */
 const useKeyboardHeight = () => {
@@ -218,7 +270,8 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
   const insets = useSafeAreaInsets();
   const { width: windowWidth } = useWindowDimensions();
   const keyboardHeight = useKeyboardHeight();
-  const margins = toastInsets(insets);
+  const tabBar = useTabBarFrame();
+  const margins = toastInsets(insets, tabBar ?? null);
   const drag = useSharedValue(0);
 
   // Tap or swipe down to dismiss; pulling up stretches a little and springs
@@ -253,6 +306,11 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
   const mac = DeviceInfo.isMac();
   const metrics = mac ? macMetrics : iosMetrics;
   const hud = mac ? macStyles : iosStyles;
+
+  // Placed once UIKit says where the tab bar is, so it doesn't jump.
+  if (tabBar === undefined) {
+    return null;
+  }
 
   return (
     <View
@@ -310,8 +368,8 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
 };
 
 /**
- * Renders the current toast as a HUD at the bottom of the window, above the
- * tab bar and the keyboard (iOS has no toast API). It draws in a window of its own, so it
+ * Renders the current toast as a HUD at the bottom of the window, clear of the
+ * tab bar wherever it is and above the keyboard (iOS has no toast API). It draws in a window of its own, so it
  * shows over modals and sheets too. Mount once.
  */
 export const Toast: React.FC = () => {

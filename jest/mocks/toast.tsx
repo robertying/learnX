@@ -25,3 +25,6 @@ export const ToastHUD = ({
 export const ToastSymbol = ({ name }: { name: string }) => (
   <View testID={`icon-${name}`} />
 );
+
+// No tab bar showing, unless a test gives one.
+export const tabBarFrame = jest.fn(() => Promise.resolve(null));
