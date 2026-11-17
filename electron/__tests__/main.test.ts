@@ -225,6 +225,23 @@ const preloadChannels = () => {
   return { sent: new Set(sent), listened: new Set(listened) };
 };
 
+/**
+ * Runs `load` with `process.platform` set (which Jest's replaceProperty
+ * can't restore).
+ */
+const onPlatform = async (
+  value: NodeJS.Platform,
+  load: () => Promise<unknown>,
+) => {
+  const platform = Object.getOwnPropertyDescriptor(process, 'platform')!;
+  Object.defineProperty(process, 'platform', { ...platform, value });
+  try {
+    await load();
+  } finally {
+    Object.defineProperty(process, 'platform', platform);
+  }
+};
+
 describe('IPC', () => {
   it('handles every channel the page sends on', async () => {
     await loadMain();
@@ -546,23 +563,6 @@ describe('the window', () => {
     expect(win.show).not.toHaveBeenCalled();
   });
 
-  /**
-   * Runs `load` with `process.platform` set (which Jest's replaceProperty
-   * can't restore).
-   */
-  const onPlatform = async (
-    value: NodeJS.Platform,
-    load: () => Promise<unknown>,
-  ) => {
-    const platform = Object.getOwnPropertyDescriptor(process, 'platform')!;
-    Object.defineProperty(process, 'platform', { ...platform, value });
-    try {
-      await load();
-    } finally {
-      Object.defineProperty(process, 'platform', platform);
-    }
-  };
-
   it('shows the window at once on Linux, where Wayland draws no hidden window', async () => {
     await onPlatform('linux', () => loadMain());
     expect(fake.windows[0].show).toHaveBeenCalled();
@@ -627,6 +627,14 @@ describe('the application menu', () => {
     expect(fake.electron.Menu.setApplicationMenu).not.toHaveBeenCalled();
     expect(fake.app.commandLine.appendSwitch).toHaveBeenCalledWith(
       'use-mock-keychain',
+    );
+  });
+
+  it('keeps a Linux dev run’s login out of the keyring', async () => {
+    await onPlatform('linux', () => loadMain());
+    expect(fake.app.commandLine.appendSwitch).toHaveBeenCalledWith(
+      'password-store',
+      'basic',
     );
   });
 

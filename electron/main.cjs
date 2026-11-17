@@ -84,7 +84,10 @@ if (!dev && process.platform === 'win32' && process.env.LOCALAPPDATA) {
 }
 
 // The dev runner (dev.mjs) keeps everything Electron writes in one folder
-// and out of the system's keychain.
+// and out of the system's keychain: a mock one on macOS, Chromium's own key
+// on Linux (`basic`), which secrets.cjs accepts only here, so a dev run and
+// the E2E tests keep their login whatever the keyring (locked, or none on
+// CI's runners).
 const devDataDir = dev ? process.env.LEARNX_DATA_DIR : undefined;
 if (devDataDir) {
   for (const name of /** @type {const} */ ([
@@ -99,6 +102,9 @@ if (devDataDir) {
     app.setPath(name, dir);
   }
   app.commandLine.appendSwitch('use-mock-keychain');
+  if (process.platform === 'linux') {
+    app.commandLine.appendSwitch('password-store', 'basic');
+  }
 }
 /**
  * False in a second launch, which hands its arguments over and quits. Its
@@ -160,6 +166,7 @@ const handleIpc = ses => {
   const secrets = createSecrets(
     createFileStore(app.getPath('userData'), { log: logStorage }),
     safeStorage,
+    { allowFallbackKey: Boolean(devDataDir) },
   );
 
   // Key-value storage. A database is read once, synchronously, when the

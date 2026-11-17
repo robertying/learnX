@@ -38,14 +38,17 @@ const SAVE_WAIT_MS = 1_000;
  * Elsewhere, the asynchronous APIs, as Electron 45 recommends.
  * @param {SafeStorage} safeStorage
  * @param {string} platform
+ * @param {boolean} allowFallbackKey whether Chromium's fallback key will do
+ *   (a dev run's, kept out of the system's keyring)
  */
-const encryptionOf = (safeStorage, platform) =>
+const encryptionOf = (safeStorage, platform, allowFallbackKey) =>
   platform === 'linux'
     ? {
         ready: () => safeStorage.isAsyncEncryptionAvailable(),
         canEncrypt: async () =>
           safeStorage.isEncryptionAvailable() &&
-          safeStorage.getSelectedStorageBackend() !== 'basic_text',
+          (allowFallbackKey ||
+            safeStorage.getSelectedStorageBackend() !== 'basic_text'),
         encrypt: async (/** @type {string} */ text) =>
           safeStorage.encryptString(text),
         decrypt: async (/** @type {Buffer} */ data) => ({
@@ -68,18 +71,20 @@ const TIMED_OUT = Symbol('timed out');
 /**
  * @param {ReturnType<typeof import('./fileStore.cjs').createFileStore>} store
  * @param {SafeStorage} safeStorage
- * @param {{ platform?: string; unlockWaitMs?: number; saveWaitMs?: number }} [options]
+ * @param {{ platform?: string; allowFallbackKey?: boolean; unlockWaitMs?: number; saveWaitMs?: number }} [options]
+ *   `allowFallbackKey`: a dev run's, whose Linux key store is Chromium's own
  */
 const createSecrets = (
   store,
   safeStorage,
   {
     platform = process.platform,
+    allowFallbackKey = false,
     unlockWaitMs = UNLOCK_WAIT_MS,
     saveWaitMs = SAVE_WAIT_MS,
   } = {},
 ) => {
-  const encryption = encryptionOf(safeStorage, platform);
+  const encryption = encryptionOf(safeStorage, platform, allowFallbackKey);
 
   /** @type {Promise<boolean> | undefined} */
   let ready;
