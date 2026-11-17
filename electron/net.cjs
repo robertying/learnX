@@ -47,6 +47,14 @@ const allowedUrl = url => {
  */
 
 /**
+ * How long a request may go without hearing from the server before it fails,
+ * so a stalled connection doesn't hold a request (and the sync behind it)
+ * forever: until the response starts, and between its pieces. One that
+ * uploads (a submission's attachment) gets longer to send its body first.
+ */
+const TIMEOUT_MS = { idle: 60_000, upload: 5 * 60_000 };
+
+/**
  * Sends a request with `net.request`, following redirects itself to record
  * the final URL: Electron's `net.fetch` leaves `Response.url` empty and can't
  * take `redirect: 'manual'`, and thu-learn-lib reads the final URL (an expired
@@ -56,14 +64,42 @@ const allowedUrl = url => {
  * @param {import('electron').Session} session
  * @param {FetchRequest} req
  * @param {AbortSignal} [signal]
+ * @param {{ idle: number, upload: number }} [timeoutMs]
  * @returns {Promise<FetchResponse>}
  */
-const mainFetch = (net, session, req, signal) =>
+const mainFetch = (net, session, req, signal, timeoutMs = TIMEOUT_MS) =>
   new Promise((resolve, reject) => {
     if (!allowedUrl(req.url)) {
       reject(new Error(`Not an allowed URL: ${req.url}`));
       return;
     }
+    /** @type {ReturnType<typeof setTimeout> | undefined} */
+    let timer;
+    const onAbort = () => fail(new Error('Aborted'));
+    /** Ends the request and its timer and listener, once. */
+    let settled = false;
+    const settle = () => {
+      if (settled) {
+        return false;
+      }
+      settled = true;
+      clearTimeout(timer);
+      signal?.removeEventListener('abort', onAbort);
+      return true;
+    };
+    const fail = (/** @type {Error} */ error) => {
+      if (settle()) {
+        request.abort();
+        reject(error);
+      }
+    };
+    const wait = (/** @type {number} */ ms) => {
+      clearTimeout(timer);
+      timer = setTimeout(
+        () => fail(new Error(`Timed out: no answer from ${new URL(url).host}`)),
+        ms,
+      );
+    };
     let url = req.url;
     let redirected = false;
     const request = net.request({
@@ -73,29 +109,33 @@ const mainFetch = (net, session, req, signal) =>
       credentials: 'include',
       redirect: 'manual',
     });
-    signal?.addEventListener('abort', () => {
-      request.abort();
-      reject(new Error('Aborted'));
-    });
+    signal?.addEventListener('abort', onAbort, { once: true });
     for (const [name, value] of req.headers) {
       request.setHeader(name, value);
     }
     request.on('redirect', (_status, _method, redirectUrl) => {
       if (!allowedUrl(redirectUrl)) {
-        request.abort();
-        reject(new Error(`Redirected off the allowed sites: ${redirectUrl}`));
+        fail(new Error(`Redirected off the allowed sites: ${redirectUrl}`));
         return;
       }
       url = redirectUrl;
       redirected = true;
+      wait(timeoutMs.idle);
       request.followRedirect();
     });
     request.on('response', response => {
       /** @type {Buffer[]} */
       const chunks = [];
-      response.on('data', chunk => chunks.push(chunk));
-      response.on('error', reject);
+      wait(timeoutMs.idle);
+      response.on('data', chunk => {
+        chunks.push(chunk);
+        wait(timeoutMs.idle);
+      });
+      response.on('error', fail);
       response.on('end', () => {
+        if (!settle()) {
+          return;
+        }
         const body = Buffer.concat(chunks);
         /** @type {[string, string][]} */
         const headers = [];
@@ -117,11 +157,12 @@ const mainFetch = (net, session, req, signal) =>
         });
       });
     });
-    request.on('error', reject);
+    request.on('error', fail);
     if (req.body) {
       request.write(Buffer.from(req.body));
     }
+    wait(req.body ? timeoutMs.upload : timeoutMs.idle);
     request.end();
   });
 
-module.exports = { allowedHost, allowedUrl, mainFetch };
+module.exports = { TIMEOUT_MS, allowedHost, allowedUrl, mainFetch };

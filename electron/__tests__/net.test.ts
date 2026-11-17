@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events';
-import { allowedHost, allowedUrl, mainFetch } from '../net.cjs';
+import { TIMEOUT_MS, allowedHost, allowedUrl, mainFetch } from '../net.cjs';
 
 describe('allowedUrl', () => {
   it.each([
@@ -175,4 +175,64 @@ it('aborts with its signal, and rejects on errors', async () => {
   });
   requests[1].emit('error', new Error('net::ERR_CONNECTION_RESET'));
   await expect(failed).rejects.toThrow('ERR_CONNECTION_RESET');
+});
+
+describe('a stalled connection', () => {
+  beforeEach(() => jest.useFakeTimers());
+  afterEach(() => jest.useRealTimers());
+
+  const get = {
+    url: 'https://learn.tsinghua.edu.cn/',
+    method: 'GET',
+    headers: [],
+  };
+
+  it('fails when the server says nothing for a minute', async () => {
+    const { net, requests } = fakeNet();
+    const pending = mainFetch(net, session, get);
+    jest.advanceTimersByTime(TIMEOUT_MS.idle - 1);
+    expect(requests[0].aborted).toBe(false);
+    jest.advanceTimersByTime(1);
+    await expect(pending).rejects.toThrow(
+      'Timed out: no answer from learn.tsinghua.edu.cn',
+    );
+    expect(requests[0].aborted).toBe(true);
+  });
+
+  it('waits a minute between pieces of the answer, however long it all takes', async () => {
+    const { net, requests } = fakeNet();
+    const pending = mainFetch(net, session, get);
+    const response = Object.assign(new EventEmitter(), {
+      statusCode: 200,
+      statusMessage: 'OK',
+      headers: {},
+    });
+    requests[0].emit('response', response);
+    for (let piece = 0; piece < 5; piece += 1) {
+      jest.advanceTimersByTime(TIMEOUT_MS.idle - 1);
+      response.emit('data', Buffer.from('x'));
+    }
+    response.emit('end');
+    await expect(pending).resolves.toMatchObject({ status: 200 });
+    // Done: nothing fires later.
+    jest.advanceTimersByTime(TIMEOUT_MS.upload);
+    expect(requests[0].aborted).toBe(false);
+  });
+
+  it('gives an upload longer to send', async () => {
+    const { net, requests } = fakeNet();
+    const controller = new AbortController();
+    const pending = mainFetch(
+      net,
+      session,
+      { ...get, method: 'POST', body: new Uint8Array(8).buffer },
+      controller.signal,
+    );
+    jest.advanceTimersByTime(TIMEOUT_MS.idle);
+    expect(requests[0].aborted).toBe(false);
+    jest.advanceTimersByTime(TIMEOUT_MS.upload - TIMEOUT_MS.idle);
+    await expect(pending).rejects.toThrow('Timed out');
+    // Aborting afterwards does nothing more.
+    controller.abort();
+  });
 });
