@@ -83,7 +83,7 @@ module.exports = {
     // dev runner, its Mac app, the packaging and clean-up scripts and the
     // E2E tests' Electron download only run on a developer's machine.
     'electron/*.{cjs,mjs}',
-    '!electron/{dev,clean,package,macDevApp,devTraces}.mjs',
+    '!electron/{dev,clean,package,macDevApp,devTraces,webExport}.mjs',
     '!electron/electronApp.cjs',
   ],
   // CI runs `pnpm test --coverage` and fails below these, so coverage can't

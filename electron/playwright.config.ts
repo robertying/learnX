@@ -9,6 +9,10 @@ export default defineConfig({
   outputDir: '../build/electron/e2e/results',
   globalTeardown: './e2e/teardown.ts',
   timeout: 90_000,
+  // On CI the whole run stops after 15 minutes, before its job's own limit
+  // (electron.yml), so a run that crawls still ends with its report and the
+  // traces of what failed, which a cancelled job never uploads.
+  globalTimeout: process.env.CI ? 15 * 60_000 : undefined,
   expect: { timeout: 15_000 },
   // One Electron app at a time: each is a whole app with its own window.
   workers: 1,

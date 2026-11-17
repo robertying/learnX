@@ -713,23 +713,31 @@ describe('an E2E run', () => {
     jest.replaceProperty(process, 'env', { ...process.env, LEARNX_E2E: '1' });
   });
 
-  it.each(['darwin', 'win32'] as const)(
-    'keeps out of the foreground on %s: no Dock icon, no window shown',
-    async platform => {
-      await onPlatform(platform, () => loadMain());
-      const [win] = fake.windows;
-      win.emit('ready-to-show');
-      expect(win.show).not.toHaveBeenCalled();
-      expect(win.showInactive).not.toHaveBeenCalled();
-      expect(win.maximize).not.toHaveBeenCalled();
-      expect(win.options.webPreferences.backgroundThrottling).toBe(false);
-      const mac = platform === 'darwin';
-      expect(fake.app.setActivationPolicy.mock.calls).toEqual(
-        mac ? [['accessory']] : [],
-      );
-      expect(fake.app.dock.hide).toHaveBeenCalledTimes(mac ? 1 : 0);
-    },
-  );
+  it('keeps out of the foreground on a Mac: no Dock icon, no window shown', async () => {
+    await onPlatform('darwin', () => loadMain());
+    const [win] = fake.windows;
+    win.emit('ready-to-show');
+    expect(win.show).not.toHaveBeenCalled();
+    expect(win.showInactive).not.toHaveBeenCalled();
+    expect(win.maximize).not.toHaveBeenCalled();
+    expect(win.options.webPreferences.backgroundThrottling).toBe(false);
+    expect(fake.app.setActivationPolicy.mock.calls).toEqual([['accessory']]);
+    expect(fake.app.dock.hide).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows the window behind the others on Windows once its page has drawn, as a hidden one hardly draws', async () => {
+    await onPlatform('win32', () => loadMain());
+    const [win] = fake.windows;
+    expect(win.showInactive).not.toHaveBeenCalled();
+    win.emit('ready-to-show');
+    expect(win.showInactive).toHaveBeenCalledTimes(1);
+    expect(win.show).not.toHaveBeenCalled();
+    expect(win.focus).not.toHaveBeenCalled();
+    expect(win.maximize).not.toHaveBeenCalled();
+    expect(win.options.webPreferences.backgroundThrottling).toBe(false);
+    expect(fake.app.setActivationPolicy).not.toHaveBeenCalled();
+    expect(fake.app.dock.hide).not.toHaveBeenCalled();
+  });
 
   it('shows the window behind the others on Linux, where Wayland draws no hidden window', async () => {
     await onPlatform('linux', () => loadMain());

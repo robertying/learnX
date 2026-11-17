@@ -1,18 +1,19 @@
-// The window really shows, and its page draws, on Linux: an E2E run shows it
-// there behind the others (system.cjs, `present`), since under Wayland a
-// window that was never shown gets no frames, so its page never draws. CI runs
-// this under a headless Wayland compositor too (electron.yml, "Electron window
-// on Wayland"), where such a window fails both checks; under xvfb's X11 a
-// window draws whether it shows or not.
+// The window really shows, and its page draws, on Windows and Linux: an E2E
+// run shows it there behind the others (system.cjs, `present`), since a
+// window that was never shown hardly draws: under Wayland it gets no frames,
+// so its page never draws, and on Windows about two a second, which made every
+// test crawl. CI runs this under a headless Wayland compositor too
+// (electron.yml, "Electron window on Wayland"), where such a window fails
+// every check; under xvfb's X11 a window draws whether it shows or not.
 import { expect, test } from './fixtures';
 
-test('shows the window on Linux, with its page drawn', async ({
+test('shows the window, with its page drawn at full rate', async ({
   app,
   window,
 }) => {
   test.skip(
-    process.platform !== 'linux',
-    'an E2E run shows the window only on Linux',
+    process.platform === 'darwin',
+    'an E2E run never shows the window on a Mac',
   );
   await window.getByTestId('welcome-continue').waitFor();
   await expect
@@ -46,4 +47,23 @@ test('shows the window on Linux, with its page drawn', async ({
       { timeout: 30_000 },
     )
     .toBeGreaterThan(16);
+  // Frames at a screen's rate, not a hidden window's few a second: the
+  // page's animation frames in one second.
+  const frames = await window.evaluate(
+    () =>
+      new Promise<number>(resolve => {
+        let count = 0;
+        const start = performance.now();
+        const tick = () => {
+          count++;
+          if (performance.now() - start < 1000) {
+            requestAnimationFrame(tick);
+          } else {
+            resolve(count);
+          }
+        };
+        requestAnimationFrame(tick);
+      }),
+  );
+  expect(frames).toBeGreaterThan(20);
 });

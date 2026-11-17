@@ -18,13 +18,13 @@
 // build/electron/learnX.app, a copy of Electron.app named and drawn as learnX
 // (macDevApp.mjs); `pnpm electron:clean` removes what dev runs leave on the
 // Mac (clean.mjs).
-import { spawn, spawnSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { electronExecutable, outDir } from './electronApp.cjs';
+import { exportWeb } from './webExport.mjs';
 
 const electronDir = import.meta.dirname;
-const root = path.join(electronDir, '..');
 const webDir = path.join(outDir, 'web');
 
 const { values, positionals } = parseArgs({
@@ -36,14 +36,7 @@ const { values, positionals } = parseArgs({
 });
 
 if (!values['skip-export']) {
-  const result = spawnSync(
-    'pnpm',
-    ['exec', 'expo', 'export', '--platform', 'web', '--output-dir', webDir],
-    { cwd: root, stdio: 'inherit', env: { ...process.env, CI: '1' } },
-  );
-  if (result.status !== 0) {
-    process.exit(result.status ?? 1);
-  }
+  exportWeb(webDir);
 }
 
 const electron = electronExecutable();
