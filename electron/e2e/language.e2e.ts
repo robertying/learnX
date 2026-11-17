@@ -22,6 +22,13 @@ test.describe('in Chinese', () => {
     ).toBeVisible();
     await openTab(window, 'notices');
     await expect(card(window, 'MOCK_NOTICE')).toContainText(/\p{Script=Han}/u);
+    // Chromium draws the gap between Chinese and Latin text (index.web.js),
+    // dialogs and menus in their portals too.
+    expect(
+      await window.evaluate(() =>
+        getComputedStyle(document.body).getPropertyValue('text-autospace'),
+      ),
+    ).toBe('normal');
     await openCard(window, 'MOCK_NOTICE', 'notice-detail');
     await openTab(window, 'courses');
     await expect(card(window, 'MOCK_COURSE')).toBeVisible();

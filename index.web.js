@@ -11,6 +11,15 @@ import FluentRoot from './src/web/FluentRoot';
 
 const LaunchedApp = withLaunchOptions(App);
 
+// A narrow gap between Chinese and Latin letters or digits ("允许 learnX 访问"),
+// as iOS and macOS draw it and spaceCjk adds on Android: the translations
+// never type one (src/assets/translations/AGENTS.md). Chromium draws it with
+// `text-autospace`, inherited by every portal and the server's text too.
+globalThis.document.documentElement.style.setProperty(
+  'text-autospace',
+  'normal',
+);
+
 AppRegistry.registerComponent(appName, () => props => (
   <FluentRoot>
     <LaunchedApp {...props} />
