@@ -423,20 +423,23 @@ const createWindow = (/** @type {Electron.Session} */ ses) => {
   });
   win.on('close', () => saveWindowState(stateFile, win));
   // Zoom from the keyboard, kept with the window's state, and again after
-  // the page loads anew (a crash's reload).
+  // the page loads anew (a crash's reload). Keys typed in a web view (a
+  // notice body, courseX) zoom the window too: web views follow its zoom.
   let zoom = state.zoom;
-  win.webContents.on('before-input-event', (event, input) => {
-    const level = zoomForKey(
-      input,
-      win.webContents.getZoomLevel(),
-      process.platform,
-    );
-    if (level !== null) {
-      event.preventDefault();
-      zoom = level;
-      win.webContents.setZoomLevel(level);
-    }
-  });
+  const zoomOnKeys = (/** @type {Electron.WebContents} */ contents) =>
+    contents.on('before-input-event', (event, input) => {
+      const level = zoomForKey(
+        input,
+        win.webContents.getZoomLevel(),
+        process.platform,
+      );
+      if (level !== null) {
+        event.preventDefault();
+        zoom = level;
+        win.webContents.setZoomLevel(level);
+      }
+    });
+  zoomOnKeys(win.webContents);
   win.webContents.on('did-finish-load', () => {
     win.webContents.setZoomLevel(zoom);
   });
@@ -498,9 +501,10 @@ const createWindow = (/** @type {Electron.Session} */ ses) => {
       event.preventDefault();
     }
   });
-  win.webContents.on('did-attach-webview', (_event, guest) =>
-    webviews.guard(guest),
-  );
+  win.webContents.on('did-attach-webview', (_event, guest) => {
+    webviews.guard(guest);
+    zoomOnKeys(guest);
+  });
   if (dev) {
     win.webContents.on('console-message', ({ level, message }) => {
       if (level === 'warning' || level === 'error') {
@@ -675,7 +679,6 @@ void app.whenReady().then(() => {
   // another download's preview.
   const ses = session.fromPartition(PARTITION);
   const appSession = session.fromPartition(APP_PARTITION);
-  appSession.setCodeCachePath(path.join(app.getPath('userData'), 'Code Cache'));
   appSession.protocol.handle(
     'app',
     createServeApp({

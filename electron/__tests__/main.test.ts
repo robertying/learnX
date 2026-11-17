@@ -428,10 +428,10 @@ describe('the window', () => {
       expect.any(Function),
     );
     expect(webviewSession.protocol.handle).not.toHaveBeenCalled();
-    // The web build's compiled code is kept for the next launch.
-    expect(appSession.setCodeCachePath).toHaveBeenCalledWith(
-      path.join(dataDir, 'userData', 'Code Cache'),
-    );
+    // The web build's compiled code is kept for the next launch, in the
+    // saved session's own folder (not the default session's).
+    expect(fake.sessions.has('persist:learnx-app')).toBe(true);
+    expect(appSession.setCodeCachePath).not.toHaveBeenCalled();
     expect(
       fake.electron.protocol.registerSchemesAsPrivileged.mock.calls[0][0][0]
         .privileges,
@@ -716,4 +716,67 @@ describe('an E2E run', () => {
     );
     expect(fake.app.dock.hide).not.toHaveBeenCalled();
   });
+});
+
+describe('on each platform', () => {
+  it('keeps a packaged Windows build’s data in the local profile', async () => {
+    jest.replaceProperty(process, 'env', {
+      ...process.env,
+      LEARNX_DATA_DIR: '',
+      LOCALAPPDATA: 'C:\\Users\\me\\AppData\\Local',
+    });
+    await onPlatform('win32', () => loadMain({ packaged: true }));
+    const local = path.join('C:\\Users\\me\\AppData\\Local', 'learnX');
+    expect(fake.app.setPath).toHaveBeenCalledWith('userData', local);
+    expect(fake.app.setPath).toHaveBeenCalledWith('sessionData', local);
+    expect(fake.app.setAppUserModelId).toHaveBeenCalledWith(
+      'io.robertying.learnXElectron',
+    );
+  });
+
+  it('tells the page when a packaged Linux run has no sandbox', async () => {
+    jest.replaceProperty(process, 'env', {
+      ...process.env,
+      LEARNX_DATA_DIR: '',
+    });
+    await onPlatform('linux', () => loadMain({ packaged: true }));
+    const event = eventFrom('window', 'app://learnx/');
+    fake.handlers.get('app:info')!(event);
+    expect(event.returnValue).toMatchObject({ unsandboxed: true });
+  });
+
+  it('keeps a Linux dev run’s login out of the keyring', async () => {
+    await onPlatform('linux', () => loadMain());
+    expect(fake.app.commandLine.appendSwitch).toHaveBeenCalledWith(
+      'password-store',
+      'basic',
+    );
+  });
+
+  it('leaves a macOS dev run’s keyring choice to the mock keychain', async () => {
+    await onPlatform('darwin', () => loadMain());
+    expect(fake.app.commandLine.appendSwitch).not.toHaveBeenCalledWith(
+      'password-store',
+      'basic',
+    );
+  });
+});
+
+it('zooms from keys typed in a web view too', async () => {
+  await loadMain();
+  const [win] = fake.windows;
+  const guest = Object.assign(new EventEmitter(), {
+    setWindowOpenHandler: jest.fn(),
+  });
+  win.webContents.emit('did-attach-webview', {}, guest);
+  const event = { preventDefault: jest.fn() };
+  guest.emit('before-input-event', event, {
+    type: 'keyDown',
+    key: '=',
+    control: process.platform !== 'darwin',
+    meta: process.platform === 'darwin',
+    alt: false,
+  });
+  expect(event.preventDefault).toHaveBeenCalled();
+  expect(win.webContents.setZoomLevel).toHaveBeenLastCalledWith(0.5);
 });
