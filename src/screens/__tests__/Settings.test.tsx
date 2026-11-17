@@ -33,6 +33,7 @@ jest.mock('services/update', () => ({
 }));
 const mockShow = jest.fn();
 jest.mock('hooks/useDetailNavigator', () => ({
+  ...jest.requireActual('hooks/useDetailNavigator'),
   useShowDetail: jest.fn(() => mockShow),
   useDetailRoot: jest.fn(() => undefined),
 }));

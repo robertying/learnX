@@ -90,7 +90,6 @@ import {
   type FormNumberFieldProps,
   type FormParagraphProps,
   type FormProfileProps,
-  type FormProgressProps,
   type FormProps,
   type FormSectionProps,
   type FormTextFieldProps,
@@ -829,17 +828,6 @@ export const FormTextField: React.FC<FormTextFieldProps> = props => {
     />
   );
 };
-
-/** A bar under its title, as for a download in progress. */
-export const FormProgress: React.FC<FormProgressProps> = ({
-  title,
-  value,
-  testID,
-}) => (
-  <ProgressView value={value} testID={testID} modifiers={rowEnd}>
-    <Text>{title}</Text>
-  </ProgressView>
-);
 
 // A switch at the end of the row, as in System Settings. (The Mac's default
 // toggle is a checkbox before the label.)

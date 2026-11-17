@@ -2,7 +2,7 @@ import { useEffect, useEffectEvent } from 'react';
 import { View, type ViewProps } from 'react-native';
 
 // How long the HUD takes to animate away, as the native view does.
-export const hideDuration = 200;
+const hideDuration = 200;
 
 // The toast's UIKit views: plain views. The HUD reports it has gone a moment
 // after it is hidden. They are findable as `toast-hud` and `icon-<name>`.

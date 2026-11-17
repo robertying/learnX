@@ -18,7 +18,11 @@ import { userQuery } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
 import { useAppState } from 'data/appState';
 import { useCredentialsStore } from 'data/credentials';
-import { useDetailRoot, useShowDetail } from 'hooks/useDetailNavigator';
+import {
+  sameDetailRoot,
+  useDetailRoot,
+  useShowDetail,
+} from 'hooks/useDetailNavigator';
 import { calendarSettingsTitle } from 'helpers/calendar/details';
 import { t } from 'helpers/i18n';
 import { findWhatsNew, releases, whatsNewContext } from 'helpers/whatsNew';
@@ -52,7 +56,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
   const detailRoot = useDetailRoot();
   const linkTo = (name: keyof SettingDetailParams) => ({
     onPress: () => show(name),
-    opened: detailRoot?.name === name,
+    opened: sameDetailRoot(detailRoot, { name }),
   });
   const graduate = useSettings(settings => settings.graduate);
 

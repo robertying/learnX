@@ -31,6 +31,7 @@ import {
 import { beijingDate, showsBeijingTime } from 'helpers/serverTime';
 import { isShownBy } from 'helpers/shown';
 import useDetailNavigator, {
+  sameDetailRoot,
   useDetailRoot,
   useShowDetail,
 } from 'hooks/useDetailNavigator';
@@ -134,20 +135,17 @@ const Today: React.FC<Props> = ({ navigation }) => {
     ...dueSoon.map(a => ({ name: 'AssignmentDetail' as const, id: a.id })),
   ].filter(
     // The class now and the next can be of one course.
-    (row, i, rows) =>
-      rows.findIndex(r => r.name === row.name && r.id === row.id) === i,
+    (row, i, rows) => rows.findIndex(r => sameDetailRoot(r, row)) === i,
   );
   const detailRoot = useDetailRoot();
   // The row whose page is open beside Today shows as selected.
   const opened = (name: keyof DetailStackParams, id?: string) =>
-    detailRoot?.name === name && detailRoot.id === id;
+    sameDetailRoot(detailRoot, { name, id });
   const isFocused = useIsFocused();
   const detailNavigator = useDetailNavigator();
   useItemStepping(
     detailRows.length,
-    detailRows.findIndex(
-      row => row.name === detailRoot?.name && row.id === detailRoot?.id,
-    ),
+    detailRows.findIndex(row => sameDetailRoot(row, detailRoot)),
     index => {
       const row = detailRows[index];
       if (row.name === 'Schedule') {
