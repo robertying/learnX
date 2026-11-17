@@ -1,21 +1,19 @@
-import { useEffect } from 'react';
-import { View, type StyleProp, type ViewStyle } from 'react-native';
+import type { StyleProp, ViewStyle } from 'react-native';
+import FilePreview from 'web/FilePreview';
 
 interface PdfProps {
+  source: { uri: string };
   style?: StyleProp<ViewStyle>;
   onError?: (error: object) => void;
 }
 
 /**
  * Stands in for react-native-pdf in the Electron app, which has no web build:
- * it reports that it can't preview, so the file screen offers its usual
- * "preview failed" state. Chromium's own PDF viewer replaces it (phase 4).
+ * the PDF shows in Chromium's own viewer, with its toolbar for pages, zoom,
+ * search and printing.
  */
-const Pdf = ({ style, onError }: PdfProps) => {
-  useEffect(() => {
-    onError?.(new Error('No PDF preview in the Electron app yet'));
-  }, [onError]);
-  return <View style={style} />;
-};
+const Pdf = ({ source, style }: PdfProps) => (
+  <FilePreview uri={source.uri} style={style} testID="pdf-preview" />
+);
 
 export default Pdf;

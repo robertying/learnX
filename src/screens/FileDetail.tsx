@@ -30,7 +30,8 @@ import {
   FormScreen,
   FormText,
 } from 'components/Form';
-import { isAndroid, isApple } from 'helpers/platform';
+import { isAndroid, isApple, isElectron } from 'helpers/platform';
+import { hasLink } from 'services/files/desktop';
 
 type Props = NativeStackScreenProps<FileDetailParamList, 'FileDetail'>;
 
@@ -72,8 +73,18 @@ const FileDetailContent: React.FC<{
   courseFileId?: string;
   navigation: Props['navigation'];
 }> = ({ file, courseFileId, navigation }) => {
-  const { path, progress, error, redownload, share, save, open } =
-    useFileDownload(file);
+  const {
+    path,
+    progress,
+    error,
+    redownload,
+    share,
+    save,
+    open,
+    showInFolder,
+    copyLink,
+  } = useFileDownload(file);
+  const linkCopyable = isElectron() && hasLink(file);
 
   // A course file downloaded here no longer shows as new.
   useEffect(() => {
@@ -183,7 +194,15 @@ const FileDetailContent: React.FC<{
           />
         )
       ) : (
-        <FileInfo file={file} onShare={share} onSave={save} onOpen={open} />
+        <FileInfo
+          file={file}
+          previewable={canRender}
+          onShare={share}
+          onSave={save}
+          onOpen={open}
+          onShowInFolder={showInFolder}
+          onCopyLink={linkCopyable ? copyLink : undefined}
+        />
       )}
     </Root>
   );
@@ -201,10 +220,22 @@ const PreviewRoot: React.FC<ViewProps> = props => (
 /** The file's details, and what to do with it, when it isn't previewed. */
 const FileInfo: React.FC<{
   file: DownloadableFile & Partial<File>;
+  /** Whether the file shows inline, when its info is asked for. */
+  previewable: boolean;
   onShare: () => void;
   onSave: () => void;
   onOpen: () => void;
-}> = ({ file, onShare, onSave, onOpen }) => (
+  onShowInFolder: () => void;
+  onCopyLink?: () => void;
+}> = ({
+  file,
+  previewable,
+  onShare,
+  onSave,
+  onOpen,
+  onShowInFolder,
+  onCopyLink,
+}) => (
   <Form testID="file-info">
     <FormSection>
       <FormParagraph text={file.title} headline />
@@ -232,15 +263,47 @@ const FileInfo: React.FC<{
     <FormSection title={t('fileDescription')}>
       <FormParagraph text={file.description || t('noFileDescription')} />
     </FormSection>
-    <FormSection>
-      <FormButton title={t('share')} icon="share" onPress={onShare} />
-      {DeviceInfo.isMac() ? (
-        <FormButton title={t('download')} icon="download" onPress={onSave} />
-      ) : null}
-      {isAndroid() ? (
-        <FormButton title={t('open')} icon="open" onPress={onOpen} />
-      ) : null}
-    </FormSection>
+    {isElectron() ? (
+      // No share sheet: the file opens, saves and shows as a desktop's do.
+      <FormSection
+        footer={previewable ? undefined : t('fileOpensInDefaultApp')}
+      >
+        <FormButton
+          title={t('openInDefaultApp')}
+          icon="open"
+          onPress={onOpen}
+          testID="file-open"
+        />
+        <FormButton
+          title={t('saveAs')}
+          icon="download"
+          onPress={onSave}
+          testID="file-save-as"
+        />
+        <FormButton
+          title={t('showInFolder')}
+          icon="folder"
+          onPress={onShowInFolder}
+        />
+        {onCopyLink ? (
+          <FormButton
+            title={t('copyLink')}
+            icon="copyLink"
+            onPress={onCopyLink}
+          />
+        ) : null}
+      </FormSection>
+    ) : (
+      <FormSection>
+        <FormButton title={t('share')} icon="share" onPress={onShare} />
+        {DeviceInfo.isMac() ? (
+          <FormButton title={t('download')} icon="download" onPress={onSave} />
+        ) : null}
+        {isAndroid() ? (
+          <FormButton title={t('open')} icon="open" onPress={onOpen} />
+        ) : null}
+      </FormSection>
+    )}
   </Form>
 );
 

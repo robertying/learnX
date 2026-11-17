@@ -16,6 +16,7 @@ import type {
 } from 'react-native-webview/lib/WebViewTypes';
 import { bridge, type WebviewLoadRequest } from 'web/bridge';
 import WebviewTag from 'web/packages/webviewTag';
+import FilePreview from 'web/FilePreview';
 
 /**
  * Stands in for react-native-webview in the Electron app: an Electron
@@ -26,7 +27,8 @@ import WebviewTag from 'web/packages/webviewTag';
  * `originWhitelist`) and keeps it on Tsinghua's sites, courseX and learnX's
  * GitHub pages. The page posts messages with
  * `window.ReactNativeWebView.postMessage`, and the injected scripts run as on
- * the phone.
+ * the phone. A downloaded file (a `file:` URI, File detail's preview) shows
+ * in `FilePreview` instead, outside any web view.
  */
 
 /** The subset of Electron's `<webview>` element the stand-in calls. */
@@ -131,7 +133,7 @@ export const extraHeadersOf = (headers: Record<string, string> = {}) =>
 
 /**
  * Loads a source: HTML as a data URL at its base URL, or an http(s) URI.
- * Anything else (a file, which previews show from phase 4 on) stays blank.
+ * Anything else stays blank (files show in `FilePreview`).
  * A load the app's rules refuse rejects (ERR_ABORTED), which the page's own
  * events report.
  */
@@ -322,7 +324,18 @@ export const connectWebview = (
   };
 };
 
-const WebView: React.FC<WebViewProps & { ref?: Ref<WebViewHandle> }> = ({
+type Props = WebViewProps & { ref?: Ref<WebViewHandle> };
+
+const WebView: React.FC<Props> = props => {
+  const uri = (props.source as WebViewSourceUri | undefined)?.uri;
+  return uri?.startsWith('file:') ? (
+    <FilePreview uri={uri} style={props.style} />
+  ) : (
+    <WebPage {...props} />
+  );
+};
+
+const WebPage: React.FC<Props> = ({
   ref,
   source,
   style,

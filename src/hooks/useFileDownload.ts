@@ -4,14 +4,22 @@ import { useSettings } from 'data/settings';
 import { DownloadableFile } from 'data/types/state';
 import { downloadFile } from 'services/files/downloads';
 import { saveFileOnMac, openFile, shareFile } from 'services/files/share';
+import {
+  copyText,
+  openInDefaultApp,
+  saveFileAs,
+  showInFolder as showFileInFolder,
+} from 'services/files/desktop';
 import { fileNameOf } from 'helpers/filename';
 import { t } from 'helpers/i18n';
-import { isAndroid } from 'helpers/platform';
+import { isAndroid, isElectron } from 'helpers/platform';
 
 /**
  * Downloads a file on mount (from the cache when it is there) and offers
- * re-download, share, save where people pick (Mac) and open. On Android
- * a non-PDF opens by itself after the download when the setting is on.
+ * re-download, share, save where people pick (Mac, Electron) and open
+ * (Android, Electron). The Electron app also shows the file in its folder
+ * and copies its link. On Android a non-PDF opens by itself after the
+ * download when the setting is on.
  *
  * Only the file given on first render is used: FileDetail remounts its
  * content when the download fields change.
@@ -79,7 +87,10 @@ const useFileDownload = (file: DownloadableFile) => {
 
   const save = async () => {
     try {
-      if (await saveFileOnMac(downloadable, path)) {
+      const saved = isElectron()
+        ? await saveFileAs(downloadable, path)
+        : await saveFileOnMac(downloadable, path);
+      if (saved) {
         toast(
           t('saveFileSucceeded', { name: fileNameOf(downloadable) }),
           'success',
@@ -90,13 +101,33 @@ const useFileDownload = (file: DownloadableFile) => {
     }
   };
 
-  /** Opens the file in another app (Android only: Apple platforms share it). */
+  /**
+   * Opens the file in another app (Android) or its default app (Electron);
+   * Apple platforms share it.
+   */
   const open = async () => {
     try {
-      await openFile(path, downloadable.fileType);
+      if (isElectron()) {
+        await openInDefaultApp(path);
+      } else {
+        await openFile(path, downloadable.fileType);
+      }
     } catch {
       toast(t('openFileFailed'), 'error');
     }
+  };
+
+  /** Shows the downloaded file in the file manager (Electron). */
+  const showInFolder = () => {
+    showFileInFolder(path).catch(() => toast(t('openFileFailed'), 'error'));
+  };
+
+  /** Copies the file's link on Web Learning (Electron). */
+  const copyLink = () => {
+    copyText(downloadable.downloadUrl).then(
+      () => toast(t('linkCopied'), 'success'),
+      () => {},
+    );
   };
 
   const downloadOnMount = useEffectEvent(() => {
@@ -124,7 +155,17 @@ const useFileDownload = (file: DownloadableFile) => {
     }
   }, [path]);
 
-  return { path, progress, error, redownload, share, save, open };
+  return {
+    path,
+    progress,
+    error,
+    redownload,
+    share,
+    save,
+    open,
+    showInFolder,
+    copyLink,
+  };
 };
 
 export default useFileDownload;

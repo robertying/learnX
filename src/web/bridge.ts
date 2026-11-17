@@ -81,6 +81,53 @@ export interface BridgeUpdate {
   version: string;
 }
 
+/** A notification for the main process to show (electron/notifications.cjs). */
+export interface BridgeNotificationRequest {
+  identifier: string;
+  content: {
+    title?: string;
+    subtitle?: string;
+    body?: string;
+    data?: Record<string, unknown>;
+    categoryIdentifier?: string;
+    threadIdentifier?: string;
+  };
+  /** Right away (null), at a date (ms), or after some seconds. */
+  trigger: null | {
+    type?: string;
+    date?: number | string;
+    seconds?: number;
+    channelId?: string;
+  };
+}
+
+/** A notification still waiting for its time. */
+export interface BridgeScheduledNotification {
+  identifier: string;
+  content: BridgeNotificationRequest['content'];
+  trigger: { type: 'date'; value: number };
+}
+
+/** A file the user picked, copied into the app's cache. */
+export interface BridgePickedFile {
+  uri: string;
+  name: string;
+  size: number;
+  mimeType: string | null;
+}
+
+/** The labels of the tray's menu and the Jump List, in the app's language. */
+export interface DesktopLabels {
+  open: string;
+  refresh: string;
+  quit: string;
+  today: string;
+  schedule: string;
+}
+
+/** A screen a Jump List task opens. */
+export type DesktopOpenTarget = 'today' | 'schedule';
+
 /**
  * What the Electron app's main process offers the page, as `window.learnx`
  * (electron/preload.cjs).
@@ -150,6 +197,57 @@ export interface Bridge {
     onReady: (listener: (update: BridgeUpdate) => void) => void;
     /** Quits, installs the waiting update and opens the app again. */
     install: () => void;
+  };
+  /** Files outside the app's folders, through dialogs and the system. */
+  shell: {
+    /** Opens a file in its default app; resolves to an error message or ''. */
+    open: (uri: string) => Promise<string>;
+    showInFolder: (uri: string) => Promise<void>;
+    /** Saves a copy where the user picks; the path, or null if cancelled. */
+    saveAs: (uri: string, name: string) => Promise<string | null>;
+    /** Saves text where the user picks; the path, or null if cancelled. */
+    saveText: (name: string, content: string) => Promise<string | null>;
+    /** A folder the user picked, which the page may then write in. */
+    pickDirectory: () => Promise<string | null>;
+    pickFiles: (options?: {
+      images?: boolean;
+      multiple?: boolean;
+    }) => Promise<BridgePickedFile[] | null>;
+    copyText: (text: string) => Promise<void>;
+  };
+  notifications: {
+    supported: () => Promise<boolean>;
+    schedule: (request: BridgeNotificationRequest) => Promise<string>;
+    cancel: (identifier: string) => Promise<void>;
+    list: () => Promise<BridgeScheduledNotification[]>;
+    /** A notification the user clicked. */
+    onResponse: (
+      listener: (request: BridgeNotificationRequest) => void,
+    ) => void;
+    /** Development: a notification the main process only logged. */
+    onDevShown: (
+      listener: (shown: {
+        title: string;
+        subtitle?: string;
+        body: string;
+      }) => void,
+    ) => void;
+  };
+  background: {
+    /** Runs the background sync every `minutes` while the app is open. */
+    start: (minutes: number) => Promise<void>;
+    onRun: (listener: (options: { manual: boolean }) => void) => void;
+  };
+  loginItem: {
+    get: () => Promise<{ supported: boolean; enabled: boolean }>;
+    /** Resolves to whether it was changed. */
+    set: (enabled: boolean) => Promise<boolean>;
+  };
+  desktop: {
+    setLabels: (labels: DesktopLabels) => Promise<void>;
+    /** The screen the launch asked for, once. */
+    takeOpen: () => Promise<DesktopOpenTarget | null>;
+    onOpen: (listener: (target: DesktopOpenTarget) => void) => void;
   };
   /** A test run's launch options in development; empty elsewhere. */
   launchOptions: () => Record<string, unknown>;

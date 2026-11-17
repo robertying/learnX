@@ -2,9 +2,12 @@
 // served from app://learnx/, and the services the renderer asks for over IPC
 // (preload.cjs): requests to Tsinghua's servers, their cookies, key-value
 // storage, the saved login, the app's own files and downloads, native menus
-// and the web views the page shows (webviews.cjs).
+// and the web views the page shows (webviews.cjs), and what's around the
+// window (desktop.cjs): the tray, notifications, the background sync's timer,
+// opening, saving and picking files.
 //
-// It registers nothing with the system: no protocol handler, no login item.
+// It registers nothing with the system: no protocol handler, and a login item
+// only when the user turns Start at login on.
 const fs = require('node:fs');
 const path = require('node:path');
 const { pathToFileURL } = require('node:url');
@@ -22,6 +25,7 @@ const {
   webContents,
 } = require('electron');
 const { aboutPanelOptions, readBuildInfo } = require('./buildInfo.cjs');
+const { claimSingleInstance, setUpDesktop } = require('./desktop.cjs');
 const { createFileStore } = require('./fileStore.cjs');
 const { createFiles } = require('./files.cjs');
 const { popupMenu } = require('./menus.cjs');
@@ -70,6 +74,13 @@ if (devDataDir) {
   app.commandLine.appendSwitch('use-mock-keychain');
 }
 /**
+ * False in a second launch, which hands its arguments over and quits. Its
+ * lock is in the data folder, so after a dev run has moved that.
+ */
+const primaryInstance = claimSingleInstance(app);
+/** @type {ReturnType<typeof setUpDesktop> | undefined} */
+let desktop;
+/**
  * Launch options for a test run (src/services/launchOptions), as JSON: the
  * app's root props, as Android's launch extras are. Development only.
  */
@@ -103,7 +114,9 @@ const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
   "script-src 'self'",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https:",
+  "img-src 'self' data: blob: https: app://files",
+  // The file preview (desktop.cjs): downloads on an origin of their own.
+  'frame-src app://files',
   "font-src 'self' data:",
   "connect-src 'self'",
   "object-src 'none'",
@@ -113,7 +126,12 @@ const CONTENT_SECURITY_POLICY = [
 
 /** Serves the web build, and index.html for any path that isn't a file. */
 const serveWeb = async (/** @type {Request} */ request) => {
-  const { pathname } = new URL(request.url);
+  const { host, pathname } = new URL(request.url);
+  if (host === 'files') {
+    return desktop
+      ? desktop.servePreview(request)
+      : new Response('Not found', { status: 404 });
+  }
   const file = path.join(webDir, decodeURIComponent(pathname));
   const target =
     file.startsWith(webDir + path.sep) &&
@@ -240,6 +258,14 @@ const handleIpc = ses => {
   const files = createFiles({
     cache: path.join(app.getPath('userData'), 'Files', 'Caches'),
     document: path.join(app.getPath('userData'), 'Files', 'Documents'),
+  });
+  desktop = setUpDesktop({
+    electron: require('electron'),
+    fromApp,
+    files,
+    cacheDir: path.join(app.getPath('userData'), 'Files', 'Caches'),
+    iconFile,
+    dev,
   });
   ipcMain.on('files', (event, op, ...args) => {
     fromApp(event);
@@ -383,7 +409,8 @@ const createWindow = (/** @type {Electron.Session} */ ses) => {
   });
   // The window is learnX, whichever screen the app names in the page title.
   win.on('page-title-updated', event => event.preventDefault());
-  win.once('ready-to-show', () => win.show());
+  // Start at login on Windows starts learnX in the tray.
+  win.once('ready-to-show', () => desktop?.startsHidden() || win.show());
 
   // Links open in the browser; the window itself never leaves the app.
   win.webContents.setWindowOpenHandler(({ url }) => {
@@ -502,6 +529,9 @@ void app.whenReady().then(() => {
 });
 
 void app.whenReady().then(() => {
+  if (!primaryInstance) {
+    return;
+  }
   const ses = session.fromPartition(PARTITION);
   ses.protocol.handle('app', serveWeb);
   // No camera, microphone, location or notifications asked of the system yet.
@@ -517,5 +547,6 @@ void app.whenReady().then(() => {
   createWindow(ses);
 });
 
-// Closing the window quits, on macOS too (only used there in development).
+// Closing the window hides it (desktop.cjs); with the window gone, so is
+// learnX.
 app.on('window-all-closed', () => app.quit());

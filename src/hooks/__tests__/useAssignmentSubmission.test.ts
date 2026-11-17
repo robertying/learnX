@@ -172,6 +172,25 @@ describe('useAttachmentPicker', () => {
     expect(result.current.picked?.uri).toBe('file:///doc.pdf');
   });
 
+  it('attaches a dropped file in place of a shared one', async () => {
+    const { result } = await setup();
+    await act(() =>
+      setPendingAssignmentData({
+        data: 'file:///shared.png',
+        mimeType: 'image/png',
+      }),
+    );
+    const dropped = {
+      uri: 'file:///c/picked/1/answers.pdf',
+      name: 'answers.pdf',
+      type: 'application/pdf',
+      size: 3,
+    };
+    await act(async () => result.current.pickDropped(dropped));
+    expect(result.current.picked).toEqual(dropped);
+    expect(result.current.isShared).toBe(false);
+  });
+
   it('removes the picked file and the shared data', async () => {
     const { result } = await setup();
     await act(() =>

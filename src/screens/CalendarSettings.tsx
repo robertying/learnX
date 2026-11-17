@@ -24,11 +24,42 @@ import {
 } from 'hooks/useCalendarSync';
 import useCalendarAccess, { CalendarAccess } from 'hooks/useCalendarAccess';
 import { SettingsStackParams } from 'navigation/types';
-import { isApple } from 'helpers/platform';
+import { isApple, isElectron } from 'helpers/platform';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'CalendarSettings'>;
 
-const CalendarSettings: React.FC<Props> = () => {
+/**
+ * The Electron app's calendar settings: Windows and Linux have no calendar
+ * on the device to sync to, so learnX only exports its classes and
+ * assignments as an .ics file, which a calendar app imports.
+ */
+const DesktopCalendarSettings: React.FC = () => {
+  const { exporting, exportToICS } = useCalendarExport();
+  return (
+    <FormScreen>
+      <Form testID="calendar-settings">
+        <FormSection footer={t('exportCalendarDescription')}>
+          <FormButton
+            testID="calendar-export"
+            icon="export"
+            title={t('exportCalendar')}
+            onPress={exportToICS}
+            loading={exporting}
+          />
+        </FormSection>
+      </Form>
+    </FormScreen>
+  );
+};
+
+const CalendarSettings: React.FC<Props> = props =>
+  isElectron() ? (
+    <DesktopCalendarSettings />
+  ) : (
+    <SyncCalendarSettings {...props} />
+  );
+
+const SyncCalendarSettings: React.FC<Props> = () => {
   const assignmentCalendarSync = useSettings(
     settings => settings.assignmentCalendarSync,
   );

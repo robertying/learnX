@@ -14,6 +14,7 @@ import DeviceInfo from 'constants/DeviceInfo';
 import { isElectron } from 'helpers/platform';
 import useAvailableUpdate from 'hooks/useAvailableUpdate';
 import useUpdateInstaller from 'hooks/useUpdateInstaller';
+import useLoginItem from 'hooks/useLoginItem';
 import { logout } from 'data/login';
 import { userQuery } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
@@ -56,6 +57,8 @@ const Settings: React.FC<Props> = ({ navigation }) => {
     onViewChangelog: () => show('Changelog'),
   });
   const whatsNew = latestWhatsNew();
+  // Electron on Windows (and a Mac dev run): off until the user turns it on.
+  const loginItem = useLoginItem();
 
   const handleLogout = () => {
     Alert.alert(
@@ -163,6 +166,19 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             />
           )}
         </FormSection>
+        {loginItem && (
+          <FormSection footer={t('startAtLoginCaption')}>
+            <FormToggle
+              icon="open"
+              testID="settings-start-at-login"
+              title={t('startAtLogin')}
+              value={loginItem.enabled}
+              onValueChange={value => {
+                void loginItem.set(value);
+              }}
+            />
+          </FormSection>
+        )}
         <FormSection>
           <FormLink
             icon="info"

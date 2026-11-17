@@ -8,6 +8,8 @@ import DeviceInfo from 'constants/DeviceInfo';
 import { fileNameOf, sanitizeFileName } from 'helpers/filename';
 import { t } from 'helpers/i18n';
 import { downloadFile, SHARED_DIR } from 'services/files/downloads';
+import { saveTextAs } from 'services/files/desktop';
+import { isElectron } from 'helpers/platform';
 
 /** Where a file is named for the save panel, under Caches. */
 const SAVE_DIR = 'save';
@@ -65,8 +67,9 @@ export const shareFile = async (file: DownloadableFile) => {
 };
 
 /**
- * Shares text as a file, or on Mac asks where to save it. Resolves to whether
- * it was saved on Mac (false for the share sheet, or when cancelled).
+ * Shares text as a file, or on Mac and in the Electron app asks where to
+ * save it. Resolves to whether it was saved there (false for the share
+ * sheet, or when cancelled).
  */
 export const exportTextFile = async (
   filename: string,
@@ -74,6 +77,9 @@ export const exportTextFile = async (
   type: string,
 ): Promise<boolean> => {
   const name = sanitizeFileName(filename);
+  if (isElectron()) {
+    return await saveTextAs(name, content);
+  }
   if (DeviceInfo.isMac()) {
     return await saveOnMac(name, staged => staged.write(content));
   }

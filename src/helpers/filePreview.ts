@@ -1,7 +1,7 @@
 // Which downloaded files File detail can show inline, and how.
 import mime from 'mime';
 import DeviceInfo from 'constants/DeviceInfo';
-import { isApple } from 'helpers/platform';
+import { isApple, isElectron } from 'helpers/platform';
 
 /** Word and Excel pages are drawn on white, also in dark mode. */
 export const needWhiteBackground = (ext?: string | null) =>
@@ -40,15 +40,36 @@ export const canRenderInIosWebview = (ext?: string | null) => {
 };
 
 /**
+ * Pictures the Electron app shows inline; it serves nothing else to the
+ * preview but PDFs (electron/fileShell.cjs). SVGs are left out: they can
+ * carry scripts.
+ */
+const electronImageTypes = new Set([
+  'png',
+  'jpg',
+  'jpeg',
+  'gif',
+  'webp',
+  'bmp',
+  'avif',
+  'ico',
+]);
+
+export const canRenderInElectron = (ext?: string | null) =>
+  !!ext && (ext === 'pdf' || electronImageTypes.has(ext.toLowerCase()));
+
+/**
  * Whether File detail shows the downloaded file itself rather than its
- * info: PDFs everywhere, and what the iOS or Mac web view can render.
+ * info: PDFs everywhere, what the iOS or Mac web view can render, and
+ * pictures in the Electron app.
  */
 export const canPreviewInline = (fileType?: string | null) =>
   fileType === 'pdf' ||
   (isApple() &&
     (DeviceInfo.isMac()
       ? canRenderInMacWebview(fileType)
-      : canRenderInIosWebview(fileType)));
+      : canRenderInIosWebview(fileType))) ||
+  (isElectron() && canRenderInElectron(fileType));
 
 /**
  * Whether the file preview may show a load: the file itself, a blank page,

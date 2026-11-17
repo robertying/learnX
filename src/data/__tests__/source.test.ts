@@ -120,6 +120,30 @@ describe('submitAssignment', () => {
     await expect(submit()).rejects.toBe(failure);
   });
 
+  it("sends the file's bytes in the Electron app, without progress", async () => {
+    jest.replaceProperty(Platform, 'OS', 'web');
+    jest.doMock('expo-file-system', () => ({
+      File: class {
+        constructor(readonly uri: string) {}
+        bytes = async () => new Uint8Array([1, 2, 3]);
+      },
+    }));
+    const onProgress = jest.fn();
+    await dataSource.submitAssignment('homework-id', {
+      attachment: { uri: 'file:///c/picked/a/Answer.pdf', name: 'Answer.pdf' },
+      onProgress,
+    });
+    const [, options] = mockSubmitHomework.mock.calls[0] as unknown as [
+      string,
+      { attachment: { content: Blob }; onProgress?: unknown },
+    ];
+    expect(options.attachment.content).toBeInstanceOf(Blob);
+    expect(options.attachment.content.type).toBe('application/pdf');
+    expect(options.attachment.content.size).toBe(3);
+    expect(options.onProgress).toBeUndefined();
+    jest.dontMock('expo-file-system');
+  });
+
   it('reports upload progress rounded to two decimals', async () => {
     const onProgress = jest.fn();
     await dataSource.submitAssignment('homework-id', {

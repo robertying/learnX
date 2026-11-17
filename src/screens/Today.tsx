@@ -31,6 +31,7 @@ import {
 import { beijingDate, showsBeijingTime } from 'helpers/serverTime';
 import { isShownBy } from 'helpers/shown';
 import { useShowDetail } from 'hooks/useDetailNavigator';
+import usePendingTarget from 'hooks/usePendingTarget';
 import { useMinute } from 'hooks/useClock';
 import usePullToRefresh from 'hooks/usePullToRefresh';
 import useSettingsBadge from 'hooks/useSettingsBadge';
@@ -44,6 +45,8 @@ type Props = MainStackScreenProps<TodayStackParams, 'Today'>;
 const Today: React.FC<Props> = ({ navigation }) => {
   const show = useShowDetail(navigation);
   const now = useMinute();
+  // The Schedule a Jump List task asked for (Electron).
+  usePendingTarget('schedule', () => show('Schedule'));
 
   // the timetable follows Beijing days, also on a phone in another time zone
   const schedule = useWeekSchedule(beijingDate(now));
