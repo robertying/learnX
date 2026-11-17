@@ -24,9 +24,9 @@ export const NumberFieldFocusContext = createContext<
 export const useNumberFieldFocus = () => useContext(NumberFieldFocusContext);
 
 /**
- * Done in the header while a number field in a Form is focused, as a text
- * button (Material's top app bar action on Android): the number pad has no
- * return key on iOS, and the keyboard's own ✓ is easy to miss on Android.
+ * Done (a checkmark) in the header while a number field in a Form is
+ * focused: the number pad has no return key on iOS, and the keyboard's own ✓
+ * is easy to miss on Android.
  * Returns what the Form provides to its fields through
  * `NumberFieldFocusContext`.
  */
@@ -67,9 +67,7 @@ const useNumberFieldDone = () => {
               {
                 id: 'keyboard-done',
                 label: t('done'),
-                icon: 'checkAll',
-                sfSymbol: 'checkmark',
-                text: true,
+                icon: 'confirm',
                 onPress: () => release.current?.(),
                 testID: 'keyboard-done',
               },

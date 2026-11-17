@@ -11,6 +11,7 @@ export const iconDrawables = {
   archive: require('./archive.xml'),
   arrow_back: require('./arrow_back.xml'),
   arrow_forward: require('./arrow_forward.xml'),
+  check: require('./check.xml'),
   checklist: require('./checklist.xml'),
   close: require('./close.xml'),
   done_all: require('./done_all.xml'),
