@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 import SystemIcon from 'components/SystemIcon';
 import { requestRelogin, useAuthStore } from 'data/auth';
-import { relativeTime, t } from 'helpers/i18n';
+import { t, timeAgo } from 'helpers/i18n';
 import { Caption, Text } from 'components/Text';
 import { FormSection, FormText, type FormSectionProps } from 'components/Form';
 import TextButton from 'components/TextButton';
@@ -40,7 +40,7 @@ export const useSyncStatus = (updatedAt?: number) => {
         ? t('syncStatusOffline')
         : t('syncStatusLoginFailed'),
     updated: updatedAt
-      ? t('syncStatusUpdated', { time: relativeTime(now, updatedAt) })
+      ? t('syncStatusUpdated', { time: timeAgo(now, updatedAt) })
       : null,
     canLogIn: failure === 'rejected' && !loggingIn,
   };

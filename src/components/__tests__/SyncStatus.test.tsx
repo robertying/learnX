@@ -30,6 +30,17 @@ it('says it is offline and how old the data is', async () => {
   expect(screen.queryByTestId('sync-status-relogin')).toBeNull();
 });
 
+// The clock the row reads only moves at each minute, so data fetched since
+// then is a few seconds ahead of it.
+it('says data fetched this minute was updated just now', async () => {
+  jest.setSystemTime(now + 30 * 1000);
+  useAuthStore.setState({ failure: 'offline' });
+  await render(<SyncStatus updatedAt={now + 30 * 1000} />);
+  expect(
+    screen.getByText(t('syncStatusUpdated', { time: 'a few seconds ago' })),
+  ).toBeTruthy();
+});
+
 it('leaves the age out when the list was never fetched', async () => {
   useAuthStore.setState({ failure: 'offline' });
   await render(<SyncStatus updatedAt={0} />);

@@ -21,7 +21,7 @@ import {
   deadlineUrgency,
   isDueSoon,
 } from 'helpers/assignments';
-import { formatDate, relativeTime, t, tCount } from 'helpers/i18n';
+import { formatDate, relativeTime, t, tCount, timeAgo } from 'helpers/i18n';
 import {
   ClassSession,
   classDetails,
@@ -211,7 +211,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
       ? t('todayFromCourses')
       : schedule.source === 'calendar' && schedule.failed
         ? t('todayCalendarFailed', {
-            time: relativeTime(now, schedule.updatedAt),
+            time: timeAgo(now, schedule.updatedAt),
           })
         : undefined;
   // Class times are Beijing's; a phone elsewhere says so beside them.
