@@ -1,12 +1,12 @@
 name: Caches
 
-# After each CI or Apple run on main, which are the only runs that save
-# caches, drops the caches newer ones replaced (scripts/prune-caches.sh), so
-# the repo stays under its 10 GB limit. A job of its own, so the jobs that
+# After each CI, Apple or Electron run on main, which are the only runs that
+# save caches, drops the caches newer ones replaced (scripts/prune-caches.sh),
+# so the repo stays under its 10 GB limit. A job of its own, so the jobs that
 # build and run the project's code don't need write access to Actions.
 on:
   workflow_run:
-    workflows: [CI, Apple]
+    workflows: [CI, Apple, Electron]
     types: [completed]
     branches: [main]
 

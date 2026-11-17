@@ -1,3 +1,8 @@
+import { Platform } from 'react-native';
+import {
+  installBridge,
+  uninstallBridge,
+} from 'test-utils/mocks/electronBridge';
 import * as IntentLauncher from 'expo-intent-launcher';
 import Share from 'react-native-share';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -153,4 +158,27 @@ it('fails to save on Mac without the native share module', async () => {
   await expect(
     share.exportTextFile('a.ics', 'BEGIN', 'text/calendar'),
   ).rejects.toThrow('LearnXShare');
+});
+
+describe('in the Electron app', () => {
+  afterEach(() => {
+    uninstallBridge();
+  });
+
+  it('saves text where the user picks instead of sharing it', async () => {
+    jest.replaceProperty(Platform, 'OS', 'web');
+    const bridge = installBridge();
+    jest
+      .mocked(bridge.shell.saveText)
+      .mockResolvedValueOnce('/Users/me/learnX.ics')
+      .mockResolvedValueOnce(null);
+    await expect(
+      exportTextFile('a/b.ics', 'BEGIN', 'text/calendar'),
+    ).resolves.toBe(true);
+    expect(bridge.shell.saveText).toHaveBeenCalledWith('a_b.ics', 'BEGIN');
+    await expect(
+      exportTextFile('learnX.ics', 'BEGIN', 'text/calendar'),
+    ).resolves.toBe(false);
+    expect(Share.open).not.toHaveBeenCalled();
+  });
 });

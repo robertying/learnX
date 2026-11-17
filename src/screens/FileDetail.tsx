@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { scrollInsetBehavior } from 'constants/scrollInsetBehavior';
-import { Linking, Platform, StyleSheet, View, ViewProps } from 'react-native';
+import { Linking, StyleSheet, View, ViewProps } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useIsFocused } from '@react-navigation/native';
 import WebView from 'react-native-webview';
@@ -18,7 +18,7 @@ import {
   showQuickLookPanel,
 } from 'modules/quicklook';
 import { formatDate, t } from 'helpers/i18n';
-import { displayFileSize } from 'helpers/filename';
+import { displayFileSize, hasLink } from 'helpers/filename';
 import Spinner from 'components/Spinner';
 import SafeArea from 'components/SafeArea';
 import { FileDetailParamList } from 'navigation/types';
@@ -38,6 +38,7 @@ import {
   FormScreen,
   FormText,
 } from 'components/Form';
+import { isAndroid, isApple, isElectron } from 'helpers/platform';
 
 type Props = NativeStackScreenProps<FileDetailParamList, 'FileDetail'>;
 
@@ -79,8 +80,18 @@ const FileDetailContent: React.FC<{
   courseFileId?: string;
   navigation: Props['navigation'];
 }> = ({ file, courseFileId, navigation }) => {
-  const { path, progress, error, redownload, share, save, open } =
-    useFileDownload(file);
+  const {
+    path,
+    progress,
+    error,
+    redownload,
+    share,
+    save,
+    open,
+    showInFolder,
+    copyLink,
+  } = useFileDownload(file);
+  const linkCopyable = isElectron() && hasLink(file);
 
   // A course file downloaded here no longer shows as new.
   useEffect(() => {
@@ -211,7 +222,7 @@ const FileDetailContent: React.FC<{
               }
               return false;
             }}
-            decelerationRate={Platform.OS === 'ios' ? 'normal' : undefined}
+            decelerationRate={isApple() ? 'normal' : undefined}
             contentInsetAdjustmentBehavior={scrollInsetBehavior}
             // React Native's own inset from the safe area, which is the same
             // toolbar on Mac (`scrollInsetBehavior`)
@@ -223,10 +234,13 @@ const FileDetailContent: React.FC<{
       ) : (
         <FileInfo
           file={file}
+          previewable={canRender}
           onQuickLook={handleQuickLook}
           onShare={share}
           onSave={save}
           onOpen={open}
+          onShowInFolder={showInFolder}
+          onCopyLink={linkCopyable ? copyLink : undefined}
         />
       )}
     </Root>
@@ -245,11 +259,24 @@ const PreviewRoot: React.FC<ViewProps> = props => (
 /** The file's details, and what to do with it, when it isn't previewed. */
 const FileInfo: React.FC<{
   file: DownloadableFile & Partial<File>;
+  /** Whether the file shows inline, when its info is asked for. */
+  previewable: boolean;
   onQuickLook: () => void;
   onShare: () => void;
   onSave: () => void;
   onOpen: () => void;
-}> = ({ file, onQuickLook, onShare, onSave, onOpen }) => (
+  onShowInFolder: () => void;
+  onCopyLink?: () => void;
+}> = ({
+  file,
+  previewable,
+  onQuickLook,
+  onShare,
+  onSave,
+  onOpen,
+  onShowInFolder,
+  onCopyLink,
+}) => (
   <Form testID="file-info">
     <FormSection>
       <FormParagraph text={file.title} headline />
@@ -277,22 +304,54 @@ const FileInfo: React.FC<{
     <FormSection title={t('fileDescription')}>
       <FormParagraph text={file.description || t('noFileDescription')} />
     </FormSection>
-    <FormSection>
-      {isQuickLookAvailable ? (
+    {isElectron() ? (
+      // No share sheet: the file opens, saves and shows as a desktop's do.
+      <FormSection
+        footer={previewable ? undefined : t('fileOpensInDefaultApp')}
+      >
         <FormButton
-          title={t('quickLook')}
-          icon="quickLook"
-          onPress={onQuickLook}
+          title={t('openInDefaultApp')}
+          icon="open"
+          onPress={onOpen}
+          testID="file-open"
         />
-      ) : null}
-      <FormButton title={t('share')} icon="share" onPress={onShare} />
-      {DeviceInfo.isMac() ? (
-        <FormButton title={t('download')} icon="download" onPress={onSave} />
-      ) : null}
-      {Platform.OS === 'android' ? (
-        <FormButton title={t('open')} icon="open" onPress={onOpen} />
-      ) : null}
-    </FormSection>
+        <FormButton
+          title={t('saveAs')}
+          icon="download"
+          onPress={onSave}
+          testID="file-save-as"
+        />
+        <FormButton
+          title={t('showInFolder')}
+          icon="folder"
+          onPress={onShowInFolder}
+        />
+        {onCopyLink ? (
+          <FormButton
+            title={t('copyLink')}
+            icon="copyLink"
+            onPress={onCopyLink}
+          />
+        ) : null}
+      </FormSection>
+    ) : (
+      <FormSection>
+        {isQuickLookAvailable ? (
+          <FormButton
+            title={t('quickLook')}
+            icon="quickLook"
+            onPress={onQuickLook}
+          />
+        ) : null}
+        <FormButton title={t('share')} icon="share" onPress={onShare} />
+        {DeviceInfo.isMac() ? (
+          <FormButton title={t('download')} icon="download" onPress={onSave} />
+        ) : null}
+        {isAndroid() ? (
+          <FormButton title={t('open')} icon="open" onPress={onOpen} />
+        ) : null}
+      </FormSection>
+    )}
   </Form>
 );
 

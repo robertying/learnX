@@ -171,6 +171,35 @@ export default {
   downloadAgain: 'Download Again',
   share: 'Share',
   open: 'Open',
+  openInDefaultApp: 'Open in Default App',
+  openRunnableTitle: 'Open “{name}”?',
+  openRunnableMessage:
+    'This file can run programs on your computer. Open it only if you trust it.',
+  showInFolder: 'Show in Folder',
+  saveAs: 'Save As',
+  copyLink: 'Copy Link',
+  linkCopied: 'Link copied',
+  fileOpensInDefaultApp:
+    "learnX can't show this type of file. Open it in its default app, or save a copy.",
+  startAtLogin: 'Start at Login',
+  unsandboxedNote:
+    "learnX is running without Chromium's sandbox, as the AppImage does on Ubuntu 24.04 and later. Install the .deb instead to keep web pages in the sandbox.",
+  startAtLoginCaption:
+    'learnX starts in the system tray when you sign in, so it keeps syncing and sends reminders. Closing its window keeps it there; Quit in the tray menu ends it.',
+  trayOpen: 'Open learnX',
+  trayCheckForNewItems: 'Check for New Items',
+  trayQuit: 'Quit learnX',
+  electronNotificationsCaption:
+    "learnX sends notifications and reminders only while it's running.",
+  exportCalendar: 'Export Calendar (.ics)',
+  exportCalendarDescription:
+    'Saves your classes for the rest of the semester and your open assignments as an .ics file, which calendar apps such as Outlook can import.',
+  dropToAttach: 'Drop a File to Attach',
+  dropFailed: "Couldn't attach the file",
+  calendarExportNoEventElectron:
+    'Nothing to export: no classes or open assignments are left this semester.',
+  notifyDeadlineRemindersCaptionElectron:
+    "Reminds you of unsubmitted assignments before they're due, and when they can still be submitted late.",
   missingUsername: 'Enter your username or student ID',
   missingPassword: 'Enter your password',
   usernameOrId: 'Username or Student ID',
@@ -199,6 +228,11 @@ export default {
   updateAllowInstall:
     'Android will first ask you to allow learnX to install apps. Allow it, then come back to learnX to continue.',
   updateDownloading: 'Downloading {percent}%',
+  updateRestartMessage:
+    'learnX will restart to install the update. Otherwise, it installs the next time you quit learnX.',
+  restart: 'Restart',
+  updateDebMessage:
+    'Download the new .deb, then open it to install it, or install it with sudo apt install in a terminal.',
   updateInstalling: 'Installing',
   updateFailed: "Couldn't Update learnX",
   updateDownloadFailed:
@@ -301,7 +335,16 @@ export default {
   filter: 'Filter',
   more: 'More',
   refresh: 'Refresh',
+  // A switch's state beside it (Windows)
+  on: 'On',
+  off: 'Off',
+  // An alert's button when it gives none (Windows)
+  ok: 'OK',
+  // The navigation pane's menu button (Windows)
+  collapseSidebar: 'Collapse Navigation',
+  expandSidebar: 'Expand Navigation',
   dragToReorder: 'Hold and drag to reorder',
+  moveToReorder: 'Move courses up or down to reorder',
   documents: 'Choose File',
   photos: 'Photo Library',
   assignmentIndividualCompletion: 'Complete Individually',
@@ -317,6 +360,8 @@ export default {
   offlineMode: 'Continue Offline',
   download: 'Download',
   saveFileSucceeded: 'Saved {name}',
+  calendarExportWithoutClasses:
+    "Saved {name} without your classes: the timetable couldn't be loaded.",
   saveFileFailed: "Couldn't save the file",
   sso: 'Electronic ID Service System of Tsinghua University',
   ssoNote:
@@ -462,6 +507,7 @@ export default {
   downloadsExportCaption:
     'Copies the files to a "learnX" folder in a place you choose, sorted by semester and course. Exporting again updates that folder.',
   downloadsExportCourse: 'Export',
+  downloadsExportFolderElectron: 'Choose Export Folder',
   downloadsExported: 'Exported {files}',
   downloadsExportedPartly: "Exported {files}; {failed} couldn't be copied",
   downloadsExportFailed: "Couldn't export: {error}",
@@ -549,4 +595,7 @@ export default {
   whatsNew19DesignTitle: 'New Design',
   whatsNew19DesignBody:
     'A cleaner look that follows Android, in Tsinghua purple.',
+  whatsNew19ElectronTitle: 'Windows & Linux',
+  whatsNew19ElectronBody:
+    'Try the experimental desktop app for Windows and Linux, from the TUNA mirror or GitHub Releases.',
 };

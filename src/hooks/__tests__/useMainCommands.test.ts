@@ -11,7 +11,7 @@ jest.mock('@react-navigation/native', () => ({
 }));
 let mockSidebarSplit = false;
 jest.mock('navigation/layout', () => ({
-  get sidebarSplit() {
+  get settingsTab() {
     return mockSidebarSplit;
   },
 }));

@@ -555,6 +555,158 @@ def upload_android(notes, track)
 end
 
 # ---------------------------------------------------------------------------
+# Electron (Windows and Linux)
+#
+# Untested: written to the release skill's procedure, not yet run.
+#
+# Where the installers are built is open: this Mac builds what it can
+# (electron-builder's NSIS and AppImage tools need an Intel Mac or Rosetta),
+# and installers built elsewhere (`pnpm electron:package --win` on a Windows
+# PC, `--linux` on Linux) are copied in with `from:`. Either way the lane
+# checks them against this commit's version before signing and uploading.
+
+ELECTRON_PLATFORMS = {
+  "win" => %w[latest.yml],
+  "linux" => %w[latest-linux.yml latest-linux-arm64.yml],
+}.freeze
+
+def electron_out_dir
+  File.join(out_dir, "electron")
+end
+
+def electron_platforms(options)
+  platforms = (options[:platforms] || ELECTRON_PLATFORMS.keys.join(",")).to_s.split(",").map(&:strip)
+  unknown = platforms - ELECTRON_PLATFORMS.keys
+  UI.user_error!("Unknown platforms: #{unknown.join(', ')} (win, linux)") unless unknown.empty?
+  platforms
+end
+
+def electron_update_file_paths(platforms)
+  platforms.flat_map { |platform| ELECTRON_PLATFORMS[platform] }.map { |name| File.join(electron_out_dir, name) }
+end
+
+# The files an update file names: its installers (`path:` and each `url:`),
+# with their SHA-512s, and their blockmaps where they exist.
+def electron_update_entries(yml)
+  text = File.read(yml)
+  urls = text.scan(/^\s*(?:-\s*)?(?:url|path):\s*['"]?([^'"\s]+)['"]?\s*$/).flatten.uniq
+  hashes = text.scan(/^\s*(?:-\s*)?url:\s*['"]?([^'"\s]+)['"]?\s*\n\s*sha512:\s*['"]?([^'"\s]+)/).to_h
+  { version: text[/^version:\s*['"]?([^'"\s]+)/, 1], files: urls, sha512: hashes }
+end
+
+# Every update file is for this version, and every installer it names is
+# here with that SHA-512: a build from another commit, or a half-copied
+# folder, is refused before anything is signed.
+def verify_electron_files!(platforms)
+  version = app_version
+  problems = []
+  electron_update_file_paths(platforms).each do |yml|
+    name = File.basename(yml)
+    unless File.exist?(yml)
+      problems << "#{name} is missing"
+      next
+    end
+    entry = electron_update_entries(yml)
+    problems << "#{name} is for version #{entry[:version].inspect}, not #{version}" unless entry[:version] == version
+    entry[:files].each do |file|
+      path = File.join(electron_out_dir, file)
+      unless File.exist?(path)
+        problems << "#{name} names #{file}, which is missing"
+        next
+      end
+      expected = entry[:sha512][file]
+      problems << "#{file}'s SHA-512 doesn't match #{name}" if expected && Digest::SHA512.file(path).base64digest != expected
+    end
+  end
+  # The .debs aren't in any update file: their names carry the version.
+  Dir[File.join(electron_out_dir, "*.{exe,AppImage,deb}")].each do |path|
+    problems << "#{File.basename(path)} isn't version #{version}" unless File.basename(path).include?("-#{version}")
+  end
+  problems << "no .deb for Linux" if platforms.include?("linux") && Dir[File.join(electron_out_dir, "*.deb")].empty?
+  UI.user_error!("Electron release files in #{electron_out_dir}: #{problems.join('; ')}") unless problems.empty?
+end
+
+# The release files of a folder: update files, installers and blockmaps.
+def electron_release_files(dir)
+  Dir[File.join(dir, "{latest*.yml,*.exe,*.AppImage,*.deb,*.blockmap}")].sort
+end
+
+# Whether this Mac can run electron-builder's Intel-only NSIS and AppImage
+# tools: an Intel Mac, or Apple silicon with Rosetta.
+def electron_can_package?
+  return true unless RUBY_PLATFORM.include?("darwin")
+
+  system("arch", "-x86_64", "/usr/bin/true", out: File::NULL, err: File::NULL)
+end
+
+# Fills build/release/v<version>/electron/: copied from `from:` (folders of
+# installers built on a Windows PC or Linux, comma-separated), or packaged
+# here with the release .env's mock login, as the mobile release bundles are.
+def build_electron(options)
+  verify_versions!
+  platforms = electron_platforms(options)
+  FileUtils.rm_rf(electron_out_dir)
+  FileUtils.mkdir_p(electron_out_dir)
+
+  if options[:from]
+    options[:from].to_s.split(",").map { |dir| File.expand_path(dir.strip) }.each do |dir|
+      files = electron_release_files(dir)
+      UI.user_error!("No installers or latest*.yml in #{dir}") if files.empty?
+      FileUtils.cp(files, electron_out_dir)
+    end
+  else
+    UI.user_error!("This Mac can't build Windows or Linux installers (electron-builder's tools need Rosetta). Build them on the Windows PC (pnpm electron:package --win) and Linux (--linux), and pass their folders with from:.") unless electron_can_package?
+    verify_release_env!
+    flags = platforms.map { |platform| "--#{platform}" }
+    sh("pnpm", "electron:package", *flags)
+    check_bundle_env!(Dir[File.join(ROOT, "build/electron/web/_expo/static/js/web/*.js")])
+    FileUtils.cp(electron_release_files(File.join(ROOT, "build/electron/dist")), electron_out_dir)
+  end
+
+  verify_electron_files!(platforms)
+  UI.success("Electron release files for #{platforms.join(', ')} in #{electron_out_dir}")
+  platforms
+end
+
+# Signs the update files (scripts/sign-electron-update.mjs, which refuses one
+# for another version), with the key from `key:` or LEARNX_UPDATE_SIGNING_KEY
+# (a file), or else read from 1Password with `op read` at
+# LEARNX_UPDATE_SIGNING_KEY_REF (an op:// reference, in fastlane/.env), so
+# the key never touches the disk.
+def sign_electron(options)
+  script = File.join(ROOT, "scripts/sign-electron-update.mjs")
+  key = options[:key] || ENV["LEARNX_UPDATE_SIGNING_KEY"]
+  if key && !key.to_s.empty?
+    sh("node", script, electron_out_dir, "--key", File.expand_path(key.to_s))
+    return
+  end
+  ref = ENV["LEARNX_UPDATE_SIGNING_KEY_REF"].to_s
+  UI.user_error!("No update signing key: pass key:, or set LEARNX_UPDATE_SIGNING_KEY (a file) or LEARNX_UPDATE_SIGNING_KEY_REF (the key's op:// reference) in fastlane/.env") if ref.empty?
+  sh("bash", "-c", 'node "$0" "$1" --key <(op read "$2")', script, electron_out_dir, ref)
+end
+
+# What goes on the GitHub release: every file, each update file with its
+# signature. An unsigned update file would be refused by every install.
+def electron_assets(platforms)
+  verify_electron_files!(platforms)
+  unsigned = electron_update_file_paths(platforms).reject { |yml| File.exist?("#{yml}.sig") }
+  UI.user_error!("Unsigned: #{unsigned.map { |f| File.basename(f) }.join(', ')}. Run `bundle exec fastlane electron sign`.") unless unsigned.empty?
+
+  electron_release_files(electron_out_dir) + Dir[File.join(electron_out_dir, "latest*.yml.sig")].sort
+end
+
+# Adds the files to the draft v<version> release `fastlane release` (or
+# `github_release`) made, replacing ones of the same name.
+def upload_electron(platforms)
+  tag = "v#{app_version}"
+  assets = electron_assets(platforms)
+  draft = sh("gh", "release", "view", tag, "--repo", GITHUB_REPO, "--json", "isDraft", "--jq", ".isDraft", log: false).strip
+  UI.user_error!("#{tag} is published: add Windows and Linux files before publishing, since the TUNA mirror copies a release on its schedule") unless draft == "true"
+
+  sh("gh", "release", "upload", tag, *assets, "--repo", GITHUB_REPO, "--clobber")
+end
+
+# ---------------------------------------------------------------------------
 # GitHub Releases
 
 def github_token
@@ -563,12 +715,13 @@ def github_token
   token
 end
 
-def publish_github(notes)
+def publish_github(notes, electron_platforms: nil)
   version = app_version
   missing = [*apk_paths, latest_json_path].reject { |f| File.exist?(f) }
   UI.user_error!("Missing #{missing.map { |f| File.basename(f) }.join(', ')} in #{android_out_dir}. Run `bundle exec fastlane android build` first.") unless missing.empty?
 
   assets = [latest_json_path, *apk_paths]
+  assets += electron_assets(electron_platforms) if electron_platforms
   maps = Dir[File.join(out_dir, "sourcemaps", "*.map")].sort
   unless maps.empty?
     zip = File.join(out_dir, "learnX-sourcemaps-v#{version}.zip")
@@ -628,17 +781,22 @@ end
 
 desc "Build and upload everything: iOS, Mac, Android (Play draft) and a draft GitHub release."
 desc "Builds all platforms before uploading anything. Nothing is submitted for review or rolled out."
-desc "Usage: bundle exec fastlane release [notes:/path/to/notes.md] [track:production]"
+desc "electron:true also builds and signs the Windows and Linux app (see `electron build`; from:, platforms: and key: as there) and puts it on the GitHub release. Untested."
+desc "Usage: bundle exec fastlane release [notes:/path/to/notes.md] [track:production] [electron:true [from:<dirs>]]"
 lane :release do |options|
   ensure_git_status_clean
   notes = notes_for_release(options)
   ipa = build_apple("ios")
   pkg = build_apple("macos")
   build_android
+  if options[:electron]
+    platforms = build_electron(options)
+    sign_electron(options)
+  end
   upload_apple("ios", ipa, notes && notes[:ios])
   upload_apple("macos", pkg, notes && notes[:mac])
   upload_android(notes && notes[:play], options[:track] || "production")
-  publish_github(notes)
+  publish_github(notes, electron_platforms: platforms)
 end
 
 desc "Decode the JS frames of a Crashlytics report with the source map of the bundle that crashed (scripts/symbolicate.mjs)."
@@ -723,5 +881,30 @@ platform :android do
     notes = notes_for_release(options)
     build_android
     upload_android(notes && notes[:play], options[:track] || "production")
+  end
+end
+
+# Untested: written to the release skill's procedure, not yet run.
+platform :electron do
+  desc "Put the Windows and Linux installers, latest*.yml and blockmaps into build/release/v<version>/electron/, checked for this version."
+  desc "Packages them here where this Mac can (Rosetta), or copies them from folders built on a Windows PC or Linux."
+  desc "Usage: bundle exec fastlane electron build [from:/path/win,/path/linux] [platforms:win,linux]"
+  lane :build do |options|
+    build_electron(options)
+  end
+
+  desc "Sign the update files there (scripts/sign-electron-update.mjs), with the key from 1Password."
+  desc "Usage: bundle exec fastlane electron sign [key:/path/to/key.pem]   (or LEARNX_UPDATE_SIGNING_KEY_REF in fastlane/.env)"
+  lane :sign do |options|
+    sign_electron(options)
+  end
+
+  desc "Build, sign and add the files to the draft v<version> GitHub release (made by `release` or `github_release`)."
+  desc "Usage: bundle exec fastlane electron release [from:<dirs>] [platforms:win,linux] [key:/path/to/key.pem]"
+  lane :release do |options|
+    ensure_git_status_clean
+    platforms = build_electron(options)
+    sign_electron(options)
+    upload_electron(platforms)
   end
 end

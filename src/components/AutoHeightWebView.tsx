@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Linking, Platform } from 'react-native';
+import { Linking } from 'react-native';
 import WebView, { WebViewProps } from 'react-native-webview';
 import {
   WebViewMessageEvent,
@@ -11,6 +11,7 @@ import CookieManager from '@preeternal/react-native-cookie-manager';
 import { recordError } from 'services/crashReporting';
 import Urls from 'constants/Urls';
 import { getTappedLink } from 'helpers/webContent';
+import { isAndroid, isApple } from 'helpers/platform';
 
 /** Whether a load is the web view's own page: HTML at Web Learning's root. */
 const isOwnPage = (url: string) =>
@@ -131,7 +132,7 @@ const AutoHeightWebView: React.FC<AutoHeightWebViewProps> = ({
     if (request.isTopFrame === false) {
       return true;
     }
-    if (Platform.OS === 'ios' && request.navigationType === 'click') {
+    if (isApple() && request.navigationType === 'click') {
       openLink(request.url);
       return false;
     }
@@ -185,7 +186,7 @@ const AutoHeightWebView: React.FC<AutoHeightWebViewProps> = ({
       bounces={false}
       directionalLockEnabled
       onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
-      decelerationRate={Platform.OS === 'ios' ? 'normal' : undefined}
+      decelerationRate={isApple() ? 'normal' : undefined}
       originWhitelist={['*']}
       sharedCookiesEnabled
       {...props}
@@ -211,7 +212,7 @@ const AutoHeightWebView: React.FC<AutoHeightWebViewProps> = ({
           // Android: a web view in a scrolling parent crashes the app as it
           // scrolls unless it is drawn in its own layer, which an opacity
           // under 1 gives it.
-          opacity: Platform.OS === 'android' ? 0.99 : 1,
+          opacity: isAndroid() ? 0.99 : 1,
           minHeight: 1,
         },
         props.style,

@@ -2,6 +2,7 @@ import { Platform } from 'react-native';
 import DeviceInfo from 'constants/DeviceInfo';
 import * as quickLook from 'modules/quicklook';
 import {
+  canRenderInElectron,
   isPreviewLoad,
   needWhiteBackground,
   previewKind,
@@ -70,6 +71,18 @@ describe('previewKind', () => {
     for (const ext of documents) {
       expect(previewKind(ext)).toBe('quickLook');
     }
+  });
+
+  it('shows PDFs and pictures in the Electron app', () => {
+    jest.replaceProperty(Platform, 'OS', 'web');
+    expect(previewKind('pdf')).toBe('pdf');
+    expect(previewKind('png')).toBe('web');
+    expect(previewKind('JPG')).toBe('web');
+    expect(previewKind('svg')).toBeNull();
+    expect(previewKind('docx')).toBeNull();
+    expect(previewKind(null)).toBeNull();
+    expect(canRenderInElectron('pdf')).toBe(true);
+    expect(canRenderInElectron(undefined)).toBe(false);
   });
 
   it("shows the info of Office and iWork documents on a Mac without Quick Look's plugin", () => {

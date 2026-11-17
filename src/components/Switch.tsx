@@ -1,7 +1,8 @@
-import { Platform, StyleProp, ViewStyle } from 'react-native';
+import { StyleProp, ViewStyle } from 'react-native';
 import { Switch as NativeSwitch } from '@expo/ui';
 import { labelsHidden } from '@expo/ui/swift-ui/modifiers';
 import ThemedHost from 'components/ThemedHost';
+import { isAndroid, isApple } from 'helpers/platform';
 
 export interface SwitchProps {
   value: boolean;
@@ -26,11 +27,9 @@ const Switch: React.FC<SwitchProps> = ({
     <ThemedHost
       matchContents
       style={style}
-      accessibilityLabel={
-        Platform.OS === 'android' ? accessibilityLabel : undefined
-      }
+      accessibilityLabel={isAndroid() ? accessibilityLabel : undefined}
     >
-      {Platform.OS === 'ios' ? (
+      {isApple() ? (
         <NativeSwitch
           {...props}
           label={accessibilityLabel}

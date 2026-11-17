@@ -1,5 +1,4 @@
 import DeviceInfo from 'constants/DeviceInfo';
-import { Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import {
   createNativeStackNavigator,
@@ -13,6 +12,7 @@ import { trackScreen } from 'services/crashReporting';
 import { useNavigationTheme } from 'theme';
 import { renderDetailContainer } from './DetailStack';
 import MainTab from './MainTab';
+import WindowFrame from './WindowFrame';
 import { initialTab, nativeSplit } from './layout';
 import Setup from 'screens/Setup';
 import {
@@ -22,15 +22,15 @@ import {
   SearchStack,
   WhatsNewStack,
 } from './stacks';
+import { isAndroid, isApple } from 'helpers/platform';
 
 const RootNavigator = createNativeStackNavigator<RootStackParams>();
 
 // A page sheet on iOS, iPadOS and Mac, which a swipe down closes, as the
 // system's own apps present search and web pages. Android covers the window.
-const sheetOptions: NativeStackNavigationOptions =
-  Platform.OS === 'ios'
-    ? { presentation: 'pageSheet' }
-    : { gestureEnabled: false };
+const sheetOptions: NativeStackNavigationOptions = isApple()
+  ? { presentation: 'pageSheet' }
+  : { gestureEnabled: false };
 
 const rootScreenOptions = {
   headerShown: false,
@@ -60,7 +60,7 @@ const renderSheets = () => (
             presentation: 'formSheet',
             sheetAllowedDetents: [1],
             // Material 3's extra-large shape; iOS keeps the system's.
-            sheetCornerRadius: Platform.OS === 'android' ? 28 : undefined,
+            sheetCornerRadius: isAndroid() ? 28 : undefined,
           }
     }
   >
@@ -94,21 +94,26 @@ const renderMainScreens = () => (
   </>
 );
 
-/** Android's main UI, in the split view drawn in JS (`SplitViewProvider`). */
+/**
+ * Android's main UI, in the split view drawn in JS (`SplitViewProvider`); the
+ * Electron app's too, with its navigation pane beside it (`WindowFrame`).
+ */
 const AndroidMain = () => {
   const frame = useSafeAreaFrame();
   const showDetail = frame.width > SplitSizes.maxCollapsedWidth;
 
   return (
-    <SplitViewProvider
-      showDetail={showDetail}
-      initialTab={initialTab}
-      renderDetail={renderDetailContainer}
-    >
-      <RootNavigator.Navigator screenOptions={rootScreenOptions}>
-        {renderMainScreens()}
-      </RootNavigator.Navigator>
-    </SplitViewProvider>
+    <WindowFrame>
+      <SplitViewProvider
+        showDetail={showDetail}
+        initialTab={initialTab}
+        renderDetail={renderDetailContainer}
+      >
+        <RootNavigator.Navigator screenOptions={rootScreenOptions}>
+          {renderMainScreens()}
+        </RootNavigator.Navigator>
+      </SplitViewProvider>
+    </WindowFrame>
   );
 };
 

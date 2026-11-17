@@ -1,7 +1,8 @@
 // Which downloaded files File detail can show inline, and how.
-import { Platform } from 'react-native';
 import mime from 'mime';
 import DeviceInfo from 'constants/DeviceInfo';
+import { isApple, isElectron } from 'helpers/platform';
+import electronFileTypes from 'constants/electronFileTypes.json';
 import { isQuickLookAvailable } from 'modules/quicklook';
 
 /** Word and Excel pages are drawn on white, also in dark mode. */
@@ -32,19 +33,31 @@ const documentTypes = new Set([
   'application/vnd.apple.numbers',
 ]);
 
+/**
+ * PDFs and pictures, which the Electron app shows inline: the list its main
+ * process serves to the preview (electron/fileShell.cjs). SVGs are left out:
+ * they can carry scripts.
+ */
+export const canRenderInElectron = (ext?: string | null) =>
+  !!ext && Object.hasOwn(electronFileTypes.preview, ext.toLowerCase());
+
 export type PreviewKind = 'pdf' | 'web' | 'quickLook';
 
 /**
  * How File detail shows the downloaded file itself rather than its info, or
  * null when it can't: PDFs everywhere with the PDF viewer; on iOS and Mac,
  * what WebKit draws in the web view; Office and iWork documents in the web
- * view on iOS and with Quick Look on Mac, where it loaded.
+ * view on iOS and with Quick Look on Mac, where it loaded; in the Electron
+ * app, pictures in its web view (`canRenderInElectron`).
  */
 export const previewKind = (fileType?: string | null): PreviewKind | null => {
   if (fileType === 'pdf') {
     return 'pdf';
   }
-  const mimeType = Platform.OS === 'ios' && fileType && mime.getType(fileType);
+  if (isElectron()) {
+    return canRenderInElectron(fileType) ? 'web' : null;
+  }
+  const mimeType = isApple() && fileType && mime.getType(fileType);
   if (!mimeType) {
     return null;
   }

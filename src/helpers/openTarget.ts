@@ -17,8 +17,14 @@ export interface CourseTarget {
 /** Something opened from its tab's list: an item or a course. */
 export type ListTarget = ItemTarget | CourseTarget;
 
-/** What a learnx:// link opens: an item, a course or a list, or Today. */
-export type OpenTarget = ListTarget | { type: 'today'; id?: undefined };
+/**
+ * What a learnx:// link opens: an item, a course or a list, or Today; and
+ * from the Electron app's Jump List, the week's Schedule.
+ */
+export type OpenTarget =
+  | ListTarget
+  | { type: 'today'; id?: undefined }
+  | { type: 'schedule'; id?: undefined };
 
 /** Where each kind of item opens: its tab, the tab's list, and the item's page. */
 export const targetRoutes = {

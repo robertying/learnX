@@ -1,10 +1,11 @@
 import type { ReactNode, Ref } from 'react';
 import { scrollInsetBehavior } from 'constants/scrollInsetBehavior';
-import { Platform, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import WebView, { type WebViewProps } from 'react-native-webview';
 import PageProgressBar from 'components/PageProgressBar';
 import SafeArea from 'components/SafeArea';
 import useWebViewProgress from 'hooks/useWebViewProgress';
+import { isApple } from 'helpers/platform';
 
 /**
  * A screen that is a web page (Changelog, CourseX, the SSO page): the page on
@@ -28,7 +29,7 @@ const ScreenWebView: React.FC<
       <WebView
         ref={ref}
         style={[styles.webView, style]}
-        decelerationRate={Platform.OS === 'ios' ? 'normal' : undefined}
+        decelerationRate={isApple() ? 'normal' : undefined}
         contentInsetAdjustmentBehavior={scrollInsetBehavior}
         // React Native's own inset from the safe area, which is the same
         // toolbar on Mac (`scrollInsetBehavior`)

@@ -1,5 +1,4 @@
 import { startTransition, useEffect, useState } from 'react';
-import { Platform } from 'react-native';
 import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
 import type { SFSymbol } from 'sf-symbols-typescript';
 import type { DayPart } from 'helpers/dayPart';
@@ -17,7 +16,7 @@ import useLaunchSheet from 'hooks/useLaunchSheet';
 import useMainStartup from 'hooks/useMainStartup';
 import useSettingsBadge from 'hooks/useSettingsBadge';
 import { renderDetailContainer, TabSplit } from './DetailStack';
-import { initialTab, nativeSplit, sidebarSplit } from './layout';
+import { initialTab, nativeSplit, settingsTab, sidebarSplit } from './layout';
 import { SplitTab } from './SplitView';
 import {
   AssignmentStack,
@@ -27,6 +26,7 @@ import {
   SettingStack,
   TodayStack,
 } from './stacks';
+import { isAndroid, isApple } from 'helpers/platform';
 
 const MainNativeNavigator = createNativeBottomTabNavigator<MainTabParams>();
 const MainSidebarNavigator = createSidebarSplitNavigator<MainTabParams>();
@@ -62,7 +62,7 @@ const filledSymbols: Record<TabIcon, SFSymbol> = {
 // (`tab_<symbol>` and `tab_<symbol>_filled`, drawn from the Material Symbols
 // font), since the bar loads its icons as images.
 const getTabBarIcon = (icon: TabIcon, focused: boolean) =>
-  Platform.OS === 'ios'
+  isApple()
     ? { sfSymbol: focused ? filledSymbols[icon] : systemIcons[icon].ios }
     : { uri: `tab_${systemIcons[icon].android}${focused ? '_filled' : ''}` };
 
@@ -85,9 +85,10 @@ const withSplit = (name: keyof MainTabParams, Master: React.ComponentType) =>
           </SplitTab>
         );
 
-// Today, Notices, Assignments, Files, Courses, and on Mac Settings. Elsewhere
-// Settings open from Today's header: Android's navigation bar holds at most
-// five tabs, and iPhone moves a sixth into "More". The first one mounts with
+// Today, Notices, Assignments, Files, Courses, and in a sidebar (Mac, the
+// Electron app's navigation pane) Settings. Elsewhere Settings open from
+// Today's header: Android's navigation bar holds at most five tabs, and
+// iPhone moves a sixth into "More". The first one mounts with
 // the app, the rest one by one after it (`useMountedTabCount`).
 interface Tab {
   name: keyof MainTabParams;
@@ -134,7 +135,7 @@ const tabs: Tab[] = [
     icon: 'courses',
     testID: 'tab-courses',
   },
-  ...(sidebarSplit
+  ...(settingsTab
     ? ([
         {
           name: 'SettingStack',
@@ -181,8 +182,9 @@ const MainTab = () => {
   useMainCommands();
   const part = useDayPart();
   const iconOf = (tab: Tab) => (tab.icon === 'dayPart' ? part : tab.icon);
-  // Settings' badge is on its sidebar row on Mac, and on its button in
-  // Today's header elsewhere; the tab bar shows none.
+  // Settings' badge is on its sidebar row on Mac and in the Electron app's
+  // navigation pane, and on its button in Today's header elsewhere; the tab
+  // bar shows none.
   const settingsBadge = useSettingsBadge();
 
   if (sidebarSplit) {
@@ -212,9 +214,7 @@ const MainTab = () => {
       sidebarAdaptable={DeviceInfo.isIPad()}
       // Material's baseline otherwise, which doesn't match the headers
       tabBarStyle={
-        Platform.OS === 'android'
-          ? { backgroundColor: theme.colors.card }
-          : undefined
+        isAndroid() ? { backgroundColor: theme.colors.card } : undefined
       }
       // Given, so the navigator doesn't blend its own from the theme, which
       // it can't do with system colors: secondaryLabel on iOS, and Material's
@@ -238,6 +238,9 @@ const MainTab = () => {
             title: tab.title,
             tabBarButtonTestID: tab.testID,
             tabBarIcon: ({ focused }) => getTabBarIcon(iconOf(tab), focused),
+            // Only the Electron app's pane has a Settings tab here.
+            tabBarBadge:
+              tab.name === 'SettingStack' && settingsBadge ? '' : undefined,
           }}
         />
       ))}

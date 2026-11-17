@@ -7,10 +7,11 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Keyboard, Platform } from 'react-native';
+import { Keyboard } from 'react-native';
 import { NavigationContext } from '@react-navigation/native';
 import { t } from 'helpers/i18n';
 import { headerButtons } from 'navigation/headerButtons';
+import { isAndroid } from 'helpers/platform';
 
 /**
  * How a focused number field lets go of the keyboard, or null when none is
@@ -44,7 +45,7 @@ const useNumberFieldDone = () => {
   // focused: it lets go then too, so Done doesn't stay behind.
   const onKeyboardHidden = useEffectEvent(() => release.current?.());
   useEffect(() => {
-    if (Platform.OS !== 'android') {
+    if (!isAndroid()) {
       return;
     }
     const subscription = Keyboard.addListener('keyboardDidHide', () =>

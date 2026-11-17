@@ -19,6 +19,7 @@ import { t } from 'helpers/i18n';
 import * as whatsNew from 'helpers/whatsNew';
 import { setServerWritesAllowed } from 'helpers/serverWrites';
 import useAvailableUpdate from 'hooks/useAvailableUpdate';
+import useLoginItem from 'hooks/useLoginItem';
 import { useDetailRoot, useShowDetail } from 'hooks/useDetailNavigator';
 import Settings from 'screens/Settings';
 import { installsUpdate, installUpdate } from 'services/update';
@@ -26,6 +27,7 @@ import { screenProps } from 'test-utils/screenProps';
 
 jest.mock('data/login', () => ({ logout: jest.fn() }));
 jest.mock('hooks/useAvailableUpdate', () => jest.fn(() => null));
+jest.mock('hooks/useLoginItem', () => jest.fn(() => null));
 jest.mock('services/update', () => ({
   ...jest.requireActual<typeof import('services/update')>('services/update'),
   installsUpdate: jest.fn(() => false),
@@ -227,4 +229,24 @@ it('shows how far an update has come in its row', async () => {
   expect(mockShow).toHaveBeenCalledWith('Changelog');
   jest.mocked(useAvailableUpdate).mockReturnValue(null);
   jest.mocked(installsUpdate).mockReturnValue(false);
+});
+
+describe('Start at login', () => {
+  it('is left out where it isn’t offered', async () => {
+    await renderScreen();
+    expect(screen.queryByTestId('settings-start-at-login')).toBeNull();
+  });
+
+  it('shows the system’s state and changes it', async () => {
+    const set = jest.fn();
+    jest.mocked(useLoginItem).mockReturnValue({ enabled: false, set });
+    await renderScreen();
+    expect(screen.getByText(t('startAtLoginCaption'))).toBeTruthy();
+    await fireEvent(
+      screen.getByTestId('settings-start-at-login'),
+      'valueChange',
+      true,
+    );
+    expect(set).toHaveBeenCalledWith(true);
+  });
 });

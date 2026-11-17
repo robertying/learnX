@@ -45,3 +45,15 @@ it('opens Today, dropping an item still waiting to open', async () => {
     params: { screen: 'Today', pop: true },
   });
 });
+
+it('opens Today for its Schedule to open (the Jump List)', async () => {
+  (await open())({ type: 'schedule' });
+  expect(setPendingTarget).toHaveBeenCalledWith({
+    type: 'schedule',
+    id: 'week',
+  });
+  expect(mockNavigate).toHaveBeenCalledWith('MainTab', {
+    screen: 'TodayStack',
+    params: { screen: 'Today', pop: true },
+  });
+});

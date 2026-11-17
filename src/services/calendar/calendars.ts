@@ -1,4 +1,3 @@
-import { Platform } from 'react-native';
 import * as Calendar from 'expo-calendar';
 import dayjs from 'dayjs';
 import { getSettings } from 'data/settings';
@@ -32,6 +31,7 @@ import {
 } from 'helpers/calendar/details';
 import { CalendarError } from 'services/calendar/errors';
 import { buildICS } from 'helpers/calendar/ics';
+import { isApple } from 'helpers/platform';
 
 const permissions = {
   calendar: {
@@ -70,7 +70,7 @@ export const requirePermission = async (
 
 /** Reminders on iOS, iPadOS and Mac; Android writes reminders as events. */
 const isReminderList = (type: AssignmentEventType) =>
-  Platform.OS === 'ios' && type === 'reminder';
+  isApple() && type === 'reminder';
 
 /**
  * The access assignment sync of `type` needs: Reminders for reminders on
@@ -173,7 +173,7 @@ const createCalendar = async ({
   onCreate?.();
 
   const defaultCalendarSource =
-    Platform.OS === 'ios' || entityType === Calendar.EntityTypes.REMINDER
+    isApple() || entityType === Calendar.EntityTypes.REMINDER
       ? await getDefaultCalendarSource(entityType)
       : androidCalendarSource;
 
@@ -476,7 +476,7 @@ export const removeCalendars = async () => {
 
   const synced = getCalendarSync();
   const reminderList =
-    Platform.OS === 'ios' &&
+    isApple() &&
     (!!synced.assignmentReminderId ||
       getSettings().assignmentReminderSync ||
       (await hasPermission('reminder')));

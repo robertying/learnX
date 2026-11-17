@@ -2,6 +2,8 @@
 
 Local Expo modules (`expo-module.config.json` in each): `crashlytics`, `menus`, `quicklook`, `share`, `shortcuts`, `sidebar`, `spotlight`, `toast` and `updater`. They have no JS-only fallback, so a change to their native code needs a rebuild.
 
+A module may have an `index.web.ts(x)` for the Electron app beside its `index.ts(x)` (`modules/menus`), with the same extension, since Metro tries a `.ts` base file before a `.web.tsx` variant.
+
 ## Native tests (iOS)
 
 - Each module's Swift is tested in `modules/<name>/ios/Tests` with Swift Testing, as a CocoaPods test spec (the `Tests` test spec every podspec gets from `modules/learnx_module.rb`, which holds their shared settings, hosted in an app CocoaPods makes, since some UIKit APIs need one). The Podfile adds every local module with its `Tests` spec before `use_expo_modules!`, so a new module's tests need only a `Tests` folder and a `pod install`. The app's own Swift (App Intents, app delegate) is tested in `ios/learnXTests`, a target hosted in learnX (a synchronized folder: new files need no project change); the share extension's file handling is `SharedFileInbox` in `modules/share`, compiled into both, and tested there.

@@ -1,0 +1,3 @@
+# pnpm parses patches byte for byte, so they keep LF line endings on
+# Windows too, where Git would otherwise check them out with CRLF.
+*.patch text eol=lf

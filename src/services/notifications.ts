@@ -1,8 +1,8 @@
 import * as Notifications from 'expo-notifications';
-import { Platform } from 'react-native';
 import { t } from 'helpers/i18n';
 import { isItemType, ItemTarget, OpenTarget } from 'helpers/openTarget';
 import { immediateTrigger } from 'services/scheduledNotifications';
+import { isAndroid } from 'helpers/platform';
 
 /**
  * Action buttons a notification shows, by what it is about. Identifiers
@@ -49,7 +49,7 @@ const toPermission = (
  * a channel exists.
  */
 const setUpChannels = async () => {
-  if (Platform.OS !== 'android') {
+  if (!isAndroid()) {
     return;
   }
   await Promise.all([
@@ -148,7 +148,7 @@ export const requestNotificationPermission = async () => {
  * (Android 14 doesn't allow them by default); always true elsewhere.
  */
 export const canScheduleExactAlarms = async () => {
-  if (Platform.OS !== 'android') {
+  if (!isAndroid()) {
     return true;
   }
   try {
@@ -163,7 +163,7 @@ export const canScheduleExactAlarms = async () => {
  * resolves when the user comes back, to whether they're allowed.
  */
 export const requestExactAlarms = async () =>
-  Platform.OS !== 'android' ||
+  !isAndroid() ||
   (await Notifications.requestExactAlarmPermissionsAsync()).granted;
 
 /**

@@ -163,6 +163,32 @@ const zh: typeof en = {
   downloadAgain: '重新下载',
   share: '分享',
   open: '打开',
+  openInDefaultApp: '用默认应用打开',
+  openRunnableTitle: '要打开“{name}”吗？',
+  openRunnableMessage: '此文件可在电脑上运行程序，请仅在信任它时打开。',
+  showInFolder: '在文件夹中显示',
+  saveAs: '另存为',
+  copyLink: '复制链接',
+  linkCopied: '已复制链接',
+  fileOpensInDefaultApp: 'learnX无法显示此类文件，可用默认应用打开或另存一份。',
+  startAtLogin: '登录时启动',
+  unsandboxedNote:
+    'learnX正在没有Chromium沙盒的情况下运行，Ubuntu 24.04及以上版本中的AppImage即是如此。请改为安装.deb包，让网页在沙盒中运行。',
+  startAtLoginCaption:
+    '登录电脑时在系统托盘中启动learnX，以便持续同步并发送提醒。关闭窗口后learnX仍在托盘中运行，可在托盘菜单中退出。',
+  trayOpen: '打开learnX',
+  trayCheckForNewItems: '检查新内容',
+  trayQuit: '退出learnX',
+  electronNotificationsCaption: 'learnX仅在运行时发送通知和提醒。',
+  exportCalendar: '导出日历（.ics）',
+  exportCalendarDescription:
+    '将本学期剩余的课程和未截止的作业保存为.ics文件，可导入Outlook等日历应用。',
+  dropToAttach: '拖放文件以添加附件',
+  dropFailed: '附件添加失败',
+  calendarExportNoEventElectron:
+    '没有可导出的内容：本学期已没有剩余的课程或未截止的作业。',
+  notifyDeadlineRemindersCaptionElectron:
+    '在未提交的作业截止前提醒你，截止后仍可补交时也会提醒。',
   missingUsername: '请输入用户名或学号',
   missingPassword: '请输入密码',
   usernameOrId: '用户名 / 学号',
@@ -187,6 +213,11 @@ const zh: typeof en = {
   updateAllowInstall:
     'Android会先请你允许learnX安装应用。允许后返回learnX继续更新。',
   updateDownloading: '正在下载{percent}%',
+  updateRestartMessage:
+    'learnX将重新启动以安装更新。如果不重新启动，更新将在下次退出learnX时安装。',
+  restart: '重新启动',
+  updateDebMessage:
+    '下载新的.deb安装包，然后打开它进行安装，或在终端中用sudo apt install安装。',
   updateInstalling: '正在安装',
   updateFailed: '更新失败',
   updateDownloadFailed: '更新下载失败。请检查网络连接后重试。',
@@ -284,7 +315,16 @@ const zh: typeof en = {
   filter: '筛选',
   more: '更多',
   refresh: '刷新',
+  // A switch's state beside it (Windows)
+  on: '开',
+  off: '关',
+  // An alert's button when it gives none (Windows)
+  ok: '确定',
+  // The navigation pane's menu button (Windows)
+  collapseSidebar: '收起导航',
+  expandSidebar: '展开导航',
   dragToReorder: '按住并拖动以排序',
+  moveToReorder: '上移或下移课程以排序',
   documents: '选取文件',
   photos: '照片图库',
   assignmentIndividualCompletion: '独立完成',
@@ -300,6 +340,8 @@ const zh: typeof en = {
   offlineMode: '离线使用',
   download: '下载',
   saveFileSucceeded: '已保存“{name}”',
+  calendarExportWithoutClasses:
+    '已保存“{name}”，但课表加载失败，其中不含课程。',
   saveFileFailed: '文件保存失败',
   sso: '清华大学用户电子身份服务系统',
   ssoNote:
@@ -442,6 +484,7 @@ const zh: typeof en = {
   downloadsExportCaption:
     '将文件复制到你选择的位置下的“learnX”文件夹，按学期和课程分类。再次导出会更新该文件夹。',
   downloadsExportCourse: '导出',
+  downloadsExportFolderElectron: '选择导出文件夹',
   downloadsExported: '已导出{files}',
   downloadsExportedPartly: '已导出{files}，{failed}个文件未能复制',
   downloadsExportFailed: '导出失败：{error}',
@@ -523,6 +566,9 @@ const zh: typeof en = {
     '在聚焦搜索中查找公告、作业和文件，或问Siri下一节课和作业截止。',
   whatsNew19DesignTitle: '全新设计',
   whatsNew19DesignBody: '更简洁的界面，遵循Android设计风格，换上清华紫。',
+  whatsNew19ElectronTitle: 'Windows与Linux',
+  whatsNew19ElectronBody:
+    '试用实验性的Windows和Linux桌面版，可从TUNA镜像或GitHub Releases下载。',
 };
 
 export default zh;

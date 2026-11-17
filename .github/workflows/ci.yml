@@ -4,7 +4,8 @@ name: CI
 # Android (whose steps skip themselves when no Android path changed). Main
 # pushes and manual runs (Actions > CI > Run workflow, on main or a branch)
 # always build Android and run the Android E2E flows on that build. The Apple
-# builds are in apple.yml, by hand only.
+# builds are in apple.yml, by hand only. The Windows and Linux app's checks
+# are in electron.yml, none of them required.
 on:
   pull_request:
   push:
@@ -198,7 +199,7 @@ jobs:
           steps.install.outcome == 'success' && steps.gradle.outcome == 'success' &&
           steps.ccache.outcome == 'success'
         run: |
-          printf 'DUMMY_USERNAME=e2e\nDUMMY_PASSWORD=e2e\n' > .env
+          bash scripts/write-e2e-env.sh
           # The key E2E builds trust for over-the-air updates.
           scripts/ota-e2e-cert.sh
           cd android
@@ -291,7 +292,7 @@ jobs:
 
       # scripts/e2e.sh types the mock login from .env; same values as the build.
       - name: Write .env
-        run: printf 'DUMMY_USERNAME=e2e\nDUMMY_PASSWORD=e2e\n' > .env
+        run: bash scripts/write-e2e-env.sh
 
       - name: Install Maestro
         run: |
@@ -329,3 +330,4 @@ jobs:
           name: e2e-android
           path: build/maestro
           if-no-files-found: ignore
+          retention-days: 14

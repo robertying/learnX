@@ -1,4 +1,4 @@
-import { AppState, Platform } from 'react-native';
+import { AppState } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as TaskManager from 'expo-task-manager';
 import { restoreQueryCache } from 'data/queryClient';
@@ -16,6 +16,7 @@ import {
   notificationActions,
 } from 'services/notifications';
 import { refreshSurfaces } from 'services/surfaces';
+import { isAndroid } from 'helpers/platform';
 
 /**
  * Keeps the widgets, Spotlight and the reminders in step with archived
@@ -81,7 +82,7 @@ export const handleNotificationAction = async (
   }
 
   // Android leaves the notification up after an action button.
-  if (Platform.OS === 'android') {
+  if (isAndroid()) {
     await Notifications.dismissNotificationAsync(
       response.notification.request.identifier,
     );
@@ -122,7 +123,7 @@ export const setUpNotificationActions = () => {
   }
   const subscription =
     Notifications.addNotificationResponseReceivedListener(handle);
-  if (Platform.OS === 'android') {
+  if (isAndroid()) {
     Notifications.registerTaskAsync(NOTIFICATION_ACTION_TASK).catch(error =>
       recordError(error, 'Registering the notification action task'),
     );

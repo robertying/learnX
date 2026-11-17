@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import {
   fireEvent,
   render,
@@ -167,4 +168,18 @@ it('toggles group submissions', async () => {
   await renderScreen();
   await toggle('groupSubmissions', true);
   expect(getSettings().notifications.groupSubmissions).toBe(true);
+});
+
+it('says when the Electron app notifies, with no system settings to open', async () => {
+  jest.replaceProperty(Platform, 'OS', 'web');
+  setSetting('notifications', {
+    ...getSettings().notifications,
+    deadlineReminders: true,
+  });
+  await renderScreen();
+  expect(screen.getByText(t('electronNotificationsCaption'))).toBeTruthy();
+  expect(
+    screen.getByText(t('notifyDeadlineRemindersCaptionElectron')),
+  ).toBeTruthy();
+  expect(screen.queryByText(t('openSystemSettings'))).toBeNull();
 });

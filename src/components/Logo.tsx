@@ -1,10 +1,5 @@
-import {
-  Image,
-  Platform,
-  View,
-  type ImageStyle,
-  type StyleProp,
-} from 'react-native';
+import { Image, View, type ImageStyle, type StyleProp } from 'react-native';
+import { isApple } from 'helpers/platform';
 
 export interface LogoProps {
   iosSize: number;
@@ -23,7 +18,7 @@ const GLYPH = { x: 93, y: 84, width: 101, height: 120 };
  * it lines up with the text beside and under it as any view does.
  */
 const Logo: React.FC<LogoProps> = ({ iosSize, style }) => {
-  if (Platform.OS !== 'android') {
+  if (isApple()) {
     return (
       <Image
         style={[

@@ -1,5 +1,4 @@
 import { useContext, useLayoutEffect } from 'react';
-import { Platform } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
 import { SplitViewContext } from 'navigation/SplitView';
@@ -7,10 +6,13 @@ import DeviceInfo from 'constants/DeviceInfo';
 import { t } from 'helpers/i18n';
 import useHeaderButtons from 'hooks/useHeaderButtons';
 import { isQuickLookAvailable } from 'modules/quicklook';
+import { isAndroid, isElectron } from 'helpers/platform';
 
 /**
  * File detail's header buttons: full screen (split view, outside search),
- * refresh, Quick Look (Mac), share, download (Mac), open (Android) and
+ * refresh, Quick Look (Mac), share (Apple, Android), download (Mac), open
+ * (Android), and in the Electron app Open in Default App and Save As instead
+ * of sharing (the file's info has Show in Folder and Copy Link too), and
  * info/preview (when the file shows inline).
  */
 const useFileDetailHeader = ({
@@ -76,11 +78,25 @@ const useFileDetailHeader = ({
       onPress: onQuickLook,
       disabled: unavailable,
     },
-    {
+    !isElectron() && {
       id: 'share',
       label: t('share'),
       icon: 'share',
       onPress: onShare,
+      disabled: unavailable,
+    },
+    isElectron() && {
+      id: 'open',
+      label: t('openInDefaultApp'),
+      icon: 'open',
+      onPress: onOpen,
+      disabled: unavailable,
+    },
+    isElectron() && {
+      id: 'saveAs',
+      label: t('saveAs'),
+      icon: 'download',
+      onPress: onSave,
       disabled: unavailable,
     },
     DeviceInfo.isMac() && {
@@ -90,7 +106,7 @@ const useFileDetailHeader = ({
       onPress: onSave,
       disabled: unavailable,
     },
-    Platform.OS === 'android' && {
+    isAndroid() && {
       id: 'open',
       label: t('open'),
       icon: 'open',

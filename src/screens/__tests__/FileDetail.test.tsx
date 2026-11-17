@@ -78,6 +78,8 @@ const download = {
   share: jest.fn(),
   save: jest.fn(),
   open: jest.fn(),
+  showInFolder: jest.fn(),
+  copyLink: jest.fn(),
 };
 const downloaded = (overrides: Partial<typeof download> = {}) =>
   jest
@@ -333,4 +335,43 @@ it('lists only what is known of a file', async () => {
   expect(screen.queryByText(t('fileCategory'))).toBeNull();
   expect(screen.queryByText(t('fileTeacher'))).toBeNull();
   expect(screen.queryByText(t('fileUploadTime'))).toBeNull();
+});
+
+describe('in the Electron app', () => {
+  beforeEach(() => {
+    jest.replaceProperty(Platform, 'OS', 'web');
+  });
+
+  it('opens, saves, shows and copies instead of sharing', async () => {
+    mockFile = zip;
+    downloaded({ path: 'file:///c/a.zip' });
+    await renderScreen({ id: zip.id });
+    expect(screen.queryByText(t('share'))).toBeNull();
+    expect(screen.getByText(t('fileOpensInDefaultApp'))).toBeTruthy();
+    const user = userEvent.setup();
+    await user.press(screen.getByText(t('openInDefaultApp')));
+    expect(download.open).toHaveBeenCalled();
+    await user.press(screen.getByText(t('saveAs')));
+    expect(download.save).toHaveBeenCalled();
+    await user.press(screen.getByText(t('showInFolder')));
+    expect(download.showInFolder).toHaveBeenCalled();
+    await user.press(screen.getByText(t('copyLink')));
+    expect(download.copyLink).toHaveBeenCalled();
+    expect(
+      jest.mocked(useFileDetailHeader).mock.lastCall![0],
+    ).not.toHaveProperty('onCopyLink');
+  });
+
+  it('has no link to copy for a picked file, and no caption for a previewable one', async () => {
+    downloaded({ path: 'file:///c/a.pdf' });
+    await renderScreen({
+      attachment: { ...pdf, downloadUrl: 'file:///c/picked/a.pdf' },
+    });
+    // The info of a file shown inline.
+    const { onToggleInfo } = jest.mocked(useFileDetailHeader).mock.lastCall![0];
+    await act(async () => onToggleInfo());
+    expect(screen.queryByText(t('copyLink'))).toBeNull();
+    expect(screen.queryByText(t('fileOpensInDefaultApp'))).toBeNull();
+    expect(screen.getByText(t('showInFolder'))).toBeTruthy();
+  });
 });

@@ -1,6 +1,6 @@
-import { Platform } from 'react-native';
 import { dataSource } from 'data/source';
 import { getScriptNonce } from 'helpers/webContent';
+import { isAndroid, isApple, isElectron } from 'helpers/platform';
 
 const darkMode = require('./preval/darkMode.preval.js');
 
@@ -59,8 +59,13 @@ export const getWebViewTemplate = (
           margin: 0px;
           padding: 0px;${
             // The Body text style, which follows Dynamic Type like the rest
-            // of the app. Android's WebView follows the font scale itself.
-            Platform.OS === 'ios' ? '\n          font: -apple-system-body;' : ''
+            // of the app. Android's WebView follows the font scale itself
+            // and draws sans-serif already; Chromium's own default is serif.
+            isApple()
+              ? '\n          font: -apple-system-body;'
+              : isElectron()
+                ? '\n          font-family: system-ui, sans-serif;'
+                : ''
           }
         }
         #root {
@@ -118,7 +123,7 @@ export const getWebViewTemplate = (
         });
       </script>
       ${math ? `<script nonce="${nonce}">${katex}</script>` : ''}${
-        Platform.OS === 'android'
+        isAndroid() || isElectron()
           ? `
       <script nonce="${nonce}">
         ${linkTaps}
