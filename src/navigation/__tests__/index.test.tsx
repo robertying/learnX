@@ -69,14 +69,14 @@ describe('with the native split (iOS, iPadOS and Mac)', () => {
       presentation: 'formSheet',
       sheetAllowedDetents: [1],
     });
-    // Search and CourseX in page sheets; a submission can't be swiped away.
-    expect(config().screens[1].options).toEqual(
-      Platform.OS === 'ios'
-        ? { presentation: 'pageSheet' }
-        : { gestureEnabled: false },
-    );
-    expect(config().screens[2].options).toEqual(config().screens[1].options);
-    expect(config().screens[3].options).toEqual(config().screens[1].options);
+    // Search, CourseX and a submission in page sheets.
+    for (const index of [1, 2, 3]) {
+      expect(config().screens[index].groupOptions).toEqual(
+        Platform.OS === 'ios'
+          ? { presentation: 'pageSheet' }
+          : { gestureEnabled: false },
+      );
+    }
   });
 });
 
@@ -95,9 +95,16 @@ describe('on Android', () => {
     ]);
   });
 
-  it('shows the main UI with the sheets over it', async () => {
+  it('shows the main UI with the modals and sheets over the whole window', async () => {
     await render(<Navigation showMain />);
-    expect(names()).toEqual(['Main', 'Setup', 'WhatsNewStack']);
+    expect(names()).toEqual([
+      'Main',
+      'CourseXStack',
+      'SearchStack',
+      'AssignmentSubmissionStack',
+      'Setup',
+      'WhatsNewStack',
+    ]);
     expect(config().screens[0].options).toEqual({
       animationTypeForReplace: 'pop',
     });
@@ -115,12 +122,8 @@ describe('on Android', () => {
 
   it('puts the detail pane beside the list in a wide window', async () => {
     await renderMain(1000);
-    expect(names()).toEqual([
-      'MainTab',
-      'CourseXStack',
-      'SearchStack',
-      'AssignmentSubmissionStack',
-    ]);
+    // Only the tabs inside the split: the modals cover the whole window.
+    expect(names()).toEqual(['MainTab']);
     expect(screen.getByText('detail stack')).toBeTruthy();
   });
 
