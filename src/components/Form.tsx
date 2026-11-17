@@ -478,9 +478,10 @@ const RowLabel: React.FC<{
 const macIconWidth = 20;
 const macIconSpacing = 14;
 const macIconModifiers = [frame({ width: macIconWidth })];
-// The separator under the row starts at the row's edge, under the symbol, as
-// System Settings draws it. (SwiftUI would start it past a leading image.)
-const macIconRowModifiers = [alignmentGuide('listRowSeparatorLeading', 0)];
+// The separator under the row starts where its text does, past the symbol.
+const macIconRowModifiers = [
+  alignmentGuide('listRowSeparatorLeading', macIconWidth + macIconSpacing),
+];
 // Every row is as wide as the row, with its separator ending at the row's
 // end, past the chevron or switch, as in System Settings. (SwiftUI on the
 // Mac ends it short of what's at the end of the row.)
