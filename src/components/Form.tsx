@@ -39,6 +39,8 @@ import {
 } from '@expo/ui/swift-ui';
 import {
   accessibilityAddTraits,
+  accessibilityElement,
+  accessibilityIdentifier,
   alignmentGuide,
   accessibilityHidden,
   accessibilityLabel,
@@ -557,7 +559,16 @@ export const FormText: React.FC<FormTextProps> = ({
 }) => {
   const { subtitle, detail } = useStackedDetail(row.subtitle, row.detail);
   return row.done || row.progress !== undefined || action ? (
-    <VStack testID={testID} modifiers={rowEnd}>
+    // SwiftUI gives a stack's identifier to every element in it, the
+    // action's own included; as a container element the row keeps it alone.
+    <VStack
+      modifiers={[
+        ...rowEnd,
+        ...(testID
+          ? [accessibilityElement('contain'), accessibilityIdentifier(testID)]
+          : []),
+      ]}
+    >
       <ItemRow
         {...row}
         detailTint={detailTint}

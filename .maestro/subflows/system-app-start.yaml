@@ -1,0 +1,35 @@
+# The system Calendar and Reminders apps open on a simulator's first launches
+# with pages of their own (a welcome page; Reminders also asks to turn on
+# iCloud syncing and explains its notifications): Continue past each one and
+# answer Not Now, until the app shows READY. Which one shows is read rather
+# than waited for, since a condition on an absent element costs Maestro's 7 s
+# lookup. After each page the next one can take a moment to come, so only
+# then is there a short wait for it.
+appId: ${APP_ID}
+env:
+  CONTINUE: 'Continue|继续'
+  NOT_NOW: 'Not Now|现在不|以后'
+---
+- evalScript: ${output.appReady = false}
+- repeat:
+    times: 5
+    while:
+      true: ${!output.appReady}
+    commands:
+      - extendedWaitUntil:
+          visible: '${CONTINUE}|${NOT_NOW}|${READY}'
+          timeout: 10000
+      - copyTextFrom: '${CONTINUE}|${NOT_NOW}|${READY}'
+      - evalScript: "${output.appReady = (CONTINUE + '|' + NOT_NOW).split('|').indexOf(maestro.copiedText) < 0}"
+      - runFlow:
+          when:
+            true: ${!output.appReady}
+          commands:
+            - tapOn: '${CONTINUE}|${NOT_NOW}'
+            - extendedWaitUntil:
+                visible: '${CONTINUE}|${NOT_NOW}'
+                timeout: 3000
+                optional: true
+- extendedWaitUntil:
+    visible: ${READY}
+    timeout: 10000

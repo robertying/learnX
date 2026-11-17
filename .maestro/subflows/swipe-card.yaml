@@ -1,6 +1,10 @@
 # Swipe the card matching CARD in DIRECTION (LEFT or RIGHT) and tap the action
-# it shows, by its id ACTION (card-fav, card-archive). Maestro's swipe stops
-# short of the full swipe that would run the action by itself.
+# it shows, by its id ACTION (card-fav, card-archive). The swipe has to stop
+# short of half the card, where letting go runs the action by itself. Maestro
+# swipes to 10% from the screen's edge: from the card's middle that's short of
+# it to the left, but to the right it's past it where the list ends before the
+# screen does (the closed iPhone Duo, with its bars at the right), so a right
+# swipe starts further along the card.
 appId: ${APP_ID}
 ---
 - runFlow:
@@ -19,6 +23,7 @@ appId: ${APP_ID}
       - swipe:
           from:
             text: ${CARD}
+            point: 70%, 50%
           direction: RIGHT
           duration: 300
 - tapOn:

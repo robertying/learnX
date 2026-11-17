@@ -10,6 +10,14 @@
 #                               the hierarchy of an app whose accessibility
 #                               tree is too deep for one snapshot (only the
 #                               status bar came back)
+#   maestro-thin-elements.patch  no taps on an element one point wide or
+#                               tall, which UIKit leaves where a bar button
+#                               was before a compact layout moved it (the
+#                               iPhone Duo closed)
+#   maestro-springboard-alerts.patch
+#                               SpringBoard's alerts over an app (a
+#                               notifications request, Save Password) in its
+#                               hierarchy, so flows see and answer them
 #
 #   scripts/maestro/build.sh <maestro checkout>
 #
@@ -45,7 +53,9 @@ if [ "${MAESTRO_KEEP:-}" != 1 ]; then
   git checkout -q -B learnx-patched "$base" >&2
   git -c commit.gpgsign=false am -q "$here/maestro-display.patch" \
     "$here/maestro-fold-posture.patch" \
-    "$here/maestro-hierarchy-fallback.patch" >&2
+    "$here/maestro-hierarchy-fallback.patch" \
+    "$here/maestro-thin-elements.patch" \
+    "$here/maestro-springboard-alerts.patch" >&2
 fi
 
 if [ -z "${JAVA_HOME:-}" ] && [ -x /usr/libexec/java_home ]; then
