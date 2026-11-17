@@ -131,8 +131,17 @@ jobs:
       - name: Set up JS
         uses: ./.github/actions/setup-js
 
-      # Fails while certs/electron-update.pem is the placeholder: installers
-      # that could never update aren't built (electron/packageConfig.cjs).
+      # Installers that could never update aren't built while
+      # certs/electron-update.pem is the placeholder (packageConfig.cjs), so
+      # this job fails, on purpose, with what to do, until the key is made.
+      - name: Update key
+        shell: bash
+        run: |
+          if head -n 1 certs/electron-update.pem | grep -q '^PLACEHOLDER'; then
+            echo '::error title=The Electron update key is still the placeholder::Installers built now could never update. Make the key once on the Mac (electron/AGENTS.md, "Signing updates": one node command), keep its private half in 1Password, and commit certs/electron-update.pem. This job passes from then on.'
+            exit 1
+          fi
+
       # Its own web build, never the E2E tests' (their made-up mock login
       # would let anyone in with it): the mock login from the repository's
       # DUMMY_USERNAME and DUMMY_PASSWORD secrets, as the mobile release
