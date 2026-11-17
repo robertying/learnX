@@ -32,6 +32,7 @@ const { popupMenu } = require('./menus.cjs');
 const { mainFetch } = require('./net.cjs');
 const { createSecrets } = require('./secrets.cjs');
 const { createUpdater, updatesSupported } = require('./updater.cjs');
+const { signedProvider } = require('./updateSignature.cjs');
 const { PARTITION, createWebviews, hardenWebview } = require('./webviews.cjs');
 
 /**
@@ -450,17 +451,23 @@ const createWindow = (/** @type {Electron.Session} */ ses) => {
 };
 
 // The version, the About panel and updates (buildInfo.cjs, updater.cjs). A
-// packaged build carries its build number in its package.json (written by
-// packageConfig.cjs) and where it looks for updates in app-update.yml; a dev
-// run reads the checkout's, and checks for updates only on a local test
-// server at `LEARNX_UPDATE_URL` (updateServer.mjs).
-const packaged = /** @type {{ buildNumber?: string }} */ (
+// packaged build carries its build number and where it looks for updates in
+// its package.json (written by packageConfig.cjs), and the certificate of the
+// key its update files are signed with; a dev run reads the checkout's, and
+// checks for updates only on a local test server at `LEARNX_UPDATE_URL`
+// (updateServer.mjs), signed by the key of `LEARNX_UPDATE_CERTIFICATE` if set.
+const packaged = /** @type {{ buildNumber?: string; updateUrl?: string }} */ (
   require('./package.json')
 );
 const buildInfo = dev
   ? readBuildInfo(path.join(__dirname, '..'))
   : { version: app.getVersion(), build: packaged.buildNumber ?? '' };
 const devUpdateUrl = dev ? process.env.LEARNX_UPDATE_URL : undefined;
+/** A dev run's updater log lines, for the E2E tests (`learnxUpdaterLog`). */
+const devUpdaterLog = dev ? /** @type {string[]} */ ([]) : undefined;
+if (devUpdaterLog) {
+  Object.assign(globalThis, { learnxUpdaterLog: devUpdaterLog });
+}
 const updater =
   // E2E runs (electron/e2e) turn checks off with LEARNX_NO_UPDATES, and a
   // second launch only hands its arguments over.
@@ -471,9 +478,9 @@ const updater =
       dev,
       platform: process.platform,
       env: process.env,
-      hasUpdateConfig: fs.existsSync(
-        path.join(process.resourcesPath, 'app-update.yml'),
-      ),
+      hasUpdateConfig:
+        !!packaged.updateUrl &&
+        fs.existsSync(path.join(process.resourcesPath, 'app-update.yml')),
     }))
     ? (() => {
         const { autoUpdater } = require('electron-updater');
@@ -514,14 +521,36 @@ const updater =
             currentVersion: semver.parse(buildInfo.version),
           });
         }
+        const certificate = fs.readFileSync(
+          dev
+            ? process.env.LEARNX_UPDATE_CERTIFICATE ||
+                path.join(__dirname, '..', 'certs', 'ota-certificate.pem')
+            : path.join(__dirname, 'ota-certificate.pem'),
+        );
         return createUpdater({
           autoUpdater,
+          feed: {
+            url: devUpdateUrl || packaged.updateUrl || '',
+            provider: signedProvider({
+              GenericProvider:
+                require('electron-updater/out/providers/GenericProvider')
+                  .GenericProvider,
+              parseUpdateInfo:
+                require('electron-updater/out/providers/Provider')
+                  .parseUpdateInfo,
+              ...require('electron-updater/out/util'),
+              certificate,
+            }),
+          },
           onReady: update => {
             for (const win of BrowserWindow.getAllWindows()) {
               win.webContents.send('updates:ready', update);
             }
           },
-          log: message => console.log(`[updater] ${message}`),
+          log: message => {
+            console.log(`[updater] ${message}`);
+            devUpdaterLog?.push(message);
+          },
         });
       })()
     : null;

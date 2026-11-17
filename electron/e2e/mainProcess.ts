@@ -41,6 +41,7 @@ interface State {
     lastMenu?: Electron.Menu;
     lastClose?: () => void;
   };
+  learnxUpdaterLog?: string[];
   learnxDev?: {
     notifications: { options: ShownNotification; click: () => void }[];
     tray: () => Electron.Tray | null;
@@ -217,6 +218,12 @@ export const mainProcess = (app: ElectronApplication) => ({
         ({ options }) => options,
       ),
     ),
+
+  /** What the updater logged (updater.cjs), oldest first. Dev runs only. */
+  updaterLog: () =>
+    app.evaluate(() => [
+      ...((globalThis as unknown as State).learnxUpdaterLog ?? []),
+    ]),
 
   /** Clicks a notification the app showed (the last by default). */
   clickNotification: (index = -1) =>

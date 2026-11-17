@@ -20,6 +20,7 @@ const { version, build } = readBuildInfo(path.join(__dirname, '..'));
 const config = (options = {}) => {
   const appVersion = options.version ?? version;
   const buildNumber = options.build ?? build;
+  const updateUrl = options.updateUrl ?? `${updateMirror.latestRelease}/`;
   return {
     appId: 'io.robertying.learnXElectron',
     productName: 'learnX',
@@ -31,6 +32,9 @@ const config = (options = {}) => {
     extraMetadata: {
       version: appVersion,
       buildNumber,
+      // Where updates come from, as app-update.yml has it (`publish`), for
+      // the provider that checks their signature (updater.cjs).
+      updateUrl,
       description: 'learnX',
       // Linux: Electron names the window after it (Wayland's app_id, X11's
       // WM_CLASS), which links it to learnx.desktop (syncDesktopName).
@@ -51,6 +55,8 @@ const config = (options = {}) => {
       'icons/icon.png',
       'icons/icon.ico',
       { from: '../build/electron/web', to: 'web' },
+      // The key update files are signed with (updateSignature.cjs).
+      { from: '../certs', to: '.', filter: ['ota-certificate.pem'] },
     ],
     // Where the packaged app finds updates (app-update.yml): the TUNA
     // mirror's copy of the latest GitHub release (`v<version>`, with the
@@ -58,10 +64,7 @@ const config = (options = {}) => {
     // reads it (src/helpers/update.ts). Also makes electron-builder write the
     // update files (latest.yml, latest-linux.yml, latest-linux-arm64.yml);
     // nothing is published from here.
-    publish: {
-      provider: 'generic',
-      url: options.updateUrl ?? `${updateMirror.latestRelease}/`,
-    },
+    publish: { provider: 'generic', url: updateUrl },
     win: {
       // One installer for both: Windows installs the one for its CPU.
       target: [{ target: 'nsis', arch: ['x64', 'arm64'] }],

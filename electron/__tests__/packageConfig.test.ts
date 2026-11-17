@@ -40,6 +40,20 @@ it('writes the update files under their default names', () => {
   expect(config.publish).not.toHaveProperty('channel');
 });
 
+it('ships the update key’s certificate, and where updates come from', () => {
+  expect(packageConfig().files).toContainEqual({
+    from: '../certs',
+    to: '.',
+    filter: ['ota-certificate.pem'],
+  });
+  expect(packageConfig().extraMetadata).toMatchObject({
+    updateUrl: `${updateMirror.latestRelease}/`,
+  });
+  expect(
+    packageConfig({ updateUrl: 'http://localhost:8299/' }).extraMetadata,
+  ).toMatchObject({ updateUrl: 'http://localhost:8299/' });
+});
+
 it("carries the checkout's version and build number", () => {
   const config = packageConfig({ version: '19.0.1', build: '4550' });
   expect(config.extraMetadata).toMatchObject({

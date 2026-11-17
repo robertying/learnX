@@ -5,8 +5,11 @@
 // latest GitHub release (`v<version>`, the mobile apps' too), through
 // electron-updater's generic provider as app-update.yml names it
 // (packageConfig.cjs). Builds are unsigned, so Windows checks no publisher
-// signature on the installer; electron-updater still checks its SHA-512
-// against the release's update file (latest.yml, latest-linux.yml).
+// signature on the installer; electron-updater checks its SHA-512 against
+// the release's update file (latest.yml, latest-linux.yml), which it reads
+// only with a valid signature by learnX's update key (updateSignature.cjs).
+// So nothing the mirror alone changes is downloaded, let alone installed on
+// quit.
 //
 // The mirror copies a release's files on a schedule, so a check can find the
 // new latest.yml before its installer: the download then fails, which is
@@ -39,6 +42,7 @@ const updatesSupported = ({ dev, platform, env, hasUpdateConfig }) =>
  *
  * @param {{
  *   autoUpdater: any;
+ *   feed: { url: string; provider: new (...args: any[]) => any };
  *   onReady: (update: ReadyUpdate) => void;
  *   log?: (message: string) => void;
  *   timers?: { setTimeout: typeof setTimeout; setInterval: typeof setInterval };
@@ -46,6 +50,7 @@ const updatesSupported = ({ dev, platform, env, hasUpdateConfig }) =>
  */
 const createUpdater = ({
   autoUpdater,
+  feed,
   onReady,
   log = () => {},
   timers = { setTimeout, setInterval },
@@ -56,6 +61,13 @@ const createUpdater = ({
   let started = false;
   let retryScheduled = false;
 
+  // Where updates come from (app-update.yml's url), read through the
+  // provider that checks the update file's signature.
+  autoUpdater.setFeedURL({
+    provider: 'custom',
+    updateProvider: feed.provider,
+    url: feed.url,
+  });
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true;
   autoUpdater.allowPrerelease = false;
@@ -75,8 +87,8 @@ const createUpdater = ({
     },
   );
   // Offline, the mirror out of reach, or a release's files only partly
-  // copied there (a 404, or a checksum that doesn't match yet): tried again
-  // half an hour later, once.
+  // copied there (a 404, a signature not there yet, or a checksum that
+  // doesn't match yet): tried again half an hour later, once.
   autoUpdater.on('error', (/** @type {Error} */ error) => {
     log(`failed: ${error.message}`);
     if (started && !retryScheduled) {

@@ -15,9 +15,13 @@ const fakeAutoUpdater = () =>
     allowPrerelease: true,
     allowDowngrade: true,
     logger: null as null | Record<string, (message: string) => void>,
+    setFeedURL: jest.fn(),
     checkForUpdates: jest.fn(async () => null),
     quitAndInstall: jest.fn(),
   });
+
+/** Where updates come from, read through the signature-checking provider. */
+const feed = { url: 'https://mirror.test/LatestRelease/', provider: class {} };
 
 beforeEach(() => jest.useFakeTimers());
 
@@ -44,9 +48,19 @@ describe('updatesSupported', () => {
   });
 });
 
+it('reads updates only through the signature-checking provider', () => {
+  const autoUpdater = fakeAutoUpdater();
+  createUpdater({ autoUpdater, feed, onReady: jest.fn() });
+  expect(autoUpdater.setFeedURL).toHaveBeenCalledWith({
+    provider: 'custom',
+    updateProvider: feed.provider,
+    url: feed.url,
+  });
+});
+
 it('downloads in the background and installs on quit', () => {
   const autoUpdater = fakeAutoUpdater();
-  createUpdater({ autoUpdater, onReady: jest.fn() });
+  createUpdater({ autoUpdater, feed, onReady: jest.fn() });
   expect(autoUpdater).toMatchObject({
     autoDownload: true,
     autoInstallOnAppQuit: true,
@@ -57,7 +71,7 @@ it('downloads in the background and installs on quit', () => {
 
 it('checks after launch and every few hours', async () => {
   const autoUpdater = fakeAutoUpdater();
-  createUpdater({ autoUpdater, onReady: jest.fn() }).start();
+  createUpdater({ autoUpdater, feed, onReady: jest.fn() }).start();
   expect(autoUpdater.checkForUpdates).not.toHaveBeenCalled();
   await jest.advanceTimersByTimeAsync(FIRST_CHECK_DELAY);
   expect(autoUpdater.checkForUpdates).toHaveBeenCalledTimes(1);
@@ -69,7 +83,7 @@ it('checks after launch and every few hours', async () => {
 it('tells the page once an update has downloaded, and stops checking', async () => {
   const autoUpdater = fakeAutoUpdater();
   const onReady = jest.fn();
-  const updater = createUpdater({ autoUpdater, onReady });
+  const updater = createUpdater({ autoUpdater, feed, onReady });
   expect(updater.ready()).toBeNull();
   autoUpdater.emit('update-downloaded', { version: '19.0.1' });
   expect(onReady).toHaveBeenCalledWith({ version: '19.0.1' });
@@ -86,7 +100,7 @@ it('runs one check at a time', async () => {
       finish = () => resolve(null);
     }),
   );
-  const updater = createUpdater({ autoUpdater, onReady: jest.fn() });
+  const updater = createUpdater({ autoUpdater, feed, onReady: jest.fn() });
   const first = updater.check();
   await updater.check();
   expect(autoUpdater.checkForUpdates).toHaveBeenCalledTimes(1);
@@ -100,7 +114,7 @@ it('logs a failed check and tries again later', async () => {
   const autoUpdater = fakeAutoUpdater();
   const log = jest.fn();
   autoUpdater.checkForUpdates.mockRejectedValueOnce(new Error('offline'));
-  const updater = createUpdater({ autoUpdater, onReady: jest.fn(), log });
+  const updater = createUpdater({ autoUpdater, feed, onReady: jest.fn(), log });
   await updater.check();
   autoUpdater.emit('error', new Error('offline'));
   expect(log).toHaveBeenCalledWith('failed: offline');
@@ -118,7 +132,7 @@ it('logs a failed check and tries again later', async () => {
 it('tries again half an hour after the mirror had only part of a release', async () => {
   const autoUpdater = fakeAutoUpdater();
   const onReady = jest.fn();
-  createUpdater({ autoUpdater, onReady }).start();
+  createUpdater({ autoUpdater, feed, onReady }).start();
   await jest.advanceTimersByTimeAsync(FIRST_CHECK_DELAY);
   expect(autoUpdater.checkForUpdates).toHaveBeenCalledTimes(1);
   // latest.yml is there, the installer not yet: the download fails.
@@ -132,7 +146,7 @@ it('tries again half an hour after the mirror had only part of a release', async
 
 it('restarts into the installer only when an update is waiting', () => {
   const autoUpdater = fakeAutoUpdater();
-  const updater = createUpdater({ autoUpdater, onReady: jest.fn() });
+  const updater = createUpdater({ autoUpdater, feed, onReady: jest.fn() });
   updater.install();
   expect(autoUpdater.quitAndInstall).not.toHaveBeenCalled();
   autoUpdater.emit('update-downloaded', { version: '19.0.1' });
@@ -142,6 +156,6 @@ it('restarts into the installer only when an update is waiting', () => {
 
 it('logs nowhere by default', () => {
   const autoUpdater = fakeAutoUpdater();
-  createUpdater({ autoUpdater, onReady: jest.fn() });
+  createUpdater({ autoUpdater, feed, onReady: jest.fn() });
   expect(() => autoUpdater.emit('error', new Error('x'))).not.toThrow();
 });

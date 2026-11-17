@@ -4,11 +4,20 @@
 // latest*.yml and checks its SHA-512; Settings then offers it, and Restart
 // quits into the installer (recorded instead, mainProcess.ts). The installer
 // here is made-up bytes: what's tested is learnX's side, not the installer.
+// The update file is signed with a throwaway key whose public half the run
+// trusts (LEARNX_UPDATE_CERTIFICATE), as a release's are with the update key
+// (updateSignature.cjs); without a valid signature nothing is downloaded.
 import { type ChildProcess, spawn } from 'node:child_process';
-import { createHash, randomBytes } from 'node:crypto';
+import {
+  createHash,
+  generateKeyPairSync,
+  randomBytes,
+  sign,
+} from 'node:crypto';
 import fs from 'node:fs';
 import net from 'node:net';
 import path from 'node:path';
+import updateSignature from '../updateSignature.cjs';
 import { expect, packagedApp, test } from './fixtures';
 import { exact, text } from './maestroEnv';
 import { byId, openSettings, shown } from './steps';
@@ -33,8 +42,24 @@ const release = () => {
   }
 };
 
-/** A release folder as the mirror has it, with `sha512` for the installer. */
-const writeRelease = (dir: string, { badChecksum = false } = {}) => {
+const keyPair = () => generateKeyPairSync('rsa', { modulusLength: 2048 });
+/** The key the runs trust, and another. */
+const trustedKey = keyPair();
+const otherKey = keyPair();
+
+type Signature = 'good' | 'missing' | 'bad' | 'wrong key';
+
+/**
+ * A release folder as the mirror has it, with `sha512` for the installer and
+ * the update file's signature.
+ */
+const writeRelease = (
+  dir: string,
+  {
+    badChecksum = false,
+    signature = 'good',
+  }: { badChecksum?: boolean; signature?: Signature } = {},
+) => {
   fs.mkdirSync(dir, { recursive: true });
   const { yml, installer } = release();
   const bytes = randomBytes(64 * 1024);
@@ -56,6 +81,18 @@ const writeRelease = (dir: string, { badChecksum = false } = {}) => {
       '',
     ].join('\n'),
   );
+  if (signature !== 'missing') {
+    const data = fs.readFileSync(path.join(dir, yml));
+    const signed = sign(
+      'sha256',
+      signature === 'bad' ? Buffer.from('something else') : data,
+      (signature === 'wrong key' ? otherKey : trustedKey).privateKey,
+    );
+    fs.writeFileSync(
+      path.join(dir, yml + updateSignature.SIGNATURE_SUFFIX),
+      updateSignature.formatSignature(signed),
+    );
+  }
   return installer;
 };
 
@@ -105,12 +142,21 @@ const serve = async (dir: string, log: string[]) => {
  * updated (AppImageUpdater reads it to download, and would replace it).
  */
 const updateEnv = (url: string, dataDir: string): Record<string, string> => {
+  const certificate = path.join(dataDir, 'update-key.pem');
+  fs.writeFileSync(
+    certificate,
+    trustedKey.publicKey.export({ type: 'spki', format: 'pem' }),
+  );
+  const env = {
+    LEARNX_UPDATE_URL: url,
+    LEARNX_UPDATE_CERTIFICATE: certificate,
+  };
   if (process.platform !== 'linux') {
-    return { LEARNX_UPDATE_URL: url };
+    return env;
   }
   const appImage = path.join(dataDir, 'learnX.AppImage');
   fs.writeFileSync(appImage, randomBytes(1024));
-  return { LEARNX_UPDATE_URL: url, APPIMAGE: appImage };
+  return { ...env, APPIMAGE: appImage };
 };
 
 let server: ChildProcess | undefined;
@@ -178,3 +224,36 @@ test('offers nothing when the download doesn’t match its checksum', async ({
   await expect(shown(window.getByTestId('settings-list'))).toBeVisible();
   await expect(window.getByTestId('settings-update')).toHaveCount(0);
 });
+
+for (const signature of ['missing', 'bad', 'wrong key'] as const) {
+  test(`downloads nothing when the update file’s signature is ${signature}`, async ({
+    login,
+    relaunch,
+    dataDir,
+  }) => {
+    const log: string[] = [];
+    const installer = writeRelease(path.join(dataDir, 'release'), {
+      signature,
+    });
+    const served = await serve(path.join(dataDir, 'release'), log);
+    server = served.server;
+    await login();
+    const { window, main } = await relaunch({
+      env: updateEnv(served.url, dataDir),
+    });
+    await main.stubInstall();
+    await openSettings(window);
+    // The update file and its signature were read, and refused.
+    await expect
+      .poll(
+        () => log.some(line => line.startsWith(`GET /${release().yml}.sig`)),
+        { timeout: 60_000 },
+      )
+      .toBe(true);
+    await expect
+      .poll(async () => (await main.updaterLog()).join('\n'))
+      .toContain(`${release().yml} refused`);
+    expect(log.some(line => line.startsWith(`GET /${installer}`))).toBe(false);
+    await expect(window.getByTestId('settings-update')).toHaveCount(0);
+  });
+}
