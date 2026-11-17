@@ -3,6 +3,7 @@ import {
   displayFileSize,
   formatFileSize,
   getExtension,
+  hasLink,
   sanitizeFileName,
   stripExtension,
   withExtension,
@@ -110,4 +111,11 @@ describe('displayFileSize', () => {
     expect(displayFileSize('')).toBe('');
     expect(displayFileSize('unknown')).toBe('unknown');
   });
+});
+
+it('tells which files have a web link to copy', () => {
+  expect(hasLink({ downloadUrl: 'https://learn.tsinghua.edu.cn/f' })).toBe(
+    true,
+  );
+  expect(hasLink({ downloadUrl: 'file:///c/picked/a.pdf' })).toBe(false);
 });

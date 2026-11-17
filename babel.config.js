@@ -41,6 +41,9 @@ module.exports = {
     ],
     // Inlines the allowed .env keys into src/helpers/env.ts.
     './babel/inline-env',
+    // Turns helpers/platform's isApple() and friends into checks Metro
+    // folds, so another platform's code leaves a release bundle.
+    './babel/inline-platform',
     'preval',
   ],
 };

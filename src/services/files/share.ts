@@ -8,7 +8,6 @@ import DeviceInfo from 'constants/DeviceInfo';
 import { fileNameOf, sanitizeFileName } from 'helpers/filename';
 import { t } from 'helpers/i18n';
 import { downloadFile, SHARED_DIR } from 'services/files/downloads';
-import { saveTextAs } from 'services/files/desktop';
 import { isElectron } from 'helpers/platform';
 
 /** Where a file is named for the save panel, under Caches. */
@@ -78,6 +77,9 @@ export const exportTextFile = async (
 ): Promise<boolean> => {
   const name = sanitizeFileName(filename);
   if (isElectron()) {
+    // Required only here, so the phones' bundles leave it out.
+    const { saveTextAs } =
+      require('services/files/desktop') as typeof import('services/files/desktop');
     return await saveTextAs(name, content);
   }
   if (DeviceInfo.isMac()) {

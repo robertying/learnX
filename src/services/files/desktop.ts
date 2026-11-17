@@ -34,7 +34,3 @@ export const saveTextAs = async (filename: string, content: string) =>
 
 /** Copies text, such as a file's link, to the clipboard. */
 export const copyText = (text: string) => bridge().shell.copyText(text);
-
-/** Whether a file has a web link to copy: a picked file has none. */
-export const hasLink = (file: Pick<DownloadableFile, 'downloadUrl'>) =>
-  /^https?:\/\//i.test(file.downloadUrl);

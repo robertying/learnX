@@ -4,15 +4,18 @@ import { useSettings } from 'data/settings';
 import { DownloadableFile } from 'data/types/state';
 import { downloadFile } from 'services/files/downloads';
 import { saveFileOnMac, openFile, shareFile } from 'services/files/share';
-import {
-  copyText,
-  openInDefaultApp,
-  saveFileAs,
-  showInFolder as showFileInFolder,
-} from 'services/files/desktop';
 import { fileNameOf } from 'helpers/filename';
 import { t } from 'helpers/i18n';
 import { isAndroid, isElectron } from 'helpers/platform';
+
+/**
+ * The Electron app's file actions (services/files/desktop), required only
+ * there, so the phones' bundles leave them out; null elsewhere.
+ */
+const desktop = () =>
+  isElectron()
+    ? (require('services/files/desktop') as typeof import('services/files/desktop'))
+    : null;
 
 /**
  * Downloads a file on mount (from the cache when it is there) and offers
@@ -87,8 +90,9 @@ const useFileDownload = (file: DownloadableFile) => {
 
   const save = async () => {
     try {
-      const saved = isElectron()
-        ? await saveFileAs(downloadable, path)
+      const electron = desktop();
+      const saved = electron
+        ? await electron.saveFileAs(downloadable, path)
         : await saveFileOnMac(downloadable, path);
       if (saved) {
         toast(
@@ -107,8 +111,9 @@ const useFileDownload = (file: DownloadableFile) => {
    */
   const open = async () => {
     try {
-      if (isElectron()) {
-        await openInDefaultApp(path);
+      const electron = desktop();
+      if (electron) {
+        await electron.openInDefaultApp(path);
       } else {
         await openFile(path, downloadable.fileType);
       }
@@ -119,15 +124,19 @@ const useFileDownload = (file: DownloadableFile) => {
 
   /** Shows the downloaded file in the file manager (Electron). */
   const showInFolder = () => {
-    showFileInFolder(path).catch(() => toast(t('openFileFailed'), 'error'));
+    desktop()
+      ?.showInFolder(path)
+      .catch(() => toast(t('openFileFailed'), 'error'));
   };
 
   /** Copies the file's link on Web Learning (Electron). */
   const copyLink = () => {
-    copyText(downloadable.downloadUrl).then(
-      () => toast(t('linkCopied'), 'success'),
-      () => {},
-    );
+    desktop()
+      ?.copyText(downloadable.downloadUrl)
+      .then(
+        () => toast(t('linkCopied'), 'success'),
+        () => {},
+      );
   };
 
   const downloadOnMount = useEffectEvent(() => {

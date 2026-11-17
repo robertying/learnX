@@ -11,7 +11,7 @@ import {
   needWhiteBackground,
 } from 'helpers/filePreview';
 import { formatDate, t } from 'helpers/i18n';
-import { displayFileSize } from 'helpers/filename';
+import { displayFileSize, hasLink } from 'helpers/filename';
 import Spinner from 'components/Spinner';
 import SafeArea from 'components/SafeArea';
 import { FileDetailParamList } from 'navigation/types';
@@ -31,7 +31,6 @@ import {
   FormText,
 } from 'components/Form';
 import { isAndroid, isApple, isElectron } from 'helpers/platform';
-import { hasLink } from 'services/files/desktop';
 
 type Props = NativeStackScreenProps<FileDetailParamList, 'FileDetail'>;
 

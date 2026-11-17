@@ -1,6 +1,5 @@
 import {
   copyText,
-  hasLink,
   openInDefaultApp,
   saveFileAs,
   saveTextAs,
@@ -52,13 +51,9 @@ it('saves text under a name the system allows', async () => {
   await expect(saveTextAs('c.ics', '')).resolves.toBe(false);
 });
 
-it('copies text, and tells which files have a link', async () => {
+it('copies text', async () => {
   await copyText('https://learn.tsinghua.edu.cn/f');
   expect(bridge.shell.copyText).toHaveBeenCalledWith(
     'https://learn.tsinghua.edu.cn/f',
   );
-  expect(hasLink({ downloadUrl: 'https://learn.tsinghua.edu.cn/f' })).toBe(
-    true,
-  );
-  expect(hasLink({ downloadUrl: 'file:///c/picked/a.pdf' })).toBe(false);
 });

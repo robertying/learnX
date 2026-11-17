@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { isElectron } from 'helpers/platform';
-import { bridge } from 'web/bridge';
 
 /**
  * Start at login in the Electron app: whether the system will start learnX
@@ -8,24 +7,29 @@ import { bridge } from 'web/bridge';
  * it isn't offered: on the phone, and on Linux. It's off until the user
  * turns it on, and only a change writes it to the system.
  */
+/** The bridge's login item (`web/bridge`), required only in the Electron app. */
+const loginItem = () =>
+  isElectron()
+    ? (require('web/bridge') as typeof import('web/bridge')).bridge().loginItem
+    : null;
+
 const useLoginItem = () => {
   const [enabled, setEnabled] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (!isElectron()) {
+    const item = loginItem();
+    if (!item) {
       return;
     }
     let current = true;
-    bridge()
-      .loginItem.get()
-      .then(
-        state => {
-          if (current && state.supported) {
-            setEnabled(state.enabled);
-          }
-        },
-        () => {},
-      );
+    item.get().then(
+      state => {
+        if (current && state.supported) {
+          setEnabled(state.enabled);
+        }
+      },
+      () => {},
+    );
     return () => {
       current = false;
     };
@@ -37,9 +41,10 @@ const useLoginItem = () => {
     }
     setEnabled(value);
     // A switch the system didn't take (a dev run never changes it) goes back.
-    const changed = await bridge()
-      .loginItem.set(value)
-      .catch(() => false);
+    const changed =
+      (await loginItem()
+        ?.set(value)
+        .catch(() => false)) ?? false;
     if (!changed) {
       setEnabled(!value);
     }

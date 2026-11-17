@@ -18,7 +18,6 @@ import { calendarErrorCode } from 'services/calendar/errors';
 import { exportTextFile } from 'services/files/share';
 import { t, TextKey } from 'helpers/i18n';
 import { isAndroid, isElectron } from 'helpers/platform';
-import { buildDesktopICS } from 'services/calendar/desktopExport';
 
 export interface ToastMessage {
   text: string;
@@ -213,7 +212,12 @@ export const allowAssignmentSync = async (
  * classes and assignments themselves.
  */
 export const exportCalendars = async (): Promise<ToastMessage | undefined> => {
-  const build = isElectron() ? buildDesktopICS : exportSyncedCalendarsToICS;
+  const build = isElectron()
+    ? // Required only here, so the phones' bundles leave it out.
+      (
+        require('services/calendar/desktopExport') as typeof import('services/calendar/desktopExport')
+      ).buildDesktopICS
+    : exportSyncedCalendarsToICS;
   try {
     const ics = await build();
     const name = 'learnX.ics';
