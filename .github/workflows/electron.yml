@@ -166,7 +166,7 @@ jobs:
         run: |
           bash scripts/write-e2e-env.sh
           if [ "$RUNNER_OS" = Linux ]; then
-            xvfb-run --auto-servernum pnpm e2e:electron --fully-parallel --shard="${RUN#Linux }/2"
+            xvfb-run --auto-servernum pnpm e2e:electron --fully-parallel --shard="${RUN#Linux }/2" --workers=2
           else
             pnpm e2e:electron
           fi
