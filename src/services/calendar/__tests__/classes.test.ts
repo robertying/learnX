@@ -372,11 +372,18 @@ describe('updateSyncedClasses', () => {
     expect(calendar.createEvent).toHaveBeenCalled();
   });
 
-  it('lists the saved weeks it follows, earliest first', () => {
+  it('lists the saved weeks it follows, earliest first, however they were saved', () => {
+    const first = calendarWeekQuery(week1, false).queryKey;
+    const classes = queryClient.getQueryData(first);
+    // The later week saved first
+    queryClient.removeQueries({ queryKey: first });
     setWeek(week2, []);
-    expect(syncedClassWeeks(now)).toEqual([
-      queryClient.getQueryData(calendarWeekQuery(week1, false).queryKey),
-      [],
-    ]);
+    queryClient.setQueryData(first, classes);
+    expect(syncedClassWeeks(now)).toEqual([classes, []]);
+  });
+
+  it('checks against the time it is called at by default', async () => {
+    setSetting('courseCalendarSync', false);
+    await expect(syncedClassesMissing()).resolves.toBe(false);
   });
 });

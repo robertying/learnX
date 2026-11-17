@@ -186,6 +186,10 @@ androidComponents {
     }
 }
 
+// JVM unit tests of the app's own Kotlin (src/test: the Material 3 dialogs),
+// with the local modules' setup; scripts/test-android.sh runs them.
+apply from: "../../modules/unit-tests.gradle"
+
 dependencies {
     implementation("com.facebook.react:react-android")
     implementation("com.facebook.react:hermes-android")

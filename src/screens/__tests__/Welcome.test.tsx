@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { render, screen, userEvent } from '@testing-library/react-native';
 import DeviceInfo from 'constants/DeviceInfo';
 import { useAppStateStore } from 'data/appState';
@@ -30,4 +31,14 @@ it("leaves out what the Mac doesn't have", async () => {
     ),
   ).toBeTruthy();
   isMac.mockRestore();
+});
+
+it('offers only the export on Windows and Linux', async () => {
+  jest.replaceProperty(Platform, 'OS', 'web');
+  await render(<Welcome {...screenProps({ navigation: {} })} />);
+  expect(
+    screen.getByLabelText(
+      `${t('welcomeDeadlinesTitle')}, ${t('welcomeDeadlinesBodyElectron')}`,
+    ),
+  ).toBeTruthy();
 });

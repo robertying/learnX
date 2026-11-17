@@ -284,6 +284,34 @@ describe('fetchCalendarRange', () => {
     });
   });
 
+  it('asks again for a saved week when fresh, and ends a failed week at the range', async () => {
+    queryClient.setQueryData(calendarWeekQuery('2026-09-14', false).queryKey, [
+      day('2026-09-15'),
+    ]);
+    getCalendar
+      .mockResolvedValueOnce({
+        events: [day('2026-09-16')],
+        failedRanges: [],
+      } as never)
+      .mockRejectedValueOnce(offline);
+
+    const result = await fetchCalendarRange(
+      dayjs('2026-09-14'),
+      dayjs('2026-09-23'),
+      false,
+      { fresh: true },
+    );
+
+    expect(getCalendar.mock.calls.map(([start]) => start)).toEqual([
+      '20260914',
+      '20260921',
+    ]);
+    expect(result).toEqual({
+      classes: [day('2026-09-16')],
+      failedRanges: [{ startDate: '20260921', endDate: '20260923' }],
+    });
+  });
+
   it('rejects when every week failed', async () => {
     getCalendar.mockRejectedValue(offline);
     await expect(
