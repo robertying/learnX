@@ -56,8 +56,10 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 
 从 [TUNA 镜像（推荐）](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/)或 [GitHub Releases](https://github.com/robertying/learnX/releases) 下载，App 会自动更新。
 
-- Windows（x64、ARM64）：下载 `learnX-Setup-X.X.X.exe`。安装程序没有签名，如果 SmartScreen 弹出提示，请点按“更多信息”，再点按“仍要运行”。
-- Linux（x64、ARM64）：Ubuntu 和 Debian 请安装 .deb 包（`sudo apt install ./learnX-X.X.X-amd64.deb`，ARM64 为 `arm64`）；在 Ubuntu 24.04 及更高版本上，AppImage 无法启用 Chromium 沙盒。其他发行版请使用 AppImage（先 `chmod +x`）。
+- Windows（x64、ARM64）：下载 .exe 安装程序。安装程序没有签名，如果 Windows 提示“Windows 已保护你的电脑”，请点按“更多信息”，再点按“仍要运行”。
+- Linux（x64、ARM64）：
+  - Ubuntu 和 Debian：按设备架构下载 .deb 包（x64 设备选文件名带 `amd64` 的，ARM64 设备选带 `arm64` 的），然后用 `sudo apt install ./文件名.deb` 安装。不建议在 Ubuntu 上用 AppImage：Ubuntu 24.04 起，AppImage 无法启用 Chromium 沙盒。
+  - 其他发行版：下载 AppImage，先用 `chmod +x` 加上执行权限，再直接运行。
 
 ## 功能
 
@@ -68,20 +70,17 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 ### 今天
 
 - 打开就能看到今天的课程、快截止的作业和各门课的新内容
-- 课程表：查看未来七天的课
 
 ### 课程内容
 
 - 随时查看老师发布的公告和附件
 - 课程文件随时预览、下载，也能分享到其他应用
 - 查看作业要求、截止时间、提交和批改情况；可直接提交作业，附件也能从其他应用分享过来
-- 作业没写完，草稿会自动保存
 - 加载过的内容，没有网络也能看
 
 ### 通知与提醒
 
 - 有新公告、新文件、新作业或出了成绩，第一时间通知你
-- 截止时间变了、开放补交、老师写了评语，也会告诉你
 - 作业截止前、上课前提醒你
 - 课表和作业可同步到日历，在 iPhone、iPad 和 Mac 上作业也可同步到提醒事项
 
@@ -89,30 +88,16 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 
 - 小组件：作业截止、下一节课（iPhone、iPad 和 Android）
 - 用聚焦搜索查找公告、作业和文件，或直接问 Siri 下一节课是什么（iPhone、iPad 和 Mac）
-- 全局搜索
 - 收藏、归档公告、作业和文件，收藏与网络学堂同步
 - 屏蔽不需要的课程
-- 切换学期
-- 深色模式
-- courseX 课程信息共享计划
-- 在 Windows 上驻留系统托盘、开机启动
 
 ## 隐私
 
-你的账号和课程内容只保存在你的设备上，只会发送到清华大学的服务器（开启课程信息共享时除外）。详见[隐私政策](docs/PRIVACY_POLICY_CN.md)。
+你的账号和课程内容保存在你的设备上，除了清华大学的服务器，不会发到其他地方。唯一的例外是课程信息共享：开启后，learnX 会把本学期课程的公开信息上传到 courseX，但不会上传任何关于你本人的信息。详见[隐私政策](docs/PRIVACY_POLICY_CN.md)。
 
 ## 开发
 
-```bash
-pnpm install
-cp .env.example .env   # 填写演示账号
-cd ios && LANG=en_US.UTF-8 bundle exec pod install && cd ..   # iOS / Mac
-pnpm start             # 启动 Metro
-pnpm ios               # 或 pnpm android
-pnpm electron          # Windows / Linux 版
-```
-
-完整的开发环境配置见 [CONTRIBUTING.md](CONTRIBUTING.md)：所需工具、用自己的团队为 iOS 签名、Android SDK 与模拟器、Windows 与 Linux 版、用演示账号测试，以及检查与 Pull Request。代码约定和架构写在 [AGENTS.md](AGENTS.md) 和各文件夹的 `AGENTS.md` 里，开发者和编程智能体都可以参考。
+开发环境的配置方法见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 ## 开源协议
 
@@ -140,25 +125,26 @@ Requires iOS / iPadOS 17.6, macOS 14.6, Android 10 or Windows 10 and later, or L
 - **iPhone, iPad and Mac:** [App Store](https://apps.apple.com/cn/app/learnx-thu-web-learning/id1459073115)
 - **Android:** [Google Play](https://play.google.com/store/apps/details?id=io.robertying.learnx), the [TUNA Mirror (recommended)](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/) or [GitHub Releases](https://github.com/robertying/learnX/releases). From the mirror or GitHub, download `learnX-arm64-v8a-vX.X.X.apk`, or `learnX-universal-vX.X.X.apk` if it doesn't install; these versions update from inside the app.
 - **Windows and Linux:** the [TUNA Mirror (recommended)](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/) or [GitHub Releases](https://github.com/robertying/learnX/releases). The app updates itself.
-  - Windows (x64, ARM64): `learnX-Setup-X.X.X.exe`. The installer is unsigned: if SmartScreen warns, choose "More info", then "Run anyway".
-  - Linux (x64, ARM64): on Ubuntu and Debian, install the .deb (`sudo apt install ./learnX-X.X.X-amd64.deb`, or `arm64`); on Ubuntu 24.04 and later, the AppImage runs without Chromium's sandbox. On other distributions, use the AppImage (`chmod +x` it first).
+  - Windows (x64, ARM64): download the .exe installer. It's unsigned, so if Windows says "Windows protected your PC", choose "More info", then "Run anyway".
+  - Ubuntu and Debian (x64, ARM64): download the .deb for your device (`amd64` in the file name for x64, `arm64` for ARM64) and install it with `sudo apt install ./<file>.deb`. Don't use the AppImage on Ubuntu: since Ubuntu 24.04, it can't turn on Chromium's sandbox.
+  - Other Linux distributions (x64, ARM64): download the AppImage, make it executable with `chmod +x`, and run it.
 
 ### Features
 
 learnX brings your Web Learning notices, assignments and files together, and tells you when something new is posted or a deadline is near.
 
-- **Today:** the day's classes, upcoming deadlines and new items in every course, and a schedule of the next seven days
-- **Course content:** notices with their attachments, file previews and downloads, assignment details, grading and submission, submission drafts, and offline reading
-- **Notifications and reminders:** new notices, files, assignments and grades, moved deadlines, late submission windows and grader comments, deadline and class reminders, and calendar sync (plus Reminders on iPhone, iPad and Mac)
-- **More:** widgets (iPhone, iPad and Android), Spotlight and Siri (iPhone, iPad and Mac), global search, favorites synced with Web Learning, archiving, hiding courses, switching semesters, dark mode, courseX Course Information Sharing, and the tray and Start at login on Windows
+- **Today:** the day's classes, upcoming deadlines and new items in every course
+- **Course content:** notices with their attachments, file previews and downloads, assignment details, grading and submission, and offline reading
+- **Notifications and reminders:** new notices, files, assignments and grades, deadline and class reminders, and calendar sync (plus Reminders on iPhone, iPad and Mac)
+- **More:** widgets (iPhone, iPad and Android), Spotlight and Siri (iPhone, iPad and Mac), favorites synced with Web Learning, archiving, and hiding courses
 
 ### Privacy
 
-Your account and course content stay on your device and only go to Tsinghua's servers, unless you turn on Course Information Sharing. See the [privacy policy](docs/PRIVACY_POLICY_EN.md).
+Your account and course content stay on your device and are sent nowhere except Tsinghua's servers. The one exception is Course Information Sharing: when you turn it on, learnX uploads public information about your courses this semester to courseX, and nothing about you. See the [privacy policy](docs/PRIVACY_POLICY_EN.md).
 
 ### Development
 
-See the commands above. [CONTRIBUTING.md](CONTRIBUTING.md) walks through the full setup (tools, iOS signing with your own team, Android SDK and emulator, the Windows and Linux app, testing with the mock login, checks and pull requests). Conventions and architecture are in [AGENTS.md](AGENTS.md) and the folders' own `AGENTS.md` files, written for both people and coding agents.
+See [CONTRIBUTING.md](CONTRIBUTING.md) to set up a development environment.
 
 ### License
 
