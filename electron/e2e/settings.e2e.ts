@@ -113,19 +113,31 @@ test.describe('where the system takes Start at Login', () => {
   // A packaged app's path: setLoginItemSettings, recorded by the stand-in.
   test.use({ appLaunch: { env: { LEARNX_ALLOW_LOGIN_ITEM: '1' } } });
 
-  test('turns it on and off', async ({ window, main, login }) => {
+  test('turns it on, reads it back after a relaunch, and off', async ({
+    window,
+    main,
+    login,
+    relaunch,
+  }) => {
     test.skip(process.platform === 'linux', 'no Start at login on Linux');
+    const options = process.platform === 'win32' ? { args: ['--hidden'] } : {};
     await login();
     await openSettings(window);
     await toggle(window, 'settings-start-at-login', true);
-    await toggle(window, 'settings-start-at-login', false);
-    expect((await main.record()).loginItems).toEqual(
-      process.platform === 'win32'
-        ? [
-            { openAtLogin: true, args: ['--hidden'] },
-            { openAtLogin: false, args: ['--hidden'] },
-          ]
-        : [{ openAtLogin: true }, { openAtLogin: false }],
-    );
+    expect((await main.record()).loginItems).toEqual([
+      { openAtLogin: true, ...options },
+    ]);
+
+    const next = await relaunch({
+      env: { LEARNX_ALLOW_LOGIN_ITEM: '1' },
+    });
+    await openSettings(next.window);
+    await expect(
+      toggleOf(next.window, 'settings-start-at-login'),
+    ).toBeChecked();
+    await toggle(next.window, 'settings-start-at-login', false);
+    expect((await next.main.record()).loginItems).toEqual([
+      { openAtLogin: false, ...options },
+    ]);
   });
 });

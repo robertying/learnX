@@ -52,6 +52,15 @@ const loginItemSupported = platform =>
   platform === 'win32' || platform === 'darwin';
 
 /**
+ * The login item's options, the same for reading and writing it: on Windows
+ * it's the Run key's command line, which only reads back as on when the
+ * arguments match.
+ * @param {string} platform
+ */
+const loginItemOptions = platform =>
+  platform === 'win32' ? { args: [HIDDEN_ARG] } : {};
+
+/**
  * Claims the single instance before the app is ready: a second launch (a
  * Jump List task, or opening learnX again) quits and hands its arguments to
  * this one. Returns false in the second launch.
@@ -305,7 +314,8 @@ const setUpDesktop = ({
     return {
       supported: loginItemSupported(platform),
       enabled:
-        loginItemSupported(platform) && app.getLoginItemSettings().openAtLogin,
+        loginItemSupported(platform) &&
+        app.getLoginItemSettings(loginItemOptions(platform)).openAtLogin,
     };
   });
   ipcMain.handle('loginItem:set', (event, enabled) => {
@@ -321,7 +331,7 @@ const setUpDesktop = ({
     }
     app.setLoginItemSettings({
       openAtLogin: Boolean(enabled),
-      ...(platform === 'win32' ? { args: [HIDDEN_ARG] } : {}),
+      ...loginItemOptions(platform),
     });
     return true;
   });
@@ -426,6 +436,7 @@ module.exports = {
   claimSingleInstance,
   openTargetOf,
   loginItemSupported,
+  loginItemOptions,
   DEFAULT_LABELS,
   HIDDEN_ARG,
   OPEN_ARG,

@@ -112,9 +112,28 @@ export const mainProcess = (app: ElectronApplication) => ({
         clipboard.writeText = async (written: string) => {
           record.clipboard.push(written);
         };
-        electronApp.setLoginItemSettings = (settings: unknown) => {
+        // Start at login as Windows keeps it, in the data folder so a
+        // relaunch reads it back: on only when read with the arguments it
+        // was written with.
+        const fs = process.getBuiltinModule('node:fs');
+        const loginItemFile = `${electronApp.getPath('userData')}/e2e-login-item.json`;
+        electronApp.setLoginItemSettings = (settings: Electron.Settings) => {
           record.loginItems.push(settings);
+          fs.writeFileSync(loginItemFile, JSON.stringify(settings));
         };
+        electronApp.getLoginItemSettings = ((
+          options?: Electron.LoginItemSettingsOptions,
+        ) => {
+          const written: Electron.Settings = fs.existsSync(loginItemFile)
+            ? JSON.parse(fs.readFileSync(loginItemFile, 'utf8'))
+            : { openAtLogin: false };
+          return {
+            openAtLogin:
+              !!written.openAtLogin &&
+              JSON.stringify(written.args ?? []) ===
+                JSON.stringify(options?.args ?? []),
+          };
+        }) as typeof electronApp.getLoginItemSettings;
         Menu.prototype.popup = function popup(
           this: Electron.Menu,
           options?: Electron.PopupOptions,

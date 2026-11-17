@@ -37,8 +37,29 @@ const fakeElectron = () => {
   const app = Object.assign(new EventEmitter(), {
     getPath: jest.fn(() => '/Users/me/Downloads'),
     getAppPath: jest.fn(() => '/repo/electron'),
-    getLoginItemSettings: jest.fn(() => ({ openAtLogin: false })),
-    setLoginItemSettings: jest.fn(),
+    // As Windows keeps it: a Run key's command line, which reads back as on
+    // only when asked with the same arguments.
+    loginItem: { openAtLogin: false, args: [] as string[] },
+    getLoginItemSettings: jest.fn(function (
+      this: { loginItem: { openAtLogin: boolean; args: string[] } },
+      options?: { args?: string[] },
+    ) {
+      const { openAtLogin, args } = this.loginItem;
+      return {
+        openAtLogin:
+          openAtLogin &&
+          JSON.stringify(args) === JSON.stringify(options?.args ?? []),
+      };
+    }),
+    setLoginItemSettings: jest.fn(function (
+      this: { loginItem: { openAtLogin: boolean; args: string[] } },
+      settings: { openAtLogin: boolean; args?: string[] },
+    ) {
+      this.loginItem = {
+        openAtLogin: settings.openAtLogin,
+        args: settings.args ?? [],
+      };
+    }),
     setUserTasks: jest.fn(),
     quit: jest.fn(),
   });
@@ -341,6 +362,23 @@ describe('Start at login', () => {
       args: [HIDDEN_ARG],
     });
   });
+
+  it.each(['win32', 'darwin'])(
+    'reads back what it wrote on %s',
+    async platform => {
+      const { invoke } = setUp({ platform });
+      await invoke('loginItem:set', true);
+      await expect(invoke('loginItem:get')).resolves.toEqual({
+        supported: true,
+        enabled: true,
+      });
+      await invoke('loginItem:set', false);
+      await expect(invoke('loginItem:get')).resolves.toEqual({
+        supported: true,
+        enabled: false,
+      });
+    },
+  );
 
   it('is left alone by a dev run unless allowed', async () => {
     const dev = setUp({ platform: 'darwin', dev: true });
