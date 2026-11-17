@@ -142,16 +142,14 @@ pnpm electron          # Windows / Linux 应用 the Windows and Linux app
 
 ---
 
-MIT licensed, with the following restrictions:
+MIT licensed, except for anyone who:
 
-For those
+- works or has worked for the Computer and Information Management Center of Tsinghua University (清华大学信息化技术中心); or
+- has a project funded by any institution affiliated with Tsinghua University.
 
-- who are working or have worked for Computer and Information Managing Center, Tsinghua University;
-- whose project is financially supported by any institute in relation to Tsinghua University.
+For them, any use of code from this project without the author's explicit permission is copyright infringement. "Use" includes copying, modifying or redistributing the source code or any derivative of this project, for commercial or non-commercial purposes.
 
-Any usage of code, without explicit authorizations from the author, from this project will be considered as infringement of copyright. The word "usage" may refer to making copies of, modifying, redistributing of the source code or any derivative of this project, for either commercial or non-commercial use.
-
-Open source code used in this project is subjected to their own licenses.
+Open-source code used in this project remains under its own licenses.
 
 ## ICP 备案 ICP Filing
 
