@@ -24,24 +24,45 @@ const CHECK_INTERVAL = 4 * 60 * 60 * 1000;
 const RETRY_DELAY = 30 * 60 * 1000;
 
 /**
- * Whether this run can update itself: a packaged build installed by NSIS on
- * Windows, or run as an AppImage on Linux (`APPIMAGE` is the AppImage's path;
- * a .deb is updated by its package manager), with the app-update.yml that
- * those targets write (an unpacked `--dir` build has none). Never a dev run,
- * and never on macOS, which has the Mac Catalyst app.
+ * How this run takes updates, if it does, from the app-update.yml its
+ * target wrote (an unpacked `--dir` build has none): `install`, downloading
+ * and installing them itself (NSIS on Windows; an AppImage on Linux, where
+ * `APPIMAGE` is its path), or `notify`, only saying one is out with a link to
+ * it (a .deb, which electron-builder marks in `package-type`: installing one
+ * needs an administrator's password, as Android's APKs need the user's
+ * consent). Never a dev run, and never on macOS, which has the Mac Catalyst
+ * app.
  *
- * @param {{ dev: boolean; platform: string; env: Record<string, string | undefined>; hasUpdateConfig: boolean }} run
+ * @param {{ dev: boolean; platform: string; env: Record<string, string | undefined>; hasUpdateConfig: boolean; packageType?: string }} run
+ * @returns {'install' | 'notify' | null}
  */
-const updatesSupported = ({ dev, platform, env, hasUpdateConfig }) =>
-  !dev &&
-  hasUpdateConfig &&
-  (platform === 'win32' || (platform === 'linux' && !!env.APPIMAGE));
+const updateMode = ({ dev, platform, env, hasUpdateConfig, packageType }) => {
+  if (dev || !hasUpdateConfig) {
+    return null;
+  }
+  if (platform === 'win32' || (platform === 'linux' && env.APPIMAGE)) {
+    return 'install';
+  }
+  return platform === 'linux' && packageType === 'deb' ? 'notify' : null;
+};
 
 /**
- * @typedef {{ version: string }} ReadyUpdate
+ * The .deb of `version` for this CPU, as packageConfig.cjs names it
+ * (electron-builder calls x64 amd64 for Debian).
+ * @param {string} version
+ * @param {string} arch Node's (`process.arch`)
+ */
+const debFileName = (version, arch) =>
+  `learnX-${version}-${arch === 'x64' ? 'amd64' : arch}.deb`;
+
+/**
+ * @typedef {{ version: string; download?: string }} ReadyUpdate
+ *   `download`: in `notify` mode, the installer to download
  *
  * @param {{
  *   autoUpdater: any;
+ *   mode?: 'install' | 'notify';
+ *   downloadUrl?: (version: string) => string;
  *   feed: { url: string; provider: new (...args: any[]) => any };
  *   onReady: (update: ReadyUpdate) => void;
  *   log?: (message: string) => void;
@@ -50,6 +71,8 @@ const updatesSupported = ({ dev, platform, env, hasUpdateConfig }) =>
  */
 const createUpdater = ({
   autoUpdater,
+  mode = 'install',
+  downloadUrl = () => '',
   feed,
   onReady,
   log = () => {},
@@ -68,8 +91,10 @@ const createUpdater = ({
     updateProvider: feed.provider,
     url: feed.url,
   });
-  autoUpdater.autoDownload = true;
-  autoUpdater.autoInstallOnAppQuit = true;
+  // Only a verified update file is ever read (the provider), so only a
+  // verified update downloads and installs on quit.
+  autoUpdater.autoDownload = mode === 'install';
+  autoUpdater.autoInstallOnAppQuit = mode === 'install';
   autoUpdater.allowPrerelease = false;
   autoUpdater.allowDowngrade = false;
   autoUpdater.logger = {
@@ -78,14 +103,25 @@ const createUpdater = ({
     warn: (/** @type {unknown} */ message) => log(`warn: ${message}`),
     error: (/** @type {unknown} */ message) => log(`error: ${message}`),
   };
-  autoUpdater.on(
-    'update-downloaded',
-    (/** @type {{ version: string }} */ info) => {
-      ready = { version: info.version };
-      log(`downloaded ${info.version}`);
-      onReady(ready);
-    },
-  );
+  if (mode === 'install') {
+    autoUpdater.on(
+      'update-downloaded',
+      (/** @type {{ version: string }} */ info) => {
+        ready = { version: info.version };
+        log(`downloaded ${info.version}`);
+        onReady(ready);
+      },
+    );
+  } else {
+    autoUpdater.on(
+      'update-available',
+      (/** @type {{ version: string }} */ info) => {
+        ready = { version: info.version, download: downloadUrl(info.version) };
+        log(`available ${info.version}`);
+        onReady(ready);
+      },
+    );
+  }
   // Offline, the mirror out of reach, or a release's files only partly
   // copied there (a 404, a signature not there yet, or a checksum that
   // doesn't match yet): tried again half an hour later, once.
@@ -127,14 +163,17 @@ const createUpdater = ({
       }, CHECK_INTERVAL);
     },
     check,
-    /** The update downloaded and waiting to be installed, if any. */
+    /**
+     * The update downloaded and waiting to be installed, or in `notify`
+     * mode the one out, if any.
+     */
     ready: () => ready,
     /**
      * Quits and installs the waiting update, then opens the app again (the
-     * installer runs silently, as on quit).
+     * installer runs silently, as on quit). Nothing in `notify` mode.
      */
     install: () => {
-      if (ready) {
+      if (ready && mode === 'install') {
         autoUpdater.quitAndInstall(true, true);
       }
     },
@@ -146,5 +185,6 @@ module.exports = {
   FIRST_CHECK_DELAY,
   RETRY_DELAY,
   createUpdater,
-  updatesSupported,
+  debFileName,
+  updateMode,
 };

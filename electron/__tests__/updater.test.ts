@@ -4,8 +4,10 @@ import {
   FIRST_CHECK_DELAY,
   RETRY_DELAY,
   createUpdater,
-  updatesSupported,
+  debFileName,
+  updateMode,
 } from '../updater.cjs';
+import { packageConfig } from '../packageConfig.cjs';
 
 /** electron-updater's autoUpdater, as far as updater.cjs uses it. */
 const fakeAutoUpdater = () =>
@@ -25,26 +27,74 @@ const feed = { url: 'https://mirror.test/LatestRelease/', provider: class {} };
 
 beforeEach(() => jest.useFakeTimers());
 
-describe('updatesSupported', () => {
+describe('updateMode', () => {
   const packaged = { dev: false, env: {}, hasUpdateConfig: true };
   it.each([
-    [{ ...packaged, platform: 'win32' }, true],
+    [{ ...packaged, platform: 'win32' }, 'install'],
     [
       {
         ...packaged,
         platform: 'linux',
         env: { APPIMAGE: '/a/learnX.AppImage' },
       },
-      true,
+      'install',
     ],
-    // A .deb: its package manager updates it.
-    [{ ...packaged, platform: 'linux' }, false],
-    [{ ...packaged, platform: 'darwin' }, false],
-    [{ ...packaged, dev: true, platform: 'win32' }, false],
+    // A .deb: its updates need an administrator, so it only says.
+    [{ ...packaged, platform: 'linux', packageType: 'deb' }, 'notify'],
+    [{ ...packaged, platform: 'linux' }, null],
+    [{ ...packaged, platform: 'darwin' }, null],
+    [{ ...packaged, dev: true, platform: 'win32' }, null],
     // An unpacked build (--dir).
-    [{ ...packaged, platform: 'win32', hasUpdateConfig: false }, false],
+    [{ ...packaged, platform: 'win32', hasUpdateConfig: false }, null],
   ])('%j: %s', (run, expected) => {
-    expect(updatesSupported(run)).toBe(expected);
+    expect(updateMode(run)).toBe(expected);
+  });
+});
+
+it('names the .deb as the build does', () => {
+  expect(debFileName('19.1.0', 'x64')).toBe('learnX-19.1.0-amd64.deb');
+  expect(debFileName('19.1.0', 'arm64')).toBe('learnX-19.1.0-arm64.deb');
+  expect(packageConfig().deb?.artifactName).toBe(
+    'learnX-${version}-${arch}.${ext}',
+  );
+});
+
+describe('in notify mode (a .deb)', () => {
+  const setUp = () => {
+    const autoUpdater = fakeAutoUpdater();
+    const onReady = jest.fn();
+    const updater = createUpdater({
+      autoUpdater,
+      feed,
+      mode: 'notify',
+      downloadUrl: version => `https://mirror.test/learnX-${version}-amd64.deb`,
+      onReady,
+    });
+    return { autoUpdater, onReady, updater };
+  };
+
+  it('downloads and installs nothing', () => {
+    const { autoUpdater } = setUp();
+    expect(autoUpdater).toMatchObject({
+      autoDownload: false,
+      autoInstallOnAppQuit: false,
+    });
+  });
+
+  it('says when a verified update is out, with its download', async () => {
+    const { autoUpdater, onReady, updater } = setUp();
+    autoUpdater.emit('update-available', { version: '19.1.0' });
+    const ready = {
+      version: '19.1.0',
+      download: 'https://mirror.test/learnX-19.1.0-amd64.deb',
+    };
+    expect(onReady).toHaveBeenCalledWith(ready);
+    expect(updater.ready()).toEqual(ready);
+    // Nothing to install, nor to check again for.
+    updater.install();
+    expect(autoUpdater.quitAndInstall).not.toHaveBeenCalled();
+    await updater.check();
+    expect(autoUpdater.checkForUpdates).not.toHaveBeenCalled();
   });
 });
 

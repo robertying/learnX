@@ -213,6 +213,8 @@ const zh: typeof en = {
   updateRestartMessage:
     'learnX将重新启动以安装更新。如果不重新启动，更新将在下次退出learnX时安装。',
   restart: '重新启动',
+  updateDebMessage:
+    '下载新的.deb安装包，然后打开它进行安装，或在终端中用sudo apt install安装。',
   updateInstalling: '正在安装',
   updateFailed: '更新失败',
   updateDownloadFailed: '更新下载失败。请检查网络连接后重试。',

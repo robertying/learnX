@@ -228,6 +228,8 @@ export default {
   updateRestartMessage:
     'learnX will restart to install the update. Otherwise, it installs the next time you quit learnX.',
   restart: 'Restart',
+  updateDebMessage:
+    'Download the new .deb, then open it to install it, or install it with sudo apt install in a terminal.',
   updateInstalling: 'Installing',
   updateFailed: "Couldn't Update learnX",
   updateDownloadFailed:

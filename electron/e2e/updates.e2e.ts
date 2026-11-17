@@ -194,6 +194,45 @@ test('downloads an update and restarts into it', async ({
   await expect.poll(async () => (await main.record()).installs).toBe(1);
 });
 
+test('tells a .deb install of an update, with its download', async ({
+  login,
+  relaunch,
+  dataDir,
+}) => {
+  const log: string[] = [];
+  const installer = writeRelease(path.join(dataDir, 'release'));
+  const served = await serve(path.join(dataDir, 'release'), log);
+  server = served.server;
+  await login();
+  const { window, main } = await relaunch({
+    env: { ...updateEnv(served.url, dataDir), LEARNX_UPDATE_MODE: 'notify' },
+  });
+  await main.stubInstall();
+  await openSettings(window);
+
+  const row = byId(window, 'settings-update');
+  await expect(row).toBeVisible({ timeout: 60_000 });
+  await expect(row).toContainText(VERSION);
+  // Checked against its signature, and nothing downloaded.
+  expect(log.some(line => line.startsWith(`GET /${release().yml}.sig`))).toBe(
+    true,
+  );
+  expect(log.some(line => line.startsWith(`GET /${installer}`))).toBe(false);
+
+  await row.click();
+  const dialog = window.getByRole('dialog');
+  await expect(dialog).toContainText(text('T_updateDebMessage'));
+  await expect(
+    dialog.getByRole('button', { name: exact('T_restart') }),
+  ).toHaveCount(0);
+  await dialog.getByRole('button', { name: exact('T_download') }).click();
+  const deb = `learnX-${VERSION}-${process.arch === 'x64' ? 'amd64' : process.arch}.deb`;
+  await expect
+    .poll(async () => (await main.record()).openedUrls)
+    .toEqual([`${served.url}${deb}`]);
+  expect((await main.record()).installs).toBe(0);
+});
+
 test('offers nothing when the download doesn’t match its checksum', async ({
   login,
   relaunch,

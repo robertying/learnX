@@ -90,6 +90,11 @@ export interface WebviewLoadRequest {
 /** An update of the Electron app, downloaded and waiting for a restart. */
 export interface BridgeUpdate {
   version: string;
+  /**
+   * Where to download it, for a build that doesn't install updates itself
+   * (a .deb): Settings links to it instead of restarting.
+   */
+  download?: string;
 }
 
 /** A notification for the main process to show (electron/notifications.cjs). */

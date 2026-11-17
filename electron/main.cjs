@@ -31,7 +31,7 @@ const { createFiles, runFileOperation } = require('./files.cjs');
 const { popupMenu } = require('./menus.cjs');
 const { mainFetch } = require('./net.cjs');
 const { createSecrets } = require('./secrets.cjs');
-const { createUpdater, updatesSupported } = require('./updater.cjs');
+const { createUpdater, debFileName, updateMode } = require('./updater.cjs');
 const { signedProvider } = require('./updateSignature.cjs');
 const {
   PARTITION,
@@ -531,20 +531,38 @@ const devUpdaterLog = dev ? /** @type {string[]} */ ([]) : undefined;
 if (devUpdaterLog) {
   Object.assign(globalThis, { learnxUpdaterLog: devUpdaterLog });
 }
-const updater =
-  // E2E runs (electron/e2e) turn checks off with LEARNX_NO_UPDATES, and a
-  // second launch only hands its arguments over.
-  !process.env.LEARNX_NO_UPDATES &&
-  primaryInstance &&
-  (devUpdateUrl ||
-    updatesSupported({
+/**
+ * How this run takes updates (updater.cjs): a packaged build's by how it was
+ * installed, a dev run's on the test server by `LEARNX_UPDATE_MODE` (`notify`
+ * for a .deb's). What kind of package it is, electron-builder writes into
+ * `package-type` (`deb`).
+ */
+const readPackageType = () => {
+  try {
+    return fs
+      .readFileSync(path.join(process.resourcesPath, 'package-type'), 'utf8')
+      .trim();
+  } catch {
+    return undefined;
+  }
+};
+const mode = devUpdateUrl
+  ? process.env.LEARNX_UPDATE_MODE === 'notify'
+    ? 'notify'
+    : 'install'
+  : updateMode({
       dev,
       platform: process.platform,
       env: process.env,
       hasUpdateConfig:
         !!packaged.updateUrl &&
         fs.existsSync(path.join(process.resourcesPath, 'app-update.yml')),
-    }))
+      packageType: readPackageType(),
+    });
+const updater =
+  // E2E runs (electron/e2e) turn checks off with LEARNX_NO_UPDATES, and a
+  // second launch only hands its arguments over.
+  !process.env.LEARNX_NO_UPDATES && primaryInstance && mode
     ? (() => {
         const { autoUpdater } = require('electron-updater');
         if (devUpdateUrl && devDataDir) {
@@ -590,10 +608,14 @@ const updater =
                 path.join(__dirname, '..', 'certs', 'electron-update.pem')
             : path.join(__dirname, 'electron-update.pem'),
         );
+        const feedUrl = devUpdateUrl || packaged.updateUrl || '';
         return createUpdater({
           autoUpdater,
+          mode,
+          downloadUrl: version =>
+            new URL(debFileName(version, process.arch), feedUrl).href,
           feed: {
-            url: devUpdateUrl || packaged.updateUrl || '',
+            url: feedUrl,
             provider: signedProvider({
               GenericProvider:
                 require('electron-updater/out/providers/GenericProvider')
