@@ -104,6 +104,8 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
       return;
     }
     navigation.setOptions({
+      // Android: the open field takes the title's place, beside Close.
+      ...(isAndroid() ? { headerTitle: () => null } : {}),
       headerSearchBarOptions: {
         ref: searchBarRef,
         placeholder: t('searchPlaceholder'),
@@ -115,8 +117,8 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
         tintColor: theme.colors.primary,
         onChangeText: e => setSearchQuery(e.nativeEvent.text),
         // Android: the field's ✕ (once the query is cleared) or Back closes
-        // the search, and so Search, as in Android's own apps: the open field
-        // covers the header's Close button. iOS and Mac have no cancel button
+        // the search, and so Search, as in Android's own apps. iOS and Mac
+        // have no cancel button
         // (patched out): it only did what the clear button in the field does,
         // and the modal has its own Close button.
         onClose: () => {

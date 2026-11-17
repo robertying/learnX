@@ -76,6 +76,7 @@ import {
 import { showChoices } from './choiceSheet';
 import ThemedHost from 'components/ThemedHost';
 import SystemIcon from 'components/SystemIcon';
+import { textStyles } from 'components/Text';
 import { playHaptic } from 'services/haptics';
 
 export * from './Form.shared';
@@ -138,7 +139,9 @@ const FormContent: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
   const list = (
     <LazyColumn
       verticalArrangement={{ spacedBy: 24 }}
-      contentPadding={{ start: 16, end: 16, top: 16, bottom: 16 }}
+      // A section's spacing below the last one, as on iOS, so it doesn't
+      // end right at the navigation bar.
+      contentPadding={{ start: 16, end: 16, top: 16, bottom: 40 }}
       // The Form ends above the keyboard (useKeyboardOverlap), so the list
       // keeps a focused number field in view as it shrinks.
       modifiers={[fillMaxSize(), ...withTestID(testID)]}
@@ -622,6 +625,9 @@ export const FormToggle: React.FC<FormToggleProps> = ({
   />
 );
 
+const { fontSize, lineHeight, letterSpacing } = textStyles.body;
+const numberText = { fontSize, lineHeight, letterSpacing };
+
 export const FormNumberField: React.FC<FormNumberFieldProps> = ({
   value,
   onValueChange,
@@ -646,7 +652,9 @@ export const FormNumberField: React.FC<FormNumberFieldProps> = ({
           keyboardOptions={{ keyboardType: 'number', imeAction: 'done' }}
           keyboardActions={{ onDone: release }}
           onFocusChanged={focused => reportFocus?.(focused ? release : null)}
-          textStyle={{ textAlign: 'right' }}
+          // The body size: in the row's trailing slot, the field would take
+          // the slot's caption-sized text.
+          textStyle={{ ...numberText, textAlign: 'right' }}
           onValueChange={parseNumberInput(onValueChange)}
           modifiers={[width(96)]}
         />

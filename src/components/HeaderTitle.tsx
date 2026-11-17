@@ -35,7 +35,9 @@ const HeaderTitle: React.FC<HeaderTitleProps> = ({
     <View
       style={{
         maxWidth: isAndroid() && !isWide ? 250 : undefined,
-        height: isAndroid() ? (isWide ? 64 : 56) : 44,
+        // As tall as the bar (Material 3's 64 dp), so the title's middle
+        // lines up with the back button's.
+        height: isAndroid() ? 64 : 44,
         justifyContent: 'center',
         alignItems: isAndroid() ? 'flex-start' : 'center',
       }}
