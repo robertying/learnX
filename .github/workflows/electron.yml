@@ -2,10 +2,13 @@ name: Electron
 
 # The Windows and Linux app (electron/). None of these checks is required: a
 # break here never blocks a mobile change, as mobile releases never wait on
-# the desktop app. Pull requests bundle the web build, run the `web` Jest
-# project and the Playwright E2E tests on Windows and Linux; main pushes and
-# manual runs also package the installers on Windows and Linux (unsigned,
-# uploaded as workflow artifacts, never published).
+# the desktop app. Pull requests bundle the web build and run the Playwright
+# E2E tests on Windows and Linux (ci.yml's JS checks run the `web` Jest
+# project); main pushes and manual runs also package the installers on
+# Windows and Linux from a web build of their own, without the E2E tests'
+# made-up mock login (uploaded as workflow artifacts, never published; the
+# update files are signed on the maintainer's Mac before a release, see the
+# release skill).
 on:
   pull_request:
   push:
@@ -29,19 +32,13 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Set up JS
-        id: install
         uses: ./.github/actions/setup-js
 
-      # Fluent UI and React Native Web in jsdom (`__tests__/web/` folders).
-      # JS checks in ci.yml runs it too; here it reports on its own.
-      - name: Web Jest project
-        run: pnpm test --selectProjects web
-
-      # The mock login, as the release bundles have it, so the E2E tests can
-      # log in; the web build inlines it as the mobile bundles do.
+      # A made-up mock login, so the E2E tests can log in; the web build
+      # inlines it as the mobile bundles do. For the E2E tests only: the
+      # Package jobs export their own.
       - name: Export web build
         id: export
-        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: |
           printf 'DUMMY_USERNAME=e2e\nDUMMY_PASSWORD=e2e\n' > .env
           pnpm exec expo export --platform web --output-dir build/electron/web
@@ -114,7 +111,6 @@ jobs:
     # version info (which electron-builder can't write from Linux without
     # Wine). Both CPU architectures per platform.
     name: Electron package ${{ matrix.name }} (not required)
-    needs: web
     if: github.event_name != 'pull_request'
     strategy:
       fail-fast: false
@@ -135,18 +131,26 @@ jobs:
       - name: Set up JS
         uses: ./.github/actions/setup-js
 
-      - name: Download web build
-        uses: actions/download-artifact@v8
-        with:
-          name: electron-web
-          path: build/electron/web
-
-      # Unsigned, and never published (package.mjs passes --publish never).
+      # Its own web build, never the E2E tests' (their made-up mock login
+      # would let anyone in with it): the mock login from the repository's
+      # DUMMY_USERNAME and DUMMY_PASSWORD secrets, as the mobile release
+      # bundles have it from .env, checked as theirs is; without the secrets,
+      # none.
       - name: Package
         shell: bash
-        run: pnpm electron:package ${{ matrix.flag }} --skip-export
+        run: |
+          rm -f .env
+          if [ -n "$DUMMY_USERNAME" ] && [ -n "$DUMMY_PASSWORD" ]; then
+            printf 'DUMMY_USERNAME=%s\nDUMMY_PASSWORD=%s\n' "$DUMMY_USERNAME" "$DUMMY_PASSWORD" > .env
+          fi
+          pnpm electron:package ${{ matrix.flag }}
+          if [ -f .env ]; then
+            node scripts/check-bundle-env.mjs build/electron/web/_expo/static/js/web/*.js
+          fi
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+          DUMMY_USERNAME: ${{ secrets.DUMMY_USERNAME }}
+          DUMMY_PASSWORD: ${{ secrets.DUMMY_PASSWORD }}
 
       - name: Upload installers
         uses: actions/upload-artifact@v7
