@@ -10,7 +10,6 @@ import {
 } from 'components/Form';
 import { t } from 'helpers/i18n';
 import { openLink } from 'helpers/openLink';
-import { isElectron } from 'helpers/platform';
 import { SettingsStackParams } from 'navigation/types';
 import packageJson from '../../package.json';
 
@@ -27,13 +26,9 @@ const contributors = [
 const copyright = `© ${new Date().getFullYear()} Rui Ying`;
 
 // The build, then the over-the-air update running, if any (the start of its
-// id, which the update's server and crash reports name it by). The Electron
-// app's builds are labeled Experimental.
+// id, which the update's server and crash reports name it by).
 const version = () => {
   const build = `${packageJson.version} (${DeviceInfo.buildNo()})`;
-  if (isElectron()) {
-    return `${build} · ${t('experimental')}`;
-  }
   return Updates.updateId && !Updates.isEmbeddedLaunch
     ? `${build} · ${Updates.updateId.slice(0, 8)}`
     : build;

@@ -35,16 +35,14 @@ it("reads the checkout's version and build number", () => {
   });
 });
 
-it('labels the About panel Experimental, in Chinese too', () => {
-  const info = { version: '19.0.0', build: '4544' };
-  expect(aboutPanelOptions(info, 'en-US', '/icon.png')).toEqual({
+it('shows the version and build number in the About panel', () => {
+  expect(
+    aboutPanelOptions({ version: '19.0.0', build: '4544' }, '/icon.png'),
+  ).toEqual({
     applicationName: 'learnX',
-    applicationVersion: '19.0.0 (4544) · Experimental',
+    applicationVersion: '19.0.0 (4544)',
     copyright: expect.stringMatching(/^© \d{4} Rui Ying$/),
     website: 'https://github.com/robertying/learnX',
     iconPath: '/icon.png',
   });
-  expect(aboutPanelOptions(info, 'zh-CN', '/icon.png').applicationVersion).toBe(
-    '19.0.0 (4544) · 实验版',
-  );
 });

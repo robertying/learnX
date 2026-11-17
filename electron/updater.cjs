@@ -1,9 +1,12 @@
 // Keeps the packaged app up to date with electron-updater: checks shortly
 // after launch and every few hours, downloads in the background, and installs
 // when the app quits, or at once when the user restarts from Settings
-// (`learnx.updates.install`). Builds are unsigned while the app is
-// experimental, so Windows checks no publisher signature on the installer;
-// electron-updater still checks its SHA-512 against the release's update file.
+// (`learnx.updates.install`). Updates come from the repo's latest GitHub
+// release (`v<version>`, the same as the mobile apps'), through
+// electron-updater's GitHub provider as app-update.yml names it
+// (packageConfig.cjs). Builds are unsigned, so Windows checks no publisher
+// signature on the installer; electron-updater still checks its SHA-512
+// against the release's update file (latest.yml, latest-linux.yml).
 
 /** The first check, after the window has had time to load. */
 const FIRST_CHECK_DELAY = 10 * 1000;
@@ -12,21 +15,23 @@ const CHECK_INTERVAL = 4 * 60 * 60 * 1000;
 
 /**
  * Whether this run can update itself: a packaged build installed by NSIS on
- * Windows, or run as an AppImage on Linux (electron-updater sets `APPIMAGE`'s
- * meaning; a .deb is updated by its package manager). Never a dev run, and
- * never on macOS, which has the Mac Catalyst app.
+ * Windows, or run as an AppImage on Linux (`APPIMAGE` is the AppImage's path;
+ * a .deb is updated by its package manager), with the app-update.yml that
+ * those targets write (an unpacked `--dir` build has none). Never a dev run,
+ * and never on macOS, which has the Mac Catalyst app.
  *
- * @param {{ dev: boolean; platform: string; env: Record<string, string | undefined> }} run
+ * @param {{ dev: boolean; platform: string; env: Record<string, string | undefined>; hasUpdateConfig: boolean }} run
  */
-const updatesSupported = ({ dev, platform, env }) =>
-  !dev && (platform === 'win32' || (platform === 'linux' && !!env.APPIMAGE));
+const updatesSupported = ({ dev, platform, env, hasUpdateConfig }) =>
+  !dev &&
+  hasUpdateConfig &&
+  (platform === 'win32' || (platform === 'linux' && !!env.APPIMAGE));
 
 /**
  * @typedef {{ version: string }} ReadyUpdate
  *
  * @param {{
  *   autoUpdater: any;
- *   feed: Record<string, unknown>;
  *   onReady: (update: ReadyUpdate) => void;
  *   log?: (message: string) => void;
  *   timers?: { setTimeout: typeof setTimeout; setInterval: typeof setInterval };
@@ -34,7 +39,6 @@ const updatesSupported = ({ dev, platform, env }) =>
  */
 const createUpdater = ({
   autoUpdater,
-  feed,
   onReady,
   log = () => {},
   timers = { setTimeout, setInterval },
@@ -47,7 +51,6 @@ const createUpdater = ({
   autoUpdater.autoInstallOnAppQuit = true;
   autoUpdater.allowPrerelease = false;
   autoUpdater.allowDowngrade = false;
-  autoUpdater.setFeedURL(feed);
   autoUpdater.logger = {
     info: () => {},
     debug: () => {},

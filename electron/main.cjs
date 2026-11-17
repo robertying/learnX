@@ -30,7 +30,6 @@ const { createFileStore } = require('./fileStore.cjs');
 const { createFiles } = require('./files.cjs');
 const { popupMenu } = require('./menus.cjs');
 const { mainFetch } = require('./net.cjs');
-const { createReleasesProvider } = require('./releasesProvider.cjs');
 const { createSecrets } = require('./secrets.cjs');
 const { createUpdater, updatesSupported } = require('./updater.cjs');
 const { PARTITION, createWebviews, hardenWebview } = require('./webviews.cjs');
@@ -452,32 +451,49 @@ const createWindow = (/** @type {Electron.Session} */ ses) => {
 
 // The version, the About panel and updates (buildInfo.cjs, updater.cjs). A
 // packaged build carries its build number in its package.json (written by
-// packageConfig.cjs), and where it looks for updates; a dev run
-// reads the checkout's, and checks for updates only at `LEARNX_UPDATE_URL`
-// (a local test server, updateServer.mjs).
-const packaged = /** @type {{ buildNumber?: string; updateUrl?: string }} */ (
+// packageConfig.cjs) and where it looks for updates in app-update.yml; a dev
+// run reads the checkout's, and checks for updates only on a local test
+// server named by `LEARNX_UPDATE_HOST` (updateServer.mjs).
+const packaged = /** @type {{ buildNumber?: string }} */ (
   require('./package.json')
 );
 const buildInfo = dev
   ? readBuildInfo(path.join(__dirname, '..'))
   : { version: app.getVersion(), build: packaged.buildNumber ?? '' };
-// E2E runs (electron/e2e) turn checks off with LEARNX_NO_UPDATES.
-const updateUrl = process.env.LEARNX_NO_UPDATES
-  ? undefined
-  : dev
-    ? process.env.LEARNX_UPDATE_URL
-    : packaged.updateUrl;
+const devUpdateHost = dev ? process.env.LEARNX_UPDATE_HOST : undefined;
 const updater =
-  updateUrl &&
-  (dev ||
-    updatesSupported({ dev, platform: process.platform, env: process.env }))
+  // E2E runs (electron/e2e) turn checks off with LEARNX_NO_UPDATES, and a
+  // second launch only hands its arguments over.
+  !process.env.LEARNX_NO_UPDATES &&
+  primaryInstance &&
+  (devUpdateHost ||
+    updatesSupported({
+      dev,
+      platform: process.platform,
+      env: process.env,
+      hasUpdateConfig: fs.existsSync(
+        path.join(process.resourcesPath, 'app-update.yml'),
+      ),
+    }))
     ? (() => {
         const { autoUpdater } = require('electron-updater');
-        if (dev && devDataDir) {
-          // electron-updater reads its cache folder's name from the update
-          // config electron-builder writes into packaged builds.
+        if (devUpdateHost && devDataDir) {
+          // What electron-builder writes into a packaged build's
+          // app-update.yml: the GitHub releases, here on the test server,
+          // and the cache folder's name.
           const config = path.join(devDataDir, 'app-update.yml');
-          fs.writeFileSync(config, 'updaterCacheDirName: learnX\n');
+          fs.writeFileSync(
+            config,
+            [
+              'provider: github',
+              'owner: robertying',
+              'repo: learnX',
+              `host: ${devUpdateHost}`,
+              'protocol: http',
+              'updaterCacheDirName: learnX',
+              '',
+            ].join('\n'),
+          );
           autoUpdater.updateConfigPath = config;
           autoUpdater.forceDevUpdateConfig = true;
           // The checkout's version, not this folder's package.json's (0.0.0),
@@ -493,13 +509,6 @@ const updater =
         }
         return createUpdater({
           autoUpdater,
-          feed: {
-            provider: 'custom',
-            updateProvider: createReleasesProvider(
-              require('electron-updater/out/providers/Provider'),
-            ),
-            url: updateUrl,
-          },
           onReady: update => {
             for (const win of BrowserWindow.getAllWindows()) {
               win.webContents.send('updates:ready', update);
@@ -522,9 +531,7 @@ ipcMain.on('updates:install', event => {
   updater?.install();
 });
 void app.whenReady().then(() => {
-  app.setAboutPanelOptions(
-    aboutPanelOptions(buildInfo, app.getLocale(), iconFile),
-  );
+  app.setAboutPanelOptions(aboutPanelOptions(buildInfo, iconFile));
   updater?.start();
 });
 

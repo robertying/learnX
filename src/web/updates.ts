@@ -38,4 +38,4 @@ export const installUpdate = () => bridge().updates.install();
 
 /** The GitHub release of an Electron app version (its tag's page). */
 export const releaseUrl = (version: string) =>
-  `https://github.com/robertying/learnX/releases/tag/electron-v${version}`;
+  `https://github.com/robertying/learnX/releases/tag/v${version}`;

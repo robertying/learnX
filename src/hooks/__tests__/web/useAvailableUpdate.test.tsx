@@ -39,7 +39,7 @@ describe('useAvailableUpdate', () => {
     announce({ version: '19.1.0' });
     expect(result.current).toEqual({
       version: '19.1.0',
-      url: 'https://github.com/robertying/learnX/releases/tag/electron-v19.1.0',
+      url: 'https://github.com/robertying/learnX/releases/tag/v19.1.0',
     });
     unmount();
     expect(bridge.updates.onReady).toHaveBeenCalledTimes(1);

@@ -1,20 +1,25 @@
 #!/usr/bin/env node
 // A local stand-in for learnX's GitHub releases, to try the Electron app's
-// updates (updater.cjs, releasesProvider.cjs) without publishing anything.
-// It serves the paths the app reads from github.com/robertying/learnX:
+// updates (updater.cjs) without publishing anything. It serves the paths
+// electron-updater's GitHub provider reads, for github.com/robertying/learnX
+// on a test host:
 //
 //   GET /robertying/learnX/releases.atom
 //       the release feed, one entry per folder in <dir> (named as its tag,
-//       such as electron-v19.0.1), newest first
+//       v19.0.1), newest first
+//   GET /api/v3/repos/robertying/learnX/releases/latest
+//   GET /robertying/learnX/releases/latest
+//       the latest release's tag, as JSON (the newest folder): the first is
+//       what the provider asks a host other than github.com
 //   GET /robertying/learnX/releases/download/<tag>/<file>
 //       a file in that folder (byte ranges too, for differential downloads)
 //
 //   node electron/updateServer.mjs <dir> [--port 8299]
 //
-// Point an app at it with `pnpm electron:package --update-url
-// http://localhost:8299/robertying/learnX` (a test build), or a dev run
-// with LEARNX_UPDATE_URL set to the same. "Publish" a release by copying a
-// build's installer and its latest*.yml (and .blockmap) into a new folder.
+// Point an app at it with `pnpm electron:package --update-host
+// localhost:8299` (a test build), or a dev run with LEARNX_UPDATE_HOST set to
+// the same. "Publish" a release by copying a build's installer, its
+// latest*.yml and .blockmap into a new folder named v<version>.
 import { createReadStream, existsSync, readdirSync, statSync } from 'node:fs';
 import { createServer } from 'node:http';
 import path from 'node:path';
@@ -82,6 +87,19 @@ export const createUpdateServer = (
     log(
       `${req.method} ${url.pathname}${req.headers.range ? ` ${req.headers.range}` : ''}`,
     );
+    if (
+      url.pathname === `${REPO}releases/latest` ||
+      url.pathname === `/api/v3/repos${REPO}releases/latest`
+    ) {
+      const latest = releases(dir)[0];
+      if (!latest) {
+        res.writeHead(404).end();
+        return;
+      }
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ tag_name: latest.tag }));
+      return;
+    }
     if (url.pathname === `${REPO}releases.atom`) {
       res.writeHead(200, { 'content-type': 'application/atom+xml' });
       res.end(releaseFeed(dir));

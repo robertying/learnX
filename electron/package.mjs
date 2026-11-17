@@ -7,10 +7,15 @@
 //   pnpm electron:package --win              Windows only (NSIS, x64 and arm64)
 //   pnpm electron:package --linux            Linux only (AppImage and .deb)
 //   pnpm electron:package --skip-export      reuse the last web export
+//   pnpm electron:package --dir              the unpacked apps only (x64 and
+//                                            arm64), no installers
 //
 // A test build for trying updates against electron/updateServer.mjs:
-//   pnpm electron:package --version 19.0.1 \
-//     --update-url http://localhost:8299/robertying/learnX
+//   pnpm electron:package --win --version 19.0.1 --update-host localhost:8299
+//
+// The installers need NSIS's and the AppImage tools, which electron-builder
+// downloads; on an Apple silicon Mac those run only with Rosetta, so build
+// them on Windows or in CI there, and use --dir on the Mac.
 import { spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import path from 'node:path';
@@ -28,7 +33,8 @@ const { values } = parseArgs({
     'skip-export': { type: 'boolean', default: false },
     version: { type: 'string' },
     build: { type: 'string' },
-    'update-url': { type: 'string' },
+    'update-host': { type: 'string' },
+    dir: { type: 'boolean', default: false },
   },
 });
 
@@ -59,13 +65,15 @@ const both = !values.win && !values.linux;
 
 await build({
   projectDir: electronDir,
-  // The config's targets (both CPU architectures) for each platform asked for.
-  win: values.win || both ? [] : undefined,
-  linux: values.linux || both ? [] : undefined,
+  // The config's targets (both CPU architectures) for each platform asked
+  // for, or with --dir the unpacked app for each architecture.
+  win: values.win || both ? (values.dir ? ['dir'] : []) : undefined,
+  linux: values.linux || both ? (values.dir ? ['dir'] : []) : undefined,
+  ...(values.dir ? { x64: true, arm64: true } : {}),
   config: packageConfig({
     version: values.version,
     build: values.build,
-    updateUrl: values['update-url'],
+    updateHost: values['update-host'],
   }),
   publish: 'never',
 });

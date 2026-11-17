@@ -1,8 +1,8 @@
-name: Electron (experimental)
+name: Electron
 
-# The experimental Windows and Linux app (electron/). None of these checks is
-# required: a break here never blocks a mobile change (the support tier in
-# electron/AGENTS.md). Pull requests bundle the web build, run the `web` Jest
+# The Windows and Linux app (electron/). None of these checks is required: a
+# break here never blocks a mobile change, as mobile releases never wait on
+# the desktop app. Pull requests bundle the web build, run the `web` Jest
 # project and the Playwright E2E tests on Windows and Linux; main pushes and
 # manual runs also package the installers on Windows and Linux (unsigned,
 # uploaded as workflow artifacts, never published).
@@ -21,7 +21,7 @@ permissions:
 
 jobs:
   web:
-    name: Web build (experimental, not required)
+    name: Electron web build (not required)
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -60,7 +60,7 @@ jobs:
     # The Playwright E2E tests (electron/e2e) in a dev run of the app on the
     # web build: mock login, Today, every tab. Linux runs them under a
     # virtual display.
-    name: E2E ${{ matrix.name }} (experimental, not required)
+    name: Electron E2E ${{ matrix.name }} (not required)
     needs: web
     strategy:
       fail-fast: false
@@ -109,7 +109,7 @@ jobs:
     # Each platform on its own runner, so Windows builds get their icon and
     # version info (which electron-builder can't write from Linux without
     # Wine). Both CPU architectures per platform.
-    name: Package ${{ matrix.name }} (experimental, not required)
+    name: Electron package ${{ matrix.name }} (not required)
     needs: web
     if: github.event_name != 'pull_request'
     strategy:
