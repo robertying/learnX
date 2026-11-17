@@ -273,16 +273,13 @@ it('shows the sync status at the top of the list, where it scrolls with it', asy
   await act(() => useAuthStore.setState(initialAuth));
 });
 
-it('opens Course X in the detail pane when there is one', async () => {
-  await renderList({ type: 'course' });
-  header().onCourseX();
-  expect(navigation.navigate).toHaveBeenCalledWith('CourseXStack');
-
+it('opens Course X over the whole window, even beside a detail pane', async () => {
   const push = jest.fn();
   jest.mocked(useDetailNavigator).mockReturnValue({ push } as never);
   await renderList({ type: 'course' });
   header().onCourseX();
-  expect(push).toHaveBeenCalledWith('CourseX');
+  expect(navigation.navigate).toHaveBeenCalledWith('CourseXStack');
+  expect(push).not.toHaveBeenCalled();
 });
 
 describe('menu bar commands', () => {

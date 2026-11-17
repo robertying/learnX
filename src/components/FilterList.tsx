@@ -212,13 +212,9 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   const handleHide = (isHidden: boolean, id: string) =>
     toggleCourseHidden(id, isHidden);
 
-  const handleNavigateCourseX = () => {
-    if (detailNavigator) {
-      detailNavigator.push('CourseX');
-    } else {
-      navigation.navigate('CourseXStack');
-    }
-  };
+  // Every course's CourseX, not the open item's, so over the whole window
+  // (a course's own opens beside it, from Course detail).
+  const handleNavigateCourseX = () => navigation.navigate('CourseXStack');
 
   useFilterListHeader({
     navigation,

@@ -81,14 +81,17 @@ const Modals =
 /**
  * Search, CourseX and a submission, over the whole window: page sheets on
  * iOS, iPadOS and Mac, and on Android above the split view (the root
- * navigator there), not inside the list's pane.
+ * navigator there), not inside the list's pane. A page about the whole app
+ * (Search, every course's CourseX) always opens here; one about the item open
+ * in a split view's detail pane (a course's CourseX, an assignment's
+ * submission) is pushed in that pane, and opens here only where there is none.
  */
 const renderModals = () => (
   <Modals.Group screenOptions={sheetOptions}>
     <Modals.Screen name="CourseXStack" component={CourseXStack} />
     <Modals.Screen name="SearchStack" component={SearchStack} />
-    {/* A sheet like Search; the draft is saved as it's written, so a swipe
-        down loses nothing (the screen holds it while uploading). */}
+    {/* The draft is saved as it's written, so a swipe down loses nothing
+        (the screen holds it while uploading). */}
     <Modals.Screen
       name="AssignmentSubmissionStack"
       component={AssignmentSubmissionStack}
