@@ -588,4 +588,7 @@ export default {
   whatsNew19DesignTitle: 'New Design',
   whatsNew19DesignBody:
     'A cleaner look that follows Android, in Tsinghua purple.',
+  whatsNew19DesktopTitle: 'Windows & Linux',
+  whatsNew19DesktopBody:
+    'Try the experimental desktop app for Windows and Linux, from the TUNA mirror or GitHub Releases.',
 };

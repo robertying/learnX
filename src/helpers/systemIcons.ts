@@ -331,6 +331,11 @@ export const systemIcons = {
   },
   library: { ios: 'shippingbox', android: 'package_2', windows: 'BoxRegular' },
   design: { ios: 'paintbrush', android: 'brush', windows: 'PaintBrushRegular' },
+  desktop: {
+    ios: 'desktopcomputer',
+    android: 'computer',
+    windows: 'DesktopRegular',
+  },
   // Header and toolbar buttons (the rest share the meanings above)
   back: {
     ios: 'chevron.backward',
@@ -489,6 +494,7 @@ export const materialCodepoints: Record<SystemIconAndroidName, number> = {
   close: 0xe5cd,
   cloud_off: 0xe2c1,
   code: 0xe86f,
+  computer: 0xe30a,
   copyright: 0xe90c,
   delete: 0xe872,
   done_all: 0xe877,

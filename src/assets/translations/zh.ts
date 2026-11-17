@@ -559,6 +559,9 @@ const zh: typeof en = {
     '在聚焦搜索中查找公告、作业和文件，或问Siri下一节课和作业截止。',
   whatsNew19DesignTitle: '全新设计',
   whatsNew19DesignBody: '更简洁的界面，遵循Android设计风格，换上清华紫。',
+  whatsNew19DesktopTitle: 'Windows与Linux',
+  whatsNew19DesktopBody:
+    '试用实验性的Windows和Linux桌面版，可从TUNA镜像或GitHub Releases下载。',
 };
 
 export default zh;
