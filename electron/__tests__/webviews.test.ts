@@ -278,7 +278,7 @@ describe('loadHtml', () => {
       attached: false,
       commands: [] as [string, Record<string, unknown>?][],
       attach() {
-        if (attachFails) {
+        if (attachFails || this.attached) {
           throw new Error('Another debugger is already attached');
         }
         this.attached = true;
@@ -382,6 +382,30 @@ describe('loadHtml', () => {
     expect(lastAsk(host)[0]).toBe('webview:ask');
     webviews.answer(host as never, lastAsk(host)[1].requestId, false);
     await expect(later).resolves.toEqual({ cancel: true });
+  });
+
+  it('ends a web view’s HTML load when another starts there', async () => {
+    const { webviews, host, guest, devtools, loaded } = setupHtml();
+    const show = (html: string) =>
+      webviews.loadHtml(
+        host as never,
+        guest as never,
+        html,
+        'https://learn.tsinghua.edu.cn/',
+      );
+    await expect(show('<p>first</p>')).resolves.toBe(true);
+    await expect(show('<p>second</p>')).resolves.toBe(true);
+    expect(loaded).toHaveLength(2);
+    expect(devtools.listenerCount('message')).toBe(1);
+    paused(devtools, 'a', 'https://learn.tsinghua.edu.cn/');
+    await flush();
+    expect(devtools.commands.at(-1)).toEqual([
+      'Fetch.fulfillRequest',
+      expect.objectContaining({
+        body: Buffer.from('<p>second</p>').toString('base64'),
+      }),
+    ]);
+    expect(devtools.attached).toBe(false);
   });
 
   it('gives up after a while, or when the web view goes', async () => {

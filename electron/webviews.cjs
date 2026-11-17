@@ -141,6 +141,12 @@ const createWebviews = ({ openExternal, timeoutMs = DECISION_TIMEOUT_MS }) => {
    * @type {Set<string>}
    */
   const htmlLoads = new Set();
+  /**
+   * The HTML load under way in each web view, by its id, ended (and its
+   * debugger detached) when another starts there: the newer one wins.
+   * @type {Map<number, () => void>}
+   */
+  const htmlLoadsByGuest = new Map();
 
   /**
    * Whether `guest` is a web view that `host` shows.
@@ -236,6 +242,7 @@ const createWebviews = ({ openExternal, timeoutMs = DECISION_TIMEOUT_MS }) => {
       }
       const url = new URL(baseUrl).href;
       const { debugger: devtools } = guest;
+      htmlLoadsByGuest.get(guest.id)?.();
       try {
         devtools.attach('1.3');
       } catch {
@@ -250,11 +257,15 @@ const createWebviews = ({ openExternal, timeoutMs = DECISION_TIMEOUT_MS }) => {
         finished = true;
         clearTimeout(timer);
         htmlLoads.delete(key);
+        if (htmlLoadsByGuest.get(guest.id) === finish) {
+          htmlLoadsByGuest.delete(guest.id);
+        }
         devtools.removeListener('message', onMessage);
         if (devtools.isAttached()) {
           devtools.detach();
         }
       };
+      htmlLoadsByGuest.set(guest.id, finish);
       const timer = setTimeout(finish, HTML_LOAD_TIMEOUT_MS);
       /**
        * @param {unknown} _event
