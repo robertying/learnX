@@ -86,7 +86,7 @@ const config = (options = {}) => {
       allowToChangeInstallationDirectory: true,
       shortcutName: 'learnX',
       uninstallDisplayName: 'learnX',
-      artifactName: 'learnX-Setup-${version}.${ext}',
+      artifactName: 'learnX-windows-v${version}.${ext}',
     },
     linux: {
       target: [
@@ -95,7 +95,9 @@ const config = (options = {}) => {
       ],
       icon: 'icons/icon.png',
       executableName: 'learnx',
-      artifactName: 'learnX-${version}-${arch}.${ext}',
+      // learnX-<target>-v<version>, as the Android APKs are named. ${arch} is
+      // x86_64 in an AppImage's name and amd64 in a .deb's (electron-builder).
+      artifactName: 'learnX-linux-${arch}-v${version}.${ext}',
       category: 'Education',
       synopsis: 'Tsinghua Web Learning',
       description: 'learnX for Tsinghua Web Learning.',
@@ -123,7 +125,7 @@ const config = (options = {}) => {
       packageName: 'learnx',
       // AppImages update themselves; a .deb is updated by installing the
       // next one.
-      artifactName: 'learnX-${version}-${arch}.${ext}',
+      artifactName: 'learnX-linux-${arch}-v${version}.${ext}',
     },
   };
 };

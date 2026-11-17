@@ -53,7 +53,7 @@ const updateMode = ({ dev, platform, env, hasUpdateConfig, packageType }) => {
  * @param {string} arch Node's (`process.arch`)
  */
 const debFileName = (version, arch) =>
-  `learnX-${version}-${arch === 'x64' ? 'amd64' : arch}.deb`;
+  `learnX-linux-${arch === 'x64' ? 'amd64' : arch}-v${version}.deb`;
 
 /**
  * @typedef {{ version: string; download?: string }} ReadyUpdate
