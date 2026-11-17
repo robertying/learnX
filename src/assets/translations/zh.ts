@@ -87,7 +87,7 @@ const zh: typeof en = {
   courseScheduleSyncNoCalendarPermissionAndroid:
     '课表同步失败：请在系统设置中允许learnX访问日历。',
   courseScheduleSyncRepetitiveError:
-    '课表同步失败：请确保已连接校园网后重试；如果仍然失败，请缩短同步的日期范围。',
+    '课表同步失败：请连接校园网后重试；如果仍然失败，请缩短同步的日期范围。',
   courseScheduleSyncNoCourse: '此日期范围内没有课，请在网络学堂查看课表。',
   openSystemSettings: '打开系统设置',
   deleteSyncedCalendarsAndReminders: '删除已同步的日历与提醒事项',
@@ -122,7 +122,7 @@ const zh: typeof en = {
   calendarAndReminderAccessCaption:
     '如果learnX无法访问日历或提醒事项，请在系统设置中允许。',
   exportSyncedCalendarsDescription:
-    '将已同步到日历的课表与作业导出为 .ics文件，可导入其他日历应用；不包含提醒事项。',
+    '将已同步到日历的课表与作业导出为.ics文件，可导入其他日历应用；不包含提醒事项。',
   calendarExportNoCalendarPermission:
     '导出失败：请在系统设置中允许learnX完全访问日历；如已允许，请重启learnX。',
   calendarExportNoCalendarPermissionAndroid:
@@ -173,7 +173,7 @@ const zh: typeof en = {
   fileOpensInDefaultApp: 'learnX无法显示此类文件，可用默认应用打开或另存一份。',
   startAtLogin: '登录时启动',
   unsandboxedNote:
-    'learnX正在没有Chromium沙盒的情况下运行，Ubuntu 24.04及以上版本中的AppImage即是如此。请改为安装.deb包，让网页在沙盒中运行。',
+    'learnX当前未启用Chromium沙盒（Ubuntu 24.04及更高版本上的AppImage均是如此）。请改为安装.deb包，让网页在沙盒中运行。',
   startAtLoginCaption:
     '登录电脑时在系统托盘中启动learnX，以便持续同步并发送提醒。关闭窗口后learnX仍在托盘中运行，可在托盘菜单中退出。',
   trayOpen: '打开learnX',
@@ -197,13 +197,13 @@ const zh: typeof en = {
   login: '登录',
   noNoticeContent: '无内容',
   itemNotFound: '内容不存在',
-  itemNotFoundDescription: '它可能已被移除，或属于其他学期。',
+  itemNotFoundDescription: '该内容可能已被移除，或属于其他学期。',
   searchPlaceholder: '公告、作业和文件',
   logout: '退出登录',
   logoutEllipsis: '退出登录…',
   logoutQuestion: '退出登录？',
   logoutConfirmation:
-    '此设备上的设置、收藏、归档和屏蔽的项目以及草稿将被清除。',
+    '此设备上的设置、收藏、已归档和已屏蔽的项目以及草稿将被清除。',
   foundNewVersion: '检测到新版本：v{version}',
   updateTitle: '更新到v{version}？',
   viewChangelog: '查看更新日志',
@@ -466,8 +466,8 @@ const zh: typeof en = {
   courseScheduleSyncOffCaption:
     '将本周和下周的{type}课程添加到日历，并随课表自动更新。',
   courseScheduleSyncOnCaption:
-    '本周和下周的{type}课程会随课表和以上设置自动更新。如需更多周，点按同步更多日期并选择日期，这些课程同样会自动更新。',
-  syncDatesBeijingCaption: '所选日期为北京时间的日期。',
+    '本周和下周的{type}课程会随课表和以上设置自动更新。如需同步更多周，请点按“同步更多日期”并选择日期，这些课程同样会自动更新。',
+  syncDatesBeijingCaption: '所选日期按北京时间计算。',
   graduateSchedule: '研究生',
   undergraduateSchedule: '本科生',
   courseInformationSharingOnCaption:

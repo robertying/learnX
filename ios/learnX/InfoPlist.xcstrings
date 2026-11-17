@@ -39,13 +39,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "learnX会将课表和作业同步到日历。它会读取日历列表以选择写入位置，并可删除它创建的日历。"
+            "value" : "learnX会将课表和作业同步到日历，读取日历列表以选择写入位置，并可删除其创建的日历。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "learnX会将课表和作业同步到日历。它会读取日历列表以选择写入位置，并可删除它创建的日历。"
+            "value" : "learnX会将课表和作业同步到日历，读取日历列表以选择写入位置，并可删除其创建的日历。"
           }
         }
       }
@@ -62,13 +62,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "learnX会将课表和作业同步到日历，并可删除它创建的日历。"
+            "value" : "learnX会将课表和作业同步到日历，并可删除其创建的日历。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "learnX会将课表和作业同步到日历，并可删除它创建的日历。"
+            "value" : "learnX会将课表和作业同步到日历，并可删除其创建的日历。"
           }
         }
       }
@@ -292,13 +292,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "learnX会将作业同步到提醒事项，并可删除它创建的列表。"
+            "value" : "learnX会将作业同步到提醒事项，并可删除其创建的列表。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "learnX会将作业同步到提醒事项，并可删除它创建的列表。"
+            "value" : "learnX会将作业同步到提醒事项，并可删除其创建的列表。"
           }
         }
       }
@@ -315,13 +315,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "learnX会将作业同步到提醒事项，并可删除它创建的列表。"
+            "value" : "learnX会将作业同步到提醒事项，并可删除其创建的列表。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "learnX会将作业同步到提醒事项，并可删除它创建的列表。"
+            "value" : "learnX会将作业同步到提醒事项，并可删除其创建的列表。"
           }
         }
       }

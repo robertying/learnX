@@ -307,9 +307,9 @@ const assignments: Record<number, Overlay> = {
   },
 };
 
-/** Titles and file names of the excellent homework of Homework 5. */
+/** Titles and file names of the excellent work shared for Homework 5. */
 const excellentTitle = 'Homework 5';
-const excellentLabel = 'Excellent Homework';
+const excellentLabel = 'Excellent Work';
 
 const files: Record<number, Overlay> = {
   2: { title: 'The Human Visual System' },

@@ -34,7 +34,7 @@ export default {
   yourSubmission: 'Your Submission',
   attachment: 'Attachment',
   answer: 'Answer',
-  excellentHomework: 'Excellent Homework',
+  excellentHomework: 'Excellent Work',
   description: 'Description',
   unsentDraft: 'Unsubmitted Draft',
   assignmentSubmission: 'Assignment Submission',
@@ -110,7 +110,7 @@ export default {
   exportSyncedCalendars: 'Export Synced Events (.ics)',
   turnOnNotifications: 'Turn On Notifications',
   notificationsOffCaption:
-    "Notifications for learnX are off in System Settings, so the ones turned on below can't show.",
+    "Notifications for learnX are off in System Settings, so the ones turned on below won't appear.",
   allowCalendarAccess: 'Allow Calendar Access',
   allowRemindersAccess: 'Allow Reminders Access',
   calendarOffCaption:
@@ -134,7 +134,7 @@ export default {
   calendarExportNoEvent:
     'Nothing to export. Sync the course schedule or assignments to your calendar first.',
   calendarExportFailed: "Couldn't export: {error}",
-  graduate: 'Graduate',
+  graduate: 'Graduate Student',
   syncCourseSchedule: 'Sync More Dates',
   classAlarm: 'Class Alert',
   classAlarmBefore: 'Alert Before (Minutes)',
@@ -147,9 +147,9 @@ export default {
   assignmentReminderAlarm: 'Reminder Alerts',
   assignmentReminderAlarmOffset: 'Alert Before (Minutes)',
   assignmentReminderAlarmCaption:
-    'Reminders shows an alert at the deadline and the set minutes before it, and lists each reminder at its earliest alert.',
+    'Reminders alerts you at the deadline and the set number of minutes before it, and lists each reminder at its earlier alert.',
   assignmentSyncDescription:
-    "Upcoming assignments are added and kept up to date whenever learnX gets assignments. Past-due assignments aren't added, and archived ones and those of hidden courses are removed.",
+    "Upcoming assignments are added and kept up to date each time learnX refreshes them. Past-due assignments aren't added, and archived assignments and assignments from hidden courses are removed.",
   assignmentCalendarSyncOffCaption:
     'Adds upcoming assignments to your calendar and keeps them up to date.',
   assignmentReminderSyncOffCaption:
@@ -328,7 +328,7 @@ export default {
   swipeNone: 'None',
   swipeArchive: 'Archive / Hide',
   swipeActionsFooter:
-    'Hide applies to courses: in the Courses list, this action hides or unhides the course.',
+    'In the Courses list, this action hides or unhides the course instead.',
   reorder: 'Reorder',
   select: 'Select',
   checkAll: 'Select All',
@@ -477,7 +477,7 @@ export default {
   listYesterday: 'Yesterday',
   listWeekdayFormat: 'dddd',
   listDateFormat: 'M/D/YY',
-  excellentHomeworkBy: 'Excellent homework by {name}',
+  excellentHomeworkBy: 'Excellent work by {name}',
   previouslyShared: '(previously shared)',
   selectedCount: '{count} selected',
   semesterName: '{term} {startYear}-{endYear}',
@@ -490,7 +490,7 @@ export default {
     "Adds this week's and next week's {type} classes to your calendar and keeps them up to date with the course schedule.",
   courseScheduleSyncOnCaption:
     "This week's and next week's {type} classes are kept up to date with the course schedule and the settings above. For more weeks, tap Sync More Dates and pick the dates; those classes are kept up to date too.",
-  syncDatesBeijingCaption: 'The dates you pick are Beijing dates.',
+  syncDatesBeijingCaption: 'The dates you pick are in Beijing time.',
   graduateSchedule: 'graduate',
   undergraduateSchedule: 'undergraduate',
   courseInformationSharingOnCaption:
@@ -514,7 +514,7 @@ export default {
   downloadsDeleteCourse: 'Delete Downloaded Files?',
   downloadsOneFile: '1 file',
   downloadsFileCount: '{count} files',
-  downloadsDeletedCourse: 'Deleted downloaded files of {course}',
+  downloadsDeletedCourse: 'Deleted downloads for {course}',
   today: 'Today',
   todayDateFormat: 'ddd, MMM D',
   todayWeek: 'Week {week}',

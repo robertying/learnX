@@ -46,7 +46,7 @@ Requires iOS / iPadOS 17.6, macOS 14.6, Android 10 or Windows 10 and later, or L
 
 - **[TUNA 镜像（推荐） TUNA Mirror (Recommended)](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/)**
   - 默认下载 Download `learnX-arm64-v8a-vX.X.X.apk`
-  - 若安装失败，请尝试 Download if there's an issue installing `learnX-universal-vX.X.X.apk`
+  - 若安装失败，请改用 If it doesn't install, download `learnX-universal-vX.X.X.apk`
 
 - [GitHub Releases](https://github.com/robertying/learnX/releases)
 
@@ -60,15 +60,15 @@ Download from the [TUNA Mirror (Recommended)](https://mirrors.tuna.tsinghua.edu.
 
   Windows (x64, ARM64): `learnX-Setup-X.X.X.exe`. The installer is unsigned: if SmartScreen warns, choose "More info", then "Run anyway".
 
-- Linux（x64、ARM64）：Ubuntu / Debian 请安装 .deb 包（`sudo apt install ./learnX-X.X.X-amd64.deb`，ARM64 为 `arm64`），Ubuntu 24.04 及以上版本请使用 .deb 包；其他发行版请使用 AppImage（先 `chmod +x`）。
+- Linux（x64、ARM64）：Ubuntu / Debian 请安装 .deb 包（`sudo apt install ./learnX-X.X.X-amd64.deb`，ARM64 为 `arm64`），在 Ubuntu 24.04 及以上版本上，AppImage 无法使用 Chromium 沙盒；其他发行版请使用 AppImage（先 `chmod +x`）。
 
-  Linux (x64, ARM64): on Ubuntu and Debian, install the .deb (`sudo apt install ./learnX-X.X.X-amd64.deb`, or `arm64`), as Ubuntu 24.04 and later should; on other distributions, use the AppImage (`chmod +x` it first).
+  Linux (x64, ARM64): on Ubuntu and Debian, install the .deb (`sudo apt install ./learnX-X.X.X-amd64.deb`, or `arm64`); on Ubuntu 24.04 and later, the AppImage runs without Chromium's sandbox. On other distributions, use the AppImage (`chmod +x` it first).
 
 ## 功能 Features
 
 > 注意：本应用只适用于清华大学学生。
 >
-> Note: the App is for Tsinghua University students only.
+> Note: learnX is for Tsinghua University students only.
 
 ### 基础功能 Basic
 
@@ -84,7 +84,7 @@ Download from the [TUNA Mirror (Recommended)](https://mirrors.tuna.tsinghua.edu.
 
   Preview or download course files, and share them to other apps.
 
-- 一览作业要求，不错过任何 deadline，实时查询作业提交与批改情况。提交作业，可从其他应用分享文件作为附件。
+- 一览作业要求，不错过任何截止时间，实时查询作业提交与批改情况。提交作业，可从其他应用分享文件作为附件。
 
   See every assignment and its deadline, and check submission and grading status. Submit assignments, attaching files shared from other apps.
 
@@ -102,8 +102,8 @@ Download from the [TUNA Mirror (Recommended)](https://mirrors.tuna.tsinghua.edu.
 - 归档内容 Archiving notices, files and assignments
 - 屏蔽课程 Hiding courses
 - 全局搜索 Global search
-- 切换学期 Switching among semesters
-- 暗黑模式 Dark mode
+- 切换学期 Switching semesters
+- 深色模式 Dark mode
 
 ## 隐私 Privacy
 
