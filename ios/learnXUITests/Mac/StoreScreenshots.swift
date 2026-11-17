@@ -8,16 +8,6 @@ import XCTest
 /// as its context menu.
 @MainActor
 final class StoreScreenshots: LearnXUITestCase {
-  // Mock data (src/data/mock.ts) the shots open, as in scripts/e2e-env.mjs.
-  private let notice = "第一次大作业"
-  private let otherNotice = "请按照助教的安排交作业"
-  private let assignment = "第一次大作业"
-  private let file = "人类视觉系统"
-  private let course = "视听信息系统导论"
-  private let otherCourse = "量子与统计"
-  private let noticeBody = "第一次大作业已布"
-  private let searchTerm = "作业"
-
   func testTakesStoreScreenshots() throws {
     // Every shot in one test: more than the 3 minutes scripts/e2e-mac.sh allows each test.
     executionTimeAllowance = 600
@@ -25,41 +15,37 @@ final class StoreScreenshots: LearnXUITestCase {
 
     // 1 Notices with a notice open
     try open(tab: "tab-notices")
-    try waitFor(containing: notice).click()
-    try waitFor(id: "notice-detail")
-    try waitFor(containing: noticeBody, timeout: 15)
+    try open(card: "notice-card", "MOCK_STORE_NOTICE", detail: "notice-detail")
+    try waitFor(text: "MOCK_STORE_NOTICE_BODY", timeout: 15)
     try shot("01-notices")
 
     // 2 Another notice's actions
-    try waitFor(containing: otherNotice).rightClick()
+    try waitFor(card: "notice-card", "MOCK_NOTICE").rightClick()
     XCTAssertTrue(app.menuItems.firstMatch.waitForExistence(timeout: 5), "no card actions")
     try shot("02-notices-actions")
     app.typeKey(.escape, modifierFlags: [])
 
     // 3 All assignments with one open
     try open(tab: "tab-assignments")
-    try filter("全部")
-    try waitFor(containing: assignment).click()
-    try waitFor(id: "assignment-detail")
+    try filter("T_all")
+    try open(card: "assignment-card", "MOCK_STORE_ASSIGNMENT", detail: "assignment-detail")
     try shot("03-assignments")
 
     // 4 Submitting it
-    try waitFor(label: "提交").click()
+    try waitFor(label: "T_submit").click()
     try waitFor(id: "assignmentSubmission")
     try shot("04-submission")
 
     // 5 Files with a PDF open
     try open(tab: "tab-files")
-    try waitFor(containing: file).click()
-    try waitFor(id: "file-detail")
-    try waitForAbsence(id: "file-loading", timeout: 60)
+    try open(card: "file-card", "MOCK_STORE_FILE", detail: "file-detail")
+    waitForAbsence(id: "file-loading", timeout: 60)
     try shot("05-files")
 
     // 6 Courses with one open and another's actions
     try open(tab: "tab-courses")
-    try waitFor(containing: course).click()
-    try waitFor(id: "course-detail")
-    try waitFor(containing: otherCourse).rightClick()
+    try open(card: "course-card", "MOCK_STORE_COURSE", detail: "course-detail")
+    try waitFor(card: "course-card", "MOCK_COURSE").rightClick()
     XCTAssertTrue(app.menuItems.firstMatch.waitForExistence(timeout: 5), "no card actions")
     try shot("06-courses")
     app.typeKey(.escape, modifierFlags: [])
@@ -68,30 +54,26 @@ final class StoreScreenshots: LearnXUITestCase {
     try open(tab: "tab-notices")
     let field = app.searchFields.firstMatch
     if !field.waitForExistence(timeout: 2) {
-      try waitFor(label: "搜索").click()
+      try waitFor(label: "T_search").click()
     }
     XCTAssertTrue(field.waitForExistence(timeout: 5), "no search field")
     field.click()
     // Pasted: typing CJK goes through the input method.
-    UIPasteboard.general.string = searchTerm
+    UIPasteboard.general.string = value("STORE_SEARCH_TERM")
     field.typeKey("v", modifierFlags: .command)
     UIPasteboard.general.string = ""
-    try waitFor(containing: assignment)
+    try waitFor(card: "assignment-card", "MOCK_STORE_ASSIGNMENT")
     try shot("07-search")
     app.typeKey(.escape, modifierFlags: [])
 
     // 8 Settings with the calendar page open
-    try open(tab: "tab-settings")
-    try waitFor(containing: "日历与提醒事项").click()
-    try waitFor(label: "日历与提醒事项", timeout: 5)
+    try openSetting("settings-calendar", page: "calendar-settings")
     try shot("08-calendar")
   }
 
   /// Opening Course Information Sharing once marks it seen, which hides the Settings badge.
   private func clearSettingsBadge() throws {
-    try open(tab: "tab-settings")
-    try waitFor(containing: "课程信息共享计划").click()
-    try waitFor(label: "课程信息共享计划", timeout: 5)
+    try openSetting("settings-course-sharing", page: "course-information-sharing")
   }
 
   /// Saves the app's window, once it has settled, as an attachment kept even when the test passes.
@@ -102,11 +84,6 @@ final class StoreScreenshots: LearnXUITestCase {
     attachment.name = name
     attachment.lifetime = .keepAlways
     add(attachment)
-  }
-
-  private func waitForAbsence(id: String, timeout: TimeInterval) throws {
-    let gone = expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: element(id: id))
-    wait(for: [gone], timeout: timeout)
   }
 }
 #endif

@@ -29,7 +29,9 @@ module.exports = {
   ],
   ignorePaths: [
     'ios/learnX/Expo.plist',
-    // Native tests don't ship.
+    // Native tests don't ship, nor do the patches' notes and tests.
+    'patches/README.md',
+    'patches/__tests__/**/*',
     'ios/learnXTests/**/*',
     'ios/learnXUITests/**/*',
     'modules/*/ios/Tests/**/*',

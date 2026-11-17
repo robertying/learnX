@@ -11,7 +11,8 @@
 // - `STORE_SEARCH_TERM`: what the store screenshots (.maestro/store/), which
 //   are in Chinese, search for.
 //
-// scripts/e2e.sh passes each line to Maestro with -e. Node strips the types.
+// scripts/e2e.sh passes each line to Maestro with -e, scripts/e2e-mac.sh to
+// the Mac app's UI tests as an environment variable. Node strips the types.
 import { readdirSync, readFileSync } from 'node:fs';
 import { registerHooks } from 'node:module';
 import { dirname, join } from 'node:path';
@@ -141,8 +142,9 @@ if (
   );
 }
 
-// The translation keys the flows use, in every folder of .maestro/, and the
-// Electron app's Playwright tests (electron/e2e, `text('T_<key>')`).
+// The translation keys the flows use, in every folder of .maestro/, the
+// Electron app's Playwright tests (electron/e2e, `text('T_<key>')`) and the
+// Mac app's UI tests (ios/learnXUITests/Mac, `value("T_<key>")`).
 const maestro = join(root, '.maestro');
 const flows = readdirSync(maestro, { recursive: true })
   .map(name => join(maestro, name))
@@ -151,12 +153,19 @@ const electronE2E = join(root, 'electron', 'e2e');
 const specs = readdirSync(electronE2E)
   .map(name => join(electronE2E, name))
   .filter(path => path.endsWith('.ts'));
+const macTests = join(root, 'ios', 'learnXUITests', 'Mac');
+const macSources = readdirSync(macTests)
+  .map(name => join(macTests, name))
+  .filter(path => path.endsWith('.swift'));
 const keys = new Set([
   ...flows.flatMap(path =>
     [...readFileSync(path, 'utf8').matchAll(/\$\{T_(\w+)\}/g)].map(m => m[1]),
   ),
   ...specs.flatMap(path =>
     [...readFileSync(path, 'utf8').matchAll(/'T_(\w+)'/g)].map(m => m[1]),
+  ),
+  ...macSources.flatMap(path =>
+    [...readFileSync(path, 'utf8').matchAll(/"T_(\w+)"/g)].map(m => m[1]),
   ),
 ]);
 

@@ -3,7 +3,7 @@
 # can't drive Mac Catalyst), logged in with the mock account from .env
 # (DUMMY_USERNAME / DUMMY_PASSWORD).
 #
-#   scripts/e2e-mac.sh [-only-testing:learnXUITests/LearnXUITests/<test>]
+#   scripts/e2e-mac.sh [-only-testing:learnXUITests/<class>[/<test>]]
 #
 # The tests move the pointer and type on the keyboard, so leave the Mac alone
 # while they run. They run the Release app (bundled JS, as it ships) and log
@@ -33,6 +33,19 @@ if pgrep -f '/learnX\.app/Contents/MacOS/learnX$' >/dev/null; then
   exit 1
 fi
 
+# Labels and mock texts the tests match (`value("T_<key>")`), from the
+# translations and mock data, as the Maestro flows get them. TEST_RUNNER_-
+# prefixed variables reach the test runner without the prefix.
+count=0
+while IFS= read -r line; do
+  export "TEST_RUNNER_${line%%=*}=${line#*=}"
+  count=$((count + 1))
+done < <(node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/e2e-env.mjs)
+if [ "$count" -eq 0 ]; then
+  echo "scripts/e2e-env.mjs failed" >&2
+  exit 1
+fi
+
 # As every E2E build (scripts/e2e-build.sh): takes a test login from launch
 # arguments and puts a failed login's reason first in its toast, for the login
 # server check (LoginServerUITests).
@@ -50,7 +63,6 @@ case " $* " in
 *) set -- -skip-testing:learnXUITests/StoreScreenshots "$@" ;;
 esac
 
-# TEST_RUNNER_-prefixed variables reach the test runner without the prefix.
 TEST_RUNNER_E2E_USERNAME="$username" TEST_RUNNER_E2E_PASSWORD="$password" \
   xcodebuild test \
   -workspace ios/learnX.xcworkspace \
