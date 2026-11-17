@@ -2,7 +2,7 @@ import { queryOptions, useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { semesterWeek } from '@robertying/thu-learn-lib';
 import { coursesQuery, schoolSemesterQuery } from 'data/queries';
-import { queryClient } from 'data/queryClient';
+import { forgetQueries, queryClient } from 'data/queryClient';
 import { queryKeys } from 'data/queryKeys';
 import { useLoggedIn } from 'data/auth';
 import { dataSource } from 'data/source';
@@ -58,9 +58,30 @@ const fetchCalendar = async (
   );
 };
 
+/** The Monday (YYYY-MM-DD) of the Beijing week under way at `now`. */
+export const currentWeekStart = (now = Date.now()) =>
+  startOfWeek(beijingDate(now)).format('YYYY-MM-DD');
+
+/**
+ * Forgets the saved timetable weeks that ended before this one, of either
+ * timetable: Today, Up Next, the reminders and the calendar sync only read
+ * this week and later ones, and Sync fetches the days it writes afresh.
+ */
+const forgetPastWeeks = (now = Date.now()) => {
+  const thisWeek = currentWeekStart(now);
+  forgetQueries(
+    key =>
+      key[0] === queryKeys.calendarAll[0] &&
+      typeof key[1] === 'string' &&
+      key[1] < thisWeek,
+  );
+};
+
 /**
  * The classes the registrar lists for the week starting `weekStart`
  * (YYYY-MM-DD, a Monday). A failed week keeps what was last fetched for it.
+ * Each week fetched drops the saved weeks that are over (`forgetPastWeeks`),
+ * so they don't pile up.
  */
 export const calendarWeekQuery = (weekStart: string, graduate: boolean) =>
   queryOptions({
@@ -70,14 +91,17 @@ export const calendarWeekQuery = (weekStart: string, graduate: boolean) =>
     // Offline, a retry only keeps the spinner going; the saved week shows.
     retry: (failures, err) => failures < 2 && !isNetworkError(err),
     retryDelay: attempt => Math.min(1000 * 2 ** attempt, 10 * 1000),
-    queryFn: () =>
-      calendarFetches(() =>
+    queryFn: async () => {
+      const classes = await calendarFetches(() =>
         fetchCalendar(
           dayjs(weekStart).format('YYYYMMDD'),
           dayjs(weekStart).add(6, 'day').format('YYYYMMDD'),
           graduate,
         ),
-      ),
+      );
+      forgetPastWeeks();
+      return classes;
+    },
   });
 
 /** Days the registrar's calendar couldn't be fetched for (YYYYMMDD). */

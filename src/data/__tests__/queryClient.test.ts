@@ -1,5 +1,5 @@
 import type { AppStateStatus } from 'react-native';
-import { CancelledError } from '@tanstack/react-query';
+import { CancelledError, QueryObserver } from '@tanstack/react-query';
 
 /**
  * Saving lists changed in place. The module listens to the app state as it
@@ -16,6 +16,7 @@ jest
 
 const {
   clearQueryCache,
+  forgetQueries,
   queryClient,
   queryPersister,
   saveQuerySoon,
@@ -110,4 +111,39 @@ it('deletes a saved response too old to show', async () => {
   // Gone from storage, not just skipped.
   jest.setSystemTime(now);
   expect(await saved()).toBeUndefined();
+});
+
+it('forgets responses in memory and on disk, except one in use', async () => {
+  const week = (monday: string) => ['calendar', monday, 'undergraduate'];
+  for (const monday of ['2026-09-07', '2026-09-14', '2026-09-21']) {
+    await queryClient.fetchQuery({
+      queryKey: week(monday),
+      queryFn: () => [monday],
+    });
+  }
+  await queryClient.fetchQuery({ queryKey: key, queryFn: () => ['notice'] });
+  await jest.advanceTimersByTimeAsync(0);
+  // One a screen shows, and one being fetched again.
+  const shown = new QueryObserver(queryClient, {
+    queryKey: week('2026-09-14'),
+    queryFn: () => ['2026-09-14'],
+    staleTime: Infinity,
+  }).subscribe(() => {});
+  const refetching = queryClient.fetchQuery({
+    queryKey: week('2026-09-21'),
+    queryFn: () => new Promise<string[]>(() => {}),
+    staleTime: 0,
+  });
+  void refetching.catch(() => {});
+
+  forgetQueries(queryKey => queryKey[0] === 'calendar');
+
+  expect(queryClient.getQueryData(week('2026-09-07'))).toBeUndefined();
+  expect(queryClient.getQueryData(week('2026-09-14'))).toEqual(['2026-09-14']);
+  expect(queryClient.getQueryData(week('2026-09-21'))).toEqual(['2026-09-21']);
+  shown();
+  // The next launch loads what was kept, and nothing the filter left out.
+  expect(await saved()).toEqual(['notice']);
+  expect(queryClient.getQueryData(week('2026-09-07'))).toBeUndefined();
+  expect(queryClient.getQueryData(week('2026-09-14'))).toEqual(['2026-09-14']);
 });

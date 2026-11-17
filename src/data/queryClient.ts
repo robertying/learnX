@@ -1,6 +1,9 @@
 import { AppState } from 'react-native';
 import { hashKey, QueryClient, type QueryKey } from '@tanstack/react-query';
-import { experimental_createQueryPersister } from '@tanstack/query-persist-client-core';
+import {
+  experimental_createQueryPersister,
+  PERSISTER_KEY_PREFIX,
+} from '@tanstack/query-persist-client-core';
 import { SQLiteStorage } from 'expo-sqlite/kv-store';
 import { localizeCachedCourseNames } from 'data/courseNames';
 
@@ -123,6 +126,26 @@ AppState.addEventListener('change', state => {
     void saveChangedQueries();
   }
 });
+
+/**
+ * Forgets the responses whose keys `matches` picks, in memory and on disk,
+ * except one a screen is showing or a fetch is filling. For responses nothing
+ * will read again, so the saved data doesn't keep growing.
+ */
+export const forgetQueries = (matches: (queryKey: QueryKey) => boolean) => {
+  const queryCache = queryClient.getQueryCache();
+  for (const query of queryCache.findAll({
+    predicate: q => matches(q.queryKey),
+  })) {
+    if (query.getObserversCount() > 0 || query.state.fetchStatus !== 'idle') {
+      continue;
+    }
+    unsaved.delete(query.queryHash);
+    queryCache.remove(query);
+    // The persister's own key for the query.
+    cache.removeItemSync(`${PERSISTER_KEY_PREFIX}-${query.queryHash}`);
+  }
+};
 
 /** Forgets every response, in memory and on disk. */
 export const clearQueryCache = () => {
