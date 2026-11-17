@@ -13,6 +13,8 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 <a href="https://apps.apple.com/cn/app/learnx-thu-web-learning/id1459073115?platform=ipad" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/platform-ipados-blue" alt="Platform iPadOS" height="20" width="auto"></a>
 <a href="https://apps.apple.com/cn/app/learnx-thu-web-learning/id1459073115?platform=mac" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/platform-macos-blue" alt="Platform macOS" height="20" width="auto"></a>
 <a href="https://play.google.com/store/apps/details?id=io.robertying.learnx" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/platform-android-red" alt="Platform Android" height="20" width="auto"></a>
+<a href="https://github.com/robertying/learnX/releases" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/platform-windows-0078d4" alt="Platform Windows" height="20" width="auto"></a>
+<a href="https://github.com/robertying/learnX/releases" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/platform-linux-orange" alt="Platform Linux" height="20" width="auto"></a>
 
 <div align="center">
     <img src="./docs/screenshots/iphone.webp?v=1" alt="iphone screenshot" height="350" width="161" />
@@ -23,9 +25,9 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 
 ## 下载 Download
 
-需要 iOS / iPadOS 17.6、macOS 14.6 或 Android 10 及以上版本。
+需要 iOS / iPadOS 17.6、macOS 14.6、Android 10 或 Windows 10 及以上版本，或 x64 / ARM64 Linux。
 
-Requires iOS / iPadOS 17.6, macOS 14.6 or Android 10 and later.
+Requires iOS / iPadOS 17.6, macOS 14.6, Android 10 or Windows 10 and later, or Linux on x64 / ARM64.
 
 ### iOS / iPadOS / macOS
 
@@ -47,6 +49,20 @@ Requires iOS / iPadOS 17.6, macOS 14.6 or Android 10 and later.
   - 若安装失败，请尝试 Download if there's an issue installing `learnX-universal-vX.X.X.apk`
 
 - [GitHub Releases](https://github.com/robertying/learnX/releases)
+
+### Windows / Linux
+
+从 [TUNA 镜像（推荐）](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/)或 [GitHub Releases](https://github.com/robertying/learnX/releases) 下载，应用会自动检查更新。
+
+Download from the [TUNA Mirror (Recommended)](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/) or [GitHub Releases](https://github.com/robertying/learnX/releases). The app checks for updates by itself.
+
+- Windows（x64、ARM64）：`learnX-Setup-X.X.X.exe`。安装程序未签名，若 SmartScreen 提示，请点击“更多信息”，然后点击“仍要运行”。
+
+  Windows (x64, ARM64): `learnX-Setup-X.X.X.exe`. The installer is unsigned: if SmartScreen warns, choose "More info", then "Run anyway".
+
+- Linux（x64、ARM64）：Ubuntu / Debian 请安装 .deb 包（`sudo apt install ./learnX-X.X.X-amd64.deb`，ARM64 为 `arm64`），Ubuntu 24.04 及以上版本请使用 .deb 包；其他发行版请使用 AppImage（先 `chmod +x`）。
+
+  Linux (x64, ARM64): on Ubuntu and Debian, install the .deb (`sudo apt install ./learnX-X.X.X-amd64.deb`, or `arm64`), as Ubuntu 24.04 and later should; on other distributions, use the AppImage (`chmod +x` it first).
 
 ## 功能 Features
 
@@ -78,6 +94,7 @@ Requires iOS / iPadOS 17.6, macOS 14.6 or Android 10 and later.
 - 新内容、成绩和截止时间变更通知 Notifications for new notices, files, assignments, grades and deadline changes
 - 作业截止提醒和上课提醒 Deadline reminders and class reminders
 - 聚焦搜索、Siri 与快捷指令 Spotlight search, Siri and Shortcuts (iOS, iPadOS, macOS)
+- 系统托盘与开机启动 System tray and Start at login (Windows)
 - 课表日历同步 Course schedule calendar sync
 - 作业日历/提醒事项同步 Assignment calendar/reminder sync
 - courseX 课程信息共享计划 Course Information Sharing
@@ -105,11 +122,12 @@ cp .env.example .env   # 填写演示账号 fill in the mock login values
 cd ios && LANG=en_US.UTF-8 bundle exec pod install && cd ..   # iOS / Mac
 pnpm start             # 启动 Metro start Metro
 pnpm ios               # 或 or: pnpm android
+pnpm electron          # Windows / Linux 应用 the Windows and Linux app
 ```
 
-[CONTRIBUTING.md](CONTRIBUTING.md) 介绍完整的开发环境配置（工具、用自己的团队为 iOS 签名、Android SDK 与模拟器、用演示账号测试、检查与 Pull Request）。代码约定和架构见 [AGENTS.md](AGENTS.md) 及各文件夹中的 `AGENTS.md`，供开发者和编程智能体共同阅读。
+[CONTRIBUTING.md](CONTRIBUTING.md) 介绍完整的开发环境配置（工具、用自己的团队为 iOS 签名、Android SDK 与模拟器、Windows 与 Linux 应用、用演示账号测试、检查与 Pull Request）。代码约定和架构见 [AGENTS.md](AGENTS.md) 及各文件夹中的 `AGENTS.md`，供开发者和编程智能体共同阅读。
 
-[CONTRIBUTING.md](CONTRIBUTING.md) walks through the full setup (tools, iOS signing with your own team, Android SDK and emulator, testing with the mock login, checks and pull requests). Conventions and architecture are in [AGENTS.md](AGENTS.md) and the folders' own `AGENTS.md` files, written for both people and coding agents.
+[CONTRIBUTING.md](CONTRIBUTING.md) walks through the full setup (tools, iOS signing with your own team, Android SDK and emulator, the Windows and Linux app, testing with the mock login, checks and pull requests). Conventions and architecture are in [AGENTS.md](AGENTS.md) and the folders' own `AGENTS.md` files, written for both people and coding agents.
 
 ## 开源协议 License
 
