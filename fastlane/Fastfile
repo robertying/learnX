@@ -422,28 +422,126 @@ def what_to_test(options, section)
   notes[section]
 end
 
+# Talks to the App Store Connect API through spaceship rather than
+# upload_to_testflight, whose build requests (they include build metrics) App
+# Store Connect answers with a 500.
+def connect_api!
+  if asc_api_key?
+    app_store_connect_api_key
+  else
+    Spaceship::ConnectAPI.login(use_portal: false, use_tunes: true)
+  end
+end
+
+ASC_ERRORS = [Spaceship::UnexpectedResponse, Spaceship::InternalServerError, Spaceship::GatewayTimeoutError].freeze
+
+# App Store Connect's TestFlight API answers the same request differently from
+# one moment to the next: lists come back empty, and ids it just listed are
+# "not found". Retries until the block returns something (or stops raising).
+def asc_retry(what, attempts: 6)
+  attempts.times do |i|
+    begin
+      result = yield
+      return result unless result.nil? || result == []
+    rescue *ASC_ERRORS => e
+      raise if i == attempts - 1
+
+      UI.message("App Store Connect: #{e.message.lines.first.strip}")
+    end
+    sleep(5) if i < attempts - 1
+  end
+  UI.user_error!("App Store Connect returned no #{what}")
+end
+
+def asc_app_id
+  bundle_id = CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier)
+  asc_retry("app #{bundle_id}") do
+    Spaceship::ConnectAPI.get_apps(filter: { bundleId: bundle_id }).to_models.find { |a| a.bundle_id == bundle_id }&.id
+  end
+end
+
+def asc_build(app_id, platform, build)
+  filter = {
+    app: app_id,
+    version: build.to_s,
+    "preReleaseVersion.version" => app_version,
+    "preReleaseVersion.platform" => platform == "macos" ? "MAC_OS" : "IOS",
+  }
+  found = asc_retry("#{platform} build #{build} of v#{app_version}") do
+    Spaceship::ConnectAPI.get_builds(filter: filter, includes: "preReleaseVersion", limit: 1).to_models.first
+  end
+  UI.user_error!("Build #{build} is #{found.processing_state}; wait until App Store Connect has processed it") unless found.processed?
+  found
+end
+
+def set_what_to_test(build, notes)
+  # An empty list is a real answer here (no What to Test yet), so no retry.
+  existing = Spaceship::ConnectAPI.get_beta_build_localizations(filter: { build: build.id }).to_models.to_h { |l| [l.locale, l] }
+  { "en-US" => notes[:en], "zh-Hans" => notes[:zh] }.each do |locale, text|
+    if existing[locale]
+      asc_retry("What to Test") { Spaceship::ConnectAPI.patch_beta_build_localizations(localization_id: existing[locale].id, attributes: { whatsNew: text }) && true }
+    else
+      asc_retry("What to Test") { Spaceship::ConnectAPI.post_beta_build_localizations(build_id: build.id, attributes: { locale: locale, whatsNew: text }) && true }
+    end
+  end
+  UI.success("Set What to Test on build #{build.version}")
+end
+
+# Some builds' beta details come only through the build, others only through
+# the filter.
+def external_build_state(client, build_id)
+  asc_retry("beta state of the build") do
+    detail = begin
+      client.get("v1/builds/#{build_id}/buildBetaDetail").body["data"]
+    rescue Spaceship::UnexpectedResponse
+      nil
+    end
+    detail ||= client.get("v1/buildBetaDetails", { "filter[build]" => build_id }).body["data"].first
+    detail&.dig("attributes", "externalBuildState")
+  end
+end
+
 # Sets What to Test on an uploaded build. With groups, also submits it for
 # Beta App Review and adds it to those external groups, whose testers get it
 # once Apple approves it (a build of a version Apple has already approved
 # may go out at once).
 def distribute_testflight(platform, build, notes, groups: nil)
-  app_store_connect_api_key if asc_api_key?
-  options = {
-    distribute_only: true,
-    app_platform: platform == "macos" ? "osx" : "ios",
-    app_version: app_version,
-    build_number: build.to_s,
-    localized_build_info: {
-      "en-US" => { whats_new: notes[:en] },
-      "zh-Hans" => { whats_new: notes[:zh] },
-    },
-  }
-  if groups
-    options.merge!(distribute_external: true, submit_beta_review: true, groups: groups)
-  else
-    options[:skip_submission] = true
+  connect_api!
+  app_id = asc_app_id
+  found = asc_build(app_id, platform, build)
+  set_what_to_test(found, notes)
+  return unless groups
+
+  client = Spaceship::ConnectAPI.test_flight_request_client
+  external = asc_retry("TestFlight groups") do
+    client.get("v1/apps/#{app_id}/betaGroups").body["data"].reject { |g| g.dig("attributes", "isInternalGroup") }
   end
-  upload_to_testflight(options)
+  group_ids = groups.map do |name|
+    group = external.find { |g| g.dig("attributes", "name") == name }
+    UI.user_error!("No external TestFlight group named #{name}; the app has #{external.map { |g| g.dig('attributes', 'name') }.join(', ')}") unless group
+    group["id"]
+  end
+
+  state = external_build_state(client, found.id)
+  case state
+  when "READY_FOR_BETA_SUBMISSION"
+    asc_retry("review submission") { Spaceship::ConnectAPI.post_beta_app_review_submissions(build_id: found.id) && true }
+    UI.success("Submitted build #{build} for Beta App Review")
+  when "WAITING_FOR_BETA_REVIEW", "IN_BETA_REVIEW", "BETA_APPROVED", "IN_BETA_TESTING"
+    UI.important("Build #{build} is already #{state}")
+  else
+    UI.user_error!("Can't submit build #{build} for Beta App Review: it is #{state}")
+  end
+  # Adding a build to a group that has it fails with "no such group".
+  missing = group_ids.reject do |id|
+    asc_retry("builds of the group") { client.get("v1/betaGroups/#{id}/relationships/builds", { "limit" => 200 }).body["data"] }.any? { |b| b["id"] == found.id }
+  end
+  if missing.empty?
+    UI.important("Build #{build} is already in #{groups.join(', ')}")
+  else
+    asc_retry("group change") { Spaceship::ConnectAPI.add_beta_groups_to_build(build_id: found.id, beta_group_ids: missing) && true }
+    UI.success("Added build #{build} to #{groups.join(', ')}")
+  end
 end
 
 # groups: if given, else TESTFLIGHT_EXTERNAL_GROUPS in fastlane/.env
