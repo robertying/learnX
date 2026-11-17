@@ -45,11 +45,27 @@ target 'learnX' do
   end
 
   post_install do |installer|
+    # react_native_post_install writes RCTNewArchEnabled into every Info.plist
+    # under ios/. Targets without pods (the share extension) have no React
+    # Native to read it, so their Info.plists stay as they are.
+    pod_target_names = installer.aggregate_targets.flat_map(&:user_targets).map(&:name)
+    plists_without_pods = installer.aggregate_targets.map(&:user_project).uniq.flat_map do |project|
+      project.native_targets.reject { |target| pod_target_names.include?(target.name) }.flat_map do |target|
+        target.build_configurations.map { |config| config.build_settings['INFOPLIST_FILE'] }.compact.uniq
+          .map { |path| File.join(File.dirname(project.path), path) }
+      end
+    end.uniq.select { |path| File.exist?(path) }
+    original_plists = plists_without_pods.to_h { |path| [path, File.read(path)] }
+
     react_native_post_install(
       installer,
       config[:reactNativePath],
       :mac_catalyst_enabled => true
     )
+
+    original_plists.each do |path, contents|
+      File.write(path, contents) unless File.read(path) == contents
+    end
 
     # pod install can drop hermes-engine/.last_build_configuration while leaving a
     # Release binary from an earlier archive in place, so Debug builds fail to link.

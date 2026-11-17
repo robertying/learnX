@@ -102,6 +102,12 @@ export interface FormLinkProps extends FormItemRowProps {
   onPress: () => void;
   /** A dot for something new on the page it opens. */
   badge?: boolean;
+  /**
+   * What it opens is open beside the Form, in a split view's detail pane:
+   * the row shows as selected, as a list's row does (`CardWrapper`'s
+   * `opened`).
+   */
+  opened?: boolean;
 }
 
 export interface FormButtonProps extends FormRowProps {
@@ -223,16 +229,6 @@ export interface FormTextFieldProps {
    */
   plain?: boolean;
   disabled?: boolean;
-  testID?: string;
-  /** Set by `FormSection` on Android, for the row's corners. */
-  position?: FormRowPosition;
-}
-
-/** A labeled bar, for an upload or another task that takes a while. */
-export interface FormProgressProps {
-  title: string;
-  /** Between 0 and 1. */
-  value: number;
   testID?: string;
   /** Set by `FormSection` on Android, for the row's corners. */
   position?: FormRowPosition;

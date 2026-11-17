@@ -49,7 +49,6 @@ import {
   type FormNumberFieldProps,
   type FormParagraphProps,
   type FormProfileProps,
-  type FormProgressProps,
   type FormProps,
   type FormSectionProps,
   type FormTextFieldProps,
@@ -568,20 +567,6 @@ export const FormTextField: React.FC<FormTextFieldProps> = ({
     </View>
   );
 };
-
-/** A bar under its title, as for a download in progress. */
-export const FormProgress: React.FC<FormProgressProps> = ({
-  title,
-  value,
-  testID,
-}) => (
-  <Card testID={testID}>
-    <View style={styles.rowWithProgress}>
-      <Text>{title}</Text>
-      <ProgressBar value={value} max={1} thickness="large" />
-    </View>
-  </Card>
-);
 
 export const FormToggle: React.FC<FormToggleProps> = ({
   title,

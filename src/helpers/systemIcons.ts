@@ -396,7 +396,15 @@ export const systemIcons = {
   },
   // An option that's on in a menu of toggles
   checked: { ios: 'checkmark', android: 'check', windows: 'CheckmarkRegular' },
+  // Finishing what's being typed (Done in the header)
+  confirm: { ios: 'checkmark', android: 'check', windows: 'CheckmarkRegular' },
   preview: { ios: 'eye', android: 'visibility', windows: 'EyeRegular' },
+  // Quick Look's floating panel (Mac), as Space opens it in Finder
+  quickLook: {
+    ios: 'eye.circle',
+    android: 'visibility',
+    windows: 'EyeRegular',
+  },
   reorder: {
     ios: 'arrow.up.and.down',
     android: 'swap_vert',

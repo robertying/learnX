@@ -15,7 +15,6 @@ import {
   FormLink,
   FormNumberField,
   FormParagraph,
-  FormProgress,
   FormScreen,
   FormSection,
   FormText,
@@ -34,10 +33,12 @@ import {
   accessibilityHidden,
   font,
   foregroundStyle,
+  listRowBackground,
+  listRowSeparator,
+  listSectionMargins,
 } from '@expo/ui/swift-ui/modifiers';
 import { FormProfile } from 'components/Form';
 import DeviceInfo from 'constants/DeviceInfo';
-import { t } from 'helpers/i18n';
 import { BrandLightTheme } from 'theme';
 
 describe('Form', () => {
@@ -110,6 +111,31 @@ describe('Form', () => {
     );
     expect(screen.getByText('Content')).toBeTruthy();
     isMac.mockRestore();
+  });
+
+  it('draws the Mac rows padded, with tinted actions', async () => {
+    jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+    const onToggle = jest.fn();
+    await render(
+      <FormSection title="Calendar" footer="Synced weekly">
+        <FormToggle
+          title="Add to Calendar"
+          icon="calendar"
+          value={false}
+          onValueChange={onToggle}
+        />
+        <FormButton title="Sync" icon="sync" onPress={jest.fn()} />
+      </FormSection>,
+    );
+    // The row's own icon and label instead of the Mac's crowded label
+    expect(screen.getByText('Add to Calendar')).toBeTruthy();
+    expect(screen.getByTestId('icon-calendar')).toBeTruthy();
+    await fireEvent(screen.getByRole('switch'), 'valueChange', true);
+    expect(onToggle).toHaveBeenCalledWith(true);
+    // An action in the tint: no label color on its title
+    expect(screen.getByText('Sync').props.modifiers).toBeUndefined();
+    // The footer in the footnote style, its lines spaced apart
+    expect(screen.getByText('Synced weekly').props.modifiers).toHaveLength(2);
   });
 
   it('shows a detail at the end of a row', async () => {
@@ -220,6 +246,32 @@ describe('Form', () => {
     expect(onPress).toHaveBeenCalledTimes(1);
   });
 
+  it('shows the link whose page is open beside the Form as selected', async () => {
+    await render(
+      <FormSection>
+        <FormLink title="Notifications" opened onPress={jest.fn()} />
+        <FormLink title="Downloads" onPress={jest.fn()} />
+      </FormSection>,
+    );
+    const open = screen.getByRole('button', {
+      name: 'Notifications',
+      selected: true,
+    });
+    // In the gray of a list's selected row
+    expect(open.props.modifiers).toContainEqual(
+      listRowBackground(PlatformColor('systemGray4')),
+    );
+    // with no separators running into it
+    expect(open.props.modifiers).toContainEqual(
+      listRowSeparator('hidden', 'all'),
+    );
+    const closed = screen.getByRole('button', {
+      name: 'Downloads',
+      selected: false,
+    });
+    expect(closed.props.modifiers).toBeUndefined();
+  });
+
   it('applies positive whole numbers typed in a number field', async () => {
     const onValueChange = jest.fn();
     await render(
@@ -263,14 +315,14 @@ describe('Form', () => {
 
     await fireEvent(screen.getByLabelText('Minutes'), 'focus');
     await render(<>{headerRight()()}</>);
-    await userEvent.setup().press(screen.getByText(t('done')));
+    await userEvent.setup().press(screen.getByTestId('keyboard-done'));
     expect(dismiss).toHaveBeenCalled();
 
     await render(numberForm);
     await fireEvent(screen.getByLabelText('Minutes'), 'focus');
     await fireEvent(screen.getByLabelText('Minutes'), 'blur');
     await render(<>{headerRight()()}</>);
-    expect(screen.queryByText(t('done'))).toBeNull();
+    expect(screen.queryByTestId('keyboard-done')).toBeNull();
 
     jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
     navigation.setOptions.mockClear();
@@ -352,14 +404,6 @@ describe('Form', () => {
     expect(screen.getByTestId('icon-doc')).toBeTruthy();
     await userEvent.setup().press(screen.getByText('report.pdf'));
     expect(onPress).toHaveBeenCalledTimes(1);
-  });
-
-  it('shows progress under its title', async () => {
-    await render(<FormProgress title="Uploading" value={0.4} />);
-    expect(screen.getByText('Uploading')).toBeTruthy();
-    expect(screen.getByRole('progressbar')).toHaveAccessibilityValue({
-      now: 40,
-    });
   });
 
   it('shows a detail page title, a tinted detail and a hosted view', async () => {
@@ -546,6 +590,26 @@ describe('Form (iOS details)', () => {
     });
   });
 
+  it('ends the last section clear of the window edge on Mac, as on iOS', async () => {
+    for (const isMac of [false, true]) {
+      jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(isMac);
+      await render(
+        <Form>
+          <FormSection footer="First">
+            <FormText title="Row" />
+          </FormSection>
+          <FormSection footer="Last">
+            <FormText title="Row" />
+          </FormSection>
+        </Form>,
+      );
+      const [first, last] = screen.getAllByTestId('section');
+      const margin = listSectionMargins({ edges: 'bottom', length: 24 });
+      expect(last.props.modifiers).toContainEqual(margin);
+      expect(first.props.modifiers).not.toContainEqual(margin);
+    }
+  });
+
   it('leaves the Mac header alone', async () => {
     jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
     const navigation = { setOptions: jest.fn() };
@@ -607,8 +671,9 @@ describe('Form (iOS details)', () => {
         <FormTextField value="" onChangeText={jest.fn()} multiline />
       </FormSection>,
     );
+    // The name in Title 2, which the Mac draws at its own smaller size
     expect(font).toHaveBeenCalledWith({
-      textStyle: 'headline',
+      textStyle: 'title2',
       weight: 'semibold',
     });
     expect(screen.getByText('Problem set')).toBeTruthy();

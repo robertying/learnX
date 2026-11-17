@@ -26,12 +26,9 @@ describe('ContainedButton (iOS)', () => {
     expect(onPress).toHaveBeenCalled();
   });
 
-  it('sets its label in the iOS body size on a Mac', async () => {
+  it('leaves its label to the system on a Mac', async () => {
     jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
     await render(<ContainedButton label="Continue" testID="continue" />);
-    expect(modifiers(screen.getByText('Continue'))).toEqual([
-      { modifier: 'font', args: [{ size: 17 }] },
-    ]);
     expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy();
   });
 });

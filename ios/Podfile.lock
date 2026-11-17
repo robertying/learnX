@@ -194,6 +194,10 @@ PODS:
     - ExpoModulesCore
   - LearnXMenus/Tests (1.0.0):
     - ExpoModulesCore
+  - LearnXQuickLook (1.0.0):
+    - ExpoModulesCore
+  - LearnXQuickLook/Tests (1.0.0):
+    - ExpoModulesCore
   - LearnXShare (1.0.0):
     - ExpoModulesCore
   - LearnXShare/Tests (1.0.0):
@@ -2506,6 +2510,8 @@ DEPENDENCIES:
   - LearnXCrashlytics/Tests (from `../modules/crashlytics/ios`)
   - LearnXMenus (from `../modules/menus/ios`)
   - LearnXMenus/Tests (from `../modules/menus/ios`)
+  - LearnXQuickLook (from `../modules/quicklook/ios`)
+  - LearnXQuickLook/Tests (from `../modules/quicklook/ios`)
   - LearnXShare (from `../modules/share/ios`)
   - LearnXShare/Tests (from `../modules/share/ios`)
   - LearnXShortcuts (from `../modules/shortcuts/ios`)
@@ -2703,6 +2709,8 @@ EXTERNAL SOURCES:
     :path: "../modules/crashlytics/ios"
   LearnXMenus:
     :path: "../modules/menus/ios"
+  LearnXQuickLook:
+    :path: "../modules/quicklook/ios"
   LearnXShare:
     :path: "../modules/share/ios"
   LearnXShortcuts:
@@ -2942,6 +2950,7 @@ SPEC CHECKSUMS:
   hermes-engine: 79484fc4e58f328d01b9339ef899ca633d3702ee
   LearnXCrashlytics: f54c9b50163ce8255ee9148b00819a6203273c3e
   LearnXMenus: d16bcb91222edad364a10a271fe1a3aaad78786a
+  LearnXQuickLook: 5a07c6af2e517166ac3e4a896533d7f0e308abfb
   LearnXShare: 593f47ced0cdb48861422731919d6f541c5e8085
   LearnXShortcuts: f7d94d3eab97e8ecb2feaaf05c27ca59f6ef6cd9
   LearnXSpotlight: 149cdd723faf121ec4ebc8549cc072b50ccd1806
@@ -3042,6 +3051,6 @@ SPEC CHECKSUMS:
   UMAppLoader: 813e4d172a12484f5bb149d9e99b1e7c11ae0b0c
   Yoga: d1c536142c5ff8ec8cd856ab2a7c227a1d875c8e
 
-PODFILE CHECKSUM: 865e293d1e2e0bc99e8295feda7ad63c4dbf1b7d
+PODFILE CHECKSUM: 65d58f69f5ad6f6e77532158a3cec4434b23bd5e
 
 COCOAPODS: 1.17.0

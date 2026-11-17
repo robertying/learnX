@@ -1,8 +1,14 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
 import dayjs from 'dayjs';
 import type { ClassSession } from 'helpers/schedule';
+import DeviceInfo from 'constants/DeviceInfo';
 import Schedule from 'screens/Schedule';
 import { screenProps } from 'test-utils/screenProps';
+
+jest.mock('@react-navigation/native', () => ({
+  ...jest.requireActual('@react-navigation/native'),
+  useIsFocused: () => true,
+}));
 
 jest.mock('hooks/useAvailableUpdate', () => () => null);
 jest.mock('data/login', () => ({ login: jest.fn() }));
@@ -151,4 +157,12 @@ it('prefers the note on classes worked out from courses', async () => {
   await setup();
   expect(screen.queryByText(/Couldn't update/)).toBeNull();
   expect(screen.getByText(/Based on course times/)).toBeOnTheScreen();
+});
+
+it('puts a refresh button in the header on a Mac', async () => {
+  jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+  const { navigation } = await setup();
+  const options = navigation.setOptions.mock.lastCall![0];
+  const items = options.unstable_headerRightItems?.() ?? options.headerRight;
+  expect(JSON.stringify(items)).toContain('refresh');
 });

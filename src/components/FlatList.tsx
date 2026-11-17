@@ -1,11 +1,12 @@
 import { FlashList, FlashListProps } from '@shopify/flash-list';
+import { scrollInsetBehavior } from 'constants/scrollInsetBehavior';
 import DeviceInfo from 'constants/DeviceInfo';
 
 function FlatList<T>(props: FlashListProps<T>) {
   const isMac = DeviceInfo.isMac();
   return (
     <FlashList
-      contentInsetAdjustmentBehavior="automatic"
+      contentInsetAdjustmentBehavior={scrollInsetBehavior}
       maintainVisibleContentPosition={{ disabled: true }}
       {...props}
       refreshControl={isMac ? undefined : props.refreshControl}

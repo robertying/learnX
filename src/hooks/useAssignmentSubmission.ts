@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, Keyboard } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
@@ -22,9 +22,10 @@ import {
 
 /**
  * The attachment to submit: picked from documents or photos, dropped on the
- * screen (Electron), or shared to the app (pending assignment data). Picking
- * a file replaces a shared one.
- * Starts with `initialPicked`, the file of a saved draft.
+ * screen (Electron), or shared to the app (pending assignment data). A shared file goes to the one submission
+ * screen that takes it first (open, or the next one opened), and no other.
+ * Picking a file replaces a shared one. Starts with `initialPicked`, the file
+ * of a saved draft.
  */
 export const useAttachmentPicker = (
   title: string,
@@ -56,7 +57,6 @@ export const useAttachmentPicker = (
       name: file.name ?? defaultName(file.mimeType),
       size: file.size,
     });
-    setPendingAssignmentData(null);
   };
 
   const pickPhoto = async () => {
@@ -79,38 +79,34 @@ export const useAttachmentPicker = (
       name: defaultName(photo.mimeType),
       size: photo.fileSize,
     });
-    setPendingAssignmentData(null);
   };
 
   /** A file dropped on the screen (Electron), already in the cache. */
-  const pickDropped = (file: PickedAttachment) => {
-    setPicked(file);
-    setPendingAssignmentData(null);
-  };
+  const pickDropped = (file: PickedAttachment) => setPicked(file);
 
-  const removePicked = () => {
-    setPicked(null);
-    setPendingAssignmentData(null);
-  };
+  const removePicked = () => setPicked(null);
 
-  // A file shared to the app becomes the attachment.
-  const [sharedAssignmentData, setSharedAssignmentData] =
-    useState<typeof pendingAssignmentData>(null);
-  if (pendingAssignmentData !== sharedAssignmentData) {
-    setSharedAssignmentData(pendingAssignmentData);
-    if (pendingAssignmentData) {
-      setPicked({
-        uri: pendingAssignmentData.data,
-        type: pendingAssignmentData.mimeType,
-        name: defaultName(pendingAssignmentData.mimeType),
-      });
-    }
+  // A file shared to the app becomes the attachment, and is taken: another
+  // assignment's screen won't attach it too.
+  const [shared, setShared] = useState<typeof pendingAssignmentData>(null);
+  if (pendingAssignmentData && pendingAssignmentData !== shared) {
+    setShared(pendingAssignmentData);
+    setPicked({
+      uri: pendingAssignmentData.data,
+      type: pendingAssignmentData.mimeType,
+      name: defaultName(pendingAssignmentData.mimeType),
+    });
   }
+  useEffect(() => {
+    if (pendingAssignmentData) {
+      setPendingAssignmentData(null);
+    }
+  }, [pendingAssignmentData]);
 
   return {
     picked,
     /** The picked file came from a share, not from the pickers */
-    isShared: !!pendingAssignmentData,
+    isShared: !!shared && picked?.uri === shared.data,
     pickDocument,
     pickPhoto,
     pickDropped,
@@ -119,9 +115,9 @@ export const useAttachmentPicker = (
 };
 
 /**
- * Uploads the submission after a confirmation alert. On success it clears
- * shared data, refreshes the course's assignments and calls `onSubmitted`; on
- * failure it says so and leaves the form as it was.
+ * Uploads the submission after a confirmation alert. On success it refreshes
+ * the course's assignments and calls `onSubmitted`; on failure it says so and
+ * leaves the form as it was.
  */
 export const useSubmitAssignment = (
   assignment: Pick<Assignment, 'courseId' | 'id' | 'submittedContent'>,
@@ -167,7 +163,6 @@ export const useSubmitAssignment = (
     setUploading(false);
     setProgress(0);
 
-    setPendingAssignmentData(null);
     // Submitted here, so a sync doesn't say the group submitted it.
     addNotifiedKeys([groupSubmittedKey(assignment.id)]);
     const semesterId = getUserData().currentSemester;

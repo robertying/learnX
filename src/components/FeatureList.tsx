@@ -10,7 +10,7 @@ import ActionBar, { BarAction } from 'components/ActionBar';
 import Divider from 'components/Divider';
 import Logo from 'components/Logo';
 import SystemIcon from 'components/SystemIcon';
-import { Caption, Headline, Title } from 'components/Text';
+import { Caption, Headline, textStyles, Title } from 'components/Text';
 import type { SystemIconName } from 'helpers/systemIcons';
 import { useTheme } from 'theme';
 import { isApple } from 'helpers/platform';
@@ -70,6 +70,9 @@ const FeatureList: React.FC<FeatureListProps> = ({
   // about the size of the title's line.
   const { fontScale } = useWindowDimensions();
   const iconScale = Math.min(Math.max(fontScale, 1), 1.6);
+  const circle = 40 * iconScale;
+  // Android: the circle's middle on the middle of the title's first line.
+  const titleLine = (textStyles.headline.lineHeight ?? 0) * fontScale;
 
   return (
     <View
@@ -135,10 +138,14 @@ const FeatureList: React.FC<FeatureListProps> = ({
                   testID="feature-icon"
                   style={[
                     styles.iconBox,
-                    apple && { width: 40 * iconScale, height: undefined },
-                    !apple && {
-                      backgroundColor: theme.colors.primaryContainer,
-                    },
+                    apple
+                      ? { width: circle, height: undefined }
+                      : {
+                          width: circle,
+                          height: circle,
+                          borderRadius: circle / 2,
+                          backgroundColor: theme.colors.primaryContainer,
+                        },
                   ]}
                 >
                   <SystemIcon
@@ -151,7 +158,12 @@ const FeatureList: React.FC<FeatureListProps> = ({
                     }
                   />
                 </View>
-                <View style={styles.featureText}>
+                <View
+                  style={[
+                    styles.featureText,
+                    !apple && { paddingTop: (circle - titleLine) / 2 },
+                  ]}
+                >
                   <Headline>{feature.title}</Headline>
                   <Caption variant="subheadline">{feature.body}</Caption>
                 </View>
@@ -199,13 +211,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: apple ? 40 : 24,
     paddingBottom: 24,
   },
-  // The icon image has room around the X: less pulled in below than Logo's
-  // default, so the X clears the title, and pulled back on Android so the X
-  // lines up with the title's start.
+  // The app icon image has room around it: less pulled in below than Logo's
+  // default, so it clears the title. Android's X is its own box, at the
+  // title's start.
   logo: {
     alignSelf: apple ? 'center' : 'flex-start',
-    marginBottom: apple ? -8 : -24,
-    marginStart: apple ? 0 : -28,
+    marginBottom: apple ? -8 : 16,
   },
   title: {
     textAlign: apple ? 'center' : 'auto',
@@ -226,9 +237,6 @@ const styles = StyleSheet.create({
   // same place. On Apple platforms the symbol's top lines up with the top of
   // the title's letters, as in Apple's own welcome sheets (Reminders).
   iconBox: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
     alignItems: 'center',
     justifyContent: apple ? 'flex-start' : 'center',
     paddingTop: apple ? 4 : 0,
@@ -236,7 +244,7 @@ const styles = StyleSheet.create({
   featureText: {
     flex: 1,
     gap: 6,
-    paddingTop: apple ? 2 : 10,
+    paddingTop: 2,
     paddingBottom: 2,
   },
 });

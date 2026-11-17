@@ -74,6 +74,17 @@ final class FakeMenuBuilder: MenuBuilding {
     #expect(builder.commandIds == [["settings"], ["search"], ["refresh", "previousItem", "nextItem"]])
   }
 
+  @Test func addsQuickLookToTheFileMenuOnTheMac() {
+    let builder = FakeMenuBuilder(menus: [.file, .view])
+    AppCommands.buildMenu(in: builder, quickLook: true)
+    #expect(builder.changes == [.insertChild(atEndOf: .file), .insertChild(atStartOf: .view)])
+    #expect(builder.commandIds.first == ["quickLook"])
+
+    let withoutQuickLook = FakeMenuBuilder(menus: [.file, .view])
+    AppCommands.buildMenu(in: withoutQuickLook, quickLook: false)
+    #expect(withoutQuickLook.changes == [.insertChild(atStartOf: .view)])
+  }
+
   @Test func putsSettingsAfterAboutWithoutAPreferencesMenu() {
     let builder = FakeMenuBuilder(menus: [.application, .about])
     AppCommands.buildMenu(in: builder)

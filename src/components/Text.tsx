@@ -7,6 +7,7 @@ import {
   TextProps as NativeTextProps,
   type TextStyle,
 } from 'react-native';
+import DeviceInfo from 'constants/DeviceInfo';
 import { useTheme } from 'theme';
 import { isAndroid, isApple, isElectron } from 'helpers/platform';
 
@@ -27,9 +28,10 @@ import { isAndroid, isApple, isElectron } from 'helpers/platform';
  * | `caption`     | Caption 2, 11/13          | labelSmall     | Caption 2     |
  *
  * On iOS each variant scales with the user's text size along its own Dynamic
- * Type curve (`dynamicTypeRamp`), as UIKit's text styles do. Mac Catalyst
- * ("Optimize for Mac") draws these at 77%, which gives macOS's own sizes
- * (body 13 pt). Android scales them with the system font scale.
+ * Type curve (`dynamicTypeRamp`), as UIKit's text styles do. The Mac
+ * ("Optimize for Mac") takes the same styles at macOS's own sizes (body 13 pt,
+ * `macStyles`), as SwiftUI's text styles (`Form`) and the system's controls
+ * are drawn there. Android scales them with the system font scale.
  */
 export type TextVariant =
   | 'largeTitle'
@@ -56,6 +58,19 @@ const iosStyles: Record<TextVariant, TextStyle> = {
   label: { fontSize: 15, lineHeight: 20, fontWeight: '500' },
   footnote: { fontSize: 13, lineHeight: 18, fontWeight: '400' },
   caption: { fontSize: 11, lineHeight: 13, fontWeight: '400' },
+};
+
+// macOS's text styles: Title 3 15/20, Headline 13/16 bold, Body 13/16,
+// Subheadline 11/14, Footnote 10/13, Caption 2 10/13, Large Title 26/32.
+const macStyles: Record<TextVariant, TextStyle> = {
+  largeTitle: { fontSize: 26, lineHeight: 32, fontWeight: '700' },
+  title: { fontSize: 15, lineHeight: 20, fontWeight: '600' },
+  headline: { fontSize: 13, lineHeight: 16, fontWeight: '700' },
+  body: { fontSize: 13, lineHeight: 16, fontWeight: '400' },
+  subheadline: { fontSize: 11, lineHeight: 14, fontWeight: '400' },
+  label: { fontSize: 11, lineHeight: 14, fontWeight: '500' },
+  footnote: { fontSize: 10, lineHeight: 13, fontWeight: '400' },
+  caption: { fontSize: 10, lineHeight: 13, fontWeight: '400' },
 };
 
 const androidStyles: Record<TextVariant, TextStyle> = {
@@ -130,7 +145,13 @@ const ramps: Record<TextVariant, Ramp> = {
 export const textStyles: Record<TextVariant, TextStyle> = StyleSheet.create(
   Object.fromEntries(
     Object.entries(
-      isApple() ? iosStyles : isElectron() ? fluentStyles : androidStyles,
+      isApple()
+        ? DeviceInfo.isMac()
+          ? macStyles
+          : iosStyles
+        : isElectron()
+          ? fluentStyles
+          : androidStyles,
     ).map(([variant, style]) => [variant, { fontFamily, ...style }]),
   ) as Record<TextVariant, TextStyle>,
 );
@@ -170,11 +191,15 @@ const useFontScale = () =>
   useSyncExternalStore(subscribeToDimensions, getFontScale);
 
 /**
- * The size of an icon drawn beside text, grown with the text size (Dynamic
- * Type, Android font scale) up to twice its size, as a symbol in text is.
+ * The size of an icon drawn beside text of `variant`: the text's point size,
+ * grown with the text size (Dynamic Type, Android font scale) up to twice
+ * that, as a symbol in text is.
  */
-export const useTextIconSize = (size: number) =>
-  Math.round(size * Math.min(Math.max(useFontScale(), 1), 2));
+export const useTextIconSize = (variant: TextVariant) =>
+  Math.round(
+    (textStyles[variant].fontSize ?? 0) *
+      Math.min(Math.max(useFontScale(), 1), 2),
+  );
 
 const StyledText = ({ color, variant, style, ...rest }: StyledTextProps) => {
   const theme = useTheme();

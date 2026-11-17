@@ -1,15 +1,22 @@
 import { useEffect, useState } from 'react';
+import { scrollInsetBehavior } from 'constants/scrollInsetBehavior';
 import { Linking, StyleSheet, View, ViewProps } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useIsFocused } from '@react-navigation/native';
 import WebView from 'react-native-webview';
 import Pdf from 'react-native-pdf';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
 import {
-  canPreviewInline,
   isPreviewLoad,
   needWhiteBackground,
+  previewKind,
 } from 'helpers/filePreview';
+import {
+  isQuickLookAvailable,
+  QuickLookView,
+  showQuickLookPanel,
+} from 'modules/quicklook';
 import { formatDate, t } from 'helpers/i18n';
 import { displayFileSize, hasLink } from 'helpers/filename';
 import Spinner from 'components/Spinner';
@@ -18,6 +25,7 @@ import { FileDetailParamList } from 'navigation/types';
 import { markFileSeen, useFile } from 'data/content';
 import { DownloadableFile, File } from 'data/types/state';
 import NotFound from 'components/NotFound';
+import useAppCommand from 'hooks/useAppCommand';
 import useFileDetailHeader from 'hooks/useFileDetailHeader';
 import useFileDownload from 'hooks/useFileDownload';
 import useHeaderTitle from 'hooks/useHeaderTitle';
@@ -97,15 +105,33 @@ const FileDetailContent: React.FC<{
   const [previewFailed, setPreviewFailed] = useState(false);
 
   const handlePreviewError = () => setPreviewFailed(true);
+  // The Mac's Quick Look preview had no window to show in: the file's info
+  // shows instead, as for a file it can't preview.
+  const [quickLookUnavailable, setQuickLookUnavailable] = useState(false);
 
   const handleRedownload = () => {
     setPreviewFailed(false);
     redownload();
   };
 
-  const canRender = !!path && canPreviewInline(file.fileType);
+  const kind = previewKind(file.fileType);
+  const canRender =
+    !!path && !!kind && !(kind === 'quickLook' && quickLookUnavailable);
 
   const handleShowInfo = () => setShowInfo(shown => !shown);
+
+  const handleQuickLook = () => {
+    if (path) {
+      void showQuickLookPanel(path);
+    }
+  };
+  // ⌘Y, as in Finder (the Mac's File menu).
+  const isFocused = useIsFocused();
+  useAppCommand(
+    'quickLook',
+    handleQuickLook,
+    isFocused && !!path && isQuickLookAvailable,
+  );
 
   useFileDetailHeader({
     navigation,
@@ -115,6 +141,7 @@ const FileDetailContent: React.FC<{
     canRender,
     showInfo,
     onRefresh: handleRedownload,
+    onQuickLook: handleQuickLook,
     onShare: share,
     onSave: save,
     onOpen: open,
@@ -152,12 +179,19 @@ const FileDetailContent: React.FC<{
           actions={[{ label: t('downloadAgain'), onPress: handleRedownload }]}
         />
       ) : !showInfo && canRender ? (
-        file.fileType === 'pdf' ? (
+        kind === 'pdf' ? (
           <Pdf
             style={Styles.flex1}
             source={{ uri: path }}
             fitPolicy={0}
             onError={handlePreviewError}
+          />
+        ) : kind === 'quickLook' ? (
+          <QuickLookView
+            testID="quick-look"
+            style={Styles.flex1}
+            uri={path}
+            onUnavailable={() => setQuickLookUnavailable(true)}
           />
         ) : (
           <WebView
@@ -189,13 +223,19 @@ const FileDetailContent: React.FC<{
               return false;
             }}
             decelerationRate={isApple() ? 'normal' : undefined}
-            contentInsetAdjustmentBehavior="automatic"
+            contentInsetAdjustmentBehavior={scrollInsetBehavior}
+            // React Native's own inset from the safe area, which is the same
+            // toolbar on Mac (`scrollInsetBehavior`)
+            automaticallyAdjustContentInsets={
+              scrollInsetBehavior === 'automatic'
+            }
           />
         )
       ) : (
         <FileInfo
           file={file}
           previewable={canRender}
+          onQuickLook={handleQuickLook}
           onShare={share}
           onSave={save}
           onOpen={open}
@@ -221,6 +261,7 @@ const FileInfo: React.FC<{
   file: DownloadableFile & Partial<File>;
   /** Whether the file shows inline, when its info is asked for. */
   previewable: boolean;
+  onQuickLook: () => void;
   onShare: () => void;
   onSave: () => void;
   onOpen: () => void;
@@ -229,6 +270,7 @@ const FileInfo: React.FC<{
 }> = ({
   file,
   previewable,
+  onQuickLook,
   onShare,
   onSave,
   onOpen,
@@ -294,6 +336,13 @@ const FileInfo: React.FC<{
       </FormSection>
     ) : (
       <FormSection>
+        {isQuickLookAvailable ? (
+          <FormButton
+            title={t('quickLook')}
+            icon="quickLook"
+            onPress={onQuickLook}
+          />
+        ) : null}
         <FormButton title={t('share')} icon="share" onPress={onShare} />
         {DeviceInfo.isMac() ? (
           <FormButton title={t('download')} icon="download" onPress={onSave} />

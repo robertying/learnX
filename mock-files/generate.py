@@ -309,6 +309,27 @@ def lab_template_docx():
     doc.save(os.path.join(OUT, "lab-report-template.docx"))
 
 
+def with_cached_values(path, sheet, values):
+    """Stores each formula cell's value next to its formula.
+
+    openpyxl writes formulas without their results, and viewers that don't
+    recalculate (Quick Look, iOS's web view) then show nothing or 0.
+    """
+    part = f"xl/worksheets/{sheet}.xml"
+    with zipfile.ZipFile(path) as src:
+        entries = [(info, src.read(info)) for info in src.infolist()]
+    with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as dst:
+        for info, data in entries:
+            if info.filename == part:
+                xml = data.decode()
+                for ref, value in values.items():
+                    start = xml.index(f'<c r="{ref}"')
+                    empty = xml.index("<v></v>", start)
+                    xml = f"{xml[:empty]}<v>{value!r}</v>{xml[empty + len('<v></v>'):]}"
+                data = xml.encode()
+            dst.writestr(info, data)
+
+
 def measurement_xlsx():
     wb = Workbook()
     ws = wb.active
@@ -318,13 +339,18 @@ def measurement_xlsx():
         cell.font = Font(bold=True, color="FFFFFF")
         cell.fill = PatternFill("solid", fgColor="660874")
         cell.alignment = Alignment(horizontal="center")
+    gains_db = {}
     for f in (100, 200, 500, 800, 1000, 1200, 1500, 2000, 3000, 4000):
-        gain = 1 / math.sqrt(1 + (f / 1000) ** 8)
+        output = round(1 / math.sqrt(1 + (f / 1000) ** 8), 3)
         row = ws.max_row + 1
-        ws.append([f, 1.0, round(gain, 3), f"=20*LOG10(C{row}/B{row})", "截止频率附近" if f == 1000 else ""])
+        ws.append([f, 1.0, output, f"=20*LOG10(C{row}/B{row})", "截止频率附近" if f == 1000 else ""])
+        ws.cell(row, 4).number_format = "0.00"
+        gains_db[f"D{row}"] = 20 * math.log10(output / 1.0)
     for col, width in zip("ABCDE", (12, 14, 14, 12, 16)):
         ws.column_dimensions[col].width = width
-    wb.save(os.path.join(OUT, "fir-measurements.xlsx"))
+    path = os.path.join(OUT, "fir-measurements.xlsx")
+    wb.save(path)
+    with_cached_values(path, "sheet1", gains_db)
 
 
 def dtmf_zip():

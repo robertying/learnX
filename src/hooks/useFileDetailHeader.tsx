@@ -5,14 +5,15 @@ import { SplitViewContext } from 'navigation/SplitView';
 import DeviceInfo from 'constants/DeviceInfo';
 import { t } from 'helpers/i18n';
 import useHeaderButtons from 'hooks/useHeaderButtons';
+import { isQuickLookAvailable } from 'modules/quicklook';
 import { isAndroid, isElectron } from 'helpers/platform';
 
 /**
  * File detail's header buttons: full screen (split view, outside search),
- * refresh, share (Apple, Android), download (Mac), open (Android), and in
- * the Electron app Open in Default App and Save As instead of sharing (the
- * file's info has Show in Folder and Copy Link too), and info/preview (when
- * the file shows inline).
+ * refresh, Quick Look (Mac), share (Apple, Android), download (Mac), open
+ * (Android), and in the Electron app Open in Default App and Save As instead
+ * of sharing (the file's info has Show in Folder and Copy Link too), and
+ * info/preview (when the file shows inline).
  */
 const useFileDetailHeader = ({
   navigation,
@@ -22,6 +23,7 @@ const useFileDetailHeader = ({
   canRender,
   showInfo,
   onRefresh,
+  onQuickLook,
   onShare,
   onSave,
   onOpen,
@@ -34,6 +36,7 @@ const useFileDetailHeader = ({
   canRender: boolean;
   showInfo: boolean;
   onRefresh: () => void;
+  onQuickLook: () => void;
   onShare: () => void;
   onSave: () => void;
   onOpen: () => void;
@@ -66,6 +69,14 @@ const useFileDetailHeader = ({
       icon: 'refresh',
       onPress: onRefresh,
       disabled: !!progress,
+    },
+    // Only the Mac has Quick Look's plugin.
+    isQuickLookAvailable && {
+      id: 'quickLook',
+      label: t('quickLook'),
+      icon: 'quickLook',
+      onPress: onQuickLook,
+      disabled: unavailable,
     },
     !isElectron() && {
       id: 'share',

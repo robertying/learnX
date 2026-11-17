@@ -11,6 +11,8 @@
 		5A0710000000000000000D02 /* SharedFileInbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000000D01 /* SharedFileInbox.swift */; };
 		5A0710000000000000001004 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 5A0710000000000000001003 /* FirebaseCrashlytics */; };
 		5A0710000000000000001006 /* FirebaseAnalyticsCore in Frameworks */ = {isa = PBXBuildFile; productRef = 5A0710000000000000001005 /* FirebaseAnalyticsCore */; };
+		5A0710000000000000002003 /* MacPreviewHosting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000002002 /* MacPreviewHosting.swift */; };
+		5A0710000000000000002004 /* MacPreview.bundle in Embed Mac Preview */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000002001 /* MacPreview.bundle */; platformFilter = maccatalyst; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		5E191CFA541A0D10472C77C2 /* Pods_learnXTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C3928D6036512F98EC224CA /* Pods_learnXTests.framework */; };
 		66752A57317AE195AB987FFB /* Pods_learnX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DE528F5AED26E2F21053210 /* Pods_learnX.framework */; };
 		ACD6CAE1A3BCBB6D60C0DB06 /* Pods_ExpoWidgetsTarget.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB4D63C3C52ABD0CD33328A2 /* Pods_ExpoWidgetsTarget.framework */; };
@@ -37,6 +39,13 @@
 			remoteGlobalIDString = 13B07F861A680F5B00A75B9A;
 			remoteInfo = learnX;
 		};
+		5A0710000000000000002005 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5A0710000000000000002009;
+			remoteInfo = MacPreview;
+		};
 		D40B9F772B248C8E004BC08C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
@@ -54,6 +63,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		5A0710000000000000002007 /* Embed Mac Preview */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				5A0710000000000000002004 /* MacPreview.bundle in Embed Mac Preview */,
+			);
+			name = "Embed Mac Preview";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D40B9F7D2B248C8E004BC08C /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -79,6 +99,8 @@
 		5A0710000000000000000D01 /* SharedFileInbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SharedFileInbox.swift; path = ../modules/share/ios/SharedFileInbox.swift; sourceTree = SOURCE_ROOT; };
 		5A0710000000000000000E01 /* learnXTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = learnXTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A0710000000000000000F01 /* learnXUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = learnXUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5A0710000000000000002001 /* MacPreview.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacPreview.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		5A0710000000000000002002 /* MacPreviewHosting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MacPreviewHosting.swift; path = ../modules/quicklook/ios/MacPreviewHosting.swift; sourceTree = SOURCE_ROOT; };
 		98A6289E98CCDFCA5DBBFDA4 /* Pods-ExpoWidgetsTarget.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ExpoWidgetsTarget.release.xcconfig"; path = "Target Support Files/Pods-ExpoWidgetsTarget/Pods-ExpoWidgetsTarget.release.xcconfig"; sourceTree = "<group>"; };
 		A06F308A48D477954EECD356 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-learnX/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		B25B8E5805D23FD4E922A767 /* Pods-learnXTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-learnXTests.debug.xcconfig"; path = "Target Support Files/Pods-learnXTests/Pods-learnXTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -152,6 +174,11 @@
 			path = learnXUITests;
 			sourceTree = "<group>";
 		};
+		5A0710000000000000002008 /* MacPreview */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = MacPreview;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -174,6 +201,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		5A0710000000000000000F05 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5A071000000000000000200B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -217,6 +251,8 @@
 				5A0710000000000000000A02 /* ShareExtension */,
 				5A0710000000000000000D01 /* SharedFileInbox.swift */,
 				5A0710000000000000000A03 /* ExpoWidgetsTarget */,
+				5A0710000000000000002008 /* MacPreview */,
+				5A0710000000000000002002 /* MacPreviewHosting.swift */,
 				5A0710000000000000000E02 /* learnXTests */,
 				5A0710000000000000000F02 /* learnXUITests */,
 				AC5859D138A6B40B1C9419B9 /* ExpoModulesProviders */,
@@ -235,6 +271,7 @@
 				13B07F961A680F5B00A75B9A /* learnX.app */,
 				D40B9F6F2B248C8E004BC08C /* ShareExtension.appex */,
 				E7D600000000000000000002 /* ExpoWidgetsTarget.appex */,
+				5A0710000000000000002001 /* MacPreview.bundle */,
 				5A0710000000000000000E01 /* learnXTests.xctest */,
 				5A0710000000000000000F01 /* learnXUITests.xctest */,
 			);
@@ -306,6 +343,7 @@
 				00EEFC60759A1932668264C0 /* [CP] Embed Pods Frameworks */,
 				E235C05ADACE081382539298 /* [CP] Copy Pods Resources */,
 				D40B9F7D2B248C8E004BC08C /* Embed Foundation Extensions */,
+				5A0710000000000000002007 /* Embed Mac Preview */,
 				D4D920102CA8540F00790DF6 /* Upload dSYM files */,
 			);
 			buildRules = (
@@ -313,6 +351,7 @@
 			dependencies = (
 				D40B9F782B248C8E004BC08C /* PBXTargetDependency */,
 				E7D600000000000000000004 /* PBXTargetDependency */,
+				5A0710000000000000002006 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				5A0710000000000000000A01 /* learnX */,
@@ -369,6 +408,26 @@
 			productName = learnXUITests;
 			productReference = 5A0710000000000000000F01 /* learnXUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		5A0710000000000000002009 /* MacPreview */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5A071000000000000000200D /* Build configuration list for PBXNativeTarget "MacPreview" */;
+			buildPhases = (
+				5A071000000000000000200A /* Sources */,
+				5A071000000000000000200B /* Frameworks */,
+				5A071000000000000000200C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				5A0710000000000000002008 /* MacPreview */,
+			);
+			name = MacPreview;
+			productName = MacPreview;
+			productReference = 5A0710000000000000002001 /* MacPreview.bundle */;
+			productType = "com.apple.product-type.bundle";
 		};
 		D40B9F6E2B248C8E004BC08C /* ShareExtension */ = {
 			isa = PBXNativeTarget;
@@ -434,6 +493,9 @@
 						CreatedOnToolsVersion = 27.0;
 						TestTargetID = 13B07F861A680F5B00A75B9A;
 					};
+					5A0710000000000000002009 = {
+						CreatedOnToolsVersion = 27.0;
+					};
 					D40B9F6E2B248C8E004BC08C = {
 						CreatedOnToolsVersion = 15.0.1;
 						LastSwiftMigration = 1500;
@@ -464,6 +526,7 @@
 				13B07F861A680F5B00A75B9A /* learnX */,
 				D40B9F6E2B248C8E004BC08C /* ShareExtension */,
 				E7D600000000000000000001 /* ExpoWidgetsTarget */,
+				5A0710000000000000002009 /* MacPreview */,
 				5A0710000000000000000E03 /* learnXTests */,
 				5A0710000000000000000F03 /* learnXUITests */,
 			);
@@ -488,6 +551,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		5A0710000000000000000F06 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5A071000000000000000200C /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -822,6 +892,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5A071000000000000000200A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5A0710000000000000002003 /* MacPreviewHosting.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D40B9F6B2B248C8E004BC08C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -850,6 +928,12 @@
 			isa = PBXTargetDependency;
 			target = 13B07F861A680F5B00A75B9A /* learnX */;
 			targetProxy = 5A0710000000000000000F07 /* PBXContainerItemProxy */;
+		};
+		5A0710000000000000002006 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			platformFilter = maccatalyst;
+			target = 5A0710000000000000002009 /* MacPreview */;
+			targetProxy = 5A0710000000000000002005 /* PBXContainerItemProxy */;
 		};
 		D40B9F782B248C8E004BC08C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1086,6 +1170,73 @@
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2,6";
 				TEST_TARGET_NAME = learnX;
+			};
+			name = Release;
+		};
+		5A071000000000000000200E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSPrincipalClass = LXMacPreviewHost;
+				LIBRARY_SEARCH_PATHS = (
+					"$(SDKROOT)/usr/lib/swift",
+					"$(inherited)",
+				);
+				"LIBRARY_SEARCH_PATHS[sdk=macosx*]" = (
+					"$(SDKROOT)/usr/lib/swift",
+					"$(SDKROOT)/System/iOSSupport/usr/lib/swift",
+					"$(inherited)",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.6;
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
+				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = io.robertying.learnX.MacPreview;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+				WRAPPER_EXTENSION = bundle;
+			};
+			name = Debug;
+		};
+		5A071000000000000000200F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSPrincipalClass = LXMacPreviewHost;
+				LIBRARY_SEARCH_PATHS = (
+					"$(SDKROOT)/usr/lib/swift",
+					"$(inherited)",
+				);
+				"LIBRARY_SEARCH_PATHS[sdk=macosx*]" = (
+					"$(SDKROOT)/usr/lib/swift",
+					"$(SDKROOT)/System/iOSSupport/usr/lib/swift",
+					"$(inherited)",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.6;
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
+				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = io.robertying.learnX.MacPreview;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_VERSION = 6.0;
+				WRAPPER_EXTENSION = bundle;
 			};
 			name = Release;
 		};
@@ -1615,6 +1766,15 @@
 			buildConfigurations = (
 				5A0710000000000000000F0A /* Debug */,
 				5A0710000000000000000F0B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5A071000000000000000200D /* Build configuration list for PBXNativeTarget "MacPreview" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5A071000000000000000200E /* Debug */,
+				5A071000000000000000200F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -3,6 +3,7 @@ import mime from 'mime';
 import DeviceInfo from 'constants/DeviceInfo';
 import { isApple, isElectron } from 'helpers/platform';
 import electronFileTypes from 'constants/electronFileTypes.json';
+import { isQuickLookAvailable } from 'modules/quicklook';
 
 /** Word and Excel pages are drawn on white, also in dark mode. */
 export const needWhiteBackground = (ext?: string | null) =>
@@ -15,8 +16,12 @@ const isWebKitType = (mimeType: string) =>
     mimeType.startsWith(kind),
   );
 
-/** Office and iWork documents, which only iOS's web view renders (not Mac's). */
-const iosDocumentTypes = new Set([
+/**
+ * Office and iWork documents. iOS's web view converts them into pages, but the
+ * Mac's shows their bytes, so the Mac shows them with Quick Look (AppKit's, from
+ * the app's MacPreview plugin), or their info without it.
+ */
+const documentTypes = new Set([
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'application/vnd.ms-powerpoint',
@@ -28,18 +33,6 @@ const iosDocumentTypes = new Set([
   'application/vnd.apple.numbers',
 ]);
 
-export const canRenderInMacWebview = (ext?: string | null) => {
-  const mimeType = ext && mime.getType(ext);
-  return !!mimeType && isWebKitType(mimeType);
-};
-
-export const canRenderInIosWebview = (ext?: string | null) => {
-  const mimeType = ext && mime.getType(ext);
-  return (
-    !!mimeType && (isWebKitType(mimeType) || iosDocumentTypes.has(mimeType))
-  );
-};
-
 /**
  * PDFs and pictures, which the Electron app shows inline: the list its main
  * process serves to the preview (electron/fileShell.cjs). SVGs are left out:
@@ -48,22 +41,41 @@ export const canRenderInIosWebview = (ext?: string | null) => {
 export const canRenderInElectron = (ext?: string | null) =>
   !!ext && Object.hasOwn(electronFileTypes.preview, ext.toLowerCase());
 
-/**
- * Whether File detail shows the downloaded file itself rather than its
- * info: PDFs everywhere, what the iOS or Mac web view can render, and
- * pictures in the Electron app.
- */
-export const canPreviewInline = (fileType?: string | null) =>
-  fileType === 'pdf' ||
-  (isApple() &&
-    (DeviceInfo.isMac()
-      ? canRenderInMacWebview(fileType)
-      : canRenderInIosWebview(fileType))) ||
-  (isElectron() && canRenderInElectron(fileType));
+export type PreviewKind = 'pdf' | 'web' | 'quickLook';
 
 /**
- * Whether the file preview may show a load: the file itself, a blank page,
- * or the pages WebKit converts an Office or iWork document into
+ * How File detail shows the downloaded file itself rather than its info, or
+ * null when it can't: PDFs everywhere with the PDF viewer; on iOS and Mac,
+ * what WebKit draws in the web view; Office and iWork documents in the web
+ * view on iOS and with Quick Look on Mac, where it loaded; in the Electron
+ * app, pictures in its web view (`canRenderInElectron`).
+ */
+export const previewKind = (fileType?: string | null): PreviewKind | null => {
+  if (fileType === 'pdf') {
+    return 'pdf';
+  }
+  if (isElectron()) {
+    return canRenderInElectron(fileType) ? 'web' : null;
+  }
+  const mimeType = isApple() && fileType && mime.getType(fileType);
+  if (!mimeType) {
+    return null;
+  }
+  if (isWebKitType(mimeType)) {
+    return 'web';
+  }
+  if (!documentTypes.has(mimeType)) {
+    return null;
+  }
+  if (!DeviceInfo.isMac()) {
+    return 'web';
+  }
+  return isQuickLookAvailable ? 'quickLook' : null;
+};
+
+/**
+ * Whether the web view preview may show a load: the file itself, a blank
+ * page, or the pages iOS's WebKit converts an Office or iWork document into
  * (`x-apple-ql-id:`). Anything else, like a web page a downloaded .html file
  * links or refreshes to, would look like part of learnX.
  */

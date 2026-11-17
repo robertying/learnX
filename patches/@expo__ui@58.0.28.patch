@@ -1,3 +1,30 @@
+diff --git a/android/src/main/java/expo/modules/ui/DateRangePickerView.kt b/android/src/main/java/expo/modules/ui/DateRangePickerView.kt
+index 48e82b02e2b7829cef14214beeb4f0eee8193a60..f6e2dd12c5e3b459e094f2ba00ae0982437bb54c 100644
+--- a/android/src/main/java/expo/modules/ui/DateRangePickerView.kt
++++ b/android/src/main/java/expo/modules/ui/DateRangePickerView.kt
+@@ -211,14 +211,18 @@ private fun MaterialDateRangePicker(
+   showHeadline: Boolean,
+   colors: DatePickerColors
+ ) {
++  // The range's dates without their year, as Material 3 shows a range
++  // ("Apr 15 – May 30"): with it, two dates don't fit on the headline's line
++  // in Chinese ("2026年11月16日") and wrap a few characters at a time.
++  val dateFormatter = remember { DatePickerDefaults.dateFormatter(selectedDateSkeleton = "MMMd") }
+   when {
+     showTitle && showHeadline ->
+-      DateRangePicker(state = state, modifier = modifier, colors = colors, showModeToggle = showModeToggle)
++      DateRangePicker(state = state, modifier = modifier, dateFormatter = dateFormatter, colors = colors, showModeToggle = showModeToggle)
+     showTitle ->
+-      DateRangePicker(state = state, modifier = modifier, colors = colors, headline = null, showModeToggle = showModeToggle)
++      DateRangePicker(state = state, modifier = modifier, dateFormatter = dateFormatter, colors = colors, headline = null, showModeToggle = showModeToggle)
+     showHeadline ->
+-      DateRangePicker(state = state, modifier = modifier, colors = colors, title = null, showModeToggle = showModeToggle)
++      DateRangePicker(state = state, modifier = modifier, dateFormatter = dateFormatter, colors = colors, title = null, showModeToggle = showModeToggle)
+     else ->
+-      DateRangePicker(state = state, modifier = modifier, colors = colors, title = null, headline = null, showModeToggle = showModeToggle)
++      DateRangePicker(state = state, modifier = modifier, dateFormatter = dateFormatter, colors = colors, title = null, headline = null, showModeToggle = showModeToggle)
+   }
+ }
 diff --git a/android/src/main/java/expo/modules/ui/HostView.kt b/android/src/main/java/expo/modules/ui/HostView.kt
 index 2a4ce000d3ac0d08d57eab9a8bd1490758b68e27..9037d4da9155ca8275d5c01f997fde681dfe4fd6 100644
 --- a/android/src/main/java/expo/modules/ui/HostView.kt
@@ -122,6 +149,54 @@ index 6c36d1fcad46d12b693fe962b8594534b8fb2cbe..aa6fb62127a3105ac3647cf981eb3c16
  ) : Record
  
  internal fun String?.toContentType(): ContentType? = when (this) {
+diff --git a/android/src/main/java/expo/modules/ui/TextView.kt b/android/src/main/java/expo/modules/ui/TextView.kt
+index 9bd672aa1aa9dda660f13986493388e93bdbdd7a..eb3375eca0f837f409d94ec809de29a1a3e853a4 100644
+--- a/android/src/main/java/expo/modules/ui/TextView.kt
++++ b/android/src/main/java/expo/modules/ui/TextView.kt
+@@ -4,6 +4,7 @@ import android.content.Context
+ import android.graphics.Color
+ import android.graphics.Typeface
+ import androidx.compose.material3.MaterialTheme
++import androidx.compose.material3.LocalTextStyle
+ import androidx.compose.material3.Text
+ import androidx.compose.runtime.Composable
+ import androidx.compose.ui.geometry.Offset
+@@ -290,8 +291,10 @@ private fun AnnotatedString.Builder.appendSpans(spans: List<TextSpanRecord>, con
+ 
+ @Composable
+ fun FunctionalComposableScope.TextContent(props: TextProps) {
+-  // Start with typography style if provided, otherwise use default
+-  val baseStyle = props.typography?.toTextStyle() ?: TextStyle.Default
++  // Start with typography style if provided, otherwise the style the text's
++  // container provides (a list item's headline, a button's label), as
++  // Material 3's Text does on its own
++  val baseStyle = props.typography?.toTextStyle() ?: LocalTextStyle.current
+ 
+   // Merge base style with custom properties
+   val mergedStyle = baseStyle.merge(
+diff --git a/android/src/main/java/expo/modules/ui/textfield/TextField.kt b/android/src/main/java/expo/modules/ui/textfield/TextField.kt
+index ef4d779cef5ce980ea30219c8b1c0d3ee17b37c1..94132a3807dde115dad9c76edd9cfb4259e9c770 100644
+--- a/android/src/main/java/expo/modules/ui/textfield/TextField.kt
++++ b/android/src/main/java/expo/modules/ui/textfield/TextField.kt
+@@ -3,6 +3,7 @@ package expo.modules.ui.textfield
+ import android.graphics.Color
+ import androidx.compose.foundation.text.selection.TextSelectionColors
+ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
++import androidx.compose.material3.LocalTextStyle
+ import androidx.compose.material3.MaterialExpressiveTheme
+ import androidx.compose.material3.MotionScheme
+ import androidx.compose.material3.OutlinedTextField
+@@ -269,7 +270,9 @@ fun FunctionalComposableScope.TextFieldContent(
+     }
+   } ?: baseColors
+ 
+-  val textStyle = props.textStyle.toTextStyle(appContext.reactContext)
++  // On the field's own style (bodyLarge), as Material 3's fields take it,
++  // not on a bare one: typed text was smaller than the field's label
++  val textStyle = LocalTextStyle.current.merge(props.textStyle.toTextStyle(appContext.reactContext))
+   val visualTransformation = props.visualTransformation.toVisualTransformation()
+ 
+   // Workaround (pending upstream fix, https://issuetracker.google.com/issues/519816993)
 diff --git a/build/jetpack-compose/modifiers/index.d.ts b/build/jetpack-compose/modifiers/index.d.ts
 index 5a667d6d91731ca9a9e99ea08d84cad17c853ae9..bdfe3bb2288d2146e4431a162a9e03ad08dba678 100644
 --- a/build/jetpack-compose/modifiers/index.d.ts
@@ -155,6 +230,38 @@ index b81f0e2f91e3638a3d2a40f4a05a853a1580e093..917593c6eea621ec84fcc06f170da6ad
          modifiers,
          ...modifiers ? createViewModifierEventListener(modifiers) : undefined,
          onButtonPress: onPress
+diff --git a/build/swift-ui/modifiers/index.d.ts b/build/swift-ui/modifiers/index.d.ts
+index 186073ea4722b5e58046bba393a905eeeff5a89c..d3e2de19f58e846135a6c0ad647afae1eaaeeaa6 100644
+--- a/build/swift-ui/modifiers/index.d.ts
++++ b/build/swift-ui/modifiers/index.d.ts
+@@ -930,7 +930,9 @@ export declare const listRowSpacing: (spacing?: number) => ModifierConfig;
+  * </HStack>
+  * ```
+  */
+-export declare const alignmentGuide: (guide: "leading" | "center" | "trailing" | "listRowSeparatorLeading" | "listRowSeparatorTrailing", value: number) => ModifierConfig;
++export declare const alignmentGuide: (guide: "leading" | "center" | "trailing" | "listRowSeparatorLeading" | "listRowSeparatorTrailing", value: number, options?: {
++    fromTrailing?: boolean;
++}) => ModifierConfig;
+ /**
+  * Sets the truncation mode for lines of text that are too long to fit in the available space.
+  * @param mode - The truncation mode that specifies where to truncate the text within the text view, if needed.
+diff --git a/build/swift-ui/modifiers/index.js b/build/swift-ui/modifiers/index.js
+index 253a9be9ee8c6c70f86edefbed21006fa953fda4..053aaa2ff031bdc1956cbd43c59aa11b55f288bd 100644
+--- a/build/swift-ui/modifiers/index.js
++++ b/build/swift-ui/modifiers/index.js
+@@ -859,9 +859,10 @@ export function frame(params) {
+  *   <Text>The separator starts 32 points from the leading edge</Text>
+  * </HStack>
+  * ```
+- */ export const alignmentGuide = (guide, value)=>createModifier('alignmentGuide', {
++ */ export const alignmentGuide = (guide, value, options)=>createModifier('alignmentGuide', {
+         guide,
+-        value
++        value,
++        fromTrailing: options?.fromTrailing ?? false
+     });
+ /**
+  * Sets the truncation mode for lines of text that are too long to fit in the available space.
 diff --git a/ios/Button/Button.swift b/ios/Button/Button.swift
 index 337bf4b91ca3f16de5ad3d264af3fe86c16584fe..8984aa1b816d564951c893181558f7135066b1f6 100644
 --- a/ios/Button/Button.swift
@@ -205,6 +312,108 @@ index 23a980a2a1cb9deb335d6e26f5ffbaf67b8afe2a..e057ed82dc6bb31c64e594495fa4381c
 +  }
    var onButtonPress = EventDispatcher()
  }
+diff --git a/ios/Modifiers/FontModifier.swift b/ios/Modifiers/FontModifier.swift
+index a9e0dac9d371043fa9a99c1b7b6b9a0916dfbd50..f5a6eb13894f151bb700b25187f411dc7c3702a7 100644
+--- a/ios/Modifiers/FontModifier.swift
++++ b/ios/Modifiers/FontModifier.swift
+@@ -27,6 +27,21 @@ internal enum FontWeight: String, Enumerable {
+     case .black: .black
+     }
+   }
++
++  // learnX
++  func toUIKit() -> UIFont.Weight {
++    switch self {
++    case .ultraLight: .ultraLight
++    case .thin: .thin
++    case .light: .light
++    case .regular: .regular
++    case .medium: .medium
++    case .semibold: .semibold
++    case .bold: .bold
++    case .heavy: .heavy
++    case .black: .black
++    }
++  }
+ }
+ 
+ internal enum FontLeading: String, Enumerable {
+@@ -87,6 +102,23 @@ internal enum FontTextStyle: String, Enumerable {
+     case .caption2: .caption2
+     }
+   }
++
++  // learnX
++  func toUIKit() -> UIFont.TextStyle {
++    switch self {
++    case .largeTitle: .largeTitle
++    case .title: .title1
++    case .title2: .title2
++    case .title3: .title3
++    case .headline: .headline
++    case .subheadline: .subheadline
++    case .body: .body
++    case .callout: .callout
++    case .footnote: .footnote
++    case .caption: .caption1
++    case .caption2: .caption2
++    }
++  }
+ }
+ 
+ internal struct FontModifier: ViewModifier, Record {
+@@ -117,6 +149,11 @@ internal struct FontModifier: ViewModifier, Record {
+   }
+ 
+   private func resolveBaseFont() -> Font {
++    #if targetEnvironment(macCatalyst)
++    if family == nil, design == nil || design == .default {
++      return Font(uiKitFont() as CTFont)
++    }
++    #endif
+     if let family = family {
+       let baseSize = size ?? 17
+       var font: Font = if let textStyle = textStyle {
+@@ -144,4 +181,18 @@ internal struct FontModifier: ViewModifier, Record {
+       design: design?.toSwiftUI() ?? .default
+     )
+   }
++
++  // learnX: on Mac, SwiftUI draws a system font's weights heavier than UIKit does (its medium looks like UIKit's
++  // semibold), so the system font comes from UIKit there, drawn as the rest of a Catalyst app's text (React Native's)
++  // is: a text style at the Mac's size for it, or a size, in the weight asked for.
++  func uiKitFont() -> UIFont {
++    guard let textStyle else {
++      return UIFont.systemFont(ofSize: size ?? 17, weight: weight?.toUIKit() ?? .regular)
++    }
++    let styled = UIFont.preferredFont(forTextStyle: textStyle.toUIKit())
++    guard let weight else {
++      return styled
++    }
++    return UIFont.systemFont(ofSize: styled.pointSize, weight: weight.toUIKit())
++  }
+ }
+diff --git a/ios/Modifiers/ViewModifierRegistry.swift b/ios/Modifiers/ViewModifierRegistry.swift
+index 07a856574df36a69b802bd483caf4e33ae05a976..13140f1f7571c618ffaf1b99116acb2fe2863481 100644
+--- a/ios/Modifiers/ViewModifierRegistry.swift
++++ b/ios/Modifiers/ViewModifierRegistry.swift
+@@ -1098,10 +1098,15 @@ internal enum AlignmentGuideOptions: String, Enumerable {
+ internal struct AlignmentGuideModifier: ViewModifier, Record {
+   @Field var guide: AlignmentGuideOptions = .leading
+   @Field var value: Double = 0
++  // learnX: `value` counted back from the view's trailing edge, so a guide can
++  // follow the end of a view whose width isn't known (a row's separator).
++  @Field var fromTrailing: Bool = false
+ 
+   func body(content: Content) -> some View {
+     if let alignment = guide.horizontalAlignment {
+-      content.alignmentGuide(alignment) { _ in CGFloat(value) }
++      content.alignmentGuide(alignment) { d in
++        fromTrailing ? d.width - CGFloat(value) : CGFloat(value)
++      }
+     } else {
+       content
+     }
 diff --git a/src/jetpack-compose/modifiers/index.ts b/src/jetpack-compose/modifiers/index.ts
 index 91a0e72da596dd78b8301a11a94bd38f0d8beff1..e14554027afed3cc80484e56b7bd98a66f1c0ebd 100644
 --- a/src/jetpack-compose/modifiers/index.ts
@@ -250,3 +459,19 @@ index 41df9325424c31c0c0eb728796bd835c4db2ba09..ad3c3db83913e39bc1d4ef75107005b1
      modifiers,
      ...(modifiers ? createViewModifierEventListener(modifiers) : undefined),
      onButtonPress: onPress,
+diff --git a/src/swift-ui/modifiers/index.ts b/src/swift-ui/modifiers/index.ts
+index 6e4bc76a1cb91cf589d0faf97afa178a267e0198..c0c246cf2a8a46149b646a63a8fca01c522360e0 100644
+--- a/src/swift-ui/modifiers/index.ts
++++ b/src/swift-ui/modifiers/index.ts
+@@ -1247,8 +1247,9 @@ export const listRowSpacing = (spacing?: number) => createModifier('listRowSpaci
+  */
+ export const alignmentGuide = (
+   guide: 'leading' | 'center' | 'trailing' | 'listRowSeparatorLeading' | 'listRowSeparatorTrailing',
+-  value: number
+-) => createModifier('alignmentGuide', { guide, value });
++  value: number,
++  options?: { fromTrailing?: boolean }
++) => createModifier('alignmentGuide', { guide, value, fromTrailing: options?.fromTrailing ?? false });
+ 
+ /**
+  * Sets the truncation mode for lines of text that are too long to fit in the available space.

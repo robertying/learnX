@@ -6,6 +6,20 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.ProvideTextStyle
+import androidx.compose.material3.Typography
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.sp
+import expo.modules.kotlin.views.ComposeFunctionHolder
+import expo.modules.kotlin.views.FunctionalComposableScope
+import expo.modules.ui.TextContent
+import expo.modules.ui.TextProps
+import expo.modules.ui.TypographyStyle
+import org.junit.Assert.assertEquals
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -171,5 +185,47 @@ class ExpoUIHostSizePatchTest {
 
     idle(Duration.ofSeconds(10))
     verify(exactly = 1) { anyConstructed<ShadowNodeProxy>().setStyleSize(any(), any()) }
+  }
+}
+
+/**
+ * What patches/@expo__ui@58.0.28.patch changes in `Text` on Android: without a typography it takes the style its
+ * container provides (a list item's headline, a button's label), as Material 3's `Text` does, instead of a bare one.
+ */
+@RunWith(RobolectricTestRunner::class)
+class ExpoUITextPatchTest {
+  @get:Rule
+  val compose = createComposeRule()
+
+  private val scope = FunctionalComposableScope(
+    mockk<ComposeFunctionHolder<TextProps>>(relaxed = true) {
+      every { appContext } returns mockk(relaxed = true)
+    },
+    ComposableScope(),
+  )
+
+  private fun fontSizeOf(props: TextProps): TextUnit {
+    compose.setContent {
+      ProvideTextStyle(TextStyle(fontSize = 22.sp)) {
+        with(scope) { TextContent(props) }
+      }
+    }
+    val results = mutableListOf<TextLayoutResult>()
+    compose.onNodeWithText(props.text).fetchSemanticsNode()
+      .config[SemanticsActions.GetTextLayoutResult].action?.invoke(results)
+    return results.single().layoutInput.style.fontSize
+  }
+
+  @Test
+  fun withoutATypographyTheTextTakesItsContainersStyle() {
+    assertEquals(22.sp, fontSizeOf(TextProps(text = "Row")))
+  }
+
+  @Test
+  fun aTypographyStillWins() {
+    assertEquals(
+      Typography().titleMedium.fontSize,
+      fontSizeOf(TextProps(text = "Row", typography = TypographyStyle.TITLE_MEDIUM)),
+    )
   }
 }

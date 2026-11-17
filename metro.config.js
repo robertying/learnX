@@ -43,12 +43,40 @@ const webAliases = require('./src/web/aliases.json');
 const defaultConfig = getDefaultConfig(__dirname);
 const upstreamResolveRequest = defaultConfig.resolver?.resolveRequest;
 
+// What Metro crawls and watches. Without Watchman (`react-native start` falls
+// back to its own crawler and file watcher) it reads every folder under the
+// project root it isn't told to skip, and warns about each one that vanishes
+// while it reads it: agent worktrees under .claude being installed, Pods and
+// Gradle outputs being rebuilt, lock folders build scripts create and remove.
+// So only the folders that hold code the app bundles are watched; files at the
+// top level (index.js, package.json, app.json) stay, since the app imports
+// them. Metro tests these patterns against absolute paths while crawling and
+// against paths relative to the project root while watching, so each takes
+// either form. With Watchman installed, .watchmanconfig skips the same
+// top-level folders. The Electron app's logo (`components/Logo.web.tsx`) is
+// its icon in electron/icons, the one folder of electron/ the web build reads.
+const escape = (/** @type {string} */ text) =>
+  text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const appFolders = ['src', 'modules', 'node_modules', 'electron[\\\\/]icons'];
+const otherTopLevelFolders = new RegExp(
+  `^(?:${escape(__dirname)}[\\\\/]|(?![\\\\/]|[A-Za-z]:))` +
+    `(?!(?:${appFolders.join('|')})(?:[\\\\/]|$))[^\\\\/]+[\\\\/]`,
+);
+// Native build outputs inside the local modules and installed packages.
+const nativeBuildOutputs =
+  /[\\/](?:android|ios)[\\/](?:build|\.cxx|\.gradle|\.kotlin|Pods)(?:[\\/]|$)/;
+
 /** @type {ReturnType<typeof getDefaultConfig>} */
 const config = {
   ...defaultConfig,
   cacheVersion: inlinedInputsHash(),
   resolver: {
     ...defaultConfig.resolver,
+    blockList: [
+      defaultConfig.resolver.blockList ?? [],
+      otherTopLevelFolders,
+      nativeBuildOutputs,
+    ].flat(),
     resolveRequest: (context, moduleName, platform) => {
       const alias = platform === 'web' ? webAliases[moduleName] : undefined;
       if (alias) {

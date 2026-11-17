@@ -25,19 +25,6 @@ const textStyles = {
 } as const;
 
 /**
- * Point sizes on a Mac: the iOS default sizes of the text styles above, which
- * is what React Native `Text` uses (components/Text). SwiftUI text styles on
- * "Optimize for Mac" switch to the macOS scale instead (subheadline 11 pt,
- * footnote 10 pt), far smaller than the text around the button, and the Mac
- * has no Dynamic Type to follow anyway.
- */
-const macSizes = {
-  small: 13,
-  regular: 15,
-  large: 17,
-} as const;
-
-/**
  * Padding inside the label, so the tap target reaches the 44 pt minimum of
  * Apple's guidelines at the default text size (one line of footnote,
  * subheadline or body is 18, 20 or 22 pt tall) instead of being one line of
@@ -79,7 +66,7 @@ const TextButton: React.FC<TextButtonProps> = ({
   const modifiers = [
     buttonStyle('borderless'),
     font({
-      ...(isMac ? { size: macSizes[size] } : { textStyle: textStyles[size] }),
+      textStyle: textStyles[size],
       weight: bold ? 'semibold' : undefined,
     }),
     ...oneLine,

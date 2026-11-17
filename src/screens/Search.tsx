@@ -36,12 +36,14 @@ import type { ToggleMenuOption } from 'components/ToggleMenu.shared';
 import { systemIcons } from 'helpers/systemIcons';
 import { headerButtons } from 'navigation/headerButtons';
 import { hasGlassHeader } from 'navigation/options';
+import { scrollInsetBehavior } from 'constants/scrollInsetBehavior';
 import { t } from 'helpers/i18n';
 import { SearchStackParams } from 'navigation/types';
 import { Paragraph } from 'components/Text';
 import { useTheme } from 'theme';
 import { isAndroid, isApple, isElectron } from 'helpers/platform';
 import HeaderSearch from 'components/HeaderSearch';
+import useKeyboardOverlap from 'hooks/useKeyboardOverlap';
 
 type Props = NativeStackScreenProps<SearchStackParams, 'Search'>;
 
@@ -83,6 +85,9 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
   // The system search bar in the header (UISearchController on iOS and Mac,
   // the toolbar search view on Android).
   const searchBarRef = useRef<SearchBarCommands>(null);
+  // Android: the results end above the keyboard, so all of them scroll into
+  // view.
+  const { ref: keyboardRef, overlap: keyboardOverlap } = useKeyboardOverlap();
   useLayoutEffect(() => {
     // The Electron app has no system search bar: a search box takes the
     // header's title.
@@ -109,13 +114,23 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
         obscureBackground: false,
         tintColor: theme.colors.primary,
         onChangeText: e => setSearchQuery(e.nativeEvent.text),
-        // Android's close button doesn't always send a text change. iOS and
-        // Mac have no cancel button (patched out): it only did what the clear
-        // button in the field does, and the modal has its own Close button.
-        onClose: () => setSearchQuery(''),
+        // Android: the field's ✕ (once the query is cleared) or Back closes
+        // the search, and so Search, as in Android's own apps: the open field
+        // covers the header's Close button. iOS and Mac have no cancel button
+        // (patched out): it only did what the clear button in the field does,
+        // and the modal has its own Close button.
+        onClose: () => {
+          setSearchQuery('');
+          if (isAndroid() && navigation.isFocused()) {
+            navigation.goBack();
+          }
+        },
         onFocus: () => {
           searchBarFocused.current = true;
         },
+        // The results follow typing, so the keyboard's search key only puts
+        // the keyboard away, to see all of them (as in Mail and Gmail).
+        onSearchButtonPress: () => searchBarRef.current?.blur(),
       },
     });
   }, [navigation, theme.colors.primary, initialQuery]);
@@ -243,7 +258,9 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
   // A kind's tab with none of the results: No Results under the tabs, as
   // when nothing matches at all.
   const scopeEmpty = scope !== 'all' && byKind[scope].length === 0;
-  const noResults = scopeEmpty || (!hasResults && !!settledQuery.trim());
+  // Only for a query: with the field empty (cleared on a kind's tab too),
+  // the prompt.
+  const noResults = !!settledQuery.trim() && (scopeEmpty || !hasResults);
 
   // The overview: the top hits, when some kind has more than it shows, then
   // the first few of each kind not among them, each with See All.
@@ -282,10 +299,6 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
   const tabTitles = tabs.map(tab =>
     tab === 'all' ? t('all') : t(titles[tab]),
   );
-  // The tabs (Android: chips and the filter menu) stay up while there's a
-  // query, whether or not it matches yet, so they don't come and go as
-  // typing pauses on a partial query.
-  const showTabs = !!searchQuery.trim();
   // The floating tabs' height, which the results scroll clear of.
   const [tabsHeight, setTabsHeight] = useState(0);
 
@@ -322,7 +335,7 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
     <SectionList<TopHit, (typeof sections)[number]>
       // Starts over at the top for another tab or tab height.
       key={`${scope}-${topInset}`}
-      contentInsetAdjustmentBehavior="automatic"
+      contentInsetAdjustmentBehavior={scrollInsetBehavior}
       keyboardDismissMode="on-drag"
       contentContainerStyle={{ paddingBottom: safeAreaInsets.bottom }}
       contentInset={{ top: topInset }}
@@ -364,7 +377,11 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
 
   return (
     <SafeArea>
-      <View style={Styles.flex1}>
+      <View
+        ref={keyboardRef}
+        collapsable={false}
+        style={[Styles.flex1, { paddingBottom: keyboardOverlap }]}
+      >
         {/* Behind the results and always mounted: a KeyboardAvoidingView
             that mounts while the keyboard is up (after the query is cleared)
             never learns its height, so the prompt would sit behind it. */}
@@ -384,32 +401,34 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
             )}
           </KeyboardAvoidingView>
         </View>
+        {/* The tabs (Android: chips and the filter menu) are always up, as
+            the system's scope bars are while searching, so they don't come
+            and go with the query: the prompt, No Results and the results all
+            show under them. */}
         {isAndroid() ? (
           // The menu also brings back what it leaves out when nothing
           // matches.
-          showTabs ? (
-            <View style={Styles.flex1}>
-              <View
-                testID="search-tabs"
-                collapsable={false}
-                style={styles.androidBar}
-              >
-                <ScopeChips
-                  titles={tabTitles}
-                  selectedIndex={tabs.indexOf(scope)}
-                  onSelect={i => setScope(tabs[i])}
-                />
-                <ToggleMenu
-                  label={t('filter')}
-                  options={filterOptions}
-                  active={filtered}
-                  onToggle={toggleFilter}
-                />
-              </View>
-              {hasResults ? renderList(0) : null}
+          <View style={Styles.flex1}>
+            <View
+              testID="search-tabs"
+              collapsable={false}
+              style={styles.androidBar}
+            >
+              <ScopeChips
+                titles={tabTitles}
+                selectedIndex={tabs.indexOf(scope)}
+                onSelect={i => setScope(tabs[i])}
+              />
+              <ToggleMenu
+                label={t('filter')}
+                options={filterOptions}
+                active={filtered}
+                onToggle={toggleFilter}
+              />
             </View>
-          ) : null
-        ) : !showTabs ? null : hasGlassHeader ? (
+            {hasResults ? renderList(0) : null}
+          </View>
+        ) : hasGlassHeader ? (
           // iPhone and iPad from iOS 26: the tabs float in glass under the
           // header, as in a course's detail, and the results scroll under
           // them once their height is known.
@@ -433,7 +452,10 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
             </SafeAreaView>
           </>
         ) : (
-          <View style={Styles.flex1}>
+          // Mac: once there are results, the sheet lays the screen out under
+          // its header (the list is its scroll view), so the tabs keep clear
+          // of it themselves.
+          <SafeAreaView edges={{ top: true }} style={Styles.flex1}>
             <SegmentedTabs
               titles={tabTitles}
               selectedIndex={tabs.indexOf(scope)}
@@ -442,7 +464,7 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
               testID="search-tabs"
             />
             {hasResults ? renderList(0) : null}
-          </View>
+          </SafeAreaView>
         )}
       </View>
     </SafeArea>

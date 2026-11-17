@@ -44,6 +44,8 @@ dependencies {
   testImplementation 'com.github.zacharee:AndroidPdfViewer:4.0.1'
   testImplementation 'io.legere:pdfiumandroid:1.0.35'
   testImplementation 'androidx.compose.foundation:foundation-android:1.12.1'
+  // The version @expo/ui builds with, for Text's style in its tests
+  testImplementation 'androidx.compose.material3:material3-android:1.5.0-beta01'
   testImplementation 'androidx.compose.ui:ui-test-junit4:1.12.1'
   testImplementation 'androidx.compose.ui:ui-test-manifest:1.12.1'
 }

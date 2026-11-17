@@ -1,4 +1,5 @@
 import type { ReactNode, Ref } from 'react';
+import { scrollInsetBehavior } from 'constants/scrollInsetBehavior';
 import { StyleSheet } from 'react-native';
 import WebView, { type WebViewProps } from 'react-native-webview';
 import PageProgressBar from 'components/PageProgressBar';
@@ -29,7 +30,10 @@ const ScreenWebView: React.FC<
         ref={ref}
         style={[styles.webView, style]}
         decelerationRate={isApple() ? 'normal' : undefined}
-        contentInsetAdjustmentBehavior="automatic"
+        contentInsetAdjustmentBehavior={scrollInsetBehavior}
+        // React Native's own inset from the safe area, which is the same
+        // toolbar on Mac (`scrollInsetBehavior`)
+        automaticallyAdjustContentInsets={scrollInsetBehavior === 'automatic'}
         onLoadProgress={event => {
           progress.onLoadProgress(event);
           onLoadProgress?.(event);

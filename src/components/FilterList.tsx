@@ -8,9 +8,11 @@ import ReorderableList, {
 } from 'react-native-reorderable-list';
 import { Assignment, Course, File, Notice } from 'data/types/state';
 import { getSettings, setSetting, useSettings } from 'data/settings';
-import useAppCommand from 'hooks/useAppCommand';
 import useDetailNavigator, { useDetailRoot } from 'hooks/useDetailNavigator';
 import useFilterListHeader from 'hooks/useFilterListHeader';
+import { scrollInsetBehavior } from 'constants/scrollInsetBehavior';
+import useItemStepping from 'hooks/useItemStepping';
+import useRefreshCommand from 'hooks/useRefreshCommand';
 import useListSelection from 'hooks/useListSelection';
 import type { DetailStackParams, RootStackParams } from 'navigation/types';
 import Styles from 'constants/Styles';
@@ -36,6 +38,7 @@ import FilterListRow, {
 import FlatList from './FlatList';
 import ListBackground from './ListBackground';
 import { playHaptic } from 'services/haptics';
+import { useTheme } from 'theme';
 
 export type { ItemComponentProps };
 
@@ -96,6 +99,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   onRefresh,
   updatedAt,
 }: FilterListProps<T>) => {
+  const theme = useTheme();
   const detailNavigator = useDetailNavigator();
   // The item open beside the list, which its row shows as selected.
   const detailRoot = useDetailRoot();
@@ -250,34 +254,15 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   // screen. Every tab's list stays mounted.
   const isFocused = useIsFocused();
   const commandsEnabled = isFocused && !selectionMode && !reorderMode;
-  useAppCommand(
-    'refresh',
-    () => {
-      if (!refreshing) {
-        onRefresh?.();
-      }
-    },
+  useRefreshCommand(
+    { refreshing, onRefresh: () => onRefresh?.() },
     commandsEnabled,
   );
   // Steps through the list from the item open beside it in the split view.
-  const openAdjacent = (offset: 1 | -1) => {
-    const index = data.findIndex(i => i.id === openedId);
-    const item =
-      index === -1
-        ? data[offset === 1 ? 0 : data.length - 1]
-        : data[index + offset];
-    if (item) {
-      rowHandlers.press(item);
-    }
-  };
-  useAppCommand(
-    'nextItem',
-    () => openAdjacent(1),
-    commandsEnabled && !!detailNavigator,
-  );
-  useAppCommand(
-    'previousItem',
-    () => openAdjacent(-1),
+  useItemStepping(
+    data.length,
+    data.findIndex(i => i.id === openedId),
+    index => rowHandlers.press(data[index]),
     commandsEnabled && !!detailNavigator,
   );
 
@@ -315,7 +300,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
 
   const listProps = {
     style: { height: '100%' as const },
-    contentInsetAdjustmentBehavior: 'automatic' as const,
+    contentInsetAdjustmentBehavior: scrollInsetBehavior,
     data,
     // In the list, so that the list is the screen's first scroll view: iOS
     // collapses the large title as it scrolls.
@@ -326,7 +311,14 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     // drag in reorder mode), nor on the Mac, which has no pull.
     refreshControl:
       selectionMode || reorderMode || DeviceInfo.isMac() ? undefined : (
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          // Android: Material 3's colors, as Compose's pull to refresh
+          // (Today) draws them; iOS keeps the system spinner.
+          colors={[theme.colors.primary]}
+          progressBackgroundColor={theme.colors.surfaceContainer}
+        />
       ),
   };
 

@@ -376,6 +376,7 @@ export default {
   exitFullscreen: 'Exit Full Screen',
   info: 'Info',
   preview: 'Preview',
+  quickLook: 'Quick Look',
   unknownFileType: 'Unknown',
   fileType: 'Type',
   fileSize: 'Size',

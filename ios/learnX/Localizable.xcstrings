@@ -91,6 +91,24 @@
         }
       }
     },
+    "Quick Look" : {
+      "comment" : "A menu bar command (modules/menus/ios/AppCommands.swift)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "快速查看"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "快速查看"
+          }
+        }
+      }
+    },
     "Refresh" : {
       "comment" : "A menu bar command (modules/menus/ios/AppCommands.swift)",
       "extractionState" : "manual",

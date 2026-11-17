@@ -8,7 +8,6 @@ import {
   FormNumberField,
   FormParagraph,
   FormProfile,
-  FormProgress,
   FormScreen,
   FormSection,
   FormText,
@@ -220,13 +219,12 @@ it('takes whole positive numbers in a number row', () => {
   expect(onValueChange).toHaveBeenCalledWith(30);
 });
 
-it('shows paragraphs, titles, progress, views and the profile', () => {
+it('shows paragraphs, titles, views and the profile', () => {
   renderForm(
     <FormScreen>
       <FormTitle title="Homework" subtitle="Due Friday" />
       <FormParagraph text="Some text" />
       <FormParagraph text="A name" headline />
-      <FormProgress title="Uploading" value={0.3} />
       <FormView loading>
         <span>Body</span>
       </FormView>
@@ -238,7 +236,6 @@ it('shows paragraphs, titles, progress, views and the profile', () => {
     'Due Friday',
     'Some text',
     'A name',
-    'Uploading',
     'Body',
     'Rui',
     'EE',

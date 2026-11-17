@@ -1,4 +1,5 @@
 import { useLayoutEffect } from 'react';
+import { useIsFocused } from '@react-navigation/native';
 import dayjs from 'dayjs';
 import ItemRow from 'components/ItemRow';
 import {
@@ -8,8 +9,7 @@ import {
   FormSection,
   FormText,
 } from 'components/Form';
-import { SyncStatusSection } from 'components/SyncStatus';
-import DeviceInfo from 'constants/DeviceInfo';
+import { SyncStatusSection, useSyncStatus } from 'components/SyncStatus';
 import { useAssignments, useFiles, useNotices } from 'data/content';
 import { getSettings, setSetting } from 'data/settings';
 import { useWeekSchedule } from 'data/schedule';
@@ -30,15 +30,25 @@ import {
 } from 'helpers/schedule';
 import { beijingDate, showsBeijingTime } from 'helpers/serverTime';
 import { isShownBy } from 'helpers/shown';
-import { useShowDetail } from 'hooks/useDetailNavigator';
+import useDetailNavigator, {
+  sameDetailRoot,
+  useDetailRoot,
+  useShowDetail,
+} from 'hooks/useDetailNavigator';
+import useItemStepping from 'hooks/useItemStepping';
 import usePendingTarget from 'hooks/usePendingTarget';
 import { useMinute } from 'hooks/useClock';
 import usePullToRefresh from 'hooks/usePullToRefresh';
+import useRefreshCommand from 'hooks/useRefreshCommand';
 import useSettingsBadge from 'hooks/useSettingsBadge';
 import { debugTitle, getTitleOptions } from 'navigation/options';
 import useHeaderButtons from 'hooks/useHeaderButtons';
 import { settingsTab } from 'navigation/layout';
-import { MainStackScreenProps, TodayStackParams } from 'navigation/types';
+import {
+  DetailStackParams,
+  MainStackScreenProps,
+  TodayStackParams,
+} from 'navigation/types';
 
 type Props = MainStackScreenProps<TodayStackParams, 'Today'>;
 
@@ -75,6 +85,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
   ).length;
 
   const settingsBadge = useSettingsBadge();
+  const syncShown = !!useSyncStatus(schedule.updatedAt);
 
   const handleRefresh = async () => {
     const results = await Promise.all([
@@ -115,6 +126,40 @@ const Today: React.FC<Props> = ({ navigation }) => {
   const pressOf = (session: ClassSession) =>
     session.courseId ? () => openCourse(session.courseId!) : undefined;
 
+  // Next Item and Previous Item step through the rows that open beside
+  // Today, in their order: the classes' courses, Schedule, what's due.
+  const detailRows = [
+    ...[current, next].flatMap(session =>
+      session?.courseId
+        ? [{ name: 'CourseDetail' as const, id: session.courseId }]
+        : [],
+    ),
+    { name: 'Schedule' as const, id: undefined },
+    ...dueSoon.map(a => ({ name: 'AssignmentDetail' as const, id: a.id })),
+  ].filter(
+    // The class now and the next can be of one course.
+    (row, i, rows) => rows.findIndex(r => sameDetailRoot(r, row)) === i,
+  );
+  const detailRoot = useDetailRoot();
+  // The row whose page is open beside Today shows as selected.
+  const opened = (name: keyof DetailStackParams, id?: string) =>
+    sameDetailRoot(detailRoot, { name, id });
+  const isFocused = useIsFocused();
+  const detailNavigator = useDetailNavigator();
+  useItemStepping(
+    detailRows.length,
+    detailRows.findIndex(row => sameDetailRoot(row, detailRoot)),
+    index => {
+      const row = detailRows[index];
+      if (row.name === 'Schedule') {
+        show('Schedule');
+      } else {
+        show(row.name, { id: row.id });
+      }
+    },
+    isFocused && !!detailNavigator,
+  );
+
   // the timetable's day (Beijing), so the date matches the week and the classes
   const dateText = formatDate(beijingDate(now), 'todayDateFormat');
   const subtitle =
@@ -126,21 +171,12 @@ const Today: React.FC<Props> = ({ navigation }) => {
   // pane, and behind this button elsewhere.
   const showSettings = !settingsTab;
   const openSettings = () => navigation.push('Settings');
-  const refreshing = pullToRefresh.refreshing;
+  const refreshButton = useRefreshCommand(pullToRefresh);
   useLayoutEffect(() => {
     navigation.setOptions(getTitleOptions(t('today'), subtitle));
   }, [navigation, subtitle]);
   useHeaderButtons(navigation, 'right', [
-    DeviceInfo.isMac() && {
-      id: 'refresh',
-      label: t('refresh'),
-      icon: 'refresh',
-      sfSymbol: refreshing
-        ? 'arrow.trianglehead.2.clockwise.rotate.90'
-        : undefined,
-      disabled: refreshing,
-      onPress: pullToRefresh.onRefresh,
-    },
+    refreshButton,
     // Debug builds: the debug tools, in a group of their own.
     __DEV__ && {
       id: 'debug',
@@ -195,7 +231,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
       <Form testID="today" onRefresh={pullToRefresh.onRefresh}>
         {/* In the Form, which scrolls under the header and collapses the
             large title; a view above it would sit behind the header. */}
-        <SyncStatusSection updatedAt={schedule.updatedAt} />
+        {syncShown && <SyncStatusSection updatedAt={schedule.updatedAt} />}
         {/* One section, and when a class ends or starts goes above its name
             rather than beside it, so a busy day keeps what's due on screen.
             The whole week is a tap away in Schedule. */}
@@ -210,6 +246,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
               subtitle={classDetails(current)}
               progress={(now - current.start) / (current.end - current.start)}
               onPress={pressOf(current)}
+              opened={opened('CourseDetail', current.courseId)}
             />
           )}
           {next && (
@@ -221,6 +258,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
               title={next.courseName}
               subtitle={classDetails(next)}
               onPress={pressOf(next)}
+              opened={opened('CourseDetail', next.courseId)}
             />
           )}
           <FormLink
@@ -228,6 +266,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
             title={t('schedule')}
             detail={classCount}
             onPress={() => show('Schedule')}
+            opened={opened('Schedule')}
             testID="today-schedule"
           />
         </FormSection>
@@ -249,6 +288,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
                   ]
                 }
                 onPress={() => openAssignment(assignment)}
+                opened={opened('AssignmentDetail', assignment.id)}
               />
             ))
           )}

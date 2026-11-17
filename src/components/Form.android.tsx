@@ -1,9 +1,9 @@
-import { Fragment, useState } from 'react';
+import { Fragment, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
-  Keyboard,
   StyleSheet,
   useWindowDimensions,
+  View,
   type ViewProps,
 } from 'react-native';
 import {
@@ -24,6 +24,7 @@ import {
   TextField,
   useMaterialColors,
   useNativeState,
+  type TextFieldRef,
 } from '@expo/ui/jetpack-compose';
 import {
   background,
@@ -31,7 +32,6 @@ import {
   clip,
   fillMaxSize,
   fillMaxWidth,
-  imePadding,
   padding,
   selectable,
   semantics,
@@ -46,6 +46,11 @@ import SafeArea from 'components/SafeArea';
 import { useMaterialTheme } from 'theme';
 import { t } from 'helpers/i18n';
 import { useFieldText } from 'hooks/useFieldText';
+import useKeyboardOverlap from 'hooks/useKeyboardOverlap';
+import useNumberFieldDone, {
+  NumberFieldFocusContext,
+  useNumberFieldFocus,
+} from 'hooks/useNumberFieldDone';
 import {
   parseNumberInput,
   positionRows,
@@ -59,7 +64,6 @@ import {
   type FormNumberFieldProps,
   type FormParagraphProps,
   type FormProfileProps,
-  type FormProgressProps,
   type FormProps,
   type FormRowPosition,
   type FormSectionProps,
@@ -135,13 +139,9 @@ const FormContent: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
     <LazyColumn
       verticalArrangement={{ spacedBy: 24 }}
       contentPadding={{ start: 16, end: 16, top: 16, bottom: 16 }}
-      modifiers={[
-        fillMaxSize(),
-        // Shrinks the list above the keyboard, so a focused number field
-        // scrolls into view.
-        imePadding(),
-        ...withTestID(testID),
-      ]}
+      // The Form ends above the keyboard (useKeyboardOverlap), so the list
+      // keeps a focused number field in view as it shrinks.
+      modifiers={[fillMaxSize(), ...withTestID(testID)]}
     >
       {children}
     </LazyColumn>
@@ -178,12 +178,22 @@ const FormContent: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
 
 export const Form: React.FC<FormProps> = props => {
   const theme = useMaterialTheme();
+  const reportNumberFocus = useNumberFieldDone();
+  const { ref, overlap } = useKeyboardOverlap();
   return (
-    <ThemedHost
-      style={[styles.fill, { backgroundColor: theme.colors.surface }]}
+    <View
+      ref={ref}
+      style={[styles.fill, { paddingBottom: overlap }]}
+      collapsable={false}
     >
-      <FormContent {...props} />
-    </ThemedHost>
+      <ThemedHost
+        style={[styles.fill, { backgroundColor: theme.colors.surface }]}
+      >
+        <NumberFieldFocusContext value={reportNumberFocus}>
+          <FormContent {...props} />
+        </NumberFieldFocusContext>
+      </ThemedHost>
+    </View>
   );
 };
 
@@ -273,6 +283,8 @@ const FormRow: React.FC<
     /** A state the row shows only visually (a badge), read after the title. */
     spokenState?: string;
     trailing?: ReactNode;
+    /** In Material's selected container color (`FormLinkProps['opened']`). */
+    opened?: boolean;
   }
 > = ({
   title,
@@ -291,8 +303,12 @@ const FormRow: React.FC<
   trailing,
   done,
   progress,
+  opened,
 }) => {
   const colors = useMaterialColors();
+  const containerColor = opened
+    ? colors.secondaryContainer
+    : colors.surfaceContainer;
   const theme = useMaterialTheme();
   const { subtitle: supporting, detail: endDetail } = stackedDetail(
     { subtitle, detail },
@@ -315,13 +331,16 @@ const FormRow: React.FC<
                 ? theme.colors.status[detailTint]
                 : colors.onSurfaceVariant
         }
-        style={
-          detailTint === 'accent'
-            ? { typography: 'titleLarge' }
-            : detailTint
-              ? { typography: 'labelLarge' }
-              : undefined
-        }
+        // A plain detail at the supporting text's size: the trailing slot's
+        // own (labelSmall) is a caption's.
+        style={{
+          typography:
+            detailTint === 'accent'
+              ? 'titleLarge'
+              : detailTint
+                ? 'labelLarge'
+                : 'bodyMedium',
+        }}
       >
         {endDetail}
       </Text>
@@ -338,14 +357,16 @@ const FormRow: React.FC<
     );
   const item = (rowModifiers: ModifierConfig[]) => (
     <ListItem
-      colors={{ containerColor: colors.surfaceContainer }}
+      colors={{ containerColor }}
       modifiers={[fillMaxWidth(), ...rowModifiers]}
     >
       <ListItem.HeadlineContent>
         <Text
           color={contentColor}
+          // The headline slot's bodyLarge, or for an item the title of a
+          // list card (titleMedium, as components/Text's headline).
           style={{
-            ...(itemTitle ? { fontWeight: '500' as const } : {}),
+            ...(itemTitle ? { typography: 'titleMedium' as const } : {}),
             ...(struck ? { textDecoration: 'lineThrough' as const } : {}),
           }}
           // Always set: a row that loses its state must read its title alone
@@ -398,7 +419,7 @@ const FormRow: React.FC<
       modifiers={[
         fillMaxWidth(),
         rowShape(position),
-        background(colors.surfaceContainer),
+        background(containerColor),
         ...(action ? [action] : []),
         ...withTestID(testID),
       ]}
@@ -433,11 +454,13 @@ export const FormText: React.FC<FormTextProps> = ({ action, ...row }) => (
 export const FormLink: React.FC<FormLinkProps> = ({
   onPress,
   badge,
+  opened,
   ...row
 }) => (
   <FormRow
     {...row}
-    action={clickable(onPress)}
+    opened={opened}
+    action={opened ? selectable(true, onPress) : clickable(onPress)}
     spokenState={badge ? t('a11yNewBadge') : undefined}
     trailing={badge ? <Badge /> : null}
   />
@@ -563,28 +586,6 @@ export const FormTextField: React.FC<FormTextFieldProps> = props => {
   );
 };
 
-/** A bar under its title. */
-export const FormProgress: React.FC<FormProgressProps> = ({
-  title,
-  value,
-  testID,
-  position,
-}) => {
-  return (
-    <SectionItem position={position} testID={testID}>
-      <ListItem.HeadlineContent>
-        <Text>{title}</Text>
-      </ListItem.HeadlineContent>
-      <ListItem.SupportingContent>
-        <LinearProgressIndicator
-          progress={value}
-          modifiers={[fillMaxWidth(), padding(0, 8, 0, 0)]}
-        />
-      </ListItem.SupportingContent>
-    </SectionItem>
-  );
-};
-
 export const FormToggle: React.FC<FormToggleProps> = ({
   value,
   onValueChange,
@@ -627,16 +628,24 @@ export const FormNumberField: React.FC<FormNumberFieldProps> = ({
   ...row
 }) => {
   const text = useNativeState(String(value));
+  const field = useRef<TextFieldRef>(null);
+  const reportFocus = useNumberFieldFocus();
+  // Letting go of the focus also puts the keyboard away.
+  const release = () => {
+    void field.current?.blur();
+  };
   return (
     <FormRow
       {...row}
       trailing={
         <OutlinedTextField
+          ref={field}
           value={text}
           singleLine
-          // The keyboard's ✓ key puts the keyboard away.
+          // The keyboard's ✓ key, as Done in the header.
           keyboardOptions={{ keyboardType: 'number', imeAction: 'done' }}
-          keyboardActions={{ onDone: () => Keyboard.dismiss() }}
+          keyboardActions={{ onDone: release }}
+          onFocusChanged={focused => reportFocus?.(focused ? release : null)}
           textStyle={{ textAlign: 'right' }}
           onValueChange={parseNumberInput(onValueChange)}
           modifiers={[width(96)]}

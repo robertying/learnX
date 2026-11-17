@@ -1,5 +1,4 @@
 import { createRef } from 'react';
-import { StyleSheet } from 'react-native';
 import {
   act,
   fireEvent,
@@ -41,7 +40,6 @@ import {
   ZStack,
   type SecureFieldRef,
 } from 'web/packages/swiftUI';
-import { ToastBackground, ToastSymbol } from 'modules/toast/index.web';
 
 // The stand-in modifiers, untyped: they record whatever they're given.
 type ModifierFactory = ((...args: unknown[]) => unknown) &
@@ -463,23 +461,4 @@ it('asks to confirm a choice', async () => {
   );
   await userEvent.press(screen.getByText('Plain'));
   await userEvent.press(screen.getAllByText('Cancel')[0]);
-});
-
-it("draws the toast's backdrop and symbol", async () => {
-  const { rerender } = await render(
-    <ToastBackground cornerRadius={12} visible testID="toast">
-      <ToastSymbol name="checkmark" size={20} color="white" />
-    </ToastBackground>,
-  );
-  expect(screen.getByTestId('toast')).toHaveStyle({
-    borderRadius: 12,
-    opacity: 1,
-  });
-  await rerender(
-    <ToastBackground cornerRadius={12} visible={false} testID="toast" />,
-  );
-  expect(screen.getByTestId('toast')).toHaveStyle({ opacity: 0 });
-  expect(
-    StyleSheet.flatten(screen.getByTestId('toast').props.style),
-  ).toBeTruthy();
 });
