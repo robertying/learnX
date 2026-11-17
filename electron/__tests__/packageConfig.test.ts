@@ -183,3 +183,17 @@ it('pins an AppImage runtime electron-builder still knows', () => {
   expect(version).toBeDefined();
   expect(Object.keys(appimageChecksums)).toContain(version);
 });
+
+it('pins an NSIS toolset electron-builder still knows', () => {
+  // The legacy toolset's makensis runs on an Apple silicon Mac only with
+  // Rosetta; an electron-builder upgrade could drop this one.
+  const { nsisChecksums } = require(
+    require.resolve('app-builder-lib/out/toolsets/windows', {
+      paths: [path.join(__dirname, '..')],
+    }),
+  ) as { nsisChecksums: Record<string, unknown> };
+  const version = packageConfig().toolsets?.nsis;
+  expect(version).toBeDefined();
+  expect(version).not.toBe('0.0.0');
+  expect(Object.keys(nsisChecksums)).toContain(version);
+});

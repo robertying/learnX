@@ -17,9 +17,9 @@
 //   pnpm electron:package --win --version 19.0.1 \
 //     --update-url http://localhost:8299/
 //
-// The installers need NSIS's and the AppImage tools, which electron-builder
-// downloads; on an Apple silicon Mac those run only with Rosetta, so build
-// them on Windows or in CI there, and use --dir on the Mac.
+// The installers need NSIS, the AppImage tools and fpm, which electron-builder
+// downloads for the computer it runs on (toolsets in packageConfig.cjs): a
+// Mac, Intel or Apple silicon (no Rosetta), Windows or Linux builds both.
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
