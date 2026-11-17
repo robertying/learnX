@@ -19,52 +19,46 @@ const SAVE_WAIT_MS = 1_000;
 
 /**
  * @typedef {Pick<import('electron').SafeStorage,
- *   'isAsyncEncryptionAvailable' | 'encryptStringAsync' | 'decryptStringAsync'
- *   | 'isEncryptionAvailable' | 'encryptString' | 'decryptString'
- *   | 'getSelectedStorageBackend'>} SafeStorage
+ *   'isAsyncEncryptionAvailable' | 'encryptStringAsync' | 'decryptStringAsync'>} SafeStorage
  */
 
 /**
- * The encryption to use. On Linux, the one whose key store
- * `getSelectedStorageBackend` reports: Chromium's synchronous OSCrypt, which
- * that report describes (the asynchronous encryptor picks its own provider,
- * which nothing reports), so the check that refuses Chromium's fallback key
- * (`basic_text`) is about the key the value is actually encrypted with. The
- * report is read after `isEncryptionAvailable()`, which initializes it.
- * OSCrypt asks for the key on the main process's thread, which a locked
- * keyring would hold for as long as its unlock prompt is up (the window
- * frozen), so nothing calls it before `ready`: the asynchronous encryptor's
- * check, which waits for the prompt off that thread.
- * Elsewhere, the asynchronous APIs, as Electron 45 recommends.
+ * The tag Chromium starts a value with when a key from the system's keyring
+ * (the Secret Service or KWallet) encrypted it, on Linux; `v10` is its own
+ * fallback key, written in its code.
+ */
+const KEYRING_KEY_TAG = 'v11';
+
+/**
+ * The encryption: safeStorage's asynchronous APIs, as Electron 45
+ * recommends, which never ask the keyring on the main process's thread (the
+ * synchronous ones held it, the window frozen, while GNOME's unlock prompt
+ * was up, and asked again after Cancel). `ready` waits for that prompt. On
+ * Linux a value is saved only if the keyring's key encrypted it (tagged
+ * `v11`): without a Secret Service or KWallet, or with its unlock cancelled,
+ * Chromium falls back to its own key, which only obscures the value. A dev
+ * run (`allowFallbackKey`) takes that key, on purpose (`--password-store=
+ * basic`), to keep its login out of the system's keyring.
  * @param {SafeStorage} safeStorage
  * @param {string} platform
- * A dev run's (`allowFallbackKey`), on Chromium's own key (`--password-store=
- * basic`), uses the asynchronous APIs on Linux too: OSCrypt reports no
- * encryption with that key.
- * @param {boolean} allowFallbackKey whether Chromium's fallback key will do
+ * @param {boolean} allowFallbackKey
  */
-const encryptionOf = (safeStorage, platform, allowFallbackKey) =>
-  platform === 'linux' && !allowFallbackKey
-    ? {
-        ready: () => safeStorage.isAsyncEncryptionAvailable(),
-        canEncrypt: async () =>
-          safeStorage.isEncryptionAvailable() &&
-          safeStorage.getSelectedStorageBackend() !== 'basic_text',
-        encrypt: async (/** @type {string} */ text) =>
-          safeStorage.encryptString(text),
-        decrypt: async (/** @type {Buffer} */ data) => ({
-          result: safeStorage.decryptString(data),
-          shouldReEncrypt: false,
-        }),
-      }
-    : {
-        ready: async () => true,
-        canEncrypt: () => safeStorage.isAsyncEncryptionAvailable(),
-        encrypt: (/** @type {string} */ text) =>
-          safeStorage.encryptStringAsync(text),
-        decrypt: (/** @type {Buffer} */ data) =>
-          safeStorage.decryptStringAsync(data),
-      };
+const encryptionOf = (safeStorage, platform, allowFallbackKey) => ({
+  ready: () => safeStorage.isAsyncEncryptionAvailable(),
+  encrypt: async (/** @type {string} */ text) => {
+    const encrypted = await safeStorage.encryptStringAsync(text);
+    if (
+      platform === 'linux' &&
+      !allowFallbackKey &&
+      encrypted.subarray(0, KEYRING_KEY_TAG.length).toString() !==
+        KEYRING_KEY_TAG
+    ) {
+      throw new Error('Encryption is not available');
+    }
+    return encrypted;
+  },
+  decrypt: (/** @type {Buffer} */ data) => safeStorage.decryptStringAsync(data),
+});
 
 /** What `within` resolves to when the wait ran out first. */
 const TIMED_OUT = Symbol('timed out');
@@ -73,7 +67,7 @@ const TIMED_OUT = Symbol('timed out');
  * @param {ReturnType<typeof import('./fileStore.cjs').createFileStore>} store
  * @param {SafeStorage} safeStorage
  * @param {{ platform?: string; allowFallbackKey?: boolean; unlockWaitMs?: number; saveWaitMs?: number }} [options]
- *   `allowFallbackKey`: a dev run's, whose Linux key store is Chromium's own
+ *   `allowFallbackKey`: a dev run's, on Chromium's own key
  */
 const createSecrets = (
   store,
@@ -179,7 +173,7 @@ const createSecrets = (
           return;
         }
         try {
-          if (!open || !(await encryption.canEncrypt())) {
+          if (!open) {
             throw new Error('Encryption is not available');
           }
           await save(key, value);

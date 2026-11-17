@@ -5,55 +5,45 @@ import { createFileStore } from '../fileStore.cjs';
 import { createSecrets } from '../secrets.cjs';
 
 /**
- * safeStorage, with each API leaving its own mark, so a test sees which one
- * encrypted: the async ones reverse the bytes, the sync ones (Linux's
- * OSCrypt) add one to each. As Chromium's OSCrypt, the backend reads
- * `unknown` until encryption is first asked about.
+ * safeStorage's asynchronous APIs, which tag a value with the key that
+ * encrypted it, as Chromium does on Linux: `v11` for the keyring's key,
+ * `v10` for its own fallback key (`fallback`: no keyring, or its unlock
+ * cancelled). The rest is the text reversed.
  */
 const fakeSafeStorage = ({
   available = true,
-  backend = 'gnome_libsecret',
+  fallback = false,
   rotated = false,
   unlocked = Promise.resolve(),
 } = {}) => {
-  let initialized = false;
-  const fail = (data: Buffer) => {
-    if (data.length === 0) {
-      throw new Error('Error while decrypting the ciphertext');
-    }
-  };
+  const tag = fallback ? 'v10' : 'v11';
   return {
-    // Resolves once the keyring is unlocked, as Chromium's async encryptor's
-    // initialization waits for the unlock prompt.
+    // Resolves once the keyring is unlocked (or its unlock cancelled), as
+    // Chromium's async encryptor's initialization waits for the prompt.
     isAsyncEncryptionAvailable: jest.fn(async () => {
       await unlocked;
       return available;
     }),
     encryptStringAsync: jest.fn(async (text: string) =>
-      Buffer.from(text).reverse(),
+      Buffer.concat([Buffer.from(tag), Buffer.from(text).reverse()]),
     ),
     decryptStringAsync: async (data: Buffer) => {
-      fail(data);
+      if (data.subarray(0, 3).toString() !== tag) {
+        throw new Error('Error while decrypting the ciphertext');
+      }
       return {
-        result: Buffer.from(data).reverse().toString(),
+        result: Buffer.from(data.subarray(3)).reverse().toString(),
         shouldReEncrypt: rotated,
       };
     },
-    isEncryptionAvailable: jest.fn(() => {
-      initialized = true;
-      return available;
-    }),
-    encryptString: jest.fn((text: string) =>
-      Buffer.from(Buffer.from(text).map(byte => byte + 1)),
-    ),
-    decryptString: (data: Buffer) => {
-      fail(data);
-      return Buffer.from(data.map(byte => byte - 1)).toString();
-    },
-    getSelectedStorageBackend: () =>
-      (initialized ? backend : 'unknown') as never,
   };
 };
+
+/** What the fake stores for `text` with the keyring's key. */
+const saved = (text: string) =>
+  Buffer.concat([Buffer.from('v11'), Buffer.from(text).reverse()]).toString(
+    'base64',
+  );
 
 let root: string;
 
@@ -76,20 +66,6 @@ it.each(['win32', 'linux'])('keeps a value encrypted on %s', async platform => {
   expect(store.getItem('secrets', 'credentials')).not.toContain('secret');
   await secrets.remove('credentials');
   await expect(secrets.get('credentials')).resolves.toBeNull();
-});
-
-it('encrypts on Linux with the OSCrypt whose key store it checked', async () => {
-  const store = createFileStore(root);
-  const safeStorage = fakeSafeStorage();
-  await createSecrets(store, safeStorage, { platform: 'linux' }).set(
-    'credentials',
-    'x',
-  );
-  expect(safeStorage.encryptString).toHaveBeenCalledWith('x');
-  expect(safeStorage.encryptStringAsync).not.toHaveBeenCalled();
-  expect(store.getItem('secrets', 'credentials')).toBe(
-    Buffer.from('y').toString('base64'),
-  );
 });
 
 it('forgets a value it can no longer decrypt', async () => {
@@ -116,7 +92,7 @@ it.each([
   ['without encryption', { available: false }, 'win32'],
   ['without encryption on Linux', { available: false }, 'linux'],
   // Chromium's fallback key on Linux without a keyring only obscures it.
-  ['with only the fallback key on Linux', { backend: 'basic_text' }, 'linux'],
+  ['with only the fallback key on Linux', { fallback: true }, 'linux'],
 ])('refuses to save %s', async (_name, storage, platform) => {
   const store = createFileStore(root);
   const secrets = createSecrets(store, fakeSafeStorage(storage), { platform });
@@ -128,123 +104,90 @@ it.each([
 
 it('saves with the fallback key on Linux when a dev run allows it', async () => {
   const store = createFileStore(root);
-  const safeStorage = fakeSafeStorage({ backend: 'basic_text' });
-  const secrets = createSecrets(store, safeStorage, {
+  const secrets = createSecrets(store, fakeSafeStorage({ fallback: true }), {
     platform: 'linux',
     allowFallbackKey: true,
   });
   await secrets.set('credentials', 'x');
   await expect(secrets.get('credentials')).resolves.toBe('x');
-  // OSCrypt reports no encryption with Chromium's own key: the async APIs.
-  expect(safeStorage.encryptStringAsync).toHaveBeenCalledWith('x');
-  expect(safeStorage.isEncryptionAvailable).not.toHaveBeenCalled();
 });
 
-it.each(['gnome_libsecret', 'kwallet6'])(
-  'saves with a keyring on Linux (%s)',
-  async backend => {
-    const store = createFileStore(root);
-    const secrets = createSecrets(store, fakeSafeStorage({ backend }), {
-      platform: 'linux',
-    });
-    await secrets.set('credentials', 'x');
-    await expect(secrets.get('credentials')).resolves.toBe('x');
-  },
-);
-
 describe('a locked keyring on Linux', () => {
-  /** A keyring whose unlock prompt is up until `unlock()`. */
-  const locked = () => {
-    let unlock!: () => void;
+  /** A keyring whose unlock prompt is up until it's answered. */
+  const locked = ({ fallback = false } = {}) => {
+    let answer!: () => void;
     const unlocked = new Promise<void>(resolve => {
-      unlock = resolve;
+      answer = resolve;
     });
-    return { safeStorage: fakeSafeStorage({ unlocked }), unlock };
+    return { safeStorage: fakeSafeStorage({ unlocked, fallback }), answer };
   };
   const options = { platform: 'linux', unlockWaitMs: 50, saveWaitMs: 10 };
-
-  it('never asks OSCrypt (on the main thread) while it’s locked', async () => {
-    const store = createFileStore(root);
-    store.setItem(
-      'secrets',
-      'credentials',
-      Buffer.from('y').toString('base64'),
-    );
-    const { safeStorage } = locked();
-    const secrets = createSecrets(store, safeStorage, options);
-    await expect(secrets.get('credentials')).resolves.toBeNull();
-    await secrets.set('credentials', 'x');
-    expect(safeStorage.isEncryptionAvailable).not.toHaveBeenCalled();
-    expect(safeStorage.encryptString).not.toHaveBeenCalled();
-    // The saved login stays for a later launch.
-    expect(store.getItem('secrets', 'credentials')).toBe(
-      Buffer.from('y').toString('base64'),
-    );
-  });
+  const settle = () => new Promise(resolve => setTimeout(resolve, 0));
 
   it('logs in at once, and saves the login once it’s unlocked', async () => {
     const store = createFileStore(root);
-    const { safeStorage, unlock } = locked();
+    const { safeStorage, answer } = locked();
     const secrets = createSecrets(store, safeStorage, options);
     await secrets.set('credentials', 'x');
     await expect(secrets.get('credentials')).resolves.toBe('x');
+    expect(safeStorage.encryptStringAsync).not.toHaveBeenCalled();
     expect(store.getItem('secrets', 'credentials')).toBeNull();
-    unlock();
-    await new Promise(resolve => setTimeout(resolve, 0));
-    expect(store.getItem('secrets', 'credentials')).toBe(
-      Buffer.from('y').toString('base64'),
-    );
+    answer();
+    await settle();
+    expect(store.getItem('secrets', 'credentials')).toBe(saved('x'));
     await expect(secrets.get('credentials')).resolves.toBe('x');
+  });
+
+  it('goes on without a saved login it can’t read in time, and keeps it', async () => {
+    const store = createFileStore(root);
+    store.setItem('secrets', 'credentials', saved('x'));
+    const secrets = createSecrets(store, locked().safeStorage, options);
+    await expect(secrets.get('credentials')).resolves.toBeNull();
+    expect(store.getItem('secrets', 'credentials')).toBe(saved('x'));
   });
 
   it('reads a saved login once it’s unlocked in time', async () => {
     const store = createFileStore(root);
-    store.setItem(
-      'secrets',
-      'credentials',
-      Buffer.from('y').toString('base64'),
-    );
-    const { safeStorage, unlock } = locked();
+    store.setItem('secrets', 'credentials', saved('x'));
+    const { safeStorage, answer } = locked();
     const secrets = createSecrets(store, safeStorage, options);
     const value = secrets.get('credentials');
-    unlock();
+    answer();
     await expect(value).resolves.toBe('x');
   });
 
   it('drops a value removed or replaced before it’s unlocked', async () => {
     const store = createFileStore(root);
-    const { safeStorage, unlock } = locked();
+    const { safeStorage, answer } = locked();
     const secrets = createSecrets(store, safeStorage, options);
     await secrets.set('credentials', 'x');
     await secrets.remove('credentials');
     await secrets.set('persist_auth', 'a');
     await secrets.set('persist_auth', 'b');
-    unlock();
-    await new Promise(resolve => setTimeout(resolve, 0));
+    answer();
+    await settle();
     expect(store.getItem('secrets', 'credentials')).toBeNull();
-    expect(safeStorage.encryptString).toHaveBeenCalledTimes(1);
+    expect(safeStorage.encryptStringAsync).toHaveBeenCalledTimes(1);
     await expect(secrets.get('persist_auth')).resolves.toBe('b');
   });
 
-  it('logs a value it couldn’t save after all', async () => {
+  it('saves nothing when the unlock is cancelled, and says so', async () => {
     const error = jest.spyOn(console, 'error').mockImplementation(() => {});
     const store = createFileStore(root);
-    let unlock!: () => void;
-    const unlocked = new Promise<void>(resolve => {
-      unlock = resolve;
-    });
-    const secrets = createSecrets(
-      store,
-      fakeSafeStorage({ unlocked, backend: 'basic_text' }),
-      options,
-    );
+    store.setItem('secrets', 'persist_auth', saved('a'));
+    // Cancelled: Chromium goes on with its own key.
+    const { safeStorage, answer } = locked({ fallback: true });
+    const secrets = createSecrets(store, safeStorage, options);
     await secrets.set('credentials', 'x');
-    unlock();
-    await new Promise(resolve => setTimeout(resolve, 0));
+    answer();
+    await settle();
     expect(error).toHaveBeenCalledWith(
       '[secrets] not saved: Encryption is not available',
     );
     expect(store.getItem('secrets', 'credentials')).toBeNull();
     await expect(secrets.get('credentials')).resolves.toBeNull();
+    // A login saved with the keyring's key stays for a launch that has it.
+    await expect(secrets.get('persist_auth')).resolves.toBeNull();
+    expect(store.getItem('secrets', 'persist_auth')).toBe(saved('a'));
   });
 });
