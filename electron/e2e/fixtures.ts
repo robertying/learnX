@@ -10,6 +10,7 @@
 // electron` does, on the web build in build/electron/web). Set
 // LEARNX_E2E_APP to a packaged app's executable to test that instead
 // (build/electron/dist/win-unpacked/learnX.exe, linux-unpacked/learnx).
+import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -39,6 +40,46 @@ const mockLogin = () => {
   return { username: env.DUMMY_USERNAME, password: env.DUMMY_PASSWORD };
 };
 
+/**
+ * On CI under Linux's X11, each worker's apps get an X server of their own
+ * (Xvfb, from the xvfb package). On one shared display every worker's window
+ * lies over the others', and the system's pointer rests in their middle:
+ * a window opening or closing above another under it sends that one a real
+ * mouseleave, which ends a hover a test made (a card's hover buttons, in
+ * favoriteArchive.e2e.ts). The Wayland run (WAYLAND_DISPLAY) has its own
+ * compositor; locally the apps use your display, one at a time.
+ */
+const ownDisplay =
+  process.platform === 'linux' &&
+  !!process.env.CI &&
+  !process.env.WAYLAND_DISPLAY;
+
+/** Starts an Xvfb on a free display; its number, as `:N`. */
+const startXvfb = () =>
+  new Promise<{ display: string; stop: () => void }>((resolve, reject) => {
+    // -displayfd: Xvfb picks a free display and writes its number to fd 3.
+    const xvfb = spawn(
+      'Xvfb',
+      ['-displayfd', '3', '-screen', '0', '1280x1024x24', '-nolisten', 'tcp'],
+      { stdio: ['ignore', 'ignore', 'pipe', 'pipe'] },
+    );
+    let errors = '';
+    xvfb.stderr!.on('data', chunk => (errors += chunk));
+    xvfb.on('error', reject);
+    xvfb.on('exit', code =>
+      reject(
+        new Error(`Xvfb exited (${code}) before its display was up: ${errors}`),
+      ),
+    );
+    let number = '';
+    xvfb.stdio[3]!.on('data', chunk => {
+      number += chunk;
+      if (number.includes('\n')) {
+        resolve({ display: `:${number.trim()}`, stop: () => xvfb.kill() });
+      }
+    });
+  });
+
 /** How a test launches learnX. */
 export interface Launch {
   /**
@@ -57,6 +98,11 @@ export interface Running {
   app: ElectronApplication;
   window: Page;
   main: MainProcess;
+}
+
+interface WorkerFixtures {
+  /** The X display the worker's apps use (`ownDisplay`), if not the run's. */
+  xDisplay: string | undefined;
 }
 
 interface Fixtures {
@@ -90,6 +136,7 @@ interface Fixtures {
 const launchApp = async (
   dataDir: string,
   language: string,
+  xDisplay: string | undefined,
   { launchOptions = { mockLatency: 'none' }, args = [], env = {} }: Launch,
 ): Promise<Running> => {
   const app = await electron.launch({
@@ -107,6 +154,7 @@ const launchApp = async (
       : [electronDir, `--lang=${language}`, ...args],
     env: {
       ...process.env,
+      ...(xDisplay ? { DISPLAY: xDisplay } : {}),
       LEARNX_DATA_DIR: dataDir,
       // Never in front: no Dock icon on a Mac, and the window never focused,
       // shown behind the others on Windows and Linux (electron/main.cjs,
@@ -127,7 +175,23 @@ const launchApp = async (
   return { app, window: await app.firstWindow(), main };
 };
 
-export const test = base.extend<Fixtures>({
+export const test = base.extend<Fixtures, WorkerFixtures>({
+  xDisplay: [
+    // oxlint-disable-next-line no-empty-pattern -- Playwright reads fixtures' dependencies from the pattern
+    async ({}, provide) => {
+      if (!ownDisplay) {
+        await provide(undefined);
+        return;
+      }
+      const xvfb = await startXvfb();
+      try {
+        await provide(xvfb.display);
+      } finally {
+        xvfb.stop();
+      }
+    },
+    { scope: 'worker' },
+  ],
   appLaunchOptions: [{ mockLatency: 'none' }, { option: true }],
   appLaunch: [{}, { option: true }],
   language: ['en-US', { option: true }],
@@ -163,10 +227,10 @@ export const test = base.extend<Fixtures>({
   },
 
   app: async (
-    { appLaunchOptions, appLaunch, language, dataDir, launched },
+    { appLaunchOptions, appLaunch, language, dataDir, launched, xDisplay },
     provide,
   ) => {
-    const running = await launchApp(dataDir, language, {
+    const running = await launchApp(dataDir, language, xDisplay, {
       launchOptions: appLaunchOptions,
       ...appLaunch,
     });
@@ -200,14 +264,14 @@ export const test = base.extend<Fixtures>({
     });
   },
 
-  relaunch: async ({ language, dataDir, launched }, provide) => {
+  relaunch: async ({ language, dataDir, launched, xDisplay }, provide) => {
     await provide(async (launch = {}) => {
       // The single-instance lock lives in the data folder: the old app must
       // be gone before the new one starts.
       for (const running of launched) {
         await running.app.close().catch(() => {});
       }
-      const running = await launchApp(dataDir, language, launch);
+      const running = await launchApp(dataDir, language, xDisplay, launch);
       launched.push(running);
       return running;
     });
