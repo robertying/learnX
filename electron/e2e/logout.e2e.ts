@@ -1,4 +1,4 @@
-// .maestro/12-settings-logout.yaml: opens the Changelog and About from
+// .maestro/13-settings-logout.yaml: opens the Changelog and About from
 // Settings, then logs out (confirmed in a dialog) back to the login page,
 // which the next launch shows too.
 import fs from 'node:fs';

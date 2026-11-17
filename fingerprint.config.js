@@ -29,11 +29,14 @@ module.exports = {
   ],
   ignorePaths: [
     'ios/learnX/Expo.plist',
-    // Native tests don't ship.
+    // Native tests don't ship, nor do the patches' notes and tests.
+    'patches/README.md',
+    'patches/__tests__/**/*',
     'ios/learnXTests/**/*',
     'ios/learnXUITests/**/*',
     'modules/*/ios/Tests/**/*',
     'modules/*/android/src/test/**/*',
+    'android/app/src/test/**/*',
     'android/patch-tests/**/*',
     // Git-ignored files a local build or setup leaves behind, so a local check
     // matches CI's clean checkout.

@@ -1,7 +1,11 @@
 import dayjs from 'dayjs';
 import * as Notifications from 'expo-notifications';
 import { postNotification } from 'services/notifications';
+import { immediateTrigger } from 'services/scheduledNotifications';
+import { queryClient } from 'data/queryClient';
+import { queryKeys } from 'data/queryKeys';
 import {
+  postLaunchNotification,
   postNotificationSamples,
   previewScheduledReminder,
   sampleContentNotifications,
@@ -171,5 +175,115 @@ describe('previewScheduledReminder', () => {
     scheduled.mockResolvedValue([]);
     await expect(previewScheduledReminder('class')).resolves.toBe(0);
     expect(schedule).not.toHaveBeenCalled();
+  });
+});
+
+describe('postLaunchNotification', () => {
+  const put = () => {
+    const { notices, assignments } = lists as unknown as Record<
+      string,
+      unknown[]
+    >;
+    queryClient.setQueryData(queryKeys.content('notices', 's'), notices);
+    queryClient.setQueryData(
+      queryKeys.content('assignments', 's'),
+      assignments,
+    );
+  };
+
+  afterEach(() => {
+    queryClient.clear();
+  });
+
+  it('posts a new item with its own buttons', async () => {
+    put();
+    await expect(postLaunchNotification('notice:n2')).resolves.toBe(true);
+    expect(postNotification).toHaveBeenCalledTimes(1);
+    expect(postNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Notice 2',
+        target: { type: 'notice', id: 'n2' },
+      }),
+    );
+  });
+
+  it("posts several items as one, in the first one's course", async () => {
+    put();
+    await expect(postLaunchNotification('notice:n1,n2')).resolves.toBe(true);
+    expect(postNotification).toHaveBeenCalledTimes(1);
+    expect(postNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        subtitle: 'Course 1',
+        target: { type: 'notice' },
+        ids: ['n1', 'n2'],
+      }),
+    );
+  });
+
+  it('posts a deadline reminder', async () => {
+    put();
+    await expect(postLaunchNotification('reminder:a1')).resolves.toBe(true);
+    expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith({
+      content: expect.objectContaining({
+        title: 'Assignment 1',
+        data: expect.objectContaining({ type: 'assignment', id: 'a1' }),
+      }),
+      trigger: immediateTrigger('deadlines'),
+    });
+  });
+
+  it('waits for the lists to load', async () => {
+    const posted = postLaunchNotification('assignment:a1');
+    expect(postNotification).not.toHaveBeenCalled();
+    put();
+    await expect(posted).resolves.toBe(true);
+    expect(postNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Assignment 1',
+        target: { type: 'assignment', id: 'a1' },
+      }),
+    );
+  });
+
+  it('gives up on items that never load', async () => {
+    jest.useFakeTimers();
+    put();
+    const posted = postLaunchNotification('file:f1');
+    await jest.advanceTimersByTimeAsync(60_000);
+    await expect(posted).resolves.toBe(false);
+    expect(postNotification).not.toHaveBeenCalled();
+  });
+
+  it('posts a new file', async () => {
+    const { files } = lists as unknown as Record<string, { id: string }[]>;
+    queryClient.setQueryData(queryKeys.content('files', 's'), files);
+    await expect(postLaunchNotification(`file:${files[0].id}`)).resolves.toBe(
+      true,
+    );
+    expect(postNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        target: { type: 'file', id: files[0].id },
+      }),
+    );
+  });
+
+  it.each(['reminder:a9', 'notice:n9', 'assignment:a9'])(
+    'gives up on %s, which never loads',
+    async spec => {
+      jest.useFakeTimers();
+      put();
+      const posted = postLaunchNotification(spec);
+      await jest.advanceTimersByTimeAsync(60_000);
+      await expect(posted).resolves.toBe(false);
+      expect(postNotification).not.toHaveBeenCalled();
+      expect(Notifications.scheduleNotificationAsync).not.toHaveBeenCalled();
+    },
+  );
+
+  it("ignores what it doesn't know", async () => {
+    await expect(postLaunchNotification('course:c1')).resolves.toBe(false);
+    await expect(postLaunchNotification('reminder')).resolves.toBe(false);
+    expect(postNotification).not.toHaveBeenCalled();
+    expect(Notifications.scheduleNotificationAsync).not.toHaveBeenCalled();
   });
 });

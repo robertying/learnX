@@ -1,4 +1,5 @@
-// The Maestro flows (and the Electron app's Playwright tests) match labels
+// The Maestro flows (and the Electron app's Playwright tests and the Mac app's
+// UI tests) match labels
 // and mock texts through env values that scripts/e2e-env.mjs reads from the
 // translations and the mock data, and they only run on a device (or in
 // Electron). This catches a mock data or translation edit that
@@ -20,6 +21,12 @@ const flows = readdirSync(maestroDir, {
 const electronE2EDir = join(root, 'electron/e2e');
 const specs = readdirSync(electronE2EDir).filter(name => name.endsWith('.ts'));
 
+// The Mac app's UI tests name them as `value("MOCK_NOTICE")`.
+const macTestsDir = join(root, 'ios/learnXUITests/Mac');
+const macTests = readdirSync(macTestsDir).filter(name =>
+  name.endsWith('.swift'),
+);
+
 const used = new Set([
   ...flows.flatMap(name =>
     [
@@ -32,6 +39,13 @@ const used = new Set([
     [
       ...readFileSync(join(electronE2EDir, name), 'utf8').matchAll(
         /'((?:T|MOCK)_\w+)'/g,
+      ),
+    ].map(match => match[1]),
+  ),
+  ...macTests.flatMap(name =>
+    [
+      ...readFileSync(join(macTestsDir, name), 'utf8').matchAll(
+        /"((?:T|MOCK)_\w+)"/g,
       ),
     ].map(match => match[1]),
   ),

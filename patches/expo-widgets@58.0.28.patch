@@ -251,7 +251,7 @@ index 3e6ff0b55c0b6d57ddeb1ba6605536adae2ca62d..0ac8618fa3c6959af86526cd17cc77f2
  }
 +#endif
 diff --git a/ios/Widgets/Utils.swift b/ios/Widgets/Utils.swift
-index 76b2199c2d3f879463fed5d2bd49038b0428a2e7..641c3aae3c87ada71b148c130eb3ad52cd6e37dd 100644
+index 76b2199c2d3f879463fed5d2bd49038b0428a2e7..d3130e19431e0c524e59c3f12ae1f41fd88aff1b 100644
 --- a/ios/Widgets/Utils.swift
 +++ b/ios/Widgets/Utils.swift
 @@ -100,7 +100,9 @@ public func getWidgetEnvironment(environment: EnvironmentValues) -> [String: Any
@@ -265,7 +265,7 @@ index 76b2199c2d3f879463fed5d2bd49038b0428a2e7..641c3aae3c87ada71b148c130eb3ad52
    ]
  
    if #available(iOS 17.0, *) {
-@@ -117,6 +119,7 @@ public func getWidgetEnvironment(environment: EnvironmentValues) -> [String: Any
+@@ -117,11 +119,13 @@ public func getWidgetEnvironment(environment: EnvironmentValues) -> [String: Any
    return env
  }
  
@@ -273,7 +273,14 @@ index 76b2199c2d3f879463fed5d2bd49038b0428a2e7..641c3aae3c87ada71b148c130eb3ad52
  func getLiveActivityEnvironment(for environment: EnvironmentValues, in context: ActivityViewContext<LiveActivityAttributes>) -> [String: Any] {
    var env: [String: Any] = [
      "colorScheme": "\(environment.colorScheme)",
-@@ -134,3 +137,4 @@ func getLiveActivityEnvironment(for environment: EnvironmentValues, in context:
+     "isLuminanceReduced": environment.isLuminanceReduced,
+-    "isActivityFullscreen": environment.isActivityFullscreen,
++    // No isActivityFullscreen: the SDK marks its getter back-deployed to iOS 17, but iOS 17's
++    // WidgetKit doesn't export it, so linking it stops the app and the widgets from launching there.
+     "isStale": context.isStale
+   ]
+ 
+@@ -134,3 +138,4 @@ func getLiveActivityEnvironment(for environment: EnvironmentValues, in context:
    }
    return env
  }

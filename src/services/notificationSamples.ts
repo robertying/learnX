@@ -1,8 +1,12 @@
 // Debug builds: every kind of notification learnX posts, made from the
 // cached items through the same code a sync uses, for reviewing their text.
+// E2E builds: the one notification a flow asks for at launch, to press its
+// action buttons (`postNotification` in services/launchOptions).
 import dayjs from 'dayjs';
 import { HomeworkCompletionType } from '@robertying/thu-learn-lib';
 import { ContentDiff } from 'data/contentDiff';
+import { getAssignment, getFile, getNotice } from 'data/content';
+import { queryClient } from 'data/queryClient';
 import { Assignment, File, Notice } from 'data/types/state';
 import {
   ContentNotification,
@@ -20,6 +24,7 @@ import {
   ReminderKind,
 } from 'services/deadlineReminders';
 import { t } from 'helpers/i18n';
+import { isItemType } from 'helpers/openTarget';
 import { notificationChannels, postNotification } from 'services/notifications';
 import {
   getScheduled,
@@ -146,16 +151,53 @@ export const sampleContentNotifications = (
   ];
 };
 
-/** The notification a sync posts for `notice` alone, as if it were new. */
-export const sampleNoticeNotification = (notice: Notice, now = dayjs()) =>
-  sampleContentNotifications(
+/**
+ * The notifications a sync posts when `items` of one type are new, as if
+ * they were all in the first one's course: one names its item, several are
+ * counted in one notification.
+ */
+export const sampleNewContentNotifications = (
+  items:
+    | { type: 'notice'; items: readonly Notice[] }
+    | { type: 'assignment'; items: readonly Assignment[] }
+    | { type: 'file'; items: readonly File[] },
+  now = dayjs(),
+) => {
+  const time = now.toISOString();
+  const course = (item: Notice | Assignment | File) => ({
+    courseId: items.items[0].courseId,
+    courseName: items.items[0].courseName,
+    id: item.id,
+  });
+  return sampleContentNotifications(
     {
       notices: {
-        added: [{ ...notice, hasRead: false, publishTime: now.toISOString() }],
+        added:
+          items.type === 'notice'
+            ? items.items.map(n => ({
+                ...n,
+                ...course(n),
+                hasRead: false,
+                publishTime: time,
+              }))
+            : [],
       },
-      files: { added: [] },
+      files: {
+        added:
+          items.type === 'file'
+            ? items.items.map(f => ({ ...f, ...course(f), uploadTime: time }))
+            : [],
+      },
       assignments: {
-        added: [],
+        added:
+          items.type === 'assignment'
+            ? items.items.map(a => ({
+                ...a,
+                ...course(a),
+                submitted: false,
+                deadline: now.add(3, 'day').toISOString(),
+              }))
+            : [],
         graded: [],
         commented: [],
         deadlineChanged: [],
@@ -163,7 +205,12 @@ export const sampleNoticeNotification = (notice: Notice, now = dayjs()) =>
       },
     },
     now,
-  )[0];
+  );
+};
+
+/** The notification a sync posts for `notice` alone, as if it were new. */
+export const sampleNoticeNotification = (notice: Notice, now = dayjs()) =>
+  sampleNewContentNotifications({ type: 'notice', items: [notice] }, now)[0];
 
 /**
  * A deadline reminder for `assignment`, as it shows an hour before the
@@ -259,4 +306,86 @@ export const previewScheduledReminder = async (kind: 'deadline' | 'class') => {
     });
   }
   return scheduled.length;
+};
+
+/**
+ * Resolves to what `find` returns once the cached lists have it (they load
+ * after the login), or to undefined after `timeout` ms.
+ */
+const whenCached = <T>(find: () => T | undefined, timeout = 60_000) =>
+  new Promise<T | undefined>(resolve => {
+    const found = find();
+    if (found !== undefined) {
+      resolve(found);
+      return;
+    }
+    const unsubscribe = queryClient.getQueryCache().subscribe(() => {
+      const value = find();
+      if (value !== undefined) {
+        clearTimeout(timer);
+        unsubscribe();
+        resolve(value);
+      }
+    });
+    const timer = setTimeout(() => {
+      unsubscribe();
+      resolve(undefined);
+    }, timeout);
+  });
+
+/** Every item of `ids`, once all are cached. */
+const cachedItems = <T>(ids: string[], get: (id: string) => T | undefined) =>
+  whenCached(() => {
+    const items = ids.map(get);
+    return items.every(item => item !== undefined) ? (items as T[]) : undefined;
+  });
+
+/**
+ * Posts the notification `spec` describes (`postNotification` in
+ * services/launchOptions) once its items are cached: `<type>:<id>[,<id>…]` new
+ * content of that type, `reminder:<assignment id>` a deadline reminder.
+ * Resolves to whether it posted one.
+ */
+export const postLaunchNotification = async (spec: string) => {
+  const [kind, list = ''] = spec.split(':');
+  const ids = list.split(',').filter(Boolean);
+  if (ids.length === 0) {
+    return false;
+  }
+  if (kind === 'reminder') {
+    const [assignment] =
+      (await cachedItems(ids.slice(0, 1), getAssignment)) ?? [];
+    if (!assignment) {
+      return false;
+    }
+    await Notifications.scheduleNotificationAsync({
+      content: sampleReminder(assignment),
+      trigger: immediateTrigger(notificationChannels.deadlines),
+    });
+    return true;
+  }
+  if (!isItemType(kind)) {
+    return false;
+  }
+  let notifications: ContentNotification[] = [];
+  if (kind === 'notice') {
+    const items = await cachedItems(ids, getNotice);
+    notifications = items
+      ? sampleNewContentNotifications({ type: kind, items })
+      : [];
+  } else if (kind === 'assignment') {
+    const items = await cachedItems(ids, getAssignment);
+    notifications = items
+      ? sampleNewContentNotifications({ type: kind, items })
+      : [];
+  } else {
+    const items = await cachedItems(ids, getFile);
+    notifications = items
+      ? sampleNewContentNotifications({ type: kind, items })
+      : [];
+  }
+  for (const notification of notifications) {
+    await postNotification(notification);
+  }
+  return notifications.length > 0;
 };

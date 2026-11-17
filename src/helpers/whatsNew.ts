@@ -76,6 +76,14 @@ export const releases: Release[] = [
         platforms: ['ios', 'mac'],
       },
       {
+        // The Mac has no widgets, so it has room for its own design row.
+        icon: 'design',
+        title: 'whatsNew19DesignTitle',
+        body: 'whatsNew19DesignMacBody',
+        minNative: '19.0.0',
+        platforms: ['mac'],
+      },
+      {
         icon: 'design',
         title: 'whatsNew19DesignTitle',
         body: 'whatsNew19DesignBody',

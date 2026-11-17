@@ -16,6 +16,7 @@ Every user-visible string is a key in `en.ts` and `zh.ts`, with the same keys in
 
 ## Chinese
 
+- Write the Chinese first, as a Chinese speaker would say it, then the English; never translate a Chinese string word for word from the English.
 - Use the Web Learning site's terms for its content: 公告 for notices (the system's notifications stay 通知), 已批改 for the graded status, 评语 for a grader's comment, 批阅 only in grader and graded-time lines. Say 截止时间 or 作业截止, not 截止日期. The app says 未读 where the site says 未浏览.
 - Use the system's terms for system things: 筛选, 文稿, 访达, 照片图库, 系统设置.
 - Address the user as 你, never 您, and call the app "learnX", not "App".

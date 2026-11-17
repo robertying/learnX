@@ -49,6 +49,14 @@ export interface LaunchOptions {
    */
   liveUsername?: unknown;
   liveFingerprint?: unknown;
+  /**
+   * A notification to post once logged in, for the notification action flow
+   * (`.maestro/12-notification-actions.yaml`): `<type>:<id>[,<id>…]` posts a
+   * new-content notification for those cached items (one item: Favorite and
+   * Archive; several: Archive All), `reminder:<assignment id>` a deadline
+   * reminder (Remind Later and Archive). Only debug and E2E builds take it.
+   */
+  postNotification?: unknown;
 }
 
 export interface LiveLogin {
@@ -60,6 +68,18 @@ let liveLogin: LiveLogin | undefined;
 
 /** The live test login from the launch arguments, if any. */
 export const getLiveLogin = () => liveLogin;
+
+let launchNotification: string | undefined;
+
+/**
+ * The notification the launch arguments ask to post (`postNotification`),
+ * once: later calls return nothing.
+ */
+export const takeLaunchNotification = () => {
+  const spec = launchNotification;
+  launchNotification = undefined;
+  return spec;
+};
 
 const latencies = new Set<unknown>(['none', 'normal', 'slow']);
 
@@ -132,6 +152,11 @@ export const applyLaunchOptions = (initialProps?: LaunchOptions) => {
       typeof fingerPrint === 'string' &&
       fingerPrint
         ? { username, fingerPrint }
+        : undefined;
+    const notification = read('postNotification', initialProps);
+    launchNotification =
+      typeof notification === 'string' && notification
+        ? notification
         : undefined;
   }
 
