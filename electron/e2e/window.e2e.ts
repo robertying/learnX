@@ -23,13 +23,19 @@ test('shows the window on Linux, with its page drawn', async ({
     )
     .toBe(true);
   // A frame the compositor got: more than the one color the window is
-  // filled with before its page draws (none at all if it never showed).
+  // filled with before its page draws (none at all if it never showed). A
+  // capture can fail before the first frame (Chromium's UnknownVizError, as
+  // on CI's runners without a GPU): it counts as no frame and is tried again.
   await expect
     .poll(
       () =>
         app.evaluate(async ({ BrowserWindow }) => {
-          const frame =
-            await BrowserWindow.getAllWindows()[0]!.webContents.capturePage();
+          const frame = await BrowserWindow.getAllWindows()[0]!
+            .webContents.capturePage()
+            .catch(() => null);
+          if (!frame) {
+            return 0;
+          }
           const bitmap = frame.toBitmap();
           const colors = new Set<number>();
           for (let i = 0; i + 4 <= bitmap.length && colors.size <= 16; i += 4) {
