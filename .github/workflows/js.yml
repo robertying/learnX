@@ -59,12 +59,12 @@ jobs:
       # (scripts/check-ota-runtime.mjs); on failure it prints what to record.
       - name: Runtime version
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-        run: node scripts/check-ota-runtime.mjs
+        run: pnpm ota:check
 
       # Catches shell mistakes before a script only runs on main
       - name: Shell scripts
         if: ${{ !cancelled() }}
-        run: shellcheck --version | head -2 && git ls-files -z '*.sh' | xargs -0 shellcheck
+        run: shellcheck --version | head -2 && pnpm lint:shell
 
       # Jest's cache holds Babel output, mostly for node_modules. Its key
       # follows what changes that output (the Babel plugins in babel/ too,

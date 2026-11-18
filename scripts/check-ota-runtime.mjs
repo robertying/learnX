@@ -11,7 +11,7 @@
 //   only the record changes.
 // - runtime version changed with no native change: older builds would stop
 //   getting updates for nothing. Put it back.
-// Record the new state with `node scripts/check-ota-runtime.mjs --write`.
+// Record the new state with `pnpm ota:check --write`.
 // Fingerprints can differ between machines (files a build left behind), so
 // CI's, from a clean checkout, are the ones to record: a failing check prints
 // them.
