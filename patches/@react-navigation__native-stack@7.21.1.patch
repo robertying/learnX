@@ -1,8 +1,8 @@
 diff --git a/lib/module/views/useHeaderConfigProps.js b/lib/module/views/useHeaderConfigProps.js
-index 0000000..1111111 100644
+index 4a073722932880de31f76138f54c29f5ac16a590..8847219eb6b5e51d9b3020ca87972522a60d20c0 100644
 --- a/lib/module/views/useHeaderConfigProps.js
 +++ b/lib/module/views/useHeaderConfigProps.js
-@@ -150,6 +150,7 @@
+@@ -157,6 +157,7 @@ export function useHeaderConfigProps({
    headerBlurEffect,
    headerTintColor,
    headerTitle,
@@ -10,8 +10,8 @@ index 0000000..1111111 100644
    headerTitleAlign,
    headerTitleStyle,
    headerTransparent,
-@@ -357,6 +358,7 @@
-     largeTitleFontWeight,
+@@ -368,6 +369,7 @@ export function useHeaderConfigProps({
+     largeTitleFontWeight: largeTitleFontWeight != null ? String(largeTitleFontWeight) : undefined,
      largeTitleHideShadow: headerLargeTitleShadowVisible === false,
      title: titleText,
 +    subtitle: headerSubtitle,
@@ -19,13 +19,14 @@ index 0000000..1111111 100644
      titleFontFamily,
      titleFontSize,
 diff --git a/lib/typescript/src/types.d.ts b/lib/typescript/src/types.d.ts
-index 0000000..1111111 100644
+index 0f097c99dda4680576d48c0617112eac39b5832f..21731af22108e16490c79dea6050159c838a7b30 100644
 --- a/lib/typescript/src/types.d.ts
 +++ b/lib/typescript/src/types.d.ts
-@@ -322,6 +322,15 @@
+@@ -336,6 +336,15 @@ export type NativeStackNavigationOptions = {
+          */
          tintColor?: string;
      }) => React.ReactNode);
-     /**
++    /**
 +     * String to display below the header title.
 +     * Only shown with a native title, i.e. when `headerTitle` is not a function.
 +     *
@@ -34,18 +35,18 @@ index 0000000..1111111 100644
 +     * @platform ios
 +     */
 +    headerSubtitle?: string;
-+    /**
+     /**
       * How to align the the header title.
       * Defaults to `left` on platforms other than iOS.
-      *
 diff --git a/src/types.tsx b/src/types.tsx
-index 0000000..1111111 100644
+index 6d882297bcf79dbbf44a86a4819227ce79e511a9..d7f01a8e2ab64c7b8d0956b231510f0cccc5025e 100644
 --- a/src/types.tsx
 +++ b/src/types.tsx
-@@ -372,6 +372,15 @@
+@@ -388,6 +388,15 @@ export type NativeStackNavigationOptions = {
+          */
          tintColor?: string;
        }) => React.ReactNode);
-   /**
++  /**
 +   * String to display below the header title.
 +   * Only shown with a native title, i.e. when `headerTitle` is not a function.
 +   *
@@ -54,15 +55,14 @@ index 0000000..1111111 100644
 +   * @platform ios
 +   */
 +  headerSubtitle?: string;
-+  /**
+   /**
     * How to align the the header title.
     * Defaults to `left` on platforms other than iOS.
-    *
 diff --git a/src/views/useHeaderConfigProps.tsx b/src/views/useHeaderConfigProps.tsx
-index 0000000..1111111 100644
+index 008ec730f51c1766fae76b7fa1f2f40599c74ab6..7ca0634ea41a63dfaec2cc3cf5c23778e054e808 100644
 --- a/src/views/useHeaderConfigProps.tsx
 +++ b/src/views/useHeaderConfigProps.tsx
-@@ -211,6 +211,7 @@
+@@ -230,6 +230,7 @@ export function useHeaderConfigProps({
    headerBlurEffect,
    headerTintColor,
    headerTitle,
@@ -70,8 +70,8 @@ index 0000000..1111111 100644
    headerTitleAlign,
    headerTitleStyle,
    headerTransparent,
-@@ -523,6 +524,7 @@
-     largeTitleFontWeight,
+@@ -536,6 +537,7 @@ export function useHeaderConfigProps({
+       largeTitleFontWeight != null ? String(largeTitleFontWeight) : undefined,
      largeTitleHideShadow: headerLargeTitleShadowVisible === false,
      title: titleText,
 +    subtitle: headerSubtitle,

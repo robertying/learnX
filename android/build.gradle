@@ -13,7 +13,7 @@ buildscript {
         firebaseBomVersion = "35.2.0"
         // Unit tests of the local modules (modules/*/android/src/test).
         junitVersion = "4.13.2"
-        robolectricVersion = "4.18"
+        robolectricVersion = "4.18.1"
         mockkVersion = "1.14.12"
     }
     dependencies {

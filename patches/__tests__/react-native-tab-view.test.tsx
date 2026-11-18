@@ -1,4 +1,4 @@
-// What patches/react-native-tab-view@4.3.4.patch changes in SceneView, in the
+// What patches/react-native-tab-view@4.3.5.patch changes in SceneView, in the
 // build Metro bundles (lib/module).
 import { Platform, StyleSheet, Text } from 'react-native';
 import { act, render, screen } from '@testing-library/react-native';

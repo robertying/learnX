@@ -1,4 +1,4 @@
-// What patches/@react-navigation__native-stack@7.21.0.patch adds: a
+// What patches/@react-navigation__native-stack@7.21.1.patch adds: a
 // `headerSubtitle` option, which reaches react-native-screens' header config
 // as `subtitle` (patches/react-native-screens@4.30.1.patch adds that prop).
 import { Text } from 'react-native';
