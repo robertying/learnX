@@ -56,7 +56,7 @@ const zh: typeof en = {
     '作业同步失败：请在系统设置中允许learnX访问日历。',
   assignmentSyncNoReminderPermission:
     '作业同步失败：请在系统设置中允许learnX访问提醒事项；如已允许，请重启learnX。',
-  assignmentSyncFailed: '作业同步失败：{error}',
+  assignmentSyncFailed: '作业同步失败，请重试。',
   filePickFailed: '文件打开失败',
   assignmentSubmissionSucceeded: '作业提交成功',
   assignmentSubmissionFailed: '作业提交失败',
@@ -107,7 +107,7 @@ const zh: typeof en = {
     '删除失败：请在系统设置中允许learnX访问日历。',
   deleteFailedNoReminderPermission:
     '删除失败：请在系统设置中允许learnX访问提醒事项；如已允许，请重启learnX。',
-  deleteFailed: '删除失败：{error}',
+  deleteFailed: '删除失败，请重试。',
   exportSyncedCalendars: '导出已同步的日程（.ics）',
   turnOnNotifications: '开启通知',
   notificationsOffCaption:
@@ -130,10 +130,10 @@ const zh: typeof en = {
   calendarExportNoCalendarPermissionAndroid:
     '导出失败：请在系统设置中允许learnX访问日历。',
   calendarExportNoEvent: '没有可导出的日程，请先将课表或作业同步到日历。',
-  calendarExportFailed: '导出失败：{error}',
+  calendarExportFailed: '导出失败，请重试。',
   graduate: '研究生',
   syncCourseSchedule: '同步更多日期',
-  classAlarm: '上课日历提醒',
+  classAlarm: '日历提醒',
   classAlarmBefore: '提前提醒（分钟）',
   calendarEventLength: '日程长度（分钟）',
   assignmentCalendarAlarm: '日历提醒',
@@ -153,7 +153,7 @@ const zh: typeof en = {
   clearFileCache: '删除全部已下载文件',
   clearFileCacheEllipsis: '删除全部已下载文件…',
   clearFileCacheConfirmation:
-    '确定删除全部已下载的文件？已导出或存储到其他位置的文件不会被删除。此操作不可撤销。',
+    '确定删除全部已下载文件？已导出或存储到其他位置的文件不会被删除。此操作不可撤销。',
   downloadsDeleteKeepsExported: '已导出或存储到其他位置的文件不会被删除。',
   clearFileCacheSucceeded: '已删除全部已下载文件',
   fileDownloadFailed: '文件下载失败，请重试。',
@@ -217,8 +217,8 @@ const zh: typeof en = {
   updateTitle: '更新到v{version}？',
   viewChangelog: '查看更新日志',
   update: '更新',
-  updateDownloads: 'learnX将从TUNA镜像下载更新并安装。',
-  updateDownloadsSize: 'learnX将从TUNA镜像下载更新（{size}）并安装。',
+  updateDownloads: 'learnX将从TUNA镜像站下载更新并安装。',
+  updateDownloadsSize: 'learnX将从TUNA镜像站下载更新（{size}）并安装。',
   updateAllowInstall:
     'Android会先请你允许learnX安装应用。允许后返回learnX继续更新。',
   updateDownloading: '正在下载{percent}%',
@@ -229,11 +229,11 @@ const zh: typeof en = {
     '请下载新的deb安装包（.deb）并打开安装，也可以在终端中用sudo apt install安装。',
   updateInstalling: '正在安装',
   updateFailed: '更新失败',
-  updateDownloadFailed: '更新下载失败。请检查网络连接后重试。',
-  updateVerifyFailed: '无法验证下载的更新。请重试，或在浏览器中下载。',
+  updateDownloadFailed: '更新下载失败，请检查网络连接后重试。',
+  updateVerifyFailed: '更新验证失败，请重试或在浏览器中下载。',
   updateNotAllowed:
     '你尚未允许learnX安装应用。请在Android询问时允许，然后重试。',
-  updateInstallFailed: 'Android安装更新失败。请重试，或在浏览器中下载。',
+  updateInstallFailed: '更新安装失败，请重试或在浏览器中下载。',
   unfinished: '未完成',
   finished: '已完成',
   all: '全部',
@@ -284,7 +284,7 @@ const zh: typeof en = {
     - 应用版本
     - 设备型号
     - 系统版本
-    - 其他补充信息
+    - 补充信息
   `,
   shareReceived: '已收到分享的文件，将在下次提交作业时自动添加为附件。',
   shareError: '文件接收失败，文件可能过大。',
@@ -293,7 +293,7 @@ const zh: typeof en = {
   datePickerStartLabel: '开始',
   datePickerEndLabel: '结束',
   datePickerSaveLabel: '同步',
-  datePickerLabel: '选择同步范围',
+  datePickerLabel: '选择同步日期',
   reviewed: '已阅',
   good: '优秀',
   exemptedCourse: '免课',
@@ -334,8 +334,9 @@ const zh: typeof en = {
   expandSidebar: '展开导航',
   dragToReorder: '按住并拖动以排序',
   moveToReorder: '上移或下移课程以排序',
-  documents: '选取文件',
+  documents: '选择文件',
   photos: '照片图库',
+  photosAndroid: '照片',
   assignmentIndividualCompletion: '独立完成',
   assignmentGroupCompletion: '小组完成',
   assignmentOnlineSubmission: '在线提交',
@@ -378,7 +379,7 @@ const zh: typeof en = {
   reloadApp: '重新加载learnX',
   notifications: '通知',
   notificationsCaption:
-    'learnX会在系统允许时于后台检查新内容，因此这些通知可能会有延迟。',
+    '系统允许时，learnX才会在后台检查新内容，所以这些通知可能会晚到。',
   notificationChannelContent: '新内容',
   notificationChannelContentDescription:
     '新公告、文件和作业，成绩、截止时间变更和小组提交',
@@ -503,8 +504,8 @@ const zh: typeof en = {
   downloadsExportFolderElectron: '选择导出文件夹',
   downloadsExported: '已导出{files}',
   downloadsExportedPartly: '已导出{files}，{failed}个文件未能复制',
-  downloadsExportFailed: '导出失败：{error}',
-  downloadsDeleteCourse: '删除已下载的文件？',
+  downloadsExportFailed: '导出失败，请重试。',
+  downloadsDeleteCourse: '删除已下载文件？',
   downloadsOneFile: '1个文件',
   downloadsFileCount: '{count}个文件',
   downloadsDeletedCourse: '已删除{course}的已下载文件',

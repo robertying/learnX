@@ -152,9 +152,9 @@ describe('Search', () => {
 
   it('starts with a prompt and the system search bar in the header', async () => {
     const { options } = await setup();
-    expect(options().placeholder).toBe('Notices, assignments and files');
+    expect(options().placeholder).toBe('Notices, assignments, and files');
     expect(
-      screen.getByText('Search Notices, Assignments and Files'),
+      screen.getByText('Search Notices, Assignments, and Files'),
     ).toBeTruthy();
     expect(screen.queryByText('No Results')).toBeNull();
   });
@@ -179,7 +179,7 @@ describe('Search', () => {
     // Clearing resets at once
     await change('');
     expect(
-      screen.getByText('Search Notices, Assignments and Files'),
+      screen.getByText('Search Notices, Assignments, and Files'),
     ).toBeTruthy();
   });
 
@@ -237,7 +237,7 @@ describe('Search', () => {
     // A cleared field brings back the prompt, under the same tabs
     await type('');
     expect(
-      screen.getByText('Search Notices, Assignments and Files'),
+      screen.getByText('Search Notices, Assignments, and Files'),
     ).toBeTruthy();
     expect(screen.getByText('All')).toBeTruthy();
   });

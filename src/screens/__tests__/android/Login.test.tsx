@@ -26,5 +26,5 @@ it('start-aligns the login page on Android, as the welcome page is', async () =>
   expect(StyleSheet.flatten(note.props.style)).toMatchObject({
     textAlign: 'auto',
   });
-  expect(screen.getByRole('button', { name: 'Log In' })).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Log in' })).toBeTruthy();
 });

@@ -13,6 +13,7 @@ jest.mock('data/source', () => ({
   ensureSession: jest.fn(async () => {}),
 }));
 jest.mock('services/files/share', () => ({ exportTextFile: jest.fn() }));
+jest.mock('services/crashReporting', () => ({ recordError: jest.fn() }));
 
 const noCalendar = new CalendarError('calendarPermission');
 

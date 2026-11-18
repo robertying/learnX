@@ -24,6 +24,7 @@ import {
 import { setSetting, useSettings } from 'data/settings';
 import { SettingsStackParams } from 'navigation/types';
 import { isAndroid } from 'helpers/platform';
+import { recordError } from 'services/crashReporting';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'Downloads'>;
 
@@ -61,10 +62,9 @@ const Downloads: React.FC<Props> = () => {
     }
     setExporting(false);
     if (error) {
-      toast(
-        t('downloadsExportFailed', { error: (error as Error).message }),
-        'error',
-      );
+      // The error's text is often the system's English: report it instead.
+      recordError(error);
+      toast(t('downloadsExportFailed'), 'error');
     } else if (result) {
       const files = fileCount(result.exported);
       toast(
@@ -103,10 +103,8 @@ const Downloads: React.FC<Props> = () => {
               await action();
               toast(succeeded, 'success');
             } catch (e) {
-              toast(
-                t('deleteFailed', { error: (e as Error).message }),
-                'error',
-              );
+              recordError(e);
+              toast(t('deleteFailed'), 'error');
             }
             reload();
           },

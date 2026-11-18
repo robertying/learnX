@@ -54,7 +54,7 @@ export default {
     "Couldn't sync assignments. Allow calendar access for learnX in System Settings.",
   assignmentSyncNoReminderPermission:
     "Couldn't sync assignments. Give learnX access to Reminders in System Settings. If it already has access, restart learnX.",
-  assignmentSyncFailed: "Couldn't sync assignments: {error}",
+  assignmentSyncFailed: "Couldn't sync assignments. Try again.",
   filePickFailed: "Couldn't open the file",
   assignmentSubmissionSucceeded: 'Assignment submitted',
   assignmentSubmissionFailed: "Couldn't submit the assignment",
@@ -108,11 +108,11 @@ export default {
     "Couldn't delete. Allow calendar access for learnX in System Settings.",
   deleteFailedNoReminderPermission:
     "Couldn't delete. Give learnX access to Reminders in System Settings. If it already has access, restart learnX.",
-  deleteFailed: "Couldn't delete: {error}",
+  deleteFailed: "Couldn't delete. Try again.",
   exportSyncedCalendars: 'Export Synced Events (.ics)',
   turnOnNotifications: 'Turn On Notifications',
   notificationsOffCaption:
-    "Notifications for learnX are off in System Settings, so the ones turned on below won't appear.",
+    "Notifications for learnX are turned off in System Settings, so the ones turned on below won't appear.",
   allowCalendarAccess: 'Allow Calendar Access',
   allowRemindersAccess: 'Allow Reminders Access',
   calendarOffCaption:
@@ -135,10 +135,10 @@ export default {
     "Couldn't export. Allow calendar access for learnX in System Settings.",
   calendarExportNoEvent:
     'Nothing to export. Sync the course schedule or assignments to your calendar first.',
-  calendarExportFailed: "Couldn't export: {error}",
+  calendarExportFailed: "Couldn't export. Try again.",
   graduate: 'Graduate Student',
   syncCourseSchedule: 'Sync More Dates',
-  classAlarm: 'Class Alert',
+  classAlarm: 'Calendar Alert',
   classAlarmBefore: 'Alert Before (Minutes)',
   calendarEventLength: 'Event Length (Minutes)',
   assignmentCalendarAlarm: 'Calendar Alert',
@@ -194,7 +194,7 @@ export default {
   later: 'Later',
   restartNow: 'Restart Now',
   trayOpen: 'Open learnX',
-  trayCheckForNewItems: 'Check for New Items',
+  trayCheckForNewItems: 'Check for New Content',
   trayQuit: 'Quit learnX',
   electronNotificationsCaption:
     "learnX sends notifications and reminders only while it's running.",
@@ -221,12 +221,12 @@ export default {
   itemNotFoundDescription:
     'It may have been removed, or it belongs to another semester.',
   switchSemester: 'Switch Semester',
-  searchPlaceholder: 'Notices, assignments and files',
+  searchPlaceholder: 'Notices, assignments, and files',
   logout: 'Log Out',
   logoutEllipsis: 'Log Out…',
   logoutQuestion: 'Log Out?',
   logoutConfirmation:
-    'Your settings, favorites, archived and hidden items and drafts on this device will be removed.',
+    'Your settings, favorites, archived and hidden items, and drafts on this device will be removed.',
   foundNewVersion: 'Update Available: v{version}',
   updateTitle: 'Update to v{version}?',
   viewChangelog: 'View Changelog',
@@ -242,7 +242,7 @@ export default {
     'learnX will restart to install the update. Otherwise, it installs the next time you quit learnX.',
   restart: 'Restart',
   updateDebMessage:
-    'Download the new .deb, then open it to install it, or install it with sudo apt install in a terminal.',
+    'Download the new .deb and open it to install, or install it with sudo apt install in a terminal.',
   updateInstalling: 'Installing',
   updateFailed: "Couldn't Update learnX",
   updateDownloadFailed:
@@ -266,7 +266,7 @@ export default {
   noCourses: 'No Courses',
   noResults: 'No Results',
   noResultsDescription: 'Check the spelling or try a new search.',
-  searchPrompt: 'Search Notices, Assignments and Files',
+  searchPrompt: 'Search Notices, Assignments, and Files',
   topHits: 'Top Hits',
   seeAll: 'See All',
   searchInclude: 'Include in Results',
@@ -304,7 +304,7 @@ export default {
     - App Version
     - Device Model
     - OS Version
-    - Other Information
+    - Additional Information
   `,
   shareReceived:
     'The shared file will be attached the next time you submit an assignment.',
@@ -314,7 +314,7 @@ export default {
   datePickerStartLabel: 'Start',
   datePickerEndLabel: 'End',
   datePickerSaveLabel: 'Sync',
-  datePickerLabel: 'Select Sync Range',
+  datePickerLabel: 'Choose Dates to Sync',
   reviewed: 'Reviewed',
   good: 'Excellent',
   exemptedCourse: 'Exempted Course',
@@ -357,10 +357,11 @@ export default {
   moveToReorder: 'Move courses up or down to reorder',
   documents: 'Choose File',
   photos: 'Photo Library',
+  photosAndroid: 'Photos',
   assignmentIndividualCompletion: 'Complete Individually',
   assignmentGroupCompletion: 'Complete as a Group',
   assignmentOnlineSubmission: 'Submit Online',
-  assignmentOfflineSubmission: 'Submit Offline',
+  assignmentOfflineSubmission: 'Submit in Person',
   becomeMaintainer: 'Become a Maintainer',
   maintainerDescription:
     'Want to help maintain learnX? Frontend experience is required, ideally with React; React Native experience is a plus. Write to us:',
@@ -402,7 +403,7 @@ export default {
     'learnX checks for new content in the background when the system lets it, so these notifications can arrive late.',
   notificationChannelContent: 'New content',
   notificationChannelContentDescription:
-    'New notices, files and assignments, grades, deadline changes and group submissions',
+    'New notices, files, assignments, grades, deadline changes, and group submissions',
   notificationChannelDeadlines: 'Deadline reminders',
   notificationChannelDeadlinesDescription:
     'Reminders before assignments are due and before late submission closes',
@@ -465,20 +466,20 @@ export default {
   notificationRemindLater: 'Remind Me Later',
   // dayjs formats: text in [] is printed as is
   time12HourFormat: 'h:mm A',
-  lateDeadlineFormat: '[Late Deadline] ddd, MMM D, YYYY {time}',
-  dateTimeFormat: 'ddd, MMM D, YYYY {time}',
-  reminderDeadlineFormat: '[Deadline:] ddd, MMM D, YYYY {time}',
+  lateDeadlineFormat: '[Late Deadline] ddd, MMM D, YYYY [at] {time}',
+  dateTimeFormat: 'ddd, MMM D, YYYY [at] {time}',
+  reminderDeadlineFormat: '[Deadline:] ddd, MMM D, YYYY [at] {time}',
   shortDateTimeFormat: 'MMM D {time}',
   widgetDateTimeFormat: 'MMM D, {time}',
-  noticeExpireTimeFormat: '[Expires] ddd, MMM D, YYYY {time}',
-  noticeExpiredTimeFormat: '[Expired] ddd, MMM D, YYYY {time}',
-  submittedAtFormat: '[Submitted] ddd, MMM D, YYYY {time}',
-  submittedLateAtFormat: '[Submitted late] ddd, MMM D, YYYY {time}',
-  lastSubmittedAtFormat: '[Last submitted] ddd, MMM D, YYYY {time}',
-  gradedAtFormat: '[Graded] ddd, MMM D, YYYY {time}',
+  noticeExpireTimeFormat: '[Expires] ddd, MMM D, YYYY [at] {time}',
+  noticeExpiredTimeFormat: '[Expired] ddd, MMM D, YYYY [at] {time}',
+  submittedAtFormat: '[Submitted] ddd, MMM D, YYYY [at] {time}',
+  submittedLateAtFormat: '[Submitted late] ddd, MMM D, YYYY [at] {time}',
+  lastSubmittedAtFormat: '[Last submitted] ddd, MMM D, YYYY [at] {time}',
+  gradedAtFormat: '[Graded] ddd, MMM D, YYYY [at] {time}',
   // {grader} is a dayjs literal, e.g. [Name]
-  gradedByAtFormat: '[Graded by] {grader}[,] ddd, MMM D, YYYY {time}',
-  deadlinePassed: 'Closed {time}',
+  gradedByAtFormat: '[Graded by] {grader}[,] ddd, MMM D, YYYY [at] {time}',
+  deadlinePassed: 'Was due {time}',
   deadlineIn: 'Due in {time}',
   deadlineInOneMinute: 'Due in 1 minute',
   deadlineInMinutes: 'Due in {count} minutes',
@@ -507,14 +508,14 @@ export default {
   courseScheduleSyncOffCaption:
     "Adds this week's and next week's {type} classes to your calendar and keeps them up to date with the course schedule.",
   courseScheduleSyncOnCaption:
-    "This week's and next week's {type} classes are kept up to date with the course schedule and the settings above. For more weeks, tap Sync More Dates and pick the dates; those classes are kept up to date too.",
+    "This week's and next week's {type} classes are kept up to date with the course schedule and the settings above. For more weeks, choose Sync More Dates and pick the dates; those classes are kept up to date too.",
   syncDatesBeijingCaption: 'The dates you pick are in Beijing time.',
   graduateSchedule: 'graduate',
   undergraduateSchedule: 'undergraduate',
   courseInformationSharingOnCaption:
     'Course information stops being uploaded when you turn this off.',
   courseInformationSharingOffCaption:
-    'When this is on, course information for the current semester (course number, name, teacher, times and locations) is uploaded to courseX, where others can see it. Personal information is never uploaded or shared.\n\nUse courseX to find courses and see when and where they meet.',
+    'When this is on, course information for the current semester (course number, name, teacher, times, and locations) is uploaded to courseX, where others can see it. Personal information is never uploaded or shared.\n\nUse courseX to find courses and see when and where they meet.',
   delete: 'Delete',
   deleteEllipsis: 'Delete…',
   downloads: 'Downloads',
@@ -523,12 +524,12 @@ export default {
     'Files downloaded in learnX, by course. Open a course to export or delete its files.',
   downloadsExport: 'Export All Downloads',
   downloadsExportCaption:
-    'Copies the files to a "learnX" folder in a place you choose, sorted by semester and course. Exporting again updates that folder.',
+    'Copies the files to a “learnX” folder in a place you choose, sorted by semester and course. Exporting again updates that folder.',
   downloadsExportCourse: 'Export',
   downloadsExportFolderElectron: 'Choose Export Folder',
   downloadsExported: 'Exported {files}',
   downloadsExportedPartly: "Exported {files}; {failed} couldn't be copied",
-  downloadsExportFailed: "Couldn't export: {error}",
+  downloadsExportFailed: "Couldn't export. Try again.",
   downloadsDeleteCourse: 'Delete Downloaded Files?',
   downloadsOneFile: '1 file',
   downloadsFileCount: '{count} files',
@@ -579,11 +580,11 @@ export default {
   welcomeTitle: 'Welcome to learnX',
   welcomeTodayTitle: 'Your Day at a Glance',
   welcomeTodayBody:
-    "Today's classes, what's due and what's new in every course.",
+    "Today's classes, what's due, and what's new in every course.",
   welcomeCoursesTitle: 'All Your Courses in One Place',
-  welcomeCoursesBody: 'Notices, assignments and files, readable offline.',
+  welcomeCoursesBody: 'Notices, assignments, and files, readable offline.',
   welcomeDeadlinesTitle: 'Never Miss a Deadline',
-  welcomeDeadlinesBody: "Reminders, calendar sync and widgets for what's due.",
+  welcomeDeadlinesBody: "Reminders, calendar sync, and widgets for what's due.",
   welcomeDeadlinesBodyMac: "Reminders and calendar sync for what's due.",
   welcomeDeadlinesBodyElectron:
     "Reminders and a calendar export for what's due.",
@@ -605,16 +606,16 @@ export default {
   fullChangelog: 'Full Changelog',
   whatsNew19TodayTitle: 'Today',
   whatsNew19TodayBody:
-    "A new first tab with your classes, what's due and what's new.",
+    "A new first tab with your classes, what's due, and what's new.",
   whatsNew19WidgetsTitle: 'Widgets',
   whatsNew19WidgetsBody:
     'See deadlines and your next class without opening learnX.',
   whatsNew19NotificationsTitle: 'Notifications',
   whatsNew19NotificationsBody:
-    'Get notified of new notices, files and grades, and before deadlines and classes.',
+    'Get notified of new notices, files, and grades, and before deadlines and classes.',
   whatsNew19SpotlightTitle: 'Spotlight & Siri',
   whatsNew19SpotlightBody:
-    'Find notices, assignments and files in Spotlight, and ask Siri for your next class or deadline.',
+    'Find notices, assignments, and files in Spotlight, and ask Siri for your next class or deadline.',
   whatsNew19DesignTitle: 'New Design',
   whatsNew19DesignBody:
     'A cleaner look that follows Android, in Tsinghua purple.',

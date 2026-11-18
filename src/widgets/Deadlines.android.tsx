@@ -45,7 +45,11 @@ function DeadlinesWidget(
   const title = props.title || (zh ? '作业截止' : 'Deadlines');
   const empty =
     props.empty ||
-    (zh ? '打开 learnX 以显示作业' : 'Open learnX to see deadlines');
+    // U+2005 is the gap iOS draws between Chinese and Latin (helpers/cjk),
+    // which Android doesn't.
+    (zh
+      ? '打开 learnX 后，这里会显示作业'
+      : 'Open learnX to show your deadlines here');
   /* oxlint-enable learnx/no-han-outside-translations */
   const now = Date.now();
   // The deadline's color by the app's rule (deadlineUrgency in

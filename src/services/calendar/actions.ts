@@ -19,6 +19,7 @@ import { calendarErrorCode } from 'services/calendar/errors';
 import { defaultCalendarRange } from 'helpers/calendar/range';
 import { exportTextFile } from 'services/files/share';
 import { t, TextKey } from 'helpers/i18n';
+import { recordError } from 'services/crashReporting';
 import { isAndroid, isElectron } from 'helpers/platform';
 
 export interface ToastMessage {
@@ -26,8 +27,15 @@ export interface ToastMessage {
   type: ToastType;
 }
 
-const messageOf = (err: unknown) =>
-  err instanceof Error ? err.message : String(err);
+/**
+ * A failure without a reason of its own to show: the toast says only what
+ * failed, in the app's language, as the error's text is often the system's
+ * or a library's English. The error goes to crash reports instead.
+ */
+const failed = (key: TextKey, err: unknown): ToastMessage => {
+  recordError(err);
+  return { text: t(key), type: 'error' };
+};
 
 /** Android has no "full access" to calendars and needs no restart once allowed. */
 const noCalendarPermission = (
@@ -59,10 +67,7 @@ export const assignmentSyncErrorToast = (err: unknown): ToastMessage => {
     case 'noSource':
       return { text: t('missingCalendarSource'), type: 'error' };
     default:
-      return {
-        text: t('assignmentSyncFailed', { error: messageOf(err) }),
-        type: 'error',
-      };
+      return failed('assignmentSyncFailed', err);
   }
 };
 
@@ -78,10 +83,7 @@ export const calendarExportErrorToast = (err: unknown): ToastMessage => {
         type: 'warning',
       };
     default:
-      return {
-        text: t('calendarExportFailed', { error: messageOf(err) }),
-        type: 'error',
-      };
+      return failed('calendarExportFailed', err);
   }
 };
 
@@ -92,10 +94,7 @@ export const calendarDeleteErrorToast = (err: unknown): ToastMessage => {
     case 'reminderPermission':
       return { text: t('deleteFailedNoReminderPermission'), type: 'error' };
     default:
-      return {
-        text: t('deleteFailed', { error: messageOf(err) }),
-        type: 'error',
-      };
+      return failed('deleteFailed', err);
   }
 };
 
