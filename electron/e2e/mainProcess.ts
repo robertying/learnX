@@ -1,6 +1,6 @@
 // Stand-ins in the app's main process for what Playwright can't click: native
-// dialogs, notifications, opening files and links, native menus, the tray
-// and Start at login. Each helper patches Electron's modules in
+// dialogs, notifications, opening files and links, native menus, the tray,
+// Start at login and relaunching. Each helper patches Electron's modules in
 // the running app (electronApp.evaluate) and records what the app asked for,
 // for the test to read back. The fixtures install them before a test starts,
 // so nothing reaches the system.
@@ -59,8 +59,8 @@ const exactly = (label: string) => ({
 export const mainProcess = (app: ElectronApplication) => ({
   /**
    * Installs every stand-in. Dialogs answer with `answers` (cancelled by
-   * default); notifications, opened paths and links, menus and Start at
-   * login are recorded instead of reaching the system. Call it
+   * default); notifications, opened paths and links, menus, Start at login
+   * and relaunches are recorded instead of reaching the system. Call it
    * again to change the answers.
    */
   stub: (answers: DialogAnswers = {}) =>
@@ -129,6 +129,14 @@ export const mainProcess = (app: ElectronApplication) => ({
                 JSON.stringify(options?.args ?? []),
           };
         }) as typeof electronApp.getLoginItemSettings;
+        // Relaunching starts a learnX the test doesn't drive: noted in the
+        // data folder instead, where the test reads it after the app quits.
+        electronApp.relaunch = () => {
+          fs.writeFileSync(
+            `${electronApp.getPath('userData')}/e2e-relaunched`,
+            '',
+          );
+        };
         Menu.prototype.popup = function popup(
           this: Electron.Menu,
           options?: Electron.PopupOptions,

@@ -174,6 +174,12 @@ const zh: typeof en = {
     'AppImage版learnX在Ubuntu 24.04及更高版本上无法启用Chromium沙盒。为提高运行时安全，建议改用deb安装包（.deb）。',
   startAtLoginCaption:
     '登录电脑时在系统托盘中启动learnX，以便持续同步并发送提醒。关闭窗口后learnX仍在托盘中运行，可在托盘菜单中退出。',
+  language: '语言',
+  followSystem: '跟随系统',
+  languageRestartTitle: '重新启动learnX？',
+  languageRestartMessage: '新的语言将在learnX重新启动后生效。',
+  later: '稍后',
+  restartNow: '立即重新启动',
   trayOpen: '打开learnX',
   trayCheckForNewItems: '检查新内容',
   trayQuit: '退出learnX',

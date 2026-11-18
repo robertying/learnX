@@ -1,9 +1,21 @@
 // The app's language follows the system's (`--lang` here), as the Maestro
 // flows run in English on the local devices and in Chinese on CI: the mock
-// data, the screens, dialogs and the tray menu all switch with it.
+// data, the screens, dialogs and the tray menu all switch with it. On
+// Windows and Linux, Settings › Language chooses one for learnX itself.
+import fs from 'node:fs';
+import path from 'node:path';
 import { expect, packagedApp, test } from './fixtures.ts';
-import { exact } from './maestroEnv.ts';
-import { byId, card, openCard, openSettings, openTab, shown } from './steps.ts';
+import type { Running } from './fixtures.ts';
+import { exact, text } from './maestroEnv.ts';
+import {
+  byId,
+  card,
+  openCard,
+  openSettings,
+  openSettingsPage,
+  openTab,
+  shown,
+} from './steps.ts';
 
 test.describe('in Chinese', () => {
   test.use({ language: 'zh-CN' });
@@ -49,6 +61,78 @@ test.describe('in Chinese', () => {
     await expect(byId(window, 'login-username')).toBeVisible();
     await expect(
       shown(window.getByRole('button', { name: chinese('T_login') })),
+    ).toBeVisible();
+  });
+});
+
+test.describe('chosen in Settings', () => {
+  // A Mac has a per-app language of its own: a dev run there offers the
+  // setting only when asked (electron/language.ts).
+  const env = { LEARNX_LANGUAGE_SETTING: '1' };
+  test.use({ appLaunch: { env } });
+
+  /** Chooses a language and answers the restart question. */
+  const choose = async (
+    { app, window }: Pick<Running, 'app' | 'window'>,
+    language: string,
+    restart: boolean,
+  ) => {
+    await openSettings(window);
+    await openSettingsPage(window, 'settings-language', 'language-settings');
+    await byId(window, `language-${language}`).click();
+    await expect(
+      window.getByText(text('T_languageRestartTitle')),
+    ).toBeVisible();
+    if (!restart) {
+      await window.getByRole('button', { name: exact('T_later') }).click();
+      return;
+    }
+    const userData = await app.evaluate(({ app: electronApp }) =>
+      electronApp.getPath('userData'),
+    );
+    const closed = app.waitForEvent('close');
+    await window.getByRole('button', { name: exact('T_restartNow') }).click();
+    // learnX quits and asks to be started again (the stand-in notes it).
+    await closed;
+    expect(fs.existsSync(path.join(userData, 'e2e-relaunched'))).toBe(true);
+  };
+
+  test('switches to Chinese at the next launch, and back to the system’s', async ({
+    app,
+    window,
+    login,
+    relaunch,
+  }) => {
+    // Launched in English (`--lang=en-US`), as the system's language.
+    await login();
+    await expect(window.getByRole('tab', { name: /^Notices$/ })).toBeVisible();
+    await choose({ app, window }, 'zh-CN', true);
+
+    // The choice wins over the system's language.
+    const chinese = await relaunch({ env });
+    await expect(
+      chinese.window.getByRole('tab', { name: /^公告$/ }),
+    ).toBeVisible();
+    await openSettings(chinese.window);
+    await openSettingsPage(
+      chinese.window,
+      'settings-language',
+      'language-settings',
+    );
+    await expect(byId(chinese.window, 'language-zh-CN')).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
+    // Asked in the language in use, and kept for later.
+    await choose(chinese, 'system', false);
+    await expect(byId(chinese.window, 'language-system')).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
+
+    const english = await relaunch({ env });
+    await expect(
+      english.window.getByRole('tab', { name: /^Notices$/ }),
     ).toBeVisible();
   });
 });

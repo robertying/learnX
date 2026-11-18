@@ -75,6 +75,7 @@ import {
   LibraryFilled,
   LibraryRegular,
 } from '@fluentui/react-icons/svg/library';
+import { LocalLanguageRegular } from '@fluentui/react-icons/svg/local-language';
 import { LocationOffRegular } from '@fluentui/react-icons/svg/location-off';
 import { MailRegular } from '@fluentui/react-icons/svg/mail';
 import { MailInboxRegular } from '@fluentui/react-icons/svg/mail-inbox';
@@ -198,6 +199,7 @@ export const fluentIcons: Record<SystemIconWindowsName, FluentIcon> = {
   InfoRegular,
   KeyRegular,
   LibraryRegular,
+  LocalLanguageRegular,
   LocationOffRegular,
   MailInboxAllRegular,
   MailInboxRegular,

@@ -278,6 +278,11 @@ export const systemIcons = {
     windows: 'ArrowSwapRegular',
   },
   swipe: { ios: 'hand.draw', android: 'swipe', windows: 'HandDrawRegular' },
+  language: {
+    ios: 'globe',
+    android: 'language',
+    windows: 'LocalLanguageRegular',
+  },
   info: { ios: 'info.circle', android: 'info', windows: 'InfoRegular' },
   whatsNew: {
     ios: 'sparkles',
@@ -532,6 +537,7 @@ export const materialCodepoints: Record<SystemIconAndroidName, number> = {
   info: 0xe88e,
   key: 0xe73c,
   lan: 0xeb2f,
+  language: 0xe894,
   light_mode: 0xe518,
   location_off: 0xe0c7,
   login: 0xea77,
