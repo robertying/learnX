@@ -322,6 +322,29 @@ describe('the tray and the Jump List', () => {
     expect(trays).toHaveLength(1);
   });
 
+  it.each([
+    ['linux', false, true],
+    ['win32', false, false],
+    ['linux', true, false],
+  ] as const)(
+    'on %s (E2E run: %s), Check for New Items and Quit bring the window forward: %s',
+    (platform, background, focuses) => {
+      const { trays, createWindow, app } = setUp({ platform, background });
+      const win = createWindow();
+      trays[0].menu[1].click!();
+      expect(win.focus).toHaveBeenCalledTimes(focuses ? 1 : 0);
+      trays[0].menu[3].click!();
+      expect(win.focus).toHaveBeenCalledTimes(focuses ? 2 : 0);
+      expect(app.quit).toHaveBeenCalled();
+    },
+  );
+
+  it('ends a tray launch on Linux with no window without throwing', () => {
+    const { trays, app } = setUp({ platform: 'linux' });
+    expect(() => trays[0].menu[3].click!()).not.toThrow();
+    expect(app.quit).toHaveBeenCalled();
+  });
+
   it('shows the window on a click on Windows only', () => {
     const win = setUp().createWindow();
     const { trays } = setUp({ platform: 'linux' });
