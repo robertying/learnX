@@ -60,7 +60,7 @@ it.each([
 
 it('trusts only the committed key, and knows a placeholder', () => {
   const committed = readFileSync(
-    path.join(__dirname, '..', '..', 'certs', 'electron-update.pem'),
+    path.join(__dirname, '..', '..', 'certs', 'electron-public-key.pem'),
     'utf8',
   );
   // Nothing a throwaway key signs passes the committed key.

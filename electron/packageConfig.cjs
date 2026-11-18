@@ -62,7 +62,7 @@ const config = (options = {}) => {
       // What the main process shares with the page (shared.cjs).
       { from: '../src/constants', to: 'constants', filter: SHARED_FILES },
       // The key update files are signed with (updateSignature.cjs).
-      { from: '../certs', to: '.', filter: ['electron-update.pem'] },
+      { from: '../certs', to: '.', filter: ['electron-public-key.pem'] },
     ],
     // Where the packaged app finds updates (app-update.yml): the TUNA
     // mirror's copy of the latest GitHub release (`v<version>`, with the
@@ -141,7 +141,7 @@ const isLocalUrl = (/** @type {string | undefined} */ url) => {
 
 /**
  * Why installers can't be built, or null: if the committed update key
- * (certs/electron-update.pem) is a placeholder, nobody can sign an update
+ * (certs/electron-public-key.pem) is a placeholder, nobody can sign an update
  * those installs would take, so they could never update. An unpacked
  * build (`--dir`), a test build for an update server on this computer
  * (`--update-url` on localhost or 127.0.0.1: any other could pass for a
@@ -156,7 +156,7 @@ const placeholderKeyProblem = (options, publicKey) =>
   !options.dir &&
   !isLocalUrl(options.updateUrl) &&
   !options.allowPlaceholderKey
-    ? 'certs/electron-update.pem is a placeholder, so these installs could never update: commit the update key\'s public half (electron/AGENTS.md, "Signing updates"), or pass --allow-placeholder-key for a build that will never be released'
+    ? 'certs/electron-public-key.pem is a placeholder, so these installs could never update: commit the update key\'s public half (electron/AGENTS.md, "Signing updates"), or pass --allow-placeholder-key for a build that will never be released'
     : null;
 
 module.exports = { packageConfig: config, placeholderKeyProblem };

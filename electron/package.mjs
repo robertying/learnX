@@ -52,7 +52,7 @@ const keyProblem = placeholderKeyProblem(
     updateUrl: values['update-url'],
     allowPlaceholderKey: values['allow-placeholder-key'],
   },
-  fs.readFileSync(path.join(root, 'certs', 'electron-update.pem')),
+  fs.readFileSync(path.join(root, 'certs', 'electron-public-key.pem')),
 );
 if (keyProblem) {
   console.error(keyProblem);
