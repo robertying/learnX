@@ -8,26 +8,24 @@ import { immediateTrigger } from 'services/scheduledNotifications';
 
 /**
  * Says a new version is out, once a version, where learnX updates itself
- * (`services/updateNotifications`). Not while the app is in front
- * (`inFront`), where Settings' badge and its update row already show it, and
- * not with Settings › Notifications › New Versions off; either way it counts
- * as said. Never asks for the permission: without it, nothing shows.
+ * (`services/updateNotifications`), also while the app is in front: Settings'
+ * badge is easy to miss. Not with Settings › Notifications › New Versions
+ * off, and then it counts as said. Never asks for the permission: without
+ * it, nothing shows.
  */
 export const notifyUpdate = async ({
   version,
   body,
-  inFront,
 }: {
   version: string;
   body: string;
-  inFront: boolean;
 }) => {
   const key = `update:${version}`;
   if (getNotifiedKeys().has(key)) {
     return;
   }
   addNotifiedKeys([key]);
-  if (inFront || !getSettings().notifications.appUpdates) {
+  if (!getSettings().notifications.appUpdates) {
     return;
   }
   try {

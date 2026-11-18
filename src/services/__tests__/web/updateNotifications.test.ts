@@ -34,7 +34,6 @@ const posted = () =>
 beforeEach(() => {
   bridge = installBridge();
   resetNotified();
-  jest.spyOn(document, 'hasFocus').mockReturnValue(false);
   watchUpdates();
 });
 
@@ -63,8 +62,8 @@ it('says when a .deb is out', async () => {
   ]);
 });
 
-it('stays quiet while the window is in front', async () => {
-  jest.mocked(document.hasFocus).mockReturnValue(true);
+it('says so while the window is in front too', async () => {
+  jest.spyOn(document, 'hasFocus').mockReturnValue(true);
   await ready({ version: '19.3.0' });
-  expect(posted()).toEqual([]);
+  expect(posted()).toHaveLength(1);
 });

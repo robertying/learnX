@@ -9,13 +9,7 @@ import { notifyUpdate } from 'services/updateNotice';
 jest.mock('services/crashReporting', () => ({ recordError: jest.fn() }));
 
 const schedule = jest.mocked(Notifications.scheduleNotificationAsync);
-const update = (overrides: { version?: string; inFront?: boolean } = {}) =>
-  notifyUpdate({
-    version: '19.1.0',
-    body: 'Body',
-    inFront: false,
-    ...overrides,
-  });
+const update = (version = '19.1.0') => notifyUpdate({ version, body: 'Body' });
 
 beforeEach(() => {
   resetNotified();
@@ -39,16 +33,10 @@ it('says it once a version', async () => {
   await update();
   await update();
   expect(schedule).toHaveBeenCalledTimes(1);
-  await update({ version: '19.2.0' });
+  await update('19.2.0');
   expect(schedule).toHaveBeenCalledTimes(2);
 });
 
-it('stays quiet while the app is in front, and later too', async () => {
-  await update({ inFront: true });
-  await update();
-  expect(schedule).not.toHaveBeenCalled();
-  expect(getNotifiedKeys().has('update:19.1.0')).toBe(true);
-});
 
 it('stays quiet with New Versions off', async () => {
   expect(getSettings().notifications.appUpdates).toBe(true);
@@ -58,6 +46,14 @@ it('stays quiet with New Versions off', async () => {
   });
   await update();
   expect(schedule).not.toHaveBeenCalled();
+  // Turning it on later doesn't post about a version already out.
+  setSetting('notifications', {
+    ...getSettings().notifications,
+    appUpdates: true,
+  });
+  await update();
+  expect(schedule).not.toHaveBeenCalled();
+  expect(getNotifiedKeys().has('update:19.1.0')).toBe(true);
 });
 
 it("doesn't throw when the notification can't be posted", async () => {
