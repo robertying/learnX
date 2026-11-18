@@ -206,7 +206,7 @@ index 674e602d5b959b1c12362efdd3d7800e6917aa4f..17ee79d895cd1132c5512ddd2a7f5a30
  }
  
 diff --git a/ios/TabViewImpl.swift b/ios/TabViewImpl.swift
-index 6de510d0190ee9fc99b99a68f2e8f021c3776391..6e6da893ebbf8ec33f1add7d4e42607fcfd9c00f 100644
+index 6de510d0190ee9fc99b99a68f2e8f021c3776391..ccc29536f5f2864ee5411076989f68e686260438 100644
 --- a/ios/TabViewImpl.swift
 +++ b/ios/TabViewImpl.swift
 @@ -58,7 +58,21 @@ struct TabViewImpl: View {
@@ -232,7 +232,15 @@ index 6de510d0190ee9fc99b99a68f2e8f021c3776391..6e6da893ebbf8ec33f1add7d4e42607f
          }
        #endif
        .introspectTabView { tabController in
-@@ -263,7 +277,7 @@ struct TabViewImpl: View {
+@@ -239,6 +253,7 @@ struct TabViewImpl: View {
+   /// switching tabs) breaks its selection styling on iOS 27, so `selectedImage` is only assigned when it
+   /// changes, and SwiftUI updates its images only when a label changes.
+   private func configureTabBarItemImages(items: [UITabBarItem], tabBar: UITabBar, props: TabViewProps) {
++    defer { syncTabButtonIdentifiers(tabBar: tabBar) }
+     for (tabBarIndex, item) in items.enumerated() {
+       let tabIndex = declarationIndex(of: item, at: tabBarIndex, in: tabBar)
+       guard let tabData = props.filteredItems[safe: tabIndex] else { continue }
+@@ -263,7 +278,7 @@ struct TabViewImpl: View {
  
        item.setTitleTextAttributes(
          TabBarFontSize.createFontAttributes(
@@ -241,7 +249,67 @@ index 6de510d0190ee9fc99b99a68f2e8f021c3776391..6e6da893ebbf8ec33f1add7d4e42607f
            family: props.fontFamily,
            weight: props.fontWeight,
            color: tabActiveColor
-@@ -441,7 +455,7 @@ struct TabViewImpl: View {
+@@ -273,6 +288,51 @@ struct TabViewImpl: View {
+     }
+   }
+ 
++  /// Gives each tab bar button its tab's `accessibilityIdentifier` (the item's `testID`).
++  ///
++  /// UIKit copies a `UITab`'s identifier to its button only when it creates the button (or when an assistive
++  /// app such as VoiceOver or XCUITest first connects to the process), and ignores later changes. SwiftUI sets
++  /// the identifier from `.accessibilityIdentifier` on a `Tab` only a few updates after the tab bar is created.
++  /// So tabs mounted while an assistive app is connected (e.g. after a login in a UI test) would have no
++  /// identifiers. Hand them over here, once per identifier, to the controls UIKit shows at the tab's frame.
++  private func syncTabButtonIdentifiers(tabBar: UITabBar) {
++    #if os(iOS)
++    guard #available(iOS 18.0, *),
++      let tabController = tabBar.delegate as? UITabBarController,
++      let window = tabController.view.window
++    else { return }
++
++    let pending = tabController.tabs.compactMap { tab -> (id: String, frame: CGRect, tab: UITab)? in
++      guard let id = tab.accessibilityIdentifier, !id.isEmpty,
++        objc_getAssociatedObject(tab, &AssociatedKeys.syncedIdentifier) as? String != id,
++        let frame = tab.frame(in: window), !frame.isEmpty
++      else { return nil }
++      return (id, frame, tab)
++    }
++    guard !pending.isEmpty else { return }
++
++    // The tabs' own content can be large and never holds the buttons.
++    let contentViews = tabController.tabs.compactMap { $0.viewController?.viewIfLoaded }
++    var synced = Set<ObjectIdentifier>()
++    func visit(_ view: UIView) {
++      if contentViews.contains(where: { $0 === view }) { return }
++      if let control = view as? UIControl {
++        let controlFrame = control.convert(control.bounds, to: window)
++        for entry in pending where controlFrame.isAlmostEqual(to: entry.frame) {
++          control.accessibilityIdentifier = entry.id
++          synced.insert(ObjectIdentifier(entry.tab))
++        }
++      }
++      view.subviews.forEach(visit)
++    }
++    visit(window)
++
++    for entry in pending where synced.contains(ObjectIdentifier(entry.tab)) {
++      objc_setAssociatedObject(entry.tab, &AssociatedKeys.syncedIdentifier, entry.id, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
++    }
++    #endif
++  }
++
+   private func assignSelectedImage(_ image: UIImage, to item: UITabBarItem) {
+     // `UITabBarItem.selectedImage` returns a copy, so compare against the last assigned instance instead.
+     let assignedImage = objc_getAssociatedObject(item, &AssociatedKeys.selectedImage) as? UIImage
+@@ -284,6 +344,7 @@ struct TabViewImpl: View {
+ 
+   private enum AssociatedKeys {
+     static var selectedImage: UInt8 = 0
++    static var syncedIdentifier: UInt8 = 0
+   }
+ 
+   struct TabBarItemImages {
+@@ -441,7 +502,7 @@ struct TabViewImpl: View {
  
    private func selectedAttributes(props: TabViewProps) -> [NSAttributedString.Key: Any] {
      TabBarFontSize.createFontAttributes(
@@ -250,6 +318,19 @@ index 6de510d0190ee9fc99b99a68f2e8f021c3776391..6e6da893ebbf8ec33f1add7d4e42607f
        family: props.fontFamily,
        weight: props.fontWeight,
        color: props.selectedActiveTintColor
+@@ -687,3 +748,12 @@ extension View {
+     }
+   }
+ }
++
++#if os(iOS)
++  private extension CGRect {
++    func isAlmostEqual(to other: CGRect) -> Bool {
++      abs(minX - other.minX) < 1 && abs(minY - other.minY) < 1
++        && abs(width - other.width) < 1 && abs(height - other.height) < 1
++    }
++  }
++#endif
 diff --git a/ios/TabViewProvider.swift b/ios/TabViewProvider.swift
 index e5663453ad1c54461a85b4a54ac85f3ffc52e032..ce1be799f8309a7ffc918b70ee299fba15695c23 100644
 --- a/ios/TabViewProvider.swift

@@ -11,9 +11,9 @@ appId: ${APP_ID}
       postNotification: ${NOTIFICATION}
 - extendedWaitUntil:
     visible:
-      id: 'tab-notices|bell\.fill'
+      id: 'tab-notices'
     timeout: 30000
 - runFlow:
     file: tab.yaml
     env:
-      TAB: 'tab-notices|bell\.fill'
+      TAB: 'tab-notices'

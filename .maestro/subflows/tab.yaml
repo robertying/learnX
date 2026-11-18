@@ -1,6 +1,4 @@
-# Switch to the tab whose id matches TAB, e.g. 'tab-files|folder\.fill'
-# (the SF Symbol covers iOS tab bar buttons that lose their identifier in
-# Maestro's snapshot after a clearState launch).
+# Switch to the tab whose id matches TAB, e.g. 'tab-files'.
 appId: ${APP_ID}
 ---
 # iPad (IPAD from scripts/e2e/e2e.sh): the tab bar pages only when its labels

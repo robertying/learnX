@@ -12,7 +12,7 @@ name: Open every other screen
 - runFlow:
     file: subflows/tab.yaml
     env:
-      TAB: 'tab-today|(sunrise|sun\.max|sunset|moon\.stars)\.fill'
+      TAB: 'tab-today'
 - tapOn:
     id: today-schedule
 - extendedWaitUntil:
@@ -28,7 +28,7 @@ name: Open every other screen
 - runFlow:
     file: subflows/tab.yaml
     env:
-      TAB: 'tab-assignments|list\.bullet\.clipboard\.fill'
+      TAB: 'tab-assignments'
 - runFlow:
     file: subflows/open.yaml
     env:
@@ -56,7 +56,7 @@ name: Open every other screen
 - runFlow:
     file: subflows/tab.yaml
     env:
-      TAB: 'tab-courses|books\.vertical\.fill'
+      TAB: 'tab-courses'
 - runFlow:
     file: subflows/open.yaml
     env:
