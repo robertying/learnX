@@ -20,7 +20,14 @@ const fakeElectron = (dataDir: string, { packaged = false } = {}) => {
     setName: jest.fn(),
     setAppUserModelId: jest.fn(),
     getPath: (name: string) => paths.get(name) ?? path.join(dataDir, name),
-    setPath: jest.fn((name: string, value: string) => paths.set(name, value)),
+    setPath: jest.fn((name: string, value: string) => {
+      // A path that isn't absolute here (a Windows one on macOS or Linux)
+      // would have the app write its files under the repo.
+      if (!path.isAbsolute(value)) {
+        throw new Error(`setPath('${name}') with a relative path: ${value}`);
+      }
+      paths.set(name, value);
+    }),
     commandLine: {
       appendSwitch: jest.fn(),
       hasSwitch: jest.fn((name: string) => name === 'no-sandbox'),
@@ -784,10 +791,10 @@ describe('on each platform', () => {
     jest.replaceProperty(process, 'env', {
       ...process.env,
       LEARNX_DATA_DIR: '',
-      LOCALAPPDATA: 'C:\\Users\\me\\AppData\\Local',
+      LOCALAPPDATA: path.join(dataDir, 'AppData', 'Local'),
     });
     await onPlatform('win32', () => loadMain({ packaged: true }));
-    const local = path.join('C:\\Users\\me\\AppData\\Local', 'learnX');
+    const local = path.join(dataDir, 'AppData', 'Local', 'learnX');
     expect(fake.app.setPath).toHaveBeenCalledWith('userData', local);
     expect(fake.app.setPath).toHaveBeenCalledWith('sessionData', local);
     expect(fake.app.setAppUserModelId).toHaveBeenCalledWith(
