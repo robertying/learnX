@@ -4,6 +4,7 @@ import {
   type BridgeNotificationRequest,
   type BridgeScheduledNotification,
 } from 'web/bridge';
+import { systemText } from 'web/systemText';
 
 /**
  * Stands in for expo-notifications in the Electron app: the main process
@@ -89,6 +90,19 @@ const toBridgeTrigger = (
   };
 };
 
+/** A notification's texts with the gaps Windows and Linux don't draw (`systemText`). */
+const systemContent = ({
+  title,
+  subtitle,
+  body,
+  ...rest
+}: RequestInput['content']): RequestInput['content'] => ({
+  ...rest,
+  ...(title !== undefined ? { title: systemText(title) } : {}),
+  ...(subtitle !== undefined ? { subtitle: systemText(subtitle) } : {}),
+  ...(body !== undefined ? { body: systemText(body) } : {}),
+});
+
 let nextId = 1;
 
 export const scheduleNotificationAsync = async ({
@@ -98,8 +112,10 @@ export const scheduleNotificationAsync = async ({
 }: RequestInput) =>
   bridge().notifications.schedule({
     identifier: identifier ?? `learnx-${Date.now()}-${nextId++}`,
-    // Only what can cross to the main process.
-    content: JSON.parse(JSON.stringify(content)) as RequestInput['content'],
+    // Only what can cross to the main process, its text as the system shows it.
+    content: systemContent(
+      JSON.parse(JSON.stringify(content)) as RequestInput['content'],
+    ),
     trigger: toBridgeTrigger(trigger),
   });
 

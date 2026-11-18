@@ -1,7 +1,9 @@
 // Spacing between Chinese and Latin letters or digits. iOS and macOS draw a
 // narrow gap there themselves wherever they lay out text (the app,
 // notifications, widgets); Android draws none. So Chinese strings never type
-// a space there, and `spaceCjk` in helpers/i18n adds this gap on Android.
+// a space there, and `spaceCjk` in helpers/i18n adds this gap on Android, as
+// `web/systemText` does to what the Electron app has Windows and Linux show
+// outside its page (Chromium draws it in the page).
 
 /** About the gap iOS draws: a quarter em. */
 export const CJK_GAP = ' ';

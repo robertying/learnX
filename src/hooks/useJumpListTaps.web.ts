@@ -2,6 +2,7 @@ import { useEffect, useEffectEvent } from 'react';
 import { t } from 'helpers/i18n';
 import useOpenTarget from 'hooks/useOpenTarget';
 import { bridge, type LaunchTarget } from 'web/bridge';
+import { systemTexts } from 'web/systemText';
 
 type Listener = (target: LaunchTarget) => void;
 const listeners = new Set<Listener>();
@@ -27,14 +28,16 @@ const useJumpListTaps = () => {
   const open = useEffectEvent(useOpenTarget());
 
   useEffect(() => {
-    void bridge().system.setLabels({
-      open: t('trayOpen'),
-      checkForNewItems: t('trayCheckForNewItems'),
-      quit: t('trayQuit'),
-      today: t('today'),
-      schedule: t('schedule'),
-      exportFolder: t('downloadsExportFolderElectron'),
-    });
+    void bridge().system.setLabels(
+      systemTexts({
+        open: t('trayOpen'),
+        checkForNewItems: t('trayCheckForNewItems'),
+        quit: t('trayQuit'),
+        today: t('today'),
+        schedule: t('schedule'),
+        exportFolder: t('downloadsExportFolderElectron'),
+      }),
+    );
     listen();
     const listener: Listener = target => open({ type: target });
     listeners.add(listener);

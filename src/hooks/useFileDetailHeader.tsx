@@ -1,4 +1,4 @@
-import { useContext, useLayoutEffect } from 'react';
+import { useContext, useEffect, useLayoutEffect, useRef } from 'react';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
 import { SplitViewContext } from 'navigation/SplitView';
@@ -53,6 +53,24 @@ const useFileDetailHeader = ({
       headerBackVisible: showDetail ? showMaster : undefined,
     });
   }, [navigation, showDetail, showMaster]);
+
+  // Full screen is this screen's own: once it's gone (back, Escape, or its
+  // stack reset), the list comes back, or the detail pane would be left
+  // with no way back to it. (The Electron app's JS header shows its back
+  // button even when `headerBackVisible` is false.)
+  const exitFullScreen = useRef<(() => void) | null>(null);
+  useLayoutEffect(() => {
+    exitFullScreen.current =
+      showDetail && !showMaster ? () => toggleMaster(true) : null;
+  }, [showDetail, showMaster, toggleMaster]);
+  useEffect(() => {
+    const exit = () => exitFullScreen.current?.();
+    const unsubscribe = navigation.addListener('blur', exit);
+    return () => {
+      unsubscribe();
+      exit();
+    };
+  }, [navigation]);
 
   const unavailable = error || !path;
   useHeaderButtons(navigation, 'right', [

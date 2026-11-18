@@ -117,6 +117,35 @@ export const SplitTab: React.FC<React.PropsWithChildren<{ name: string }>> = ({
   );
 };
 
+/**
+ * A tab's detail stack: its screens toggle that tab's own full screen, even
+ * while another tab is selected (e.g. a File detail closed as its tab's
+ * stack is reset), and read that tab's.
+ */
+const TabFullScreen: React.FC<
+  React.PropsWithChildren<{
+    tab: string;
+    fullScreen: boolean;
+    toggleTabMaster: (tab: string, show: boolean) => void;
+  }>
+> = ({ tab, fullScreen, toggleTabMaster, children }) => {
+  const context = useContext(SplitViewContext);
+  const value = useMemo(
+    () => ({
+      ...context,
+      showMaster: !fullScreen,
+      toggleMaster: (show: boolean) => toggleTabMaster(tab, show),
+    }),
+    [context, fullScreen, tab, toggleTabMaster],
+  );
+
+  return (
+    <SplitViewContext.Provider value={value}>
+      {children}
+    </SplitViewContext.Provider>
+  );
+};
+
 export interface SplitViewProps {
   showDetail: boolean;
   /** The tab shown first, whose detail stack is there from the start. */
@@ -147,21 +176,25 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
   );
   const showMaster = !fullScreenTabs.has(selectedTab);
   const masterHidden = showDetail && !showMaster;
-  const toggleMaster = useCallback(
-    (show: boolean) =>
+  const toggleTabMaster = useCallback(
+    (tab: string, show: boolean) =>
       setFullScreenTabs(tabs => {
-        if (tabs.has(selectedTab) === !show) {
+        if (tabs.has(tab) === !show) {
           return tabs;
         }
         const next = new Set(tabs);
         if (show) {
-          next.delete(selectedTab);
+          next.delete(tab);
         } else {
-          next.add(selectedTab);
+          next.add(tab);
         }
         return next;
       }),
-    [selectedTab],
+    [],
+  );
+  const toggleMaster = useCallback(
+    (show: boolean) => toggleTabMaster(selectedTab, show),
+    [selectedTab, toggleTabMaster],
   );
 
   // Each tab's detail stack mounts once the tab is first selected.
@@ -231,7 +264,13 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
         >
           {loadedTabs.map(tab => (
             <TabLayer key={tab} selected={tab === selectedTab}>
-              {renderDetail(tabs.detailRef(tab))}
+              <TabFullScreen
+                tab={tab}
+                fullScreen={fullScreenTabs.has(tab)}
+                toggleTabMaster={toggleTabMaster}
+              >
+                {renderDetail(tabs.detailRef(tab))}
+              </TabFullScreen>
             </TabLayer>
           ))}
         </View>
