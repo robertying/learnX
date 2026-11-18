@@ -168,9 +168,9 @@ The pull request checks `JS / Checks` and `JS / Release bundles` (`.github/workf
 pnpm typecheck                   # TypeScript (tsc)
 pnpm lint --deny-warnings        # Oxlint, type-aware; config in .oxlintrc.json and lint/plugin.mjs
 pnpm format --check              # Oxfmt; run `pnpm format` to fix
-node scripts/check-ota-runtime.mjs   # The over-the-air runtime version changes when native code does (AGENTS.md)
+pnpm ota:check                   # The over-the-air runtime version changes when native code does (AGENTS.md)
 pnpm test --coverage             # Jest: the iOS, Android, web (Electron) and tooling projects; fails below the coverage thresholds in jest.config.js
-git ls-files -z '*.sh' | xargs -0 shellcheck   # ShellCheck, for every shell script
+pnpm lint:shell                  # ShellCheck, for every shell script in git
 scripts/check-release-bundle.sh  # The Android and iOS release JS bundles, with no .env value but the mock login and no other platform's code in them
 ```
 

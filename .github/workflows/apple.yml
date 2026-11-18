@@ -43,20 +43,20 @@ jobs:
       CACHE_CAS: ${{ matrix.name == 'iOS' }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up JS
         uses: ./.github/actions/setup-js
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1.338.0
+        uses: ruby/setup-ruby@4e97ecde5048e1e0816923020652678063ffbf65 # v1.339.0
         with:
           # Version comes from .ruby-version.
           bundler-cache: true
 
       - name: Restore Pods
         id: pods
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ios/Pods
@@ -75,7 +75,7 @@ jobs:
       # Both matrix jobs make the same Pods; whichever finishes second skips the save.
       - name: Save Pods
         if: env.SAVE_CACHE == 'true' && steps.pods.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ios/Pods
@@ -85,7 +85,7 @@ jobs:
       # The Swift packages (Firebase) Xcode checks out into the build folder.
       - name: Restore Swift packages
         id: spm
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: build/DerivedData/SourcePackages
           key: spm-${{ runner.os }}-${{ hashFiles('ios/learnX.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
@@ -95,7 +95,7 @@ jobs:
       # here: Xcode 26 never calls the CC wrapper React Native sets up.
       - name: Restore compilation cache
         if: env.CACHE_CAS == 'true'
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: build/DerivedData/CompilationCache.noindex
           key: xcode-cas-${{ matrix.name }}-${{ github.sha }}
@@ -145,21 +145,21 @@ jobs:
       # Both matrix jobs check out the same packages; whichever finishes second skips the save.
       - name: Save Swift packages
         if: env.SAVE_CACHE == 'true' && steps.spm.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: build/DerivedData/SourcePackages
           key: ${{ steps.spm.outputs.cache-primary-key }}
 
       - name: Save compilation cache
         if: always() && env.CACHE_CAS == 'true' && env.SAVE_CACHE == 'true'
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: build/DerivedData/CompilationCache.noindex
           key: xcode-cas-${{ matrix.name }}-${{ github.sha }}
 
       - name: Upload logs
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: xcodebuild-${{ matrix.name }}
           path: |

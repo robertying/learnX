@@ -42,7 +42,7 @@ jobs:
       changed: ${{ steps.changes.outputs.changed }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 2
 
@@ -66,7 +66,7 @@ jobs:
       - name: Restore Metro cache
         id: metro-cache
         if: steps.changes.outputs.changed == 'true'
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ runner.temp }}/metro-cache
           key: metro-web-${{ hashFiles('pnpm-lock.yaml', 'patches/**', 'babel.config.js', 'babel/**', 'metro.config.js') }}${{ github.sha }}
@@ -88,14 +88,14 @@ jobs:
 
       - name: Save Metro cache
         if: env.SAVE_CACHE == 'true' && steps.export.outcome == 'success'
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ runner.temp }}/metro-cache
           key: ${{ steps.metro-cache.outputs.cache-primary-key }}
 
       - name: Upload web build
         if: ${{ !cancelled() && steps.export.outcome == 'success' }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: electron-web
           path: build/electron/web
@@ -132,7 +132,7 @@ jobs:
     steps:
       - name: Checkout repository
         if: env.CHANGED == 'true'
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up JS
         if: env.CHANGED == 'true'
@@ -140,7 +140,7 @@ jobs:
 
       - name: Download web build
         if: env.CHANGED == 'true'
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: electron-web
           path: build/electron/web
@@ -154,7 +154,7 @@ jobs:
       - name: Restore Electron download cache
         id: electron-cache
         if: env.CHANGED == 'true'
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: build/electron/cache
           key: electron-e2e-${{ runner.os }}-${{ hashFiles('electron/package.json', 'electron/packageConfig.cjs') }}
@@ -193,7 +193,7 @@ jobs:
       # Traces and screenshots of failed tests, and the HTML report.
       - name: Upload results
         if: ${{ !cancelled() && env.CHANGED == 'true' }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: electron-e2e-${{ matrix.run }}
           path: build/electron/e2e
@@ -202,7 +202,7 @@ jobs:
 
       - name: Save Electron download cache
         if: env.SAVE_CACHE == 'true' && steps.e2e.outcome == 'success' && steps.electron-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: build/electron/cache
           key: ${{ steps.electron-cache.outputs.cache-primary-key }}
@@ -222,14 +222,14 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up JS
         uses: ./.github/actions/setup-js
 
       - name: Restore Electron download cache
         id: electron-cache
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: build/electron/cache
           key: electron-package-${{ runner.os }}-${{ hashFiles('electron/package.json', 'electron/packageConfig.cjs') }}
@@ -256,7 +256,7 @@ jobs:
           DUMMY_PASSWORD: ${{ secrets.DUMMY_PASSWORD }}
 
       - name: Upload installers
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: electron-${{ matrix.platform }}-check
           path: |
@@ -290,7 +290,7 @@ jobs:
 
       - name: Save Electron download cache
         if: env.SAVE_CACHE == 'true' && steps.package.outcome == 'success' && steps.electron-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: build/electron/cache
           key: ${{ steps.electron-cache.outputs.cache-primary-key }}
