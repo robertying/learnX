@@ -34,8 +34,9 @@ final class TabsUITests: LearnXUITestCase {
     try waitFor(card: "notice-card", "MOCK_NOTICE")
   }
 
-  /// The sidebar opens as it was left (`sidebarHidden` in `data/appState.ts`): UIKit only keeps it with the window's
-  /// saved state, which quitting discards unless "Close windows when quitting an application" is off.
+  /// The sidebar opens as it was left (`sidebarAutosaveName` in patches/react-native-screens@4.30.1.patch): UIKit only
+  /// keeps it with the window's saved state, which quitting discards unless "Close windows when quitting an
+  /// application" is off.
   func testSidebarStaysAsItWasLeft() throws {
     let tab = try waitFor(id: "tab-notices")
     // View › Hide Sidebar.
@@ -52,6 +53,43 @@ final class TabsUITests: LearnXUITestCase {
     try launch()
     try logIn()
     XCTAssertTrue(try waitFor(id: "tab-notices").isHittable, "the sidebar stayed hidden after showing it")
+  }
+
+  /// The window opens at the size it was left at (`WindowFrameAutosave` in modules/windows), also when the window's
+  /// saved state is thrown away, as quitting does by default (`ApplePersistenceIgnoreState` stands in for that).
+  /// XCUITest can't resize a Catalyst window by dragging it, so a launch argument stands in for a saved size, and the
+  /// next launch without it checks that the window saved the size it opened at.
+  func testWindowKeepsItsSize() throws {
+    try waitFor(id: "tab-notices")
+    let original = app.windows.firstMatch.frame
+
+    try launch(["ApplePersistenceIgnoreState": "YES", WindowFrame.key: WindowFrame.string(WindowFrame.smaller)])
+    try waitFor(id: "today", timeout: 60)
+    let restored = app.windows.firstMatch.frame
+    XCTAssertEqual(restored.width, WindowFrame.smaller.width, accuracy: 2, "the window didn't open at the saved width")
+    XCTAssertEqual(
+      restored.height, WindowFrame.smaller.height, accuracy: 2, "the window didn't open at the saved height")
+
+    try launch(["ApplePersistenceIgnoreState": "YES"])
+    try waitFor(id: "today", timeout: 60)
+    let reopened = app.windows.firstMatch.frame
+    XCTAssertEqual(reopened.width, restored.width, accuracy: 2, "the window didn't keep its width")
+    XCTAssertEqual(reopened.height, restored.height, accuracy: 2, "the window didn't keep its height")
+
+    // Back to the frame the window had before, for the next runs.
+    try launch(["ApplePersistenceIgnoreState": "YES", WindowFrame.key: WindowFrame.string(original)])
+    try waitFor(id: "today", timeout: 60)
+  }
+
+  private enum WindowFrame {
+    /// `WindowFrameAutosave.key`. Launch arguments override user defaults for that launch only.
+    static let key = "Window Frame Main"
+    static let smaller = CGRect(x: 200, y: 150, width: 860, height: 640)
+
+    /// `NSStringFromCGRect`'s format, quoted so the argument reads as a string rather than a property list.
+    static func string(_ frame: CGRect) -> String {
+      "\"{{\(frame.minX), \(frame.minY)}, {\(frame.width), \(frame.height)}}\""
+    }
   }
 
   /// patches/react-native-screens@4.30.1.patch: in a split view each column keeps its bar, as on iPad, instead of
