@@ -4,6 +4,7 @@ import { resetNotified } from 'data/notified';
 import type { Bridge, BridgeUpdate } from 'web/bridge';
 import { pendingUpdate } from 'services/electronUpdates';
 import {
+  checkForUpdate,
   checksForUpdates,
   watchUpdates,
 } from 'services/updateNotifications.web';
@@ -93,4 +94,12 @@ it('says an update found before logging in once someone logs in', async () => {
       title: t('foundNewVersion', { version: '19.4.0' }),
     }),
   ]);
+});
+
+it('says nothing when the main process has nothing pending', async () => {
+  jest.mocked(bridge.updates.onReady).mock.calls[0]?.[0]({ version: '19.4.0' });
+  await new Promise(resolve => setTimeout(resolve));
+  expect(posted()).toEqual([]);
+  // The main process checks on its own timer.
+  await expect(checkForUpdate()).resolves.toBeUndefined();
 });

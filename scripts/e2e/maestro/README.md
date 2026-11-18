@@ -7,8 +7,15 @@ setups:
 - the iPhone Duo simulator open, where the app is on the inner display;
 - iPadOS windowed apps, where the app is in a window smaller than the screen.
 
-`maestro-display.patch` fixes the driver (upstream issue
-mobile-dev-inc/Maestro#3623). `maestro-fold-posture.patch` adds the
+`maestro-display.patch` fixes the positions (upstream issue
+mobile-dev-inc/Maestro#3623), but no event XCUITest makes reaches the inner
+display. Xcode 27's simulators take touches and keys from `dtuhidd`, a daemon
+inside the simulator, which names the display each touch is for.
+`maestro-sim-touch.patch` sends taps, long presses, swipes, typing and erasing
+through `scripts/e2e/sim-touch.swift`, which talks to it, whenever a display
+other than the main one is lit. `scripts/e2e/e2e.sh` builds the helper and
+names it in `MAESTRO_IOS_SIM_TOUCH`; without it, or on the main display,
+Maestro sends its own events. The helper only types ASCII. `maestro-fold-posture.patch` adds the
 `setFoldPosture` command from upstream PR mobile-dev-inc/Maestro#3621, so a
 flow can set the iPhone Duo's hinge:
 
