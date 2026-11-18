@@ -1,4 +1,4 @@
-// scripts/changed-files.sh decides whether the required Android and Electron
+// scripts/ci/changed-files.sh decides whether the required Android and Electron
 // jobs build a pull request. A path it misses lets a break merge with the
 // required checks green, so each kind of path is listed here.
 import { execFileSync } from 'node:child_process';
@@ -6,7 +6,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 
-const script = join(__dirname, '../changed-files.sh');
+const script = join(__dirname, '../ci/changed-files.sh');
 
 let repo: string;
 
@@ -60,10 +60,11 @@ test.each([
   'pnpm-workspace.yaml',
   'app.json',
   '.node-version',
-  'scripts/changed-files.sh',
-  'scripts/test-android.sh',
-  'scripts/android-coverage.mjs',
-  'scripts/ota-e2e-cert.sh',
+  'scripts/ci/changed-files.sh',
+  'scripts/checks/test-android.sh',
+  'scripts/checks/android-coverage.mjs',
+  'scripts/checks/coverage-table.mjs',
+  'scripts/e2e/ota-e2e-cert.sh',
   '.github/workflows/android.yml',
   '.github/actions/setup-js/action.yml',
 ])('%s builds Android', path => {
@@ -75,7 +76,7 @@ test.each([
   'ios/learnX/AppDelegate.swift',
   'modules/share/ios/Share.swift',
   'modules/share/src/index.ts',
-  'scripts/test-ios.sh',
+  'scripts/checks/test-ios.sh',
   '.github/workflows/apple.yml',
   '.github/workflows/js.yml',
   '.github/workflows/electron.yml',
@@ -92,13 +93,13 @@ test('one Android path among others builds Android', () => {
 
 test.each([
   'src/screens/Today.tsx',
-  'electron/main.cjs',
+  'electron/main.ts',
   'modules/share/src/index.ts',
   'patches/react-native@0.88.1.patch',
   'package.json',
   'pnpm-lock.yaml',
-  'scripts/changed-files.sh',
-  'scripts/write-e2e-env.sh',
+  'scripts/ci/changed-files.sh',
+  'scripts/ci/write-e2e-env.sh',
   '.github/workflows/electron.yml',
   '.github/actions/setup-js/action.yml',
 ])('%s builds Electron', path => {

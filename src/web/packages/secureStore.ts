@@ -2,7 +2,7 @@ import { bridge } from 'web/bridge';
 
 /**
  * Stands in for expo-secure-store in the Electron app: values are encrypted
- * with Electron's safeStorage in the main process (electron/secrets.cjs).
+ * with Electron's safeStorage in the main process (electron/secrets.ts).
  * The keychain options have no meaning there and are ignored.
  */
 export type SecureStoreOptions = Record<string, unknown>;

@@ -1,6 +1,6 @@
 import { ActionSheetIOS, Alert } from 'react-native';
 import { t } from 'helpers/i18n';
-import { isApple } from 'helpers/platform';
+import { isAndroid, isApple } from 'helpers/platform';
 
 export interface Choice {
   label: string;
@@ -23,8 +23,8 @@ export interface ChoiceSheet {
 
 /**
  * Asks which of a few things to do, as each platform does: an action sheet
- * on iOS, iPadOS and Mac, with Cancel last; a dialog on Android, the first
- * choice as its main button. Android's dialog holds at most two choices.
+ * on iOS, iPadOS and Mac, with Cancel last; a dialog on Android and in the
+ * Electron app, the first choice as its main button. Android's dialog holds at most two choices.
  * On iPad and Mac the sheet is a popover in the middle of the window, so a
  * form row that asks uses `FormChoiceButton`, whose sheet points at the row.
  */
@@ -50,16 +50,19 @@ export const showChoices = ({
     );
     return;
   }
+  const buttons = choices.map(choice => ({
+    text: choice.label,
+    onPress: choice.onPress,
+  }));
   // Android lays the buttons out start to end as neutral, negative and
-  // positive: Cancel first, the first choice last as the main one.
+  // positive: Cancel first, the first choice last as the main one. Windows
+  // (the Electron app's dialog) puts the main one first and Cancel last.
   Alert.alert(
     title,
     message,
     [
       { text: t('cancel'), style: 'cancel', onPress: onCancel },
-      ...choices
-        .map(choice => ({ text: choice.label, onPress: choice.onPress }))
-        .reverse(),
+      ...(isAndroid() ? buttons.reverse() : buttons),
     ],
     { cancelable: true, onDismiss: onCancel },
   );

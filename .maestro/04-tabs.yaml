@@ -1,6 +1,6 @@
 appId: ${APP_ID}
 name: Log in and visit every tab
-# Live runs (scripts/e2e.sh --live) only check the screens: the content is
+# Live runs (scripts/e2e/e2e.sh --live) only check the screens: the content is
 # the real account's.
 tags:
   - live

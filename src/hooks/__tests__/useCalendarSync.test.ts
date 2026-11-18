@@ -11,10 +11,12 @@ import {
   syncCourseSchedule,
 } from 'services/calendar/actions';
 import { refreshSurfaces } from 'services/surfaces';
+import { defaultCalendarRange } from 'helpers/calendar/range';
 import {
   confirmDeleteCalendars,
   useAssignmentSync,
   useCalendarExport,
+  useCalendarExportRange,
   useCourseScheduleSync,
 } from 'hooks/useCalendarSync';
 
@@ -150,6 +152,33 @@ it('exports the calendars, showing the result', async () => {
   await act(() => result.current.exportToICS());
   expect(toast).toHaveBeenCalledWith('Saved', 'success');
   expect(result.current.exporting).toBe(false);
+});
+
+it('exports the dates picked, offered from today and the next four weeks', async () => {
+  const { result } = await renderHook(() => useCalendarExportRange());
+  expect(result.current.picker.open).toBe(false);
+  await act(async () => result.current.picker.openPicker());
+  const { start, end } = defaultCalendarRange();
+  expect(result.current.picker).toMatchObject({
+    open: true,
+    startDate: start.toDate(),
+    endDate: end.toDate(),
+  });
+  await act(async () => result.current.picker.closePicker());
+  expect(result.current.picker.open).toBe(false);
+  expect(exportCalendars).not.toHaveBeenCalled();
+
+  await act(async () => result.current.picker.openPicker());
+  const picked = {
+    startDate: new Date('2026-11-20T00:00:00'),
+    endDate: new Date('2026-11-30T00:00:00'),
+  };
+  await act(async () => result.current.picker.onRangeConfirm(picked));
+  expect(result.current.picker.open).toBe(false);
+  expect(exportCalendars).toHaveBeenCalledWith({
+    start: dayjs(picked.startDate),
+    end: dayjs(picked.endDate),
+  });
 });
 
 it('deletes the calendars only once confirmed', async () => {

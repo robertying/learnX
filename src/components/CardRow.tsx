@@ -19,7 +19,7 @@ import { t } from 'helpers/i18n';
 import { matchRanges } from 'helpers/search';
 import { truncate } from 'helpers/text';
 import { StatusTone, statusContainerOpacity, useTheme } from 'theme';
-import { isAndroid } from 'helpers/platform';
+import { isAndroid, isApple } from 'helpers/platform';
 
 const android = isAndroid();
 
@@ -279,8 +279,9 @@ export const CardPill: React.FC<{
     tone === 'primary'
       ? [colors.primaryContainer, colors.onPrimaryContainer]
       : [colors.statusContainer[tone], colors.onStatusContainer[tone]];
-  // iOS tints with the brand color itself, as with the status hues.
-  const tint = tone === 'primary' && !android ? colors.primary : container;
+  // iOS and Mac tint with the brand color itself, as with the status hues;
+  // Material and Fluent draw the container color as it is.
+  const tint = tone === 'primary' && isApple() ? colors.primary : container;
   return (
     <View testID={testID} style={styles.pill}>
       <View

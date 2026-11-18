@@ -3,7 +3,7 @@ import { bridge, type FileOps } from 'web/bridge';
 /**
  * Stands in for expo-file-system in the Electron app: files live in learnX's
  * own folders under its data folder (`Paths.cache`, `Paths.document`), read
- * and written by the main process (electron/files.cjs), synchronously as
+ * and written by the main process (electron/files.ts), synchronously as
  * expo-file-system's are. Downloads run there with the session's cookies.
  * Picking a folder (an export's destination) asks in the system's folder
  * dialog, and the page may then write in the folder picked. Opening a file

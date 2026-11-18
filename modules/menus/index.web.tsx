@@ -21,7 +21,7 @@ export type {
 
 // The Electron app's menus and commands (Windows): the commands the iOS menu
 // bar sends come from their Windows shortcuts, and a card's context menu is
-// a native menu (electron/menus.cjs), opened by right-click or the menu key.
+// a native menu (electron/menus.ts), opened by right-click or the menu key.
 
 export type MenuItem = BridgeMenuItem;
 
@@ -42,7 +42,7 @@ export const menuPosition = (anchor?: unknown) => {
 };
 
 /**
- * Shows a native menu of `items` (electron/menus.cjs), under `anchor` or at
+ * Shows a native menu of `items` (electron/menus.ts), under `anchor` or at
  * the pointer, and calls `onChoose` with the chosen item's id.
  */
 export const showMenu = async (

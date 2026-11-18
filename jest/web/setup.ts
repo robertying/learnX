@@ -39,7 +39,7 @@ class ResizeObserver {
 }
 Object.assign(globalThis, { ResizeObserver });
 
-// What polyfills.web.js gives React Native Web in the app: Apple's color
+// What src/polyfills.web.js gives React Native Web in the app: Apple's color
 // functions as CSS variables, and alerts as Fluent dialogs.
 const ReactNativeWeb = require('react-native-web');
 const {

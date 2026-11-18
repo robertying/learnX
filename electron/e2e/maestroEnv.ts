@@ -1,21 +1,21 @@
 // The texts the Maestro flows match, from the same source
-// (scripts/e2e-env.mjs): `T_<key>` translations and `MOCK_*` mock items, each
+// (scripts/e2e/e2e-env.mjs): `T_<key>` translations and `MOCK_*` mock items, each
 // an English|Chinese alternation, so a flow ports with the same values.
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 
-const root = path.join(__dirname, '..', '..');
+const root = path.join(import.meta.dirname, '..', '..');
 
 let cached: Record<string, string> | undefined;
 
-/** Every `KEY=value` scripts/e2e-env.mjs prints. */
+/** Every `KEY=value` scripts/e2e/e2e-env.mjs prints. */
 export const maestroEnv = (): Record<string, string> => {
   cached ??= Object.fromEntries(
     execFileSync(
       process.execPath,
       [
         '--disable-warning=MODULE_TYPELESS_PACKAGE_JSON',
-        path.join(root, 'scripts', 'e2e-env.mjs'),
+        path.join(root, 'scripts', 'e2e', 'e2e-env.mjs'),
       ],
       {
         encoding: 'utf8',
@@ -35,7 +35,7 @@ export const maestroEnv = (): Record<string, string> => {
 const value = (key: string) => {
   const found = maestroEnv()[key];
   if (found === undefined) {
-    throw new Error(`scripts/e2e-env.mjs prints no ${key}`);
+    throw new Error(`scripts/e2e/e2e-env.mjs prints no ${key}`);
   }
   // A translation's `{param}` placeholders (escaped for a regex, as every
   // value is) match whatever fills them in.
@@ -45,7 +45,7 @@ const value = (key: string) => {
 /**
  * A value as the regular expression a flow uses: `'.*(${MOCK_NOTICE}).*'`
  * is `text('MOCK_NOTICE')` with `getByText`. Any `T_<key>` a test names this
- * way is printed (scripts/e2e-env.mjs reads the tests for them).
+ * way is printed (scripts/e2e/e2e-env.mjs reads the tests for them).
  */
 export const text = (key: string) => new RegExp(value(key));
 

@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events';
-import { TIMEOUT_MS, allowedHost, allowedUrl, mainFetch } from '../net.cjs';
+import { TIMEOUT_MS, allowedHost, allowedUrl, mainFetch } from '../net.ts';
 
 describe('allowedUrl', () => {
   it.each([

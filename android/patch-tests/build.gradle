@@ -1,5 +1,5 @@
 // Tests of what the patches in patches/ change in libraries' Android code
-// (src/test: JUnit, Robolectric, MockK; scripts/test-android.sh runs them).
+// (src/test: JUnit, Robolectric, MockK; scripts/checks/test-android.sh runs them).
 // Nothing links this project: it only has tests, against the patched
 // libraries' Gradle projects.
 buildscript {

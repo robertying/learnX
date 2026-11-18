@@ -168,8 +168,6 @@ const zh: typeof en = {
   openRunnableMessage: '此文件可在电脑上运行程序，请仅在信任它时打开。',
   showInFolder: '在文件夹中显示',
   saveAs: '另存为',
-  copyLink: '复制链接',
-  linkCopied: '已复制链接',
   fileOpensInDefaultApp: 'learnX无法显示此类文件，可用默认应用打开或另存一份。',
   startAtLogin: '登录时启动',
   unsandboxedNote:
@@ -182,7 +180,9 @@ const zh: typeof en = {
   electronNotificationsCaption: 'learnX仅在运行时发送通知和提醒。',
   exportCalendar: '导出日历（.ics）',
   exportCalendarDescription:
-    '将本学期剩余的课程和未截止的作业保存为日历文件（.ics），可导入Outlook等日历应用。',
+    '将所选日期内的课程和未截止的作业保存为日历文件（.ics），可导入Outlook等日历应用。',
+  exportRangeTitle: '选择导出日期',
+  exportRangeSave: '导出',
   dropToAttach: '拖放文件以添加附件',
   dropFailed: '附件添加失败',
   calendarExportNoEventElectron:

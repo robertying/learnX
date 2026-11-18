@@ -6,7 +6,7 @@ import {
   createFileStore,
   fileName,
   loggedWrites,
-} from '../fileStore.cjs';
+} from '../fileStore.ts';
 
 let root: string;
 

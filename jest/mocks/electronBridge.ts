@@ -55,7 +55,6 @@ export const installBridge = (overrides: Partial<Bridge> = {}): Bridge => {
       saveText: jest.fn(async () => null),
       pickDirectory: jest.fn(async () => null),
       pickFiles: jest.fn(async () => null),
-      copyText: jest.fn(async () => {}),
     },
     notifications: {
       supported: jest.fn(async () => true),

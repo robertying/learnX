@@ -2,13 +2,13 @@
 // from the repo-root .env, at build time. Only listed keys reach the bundle:
 // - PUBLIC_KEYS: shipped as plain strings (the mock login). The fastlane
 //   build lanes fail if a release bundle contains any other .env value.
-// - TEST_LOGIN=1 in the build's environment (set by scripts/e2e-build.sh for
+// - TEST_LOGIN=1 in the build's environment (set by scripts/e2e/e2e-build.sh for
 //   every E2E build) adds `TEST_LOGIN: true`, no .env value: that build takes a
 //   test login from launch arguments (services/launchOptions.ts) and says why a
 //   login failed, so E2E runs need no secret in any bundle. The fastlane build
 //   lanes refuse to run with it set.
 // Every other key in .env is left out, including the live test login
-// (`LIVE_*`), which scripts/e2e.sh passes as launch arguments instead.
+// (`LIVE_*`), which scripts/e2e/e2e.sh passes as launch arguments instead.
 const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');

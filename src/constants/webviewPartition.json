@@ -1,4 +1,4 @@
 {
-  "$comment": "The session the Electron app's web views share with its requests (electron/webviews.cjs), which the page's web view stand-in names (src/web/packages/WebView.tsx).",
+  "$comment": "The session the Electron app's web views share with its requests (electron/webviews.ts), which the page's web view stand-in names (src/web/packages/WebView.tsx).",
   "partition": "persist:learnx"
 }

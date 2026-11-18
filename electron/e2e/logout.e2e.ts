@@ -3,9 +3,9 @@
 // which the next launch shows too.
 import fs from 'node:fs';
 import path from 'node:path';
-import { expect, test } from './fixtures';
-import { exact } from './maestroEnv';
-import { backToSettings, byId, openSettings, shown } from './steps';
+import { expect, test } from './fixtures.ts';
+import { exact } from './maestroEnv.ts';
+import { backToSettings, byId, openSettings, shown } from './steps.ts';
 
 test('opens settings pages and logs out', async ({
   window,

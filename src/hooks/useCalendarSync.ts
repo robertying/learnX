@@ -14,6 +14,7 @@ import {
 import { refreshSurfaces } from 'services/surfaces';
 import { t } from 'helpers/i18n';
 import { isApple } from 'helpers/platform';
+import { defaultCalendarRange } from 'helpers/calendar/range';
 
 const show = (message?: ToastMessage) => {
   if (message) {
@@ -52,11 +53,11 @@ export const useCourseScheduleSync = () => {
     setEnabling(false);
   };
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [startDate, setStartDate] = useState<Date | undefined>(
-    dayjs().toDate(),
+  const [startDate, setStartDate] = useState<Date | undefined>(() =>
+    defaultCalendarRange().start.toDate(),
   );
-  const [endDate, setEndDate] = useState<Date | undefined>(
-    dayjs().add(28, 'day').toDate(),
+  const [endDate, setEndDate] = useState<Date | undefined>(() =>
+    defaultCalendarRange().end.toDate(),
   );
 
   const sync = async (start?: Date, end?: Date) => {
@@ -140,13 +141,46 @@ export const useAssignmentSync = () => {
 export const useCalendarExport = () => {
   const [exporting, setExporting] = useState(false);
 
-  const exportToICS = async () => {
+  const exportToICS = async (range?: { startDate: Date; endDate: Date }) => {
     setExporting(true);
-    show(await exportCalendars());
+    show(
+      await exportCalendars(
+        range && { start: dayjs(range.startDate), end: dayjs(range.endDate) },
+      ),
+    );
     setExporting(false);
   };
 
   return { exporting, exportToICS };
+};
+
+/**
+ * The Electron app's export: the dates to export are picked first, starting
+ * from today and the next four weeks, as class sync on the phones.
+ */
+export const useCalendarExportRange = () => {
+  const { exporting, exportToICS } = useCalendarExport();
+  const [range, setRange] = useState<{ startDate: Date; endDate: Date }>();
+
+  const openPicker = () => {
+    const { start, end } = defaultCalendarRange();
+    setRange({ startDate: start.toDate(), endDate: end.toDate() });
+  };
+
+  return {
+    exporting,
+    picker: {
+      open: !!range,
+      startDate: range?.startDate,
+      endDate: range?.endDate,
+      openPicker,
+      closePicker: () => setRange(undefined),
+      onRangeConfirm: (picked: { startDate: Date; endDate: Date }) => {
+        setRange(undefined);
+        void exportToICS(picked);
+      },
+    },
+  };
 };
 
 /** Asks first, then deletes every learnX calendar and reminder list */

@@ -1,4 +1,4 @@
-// Calls the E2E update server (scripts/ota-e2e-server.mjs) at OTA_SERVER and
+// Calls the E2E update server (scripts/e2e/ota-e2e-server.mjs) at OTA_SERVER and
 // keeps its status in output.ota (with `short`, the update id as About shows
 // it). PATH_ is the request: /mode/<mode>, /status or /wait?for=…&after=N.
 const response = http.get(`${OTA_SERVER}${PATH_}`);

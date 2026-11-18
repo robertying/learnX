@@ -1,6 +1,7 @@
 // The Calendar & Reminders settings actions, as plain async functions that
 // resolve to the toast to show. hooks/useCalendarSync adds loading state.
 import type { Dayjs } from 'dayjs';
+import type { ExportRange } from 'services/calendar/electronExport';
 import type { ToastType } from 'components/Toast';
 import { ensureSession } from 'data/source';
 import { fetchCalendarRange } from 'data/schedule';
@@ -15,6 +16,7 @@ import {
 import { saveClassesToCalendar } from 'services/calendar/classes';
 import { setLastSynced } from 'data/calendarSync';
 import { calendarErrorCode } from 'services/calendar/errors';
+import { defaultCalendarRange } from 'helpers/calendar/range';
 import { exportTextFile } from 'services/files/share';
 import { t, TextKey } from 'helpers/i18n';
 import { isAndroid, isElectron } from 'helpers/platform';
@@ -209,14 +211,19 @@ export const allowAssignmentSync = async (
 /**
  * Shares (or on Mac, saves where people pick) the synced calendars as
  * learnX.ics. The Electron app, which has no calendar to sync, saves the
- * classes and assignments themselves.
+ * classes and assignments themselves, in `range` (by default today and the
+ * next four weeks).
  */
-export const exportCalendars = async (): Promise<ToastMessage | undefined> => {
+export const exportCalendars = async (
+  range?: ExportRange,
+): Promise<ToastMessage | undefined> => {
   const build = isElectron()
     ? // Required only here, so the phones' bundles leave it out.
-      (
-        require('services/calendar/electronExport') as typeof import('services/calendar/electronExport')
-      ).buildElectronICS
+      async () => {
+        const electronExport =
+          require('services/calendar/electronExport') as typeof import('services/calendar/electronExport');
+        return electronExport.buildElectronICS(range ?? defaultCalendarRange());
+      }
     : async () => ({
         ics: await exportSyncedCalendarsToICS(),
         withoutClasses: false,

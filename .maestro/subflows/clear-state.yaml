@@ -1,4 +1,4 @@
-# Wipes the app's data and saved login. scripts/e2e.sh --live runs it after
+# Wipes the app's data and saved login. scripts/e2e/e2e.sh --live runs it after
 # the live flows, so the real account isn't left logged in on the device.
 appId: ${APP_ID}
 ---

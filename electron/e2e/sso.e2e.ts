@@ -6,8 +6,8 @@
 // id.tsinghua.edu.cn, which CI's runners abroad can't always reach: tagged
 // @network, and skipped (not failed) when it doesn't answer.
 import type { Page } from '@playwright/test';
-import { expect, test } from './fixtures';
-import { exact } from './maestroEnv';
+import { expect, test } from './fixtures.ts';
+import { exact } from './maestroEnv.ts';
 
 const NOBODY = 'learnx-e2e-nobody';
 const SSO = 'https://id.tsinghua.edu.cn/';

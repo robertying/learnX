@@ -20,6 +20,7 @@ import {
   confirmDeleteCalendars,
   useAssignmentSync,
   useCalendarExport,
+  useCalendarExportRange,
   useCourseScheduleSync,
 } from 'hooks/useCalendarSync';
 import useCalendarAccess, { CalendarAccess } from 'hooks/useCalendarAccess';
@@ -31,10 +32,11 @@ type Props = NativeStackScreenProps<SettingsStackParams, 'CalendarSettings'>;
 /**
  * The Electron app's calendar settings: Windows and Linux have no calendar
  * on the device to sync to, so learnX only exports its classes and
- * assignments as an .ics file, which a calendar app imports.
+ * assignments in the dates picked as an .ics file, which a calendar app
+ * imports.
  */
 const ElectronCalendarSettings: React.FC = () => {
-  const { exporting, exportToICS } = useCalendarExport();
+  const { exporting, picker } = useCalendarExportRange();
   return (
     <FormScreen>
       <Form testID="calendar-settings">
@@ -43,11 +45,23 @@ const ElectronCalendarSettings: React.FC = () => {
             testID="calendar-export"
             icon="export"
             title={t('exportCalendar')}
-            onPress={exportToICS}
+            onPress={picker.openPicker}
             loading={exporting}
           />
         </FormSection>
       </Form>
+      <DateRangePicker
+        visible={picker.open}
+        title={t('exportRangeTitle')}
+        startLabel={t('datePickerStartLabel')}
+        endLabel={t('datePickerEndLabel')}
+        saveLabel={t('exportRangeSave')}
+        cancelLabel={t('cancel')}
+        startDate={picker.startDate}
+        endDate={picker.endDate}
+        onDismiss={picker.closePicker}
+        onConfirm={picker.onRangeConfirm}
+      />
     </FormScreen>
   );
 };

@@ -1,5 +1,4 @@
 import {
-  copyText,
   openInDefaultApp,
   saveFileAs,
   saveTextAs,
@@ -55,11 +54,4 @@ it('saves text under a name the system allows', async () => {
   await expect(saveTextAs('a/b.ics', 'BEGIN')).resolves.toBe(true);
   expect(bridge.shell.saveText).toHaveBeenCalledWith('a_b.ics', 'BEGIN');
   await expect(saveTextAs('c.ics', '')).resolves.toBe(false);
-});
-
-it('copies text', async () => {
-  await copyText('https://learn.tsinghua.edu.cn/f');
-  expect(bridge.shell.copyText).toHaveBeenCalledWith(
-    'https://learn.tsinghua.edu.cn/f',
-  );
 });

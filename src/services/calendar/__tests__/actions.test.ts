@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import { resetCalendarSync, useCalendarSyncStore } from 'data/calendarSync';
 import { ensureSession } from 'data/source';
 import { fetchCalendarRange } from 'data/schedule';
+import { defaultCalendarRange } from 'helpers/calendar/range';
 import { Assignment } from 'data/types/state';
 import {
   allowAssignmentSync,
@@ -306,6 +307,14 @@ describe('exportCalendars', () => {
       'text/calendar',
     );
     expect(exportSyncedCalendarsToICS).not.toHaveBeenCalled();
+    const { buildElectronICS } = jest.requireMock(
+      'services/calendar/electronExport',
+    );
+    // Today and the next four weeks, unless dates were picked.
+    expect(buildElectronICS).toHaveBeenLastCalledWith(defaultCalendarRange());
+    const range = { start: dayjs('2026-11-18'), end: dayjs('2026-11-30') };
+    await exportCalendars(range);
+    expect(buildElectronICS).toHaveBeenLastCalledWith(range);
   });
 
   it('says when the Electron app saved it without the classes', async () => {

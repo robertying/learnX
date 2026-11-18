@@ -2,7 +2,7 @@ import { createElement, type CSSProperties, type Ref } from 'react';
 
 /**
  * Electron's `<webview>` element, which only exists in the Electron app's
- * window (`webviewTag` in electron/main.cjs). Its own module, so tests can
+ * window (`webviewTag` in electron/main.ts). Its own module, so tests can
  * stand in for the element.
  */
 const WebviewTag: React.FC<{

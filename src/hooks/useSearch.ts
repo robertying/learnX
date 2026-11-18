@@ -1,4 +1,4 @@
-import { useDeferredValue } from 'react';
+import { useDeferredValue, useState } from 'react';
 import dayjs from 'dayjs';
 import Fuse, { IFuseOptions } from 'fuse.js';
 import { Assignment, File, Notice } from 'data/types/state';
@@ -123,9 +123,34 @@ const noResults: SearchResults = {
 
 const items = <T>(hits: SearchHit<T>[]) => hits.map(({ item }) => item);
 
+/** The ids of the items needing attention, of each kind, for one query. */
+interface Attention {
+  query: string;
+  notice: Set<string>;
+  assignment: Set<string>;
+  file: Set<string>;
+}
+
+const idsNeedingAttention = <T extends { id: string }>(
+  list: readonly T[],
+  spec: SearchSpec<T>,
+  now: number,
+) =>
+  new Set(list.filter(item => spec.attention(item, now)).map(item => item.id));
+
+/**
+ * `spec` with attention read from `ids`; an item that came in after them
+ * (a refresh during the search) doesn't need it.
+ */
+const withAttention = <T extends { id: string }>(
+  spec: SearchSpec<T>,
+  ids: Set<string>,
+): SearchSpec<T> => ({ ...spec, attention: item => ids.has(item.id) });
+
 /**
  * The notices, assignments and files that match `query`, best first (see
- * `helpers/search`), and the best of them all. The search follows typing at
+ * `helpers/search`; what needs attention as of when the query was made), and
+ * the best of them all. The search follows typing at
  * a lower priority (`useDeferredValue`), so a keystroke shows before the
  * search finishes.
  */
@@ -137,14 +162,46 @@ export default function useSearch(
 ): SearchResults {
   const deferredQuery = useDeferredValue(query);
   const now = useMinute();
+
+  // What needs attention as the query was made: opening a result marks it
+  // read (or seen), and ranking by the live state would move it down the
+  // list behind the one coming back to it. A new query ranks afresh.
+  const attentionNow = (): Attention => ({
+    query: deferredQuery,
+    notice: idsNeedingAttention(notices, noticeSpec, now),
+    assignment: idsNeedingAttention(assignments, assignmentSpec, now),
+    file: idsNeedingAttention(files, fileSpec, now),
+  });
+  const [savedAttention, setSavedAttention] = useState(attentionNow);
+  let attention = savedAttention;
+  if (attention.query !== deferredQuery) {
+    attention = attentionNow();
+    setSavedAttention(attention);
+  }
+
   const words = queryWords(deferredQuery);
   if (!words.length) {
     return noResults;
   }
   const hits = {
-    notice: searchHits(notices, deferredQuery, noticeSpec, now),
-    assignment: searchHits(assignments, deferredQuery, assignmentSpec, now),
-    file: searchHits(files, deferredQuery, fileSpec, now),
+    notice: searchHits(
+      notices,
+      deferredQuery,
+      withAttention(noticeSpec, attention.notice),
+      now,
+    ),
+    assignment: searchHits(
+      assignments,
+      deferredQuery,
+      withAttention(assignmentSpec, attention.assignment),
+      now,
+    ),
+    file: searchHits(
+      files,
+      deferredQuery,
+      withAttention(fileSpec, attention.file),
+      now,
+    ),
   };
   const found = hits.notice.length + hits.assignment.length + hits.file.length;
   if (found) {

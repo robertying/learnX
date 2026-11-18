@@ -3,8 +3,12 @@ import { createPublicKey } from 'node:crypto';
 import path from 'node:path';
 import updateMirror from '../../src/constants/updateMirror.json';
 import electronPackage from '../package.json';
-import { packageConfig, placeholderKeyProblem } from '../packageConfig.cjs';
-import { SHARED_FILES, readShared } from '../shared.cjs';
+import {
+  mainProcessFiles,
+  packageConfig,
+  placeholderKeyProblem,
+} from '../packageConfig.ts';
+import { SHARED_FILES, readShared } from '../shared.ts';
 
 it('updates from the TUNA mirror, as the Android app does', () => {
   expect(packageConfig().publish).toEqual({
@@ -49,7 +53,7 @@ it('ships the update key’s public half, and where updates come from', () => {
   expect(packageConfig().files).toContainEqual({
     from: '../certs',
     to: '.',
-    filter: ['electron-update.pem'],
+    filter: ['electron-public-key.pem'],
   });
   expect(packageConfig().extraMetadata).toMatchObject({
     updateUrl: `${updateMirror.latestRelease}/`,
@@ -87,14 +91,14 @@ it('installs for the current user, and uninstalling removes learnX’s data', ()
     'utf8',
   );
   expect(script).toContain('StrCpy $isForceCurrentInstall "1"');
-  // Start at login's Run entry is named after the app id (main.cjs), and
+  // Start at login's Run entry is named after the app id (main.ts), and
   // electron-updater's cache after the package's name.
   const appId = packageConfig().appId!;
   expect(script).toContain(
     `DeleteRegValue HKCU "Software\\Microsoft\\Windows\\CurrentVersion\\Run" "${appId}"`,
   );
   expect(
-    fs.readFileSync(path.join(__dirname, '..', 'main.cjs'), 'utf8'),
+    fs.readFileSync(path.join(__dirname, '..', 'main.ts'), 'utf8'),
   ).toContain(`const APP_ID = '${appId}';`);
   expect(script).toContain('RMDir /r "$LOCALAPPDATA\\learnX"');
   expect(script).toContain(
@@ -122,15 +126,39 @@ it('packages what the main process shares with the page', () => {
     'Not a shared file',
   );
   // Nothing in the main process reads src/ any other way.
-  const readingSrc = fs
-    .readdirSync(path.join(__dirname, '..'))
-    .filter(name => name.endsWith('.cjs') && name !== 'packageConfig.cjs')
-    .filter(name =>
-      fs
-        .readFileSync(path.join(__dirname, '..', name), 'utf8')
-        .includes("require('../src/"),
-    );
+  const readingSrc = mainProcessFiles().filter(name =>
+    /from '\.\.\/src\//.test(
+      fs.readFileSync(path.join(__dirname, '..', name), 'utf8'),
+    ),
+  );
   expect(readingSrc).toEqual([]);
+});
+
+it('packages the main process: main.ts and what it imports, nothing else', () => {
+  const files = mainProcessFiles();
+  expect(files).toEqual(
+    expect.arrayContaining(['main.ts', 'preloads.ts', 'system.ts', 'net.ts']),
+  );
+  // Dev runs, packaging and tests only.
+  for (const name of [
+    'dev.ts',
+    'clean.ts',
+    'electronApp.ts',
+    'macDevApp.ts',
+    'package.ts',
+    'packageConfig.ts',
+    'updateServer.ts',
+    'webExport.ts',
+  ]) {
+    expect(files).not.toContain(name);
+  }
+  expect(packageConfig().files).toEqual(expect.arrayContaining(files));
+  // The preloads go as JavaScript (preloads.ts).
+  expect(packageConfig().files).toContainEqual({
+    from: '../build/electron/preloads',
+    to: '.',
+    filter: ['preload.cjs', 'webviewPreload.cjs'],
+  });
 });
 
 describe('placeholderKeyProblem', () => {
@@ -163,7 +191,7 @@ describe('placeholderKeyProblem', () => {
 
   it('takes the committed key, a real Ed25519 public key', () => {
     const committed = fs.readFileSync(
-      path.join(__dirname, '../../certs/electron-update.pem'),
+      path.join(__dirname, '../../certs/electron-public-key.pem'),
       'utf8',
     );
     expect(placeholderKeyProblem({}, committed)).toBeNull();

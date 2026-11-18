@@ -32,7 +32,7 @@ env:
 
 jobs:
   build:
-    # The local modules' JVM unit tests (scripts/test-android.sh) and a release
+    # The local modules' JVM unit tests (scripts/checks/test-android.sh) and a release
     # APK (R8 and the bundled JS; -PciRelease signs it with the debug key and
     # turns off Crashlytics uploads, android/app/build.gradle). A required
     # check: on a pull request that changes nothing Android, every step after
@@ -47,7 +47,7 @@ jobs:
       CCACHE_COMPRESS: 'true'
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 2
 
@@ -57,7 +57,7 @@ jobs:
       # says nothing changed.
       - name: Detect changed files
         id: changes
-        run: scripts/changed-files.sh android >> "$GITHUB_OUTPUT"
+        run: scripts/ci/changed-files.sh android >> "$GITHUB_OUTPUT"
 
       - name: Set up JS
         id: install
@@ -66,7 +66,7 @@ jobs:
 
       - name: Set up Java
         if: steps.changes.outputs.changed != 'false'
-        uses: actions/setup-java@v6
+        uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
         with:
           distribution: temurin
           java-version: 17
@@ -92,7 +92,7 @@ jobs:
 
       - name: Unit tests
         if: steps.changes.outputs.changed != 'false'
-        run: scripts/test-android.sh --build-cache
+        run: scripts/checks/test-android.sh --build-cache
 
       # The release bundle inlines .env; the mock login is what E2E logs in
       # with. Any non-empty values work, as they only switch to mock data.
@@ -106,19 +106,19 @@ jobs:
           steps.install.outcome == 'success' && steps.gradle.outcome == 'success' &&
           steps.ccache.outcome == 'success'
         run: |
-          bash scripts/write-e2e-env.sh
+          bash scripts/ci/write-e2e-env.sh
           # The key E2E builds trust for over-the-air updates.
-          scripts/ota-e2e-cert.sh
+          scripts/e2e/ota-e2e-cert.sh
           cd android
           ./gradlew app:assembleGithubRelease -PciRelease -PreactNativeArchitectures=x86_64 --build-cache
         env:
           CMAKE_C_COMPILER_LAUNCHER: ccache
           CMAKE_CXX_COMPILER_LAUNCHER: ccache
-          # An E2E build, as scripts/e2e-build.sh makes (babel/inline-env.js).
+          # An E2E build, as scripts/e2e/e2e-build.sh makes (babel/inline-env.js).
           TEST_LOGIN: '1'
 
       # The APK, and newer builds of the same app for the updater flows to
-      # update to (scripts/e2e-updater.sh), which differ only in the version
+      # update to (scripts/e2e/e2e-updater.sh), which differ only in the version
       # and are built over it.
       - name: Build update APKs for E2E
         if: >-
@@ -143,7 +143,7 @@ jobs:
 
       - name: Upload APK for E2E
         if: env.E2E == 'true'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: apk
           path: build/e2e-apks
@@ -152,14 +152,14 @@ jobs:
       # The update server in the E2E job signs with the key this APK trusts.
       - name: Upload update signing key for E2E
         if: env.E2E == 'true'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ota-e2e-key
           path: build/ota-e2e/*.pem
           retention-days: 1
 
   e2e:
-    # The Maestro flows (scripts/e2e.sh) in an emulator on the APK from
+    # The Maestro flows (scripts/e2e/e2e.sh) in an emulator on the APK from
     # Build, in manual runs only. The first flow logs in
     # through the real SSO login, so it needs id.tsinghua.edu.cn reachable from
     # the runner. The flows are kept passing here, as on the local devices
@@ -177,28 +177,28 @@ jobs:
       MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED: 'true'
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Download APK
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: apk
           path: build
 
       - name: Download update signing key
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: ota-e2e-key
           path: build/ota-e2e
 
-      # scripts/e2e.sh reads the flows' labels and mock texts from the
-      # translations and mock data (scripts/e2e-env.mjs), which import packages.
+      # scripts/e2e/e2e.sh reads the flows' labels and mock texts from the
+      # translations and mock data (scripts/e2e/e2e-env.mjs), which import packages.
       - name: Set up JS
         uses: ./.github/actions/setup-js
 
-      # scripts/e2e.sh types the mock login from .env; same values as the build.
+      # scripts/e2e/e2e.sh types the mock login from .env; same values as the build.
       - name: Write .env
-        run: bash scripts/write-e2e-env.sh
+        run: bash scripts/ci/write-e2e-env.sh
 
       - name: Install Maestro
         run: |
@@ -220,18 +220,18 @@ jobs:
           profile: pixel_7
           disable-animations: true
           # The action's default options. The system language is set after
-          # boot by scripts/android-locale.sh, which doesn't restart Android:
+          # boot by scripts/e2e/android-locale.sh, which doesn't restart Android:
           # the emulator's -change-locale does, and the emulator sometimes
           # exited or dropped its adb connection during that restart.
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           script: |
-            scripts/android-locale.sh zh-CN
+            scripts/e2e/android-locale.sh zh-CN
             adb install -r build/app-github-x86_64-release.apk
-            mkdir -p build/maestro; E2E_SCREENSHOTS=build/maestro/screenshots scripts/e2e.sh android --format junit --output build/maestro/report.xml --test-output-dir build/maestro; status=$?; scripts/e2e-ota.sh android || status=1; scripts/e2e-updater.sh android build/updater || status=1; cp build/ota-e2e/server-android.log build/updater-e2e/server.log build/maestro/ 2>/dev/null || true; adb logcat -d > build/maestro/logcat.txt; scripts/android-crash-reports.sh build/maestro; exit $status
+            mkdir -p build/maestro; E2E_SCREENSHOTS=build/maestro/screenshots scripts/e2e/e2e.sh android --format junit --output build/maestro/report.xml --test-output-dir build/maestro; status=$?; scripts/e2e/e2e-ota.sh android || status=1; scripts/e2e/e2e-updater.sh android build/updater || status=1; cp build/ota-e2e/server-android.log build/updater-e2e/server.log build/maestro/ 2>/dev/null || true; adb logcat -d > build/maestro/logcat.txt; scripts/e2e/android-crash-reports.sh build/maestro; exit $status
 
       - name: Upload results
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: e2e-android
           path: build/maestro

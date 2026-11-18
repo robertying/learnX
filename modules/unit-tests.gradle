@@ -1,5 +1,5 @@
 // The JVM unit tests every local module shares (src/test: JUnit, Robolectric,
-// MockK; scripts/test-android.sh runs them). Apply after the module's plugins.
+// MockK; scripts/checks/test-android.sh runs them). Apply after the module's plugins.
 
 android {
   buildTypes {

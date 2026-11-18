@@ -1,7 +1,7 @@
 appId: ${APP_ID}
 name: Google Play screenshots on an Android phone
 ---
-# Run by scripts/store-screenshots.sh (android-phone): the phone shots of
+# Run by scripts/e2e/store-screenshots.sh (android-phone): the phone shots of
 # the Play listing, as STORE_OUT/NN-<slug>.png.
 - runFlow: subflows/start.yaml
 

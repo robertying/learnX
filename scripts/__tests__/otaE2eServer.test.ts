@@ -1,4 +1,4 @@
-// scripts/ota-e2e-server.mjs answers the E2E builds as the real update server
+// scripts/e2e/ota-e2e-server.mjs answers the E2E builds as the real update server
 // would. These checks run its module in Node (ESM) on a made-up export and
 // read the answers the way expo-updates does: the signed part must verify
 // with the key the app trusts, and only with that one.
@@ -8,7 +8,7 @@ import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const server = join(__dirname, '../ota-e2e-server.mjs');
+const server = join(__dirname, '../e2e/ota-e2e-server.mjs');
 
 const dist = mkdtempSync(join(tmpdir(), 'ota-e2e-'));
 mkdirSync(join(dist, '_expo/static/js/ios'), { recursive: true });

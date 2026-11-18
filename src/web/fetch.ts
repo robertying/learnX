@@ -6,7 +6,7 @@ const abortError = () => new DOMException('Aborted', 'AbortError');
 
 /**
  * `fetch` for http(s) URLs in the Electron app: each request runs in the main
- * process (electron/net.cjs), where the browser's cross-origin rules don't
+ * process (electron/net.ts), where the browser's cross-origin rules don't
  * apply and the cookies stay in the window's session. thu-learn-lib reads
  * `url` and `redirected`, which the response carries from there.
  */

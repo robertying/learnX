@@ -1,4 +1,4 @@
-import { menuTemplate, popupMenu } from '../menus.cjs';
+import { menuTemplate, popupMenu } from '../menus.ts';
 
 type Template = { label?: string; type?: string; click?: () => void }[];
 

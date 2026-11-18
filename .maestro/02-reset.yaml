@@ -1,6 +1,6 @@
 appId: ${APP_ID}
 name: Start from a fresh install
-# Live runs (scripts/e2e.sh --live) start fresh too.
+# Live runs (scripts/e2e/e2e.sh --live) start fresh too.
 tags:
   - live
 ---

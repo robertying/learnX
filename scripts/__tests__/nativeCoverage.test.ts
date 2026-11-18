@@ -1,6 +1,6 @@
-// The native coverage tables: scripts/native-coverage.mjs reads xccov reports
-// (scripts/test-ios.sh), scripts/android-coverage.mjs JaCoCo XML
-// (scripts/test-android.sh). Both run against this checkout's sources.
+// The native coverage tables: scripts/checks/native-coverage.mjs reads xccov reports
+// (scripts/checks/test-ios.sh), scripts/checks/android-coverage.mjs JaCoCo XML
+// (scripts/checks/test-android.sh). Both run against this checkout's sources.
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -9,7 +9,7 @@ import { join } from 'node:path';
 const root = join(__dirname, '../..');
 
 const run = (script: string, args: string[], input = '') =>
-  execFileSync('node', [join(root, 'scripts', script), ...args], {
+  execFileSync('node', [join(root, 'scripts/checks', script), ...args], {
     cwd: root,
     encoding: 'utf8',
     input,
@@ -30,7 +30,7 @@ describe('native-coverage.mjs', () => {
   const table = run(
     'native-coverage.mjs',
     [root],
-    // Two runs back to back, as scripts/test-ios.sh pipes them
+    // Two runs back to back, as scripts/checks/test-ios.sh pipes them
     report(
       file('ios/learnX/AppDelegate.swift', 4),
       file('modules/share/ios/ShareModule.swift', 9),

@@ -4,13 +4,13 @@ import env from 'helpers/env';
 
 /**
  * The TUNA mirror's copy of the latest GitHub release, which the Electron
- * app updates from too (electron/packageConfig.cjs reads the same file).
+ * app updates from too (electron/packageConfig.ts reads the same file).
  */
 const tunaMirrorUrl = updateMirror.latestRelease;
 
 /**
- * Where E2E builds look for updates instead: `scripts/updater-e2e-server.mjs`,
- * through `adb reverse` (`scripts/e2e-updater.sh`).
+ * Where E2E builds look for updates instead: `scripts/e2e/updater-e2e-server.mjs`,
+ * through `adb reverse` (`scripts/e2e/e2e-updater.sh`).
  */
 export const E2E_UPDATE_URL = 'http://localhost:8198';
 

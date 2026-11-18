@@ -2,9 +2,9 @@
 // context menu (a native menu here) and puts it back, filtering the list each
 // time. Cards don't swipe on the desktop: the buttons that show while the
 // pointer is on a card stand in for iOS's swipe actions.
-import { expect, test } from './fixtures';
-import { exact } from './maestroEnv';
-import { card, cardAction, filter, openTab } from './steps';
+import { expect, test } from './fixtures.ts';
+import { exact } from './maestroEnv.ts';
+import { card, cardAction, filter, openTab } from './steps.ts';
 
 test('favorites and archives a notice from its context menu', async ({
   window,

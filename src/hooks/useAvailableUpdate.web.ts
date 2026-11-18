@@ -8,7 +8,7 @@ import {
 
 /**
  * The Electron app's update, once it has downloaded in the background
- * (electron/updater.cjs), or for a .deb once it's out, or null: Settings
+ * (electron/updater.ts), or for a .deb once it's out, or null: Settings
  * shows it on top, as the APKs' update, and installing it takes a restart, or
  * for a .deb a download (`useUpdateInstaller`).
  */

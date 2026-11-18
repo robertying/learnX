@@ -2,8 +2,8 @@
 // submission page, courseX's course information, every course's courseX and
 // every Settings page.
 // Swipe Actions isn't in the Electron app's Settings (cards don't swipe).
-import { expect, test } from './fixtures';
-import { exact } from './maestroEnv';
+import { expect, test } from './fixtures.ts';
+import { exact } from './maestroEnv.ts';
 import {
   backToSettings,
   byId,
@@ -13,7 +13,7 @@ import {
   openSettingsPage,
   openTab,
   shown,
-} from './steps';
+} from './steps.ts';
 
 test('opens every other screen', async ({ window, login }) => {
   await login();

@@ -4,7 +4,7 @@
 import dayjs from 'dayjs';
 import { ensureSession } from 'data/source';
 import { assignmentsQuery } from 'data/content';
-import { getCachedCourses, schoolSemesterQuery } from 'data/queries';
+import { getCachedCourses } from 'data/queries';
 import { queryClient } from 'data/queryClient';
 import { fetchCalendarRange } from 'data/schedule';
 import { getSettings } from 'data/settings';
@@ -30,11 +30,20 @@ const icsEvent = (id: string, details: EventDetails, isCourse: boolean) =>
     isCourse,
   );
 
+/** The days an export covers, from the start of `start` to the end of `end`. */
+export interface ExportRange {
+  start: dayjs.Dayjs;
+  end: dayjs.Dayjs;
+}
+
+const inRange = (time: dayjs.Dayjs, { start, end }: ExportRange) =>
+  !time.isBefore(start.startOf('day')) && !time.isAfter(end.endOf('day'));
+
 /**
  * The open assignments the Assignments tab shows (none archived or in a
- * hidden course), as events ending at their deadlines.
+ * hidden course) due in `range`, as events ending at their deadlines.
  */
-const assignmentEvents = (now: dayjs.Dayjs): ICSEvent[] => {
+const assignmentEvents = (range: ExportRange, now: dayjs.Dayjs): ICSEvent[] => {
   const { currentSemester, hiddenCourses, archived } = getUserData();
   const assignments =
     (currentSemester &&
@@ -45,24 +54,28 @@ const assignmentEvents = (now: dayjs.Dayjs): ICSEvent[] => {
     assignments.filter(isShownBy(hiddenCourses, archived.assignment)),
     getCachedCourses(),
     now,
-  ).map(input =>
-    icsEvent(
-      `assignment-${input.assignmentId}`,
-      buildAssignmentEventDetails(settings, input),
-      false,
-    ),
-  );
+  )
+    .filter(input => inRange(input.dueDate, range))
+    .map(input =>
+      icsEvent(
+        `assignment-${input.assignmentId}`,
+        buildAssignmentEventDetails(settings, input),
+        false,
+      ),
+    );
 };
 
-/** The classes from today to the semester's end, fetched week by week. */
-const classEvents = async (now: dayjs.Dayjs): Promise<ICSEvent[]> => {
-  const semester = await queryClient.fetchQuery(schoolSemesterQuery);
-  const end = dayjs(semester.endDate);
-  if (!end.isValid() || end.isBefore(now, 'day')) {
-    return [];
-  }
+/** The classes in `range`, fetched week by week. */
+const classEvents = async ({
+  start,
+  end,
+}: ExportRange): Promise<ICSEvent[]> => {
   const settings = getSettings();
-  const { classes } = await fetchCalendarRange(now, end, settings.graduate);
+  const { classes } = await fetchCalendarRange(
+    start.startOf('day'),
+    end.endOf('day'),
+    settings.graduate,
+  );
   const courses = getCachedCourses();
   return classes.map(c =>
     icsEvent('', buildCourseEventDetails(c, settings, courses), true),
@@ -70,20 +83,20 @@ const classEvents = async (now: dayjs.Dayjs): Promise<ICSEvent[]> => {
 };
 
 /**
- * The semester's remaining classes and the open assignments as an .ics
- * calendar. Rejects with `noEvents` when there's nothing to export; when the
- * timetable can't be fetched the classes are left out, which `withoutClasses`
- * says.
+ * The classes and the open assignments in `range` as an .ics calendar.
+ * Rejects with `noEvents` when there's nothing to export; when the timetable
+ * can't be fetched the classes are left out, which `withoutClasses` says.
  */
 export const buildElectronICS = async (
+  range: ExportRange,
   now = dayjs(),
 ): Promise<{ ics: string; withoutClasses: boolean }> => {
-  const assignments = assignmentEvents(now);
+  const assignments = assignmentEvents(range, now);
   let classes: ICSEvent[] = [];
   let withoutClasses = false;
   try {
     await ensureSession();
-    classes = await classEvents(now);
+    classes = await classEvents(range);
   } catch (error) {
     if (assignments.length === 0) {
       throw error;

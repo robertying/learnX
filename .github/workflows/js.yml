@@ -36,7 +36,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up JS
         id: install
@@ -56,15 +56,15 @@ jobs:
         run: pnpm format --check
 
       # The over-the-air runtime version changes exactly when native code does
-      # (scripts/check-ota-runtime.mjs); on failure it prints what to record.
+      # (scripts/checks/check-ota-runtime.mjs); on failure it prints what to record.
       - name: Runtime version
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-        run: node scripts/check-ota-runtime.mjs
+        run: pnpm ota:check
 
       # Catches shell mistakes before a script only runs on main
       - name: Shell scripts
         if: ${{ !cancelled() }}
-        run: shellcheck --version | head -2 && git ls-files -z '*.sh' | xargs -0 shellcheck
+        run: shellcheck --version | head -2 && pnpm lint:shell
 
       # Jest's cache holds Babel output, mostly for node_modules. Its key
       # follows what changes that output (the Babel plugins in babel/ too,
@@ -74,7 +74,7 @@ jobs:
       - name: Restore Jest cache
         id: jest-cache
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ env.JEST_CACHE_DIR }}
           key: jest-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'patches/**', 'babel.config.js', 'babel/**', 'jest.config.js', 'jest/transformer.js') }}
@@ -86,7 +86,7 @@ jobs:
 
       - name: Save Jest cache
         if: env.SAVE_CACHE == 'true' && steps.test.outcome == 'success' && steps.jest-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ env.JEST_CACHE_DIR }}
           key: ${{ steps.jest-cache.outputs.cache-primary-key }}
@@ -98,7 +98,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up JS
         uses: ./.github/actions/setup-js
@@ -117,4 +117,4 @@ jobs:
           LIVE_FINGERPRINT=ci-canary-live-fingerprint
           UNLISTED_KEY=ci-canary-unlisted-key
           ENV
-          scripts/check-release-bundle.sh
+          scripts/checks/check-release-bundle.sh
