@@ -30,7 +30,7 @@
 - iPad: Maestro only sees SpringBoard with Windowed Apps unless it's the patched build, so the `ipad` profile needs Full Screen Apps and `ipad-windowed` a second iPad.
 - Android foldable: unfolded, it has the tablet layout, so it stands in for Android tablets.
 - iPhone Duo closed: the outer display is short and its bars sit at the side, so bring rows on screen before using them and expect a toast to cover the lower buttons until it goes. Bar buttons moved to the side lose their ids, so system apps' are tapped by label.
-- iPhone Duo open: no public tool sends touches to the inner display, so the open profiles log in while closed, open the hinge (`subflows/fold.yaml`, patched Maestro only) and run `.maestro/postures/`, which open screens by `learnx://` link and check only their ids.
+- iPhone Duo open: Maestro's taps and typing (XCUITest) don't reach the inner display, so the open profiles log in while closed, open the hinge (`subflows/fold.yaml`, patched Maestro only) and run `.maestro/postures/`, which open screens by `learnx://` link and check only their ids.
 
 ## XCUITest (Mac and iOS)
 
