@@ -41,6 +41,3 @@ export const saveFileAs = async (
  */
 export const saveTextAs = async (filename: string, content: string) =>
   (await bridge().shell.saveText(sanitizeFileName(filename), content)) !== null;
-
-/** Copies text, such as a file's link, to the clipboard. */
-export const copyText = (text: string) => bridge().shell.copyText(text);

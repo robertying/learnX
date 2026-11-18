@@ -18,7 +18,7 @@ import {
   showQuickLookPanel,
 } from 'modules/quicklook';
 import { formatDate, t } from 'helpers/i18n';
-import { displayFileSize, hasLink } from 'helpers/filename';
+import { displayFileSize } from 'helpers/filename';
 import Spinner from 'components/Spinner';
 import SafeArea from 'components/SafeArea';
 import { FileDetailParamList } from 'navigation/types';
@@ -89,9 +89,7 @@ const FileDetailContent: React.FC<{
     save,
     open,
     showInFolder,
-    copyLink,
   } = useFileDownload(file);
-  const linkCopyable = isElectron() && hasLink(file);
 
   // A course file downloaded here no longer shows as new.
   useEffect(() => {
@@ -240,7 +238,6 @@ const FileDetailContent: React.FC<{
           onSave={save}
           onOpen={open}
           onShowInFolder={showInFolder}
-          onCopyLink={linkCopyable ? copyLink : undefined}
         />
       )}
     </Root>
@@ -266,7 +263,6 @@ const FileInfo: React.FC<{
   onSave: () => void;
   onOpen: () => void;
   onShowInFolder: () => void;
-  onCopyLink?: () => void;
 }> = ({
   file,
   previewable,
@@ -275,7 +271,6 @@ const FileInfo: React.FC<{
   onSave,
   onOpen,
   onShowInFolder,
-  onCopyLink,
 }) => (
   <Form testID="file-info">
     <FormSection>
@@ -326,13 +321,6 @@ const FileInfo: React.FC<{
           icon="folder"
           onPress={onShowInFolder}
         />
-        {onCopyLink ? (
-          <FormButton
-            title={t('copyLink')}
-            icon="copyLink"
-            onPress={onCopyLink}
-          />
-        ) : null}
       </FormSection>
     ) : (
       <FormSection>

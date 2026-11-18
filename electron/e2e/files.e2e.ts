@@ -1,7 +1,7 @@
 // What the Electron app does with a downloaded file instead of the phone's
 // share sheet: previews PDFs and pictures on app://files/, opens a file in
-// its default app, saves a copy with Save As, shows it in its folder and
-// copies its link, all through the main process's stand-ins (mainProcess.ts).
+// its default app, saves a copy with Save As and shows it in its folder,
+// all through the main process's stand-ins (mainProcess.ts).
 // Exporting every download is in downloads.e2e.ts.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -107,13 +107,4 @@ test('opens, saves, shows and copies the link of a file', async ({
   await expect
     .poll(async () => (await main.record()).shownInFolder)
     .toEqual([opened]);
-  await byId(window, 'file-info')
-    .getByRole('button', { name: exact('T_copyLink') })
-    .click();
-  await expect(
-    shown(window.getByTestId('toast').getByText(exact('T_linkCopied'))),
-  ).toBeVisible();
-  const { clipboard } = await main.record();
-  expect(clipboard).toHaveLength(1);
-  expect(clipboard[0]).toMatch(/^https:\/\//);
 });

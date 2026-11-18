@@ -234,7 +234,6 @@ export const systemIcons = {
     android: 'open_in_new',
     windows: 'OpenRegular',
   },
-  copyLink: { ios: 'link', android: 'link', windows: 'LinkRegular' },
   share: {
     ios: 'square.and.arrow.up',
     android: 'share',

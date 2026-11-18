@@ -7,7 +7,9 @@ export type { HeaderTitleProps } from './HeaderTitle';
 /**
  * A page's title at the start of the header, in Fluent's Subtitle 1, with
  * its subtitle (the filter, the date) as a caption under it, as Windows apps
- * title their pages.
+ * title their pages. Both shorten at their end: React Native Web can't cut
+ * text in the middle, so `ellipsizeMode` 'middle' (an item's name on the
+ * phones) ends up as 'tail' here.
  */
 const HeaderTitle: React.FC<HeaderTitleProps> = ({
   title,

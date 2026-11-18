@@ -177,8 +177,6 @@ export default {
     'This file can run programs on your computer. Open it only if you trust it.',
   showInFolder: 'Show in Folder',
   saveAs: 'Save As',
-  copyLink: 'Copy Link',
-  linkCopied: 'Link copied',
   fileOpensInDefaultApp:
     "learnX can't show this type of file. Open it in its default app, or save a copy.",
   startAtLogin: 'Start at Login',
@@ -193,7 +191,9 @@ export default {
     "learnX sends notifications and reminders only while it's running.",
   exportCalendar: 'Export Calendar (.ics)',
   exportCalendarDescription:
-    'Saves your classes for the rest of the semester and your open assignments as an .ics file, which calendar apps such as Outlook can import.',
+    'Saves your classes and open assignments in the dates you pick as an .ics file, which calendar apps such as Outlook can import.',
+  exportRangeTitle: 'Choose Dates to Export',
+  exportRangeSave: 'Export',
   dropToAttach: 'Drop a File to Attach',
   dropFailed: "Couldn't attach the file",
   calendarExportNoEventElectron:

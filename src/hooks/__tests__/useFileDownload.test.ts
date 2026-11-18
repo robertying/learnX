@@ -8,7 +8,6 @@ import { openFile, saveFileOnMac, shareFile } from 'services/files/share';
 import { t } from 'helpers/i18n';
 import useFileDownload from 'hooks/useFileDownload';
 import {
-  copyText,
   openInDefaultApp,
   saveFileAs,
   showInFolder,
@@ -22,7 +21,6 @@ jest.mock('services/files/share', () => ({
   shareFile: jest.fn(),
 }));
 jest.mock('services/files/electron', () => ({
-  copyText: jest.fn(async () => {}),
   openInDefaultApp: jest.fn(async () => {}),
   saveFileAs: jest.fn(async () => true),
   showInFolder: jest.fn(async () => {}),
@@ -229,7 +227,7 @@ describe('useFileDownload', () => {
       );
     });
 
-    it('shows the file in its folder, and copies its link', async () => {
+    it('shows the file in its folder', async () => {
       const { result } = await setup();
       await waitFor(() => expect(result.current.path).toBe(PATH));
       await act(async () => result.current.showInFolder());
@@ -237,14 +235,6 @@ describe('useFileDownload', () => {
       jest.mocked(showInFolder).mockRejectedValueOnce(new Error());
       await act(async () => result.current.showInFolder());
       expect(toast).toHaveBeenLastCalledWith(t('openFileFailed'), 'error');
-
-      await act(async () => result.current.copyLink());
-      expect(copyText).toHaveBeenCalledWith(file.downloadUrl);
-      expect(toast).toHaveBeenLastCalledWith(t('linkCopied'), 'success');
-      jest.mocked(toast).mockClear();
-      jest.mocked(copyText).mockRejectedValueOnce(new Error());
-      await act(async () => result.current.copyLink());
-      expect(toast).not.toHaveBeenCalled();
     });
   });
 });
