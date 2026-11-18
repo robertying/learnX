@@ -2,11 +2,10 @@ name: Electron
 
 # The Windows and Linux app (electron/). The web build and the E2E tests are
 # required; a pull request that can't affect the app (the `changes` step)
-# skips their steps and passes. Update E2E tests, not required, run on pull
-# requests that change how the app updates, and by hand. Manual runs also
-# check that the installers still build (Installers); those builds are never
-# released: releases are built, signed and uploaded by hand with fastlane
-# (the release skill). js.yml's Checks run the `web` Jest project.
+# skips their steps and passes. Manual runs also run a real update (Update
+# E2E tests) and check that the installers still build (Installers); those
+# builds are never released: releases are built, signed and uploaded by hand
+# with fastlane (the release skill). js.yml's Checks run the `web` Jest project.
 on:
   pull_request:
   push:
@@ -37,7 +36,6 @@ jobs:
     timeout-minutes: 20
     outputs:
       changed: ${{ steps.changes.outputs.changed }}
-      updates: ${{ steps.updates.outputs.updates }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -49,11 +47,6 @@ jobs:
       - name: Detect changed files
         id: changes
         run: scripts/ci/changed-files.sh electron >> "$GITHUB_OUTPUT"
-
-      # Whether Update E2E tests run.
-      - name: Detect update changes
-        id: updates
-        run: scripts/ci/changed-files.sh electron-updates >> "$GITHUB_OUTPUT"
 
       - name: Set up JS
         if: steps.changes.outputs.changed == 'true'
@@ -215,14 +208,13 @@ jobs:
     # made for the run, installs 99.0.0 (the NSIS installer on Windows, the
     # AppImage on Linux), serves 99.0.1 and checks that the app updates from
     # Settings and comes back as 99.0.1. Two packagings make it the slowest
-    # Electron job, and it tests what few changes touch, so it isn't
-    # required: it runs on pull requests that change the update path
-    # (scripts/ci/changed-files.sh electron-updates) and by hand, not on main
-    # pushes. A static name: rows show as "Update E2E tests (Linux)" and
-    # "Update E2E tests (Windows)".
+    # Electron job, so by hand only, as Android's updater test (android.yml's
+    # E2E tests): the release and upgrade-dependencies skills run it. A static
+    # name: rows show as "Update E2E tests (Linux)" and "Update E2E tests
+    # (Windows)", and the job skipped on other runs as "Update E2E tests".
     name: Update E2E tests
     needs: web
-    if: github.event_name != 'push' && needs.web.outputs.updates == 'true' && needs.web.outputs.changed == 'true'
+    if: github.event_name == 'workflow_dispatch'
     strategy:
       fail-fast: false
       matrix:
