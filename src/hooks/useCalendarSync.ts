@@ -13,7 +13,8 @@ import {
 } from 'services/calendar/actions';
 import { refreshSurfaces } from 'services/surfaces';
 import { t } from 'helpers/i18n';
-import { isApple, isElectron } from 'helpers/platform';
+import { isApple } from 'helpers/platform';
+import { defaultCalendarRange } from 'helpers/calendar/range';
 
 const show = (message?: ToastMessage) => {
   if (message) {
@@ -52,11 +53,11 @@ export const useCourseScheduleSync = () => {
     setEnabling(false);
   };
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [startDate, setStartDate] = useState<Date | undefined>(
-    dayjs().toDate(),
+  const [startDate, setStartDate] = useState<Date | undefined>(() =>
+    defaultCalendarRange().start.toDate(),
   );
-  const [endDate, setEndDate] = useState<Date | undefined>(
-    dayjs().add(28, 'day').toDate(),
+  const [endDate, setEndDate] = useState<Date | undefined>(() =>
+    defaultCalendarRange().end.toDate(),
   );
 
   const sync = async (start?: Date, end?: Date) => {
@@ -155,21 +156,14 @@ export const useCalendarExport = () => {
 
 /**
  * The Electron app's export: the dates to export are picked first, starting
- * from today to the semester's end.
+ * from today and the next four weeks, as class sync on the phones.
  */
 export const useCalendarExportRange = () => {
   const { exporting, exportToICS } = useCalendarExport();
   const [range, setRange] = useState<{ startDate: Date; endDate: Date }>();
 
-  const openPicker = async () => {
-    // Required only here, so the phones' bundles leave it out.
-    const electronExport = isElectron()
-      ? (require('services/calendar/electronExport') as typeof import('services/calendar/electronExport'))
-      : undefined;
-    if (!electronExport) {
-      return;
-    }
-    const { start, end } = await electronExport.defaultExportRange();
+  const openPicker = () => {
+    const { start, end } = defaultCalendarRange();
     setRange({ startDate: start.toDate(), endDate: end.toDate() });
   };
 

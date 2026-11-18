@@ -16,6 +16,7 @@ import {
 import { saveClassesToCalendar } from 'services/calendar/classes';
 import { setLastSynced } from 'data/calendarSync';
 import { calendarErrorCode } from 'services/calendar/errors';
+import { defaultCalendarRange } from 'helpers/calendar/range';
 import { exportTextFile } from 'services/files/share';
 import { t, TextKey } from 'helpers/i18n';
 import { isAndroid, isElectron } from 'helpers/platform';
@@ -210,8 +211,8 @@ export const allowAssignmentSync = async (
 /**
  * Shares (or on Mac, saves where people pick) the synced calendars as
  * learnX.ics. The Electron app, which has no calendar to sync, saves the
- * classes and assignments themselves, in `range` (by default today to the
- * semester's end).
+ * classes and assignments themselves, in `range` (by default today and the
+ * next four weeks).
  */
 export const exportCalendars = async (
   range?: ExportRange,
@@ -221,9 +222,7 @@ export const exportCalendars = async (
       async () => {
         const electronExport =
           require('services/calendar/electronExport') as typeof import('services/calendar/electronExport');
-        return electronExport.buildElectronICS(
-          range ?? (await electronExport.defaultExportRange()),
-        );
+        return electronExport.buildElectronICS(range ?? defaultCalendarRange());
       }
     : async () => ({
         ics: await exportSyncedCalendarsToICS(),
