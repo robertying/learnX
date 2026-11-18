@@ -38,13 +38,22 @@ test('favorites and archives a notice from its hover buttons', async ({
 }) => {
   await login();
   await openTab(window, 'notices');
-  /** A button the card shows while the pointer is on it. */
+  /**
+   * A button the card shows while the pointer is on it. Looked for in the
+   * card's own menu view (the innermost element holding both): the card the
+   * pointer just left can still show its buttons until React renders again,
+   * and the first visible one in the window may be that card's.
+   */
   const hoverButton = async (action: string) => {
-    await card(window, 'MOCK_NOTICE').hover();
+    const notice = card(window, 'MOCK_NOTICE');
+    await notice.hover();
+    const button = window.getByRole('button', { name: exact(action) });
     await window
+      .locator('div')
+      .filter({ has: notice })
+      .filter({ has: button })
+      .last()
       .getByRole('button', { name: exact(action) })
-      .filter({ visible: true })
-      .first()
       .click();
   };
 
