@@ -1,6 +1,6 @@
 appId: ${APP_ID}
 name: Update the Android app from the APK mirror
-# Run by scripts/e2e-updater.sh, which starts the APK mirror and serves a
+# Run by scripts/e2e/e2e-updater.sh, which starts the APK mirror and serves a
 # newer E2E build as VERSION (99.0.0); not part of the normal runs. Android
 # only: the APKs update themselves, the stores update the other builds.
 ---
@@ -52,7 +52,7 @@ name: Update the Android app from the APK mirror
 # let an app in the background ask to install. The mirror takes seconds to
 # send it (slow mode). Android asks to confirm the install, except from
 # Android 17 on, where "Always allow" lets learnX install without asking
-# (CONFIRMS, set by scripts/e2e-updater.sh).
+# (CONFIRMS, set by scripts/e2e/e2e-updater.sh).
 - runScript:
     file: server.js
     env:
@@ -93,7 +93,7 @@ name: Update the Android app from the APK mirror
     notVisible:
       id: settings-update
     timeout: 60000
-# The new version is installed (scripts/e2e-updater.sh checks it too), so
+# The new version is installed (scripts/e2e/e2e-updater.sh checks it too), so
 # there's no update to offer.
 - launchApp:
     stopApp: false

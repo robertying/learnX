@@ -1,5 +1,5 @@
-import './setupEnv';
-import './polyfills';
+import './src/setupEnv';
+import './src/polyfills';
 
 import { AppRegistry, LogBox } from 'react-native';
 import { name as appName } from './app.json';

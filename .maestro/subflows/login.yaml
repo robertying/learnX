@@ -1,16 +1,16 @@
 # Open the app logged in with the mock account (see src/data/AGENTS.md, Mock
 # login), on the notices. The flows share one login: the first flow of a run
 # logs in after 02-reset, the others find the app logged in and only relaunch
-# it. USERNAME / PASSWORD / APP_ID are passed with -e by scripts/e2e.sh.
+# it. USERNAME / PASSWORD / APP_ID are passed with -e by scripts/e2e/e2e.sh.
 appId: ${APP_ID}
 ---
-# ORIENTATION comes from scripts/e2e.sh (PORTRAIT unless E2E_ORIENTATION is
+# ORIENTATION comes from scripts/e2e/e2e.sh (PORTRAIT unless E2E_ORIENTATION is
 # set), so iPad landscape runs need no rotating by hand.
 - setOrientation: ${ORIENTATION}
 # Every launch: no emulated server delay (services/launchOptions.ts), and with
-# APP_LANGUAGE (from scripts/e2e.sh, empty by default, e.g. zh-Hans) iOS in
+# APP_LANGUAGE (from scripts/e2e/e2e.sh, empty by default, e.g. zh-Hans) iOS in
 # that language. Android takes the app's locale from
-# `cmd locale set-app-locales` instead (scripts/store-screenshots.sh).
+# `cmd locale set-app-locales` instead (scripts/e2e/store-screenshots.sh).
 - runFlow:
     when:
       true: ${!APP_LANGUAGE && ACCOUNT != 'live'}
@@ -26,7 +26,7 @@ appId: ${APP_ID}
           arguments:
             mockLatency: none
             AppleLanguages: '(${APP_LANGUAGE})'
-# Live runs (scripts/e2e.sh --live) hand the app the live account's saved
+# Live runs (scripts/e2e/e2e.sh --live) hand the app the live account's saved
 # fingerprint, so typing its username signs in without the SSO page
 # (services/launchOptions.ts). Only E2E builds (TEST_LOGIN) take it.
 - runFlow:

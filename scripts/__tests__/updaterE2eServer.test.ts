@@ -1,4 +1,4 @@
-// scripts/updater-e2e-server.mjs stands in for the TUNA mirror in E2E runs:
+// scripts/e2e/updater-e2e-server.mjs stands in for the TUNA mirror in E2E runs:
 // `latest.json` as fastlane writes it, naming the one APK it serves under
 // every ABI, with its SHA-256 (and a damaged APK, to test the check, or one
 // sent slowly).
@@ -6,7 +6,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 
-const server = join(__dirname, '../updater-e2e-server.mjs');
+const server = join(__dirname, '../e2e/updater-e2e-server.mjs');
 
 interface Answer {
   status: number;

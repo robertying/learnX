@@ -1,6 +1,6 @@
 const path = require('path');
 
-// Keeps React Native's own fetch as the global fetch (setupEnv.ts says why).
+// Keeps React Native's own fetch as the global fetch (src/setupEnv.ts says why).
 // In release bundles babel-preset-expo inlines EXPO_PUBLIC_* variables from the
 // environment Babel runs in, so the app setting it at runtime is too late
 // there: the flag must be set here as well. Without it, a release build installs

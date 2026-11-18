@@ -1,6 +1,6 @@
 // babel/inline-platform.js, run with only itself (babel-preset-expo inlines
 // `process.env.EXPO_OS` and Metro folds the result in a real build;
-// scripts/check-release-bundle.sh checks that end to end).
+// scripts/checks/check-release-bundle.sh checks that end to end).
 import path from 'node:path';
 import { transformSync } from '@babel/core';
 import inlinePlatform from '../../babel/inline-platform';

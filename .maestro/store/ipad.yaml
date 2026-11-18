@@ -1,7 +1,7 @@
 appId: ${APP_ID}
 name: App Store screenshots on the iPad
 ---
-# Run by scripts/store-screenshots.sh (ipad): the iPad shots of the store
+# Run by scripts/e2e/store-screenshots.sh (ipad): the iPad shots of the store
 # listing, as STORE_OUT/NN-<slug>.png, in landscape. It turns after the
 # login, which sets E2E_ORIENTATION (portrait by default). Details open
 # beside the lists.

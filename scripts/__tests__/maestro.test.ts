@@ -38,7 +38,7 @@ describe('config.yaml', () => {
   });
 });
 
-// scripts/store-screenshots.sh copies this one over subflows/screenshot.yaml,
+// scripts/e2e/store-screenshots.sh copies this one over subflows/screenshot.yaml,
 // so it runs from there.
 const runsFrom = (path: string) =>
   path.endsWith('/store/subflows/screenshot-posture.yaml')

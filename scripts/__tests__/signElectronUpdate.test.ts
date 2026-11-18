@@ -7,7 +7,7 @@ import {
   signUpdateFiles,
   updateFileVersion,
   updateFiles,
-} from '../sign-electron-update.mjs';
+} from '../release/sign-electron-update.mjs';
 
 const { signatureProblem } = updateSignature;
 

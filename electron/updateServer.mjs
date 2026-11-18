@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // A local stand-in for the TUNA mirror's LatestRelease/ folder, to try the
 // Electron app's updates (updater.cjs) without publishing anything, as
-// scripts/updater-e2e-server.mjs does for the Android APKs. It serves the
+// scripts/e2e/updater-e2e-server.mjs does for the Android APKs. It serves the
 // files in <dir> as they are, byte ranges too (differential downloads read
 // the .blockmap files):
 //

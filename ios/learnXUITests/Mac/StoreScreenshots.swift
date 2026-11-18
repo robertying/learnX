@@ -3,13 +3,13 @@ import UIKit
 import XCTest
 
 /// The Mac App Store screenshots: the same screens as the iPad shots (`.maestro/store/ipad.yaml`), each saved as a
-/// window screenshot attachment named `NN-<slug>`. `scripts/store-screenshots.sh mac` runs it and exports the
-/// attachments; `scripts/e2e-mac.sh` leaves it out otherwise. The Mac has no swipe actions, so a card's actions show
+/// window screenshot attachment named `NN-<slug>`. `scripts/e2e/store-screenshots.sh mac` runs it and exports the
+/// attachments; `scripts/e2e/e2e-mac.sh` leaves it out otherwise. The Mac has no swipe actions, so a card's actions show
 /// as its context menu.
 @MainActor
 final class StoreScreenshots: LearnXUITestCase {
   func testTakesStoreScreenshots() throws {
-    // Every shot in one test: more than the 3 minutes scripts/e2e-mac.sh allows each test.
+    // Every shot in one test: more than the 3 minutes scripts/e2e/e2e-mac.sh allows each test.
     executionTimeAllowance = 600
     try clearSettingsBadge()
 

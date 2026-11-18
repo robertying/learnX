@@ -3,7 +3,7 @@
 # Maestro's snapshot after a clearState launch).
 appId: ${APP_ID}
 ---
-# iPad (IPAD from scripts/e2e.sh): the tab bar pages only when its labels
+# iPad (IPAD from scripts/e2e/e2e.sh): the tab bar pages only when its labels
 # don't fit (English, portrait). Then page 1 shows Today to Files with a Next
 # Page button over Courses, and page 2 a Previous Page button with Notices to
 # Courses, so only Today and Courses may need a page turn first. Checking for

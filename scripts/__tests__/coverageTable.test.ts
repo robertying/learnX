@@ -1,6 +1,6 @@
-// The line coverage table of scripts/android-coverage.mjs and
-// scripts/native-coverage.mjs.
-import { coverageTable } from '../lib/coverage-table.mjs';
+// The line coverage table of scripts/checks/android-coverage.mjs and
+// scripts/checks/native-coverage.mjs.
+import { coverageTable } from '../checks/coverage-table.mjs';
 
 it('lists each file, then the total', () => {
   expect(

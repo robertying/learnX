@@ -5,9 +5,9 @@ import groovy.json.JsonSlurper
 // and runtime version from app.json and the certificate from
 // certs/ota-certificate.pem, as string
 // resources the manifest's expo.modules.updates meta-data reads. iOS does the
-// same in scripts/ota-config-ios.sh. E2E builds (-PciRelease) get the local
-// test server (scripts/ota-e2e-server.mjs, through `adb reverse`), runtime
-// version "e2e" and the test certificate from scripts/ota-e2e-cert.sh, so they
+// same in scripts/xcode/ota-config-ios.sh. E2E builds (-PciRelease) get the local
+// test server (scripts/e2e/ota-e2e-server.mjs, through `adb reverse`), runtime
+// version "e2e" and the test certificate from scripts/e2e/ota-e2e-cert.sh, so they
 // never load a published update.
 def otaConfig(boolean e2e) {
     def root = rootProject.file("..")
@@ -16,7 +16,7 @@ def otaConfig(boolean e2e) {
     def headers = e2e ? ["expo-channel-name": "production"] : appJson.updates.requestHeaders
     def certificate = e2e ? new File(root, "build/ota-e2e/certificate.pem") : new File(root, "certs/ota-certificate.pem")
     if (!certificate.exists()) {
-        throw new GradleException("${certificate} is missing; for an E2E build, run scripts/ota-e2e-cert.sh first.")
+        throw new GradleException("${certificate} is missing; for an E2E build, run scripts/e2e/ota-e2e-cert.sh first.")
     }
     return [
         strings: [
@@ -68,7 +68,7 @@ android {
         targetSdk = rootProject.ext.targetSdkVersion
         versionCode = 9204544
         versionName = "19.0.0"
-        // A newer build of the same app for scripts/e2e-updater.sh to update
+        // A newer build of the same app for scripts/e2e/e2e-updater.sh to update
         // to: -Pe2eVersion=99.0.<n> names it so and raises the version code
         // by n + 1.
         def e2eVersion = findProperty("e2eVersion")
@@ -143,7 +143,7 @@ android {
             buildConfigField "boolean", "TAKES_LAUNCH_OPTIONS", "true"
         }
         release {
-            // -PciRelease (E2E builds: CI's and scripts/e2e-build.sh): a real
+            // -PciRelease (E2E builds: CI's and scripts/e2e/e2e-build.sh): a real
             // release build (R8, bundled JS) signed with the debug key, and
             // nothing uploaded to Crashlytics.
             def ciRelease = project.hasProperty("ciRelease")
@@ -187,7 +187,7 @@ androidComponents {
 }
 
 // JVM unit tests of the app's own Kotlin (src/test: the Material 3 dialogs),
-// with the local modules' setup; scripts/test-android.sh runs them.
+// with the local modules' setup; scripts/checks/test-android.sh runs them.
 apply from: "../../modules/unit-tests.gradle"
 
 dependencies {
@@ -204,9 +204,9 @@ dependencies {
 }
 
 // Fails the build when a patch in patches/ isn't applied to node_modules
-// (scripts/check-patches.sh).
+// (scripts/checks/check-patches.sh).
 def checkPatches = tasks.register("checkPatches", Exec) {
-    commandLine "${rootDir}/../scripts/check-patches.sh"
+    commandLine "${rootDir}/../scripts/checks/check-patches.sh"
 }
 tasks.named("preBuild").configure { dependsOn checkPatches }
 

@@ -325,12 +325,12 @@ def verify_release_env!
 end
 
 # Fail the build unless each release bundle has the mock login in it and no
-# other .env value (scripts/check-bundle-env.mjs, which CI's release bundle
+# other .env value (scripts/checks/check-bundle-env.mjs, which CI's release bundle
 # check runs too).
 def check_bundle_env!(bundles)
   UI.user_error!("Found no JS bundle to check for .env values") if bundles.empty?
 
-  sh("node", File.join(ROOT, "scripts/check-bundle-env.mjs"), *bundles)
+  sh("node", File.join(ROOT, "scripts/checks/check-bundle-env.mjs"), *bundles)
 end
 
 # ---------------------------------------------------------------------------
@@ -699,13 +699,13 @@ def build_electron(options)
   platforms
 end
 
-# Signs the update files (scripts/sign-electron-update.mjs, which refuses one
+# Signs the update files (scripts/release/sign-electron-update.mjs, which refuses one
 # for another version), with the key from `key:` or LEARNX_UPDATE_SIGNING_KEY
 # (a file), or else read from 1Password with `op read` at
 # LEARNX_UPDATE_SIGNING_KEY_REF (an op:// reference, in fastlane/.env), so
 # the key never touches the disk.
 def sign_electron(options)
-  script = File.join(ROOT, "scripts/sign-electron-update.mjs")
+  script = File.join(ROOT, "scripts/release/sign-electron-update.mjs")
   key = options[:key] || ENV["LEARNX_UPDATE_SIGNING_KEY"]
   if key && !key.to_s.empty?
     sh("node", script, electron_out_dir, "--key", File.expand_path(key.to_s))
@@ -830,7 +830,7 @@ lane :release do |options|
   publish_github(notes, electron_platforms: platforms)
 end
 
-desc "Decode the JS frames of a Crashlytics report with the source map of the bundle that crashed (scripts/symbolicate.mjs)."
+desc "Decode the JS frames of a Crashlytics report with the source map of the bundle that crashed (scripts/release/symbolicate.mjs)."
 desc "bundle: the report's js_bundle key (an update id, or embedded); a built-in bundle needs the report's version and build"
 desc "(Android: its version code). Store maps come from build/release, or the version's GitHub release; update maps from build/ota/updates."
 desc "Usage: bundle exec fastlane symbolicate platform:ios|macos|android stack:/path/to/stack.txt [bundle:<js_bundle>] [version:19.0.0 build:190] [map:/path/to/file.map]"
@@ -840,7 +840,7 @@ lane :symbolicate do |options|
     options[key] ? ["--#{key}", options[key].to_s] : []
   end
   # Its output is the decoded stack, so it goes to the terminal as is.
-  ok = system("node", File.join(ROOT, "scripts/symbolicate.mjs"), *args, File.expand_path(options[:stack].to_s))
+  ok = system("node", File.join(ROOT, "scripts/release/symbolicate.mjs"), *args, File.expand_path(options[:stack].to_s))
   UI.user_error!("Symbolicating failed") unless ok
 end
 
@@ -936,7 +936,7 @@ platform :electron do
     build_electron(options)
   end
 
-  desc "Sign the update files there (scripts/sign-electron-update.mjs), with the key from 1Password."
+  desc "Sign the update files there (scripts/release/sign-electron-update.mjs), with the key from 1Password."
   desc "Usage: bundle exec fastlane electron sign [key:/path/to/key.pem]   (or LEARNX_UPDATE_SIGNING_KEY_REF in fastlane/.env)"
   lane :sign do |options|
     sign_electron(options)

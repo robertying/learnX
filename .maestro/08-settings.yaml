@@ -83,7 +83,7 @@ name: Change every setting
 
 # Notifications: each on, then each off. The first one asks for the
 # permission, which launchApp allows: on iOS the patched Maestro answers the
-# system's alert (scripts/maestro/maestro-springboard-alerts.patch).
+# system's alert (scripts/e2e/maestro/maestro-springboard-alerts.patch).
 - runFlow:
     commands:
       - tapOn:

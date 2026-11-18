@@ -1,9 +1,9 @@
-// scripts/check-ota-runtime.mjs's verdicts, run in Node (ESM). The fingerprints
+// scripts/checks/check-ota-runtime.mjs's verdicts, run in Node (ESM). The fingerprints
 // themselves come from expo-updates.
 import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 
-const script = join(__dirname, '../check-ota-runtime.mjs');
+const script = join(__dirname, '../checks/check-ota-runtime.mjs');
 
 interface State {
   runtimeVersion: string;
