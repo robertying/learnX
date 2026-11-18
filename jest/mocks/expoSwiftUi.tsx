@@ -296,6 +296,7 @@ export const useNativeState = <T,>(initial: T) =>
 /**
  * A plain text input showing the native state's text. The return key runs
  * the `onSubmit` modifier's handler, and the ref's `focus` is a `jest.fn`.
+ * Its `tabKey` prop is the `onTabKey` modifier's handler (`modules/menus`).
  */
 export const TextField = ({
   text,
@@ -324,9 +325,13 @@ export const TextField = ({
 }) => {
   const value = useSyncExternalStore(text.subscribe, text.get);
   const [focus] = useState(() => jest.fn());
-  useImperativeHandle(ref, () => ({ focus }));
-  const submit = modifiers?.find(modifier => modifier?.modifier === 'onSubmit')
-    ?.args?.[0] as (() => void) | undefined;
+  useImperativeHandle(ref, () => ({ focus }), [focus]);
+  const handler = (name: string) =>
+    modifiers?.find(modifier => modifier?.modifier === name)?.args?.[0] as
+      | (() => void)
+      | undefined;
+  const submit = handler('onSubmit');
+  const tabKey = handler('onTabKey');
   return (
     <RNTextInput
       value={value}
@@ -343,7 +348,7 @@ export const TextField = ({
         onTextChange?.(typed);
       }}
       onSubmitEditing={submit}
-      {...{ focus }}
+      {...{ focus, tabKey }}
       testID={testID}
     />
   );

@@ -6,7 +6,10 @@ import { getLatestRelease } from 'helpers/update';
 import useAvailableUpdate from 'hooks/useAvailableUpdate';
 import Updater from 'modules/updater';
 
-jest.mock('helpers/update', () => ({ getLatestRelease: jest.fn() }));
+jest.mock('helpers/update', () => ({
+  ...jest.requireActual('helpers/update'),
+  getLatestRelease: jest.fn(),
+}));
 // The APKs: the build that updates itself.
 jest.mock('modules/updater', () => ({
   __esModule: true,

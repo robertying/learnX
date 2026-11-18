@@ -192,8 +192,10 @@ PODS:
     - ExpoModulesCore
   - LearnXMenus (1.0.0):
     - ExpoModulesCore
+    - ExpoUI
   - LearnXMenus/Tests (1.0.0):
     - ExpoModulesCore
+    - ExpoUI
   - LearnXQuickLook (1.0.0):
     - ExpoModulesCore
   - LearnXQuickLook/Tests (1.0.0):
@@ -2957,7 +2959,7 @@ SPEC CHECKSUMS:
   glog: 3cf7cb46f743c4bc758ae3e6d9c15bd1b4cfd6d4
   hermes-engine: 79484fc4e58f328d01b9339ef899ca633d3702ee
   LearnXCrashlytics: f54c9b50163ce8255ee9148b00819a6203273c3e
-  LearnXMenus: d16bcb91222edad364a10a271fe1a3aaad78786a
+  LearnXMenus: 2dcfdffd7d21297d1235b14669f1256ec039f030
   LearnXQuickLook: 5a07c6af2e517166ac3e4a896533d7f0e308abfb
   LearnXShare: 593f47ced0cdb48861422731919d6f541c5e8085
   LearnXShortcuts: f7d94d3eab97e8ecb2feaaf05c27ca59f6ef6cd9

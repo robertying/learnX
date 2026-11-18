@@ -9,6 +9,16 @@ jest.mock('@react-navigation/native', () => ({
 }));
 jest.mock('hooks/useLaunchSheet', () => ({ noteOpenedFromOutside: jest.fn() }));
 jest.mock('hooks/usePendingTarget', () => ({ setPendingTarget: jest.fn() }));
+const mockSettingsTab = { current: false };
+jest.mock('navigation/layout', () => ({
+  get settingsTab() {
+    return mockSettingsTab.current;
+  },
+}));
+
+beforeEach(() => {
+  mockSettingsTab.current = false;
+});
 
 const open = async () =>
   (await renderHook(() => useOpenTarget())).result.current;
@@ -55,5 +65,23 @@ it('opens Today for its Schedule to open (the Jump List)', async () => {
   expect(mockNavigate).toHaveBeenCalledWith('MainTab', {
     screen: 'TodayStack',
     params: { screen: 'Today', pop: true },
+  });
+});
+
+it('opens Settings for a new version, with its row on top', async () => {
+  mockSettingsTab.current = true;
+  (await open())({ type: 'update' });
+  expect(setPendingTarget).toHaveBeenCalledWith(null, undefined);
+  expect(mockNavigate).toHaveBeenCalledWith('MainTab', {
+    screen: 'SettingStack',
+    params: { screen: 'Settings', pop: true },
+  });
+});
+
+it("opens Settings from Today's stack where it isn't a tab", async () => {
+  (await open())({ type: 'update' });
+  expect(mockNavigate).toHaveBeenCalledWith('MainTab', {
+    screen: 'TodayStack',
+    params: { screen: 'Settings', pop: true },
   });
 });

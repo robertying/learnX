@@ -41,10 +41,21 @@ export interface UpNextWidgetClass {
   time: string;
   /** The start alone, e.g. 08:00 or 4:00 PM, where a range doesn't fit. */
   startTime: string;
-  /** Its weekday, e.g. "Mon", shown when it's later this week. */
+  /**
+   * When it is, from tomorrow on, as the widget shows it by how far away it
+   * is: the time with its day ("明天上午8:00–9:35", "Tomorrow 8:00–9:35 AM"),
+   * its weekday when it's later this week ("周一 08:00–09:35", "Mon
+   * 08:00–09:35") and its date from a week on ("11月9日 周一 08:00–09:35",
+   * "Mon 11/9 08:00–09:35"). Each `…Start` has the start alone, as
+   * `startTime`. The app writes them, as dates are written only through
+   * helpers/i18n.
+   */
+  tomorrow: string;
+  tomorrowStart: string;
   weekday: string;
-  /** Its day with the date, e.g. "Mon 11/9", shown when it's a week or more away. */
+  weekdayStart: string;
   day: string;
+  dayStart: string;
   /** The learnx:// link that opens its course, or none when the course is unknown. */
   url?: string;
 }
@@ -66,7 +77,6 @@ export interface UpNextWidgetProps {
   /** Before the countdowns ("Starts in", "Ends in"); iOS only. */
   startsIn: string;
   endsIn: string;
-  tomorrow: string;
   /** Shown when no classes are left. */
   noClasses: string;
   /** The learnx:// link that opens Today. */

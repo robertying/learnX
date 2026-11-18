@@ -9,10 +9,10 @@ export default {
   widgetLater: 'Later Classes',
   widgetStartsIn: 'Starts in',
   widgetEndsIn: 'Ends in',
-  widgetTomorrow: 'Tomorrow',
   widgetNoClasses: 'No upcoming classes',
-  widgetClassDayFormat: 'ddd M/D',
-  widgetClassWeekdayFormat: 'ddd',
+  widgetClassTomorrowFormat: '[Tomorrow] {time}',
+  widgetClassWeekdayFormat: 'ddd {time}',
+  widgetClassDayFormat: 'ddd M/D {time}',
   files: 'Files',
   courses: 'Courses',
   calendarsAndReminders: 'Calendars & Reminders',
@@ -185,7 +185,7 @@ export default {
   unsandboxedNote:
     "learnX is running without Chromium's sandbox, as the AppImage does on Ubuntu 24.04 and later. For better security, install the .deb instead.",
   startAtLoginCaption:
-    'learnX starts in the system tray when you sign in, so it keeps syncing and sends reminders. Closing its window keeps it there; Quit in the tray menu ends it.',
+    'Starts learnX in the system tray when you log in to your computer, so it keeps syncing and sending reminders. Closing the window keeps it running there; to quit, choose Quit learnX in the tray menu.',
   language: 'Language',
   followSystem: 'Follow System',
   languageRestartTitle: 'Restart learnX?',
@@ -220,6 +220,7 @@ export default {
   itemNotFound: 'Item Not Available',
   itemNotFoundDescription:
     'It may have been removed, or it belongs to another semester.',
+  switchSemester: 'Switch Semester',
   searchPlaceholder: 'Notices, assignments and files',
   logout: 'Log Out',
   logoutEllipsis: 'Log Out…',
@@ -370,7 +371,7 @@ export default {
   download: 'Download',
   saveFileSucceeded: 'Saved {name}',
   calendarExportWithoutClasses:
-    "Saved {name} without your classes: the timetable couldn't be loaded.",
+    "Saved {name}, but without your classes: the course schedule couldn't be loaded.",
   saveFileFailed: "Couldn't save the file",
   sso: 'Electronic ID Service System of Tsinghua University',
   ssoNote:
@@ -436,6 +437,13 @@ export default {
   sampleGradeComment: 'Well done. Part 2 misses the empty-tree case.',
   notificationChannelClasses: 'Class reminders',
   notificationChannelClassesDescription: 'Reminders before your classes start',
+  notificationChannelUpdates: 'New versions',
+  notificationChannelUpdatesDescription: 'When a new version of learnX is out',
+  notifyAppUpdates: 'New Versions',
+  notifyAppUpdatesCaption: 'Lets you know when a new version of learnX is out.',
+  updateNotificationBody: 'Download and install it in Settings.',
+  updateNotificationReadyBody:
+    "It's downloaded and installs when you quit learnX.",
   notifyClassReminders: 'Class Reminders',
   classReminderOffset: 'Remind Before (Minutes)',
   classStartsAt: 'Starts at {time}',
@@ -512,7 +520,7 @@ export default {
   downloads: 'Downloads',
   downloadsTotal: 'All Downloads',
   downloadsCaption:
-    'Files downloaded in learnX, by course. Tap a course to export or delete its files.',
+    'Files downloaded in learnX, by course. Open a course to export or delete its files.',
   downloadsExport: 'Export All Downloads',
   downloadsExportCaption:
     'Copies the files to a "learnX" folder in a place you choose, sorted by semester and course. Exporting again updates that folder.',
@@ -561,6 +569,7 @@ export default {
   a11yNewBadge: 'New',
   a11yDone: 'Ended',
   a11yStruck: 'Will be replaced or removed',
+  a11yListWidth: 'List width',
   openInNewWindow: 'Open in New Window',
   moveUp: 'Move Up',
   moveDown: 'Move Down',
@@ -613,5 +622,5 @@ export default {
     'A cleaner look that follows macOS, and Quick Look for course files.',
   whatsNew19ElectronTitle: 'Windows & Linux',
   whatsNew19ElectronBody:
-    'Try the experimental desktop app for Windows and Linux, from the TUNA mirror or GitHub Releases.',
+    'Try the experimental desktop app for Windows and Linux.',
 };

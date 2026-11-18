@@ -9,6 +9,8 @@ import {
   SplitViewProvider,
 } from 'navigation/SplitView';
 import type { DetailNavigationContainerRef } from 'navigation/types';
+import Storage from 'expo-sqlite/kv-store';
+import { fireLayout } from 'test-utils/layout';
 
 const seenContext = jest.fn<
   void,
@@ -69,6 +71,28 @@ it('shows the list alone in a narrow window', async () => {
   // Hiding the list does nothing without a detail pane beside it.
   await act(() => context().toggleMaster(false));
   expect(screen.getByText('master')).toBeTruthy();
+});
+
+it("keeps the list's saved width, narrowed while the detail would have too little room", async () => {
+  const store = (Storage as unknown as { __store: Map<string, string> })
+    .__store;
+  store.set('splitMasterWidth', '600');
+  try {
+    await renderSplit(true);
+    expect(screen.getByTestId('split-master')).toHaveStyle({ width: 600 });
+    await act(() =>
+      fireLayout(screen.getByTestId('split-master'), { width: 900 }),
+    );
+    // 900 less the narrowest detail (400) and the divider
+    expect(screen.getByTestId('split-master')).toHaveStyle({ width: 499 });
+    expect(context().masterWidth).toBe(499);
+    await act(() =>
+      fireLayout(screen.getByTestId('split-master'), { width: 600 }),
+    );
+    expect(screen.getByTestId('split-master')).toHaveStyle({ width: 280 });
+  } finally {
+    store.clear();
+  }
 });
 
 it('puts the detail beside the list in a wide window, and can hide the list', async () => {

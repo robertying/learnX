@@ -39,12 +39,16 @@ import { getNotifiedKeys, resetNotified } from 'data/notified';
 import { ContentDiff } from 'data/contentDiff';
 import { resetSyncLog, useSyncLogStore } from 'data/syncLog';
 import { recordError } from 'services/crashReporting';
+import { checkForUpdate } from 'services/updateNotifications';
 
 jest.mock('expo-background-task', () => ({
   BackgroundTaskResult: { Success: 1, Failed: 2 },
   registerTaskAsync: jest.fn(),
 }));
 jest.mock('expo-task-manager', () => ({ defineTask: jest.fn() }));
+jest.mock('services/updateNotifications', () => ({
+  checkForUpdate: jest.fn(() => Promise.resolve()),
+}));
 jest.mock('services/crashReporting', () => ({
   recordError: jest.fn(),
   setCustomKey: jest.fn(),
@@ -597,6 +601,12 @@ describe('the background task', () => {
       BackgroundTask.BackgroundTaskResult.Success,
     );
     expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(1);
+  });
+
+  it('checks for a new version too, even when the sync fails', async () => {
+    setMockNetworkConfig({ failure: 'serverError' });
+    await backgroundTask({} as never);
+    expect(checkForUpdate).toHaveBeenCalled();
   });
 
   it('reports a failed sync to the system', async () => {

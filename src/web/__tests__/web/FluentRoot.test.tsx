@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import * as ReactNative from 'react-native';
 import { Switch } from '@fluentui/react-components';
 import { Alert } from 'web/alert';
 import FluentRoot from 'web/FluentRoot';
@@ -18,6 +19,17 @@ it('keeps Tabster while the app runs, whatever Fluent controls show', () => {
   expect(tabster()).toBeTruthy();
   unmount();
   expect(tabster()).toBeUndefined();
+});
+
+it("tells Chromium the page's appearance, for its scroll bars", () => {
+  const scheme = jest
+    .spyOn(ReactNative, 'useColorScheme')
+    .mockReturnValue('light');
+  const { rerender } = render(<FluentRoot />);
+  expect(document.documentElement.style.colorScheme).toBe('light');
+  scheme.mockReturnValue('dark');
+  rerender(<FluentRoot />);
+  expect(document.documentElement.style.colorScheme).toBe('dark');
 });
 
 it('gives the page back to assistive technology after an alert', async () => {

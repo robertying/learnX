@@ -18,7 +18,7 @@ type Props = NativeStackScreenProps<SettingsStackParams, 'SemesterSelection'>;
 
 const noSemesters: string[] = [];
 
-const SemesterSelection: React.FC<Props> = ({ navigation }) => {
+const SemesterSelection: React.FC<Props> = ({ navigation, route }) => {
   const loggedIn = useLoggedIn();
   const currentSemesterId = useCurrentSemester();
   const semestersResult = useQuery({ ...semestersQuery, enabled: loggedIn });
@@ -57,7 +57,12 @@ const SemesterSelection: React.FC<Props> = ({ navigation }) => {
               testID={`semester-${semester}`}
               title={getSemesterTextFromId(semester)}
               selected={currentSemesterId === semester}
-              onPress={() => setCurrentSemester(semester)}
+              onPress={() => {
+                setCurrentSemester(semester);
+                if (route.params?.closeOnSelect) {
+                  navigation.goBack();
+                }
+              }}
             />
           ))}
         </FormSection>

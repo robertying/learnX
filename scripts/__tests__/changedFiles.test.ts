@@ -1,5 +1,5 @@
 // scripts/ci/changed-files.sh decides whether the required Android and Electron
-// jobs build a pull request. A path it misses lets a break merge with the
+// jobs build a pull request, and whether Electron's Update E2E runs. A path it misses lets a break merge with the
 // required checks green, so each kind of path is listed here.
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
@@ -132,15 +132,48 @@ test('one Electron path among others builds Electron', () => {
   ).toBe('changed=true');
 });
 
-test.each(['android', 'electron'])(
-  'main pushes and manual runs always build %s',
-  target => {
-    expect(changed(['docs/README.md'], target, 'push')).toBe('changed=true');
-    expect(changed(['docs/README.md'], target, 'workflow_dispatch')).toBe(
-      'changed=true',
-    );
-  },
-);
+test.each([
+  'electron/updater.ts',
+  'electron/updateSignature.ts',
+  'electron/updateServer.ts',
+  'electron/updateE2E.ts',
+  'electron/main.ts',
+  'electron/package.ts',
+  'electron/packageConfig.ts',
+  'electron/buildInfo.ts',
+  'electron/installer.nsh',
+  'electron/package.json',
+  'electron/e2e/installUpdate.e2e.ts',
+  'electron/e2e/fixtures.ts',
+  'electron/e2e/steps.ts',
+  'pnpm-lock.yaml',
+  '.github/workflows/electron.yml',
+  'scripts/ci/changed-files.sh',
+])('%s tests Electron updates', path => {
+  expect(changed([path], 'electron-updates')).toBe('updates=true');
+});
+
+test.each([
+  'src/screens/Today.tsx',
+  'electron/system.ts',
+  'electron/e2e/updates.e2e.ts',
+  'electron/__tests__/updater.test.ts',
+  'electron/AGENTS.md',
+  'package.json',
+])('%s alone skips Electron updates', path => {
+  expect(changed([path], 'electron-updates')).toBe('updates=false');
+});
+
+test.each([
+  ['android', 'changed'],
+  ['electron', 'changed'],
+  ['electron-updates', 'updates'],
+])('main pushes and manual runs always build %s', (target, output) => {
+  expect(changed(['docs/README.md'], target, 'push')).toBe(`${output}=true`);
+  expect(changed(['docs/README.md'], target, 'workflow_dispatch')).toBe(
+    `${output}=true`,
+  );
+});
 
 test('an unknown target fails', () => {
   expect(() => changed(['docs/README.md'], 'web')).toThrow('Command failed');

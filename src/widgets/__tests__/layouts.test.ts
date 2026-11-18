@@ -165,8 +165,13 @@ const klass = (
   end,
   time: `${key}-time`,
   startTime: `${key}-start`,
-  weekday: `${key}-weekday`,
-  day: `${key}-day`,
+  // As the app writes them with its date formats (widgets/index)
+  tomorrow: `Tomorrow ${key}-time`,
+  tomorrowStart: `Tomorrow ${key}-start`,
+  weekday: `${key}-weekday ${key}-time`,
+  weekdayStart: `${key}-weekday ${key}-start`,
+  day: `${key}-day ${key}-time`,
+  dayStart: `${key}-day ${key}-start`,
   url: `learnx://course/${key}`,
 });
 
@@ -224,7 +229,6 @@ const upNextProps: UpNextWidgetProps = {
   later: 'Later',
   startsIn: 'Starts in',
   endsIn: 'Ends in',
-  tomorrow: 'Tomorrow',
   noClasses: 'No more classes',
   url: 'learnx://today',
 };

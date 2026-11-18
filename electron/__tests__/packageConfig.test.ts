@@ -7,6 +7,7 @@ import {
   mainProcessFiles,
   packageConfig,
   placeholderKeyProblem,
+  testKeyProblem,
 } from '../packageConfig.ts';
 import { SHARED_FILES, readShared } from '../shared.ts';
 
@@ -61,6 +62,76 @@ it('ships the update key’s public half, and where updates come from', () => {
   expect(
     packageConfig({ updateUrl: 'http://localhost:8299/' }).extraMetadata,
   ).toMatchObject({ updateUrl: 'http://localhost:8299/' });
+});
+
+it('ships a test build’s own update key in place of the committed one', () => {
+  const config = packageConfig({
+    updateUrl: 'http://127.0.0.1:8299/',
+    updateKeyDir: '/tmp/test-update-key',
+  });
+  expect(config.files).toContainEqual({
+    from: '/tmp/test-update-key',
+    to: '.',
+    filter: ['electron-public-key.pem'],
+  });
+  expect(config.files).not.toContainEqual(
+    expect.objectContaining({ from: '../certs' }),
+  );
+});
+
+it('builds both CPU architectures, or the one asked for', () => {
+  const targets = (config: ReturnType<typeof packageConfig>) => [
+    config.win?.target,
+    config.linux?.target,
+  ];
+  expect(targets(packageConfig())).toEqual([
+    [{ target: 'nsis', arch: ['x64', 'arm64'] }],
+    [
+      { target: 'AppImage', arch: ['x64', 'arm64'] },
+      { target: 'deb', arch: ['x64', 'arm64'] },
+    ],
+  ]);
+  expect(targets(packageConfig({ arch: 'arm64' }))).toEqual([
+    [{ target: 'nsis', arch: ['arm64'] }],
+    [
+      { target: 'AppImage', arch: ['arm64'] },
+      { target: 'deb', arch: ['arm64'] },
+    ],
+  ]);
+});
+
+it('builds into build/electron/dist, or where asked', () => {
+  expect(packageConfig().directories?.output).toBe('../build/electron/dist');
+  expect(packageConfig({ output: '/tmp/out' }).directories?.output).toBe(
+    '/tmp/out',
+  );
+});
+
+describe('testKeyProblem', () => {
+  it('lets a test build for a local server trust its own key', () => {
+    for (const updateUrl of [
+      'http://localhost:8299/',
+      'http://127.0.0.1:8299/',
+    ]) {
+      expect(
+        testKeyProblem({ updateUrl, updatePublicKey: 'key.pem' }),
+      ).toBeNull();
+    }
+    expect(testKeyProblem({})).toBeNull();
+  });
+
+  it.each([
+    undefined,
+    'https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/',
+    'http://localhost.example.com/',
+  ])(
+    'refuses another key for %s, which could pass for a release',
+    updateUrl => {
+      expect(testKeyProblem({ updateUrl, updatePublicKey: 'key.pem' })).toMatch(
+        /test build only/,
+      );
+    },
+  );
 });
 
 it('gives the .deb the homepage it requires', () => {
