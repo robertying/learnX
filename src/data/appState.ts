@@ -8,7 +8,8 @@ export const APP_STATE_KEY = 'appState';
 
 /**
  * What the user has already seen in the app: for the Settings badges, and
- * the welcome, set-up and What's New pages (`helpers/whatsNew`).
+ * the welcome, set-up and What's New pages (`helpers/whatsNew`). Also how the
+ * window was left, to open it the same way next time.
  */
 export interface AppState {
   /** Course information sharing was opened once, so its badge is gone. */
@@ -22,6 +23,12 @@ export interface AppState {
    * up to which What's New has been shown. It only moves forward.
    */
   whatsNewSeenVersion: string | null;
+  /**
+   * The sidebar was hidden. Apps keep this across launches (as NSSplitView's
+   * autosave does on the Mac); UIKit only keeps it with the window's saved
+   * state, which quitting discards by default.
+   */
+  sidebarHidden: boolean;
 }
 
 const initialAppState = (): AppState => ({
@@ -29,6 +36,7 @@ const initialAppState = (): AppState => ({
   welcomeSeen: false,
   setupSeen: false,
   whatsNewSeenVersion: null,
+  sidebarHidden: false,
 });
 
 export const useAppStateStore = create<AppState>()(
@@ -56,6 +64,12 @@ export const setSetupSeen = () => {
 };
 
 /** Marks What's New seen up to `version`, never moving it back. */
+export const setSidebarHidden = (sidebarHidden: boolean) => {
+  if (useAppStateStore.getState().sidebarHidden !== sidebarHidden) {
+    useAppStateStore.setState({ sidebarHidden });
+  }
+};
+
 export const setWhatsNewSeen = (version: string) => {
   const seen = useAppStateStore.getState().whatsNewSeenVersion;
   if (!seen || semverGt(version, seen)) {
@@ -65,13 +79,15 @@ export const setWhatsNewSeen = (version: string) => {
 
 /**
  * Forgets what the account has seen (on logout or another login). The
- * welcome page and What's New belong to the install, so they stay seen; the
- * set-up page shows again, since the account's settings start over.
+ * welcome page, What's New and the window belong to the install, so they
+ * stay as they were; the set-up page shows again, since the account's
+ * settings start over.
  */
 export const resetAppState = () => {
-  const { welcomeSeen, whatsNewSeenVersion } = useAppStateStore.getState();
+  const { welcomeSeen, whatsNewSeenVersion, sidebarHidden } =
+    useAppStateStore.getState();
   useAppStateStore.setState(
-    { ...initialAppState(), welcomeSeen, whatsNewSeenVersion },
+    { ...initialAppState(), welcomeSeen, whatsNewSeenVersion, sidebarHidden },
     true,
   );
 };
