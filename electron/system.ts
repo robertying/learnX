@@ -405,6 +405,17 @@ export const setUpSystem = ({
   let labels: Labels = DEFAULT_LABELS;
   let tray: Electron.Tray | null = null;
   let trayMenu: Electron.Menu | null = null;
+  /**
+   * Linux: GNOME's tray extension starts a launch (a busy cursor) for every
+   * click on a tray menu item and hands learnX its activation token, which
+   * only a window coming forward ends. Without one, as for Quit, the cursor
+   * stays busy until GNOME gives up on the launch, after learnX is gone.
+   */
+  const endTrayLaunch = () => {
+    if (platform === 'linux' && !background) {
+      appWindow()?.focus();
+    }
+  };
   const updateMenus = () => {
     if (!tray) {
       const image = nativeImage.createFromPath(iconFile);
@@ -421,9 +432,21 @@ export const setUpSystem = ({
     }
     trayMenu = Menu.buildFromTemplate([
       { label: labels.open, click: showWindow },
-      { label: labels.checkForNewItems, click: () => runSync(true) },
+      {
+        label: labels.checkForNewItems,
+        click: () => {
+          endTrayLaunch();
+          runSync(true);
+        },
+      },
       { type: 'separator' },
-      { label: labels.quit, click: () => app.quit() },
+      {
+        label: labels.quit,
+        click: () => {
+          endTrayLaunch();
+          app.quit();
+        },
+      },
     ]);
     tray.setContextMenu(trayMenu);
     if (platform === 'win32') {
