@@ -1,33 +1,22 @@
-import { queryOptions, useQuery } from '@tanstack/react-query';
-import { nativeApplicationVersion } from 'expo-application';
-import semverGt from 'semver/functions/gt';
+import { useQuery } from '@tanstack/react-query';
 import Updater from 'modules/updater';
-import { getLatestRelease } from 'helpers/update';
-
-/** The mirror's `latest.json`, checked at most once a day. */
-export const latestReleaseQuery = queryOptions({
-  queryKey: ['latestRelease'],
-  queryFn: getLatestRelease,
-  staleTime: 24 * 60 * 60 * 1000,
-});
+import { latestReleaseQuery, UPDATE_CHECK_INTERVAL } from 'data/latestRelease';
+import { isNewerRelease } from 'helpers/update';
 
 /**
  * A newer Android release on the TUNA mirror, or null. Only the APKs check
  * (`modules/updater`): the Google Play build and iOS are updated by their
- * stores. Compared with the installed app's own version, not the JS bundle's,
- * which an over-the-air update can change. Offline or with the mirror down,
- * there's simply none.
+ * stores. Checked again every few hours while open; coming back to the app
+ * and the background task check too (`services/updateNotifications`).
+ * Offline or with the mirror down, there's simply none.
  */
 const useAvailableUpdate = () => {
   const { data } = useQuery({
     ...latestReleaseQuery,
     enabled: Updater?.isSupported ?? false,
+    refetchInterval: UPDATE_CHECK_INTERVAL,
   });
-  return data &&
-    nativeApplicationVersion &&
-    semverGt(data.version, nativeApplicationVersion)
-    ? data
-    : null;
+  return data && isNewerRelease(data) ? data : null;
 };
 
 export default useAvailableUpdate;

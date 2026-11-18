@@ -23,6 +23,7 @@ jest.mock('navigation/stacks', () => ({
   CourseXStack: () => null,
   LoginStack: () => null,
   SearchStack: () => null,
+  SemesterSelectionStack: () => null,
   WhatsNewStack: () => null,
 }));
 jest.mock('screens/Setup', () => () => null);
@@ -60,17 +61,18 @@ describe('with the native split (iOS, iPadOS and Mac)', () => {
       'MainTab',
       'CourseXStack',
       'SearchStack',
+      'SemesterSelectionStack',
       'AssignmentSubmissionStack',
       'Setup',
       'WhatsNewStack',
     ]);
-    const setup = config().screens[4];
+    const setup = config().screens[5];
     expect(setup.groupOptions).toEqual({
       presentation: 'formSheet',
       sheetAllowedDetents: [1],
     });
-    // Search, CourseX and a submission in page sheets.
-    for (const index of [1, 2, 3]) {
+    // Search, CourseX, the semesters and a submission in page sheets.
+    for (const index of [1, 2, 3, 4]) {
       expect(config().screens[index].groupOptions).toEqual(
         Platform.OS === 'ios'
           ? { presentation: 'pageSheet' }
@@ -101,6 +103,7 @@ describe('on Android', () => {
       'Main',
       'CourseXStack',
       'SearchStack',
+      'SemesterSelectionStack',
       'AssignmentSubmissionStack',
       'Setup',
       'WhatsNewStack',

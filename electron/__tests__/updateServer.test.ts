@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import type { AddressInfo } from 'node:net';
 import os from 'node:os';
 import path from 'node:path';
-import { byteRange, createUpdateServer } from '../updateServer.ts';
+import { byteRanges, createUpdateServer } from '../updateServer.ts';
 
 let dir: string;
 let base: string;
@@ -36,6 +36,36 @@ it("serves the folder's files, whole or in ranges, as the mirror does", async ()
   );
 });
 
+it('serves several ranges at once as multipart/byteranges', async () => {
+  const response = await fetch(`${base}/latest.yml`, {
+    headers: { range: 'bytes=0-6, 9-14' },
+  });
+  expect(response.status).toBe(206);
+  const type = response.headers.get('content-type')!;
+  const boundary = /boundary=(.+)$/.exec(type)![1];
+  expect(type).toMatch(/^multipart\/byteranges; /);
+  const body = await response.text();
+  expect(Number(response.headers.get('content-length'))).toBe(
+    Buffer.byteLength(body),
+  );
+  expect(body).toBe(
+    [
+      `--${boundary}`,
+      'content-type: application/octet-stream',
+      'content-range: bytes 0-6/15',
+      '',
+      'version',
+      `--${boundary}`,
+      'content-type: application/octet-stream',
+      'content-range: bytes 9-14/15',
+      '',
+      '19.0.1',
+      `--${boundary}--`,
+      '',
+    ].join('\r\n'),
+  );
+});
+
 it('serves nothing else', async () => {
   for (const pathname of [
     '/',
@@ -48,17 +78,25 @@ it('serves nothing else', async () => {
   }
 });
 
-describe('byteRange', () => {
+describe('byteRanges', () => {
   it.each([
     [undefined, null],
-    ['bytes=0-9', { start: 0, end: 9 }],
-    ['bytes=5-', { start: 5, end: 99 }],
-    ['bytes=-10', { start: 90, end: 99 }],
+    ['bytes=0-9', [{ start: 0, end: 9 }]],
+    ['bytes=5-', [{ start: 5, end: 99 }]],
+    ['bytes=-10', [{ start: 90, end: 99 }]],
+    [
+      'bytes=0-9, 20-29',
+      [
+        { start: 0, end: 9 },
+        { start: 20, end: 29 },
+      ],
+    ],
     ['bytes=-', 'invalid'],
     ['bytes=9-5', 'invalid'],
     ['bytes=0-100', 'invalid'],
+    ['bytes=0-9, 9-5', 'invalid'],
     ['items=0-1', 'invalid'],
   ])('%s', (header, expected) => {
-    expect(byteRange(header, 100)).toEqual(expected);
+    expect(byteRanges(header, 100)).toEqual(expected);
   });
 });

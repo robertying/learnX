@@ -4,6 +4,7 @@ import { tCount, type TextKey } from 'helpers/i18n';
 import { CardGutter } from './CardRow';
 import SystemIcon from './SystemIcon';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
+import { getTargetUrl } from 'helpers/openTarget';
 import { Caption, Headline, useTextIconSize } from 'components/Text';
 import { useTheme } from 'theme';
 
@@ -45,6 +46,7 @@ const countText = (count: number, one: TextKey, other: TextKey) =>
 
 const CourseCard: React.FC<CourseCardProps> = ({
   data: {
+    id,
     name,
     teacherName,
     unreadNoticeCount,
@@ -55,6 +57,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
 }) => (
   <CardWrapper
     {...restProps}
+    link={getTargetUrl({ type: 'course', id })}
     testID="course-card"
     accessibilityLabel={[
       name,

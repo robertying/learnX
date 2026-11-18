@@ -28,6 +28,7 @@ export const notificationChannels = {
   content: 'content',
   deadlines: 'deadlines',
   classes: 'classes',
+  updates: 'updates',
 } as const;
 
 export type NotificationPermission = 'granted' | 'undetermined' | 'denied';
@@ -67,6 +68,11 @@ const setUpChannels = async () => {
       name: t('notificationChannelClasses'),
       description: t('notificationChannelClassesDescription'),
       importance: Notifications.AndroidImportance.HIGH,
+    }),
+    Notifications.setNotificationChannelAsync(notificationChannels.updates, {
+      name: t('notificationChannelUpdates'),
+      description: t('notificationChannelUpdatesDescription'),
+      importance: Notifications.AndroidImportance.DEFAULT,
     }),
   ]);
 };
@@ -258,10 +264,10 @@ export const getNotificationData = (
 export const getNotificationTarget = (
   response: Notifications.NotificationResponse,
 ): OpenTarget | null => {
-  // A class reminder opens its course, or Today.
+  // A class reminder opens its course, or Today; a new version, Settings.
   const raw = responseData(response);
-  if (raw?.type === 'today') {
-    return { type: 'today' };
+  if (raw?.type === 'today' || raw?.type === 'update') {
+    return { type: raw.type };
   }
   if (raw?.type === 'course' && typeof raw.id === 'string') {
     return { type: 'course', id: raw.id };

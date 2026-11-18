@@ -241,6 +241,8 @@ export interface Bridge {
   };
   /** Updates of the packaged app (electron/updater.ts). */
   updates: {
+    /** Whether this run takes updates: a packaged Windows or Linux build. */
+    checks: () => boolean;
     /** The update downloaded and waiting for a restart, or null. */
     pending: () => BridgeUpdate | null;
     /** Called when an update has downloaded. */

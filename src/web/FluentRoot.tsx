@@ -1,4 +1,4 @@
-import type { PropsWithChildren } from 'react';
+import { useEffect, type PropsWithChildren } from 'react';
 import {
   FluentProvider,
   makeStaticStyles,
@@ -52,6 +52,11 @@ const KeepTabster = () => {
 const FluentRoot = ({ children }: PropsWithChildren) => {
   const { dark } = useTheme();
   useFocusStyles();
+  // Chromium draws its own parts of the page (scroll bars, the text
+  // caret's default color) light unless the page says it's dark.
+  useEffect(() => {
+    document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+  }, [dark]);
   return (
     <FluentProvider theme={fluentTheme(dark)} style={rootStyle}>
       <KeepTabster />

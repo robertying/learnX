@@ -1,6 +1,8 @@
 import { renderHook } from '@testing-library/react-native';
 import Spotlight from 'modules/spotlight';
 import useSpotlightTaps from 'hooks/useSpotlightTaps';
+import { WindowProvider } from 'hooks/useWindow';
+import { registerWindow } from 'services/windows';
 
 const mockOpen = jest.fn();
 jest.mock('hooks/useOpenTarget', () => () => mockOpen);
@@ -32,4 +34,21 @@ it('opens notices, assignments and files tapped later, ignoring other domains', 
   expect(mockOpen).toHaveBeenCalledWith({ type: 'assignment', id: 'a1' });
   listener({ domain: 'file', id: 'f1' });
   expect(mockOpen).toHaveBeenCalledWith({ type: 'file', id: 'f1' });
+});
+
+it('leaves a result tapped later to the window it was delivered to', async () => {
+  const removeFirst = registerWindow('first');
+  await renderHook(() => useSpotlightTaps(), {
+    wrapper: ({ children }: React.PropsWithChildren) => (
+      <WindowProvider windowId="second">{children}</WindowProvider>
+    ),
+  });
+  const listener = spotlight.addListener.mock.calls[0][1] as (item: {
+    domain: string;
+    id: string;
+  }) => void;
+  // UIKit names no window, so the oldest one opens it.
+  listener({ domain: 'notice', id: 'n1' });
+  expect(mockOpen).not.toHaveBeenCalled();
+  removeFirst();
 });

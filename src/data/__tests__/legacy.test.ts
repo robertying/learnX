@@ -169,6 +169,7 @@ describe('importing user data saved by 18.0.x', () => {
       welcomeSeen: false,
       setupSeen: false,
       whatsNewSeenVersion: null,
+      sidebarHidden: false,
     });
     expect(m.userData.getUserData()).toEqual({
       pendingActions: [

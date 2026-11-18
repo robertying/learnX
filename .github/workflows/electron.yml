@@ -2,9 +2,11 @@ name: Electron
 
 # The Windows and Linux app (electron/). The web build and the E2E tests are
 # required; a pull request that can't affect the app (the `changes` step)
-# skips their steps and passes. Manual runs also check that the installers
-# still build (Installers); those builds are never released: releases are
-# built, signed and uploaded by hand with fastlane (the release skill).
+# skips their steps and passes. Update E2E, not required, runs on pull
+# requests that change how the app updates, and by hand. Manual runs also
+# check that the installers still build (Installers); those builds are never
+# released: releases are built, signed and uploaded by hand with fastlane
+# (the release skill).
 # js.yml's Checks run the `web` Jest project.
 on:
   pull_request:
@@ -37,6 +39,7 @@ jobs:
     timeout-minutes: 20
     outputs:
       changed: ${{ steps.changes.outputs.changed }}
+      updates: ${{ steps.updates.outputs.updates }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -48,6 +51,11 @@ jobs:
       - name: Detect changed files
         id: changes
         run: scripts/ci/changed-files.sh electron >> "$GITHUB_OUTPUT"
+
+      # Whether Update E2E runs.
+      - name: Detect update changes
+        id: updates
+        run: scripts/ci/changed-files.sh electron-updates >> "$GITHUB_OUTPUT"
 
       - name: Set up JS
         if: steps.changes.outputs.changed == 'true'
@@ -201,6 +209,76 @@ jobs:
         with:
           path: build/electron/cache
           key: ${{ steps.electron-cache.outputs.cache-primary-key }}
+
+  update:
+    # A real update of the packaged app (electron/updateE2E.ts): packages
+    # 99.0.0 and 99.0.1 for the runner's CPU, signed with a throwaway key
+    # made for the run, installs 99.0.0 (the NSIS installer on Windows, the
+    # AppImage on Linux), serves 99.0.1 and checks that the app updates from
+    # Settings and comes back as 99.0.1. Two packagings make it the slowest
+    # Electron job, and it tests what few changes touch, so it isn't
+    # required: it runs on pull requests that change the update path
+    # (scripts/ci/changed-files.sh electron-updates) and by hand, not on main
+    # pushes. A static name: rows show as "Update E2E (Linux)" and "Update
+    # E2E (Windows)".
+    name: Update E2E
+    needs: web
+    if: github.event_name != 'push' && needs.web.outputs.updates == 'true' && needs.web.outputs.changed == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        run: [Linux, Windows]
+    runs-on: ${{ matrix.run == 'Windows' && 'windows-latest' || 'ubuntu-latest' }}
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up JS
+        uses: ./.github/actions/setup-js
+
+      - name: Download web build
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: electron-web
+          path: build/electron/web
+
+      # Electron and electron-builder's tools, as Installers saves them.
+      - name: Restore Electron download cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: build/electron/cache
+          key: electron-package-${{ runner.os }}-${{ hashFiles('electron/package.json', 'electron/packageConfig.ts') }}
+          restore-keys: electron-package-${{ runner.os }}-
+
+      # The AppImage mounts itself with FUSE, as on a desktop, which needs
+      # a fusermount the runner image may not have.
+      - name: Install FUSE
+        if: matrix.run == 'Linux'
+        run: |
+          if ! command -v fusermount3 >/dev/null && ! command -v fusermount >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends fuse3
+          fi
+
+      # The web build above has the mock login the test logs in with. On
+      # Linux the test's app gets an Xvfb of its own (e2e/fixtures.ts).
+      - name: Update E2E
+        shell: bash
+        run: |
+          bash scripts/ci/write-e2e-env.sh
+          pnpm e2e:electron:update --skip-export
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - name: Upload results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: electron-update-e2e-${{ matrix.run }}
+          path: build/electron/e2e
+          if-no-files-found: ignore
+          retention-days: 14
 
   installers:
     # Checks that the installers still build: each platform on its own

@@ -1,3 +1,5 @@
+import { nativeApplicationVersion } from 'expo-application';
+import semverGt from 'semver/functions/gt';
 import DeviceInfo from 'constants/DeviceInfo';
 import updateMirror from 'constants/updateMirror.json';
 import env from 'helpers/env';
@@ -57,3 +59,11 @@ export const getLatestRelease = async (): Promise<Release> => {
     size: file?.size,
   };
 };
+
+/**
+ * Whether `release` is newer than the installed app: its own version, not
+ * the JS bundle's, which an over-the-air update can change.
+ */
+export const isNewerRelease = (release: Pick<Release, 'version'>) =>
+  !!nativeApplicationVersion &&
+  semverGt(release.version, nativeApplicationVersion);

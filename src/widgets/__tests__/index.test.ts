@@ -1,5 +1,7 @@
 import { Platform } from 'react-native';
 import { Assignment } from 'data/types/state';
+import { CJK_GAP } from 'helpers/cjk';
+import { mockClock, mockLocale } from 'test-utils/locale';
 import { updateDeadlineWidget, updateUpNextWidget } from 'widgets';
 import iosWidget from 'widgets/Deadlines';
 import androidWidget from 'widgets/Deadlines.android';
@@ -141,8 +143,12 @@ describe('updateUpNextWidget', () => {
           courseName: 'Calculus',
           time: '08:00–09:35',
           startTime: '08:00',
-          weekday: 'Mon',
-          day: 'Mon 3/16',
+          tomorrow: 'Tomorrow 08:00–09:35',
+          tomorrowStart: 'Tomorrow 08:00',
+          weekday: 'Mon 08:00–09:35',
+          weekdayStart: 'Mon 08:00',
+          day: 'Mon 3/16 08:00–09:35',
+          dayStart: 'Mon 3/16 08:00',
           url: 'learnx://course/c1',
         },
         { courseName: 'Physics', time: '13:30–15:05', url: undefined },
@@ -162,6 +168,30 @@ describe('updateUpNextWidget', () => {
     updateUpNextWidget(classes);
     const [entries] = jest.mocked(iosUpNext.updateTimeline).mock.calls[0];
     expect(entries[0].props).toMatchObject({ locale: 'zh_Hans' });
+  });
+
+  it('writes the days in Chinese with no space after 明天', () => {
+    jest.replaceProperty(Platform, 'OS', 'ios');
+    mockLocale.current = 'zh-CN';
+    mockClock.uses24hourClock = false;
+    updateUpNextWidget(classes);
+    const [entries] = jest.mocked(iosUpNext.updateTimeline).mock.calls[0];
+    expect(entries[0].props.classes[0]).toMatchObject({
+      tomorrow: '明天上午8:00–9:35',
+      tomorrowStart: '明天上午8:00',
+      weekday: '周一 上午8:00–9:35',
+      day: '3月16日 周一 上午8:00–9:35',
+    });
+  });
+
+  it('adds the gap Android leaves out between Chinese and digits', () => {
+    jest.replaceProperty(Platform, 'OS', 'android');
+    mockLocale.current = 'zh-CN';
+    updateUpNextWidget(classes);
+    const [props] = jest.mocked(androidUpNext.updateSnapshot).mock.calls[0];
+    expect(props.classes[0]).toMatchObject({
+      tomorrow: `明天${CJK_GAP}08:00–09:35`,
+    });
   });
 
   it('gives Android a snapshot, once for the same props', () => {

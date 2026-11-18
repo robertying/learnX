@@ -17,6 +17,10 @@
 // A test build for trying updates against electron/updateServer.ts:
 //   pnpm electron:package --win --version 19.0.1 \
 //     --update-url http://localhost:8299/
+// which can also trust a throwaway update key instead of the committed one
+// (--update-public-key <PEM>, only with such an --update-url), build for one
+// CPU architecture (--arch x64 or arm64) and go elsewhere (--output <dir>),
+// as updateE2E.ts's builds do.
 //
 // The installers need NSIS, the AppImage tools and fpm, which electron-builder
 // downloads for the computer it runs on (toolsets in packageConfig.ts): a
@@ -24,7 +28,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
-import { packageConfig, placeholderKeyProblem } from './packageConfig.ts';
+import {
+  packageConfig,
+  placeholderKeyProblem,
+  testKeyProblem,
+} from './packageConfig.ts';
 import { stripPreloads } from './preloads.ts';
 import { exportWeb } from './webExport.ts';
 
@@ -42,8 +50,24 @@ const { values } = parseArgs({
     'update-url': { type: 'string' },
     dir: { type: 'boolean', default: false },
     'allow-placeholder-key': { type: 'boolean', default: false },
+    'update-public-key': { type: 'string' },
+    arch: { type: 'string' },
+    output: { type: 'string' },
   },
 });
+
+if (values.arch && values.arch !== 'x64' && values.arch !== 'arm64') {
+  console.error('--arch is x64 or arm64');
+  process.exit(1);
+}
+const testKey = testKeyProblem({
+  updateUrl: values['update-url'],
+  updatePublicKey: values['update-public-key'],
+});
+if (testKey) {
+  console.error(testKey);
+  process.exit(1);
+}
 
 // Installers that could never update aren't built (packageConfig.ts).
 const keyProblem = placeholderKeyProblem(
@@ -52,7 +76,10 @@ const keyProblem = placeholderKeyProblem(
     updateUrl: values['update-url'],
     allowPlaceholderKey: values['allow-placeholder-key'],
   },
-  fs.readFileSync(path.join(root, 'certs', 'electron-public-key.pem')),
+  fs.readFileSync(
+    values['update-public-key'] ??
+      path.join(root, 'certs', 'electron-public-key.pem'),
+  ),
 );
 if (keyProblem) {
   console.error(keyProblem);
@@ -77,19 +104,42 @@ process.env.ELECTRON_BUILDER_CACHE ??= path.join(
 // Loaded only now: it takes a while, and the steps above may stop the run.
 const { build } = await import('electron-builder');
 
+/**
+ * A test build's own update key (--update-public-key), copied under the name
+ * the app reads it by into a folder for packageConfig.ts.
+ */
+const testKeyDir = () => {
+  if (!values['update-public-key']) {
+    return undefined;
+  }
+  const dir = path.join(root, 'build', 'electron', 'test-update-key');
+  fs.mkdirSync(dir, { recursive: true });
+  fs.copyFileSync(
+    values['update-public-key'],
+    path.join(dir, 'electron-public-key.pem'),
+  );
+  return dir;
+};
+
 const both = !values.win && !values.linux;
+const arch = values.arch as 'x64' | 'arm64' | undefined;
+const config = packageConfig({
+  version: values.version,
+  build: values.build,
+  updateUrl: values['update-url'],
+  updateKeyDir: testKeyDir(),
+  output: values.output && path.resolve(values.output),
+  arch,
+});
 
 await build({
   projectDir: electronDir,
-  // The config's targets (both CPU architectures) for each platform asked
-  // for, or with --dir the unpacked app for each architecture.
+  // The config's targets (both CPU architectures, unless --arch) for each
+  // platform asked for, or with --dir the unpacked app for each
+  // architecture.
   win: values.win || both ? (values.dir ? ['dir'] : []) : undefined,
   linux: values.linux || both ? (values.dir ? ['dir'] : []) : undefined,
-  ...(values.dir ? { x64: true, arm64: true } : {}),
-  config: packageConfig({
-    version: values.version,
-    build: values.build,
-    updateUrl: values['update-url'],
-  }),
+  ...(values.dir ? (arch ? { [arch]: true } : { x64: true, arm64: true }) : {}),
+  config,
   publish: 'never',
 });

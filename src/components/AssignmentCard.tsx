@@ -8,6 +8,7 @@ import {
 import { t } from 'helpers/i18n';
 import { useMinute } from 'hooks/useClock';
 import { CardPill } from './CardRow';
+import { getTargetUrl } from 'helpers/openTarget';
 import ContentCard, { cardPreview, type ContentCardProps } from './ContentCard';
 
 export interface AssignmentCardProps extends ContentCardProps {
@@ -16,6 +17,7 @@ export interface AssignmentCardProps extends ContentCardProps {
 
 const AssignmentCard: React.FC<AssignmentCardProps> = ({
   data: {
+    id,
     courseName,
     courseTeacherName,
     title,
@@ -63,6 +65,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
   return (
     <ContentCard
       {...restProps}
+      link={getTargetUrl({ type: 'assignment', id })}
       testID="assignment-card"
       overline={overline}
       title={title}

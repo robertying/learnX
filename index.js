@@ -18,6 +18,7 @@ import { setUpNotificationActions } from './src/services/notificationActions';
 // (useMainStartup) would load the module only once the app has mounted.
 import { watchAssignmentChanges } from './src/services/background';
 import { watchSurfaces } from './src/services/surfaces';
+import { watchUpdates } from './src/services/updateNotifications';
 import { withLaunchOptions } from './src/services/launchOptions';
 
 // Keep LogBox off: its "Open debugger to view warnings" toast covers the tab
@@ -35,6 +36,9 @@ setUpNotificationActions();
 watchSurfaces();
 // Notifies about grades and moved deadlines the app itself fetches while open.
 watchAssignmentChanges();
+// Checks for a new version where learnX updates itself, and says when one is
+// out.
+watchUpdates();
 
 // Test runs set the app up with launch arguments (services/launchOptions).
 AppRegistry.registerComponent(appName, () => withLaunchOptions(App));

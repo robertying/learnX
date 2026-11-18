@@ -11,6 +11,9 @@ import { textStyles } from 'components/Text';
 import { Toast, toast } from 'components/Toast';
 import { toast as androidToast } from 'components/Toast.android';
 import { tabBarFrame } from 'modules/toast';
+import { WindowProvider } from 'hooks/useWindow';
+import { registerWindow } from 'services/windows';
+import { Windows } from 'test-utils/mocks/windows';
 
 // How long a toast takes to animate away once its time is up.
 const exitDuration = 300;
@@ -63,6 +66,25 @@ describe('Toast (iOS)', () => {
     expect(screen.getByText('Second')).toBeTruthy();
     await act(() => jest.advanceTimersByTime(1000 + exitDuration));
     expect(screen.queryByText('Second')).toBeNull();
+  });
+
+  it('shows only in the window the person is using', async () => {
+    const unregister = registerWindow('b');
+    await render(
+      <WindowProvider windowId="a">
+        <Toast />
+      </WindowProvider>,
+    );
+    Windows.targetWindowId.mockReturnValue('b');
+    await act(() => toast('Elsewhere', 'success'));
+    expect(screen.queryByText('Elsewhere')).toBeNull();
+
+    Windows.targetWindowId.mockReturnValue('a');
+    await act(() => toast('Here', 'success'));
+    expect(screen.getByText('Here')).toBeTruthy();
+    expect(tabBarFrame).toHaveBeenLastCalledWith('a');
+    Windows.targetWindowId.mockReturnValue(null);
+    unregister();
   });
 
   it('dismisses on tap', async () => {

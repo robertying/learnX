@@ -12,7 +12,7 @@ description: Write learnX release notes since the last tag, as separate texts fo
 
 ## File shape
 
-Four sections, each opened by its label line exactly as written here, in this order. Inside each store section, a `---- 中文（<locale>）----` block, then a `---- English (en-US) ----` block. Leave a blank line around every label line.
+Four sections, each opened by its label line exactly as written here, in this order. Inside each store section, a `---- English (en-US) ----` block first (the stores show English first, so it's filled in first), then a `---- 中文（<locale>）----` block. Leave a blank line around every label line.
 
 ```
 ==== GitHub Releases ====
@@ -31,14 +31,14 @@ Four sections, each opened by its label line exactly as written here, in this or
 
 ==== Google Play ====
 
----- 中文（zh-CN）----
-
-# 功能
-…
-
 ---- English (en-US) ----
 
 # Features
+…
+
+---- 中文（zh-CN）----
+
+# 功能
 …
 
 ==== App Store (iOS) ====

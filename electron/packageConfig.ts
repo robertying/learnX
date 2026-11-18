@@ -36,17 +36,31 @@ export const mainProcessFiles = (entry = 'main.ts'): string[] => {
   return [...found].sort();
 };
 
-/**
- * The config for a version and build number (the checkout's unless a test
- * build sets them, package.ts), and `updateUrl`, a test server standing in
- * for the mirror (updateServer.ts).
- */
-export const packageConfig = (
-  options: { version?: string; build?: string; updateUrl?: string } = {},
-): Configuration => {
+/** What a build may differ in from a release's (package.ts). */
+export interface PackageOptions {
+  /** The version and build number, the checkout's unless a test build sets them. */
+  version?: string;
+  build?: string;
+  /** A test server standing in for the mirror (updateServer.ts). */
+  updateUrl?: string;
+  /**
+   * A folder with a test build's own electron-public-key.pem, in place of
+   * certs/: the key the build trusts update files signed by (updateE2E.ts).
+   */
+  updateKeyDir?: string;
+  /** Where the installers go, instead of build/electron/dist. */
+  output?: string;
+  /** One CPU architecture's installers instead of both. */
+  arch?: 'x64' | 'arm64';
+}
+
+export const packageConfig = (options: PackageOptions = {}): Configuration => {
   const appVersion = options.version ?? version;
   const buildNumber = options.build ?? build;
   const updateUrl = options.updateUrl ?? `${updateMirror.latestRelease}/`;
+  const arch: ('x64' | 'arm64')[] = options.arch
+    ? [options.arch]
+    : ['x64', 'arm64'];
   return {
     appId: 'io.robertying.learnXElectron',
     productName: 'learnX',
@@ -71,7 +85,10 @@ export const packageConfig = (
     },
     // Windows' file version: the version and the build number.
     buildVersion: `${appVersion}.${buildNumber}`,
-    directories: { output: '../build/electron/dist', buildResources: 'icons' },
+    directories: {
+      output: options.output ?? '../build/electron/dist',
+      buildResources: 'icons',
+    },
     // Electron's downloads for each platform, kept with the dev runner's.
     electronDownload: {
       cache: path.join(electronDir, '..', 'build', 'electron', 'cache'),
@@ -95,7 +112,11 @@ export const packageConfig = (
         filter: [...SHARED_FILES],
       },
       // The key update files are signed with (updateSignature.ts).
-      { from: '../certs', to: '.', filter: ['electron-public-key.pem'] },
+      {
+        from: options.updateKeyDir ?? '../certs',
+        to: '.',
+        filter: ['electron-public-key.pem'],
+      },
     ],
     // Where the packaged app finds updates (app-update.yml): the TUNA
     // mirror's copy of the latest GitHub release (`v<version>`, with the
@@ -106,7 +127,7 @@ export const packageConfig = (
     publish: { provider: 'generic', url: updateUrl },
     win: {
       // One installer for both: Windows installs the one for its CPU.
-      target: [{ target: 'nsis', arch: ['x64', 'arm64'] }],
+      target: [{ target: 'nsis', arch }],
       icon: 'icons/icon.ico',
       executableName: 'learnX',
     },
@@ -123,8 +144,8 @@ export const packageConfig = (
     },
     linux: {
       target: [
-        { target: 'AppImage', arch: ['x64', 'arm64'] },
-        { target: 'deb', arch: ['x64', 'arm64'] },
+        { target: 'AppImage', arch },
+        { target: 'deb', arch },
       ],
       icon: 'icons/icon.png',
       executableName: 'learnx',
@@ -171,6 +192,19 @@ const isLocalUrl = (url: string | undefined) => {
     return false;
   }
 };
+
+/**
+ * Why a build can't trust another update key than the committed one, or
+ * null: only a test build for an update server on this computer may, so a
+ * build that trusts a throwaway key can never pass for a release.
+ */
+export const testKeyProblem = (options: {
+  updateUrl?: string;
+  updatePublicKey?: string;
+}): string | null =>
+  options.updatePublicKey && !isLocalUrl(options.updateUrl)
+    ? '--update-public-key is for a test build only: pass an --update-url on localhost or 127.0.0.1 too'
+    : null;
 
 /**
  * Why installers can't be built, or null: if the committed update key

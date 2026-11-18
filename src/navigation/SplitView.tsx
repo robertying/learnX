@@ -14,7 +14,8 @@ import {
 } from '@react-navigation/native';
 import type { DetailNavigationContainerRef, DetailStackParams } from './types';
 import SplitSizes from 'constants/SplitSizes';
-import Divider from 'components/Divider';
+import { saveMasterWidth, savedMasterWidth } from './paneLayout';
+import SplitDivider from './SplitDivider';
 
 const SplitViewContext = createContext<{
   detailNavigationContainerRef: DetailNavigationContainerRef | null;
@@ -174,6 +175,25 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
   const [fullScreenTabs, setFullScreenTabs] = useState<ReadonlySet<string>>(
     () => new Set(),
   );
+  // The list column's width: the user's (in the Electron app, which drags
+  // it), narrowed while the window leaves the detail column too little room.
+  const [chosenWidth, setChosenWidth] = useState(
+    () => savedMasterWidth() ?? SplitSizes.masterWidth,
+  );
+  const [rootWidth, setRootWidth] = useState<number | null>(null);
+  const maxMasterWidth = Math.max(
+    SplitSizes.minMasterWidth,
+    Math.min(
+      SplitSizes.maxMasterWidth,
+      rootWidth === null
+        ? Infinity
+        : rootWidth - SplitSizes.minDetailWidth - DIVIDER_WIDTH,
+    ),
+  );
+  const masterWidth = Math.max(
+    SplitSizes.minMasterWidth,
+    Math.min(chosenWidth, maxMasterWidth),
+  );
   const showMaster = !fullScreenTabs.has(selectedTab);
   const masterHidden = showDetail && !showMaster;
   const toggleTabMaster = useCallback(
@@ -233,21 +253,25 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
         laidOut: true,
         showMaster,
         toggleMaster,
-        masterWidth: SplitSizes.masterWidth,
+        masterWidth,
         tabs,
       }}
     >
-      <View style={styles.root}>
+      <View
+        style={styles.root}
+        onLayout={event => setRootWidth(event.nativeEvent.layout.width)}
+      >
         <View
           testID="split-master"
           style={[
             styles.master,
+            { width: masterWidth },
             // Its own width beside the detail. (Not `flex: 0`, which React
             // Native Web reads as a zero basis.)
             showDetail ? styles.masterBeside : styles.masterAlone,
             // Not `display: 'none'`: Fabric doesn't mount the children of hidden views, so
             // every toggle would destroy and recreate the whole master pane natively.
-            masterHidden && styles.masterHidden,
+            masterHidden && [styles.masterHidden, { left: -masterWidth }],
           ]}
           pointerEvents={masterHidden ? 'none' : 'auto'}
           accessibilityElementsHidden={masterHidden}
@@ -257,7 +281,16 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
         >
           {children}
         </View>
-        {showDetail && !masterHidden && <Divider vertical />}
+        {showDetail && !masterHidden && (
+          <SplitDivider
+            width={masterWidth}
+            min={SplitSizes.minMasterWidth}
+            max={maxMasterWidth}
+            defaultWidth={SplitSizes.masterWidth}
+            onResize={setChosenWidth}
+            onResizeEnd={saveMasterWidth}
+          />
+        )}
         <View
           testID="split-detail"
           style={[styles.detail, { display: showDetail ? 'flex' : 'none' }]}
@@ -279,6 +312,8 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
   );
 };
 
+const DIVIDER_WIDTH = 1;
+
 const styles = StyleSheet.create({
   // Clips the hidden master pane, which sits off its leading edge: in the
   // Electron app the navigation pane is there, not the window's edge.
@@ -288,7 +323,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   master: {
-    width: SplitSizes.masterWidth,
     zIndex: 2,
   },
   masterBeside: {
@@ -302,7 +336,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     bottom: 0,
-    left: -SplitSizes.masterWidth,
   },
   detail: {
     flex: 1,
