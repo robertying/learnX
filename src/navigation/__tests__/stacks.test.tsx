@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import DeviceInfo from 'constants/DeviceInfo';
 import { render, screen } from '@testing-library/react-native';
 import { useAppStateStore } from 'data/appState';
 import { useCredentialsStore } from 'data/credentials';
@@ -250,7 +251,7 @@ describe('LoginStack', () => {
     expect((await configOf(LoginStack)).initialRouteName).toBe('Login');
   });
 
-  it('opens SSO full screen with a close button, in place on Mac', async () => {
+  it('opens SSO full screen with a close button', async () => {
     const config = await configOf(LoginStack);
     expect(config.screens.map(s => s.name)).toEqual([
       'Welcome',
@@ -263,5 +264,15 @@ describe('LoginStack', () => {
       presentation: 'fullScreenModal',
     });
     expect(optionsArgs.navigation.goBack).not.toHaveBeenCalled();
+  });
+
+  it('opens SSO in a page sheet on Mac', async () => {
+    const isMac = jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+    const config = await configOf(LoginStack);
+    expect(config.screens[2].options).toMatchObject({
+      title: t('sso'),
+      presentation: 'pageSheet',
+    });
+    isMac.mockRestore();
   });
 });
