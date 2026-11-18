@@ -137,9 +137,9 @@ const openedModifiers = [
 const macFormModifiers = [
   scrollContentBackground('hidden'),
   background(PlatformColor('systemBackground')),
-  // Space between groups as System Settings leaves it, so a footer doesn't
-  // run into the next group's title.
-  listSectionSpacing(20),
+  // Sections close together, as System Settings groups them: with a
+  // section's title or footer, SwiftUI's own spacing is already wide.
+  listSectionSpacing(12),
 ];
 
 // Behind iOS's inset grouped rows
@@ -209,7 +209,7 @@ export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
           modifiers={[
             // Dragging the form down pulls the keyboard away, as in Notes.
             scrollDismissesKeyboard('interactively'),
-            ...(DeviceInfo.isMac() ? macFormModifiers : iosFormModifiers),
+            ...(DeviceInfo.isMac() ? macFormModifiers : glassHeaderModifiers),
             ...(onRefresh ? [refreshable(onRefresh)] : []),
           ]}
         >
@@ -244,12 +244,6 @@ export const FormScreen: React.FC<ViewProps> = ({ style, ...props }) => (
 // scroll views (`ScrollEdgeEffect.swift`, which SwiftUI's own style overrides):
 // in an iPad split view's other columns the automatic style is an opaque band.
 const glassHeaderModifiers = [scrollEdgeEffectStyle('soft', 'top')];
-
-// The default's 35 pt between sections, as in the Settings app, given as a
-// number: SwiftUI then adds it to a footer and the next section's title
-// rather than leaving them 21 pt apart, which ran a screen whose sections
-// all have both (Calendars & Reminders) into one block.
-const iosFormModifiers = [...glassHeaderModifiers, listSectionSpacing(35)];
 
 const macRowBackground = listRowBackground(
   PlatformColor('quaternarySystemFill'),
