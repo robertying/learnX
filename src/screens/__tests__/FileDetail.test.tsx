@@ -189,9 +189,9 @@ it('keeps the preview on the file and opens tapped links outside', async () => {
 it('switches to the info page from the header', async () => {
   downloaded({ path: 'file:///a.pdf' });
   await renderScreen({ id: pdf.id });
-  const { onToggleInfo, canRender } =
+  const { onToggleInfo, previewable } =
     jest.mocked(useFileDetailHeader).mock.lastCall![0];
-  expect(canRender).toBe(true);
+  expect(previewable).toBe(true);
   await act(() => onToggleInfo());
   expect(screen.getByTestId('file-info')).toBeTruthy();
   expect(screen.queryByTestId('pdf')).toBeNull();
@@ -248,7 +248,7 @@ it('previews Office documents with Quick Look on the Mac', async () => {
   });
   expect(screen.getByTestId('quick-look').props.uri).toBe('file:///a.pptx');
   expect(screen.queryByTestId('webview')).toBeNull();
-  expect(jest.mocked(useFileDetailHeader).mock.lastCall![0].canRender).toBe(
+  expect(jest.mocked(useFileDetailHeader).mock.lastCall![0].previewable).toBe(
     true,
   );
 });
@@ -261,7 +261,7 @@ it("shows an Office document's info on a Mac without Quick Look", async () => {
   });
   expect(screen.queryByTestId('quick-look')).toBeNull();
   expect(screen.getByText(t('fileType'))).toBeTruthy();
-  expect(jest.mocked(useFileDetailHeader).mock.lastCall![0].canRender).toBe(
+  expect(jest.mocked(useFileDetailHeader).mock.lastCall![0].previewable).toBe(
     false,
   );
 });
@@ -282,7 +282,7 @@ it("shows an Office document's info when Quick Look has nowhere to show it", asy
   });
   expect(screen.queryByTestId('quick-look')).toBeNull();
   expect(screen.getByText(t('fileType'))).toBeTruthy();
-  expect(jest.mocked(useFileDetailHeader).mock.lastCall![0].canRender).toBe(
+  expect(jest.mocked(useFileDetailHeader).mock.lastCall![0].previewable).toBe(
     false,
   );
 });

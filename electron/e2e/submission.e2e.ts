@@ -7,13 +7,15 @@ import path from 'node:path';
 import type { Page } from '@playwright/test';
 import { expect, test } from './fixtures.ts';
 import { exact } from './maestroEnv.ts';
-import { byId, openCard, openTab, shown } from './steps.ts';
+import { byId, drawn, openCard, openTab, shown } from './steps.ts';
 
 const openSubmission = async (window: Page) => {
   await openTab(window, 'assignments');
   await openCard(window, 'MOCK_ASSIGNMENT', 'assignment-detail');
   await shown(window.getByRole('button', { name: exact('T_submit') })).click();
   await expect(byId(window, 'assignmentSubmission')).toBeVisible();
+  // Over the assignment's description, a web view.
+  await drawn(window);
 };
 
 /** Submits, confirmed in the dialog, and waits for it to go through. */
