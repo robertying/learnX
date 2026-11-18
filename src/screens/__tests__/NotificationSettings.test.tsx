@@ -11,11 +11,15 @@ import { t } from 'helpers/i18n';
 import { openSystemSettings } from 'helpers/systemSettings';
 import useNotificationPermission from 'hooks/useNotificationPermission';
 import NotificationSettings from 'screens/NotificationSettings';
+import { checksForUpdates } from 'services/updateNotifications';
 import { screenProps } from 'test-utils/screenProps';
 
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
 jest.mock('hooks/useNotificationPermission', () => jest.fn());
 jest.mock('helpers/systemSettings', () => ({ openSystemSettings: jest.fn() }));
+jest.mock('services/updateNotifications', () => ({
+  checksForUpdates: jest.fn(() => false),
+}));
 
 const request = jest.fn(async () => true);
 const requestExact = jest.fn();
@@ -182,4 +186,24 @@ it('says when the Electron app notifies, with no system settings to open', async
     screen.getByText(t('notifyDeadlineRemindersCaptionElectron')),
   ).toBeTruthy();
   expect(screen.queryByText(t('openSystemSettings'))).toBeNull();
+});
+
+describe('New Versions', () => {
+  it('is hidden where the stores update learnX', async () => {
+    permission({ permission: 'undetermined' });
+    await renderScreen();
+    expect(screen.queryByTestId('notifications-appUpdates')).toBeNull();
+    // On by default, but not shown: nothing to turn on.
+    expect(screen.queryByTestId('notifications-turn-on')).toBeNull();
+  });
+
+  it('is on by default where learnX updates itself', async () => {
+    jest.mocked(checksForUpdates).mockReturnValue(true);
+    permission({ permission: 'undetermined' });
+    await renderScreen();
+    expect(
+      screen.getByRole('switch', { name: t('notifyAppUpdates') }),
+    ).toBeChecked();
+    expect(screen.getByTestId('notifications-turn-on')).toBeTruthy();
+  });
 });

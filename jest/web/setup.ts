@@ -7,6 +7,11 @@ import { mockClock, mockLocale } from '../locale';
 // React Native Web and Fluent UI into jsdom, so only the native modules the
 // shared code they import touches are replaced.
 
+// Code that reads process.platform (the Electron app's main process) runs as
+// on CI's Linux runners on every machine, as process.env.TZ in jest.config.js
+// does for time zones: a test that needs another platform sets it itself.
+Object.defineProperty(process, 'platform', { value: 'linux' });
+
 dayjs.extend(relativeTime);
 
 jest.mock('../../src/helpers/env', () => require('../mocks/env'));

@@ -75,10 +75,10 @@ function UpNextWidget(
     return days === 0
       ? c.time
       : days === 1
-        ? `${props.tomorrow} ${c.time}`
+        ? c.tomorrow
         : days < 7
-          ? `${c.weekday} ${c.time}`
-          : `${c.day} ${c.time}`;
+          ? c.weekday
+          : c.day;
   };
 
   return (
@@ -157,7 +157,6 @@ const initialProps: UpNextWidgetProps = {
   later: '',
   startsIn: '',
   endsIn: '',
-  tomorrow: '',
   noClasses: '',
   url: '',
 };

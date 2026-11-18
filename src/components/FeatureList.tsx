@@ -11,6 +11,7 @@ import Divider from 'components/Divider';
 import Logo from 'components/Logo';
 import SystemIcon from 'components/SystemIcon';
 import { Caption, Headline, textStyles, Title } from 'components/Text';
+import { openLink } from 'helpers/openLink';
 import type { SystemIconName } from 'helpers/systemIcons';
 import { useTheme } from 'theme';
 import { isApple } from 'helpers/platform';
@@ -19,6 +20,8 @@ export interface Feature {
   icon: SystemIconName;
   title: string;
   body: string;
+  /** A web page linked under the body, shown without its scheme. */
+  link?: string;
 }
 
 export interface FeatureListProps {
@@ -36,6 +39,9 @@ export interface FeatureListProps {
 }
 
 const apple = isApple();
+
+/** A web address as people read it: "tsinghua.app/learnX". */
+const linkText = (text: string) => text.replace(/^https?:\/\//, '');
 
 /**
  * A page of features under a title, with a button at the bottom: Apple's
@@ -127,12 +133,23 @@ const FeatureList: React.FC<FeatureListProps> = ({
           scrollEventThrottle={16}
         >
           <View style={styles.features}>
-            {features.map(feature => (
+            {features.map(({ link, ...feature }) => (
               <View
                 key={feature.title}
                 style={styles.feature}
                 accessible
-                accessibilityLabel={`${feature.title}, ${feature.body}`}
+                accessibilityLabel={[
+                  feature.title,
+                  feature.body,
+                  ...(link ? [linkText(link)] : []),
+                ].join(', ')}
+                // The row is one element to VoiceOver and TalkBack, so it
+                // opens its link itself.
+                {...(link && {
+                  accessibilityRole: 'link' as const,
+                  accessibilityActions: [{ name: 'activate' }],
+                  onAccessibilityAction: () => openLink(link),
+                })}
               >
                 <View
                   testID="feature-icon"
@@ -166,6 +183,16 @@ const FeatureList: React.FC<FeatureListProps> = ({
                 >
                   <Headline>{feature.title}</Headline>
                   <Caption variant="subheadline">{feature.body}</Caption>
+                  {link && (
+                    <Caption
+                      testID="feature-link"
+                      variant="subheadline"
+                      style={{ color: theme.colors.primary }}
+                      onPress={() => openLink(link)}
+                    >
+                      {linkText(link)}
+                    </Caption>
+                  )}
                 </View>
               </View>
             ))}

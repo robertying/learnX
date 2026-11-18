@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
+import Storage from 'expo-sqlite/kv-store';
 import WindowFrame from 'navigation/WindowFrame';
 import FluentRoot from 'web/FluentRoot';
 import {
@@ -8,6 +9,13 @@ import {
   EXPANDED_FROM,
   tabIcon,
 } from 'web/packages/navigationPane';
+
+// The in-memory store the phones' tests use, for the Electron app's.
+jest.mock('expo-sqlite/kv-store', () =>
+  require('test-utils/mocks/sqliteKvStore'),
+);
+const store = (Storage as unknown as { __store: Map<string, string> }).__store;
+beforeEach(() => store.clear());
 
 const Tabs = createNativeBottomTabNavigator();
 
@@ -110,6 +118,34 @@ it('is a rail of icons in a narrower window, until expanded', async () => {
   expect(screen.getByText('First')).toBeTruthy();
   await act(async () => fireEvent.click(toggle));
   expect(screen.queryByText('First')).toBeNull();
+});
+
+it("keeps the menu button's choice across launches, whatever the window's width", async () => {
+  setWidth(1200);
+  const { unmount } = renderPane();
+  await act(async () =>
+    fireEvent.click(screen.getByTestId('navigation-pane-toggle')),
+  );
+  expect(screen.queryByText('First')).toBeNull();
+  unmount();
+
+  renderPane();
+  expect(screen.queryByText('First')).toBeNull();
+  expect(
+    screen.getByTestId('navigation-pane-toggle').getAttribute('aria-expanded'),
+  ).toBe('false');
+});
+
+it('keeps the pane expanded in a narrower window once the user expanded it', async () => {
+  setWidth(EXPANDED_FROM - 1);
+  const { unmount } = renderPane();
+  await act(async () =>
+    fireEvent.click(screen.getByTestId('navigation-pane-toggle')),
+  );
+  unmount();
+
+  renderPane();
+  expect(screen.getByText('First')).toBeTruthy();
 });
 
 it("finds a tab's icon from its Android drawable name", () => {

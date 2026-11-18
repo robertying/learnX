@@ -2,6 +2,7 @@ import {
   useNavigation,
   type NavigatorScreenParams,
 } from '@react-navigation/native';
+import { settingsTab } from 'navigation/layout';
 import type { MainTabParams } from 'navigation/types';
 import { OpenTarget, targetRoutes } from 'helpers/openTarget';
 import { noteOpenedFromOutside } from 'hooks/useLaunchSheet';
@@ -10,13 +11,23 @@ import { setPendingTarget } from 'hooks/usePendingTarget';
 /**
  * Opens what a tapped notification, widget row or Spotlight result points
  * to: the item's detail, its list, or Today; or the Schedule (the Electron
- * app's Jump List), which Today opens once it's shown.
+ * app's Jump List), which Today opens once it's shown; or Settings, for a new
+ * version.
  */
 const useOpenTarget = () => {
   const navigation = useNavigation();
 
   return (target: OpenTarget) => {
     noteOpenedFromOutside();
+    if (target.type === 'update') {
+      setPendingTarget(null);
+      // Without a Settings tab (the phones), Settings opens on Today's stack,
+      // as Today's header button opens it.
+      return navigation.navigate('MainTab', {
+        screen: settingsTab ? 'SettingStack' : 'TodayStack',
+        params: { screen: 'Settings', pop: true },
+      });
+    }
     if (target.type === 'today' || target.type === 'schedule') {
       setPendingTarget(
         target.type === 'schedule' ? { type: 'schedule', id: 'week' } : null,

@@ -3,6 +3,11 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/zh-cn';
 import { mockClock, mockLocale } from './locale';
 
+// Code that reads process.platform (the Electron app's main process) runs as
+// on CI's Linux runners on every machine, as process.env.TZ in jest.config.js
+// does for time zones: a test that needs another platform sets it itself.
+Object.defineProperty(process, 'platform', { value: 'linux' });
+
 // As helpers/i18n does when it loads
 dayjs.extend(relativeTime);
 

@@ -51,7 +51,8 @@ type ItemDetails<Name extends keyof ItemDetailParams> = Pick<
 export type SettingDetailParams = {
   CourseInformationSharing: ExtraParams | undefined;
   CalendarSettings: ExtraParams | undefined;
-  SemesterSelection: ExtraParams | undefined;
+  /** `closeOnSelect`: the sheet closes once a semester is picked. */
+  SemesterSelection: (ExtraParams & { closeOnSelect?: boolean }) | undefined;
   Downloads: ExtraParams | undefined;
   NotificationSettings: ExtraParams | undefined;
   LanguageSettings: ExtraParams | undefined;
@@ -122,6 +123,12 @@ export type CourseXStackParams = {
   CourseX: { id: string } | undefined;
 };
 
+/** The semesters in a sheet, from an item that isn't in the semester shown. */
+export type SemesterSelectionStackParams = Pick<
+  SettingDetailParams,
+  'SemesterSelection'
+>;
+
 export type SearchStackParams = {
   Search:
     | {
@@ -156,6 +163,9 @@ export type RootStackParams = {
   MainTab: NavigatorScreenParams<MainTabParams>;
   CourseXStack: NavigatorScreenParams<CourseXStackParams> | undefined;
   SearchStack: NavigatorScreenParams<SearchStackParams> | undefined;
+  SemesterSelectionStack:
+    | NavigatorScreenParams<SemesterSelectionStackParams>
+    | undefined;
   AssignmentSubmissionStack: NavigatorScreenParams<AssignmentSubmissionStackParams>;
   LoginStack: NavigatorScreenParams<LoginStackParams>;
   Setup: SetupParams | undefined;
@@ -167,6 +177,9 @@ export type AndroidRootStackParams = {
   Main: undefined;
   CourseXStack: NavigatorScreenParams<CourseXStackParams> | undefined;
   SearchStack: NavigatorScreenParams<SearchStackParams> | undefined;
+  SemesterSelectionStack:
+    | NavigatorScreenParams<SemesterSelectionStackParams>
+    | undefined;
   AssignmentSubmissionStack: NavigatorScreenParams<AssignmentSubmissionStackParams>;
   LoginStack: NavigatorScreenParams<LoginStackParams>;
   Setup: SetupParams | undefined;

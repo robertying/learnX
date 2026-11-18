@@ -65,6 +65,7 @@ const learnx: Bridge = {
     set: language => ipcRenderer.invoke('language:set', language),
   },
   updates: {
+    checks: () => ipcRenderer.sendSync('updates:checks'),
     pending: () => ipcRenderer.sendSync('updates:pending'),
     onReady: listener => {
       ipcRenderer.on('updates:ready', (_event, update) => listener(update));

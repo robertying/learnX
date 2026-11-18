@@ -133,6 +133,7 @@ export const sampleContentNotifications = (
       deadlineReminders: true,
       deadlineReminderOffset: 60,
       classReminders: true,
+      appUpdates: true,
       classReminderOffset: 15,
     },
     notified: new Set(),
