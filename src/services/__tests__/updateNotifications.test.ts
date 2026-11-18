@@ -1,5 +1,6 @@
 import { AppState } from 'react-native';
 import * as Notifications from 'expo-notifications';
+import { useCredentialsStore } from 'data/credentials';
 import { latestReleaseQuery } from 'data/latestRelease';
 import { resetNotified } from 'data/notified';
 import { clearQueryCache, queryClient } from 'data/queryClient';
@@ -30,9 +31,21 @@ const latest = (version: string) =>
     .mocked(getLatestRelease)
     .mockResolvedValue({ version, url: 'https://mirror/app.apk' });
 
+const logIn = () =>
+  useCredentialsStore.setState({
+    credentials: {
+      username: 'user',
+      password: 'password',
+      fingerPrint: 'fp',
+      fingerGenPrint: 'fp2',
+      fingerGenPrint3: 'fp3',
+    },
+  });
+
 beforeEach(() => {
   clearQueryCache();
   resetNotified();
+  logIn();
 });
 
 describe('checkForUpdate', () => {
@@ -92,5 +105,18 @@ describe('watchUpdates', () => {
     onChange('active');
     await new Promise(setImmediate);
     expect(getLatestRelease).toHaveBeenCalledTimes(1);
+  });
+
+  it('says what it found before logging in once someone logs in', async () => {
+    // Watching since the test above.
+    useCredentialsStore.setState({ credentials: null });
+    latest('19.2.0');
+    await queryClient.fetchQuery(latestReleaseQuery);
+    await new Promise(setImmediate);
+    expect(schedule).not.toHaveBeenCalled();
+
+    logIn();
+    await new Promise(setImmediate);
+    expect(schedule).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,7 +1,7 @@
 import { t } from 'helpers/i18n';
 import { bridge } from 'web/bridge';
 import { pendingUpdate, subscribeToUpdates } from 'services/electronUpdates';
-import { notifyUpdate } from 'services/updateNotice';
+import { notifyOnLogin, notifyUpdate } from 'services/updateNotice';
 
 /**
  * Whether this run of the Electron app takes updates (electron/updater.ts):
@@ -23,7 +23,7 @@ export const watchUpdates = () => {
     return;
   }
   watching = true;
-  subscribeToUpdates(() => {
+  const notifyPending = () => {
     const update = pendingUpdate();
     if (update) {
       void notifyUpdate({
@@ -33,7 +33,11 @@ export const watchUpdates = () => {
           : t('updateNotificationReadyBody'),
       });
     }
-  });
+  };
+  subscribeToUpdates(notifyPending);
+  // An update found before logging in, said once someone does. It installs
+  // on quit either way.
+  notifyOnLogin(notifyPending);
 };
 
 /** The main process checks on its own timer (electron/updater.ts). */

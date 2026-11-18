@@ -1,9 +1,10 @@
 import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
+import { useCredentialsStore } from 'data/credentials';
 import { getNotifiedKeys, resetNotified } from 'data/notified';
 import { getSettings, resetSettings, setSetting } from 'data/settings';
 import { t } from 'helpers/i18n';
-import { notifyUpdate } from 'services/updateNotice';
+import { notifyOnLogin, notifyUpdate } from 'services/updateNotice';
 
 // Loads expo-updates and the Crashlytics module, neither of which Jest can.
 jest.mock('services/crashReporting', () => ({ recordError: jest.fn() }));
@@ -11,9 +12,20 @@ jest.mock('services/crashReporting', () => ({ recordError: jest.fn() }));
 const schedule = jest.mocked(Notifications.scheduleNotificationAsync);
 const update = (version = '19.1.0') => notifyUpdate({ version, body: 'Body' });
 
+const login = {
+  username: 'user',
+  password: 'password',
+  fingerPrint: 'fp',
+  fingerGenPrint: 'fp2',
+  fingerGenPrint3: 'fp3',
+};
+const logIn = () => useCredentialsStore.setState({ credentials: login });
+const logOut = () => useCredentialsStore.setState({ credentials: null });
+
 beforeEach(() => {
   resetNotified();
   resetSettings();
+  logIn();
 });
 
 it('says a new version is out, opening Settings', async () => {
@@ -58,4 +70,29 @@ it('stays quiet with New Versions off', async () => {
 it("doesn't throw when the notification can't be posted", async () => {
   schedule.mockRejectedValueOnce(new Error('No permission'));
   await expect(update()).resolves.toBeUndefined();
+});
+
+describe('before logging in', () => {
+  beforeEach(logOut);
+
+  it('stays quiet, and keeps the version to say later', async () => {
+    await update();
+    expect(schedule).not.toHaveBeenCalled();
+    expect(getNotifiedKeys().has('update:19.1.0')).toBe(false);
+    logIn();
+    await update();
+    expect(schedule).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls back once someone logs in, not on later changes', () => {
+    const notify = jest.fn();
+    const unsubscribe = notifyOnLogin(notify);
+    useCredentialsStore.setState({ credentials: { ...login, password: '' } });
+    expect(notify).not.toHaveBeenCalled();
+    logIn();
+    expect(notify).toHaveBeenCalledTimes(1);
+    useCredentialsStore.setState({ credentials: { ...login } });
+    expect(notify).toHaveBeenCalledTimes(1);
+    unsubscribe();
+  });
 });

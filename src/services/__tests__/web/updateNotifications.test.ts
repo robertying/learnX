@@ -1,4 +1,5 @@
 import { t } from 'helpers/i18n';
+import { useCredentialsStore } from 'data/credentials';
 import { resetNotified } from 'data/notified';
 import type { Bridge, BridgeUpdate } from 'web/bridge';
 import { pendingUpdate } from 'services/electronUpdates';
@@ -31,9 +32,21 @@ const posted = () =>
     body: request.content.body,
   }));
 
+const logIn = () =>
+  useCredentialsStore.setState({
+    credentials: {
+      username: 'user',
+      password: 'password',
+      fingerPrint: 'fp',
+      fingerGenPrint: 'fp2',
+      fingerGenPrint3: 'fp3',
+    },
+  });
+
 beforeEach(() => {
   bridge = installBridge();
   resetNotified();
+  logIn();
   watchUpdates();
 });
 
@@ -66,4 +79,18 @@ it('says so while the window is in front too', async () => {
   jest.spyOn(document, 'hasFocus').mockReturnValue(true);
   await ready({ version: '19.3.0' });
   expect(posted()).toHaveLength(1);
+});
+
+it('says an update found before logging in once someone logs in', async () => {
+  useCredentialsStore.setState({ credentials: null });
+  await ready({ version: '19.4.0' });
+  expect(posted()).toEqual([]);
+
+  logIn();
+  await new Promise(resolve => setTimeout(resolve));
+  expect(posted()).toEqual([
+    expect.objectContaining({
+      title: t('foundNewVersion', { version: '19.4.0' }),
+    }),
+  ]);
 });

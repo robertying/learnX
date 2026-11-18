@@ -4,7 +4,7 @@ import { latestReleaseQuery } from 'data/latestRelease';
 import { queryClient } from 'data/queryClient';
 import { t } from 'helpers/i18n';
 import { isNewerRelease, type Release } from 'helpers/update';
-import { notifyUpdate } from 'services/updateNotice';
+import { notifyOnLogin, notifyUpdate } from 'services/updateNotice';
 
 /**
  * Whether learnX checks for its own updates: only the APKs
@@ -41,6 +41,13 @@ export const watchUpdates = () => {
       event.query.queryKey[0] === latestReleaseQuery.queryKey[0]
     ) {
       void notifyRelease(event.query.state.data as Release);
+    }
+  });
+  // A version found before logging in, said once someone does.
+  notifyOnLogin(() => {
+    const release = queryClient.getQueryData(latestReleaseQuery.queryKey);
+    if (release) {
+      void notifyRelease(release);
     }
   });
   AppState.addEventListener('change', state => {
