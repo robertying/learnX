@@ -13,7 +13,7 @@ import {
 } from 'services/calendar/actions';
 import { refreshSurfaces } from 'services/surfaces';
 import { t } from 'helpers/i18n';
-import { isApple } from 'helpers/platform';
+import { isApple, isElectron } from 'helpers/platform';
 
 const show = (message?: ToastMessage) => {
   if (message) {
@@ -162,9 +162,14 @@ export const useCalendarExportRange = () => {
   const [range, setRange] = useState<{ startDate: Date; endDate: Date }>();
 
   const openPicker = async () => {
-    const { defaultExportRange } =
-      require('services/calendar/electronExport') as typeof import('services/calendar/electronExport');
-    const { start, end } = await defaultExportRange();
+    // Required only here, so the phones' bundles leave it out.
+    const electronExport = isElectron()
+      ? (require('services/calendar/electronExport') as typeof import('services/calendar/electronExport'))
+      : undefined;
+    if (!electronExport) {
+      return;
+    }
+    const { start, end } = await electronExport.defaultExportRange();
     setRange({ startDate: start.toDate(), endDate: end.toDate() });
   };
 

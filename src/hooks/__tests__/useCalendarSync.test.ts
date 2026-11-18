@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { act, renderHook } from '@testing-library/react-native';
 import dayjs from 'dayjs';
 import { toast } from 'components/Toast';
@@ -165,6 +165,10 @@ it('exports the calendars, showing the result', async () => {
 it('exports the dates picked, offered from today to the semester end', async () => {
   const { result } = await renderHook(() => useCalendarExportRange());
   expect(result.current.picker.open).toBe(false);
+  // The Electron app's alone.
+  await act(() => result.current.picker.openPicker());
+  expect(result.current.picker.open).toBe(false);
+  jest.replaceProperty(Platform, 'OS', 'web');
   await act(() => result.current.picker.openPicker());
   expect(result.current.picker).toMatchObject({
     open: true,
