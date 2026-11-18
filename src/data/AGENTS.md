@@ -8,7 +8,7 @@
 - `src/data/legacy.ts` imports what 18.0.x saved in AsyncStorage (`persist:settings`, and the user data inside the slices of `persist:root`) once, before the UI shows, then deletes both keys. Don't remove it while users can still upgrade from 18.0.x.
 - `scripts/e2e/e2e-upgrade.sh ios|android <device>` tests that import end to end: it installs a Release build of 18.0.3 (built once from the tag), uses it with 18.0.3's persistent mock account, installs the current Release build over it and checks the stores with the `storeReport` launch argument (`.maestro/upgrade/`). Run it after changing `data/legacy`, `data/credentials`, `data/install` or a store's persisted shape.
 - The saved data (server cache, user data, settings, drafts) belongs to one account, recorded as `dataOwner` (`src/data/dataOwner.ts`) apart from the credentials, which some logins don't keep. A successful login as anyone else drops all of it first (`clearAccountData` in `data/accountData`, the same steps as logout), so a new account never starts with the previous one's courses or timetable; logging in again as the same user (relaunch, resume, "Log in again") keeps it. Data saved before the owner was recorded counts as the saved login's.
-- In the Electron app the key-value stores and the query cache are files in the app's data folder, written by the main process (`electron/fileStore.cjs`), and the saved login is encrypted with Electron's `safeStorage` (`electron/secrets.cjs`).
+- In the Electron app the key-value stores and the query cache are files in the app's data folder, written by the main process (`electron/fileStore.ts`), and the saved login is encrypted with Electron's `safeStorage` (`electron/secrets.ts`).
 
 ## Server data
 

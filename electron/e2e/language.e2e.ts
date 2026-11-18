@@ -1,9 +1,9 @@
 // The app's language follows the system's (`--lang` here), as the Maestro
 // flows run in English on the local devices and in Chinese on CI: the mock
 // data, the screens, dialogs and the tray menu all switch with it.
-import { expect, packagedApp, test } from './fixtures';
-import { exact } from './maestroEnv';
-import { byId, card, openCard, openSettings, openTab, shown } from './steps';
+import { expect, packagedApp, test } from './fixtures.ts';
+import { exact } from './maestroEnv.ts';
+import { byId, card, openCard, openSettings, openTab, shown } from './steps.ts';
 
 test.describe('in Chinese', () => {
   test.use({ language: 'zh-CN' });

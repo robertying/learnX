@@ -1,7 +1,7 @@
 // The Electron app's entry: the app's own (index.js), registered again inside
 // Fluent's theme (src/web/FluentRoot), then rendered into the page's root
 // element, which React Native Web doesn't do by itself, with the launch
-// options of a test run as its props (electron/dev.mjs).
+// options of a test run as its props (electron/dev.ts).
 import './index.js';
 import { AppRegistry } from 'react-native';
 import { name as appName } from './app.json';

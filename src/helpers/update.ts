@@ -4,7 +4,7 @@ import env from 'helpers/env';
 
 /**
  * The TUNA mirror's copy of the latest GitHub release, which the Electron
- * app updates from too (electron/packageConfig.cjs reads the same file).
+ * app updates from too (electron/packageConfig.ts reads the same file).
  */
 const tunaMirrorUrl = updateMirror.latestRelease;
 

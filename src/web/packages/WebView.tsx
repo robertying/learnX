@@ -23,7 +23,7 @@ import webviewPartition from 'constants/webviewPartition.json';
  * Stands in for react-native-webview in the Electron app: an Electron
  * `<webview>` on the window's session, so pages share the cookies the app's
  * requests use. The main process hardens it as it attaches (sandbox, context
- * isolation, learnX's own preload; electron/webviews.cjs), asks this
+ * isolation, learnX's own preload; electron/webviews.ts), asks this
  * component about every top-level load (`onShouldStartLoadWithRequest`,
  * `originWhitelist`) and keeps it on Tsinghua's sites, courseX and learnX's
  * GitHub pages. The page posts messages with
@@ -70,7 +70,7 @@ const DEFAULT_ORIGIN_WHITELIST = [
   'data:',
 ];
 
-/** The session the main process lets web views use (webviews.cjs). */
+/** The session the main process lets web views use (webviews.ts). */
 const PARTITION = webviewPartition.partition;
 
 /** The `<webview>` events the stand-in turns into React Native's. */
@@ -142,7 +142,7 @@ export const MAX_DATA_URL_LENGTH = 1_500_000;
 
 /**
  * Loads a source: HTML as a data URL at its base URL (or, too long for one,
- * served at the base URL by the main process, electron/webviews.cjs), or an
+ * served at the base URL by the main process, electron/webviews.ts), or an
  * http(s) URI. Anything else stays blank (files show in `FilePreview`).
  * A load the app's rules refuse rejects (ERR_ABORTED), which the page's own
  * events report.

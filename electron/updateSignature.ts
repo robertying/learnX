@@ -7,38 +7,38 @@
 // the public half (certs/electron-public-key.pem). It reads an update file only
 // through `signedProvider`, which refuses one without a valid signature: no
 // update is offered, and the reason is logged.
-const { createPublicKey, sign, verify } = require('node:crypto');
+import { createPublicKey, sign, verify } from 'node:crypto';
 
 /** The signature's file name next to an update file's. */
-const SIGNATURE_SUFFIX = '.sig';
+export const SIGNATURE_SUFFIX = '.sig';
 
 /**
  * Whether a public key PEM is a placeholder (its first line says so), whose
  * private half no one holds: packaging and signing refuse one, so a
  * placeholder can't take the real key's place unnoticed.
- * @param {string | Buffer} publicKey
  */
-const isPlaceholderKey = publicKey =>
+export const isPlaceholderKey = (publicKey: string | Buffer): boolean =>
   String(publicKey).trimStart().startsWith('PLACEHOLDER');
 
 /**
  * A signature file's text for `data`: the Ed25519 signature in base64.
- * @param {Buffer} data
- * @param {string | Buffer} privateKey PEM
+ * @param privateKey PEM
  */
-const signUpdateFile = (data, privateKey) =>
-  `${sign(null, data, privateKey).toString('base64')}\n`;
+export const signUpdateFile = (
+  data: Buffer,
+  privateKey: string | Buffer,
+): string => `${sign(null, data, privateKey).toString('base64')}\n`;
 
 /**
  * Why `data` doesn't carry a valid signature by the public key, or null when
  * it does.
- *
- * @param {Buffer | string} data
- * @param {string | null | undefined} signatureText
- * @param {string | Buffer} publicKey PEM
- * @returns {string | null}
+ * @param publicKey PEM
  */
-const signatureProblem = (data, signatureText, publicKey) => {
+export const signatureProblem = (
+  data: Buffer | string,
+  signatureText: string | null | undefined,
+  publicKey: string | Buffer,
+): string | null => {
   if (!signatureText) {
     return 'no signature';
   }
@@ -58,39 +58,47 @@ const signatureProblem = (data, signatureText, publicKey) => {
 
 /**
  * electron-updater's generic provider, reading the update file only with a
- * valid signature: an error otherwise, which the updater logs (updater.cjs).
+ * valid signature: an error otherwise, which the updater logs (updater.ts).
  * Takes electron-updater's pieces as arguments, so tests can give stand-ins.
- *
- * @param {{
- *   GenericProvider: new (...args: any[]) => any;
- *   parseUpdateInfo: (rawData: string | null, channelFile: string, channelFileUrl: URL) => unknown;
- *   getChannelFilename: (channel: string) => string;
- *   newUrlFromBase: (pathname: string, baseUrl: URL, addRandomQueryToAvoidCaching?: boolean) => URL;
- *   publicKey: string | Buffer;
- * }} options
  */
-const signedProvider = ({
+export const signedProvider = ({
   GenericProvider,
   parseUpdateInfo,
   getChannelFilename,
   newUrlFromBase,
   publicKey,
+}: {
+  // The provider's fields it reads (`channel`, `updater`, `baseUrl`,
+  // `httpRequest`) are private in electron-updater's types.
+  GenericProvider: new (...args: any[]) => any;
+  parseUpdateInfo: (
+    rawData: string | null,
+    channelFile: string,
+    channelFileUrl: URL,
+  ) => unknown;
+  getChannelFilename: (channel: string) => string;
+  newUrlFromBase: (
+    pathname: string,
+    baseUrl: URL,
+    addRandomQueryToAvoidCaching?: boolean,
+  ) => URL;
+  publicKey: string | Buffer;
 }) =>
   class SignedProvider extends GenericProvider {
     async getLatestVersion() {
-      const channelFile = getChannelFilename(this.channel);
+      const channelFile = getChannelFilename(this.channel as string);
       // Both from the same moment's copy: a cached update file with a fresh
       // signature would fail, and be tried again later.
-      const noCache = this.updater.isAddNoCacheQuery;
-      const channelUrl = newUrlFromBase(channelFile, this.baseUrl, noCache);
+      const noCache = this.updater.isAddNoCacheQuery as boolean;
+      const baseUrl = this.baseUrl as URL;
+      const channelUrl = newUrlFromBase(channelFile, baseUrl, noCache);
       const signatureUrl = newUrlFromBase(
         channelFile + SIGNATURE_SUFFIX,
-        this.baseUrl,
+        baseUrl,
         noCache,
       );
-      const data = await this.httpRequest(channelUrl);
-      /** @type {string | null} */
-      let signatureText = null;
+      const data: string | null = await this.httpRequest(channelUrl);
+      let signatureText: string | null = null;
       try {
         signatureText = await this.httpRequest(signatureUrl);
       } catch {
@@ -105,11 +113,3 @@ const signedProvider = ({
       return parseUpdateInfo(data, channelFile, channelUrl);
     }
   };
-
-module.exports = {
-  SIGNATURE_SUFFIX,
-  isPlaceholderKey,
-  signUpdateFile,
-  signatureProblem,
-  signedProvider,
-};

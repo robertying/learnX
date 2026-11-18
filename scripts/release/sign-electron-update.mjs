@@ -2,7 +2,7 @@
 // Signs the Electron app's update files (latest.yml, latest-linux.yml,
 // latest-linux-arm64.yml) in a folder before they're uploaded to the GitHub
 // release: a detached Ed25519 signature, `<file>.sig`, next to each, which
-// the app checks before it reads the file (electron/updateSignature.cjs)
+// the app checks before it reads the file (electron/updateSignature.ts)
 // against the public key it carries, certs/electron-public-key.pem.
 //
 //   node scripts/release/sign-electron-update.mjs <dir> [--key <private key PEM>] [--version <x.y.z>]
@@ -18,10 +18,12 @@
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
-import updateSignature from '../../electron/updateSignature.cjs';
-
-const { SIGNATURE_SUFFIX, isPlaceholderKey, signUpdateFile, signatureProblem } =
-  updateSignature;
+import {
+  SIGNATURE_SUFFIX,
+  isPlaceholderKey,
+  signUpdateFile,
+  signatureProblem,
+} from '../../electron/updateSignature.ts';
 
 /** The update files electron-builder writes into a folder. */
 export const updateFiles = (/** @type {string} */ dir) =>
@@ -79,7 +81,7 @@ export const signUpdateFiles = (dir, privateKey, publicKey, version) => {
 };
 
 const main = () => {
-  const root = path.join(import.meta.dirname, '../..');
+  const root = path.join(import.meta.dirname, '..');
   const { values, positionals } = parseArgs({
     allowPositionals: true,
     options: { key: { type: 'string' }, version: { type: 'string' } },

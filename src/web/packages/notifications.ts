@@ -7,7 +7,7 @@ import {
 
 /**
  * Stands in for expo-notifications in the Electron app: the main process
- * shows each notification (electron/notifications.cjs), right away or, for a
+ * shows each notification (electron/notifications.ts), right away or, for a
  * reminder, at its time while learnX runs, and says which one was clicked.
  * Windows and Linux ask for no permission: notifications are allowed
  * wherever the system shows them. There are no action buttons, channels or
@@ -181,7 +181,7 @@ export const addNotificationResponseReceivedListener = (
 };
 
 /**
- * A notification a dev run only logged (electron/system.cjs), shown as a
+ * A notification a dev run only logged (electron/system.ts), shown as a
  * toast so it can be seen without posting one to the system.
  */
 const showDevNotification = ({

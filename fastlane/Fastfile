@@ -655,7 +655,7 @@ def verify_electron_files!(platforms)
     end
   end
   # The .debs aren't in any update file: their names carry the version
-  # (learnX-<target>-v<version>, electron/packageConfig.cjs).
+  # (learnX-<target>-v<version>, electron/packageConfig.ts).
   Dir[File.join(electron_out_dir, "*.{exe,AppImage,deb}")].each do |path|
     problems << "#{File.basename(path)} isn't version #{version}" unless File.basename(path).include?("-v#{version}.")
   end

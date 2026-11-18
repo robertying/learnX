@@ -27,7 +27,7 @@ const hasFiles = (event: DragEvent) =>
 
 /**
  * Copies a dropped file into the app's cache, where the submission reads
- * it, as the file picker does (electron/fileShell.cjs), a piece at a time.
+ * it, as the file picker does (electron/fileShell.ts), a piece at a time.
  */
 export const copyDroppedFile = async (file: globalThis.File) => {
   const dir = new Directory(

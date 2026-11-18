@@ -2,7 +2,7 @@ import { bridge } from 'web/bridge';
 
 /**
  * Stands in for expo-image-picker in the Electron app: the system's open
- * dialog for pictures and videos (electron/fileShell.cjs), copied into the
+ * dialog for pictures and videos (electron/fileShell.ts), copied into the
  * app's cache. There's no camera.
  */
 

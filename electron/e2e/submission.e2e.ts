@@ -5,9 +5,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { Page } from '@playwright/test';
-import { expect, test } from './fixtures';
-import { exact } from './maestroEnv';
-import { byId, openCard, openTab, shown } from './steps';
+import { expect, test } from './fixtures.ts';
+import { exact } from './maestroEnv.ts';
+import { byId, openCard, openTab, shown } from './steps.ts';
 
 const openSubmission = async (window: Page) => {
   await openTab(window, 'assignments');
@@ -58,7 +58,10 @@ test('submits a file chosen in the open dialog', async ({
 
   // Another one, from Photo Library: the same open dialog, for pictures.
   const photo = path.join(dataDir, 'photo.png');
-  fs.copyFileSync(path.join(__dirname, '..', 'icons', 'icon.png'), photo);
+  fs.copyFileSync(
+    path.join(import.meta.dirname, '..', 'icons', 'icon.png'),
+    photo,
+  );
   await main.stub({ open: [photo] });
   await pickAgain.click();
   await window

@@ -29,7 +29,7 @@ export interface DialogAnswers {
   messageBox?: number;
 }
 
-/** A notification the app showed: on a dev run, logged instead (system.cjs). */
+/** A notification the app showed: on a dev run, logged instead (system.ts). */
 export interface ShownNotification {
   title?: string;
   subtitle?: string;
@@ -212,7 +212,7 @@ export const mainProcess = (app: ElectronApplication) => ({
 
   /**
    * The notifications the app showed, oldest first: a dev run logs them
-   * instead of showing them (system.cjs). Dev runs only.
+   * instead of showing them (system.ts). Dev runs only.
    */
   shownNotifications: () =>
     app.evaluate(() =>
@@ -221,7 +221,7 @@ export const mainProcess = (app: ElectronApplication) => ({
       ),
     ),
 
-  /** What the updater logged (updater.cjs), oldest first. Dev runs only. */
+  /** What the updater logged (updater.ts), oldest first. Dev runs only. */
   updaterLog: () =>
     app.evaluate(() => [
       ...((globalThis as unknown as State).learnxUpdaterLog ?? []),
@@ -241,7 +241,7 @@ export const mainProcess = (app: ElectronApplication) => ({
 
   /**
    * Whether the app means its window to show: an E2E run shows it behind
-   * the others on Windows and Linux and never on a Mac (system.cjs,
+   * the others on Windows and Linux and never on a Mac (system.ts,
    * `present`), so this is what the app asked for, not the OS (window.e2e.ts
    * checks the OS on Windows and Linux).
    */
@@ -279,10 +279,10 @@ export const mainProcess = (app: ElectronApplication) => ({
   stubInstall: () =>
     app.evaluate(({ app: electronApp }) => {
       const state = globalThis as unknown as Required<State>;
-      // The copy main.cjs loaded: required from the app's own folder.
+      // The copy main.ts loaded: required from the app's own folder.
       const { createRequire } = process.getBuiltinModule('node:module');
       const { autoUpdater } = createRequire(
-        `${electronApp.getAppPath()}/main.cjs`,
+        `${electronApp.getAppPath()}/main.ts`,
       )('electron-updater') as {
         autoUpdater: {
           quitAndInstall: () => void;
@@ -292,7 +292,7 @@ export const mainProcess = (app: ElectronApplication) => ({
       autoUpdater.quitAndInstall = () => {
         state.learnxE2E.installs += 1;
       };
-      // Nor when the test closes the app (updater.cjs turns it on).
+      // Nor when the test closes the app (updater.ts turns it on).
       autoUpdater.autoInstallOnAppQuit = false;
     }),
 });

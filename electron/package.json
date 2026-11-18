@@ -6,9 +6,10 @@
   "description": "learnX for Windows and Linux",
   "author": "Rui Ying",
   "license": "MIT",
-  "main": "main.cjs",
+  "type": "module",
+  "main": "main.ts",
   "scripts": {
-    "start": "node dev.mjs"
+    "start": "node dev.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.65.1",

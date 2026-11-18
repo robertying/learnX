@@ -2,14 +2,12 @@ import { generateKeyPairSync } from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import updateSignature from '../../electron/updateSignature.cjs';
+import { signatureProblem } from '../../electron/updateSignature.ts';
 import {
   signUpdateFiles,
   updateFileVersion,
   updateFiles,
 } from '../release/sign-electron-update.mjs';
-
-const { signatureProblem } = updateSignature;
 
 const keyPair = () => {
   const { privateKey, publicKey } = generateKeyPairSync('ed25519');

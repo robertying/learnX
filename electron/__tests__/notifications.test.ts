@@ -4,7 +4,7 @@ import {
   createNotifier,
   dueAt,
   shownContent,
-} from '../notifications.cjs';
+} from '../notifications.ts';
 
 type Shown = {
   options: { title: string; subtitle?: string; body: string };

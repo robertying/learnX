@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 // A local stand-in for the TUNA mirror's LatestRelease/ folder, to try the
-// Electron app's updates (updater.cjs) without publishing anything, as
+// Electron app's updates (updater.ts) without publishing anything, as
 // scripts/e2e/updater-e2e-server.mjs does for the Android APKs. It serves the
 // files in <dir> as they are, byte ranges too (differential downloads read
 // the .blockmap files):
 //
 //   GET /<file>    latest.yml, latest-linux.yml, an installer, a .blockmap
 //
-//   node electron/updateServer.mjs <dir> [--port 8299]
+//   node electron/updateServer.ts <dir> [--port 8299]
 //
 // Point an app at it with `pnpm electron:package --update-url
 // http://localhost:8299/` (a test build), or a dev run with LEARNX_UPDATE_URL
@@ -24,13 +24,11 @@ export const DEFAULT_PORT = 8299;
 /**
  * A byte range of a file of `size` bytes from a Range header, or null for
  * the whole file; 'invalid' when it can't be served.
- *
- * @returns {{ start: number; end: number } | null | 'invalid'}
  */
 export const byteRange = (
-  /** @type {string | undefined} */ header,
-  /** @type {number} */ size,
-) => {
+  header: string | undefined,
+  size: number,
+): { start: number; end: number } | null | 'invalid' => {
   if (!header) {
     return null;
   }
@@ -47,8 +45,8 @@ export const byteRange = (
 
 /** A server for the files in `dir`. */
 export const createUpdateServer = (
-  /** @type {string} */ dir,
-  /** @type {(line: string) => void} */ log = () => {},
+  dir: string,
+  log: (line: string) => void = () => {},
 ) =>
   createServer((req, res) => {
     const url = new URL(req.url ?? '/', 'http://localhost');
@@ -84,15 +82,15 @@ export const createUpdateServer = (
     createReadStream(file, { start, end }).pipe(res);
   });
 
-// Run as a script (Jest's transform leaves `import.meta` out).
-if (process.argv[1]?.endsWith(`${path.sep}updateServer.mjs`)) {
+if (import.meta.main) {
   const { values, positionals } = parseArgs({
     options: { port: { type: 'string', default: String(DEFAULT_PORT) } },
     allowPositionals: true,
   });
   const dir = positionals[0];
   if (!dir || !existsSync(dir)) {
-    console.error('Usage: node electron/updateServer.mjs <dir> [--port 8299]');
+    console.error('Usage: node electron/updateServer.ts <dir> [--port 8299]');
+
     process.exit(1);
   }
   const port = Number(values.port);

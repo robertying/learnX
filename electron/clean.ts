@@ -20,8 +20,8 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { devRunRegistrations, IDS, isDevRunName } from './devTraces.mjs';
-import { APP_NAME } from './macDevApp.mjs';
+import { devRunRegistrations, IDS, isDevRunName } from './devTraces.ts';
+import { APP_NAME } from './macDevApp.ts';
 
 const LIBRARY_FOLDERS = [
   'Application Support',
@@ -42,8 +42,7 @@ const main = () => {
   }
   const root = path.join(import.meta.dirname, '..');
   const library = path.join(os.homedir(), 'Library');
-  /** @type {string[]} */
-  const removed = [];
+  const removed: string[] = [];
 
   const dataDir = path.join(root, 'build', 'electron', 'data');
   // --keep-data: the E2E tests' teardown, which leaves the dev login.

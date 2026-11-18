@@ -2,6 +2,7 @@
 // Electron's safeStorage (DPAPI on Windows, the Secret Service or KWallet on
 // Linux, the keychain on macOS) and kept as base64 in the file store's
 // `secrets` database.
+import type { FileStore } from './fileStore.ts';
 
 const DB = 'secrets';
 
@@ -17,10 +18,10 @@ const UNLOCK_WAIT_MS = 30_000;
  */
 const SAVE_WAIT_MS = 1_000;
 
-/**
- * @typedef {Pick<import('electron').SafeStorage,
- *   'isAsyncEncryptionAvailable' | 'encryptStringAsync' | 'decryptStringAsync'>} SafeStorage
- */
+type SafeStorage = Pick<
+  Electron.SafeStorage,
+  'isAsyncEncryptionAvailable' | 'encryptStringAsync' | 'decryptStringAsync'
+>;
 
 /**
  * The tag Chromium starts a value with on Linux when its own fallback key,
@@ -40,13 +41,14 @@ const FALLBACK_KEY_TAG = 'v10';
  * keyring's unlock cancelled: that key only obscures the value. A dev
  * run (`allowFallbackKey`) takes that key, on purpose (`--password-store=
  * basic`), to keep its login out of the system's keyring.
- * @param {SafeStorage} safeStorage
- * @param {string} platform
- * @param {boolean} allowFallbackKey
  */
-const encryptionOf = (safeStorage, platform, allowFallbackKey) => ({
+const encryptionOf = (
+  safeStorage: SafeStorage,
+  platform: string,
+  allowFallbackKey: boolean,
+) => ({
   ready: () => safeStorage.isAsyncEncryptionAvailable(),
-  encrypt: async (/** @type {string} */ text) => {
+  encrypt: async (text: string) => {
     const encrypted = await safeStorage.encryptStringAsync(text);
     const tag = encrypted.subarray(0, FALLBACK_KEY_TAG.length).toString();
     if (platform === 'linux' && !allowFallbackKey && tag === FALLBACK_KEY_TAG) {
@@ -56,58 +58,52 @@ const encryptionOf = (safeStorage, platform, allowFallbackKey) => ({
     }
     return encrypted;
   },
-  decrypt: (/** @type {Buffer} */ data) => safeStorage.decryptStringAsync(data),
+  decrypt: (data: Buffer) => safeStorage.decryptStringAsync(data),
 });
 
 /** What `within` resolves to when the wait ran out first. */
 const TIMED_OUT = Symbol('timed out');
 
-/**
- * @param {ReturnType<typeof import('./fileStore.cjs').createFileStore>} store
- * @param {SafeStorage} safeStorage
- * @param {{ platform?: string; allowFallbackKey?: boolean; unlockWaitMs?: number; saveWaitMs?: number }} [options]
- *   `allowFallbackKey`: a dev run's, on Chromium's own key
- */
-const createSecrets = (
-  store,
-  safeStorage,
+export const createSecrets = (
+  store: FileStore,
+  safeStorage: SafeStorage,
   {
     platform = process.platform,
     allowFallbackKey = false,
     unlockWaitMs = UNLOCK_WAIT_MS,
     saveWaitMs = SAVE_WAIT_MS,
+  }: {
+    platform?: string;
+    /** A dev run's, on Chromium's own key. */
+    allowFallbackKey?: boolean;
+    unlockWaitMs?: number;
+    saveWaitMs?: number;
   } = {},
 ) => {
   const encryption = encryptionOf(safeStorage, platform, allowFallbackKey);
 
-  /** @type {Promise<boolean> | undefined} */
-  let ready;
+  let ready: Promise<boolean> | undefined;
   /** Whether the key store is open: asked once, resolved once it opens. */
   const keyStore = () =>
     (ready ??= Promise.resolve()
       .then(() => encryption.ready())
       .catch(() => false));
 
-  /**
-   * The promise's value, or TIMED_OUT if it takes longer than `ms`.
-   * @template T
-   * @param {Promise<T>} promise
-   * @param {number} ms
-   * @returns {Promise<T | typeof TIMED_OUT>}
-   */
-  const within = (promise, ms) => {
-    /** @type {ReturnType<typeof setTimeout> | undefined} */
-    let timer;
+  /** The promise's value, or TIMED_OUT if it takes longer than `ms`. */
+  const within = <T>(
+    promise: Promise<T>,
+    ms: number,
+  ): Promise<T | typeof TIMED_OUT> => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
     return Promise.race([
       promise,
-      new Promise(resolve => {
+      new Promise<typeof TIMED_OUT>(resolve => {
         timer = setTimeout(() => resolve(TIMED_OUT), ms);
       }),
     ]).finally(() => clearTimeout(timer));
   };
 
-  /** @param {string} key @param {string} value */
-  const save = async (key, value) =>
+  const save = async (key: string, value: string) =>
     store.setItem(
       DB,
       key,
@@ -117,9 +113,8 @@ const createSecrets = (
   /**
    * Values waiting for the key store to open, by key: read back from here
    * meanwhile, and dropped if removed or replaced first.
-   * @type {Map<string, string>}
    */
-  const unsaved = new Map();
+  const unsaved = new Map<string, string>();
 
   return {
     /**
@@ -127,10 +122,8 @@ const createSecrets = (
      * more (the system's key changed), or the key store stays locked: the
      * user signs in again. A value whose key has been rotated is saved
      * again with the new one.
-     * @param {string} key
-     * @returns {Promise<string | null>}
      */
-    get: async key => {
+    get: async (key: string): Promise<string | null> => {
       const waiting = unsaved.get(key);
       if (waiting !== undefined) {
         return waiting;
@@ -161,10 +154,8 @@ const createSecrets = (
      * password where anyone who reads the file could read it. While the key
      * store is locked (its unlock prompt up), resolves after a moment and
      * saves the value once it opens; until then it's only in memory.
-     * @param {string} key
-     * @param {string} value
      */
-    set: async (key, value) => {
+    set: async (key: string, value: string): Promise<void> => {
       unsaved.set(key, value);
       const saving = (async () => {
         const open = await keyStore();
@@ -183,17 +174,14 @@ const createSecrets = (
         }
       })();
       if ((await within(saving, saveWaitMs)) === TIMED_OUT) {
-        saving.catch(error =>
+        saving.catch((error: Error) =>
           console.error(`[secrets] not saved: ${error.message}`),
         );
       }
     },
-    /** @param {string} key */
-    remove: async key => {
+    remove: async (key: string): Promise<void> => {
       unsaved.delete(key);
       store.removeItem(DB, key);
     },
   };
 };
-
-module.exports = { createSecrets };

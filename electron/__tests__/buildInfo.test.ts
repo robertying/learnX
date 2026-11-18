@@ -4,7 +4,7 @@ import {
   aboutPanelOptions,
   buildNumberOf,
   readBuildInfo,
-} from '../buildInfo.cjs';
+} from '../buildInfo.ts';
 
 const root = path.join(__dirname, '..', '..');
 

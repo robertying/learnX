@@ -2,7 +2,7 @@ import { bridge } from 'web/bridge';
 
 /**
  * Stands in for expo-application in the Electron app: the version and build
- * number are the packaged app's (electron/buildInfo.cjs), the same as the
+ * number are the packaged app's (electron/buildInfo.ts), the same as the
  * mobile apps' for a release, and the id is the Electron app's.
  */
 const info = (() => {

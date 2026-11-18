@@ -1,18 +1,22 @@
 // The Electron app to run from this checkout: on a Mac build/electron/
-// learnX.app (macDevApp.mjs), elsewhere the downloaded Electron binary.
+// learnX.app (macDevApp.ts), elsewhere the downloaded Electron binary.
 // Downloads Electron on first use: pnpm install skips its download script
 // (see pnpm-workspace.yaml), with its download cache in build/electron.
-// CommonJS, so Playwright's E2E fixtures (e2e/fixtures.ts) can load it too.
-const { spawnSync } = require('node:child_process');
-const { existsSync } = require('node:fs');
-const path = require('node:path');
+// The dev runner (dev.ts) and Playwright's E2E fixtures (e2e/fixtures.ts)
+// both start the app from here.
+import { spawnSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import path from 'node:path';
+import { macDevApp } from './macDevApp.ts';
 
-const electronDir = __dirname;
+const require = createRequire(import.meta.url);
+const electronDir = import.meta.dirname;
 const root = path.join(electronDir, '..');
-const outDir = path.join(root, 'build', 'electron');
+export const outDir = path.join(root, 'build', 'electron');
 
 /** The executable that runs this folder as the app. */
-const electronExecutable = () => {
+export const electronExecutable = (): string => {
   const electronPackage = path.dirname(
     require.resolve('electron/package.json'),
   );
@@ -34,13 +38,15 @@ const electronExecutable = () => {
     }
   }
   return process.platform === 'darwin'
-    ? require('./macDevApp.mjs').macDevApp({
+    ? macDevApp({
         electronApp: path.join(electronPackage, 'dist', 'Electron.app'),
-        electronVersion: require('electron/package.json').version,
+        electronVersion: (
+          require('electron/package.json') as { version: string }
+        ).version,
         iconSource: path.join(root, 'ios', 'learnX', 'AppIcon.icon'),
         outDir,
       })
-    : /** @type {string} */ (/** @type {unknown} */ (require('electron')));
+    : // Loaded only now: it throws until Electron is downloaded. In Node it's
+      // the executable's path.
+      (require('electron') as string);
 };
-
-module.exports = { electronExecutable, outDir };

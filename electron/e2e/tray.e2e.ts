@@ -1,13 +1,13 @@
-// The tray (system.cjs): closing the window keeps learnX running there, its
+// The tray (system.ts): closing the window keeps learnX running there, its
 // menu brings the window back, runs the background sync now (services/
 // background, as the main process's timer does every 15 minutes) and quits.
 // The test chooses the menu's items as a click would (mainProcess.ts).
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileName } from '../fileStore.cjs';
-import { expect, packagedApp, test } from './fixtures';
-import { exact } from './maestroEnv';
-import { byId } from './steps';
+import { fileName } from '../fileStore.ts';
+import { expect, packagedApp, test } from './fixtures.ts';
+import { exact } from './maestroEnv.ts';
+import { byId } from './steps.ts';
 
 interface SyncRun {
   status: string;

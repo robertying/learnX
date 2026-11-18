@@ -11,11 +11,11 @@
     "start": "react-native start --client-logs",
     "ios": "react-native run-ios",
     "android": "react-native run-android --mode githubDebug",
-    "electron": "node electron/dev.mjs",
+    "electron": "node electron/dev.ts",
     "format": "oxfmt",
     "lint": "oxlint",
     "lint:shell": "git ls-files -z '*.sh' | xargs -0 shellcheck",
-    "typecheck": "tsc && tsc -p scripts",
+    "typecheck": "tsc && tsc -p scripts && tsc -p electron",
     "test": "jest",
     "ota:check": "node scripts/checks/check-ota-runtime.mjs",
     "check": "pnpm typecheck && pnpm lint --deny-warnings && pnpm format --check && pnpm ota:check && pnpm test --coverage && pnpm lint:shell",
@@ -26,8 +26,8 @@
     "e2e:devices": "scripts/e2e/e2e-devices.sh",
     "bump": "scripts/release/bump.sh",
     "store:screenshots": "scripts/e2e/store-screenshots.sh",
-    "electron:package": "node electron/package.mjs",
-    "electron:clean": "node electron/clean.mjs"
+    "electron:package": "node electron/package.ts",
+    "electron:clean": "node electron/clean.ts"
   },
   "dependencies": {
     "@babel/core": "7.29.13",
