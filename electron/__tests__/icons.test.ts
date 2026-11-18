@@ -2,7 +2,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {
+  ICO_SHAPE_FRACTION,
   ICO_SIZES,
+  PNG_SHAPE_FRACTION,
   PNG_SIZE,
   decodePng,
   encodeIco,
@@ -55,14 +57,41 @@ it('has a 512 icon.png for Linux, with transparent corners', () => {
   expectShapeOnClear(png);
 });
 
-it('centers the shape at about 92%, on whole pixels', () => {
-  for (const size of [...ICO_SIZES, PNG_SIZE]) {
-    const shape = shapeSize(size);
-    expect((size - shape) % 2).toBe(0);
-    expect(Math.abs(shape / size - 0.92)).toBeLessThan(0.07);
+it('centers the shape at its share of the canvas, on whole pixels', () => {
+  for (const [sizes, fraction] of [
+    [ICO_SIZES, ICO_SHAPE_FRACTION],
+    [[PNG_SIZE], PNG_SHAPE_FRACTION],
+  ] as const) {
+    for (const size of sizes) {
+      const shape = shapeSize(size, fraction);
+      expect((size - shape) % 2).toBe(0);
+      expect(Math.abs(shape / size - fraction)).toBeLessThan(0.07);
+    }
   }
-  expect(shapeSize(256)).toBe(236);
-  expect(shapeSize(16)).toBe(14);
+  expect(shapeSize(256, ICO_SHAPE_FRACTION)).toBe(256);
+  expect(shapeSize(16, ICO_SHAPE_FRACTION)).toBe(16);
+  expect(shapeSize(512, PNG_SHAPE_FRACTION)).toBe(416);
+});
+
+/** The shape's width in the middle row: where alpha starts and ends. */
+const shapeWidth = (image: Image) => {
+  const y = Math.floor(image.height / 2);
+  const opaque = Array.from({ length: image.width }, (_, x) => x).filter(
+    x => alphaAt(image, x, y) > 0,
+  );
+  return opaque[opaque.length - 1] - opaque[0] + 1;
+};
+
+it('draws the committed icons at their share of the canvas', () => {
+  const ico = icoImages(fs.readFileSync(path.join(icons, 'icon.ico')));
+  const largest = ico[ico.length - 1];
+  expect(
+    Math.abs(shapeWidth(largest) - shapeSize(256, ICO_SHAPE_FRACTION)),
+  ).toBeLessThanOrEqual(2);
+  const png = decodePng(fs.readFileSync(path.join(icons, 'icon.png')));
+  expect(
+    Math.abs(shapeWidth(png) - shapeSize(PNG_SIZE, PNG_SHAPE_FRACTION)),
+  ).toBeLessThanOrEqual(2);
 });
 
 it('reads back the .ico it writes', () => {
