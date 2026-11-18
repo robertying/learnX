@@ -1,6 +1,11 @@
 import { Linking } from 'react-native';
 import { act, renderHook } from '@testing-library/react-native';
 import { getTargetUrl } from 'helpers/openTarget';
+import {
+  defaultMockNetworkConfig,
+  getMockNetworkConfig,
+  setMockNetworkConfig,
+} from 'data/mockSource';
 import useLinkTaps from 'hooks/useLinkTaps';
 
 const mockOpen = jest.fn();
@@ -39,4 +44,15 @@ it('opens widget links while running, ignoring other links', async () => {
   expect(mockOpen).not.toHaveBeenCalled();
   await act(() => listener({ url: getTargetUrl({ type: 'today' }) }));
   expect(mockOpen).toHaveBeenCalledWith({ type: 'today' });
+});
+
+it('sets the mock network from its link without opening anything', async () => {
+  await renderHook(() => useLinkTaps());
+  const listener = addEventListener.mock.calls[0][1] as (event: {
+    url: string;
+  }) => void;
+  await act(() => listener({ url: 'learnx://mock-network?latency=slow' }));
+  expect(getMockNetworkConfig().latency).toBe('slow');
+  expect(mockOpen).not.toHaveBeenCalled();
+  setMockNetworkConfig(defaultMockNetworkConfig);
 });

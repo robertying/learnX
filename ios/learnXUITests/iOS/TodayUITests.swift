@@ -16,6 +16,10 @@ final class TodayUITests: SimulatorUITestCase {
     try waitFor(id: "today-schedule", timeout: 30)
     let bar = try waitFor(idMatching: "今天")
     XCTAssertEqual(bar.elementType, .navigationBar)
+    // The refresh lasts as long as its requests, so it has to outlast the screenshot below. The app launched with no
+    // emulated delay, so its login and catch-up are over; from here on each request takes 3 to 6 s, and the refresh
+    // makes requests of its own rather than joining ones under way.
+    app.open(try XCTUnwrap(URL(string: "learnx://mock-network?latency=slow")))
 
     // The spinner shows while the list is held down, and isn't in the accessibility tree: look at the gap the pull
     // opens in the bar, from a screenshot taken while the finger is still down.
@@ -33,14 +37,19 @@ final class TodayUITests: SimulatorUITestCase {
     try open(tab: "tab-today")
     try waitFor(id: "today-schedule", timeout: 30)
     // The tabs are one above another in a tab bar down the side.
-    if abs(element(id: "tab-today").frame.midX - element(id: "tab-notices").frame.midX) < 1 {
+    if try abs(tab("tab-today").frame.midX - tab("tab-notices").frame.midX) < 1 {
       throw XCTSkip("Beside a tab bar down the side (the closed iPhone Duo), the title has no collapsed form")
     }
     let bar = try waitFor(idMatching: "今天")
 
-    // Scrolled, the title is the bar's small one, centered at its top, where the expanded bar has nothing. Today's
-    // mock day fits on the screen and would bounce back, so look while the finger holds it up.
-    let top = CGRect(x: bar.frame.midX - 40, y: bar.frame.minY, width: 80, height: 44)
+    // Scrolled, the title is the bar's small one, in its top row before the buttons, where the expanded bar has
+    // nothing. UIKit centers it when the title and subtitle fit between the bar's ends and puts it at the leading
+    // edge when they don't, as with the week in the subtitle beside Search and Settings, so look along the whole row.
+    // Today's mock day fits on the screen and would bounce back, so look while the finger holds it up.
+    let buttons = bar.buttons.allElementsBoundByIndex.map(\.frame).filter { $0.minX > bar.frame.midX }
+    let trailing = buttons.map(\.minX).min() ?? bar.frame.maxX
+    let leading = bar.frame.minX + 16
+    let top = CGRect(x: leading, y: bar.frame.minY, width: trailing - 8 - leading, height: 44)
     XCTAssertEqual(XCUIScreen.main.screenshot().markedPixels(in: top), 0, "the bar's top isn't empty before scrolling")
     let held = try XCTUnwrap(holdingScreenshot(dragging: element(id: "today"), by: -200, after: 1.5))
     XCTAssertGreaterThan(held.markedPixels(in: top), 50, "the large title didn't collapse into the bar")
