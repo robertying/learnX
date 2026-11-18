@@ -55,7 +55,6 @@ import {
   listRowBackground,
   listRowSeparator,
   listSectionMargins,
-  listSectionSpacing,
   listRowInsets,
   lineSpacing,
   opacity,
@@ -137,9 +136,6 @@ const openedModifiers = [
 const macFormModifiers = [
   scrollContentBackground('hidden'),
   background(PlatformColor('systemBackground')),
-  // Sections close together, as System Settings groups them: with a
-  // section's title or footer, SwiftUI's own spacing is already wide.
-  listSectionSpacing(12),
 ];
 
 // Behind iOS's inset grouped rows
