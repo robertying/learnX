@@ -1,4 +1,4 @@
-import { PlatformColor } from 'react-native';
+import { Platform, PlatformColor } from 'react-native';
 import { Text } from 'react-native';
 import {
   act,
@@ -289,6 +289,14 @@ describe('swipe actions', () => {
     );
     await view.rerender(card());
     expect(swipeEnabled()).toBe(false);
+  });
+
+  it('has none with a mouse (Electron), whose menu and hover buttons stand in', async () => {
+    jest.replaceProperty(Platform, 'OS', 'web');
+    await render(card());
+    expect(swipeEnabled()).toBe(false);
+    expect(swipeKeys('right')).toEqual([]);
+    expect(swipeKeys('left')).toEqual([]);
   });
 
   it('runs the pressed action and closes the swipe', async () => {

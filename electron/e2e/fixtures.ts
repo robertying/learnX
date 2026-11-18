@@ -41,13 +41,10 @@ const mockLogin = () => {
 };
 
 /**
- * On CI under Linux's X11, each worker's apps get an X server of their own
- * (Xvfb, from the xvfb package). On one shared display every worker's window
- * lies over the others', and the system's pointer rests in their middle:
- * a window opening or closing above another under it sends that one a real
- * mouseleave, which ends a hover a test made (a card's hover buttons, in
- * favoriteArchive.e2e.ts). The Wayland run (WAYLAND_DISPLAY) has its own
- * compositor; locally the apps use your display, one at a time.
+ * On CI under Linux's X11, which has no display, each worker's apps get an
+ * X server of their own (Xvfb, from the xvfb package). The Wayland run
+ * (WAYLAND_DISPLAY) has its own compositor; locally the apps use your
+ * display, one at a time.
  */
 const ownDisplay =
   process.platform === 'linux' &&
