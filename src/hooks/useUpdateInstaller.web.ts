@@ -10,8 +10,7 @@ import { installUpdate, pendingUpdate } from 'services/electronUpdates';
  * already downloaded, so this asks to restart (with a button for the
  * changelog when `onViewChangelog` is given) and quits into the installer,
  * which opens learnX again. Without it, the update installs when learnX quits.
- * A .deb doesn't install updates itself: this offers its download instead,
- * as Android's Google Play builds open the APK in the browser.
+ * A .deb doesn't install updates itself: this offers its download instead.
  */
 const useUpdateInstaller = (
   release: Release | null,
