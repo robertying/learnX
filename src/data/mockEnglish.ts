@@ -172,7 +172,7 @@ const notices: Record<number, Overlay> = {
       '<p><span style="font-size:xx-large"><span style="color:black">Original: for a discrete source with a fixed number of events</span><span style="color:black"><em> M</em></span><span style="color:black">, the entropy is maximal for the uniform distribution, equal to 1/<em>M</em></span></span></p><p><span style="font-size:24pt"><span style="color:black">Corrected: for a discrete source with a fixed number of events <em>M</em>, the entropy is maximal for the uniform distribution, equal to log<em>M</em></span></span></p>',
   },
   15: {
-    title: 'AutoCAD Computer Session',
+    title: 'AutoCAD Lab Session',
     content: `<p>On ${lastMonday} we meet at A302 in the Li Ka Shing Building for a hands-on session. Please install the AutoCAD education version on your own computer beforehand, or use the lab computers.</p>`,
   },
   16: intro(
@@ -212,7 +212,7 @@ const assignments: Record<number, Overlay> = {
   2: {
     title: 'Homework 6',
     description:
-      '<p>Textbook exercises 4.3, 4.7 and 5.2.</p><p>Hint: the Poisson process satisfies $$P\\{N(t)=k\\}=\\frac{(\\lambda t)^k}{k!}e^{-\\lambda t}.$$</p>',
+      '<p>Textbook exercises 4.3, 4.7 and 5.2; submit the electronic version.</p><p>Hint: for problem 2, first use independent increments to write the Poisson process’s distribution, then find the conditional probability.</p>',
   },
   3: {
     title: 'Lecture 4 Exercises (paper)',

@@ -7,7 +7,8 @@ appId: ${APP_ID}
 # ORIENTATION comes from scripts/e2e/e2e.sh (PORTRAIT unless E2E_ORIENTATION is
 # set), so iPad landscape runs need no rotating by hand.
 - setOrientation: ${ORIENTATION}
-# Every launch: no emulated server delay (services/launchOptions.ts), and with
+# Every launch: no emulated server delay (services/launchOptions.ts), the
+# clock from APP_CLOCK (empty by default: the real one), and with
 # APP_LANGUAGE (from scripts/e2e/e2e.sh, empty by default, e.g. zh-Hans) iOS in
 # that language. Android takes the app's locale from
 # `cmd locale set-app-locales` instead (scripts/e2e/store-screenshots.sh).
@@ -18,6 +19,7 @@ appId: ${APP_ID}
       - launchApp:
           arguments:
             mockLatency: none
+            mockClock: ${APP_CLOCK}
 - runFlow:
     when:
       true: ${!!APP_LANGUAGE}
@@ -25,6 +27,7 @@ appId: ${APP_ID}
       - launchApp:
           arguments:
             mockLatency: none
+            mockClock: ${APP_CLOCK}
             AppleLanguages: '(${APP_LANGUAGE})'
 # Live runs (scripts/e2e/e2e.sh --live) hand the app the live account's saved
 # fingerprint, so typing its username signs in without the SSO page

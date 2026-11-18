@@ -28,16 +28,23 @@
 #
 # Settings, all optional:
 #   STORE_OUT_DIR          where the shots go (default build/store-screenshots)
-#   STORE_LANGUAGE         iOS app language (default zh-Hans)
+#   STORE_LANGUAGE         iOS app and system language (default zh-Hans)
+#   STORE_LOCALE           iOS system region (default zh_CN)
 #   STORE_ANDROID_LOCALE   Android app locale (default zh-CN)
 #   STORE_ANDROID_SIZE     Android screen size while shooting (default
 #                          1080x1920 for phone, 2560x1440 for tablet)
 #   STORE_ANDROID_DENSITY  Android density (default 420 phone, 280 tablet)
+#   STORE_CLOCK            the moment the app's clock starts from (default
+#                          9:41 Beijing time on this week's Wednesday, when
+#                          Today shows a class coming up and a busy day)
 #
 # The script sets the device up for the shots and puts it back on exit: the
 # iOS status bar (9:41, full battery and signal) and light mode, or the
 # Android screen size, density, app locale and status bar (9:41; the other
-# icons are painted over with the bar's color after the run). Which simulator
+# icons are painted over with the bar's color after the run). The device's
+# time zone is Beijing's for the run, so Today shows class times without a
+# Beijing time note, and the app's clock reads STORE_CLOCK, so its times match
+# the status bar's 9:41. Which simulator
 # or emulator model to use depends on the store's size rules: an iPhone of
 # 1206x2622 pixels, a 13-inch iPad, the iPhone Duo, and any Android foldable
 # or tablet emulator.
@@ -78,6 +85,13 @@ esac
 
 cd "$(dirname "$0")/../.."
 
+# Wednesday of this week (Monday first) in Beijing, at 9:41 there.
+export E2E_CLOCK="${STORE_CLOCK:-$(node -e '
+const beijing = new Date(Date.now() + 8 * 3600e3);
+const wednesday = new Date(beijing - ((beijing.getUTCDay() + 6) % 7 - 2) * 864e5);
+console.log(wednesday.toISOString().slice(0, 10) + "T09:41:00+08:00");
+')}"
+
 out_root="${STORE_OUT_DIR:-build/store-screenshots}"
 mkdir -p "$out_root/$folder"
 out="$(cd "$out_root/$folder" && pwd)"
@@ -112,12 +126,23 @@ fi
 
 android_app_id="io.robertying.learnx"
 restore_locales=""
+restore_time_zone=""
+restore_auto_time_zone=""
 restore_appearance=""
+restore_languages=()
+restore_locale=""
 
 # shellcheck disable=SC2329 # run by the EXIT trap
 cleanup() {
   if [ "$platform" = ios ]; then
     xcrun simctl status_bar "$device" clear || true
+    xcrun simctl spawn "$device" launchctl unsetenv TZ || true
+    # Back to the system language it had, from its next boot.
+    if [ -n "$restore_locale" ]; then
+      xcrun simctl spawn "$device" defaults write -g AppleLanguages \
+        -array ${restore_languages[@]+"${restore_languages[@]}"} || true
+      xcrun simctl spawn "$device" defaults write -g AppleLocale "$restore_locale" || true
+    fi
     if [ -n "$restore_appearance" ]; then
       xcrun simctl ui "$device" appearance "$restore_appearance" || true
     fi
@@ -127,6 +152,10 @@ cleanup() {
     adb -s "$device" shell cmd locale set-app-locales "$android_app_id" \
       --locales "$restore_locales" || true
     demo exit || true
+    if [ -n "$restore_time_zone" ]; then
+      adb -s "$device" shell cmd alarm set-timezone "$restore_time_zone" || true
+      adb -s "$device" shell settings put global auto_time_zone "$restore_auto_time_zone" || true
+    fi
     adb -s "$device" shell settings put global sysui_demo_allowed 0 || true
   fi
 }
@@ -142,9 +171,30 @@ trap cleanup EXIT
 
 if [ "$platform" = ios ]; then
   export E2E_LANGUAGE="${STORE_LANGUAGE:-zh-Hans}"
+  # The system in the same language, for the status bar's date (iPad) and
+  # system alerts. It takes a restart.
+  locale="${STORE_LOCALE:-zh_CN}"
+  current_locale="$(xcrun simctl spawn "$device" defaults read -g AppleLocale 2>/dev/null || true)"
+  # The languages, one per line, from the plist array defaults prints.
+  current_languages="$(xcrun simctl spawn "$device" defaults read -g AppleLanguages 2>/dev/null |
+    sed -n 's/^ *"\{0,1\}\([^",()]*\)"\{0,1\},\{0,1\}$/\1/p')"
+  if [ "$current_locale" != "$locale" ] ||
+    [ "$(printf '%s\n' "$current_languages" | head -n 1)" != "$E2E_LANGUAGE" ]; then
+    while IFS= read -r language; do
+      [ -n "$language" ] && restore_languages+=("$language")
+    done <<<"$current_languages"
+    restore_locale="${current_locale:-en_US}"
+    xcrun simctl spawn "$device" defaults write -g AppleLanguages -array "$E2E_LANGUAGE"
+    xcrun simctl spawn "$device" defaults write -g AppleLocale "$locale"
+    xcrun simctl shutdown "$device"
+    xcrun simctl boot "$device"
+    xcrun simctl bootstatus "$device" >/dev/null
+  fi
   # The shots are in light mode.
   restore_appearance="$(xcrun simctl ui "$device" appearance)"
   xcrun simctl ui "$device" appearance light
+  # Apps launched from now on take Beijing's time zone.
+  xcrun simctl spawn "$device" launchctl setenv TZ Asia/Shanghai
   xcrun simctl status_bar "$device" override --time 9:41 \
     --batteryState discharging --batteryLevel 100 \
     --wifiBars 3 --cellularMode active --cellularBars 4
@@ -158,6 +208,11 @@ else
   export E2E_STATE_CLEARED=1
   adb -s "$device" shell cmd locale set-app-locales "$android_app_id" \
     --locales "${STORE_ANDROID_LOCALE:-zh-CN}"
+  # Beijing's time zone, with automatic time zone off so it stays.
+  restore_time_zone="$(adb -s "$device" shell getprop persist.sys.timezone | tr -d '\r')"
+  restore_auto_time_zone="$(adb -s "$device" shell settings get global auto_time_zone | tr -d '\r')"
+  adb -s "$device" shell settings put global auto_time_zone 0
+  adb -s "$device" shell cmd alarm set-timezone Asia/Shanghai
   # From the default size: straight from another override (the previous
   # target), SystemUI can leave the clock out of demo mode.
   adb -s "$device" shell wm size reset

@@ -1,17 +1,33 @@
 # From a fresh install, log in and clear the Settings badge, which the
 # screenshots mustn't show: opening Course Information Sharing once marks it
-# seen. Ends on the notices.
+# seen, then back to Today (Settings opens on its stack). Ends on the
+# notices.
 appId: ${APP_ID}
 ---
 - runFlow: ../../subflows/reset.yaml
+# The notification and calendar switches the shots turn on get their
+# permissions here, so no system alert asks.
+- launchApp:
+    permissions:
+      notifications: allow
+      calendar: allow
+- stopApp
 - runFlow: ../../subflows/login.yaml
 - runFlow: ../../subflows/settings.yaml
+# Below the screen's end on a short phone.
+- scrollUntilVisible:
+    element: '.*(${T_courseInformationSharing}).*'
+    direction: DOWN
 - tapOn: '.*(${T_courseInformationSharing}).*'
 - waitForAnimationToEnd
 - runFlow:
     file: ../../subflows/back.yaml
     env:
       LIST: '.*(${T_logout}).*'
+- runFlow:
+    file: ../../subflows/back.yaml
+    env:
+      LIST: '.*(${T_todayDueSoon}).*'
 - runFlow:
     file: ../../subflows/tab.yaml
     env:

@@ -5,23 +5,48 @@ name: App Store screenshots on the iPhone
 # of the store listing, as STORE_OUT/NN-<slug>.png.
 - runFlow: subflows/start.yaml
 
-# 1 Notices
+# 1 Today and 2 Schedule
+- runFlow: subflows/today.yaml
 - runFlow:
     file: ../subflows/screenshot.yaml
     env:
-      NAME: 01-notices
+      NAME: 01-today
+- tapOn:
+    id: today-schedule
+- extendedWaitUntil:
+    visible:
+      id: schedule
+    timeout: 10000
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 02-schedule
+- runFlow:
+    file: ../subflows/back.yaml
+    env:
+      LIST: '.*(${T_todayDueSoon}).*'
 
-# 2 A row's swipe actions with the filter menu open
+# Notices, plain, for the search results asset
+- runFlow:
+    file: ../subflows/tab.yaml
+    env:
+      TAB: 'tab-notices'
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 03-notices-plain
+
+# 3 A row's swipe actions with the filter menu open
 - runFlow:
     file: subflows/swipe-actions.yaml
     env:
-      CARD: '.*(${MOCK_NOTICE}).*'
+      CARD: '.*(${MOCK_STORE_SWIPE_NOTICE}).*'
       DIRECTION: LEFT
 - tapOn: '${T_filter}'
 - runFlow:
     file: ../subflows/screenshot.yaml
     env:
-      NAME: 02-notices-actions
+      NAME: 03-notices-actions
 # Closes the filter menu. Opening the hinge for the shot already closed it
 # (duo-half-open, duo-open).
 - runFlow:
@@ -31,7 +56,7 @@ name: App Store screenshots on the iPhone
       - tapOn: '(${T_all})(, .*)?'
 - waitForAnimationToEnd
 
-# 3 A notice with an attachment
+# 4 A notice with an attachment
 - runFlow:
     file: ../subflows/open.yaml
     env:
@@ -44,13 +69,13 @@ name: App Store screenshots on the iPhone
 - runFlow:
     file: ../subflows/screenshot.yaml
     env:
-      NAME: 03-notice-detail
+      NAME: 04-notice-detail
 - runFlow:
     file: ../subflows/back.yaml
     env:
       LIST: '${T_filter}'
 
-# 4 Assignments, all of them
+# 5 Assignments, all of them
 - runFlow:
     file: ../subflows/tab.yaml
     env:
@@ -62,29 +87,7 @@ name: App Store screenshots on the iPhone
 - runFlow:
     file: ../subflows/screenshot.yaml
     env:
-      NAME: 04-assignments
-
-# 5 Submitting an assignment
-# It is far down the list on a short screen (the folded iPhone Duo).
-- scrollUntilVisible:
-    element: '.*(${MOCK_STORE_ASSIGNMENT}).*'
-    direction: DOWN
-- runFlow:
-    file: ../subflows/open.yaml
-    env:
-      CARD: '.*(${MOCK_STORE_ASSIGNMENT}).*'
-      DETAIL: assignment-detail
-- runFlow: subflows/submission.yaml
-- runFlow:
-    file: ../subflows/screenshot.yaml
-    env:
-      NAME: 05-submission
-- tapOn: '${T_close}'
-- waitForAnimationToEnd
-- runFlow:
-    file: ../subflows/back.yaml
-    env:
-      LIST: '${T_filter}'
+      NAME: 05-assignments
 
 # 6 Files
 - runFlow:
@@ -136,7 +139,7 @@ name: App Store screenshots on the iPhone
     file: ../subflows/search.yaml
     env:
       TERM: ${STORE_SEARCH_TERM}
-      RESULT: '.*(${MOCK_STORE_ASSIGNMENT}).*'
+      RESULT: '.*(${MOCK_NOTICE}).*'
 # The search key hides the keyboard.
 - pressKey: Enter
 - runFlow:

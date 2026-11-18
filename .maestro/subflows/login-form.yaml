@@ -2,7 +2,7 @@
 # set-up page that a first login opens. Reached from login.yaml.
 appId: ${APP_ID}
 env:
-  SAVE_PASSWORD: 'Save Password\??|存储密码？?|要存储密码吗？?'
+  SAVE_PASSWORD: 'Save Password\??|存储密码？?|要存储密码吗？?|保存密码[?？]?'
 ---
 - tapOn:
     id: welcome-continue

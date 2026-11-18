@@ -1,0 +1,52 @@
+# Open Settings › Notifications, with the new content ones on.
+appId: ${APP_ID}
+---
+- runFlow: ../../subflows/settings.yaml
+- tapOn:
+    id: settings-notifications
+- extendedWaitUntil:
+    visible:
+      id: notification-settings
+    timeout: 10000
+- waitForAnimationToEnd
+# With the new content notifications on.
+- runFlow:
+    file: ../../subflows/toggle.yaml
+    env:
+      LIST: notification-settings
+      ID: notifications-notices
+      ON: 'true'
+# The permission given at launch (start.yaml) doesn't always hold: then the
+# first switch asks. On iPad a tap on the alert's button by its text misses
+# (it lands where the button would be on a phone), so tap where the button
+# shows in landscape.
+- waitForAnimationToEnd
+- runFlow:
+    when:
+      visible: '^(Allow|允许)$'
+    commands:
+      - runFlow:
+          when:
+            true: ${IPAD == 'true'}
+          commands:
+            - tapOn:
+                point: 55%,53%
+      - runFlow:
+          when:
+            true: ${IPAD != 'true'}
+          commands:
+            - tapOn: '^(Allow|允许)$'
+      - waitForAnimationToEnd
+- runFlow:
+    file: ../../subflows/toggle.yaml
+    env:
+      LIST: notification-settings
+      ID: notifications-assignments
+      ON: 'true'
+- runFlow:
+    file: ../../subflows/toggle.yaml
+    env:
+      LIST: notification-settings
+      ID: notifications-files
+      ON: 'true'
+- waitForAnimationToEnd

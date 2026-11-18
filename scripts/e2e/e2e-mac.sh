@@ -63,7 +63,10 @@ case " $* " in
 *) set -- -skip-testing:learnXUITests/StoreScreenshots "$@" ;;
 esac
 
+# E2E_CLOCK: the moment the store screenshots' app clock starts from
+# (scripts/e2e/store-screenshots.sh).
 TEST_RUNNER_E2E_USERNAME="$username" TEST_RUNNER_E2E_PASSWORD="$password" \
+  TEST_RUNNER_E2E_CLOCK="${E2E_CLOCK:-}" \
   xcodebuild test \
   -workspace ios/learnX.xcworkspace \
   -scheme learnXUITests \
