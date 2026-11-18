@@ -53,7 +53,7 @@ final class FakeMenuBuilder: MenuBuilding {
 
   /// The commands inserted, by their ids.
   var commandIds: [[String]] {
-    inserted.map { menu in menu.children.compactMap { ($0 as? UIKeyCommand)?.propertyList as? String } }
+    inserted.map { menu in menu.children.compactMap { ($0 as? UICommand)?.propertyList as? String } }
   }
 }
 
@@ -83,6 +83,23 @@ final class FakeMenuBuilder: MenuBuilding {
     let withoutQuickLook = FakeMenuBuilder(menus: [.file, .view])
     AppCommands.buildMenu(in: withoutQuickLook, quickLook: false)
     #expect(withoutQuickLook.changes == [.insertChild(atStartOf: .view)])
+  }
+
+  @Test func replacesTheHelpMenusItemsWithTheLinks() {
+    let builder = FakeMenuBuilder(menus: [.help])
+    AppCommands.buildMenu(in: builder)
+    #expect(builder.changes == [.replace(.help)])
+    #expect(builder.inserted.first?.identifier == .help)
+    #expect(builder.commandIds == [["website", "privacyPolicy"]])
+  }
+
+  @Test func makesHelpMenuCommands() {
+    let command = AppCommands.command(AppCommands.privacyPolicy)
+
+    #expect(command.title == "Privacy Policy")
+    #expect(command.image != nil)
+    #expect(command.propertyList as? String == "privacyPolicy")
+    #expect(command.action == #selector(UIApplication.learnXPerformAppCommand(_:)))
   }
 
   @Test func putsSettingsAfterAboutWithoutAPreferencesMenu() {

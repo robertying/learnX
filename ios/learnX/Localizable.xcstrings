@@ -91,6 +91,24 @@
         }
       }
     },
+    "Privacy Policy" : {
+      "comment" : "A Help menu item (modules/menus/ios/AppCommands.swift)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隐私政策"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隐私政策"
+          }
+        }
+      }
+    },
     "Quick Look" : {
       "comment" : "A menu bar command (modules/menus/ios/AppCommands.swift)",
       "extractionState" : "manual",
@@ -193,6 +211,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "告诉你下一项要交的作业。"
+          }
+        }
+      }
+    },
+    "Website" : {
+      "comment" : "A Help menu item (modules/menus/ios/AppCommands.swift)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "官方网站"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "官方网站"
           }
         }
       }

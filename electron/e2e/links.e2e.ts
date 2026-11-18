@@ -32,8 +32,16 @@ test('opens links in the browser', async ({ window, main, login }) => {
   await login();
   await openSettings(window);
   await byId(window, 'settings-about').click();
-  await shown(window.getByText(exact('T_sourceCode'))).click();
+  await shown(window.getByText(exact('T_website'))).click();
+  await window.getByText(exact('T_sourceCode')).click();
+  await window.getByText(exact('T_privacyPolicy')).click();
   await expect
     .poll(async () => (await main.record()).openedUrls)
-    .toEqual(['https://github.com/robertying/learnX']);
+    .toEqual([
+      'https://tsinghua.app/learnX',
+      'https://github.com/robertying/learnX',
+      expect.stringMatching(
+        /^https:\/\/github\.com\/robertying\/learnX\/blob\/main\/docs\/PRIVACY_POLICY_(CN|EN)\.md$/,
+      ),
+    ]);
 });

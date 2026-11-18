@@ -18,7 +18,11 @@ export type AppCommand =
   /** ⌥⌘↓ */
   | 'nextItem'
   /** ⌘Y (Mac) */
-  | 'quickLook';
+  | 'quickLook'
+  /** Help menu, no shortcut */
+  | 'website'
+  /** Help menu, no shortcut */
+  | 'privacyPolicy';
 
 type MenusEvents = {
   onCommand: (event: { command: AppCommand }) => void;

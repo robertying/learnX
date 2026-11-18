@@ -44,6 +44,8 @@ const zh: typeof en = {
     '登录失败，请检查网络连接，并确认能正常登录清华大学用户电子身份服务系统。',
   versionInformation: '版本',
   sourceCode: '源代码',
+  website: '官方网站',
+  privacyPolicy: '隐私政策',
   appIcon: '应用图标',
   specialThanks: '特别感谢',
   opensourceDependencies: '开源库',
