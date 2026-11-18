@@ -7,6 +7,7 @@ import {
   useNativeState,
   VStack,
   type SecureFieldRef,
+  type TextFieldRef,
 } from '@expo/ui/swift-ui';
 import {
   accessibilityLabel,
@@ -20,6 +21,7 @@ import {
   textContentType,
   textInputAutocapitalization,
 } from '@expo/ui/swift-ui/modifiers';
+import { onTabKey } from 'modules/menus';
 import { useFieldText } from 'hooks/useFieldText';
 import ThemedHost from 'components/ThemedHost';
 import { trim, type LoginFieldsProps } from './LoginFields.shared';
@@ -67,10 +69,14 @@ const LoginFields: React.FC<LoginFieldsProps> = ({
     format: trim,
   });
 
-  // Next on the account moves to the password.
+  // Next or Tab on the account moves to the password, Shift-Tab back.
+  const [usernameField, setUsernameField] = useState<TextFieldRef | null>(null);
   const [passwordField, setPasswordField] = useState<SecureFieldRef | null>(
     null,
   );
+  const focusUsername = () => {
+    void usernameField?.focus();
+  };
   const focusPassword = () => {
     void passwordField?.focus();
   };
@@ -79,6 +85,7 @@ const LoginFields: React.FC<LoginFieldsProps> = ({
     <ThemedHost matchContents={{ vertical: true }} style={style}>
       <VStack spacing={0} modifiers={groupModifiers}>
         <TextField
+          ref={setUsernameField}
           text={usernameText}
           placeholder={usernameLabel}
           testID="login-username"
@@ -88,6 +95,7 @@ const LoginFields: React.FC<LoginFieldsProps> = ({
             submitLabel('next'),
             accessibilityLabel(usernameLabel),
             onSubmit(focusPassword),
+            onTabKey(focusPassword),
           ]}
         />
         <Divider modifiers={[padding({ leading: 16 })]} />
@@ -102,6 +110,7 @@ const LoginFields: React.FC<LoginFieldsProps> = ({
             submitLabel('done'),
             accessibilityLabel(passwordLabel),
             onSubmit(submit),
+            onTabKey(focusUsername, { backward: true }),
           ]}
         />
       </VStack>

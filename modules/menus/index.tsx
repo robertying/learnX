@@ -4,6 +4,7 @@ import type { NativeSyntheticEvent, ViewProps } from 'react-native';
 import { requireNativeView, requireOptionalNativeModule } from 'expo';
 import type { NativeModule } from 'expo';
 import type { SFSymbol } from 'sf-symbols-typescript';
+import { createModifierWithEventListener } from '@expo/ui/swift-ui/modifiers';
 
 /** The menu bar commands (see AppCommands.swift), with their shortcuts. */
 export type AppCommand =
@@ -66,3 +67,11 @@ export interface ContextMenuViewProps extends ViewProps {
 export const ContextMenuView: React.ComponentType<ContextMenuViewProps> = Menus
   ? requireNativeView('Menus')
   : ({ children }: ContextMenuViewProps) => <Fragment>{children}</Fragment>;
+
+/**
+ * Tab on an Expo UI text field (Shift-Tab with `backward`), to move the focus
+ * to the next field: Mac Catalyst doesn't, as an AppKit form does. An app built
+ * before the modifier was added leaves Tab to the system.
+ */
+export const onTabKey = (handler: () => void, { backward = false } = {}) =>
+  createModifierWithEventListener('onTabKey', handler, { backward });
