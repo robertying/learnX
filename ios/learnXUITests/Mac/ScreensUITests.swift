@@ -2,7 +2,7 @@
 import XCTest
 
 /// `.maestro/07-screens.yaml`: the screens the other tests don't reach (the timetable, an assignment's submission
-/// page, a course's courseX page, every Settings page and What's New), each checked by its id.
+/// page, a course's courseX page, every course's courseX, every Settings page and What's New), each checked by its id.
 @MainActor
 final class ScreensUITests: LearnXUITestCase {
   func testOpensTheSchedule() throws {
@@ -30,6 +30,18 @@ final class ScreensUITests: LearnXUITestCase {
     try waitFor(label: "T_courseInformation").click()
     try waitFor(id: "courseXReload")
     try back()
+    waitForAbsence(id: "courseXReload")
+  }
+
+  /// Every course's courseX, from the Courses list's More menu: about the whole app, not the open course, so a page
+  /// sheet over the window rather than pushed beside the course, and closed with its Close button.
+  func testOpensEveryCoursesInformation() throws {
+    try open(tab: "tab-courses")
+    try waitFor(label: "T_more").click()
+    try menuItem("T_courseX").click()
+    _ = try wait(app.sheets.descendants(matching: .any).matching(identifier: "courseXReload").firstMatch,
+      "courseX in a sheet", 10)
+    try close()
     waitForAbsence(id: "courseXReload")
   }
 
