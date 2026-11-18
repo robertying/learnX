@@ -1,6 +1,6 @@
 // Flows that open mock items by their learnx:// links: 11-links.yaml (and the
-// Mac app's LinksUITests), and the iPhone Duo posture flows (.maestro/postures), since Maestro can't tap on the
-// Duo's inner display; and 12-notification-actions.yaml, whose launches post
+// Mac app's LinksUITests), and the iPhone Duo posture flows (.maestro/postures), since Maestro can't see the
+// open Duo's tab bar; and 12-notification-actions.yaml, whose launches post
 // notifications about mock items by id. Keep them pointing at items the mock
 // account has.
 import { mockAssignments, mockFiles, mockNotices } from 'data/mock';
