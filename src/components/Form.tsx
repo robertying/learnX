@@ -245,13 +245,10 @@ export const FormScreen: React.FC<ViewProps> = ({ style, ...props }) => (
 // in an iPad split view's other columns the automatic style is an opaque band.
 const glassHeaderModifiers = [scrollEdgeEffectStyle('soft', 'top')];
 
-// A Form's sections are compact by default from iOS 17, so a footer runs
-// into the next section's title. The Settings app spaces them as a list
-// does.
-const iosFormModifiers = [
-  ...glassHeaderModifiers,
-  listSectionSpacing('default'),
-];
+// More room between sections than SwiftUI's default, which leaves a footer
+// close above the next section's title: a settings screen whose sections
+// all have both (Calendars & Reminders) read as one block.
+const iosFormModifiers = [...glassHeaderModifiers, listSectionSpacing(28)];
 
 const macRowBackground = listRowBackground(
   PlatformColor('quaternarySystemFill'),
