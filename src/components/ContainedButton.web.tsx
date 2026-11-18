@@ -1,4 +1,4 @@
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Button } from '@fluentui/react-components';
 import type { ContainedButtonProps } from './ContainedButton.shared';
 
@@ -13,7 +13,7 @@ const ContainedButton: React.FC<ContainedButtonProps> = ({
   style,
   testID,
 }) => (
-  <View style={[{ alignSelf: 'flex-start' }, style]}>
+  <View style={[styles.root, style]}>
     <Button
       appearance="primary"
       size={size === 'large' ? 'large' : 'medium'}
@@ -26,5 +26,14 @@ const ContainedButton: React.FC<ContainedButtonProps> = ({
     </Button>
   </View>
 );
+
+const styles = StyleSheet.create({
+  // Holds the button at its own size wherever it's placed, without taking
+  // the place itself (`alignSelf` would override a row's centering).
+  root: {
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+  },
+});
 
 export default ContainedButton;

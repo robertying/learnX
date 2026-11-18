@@ -48,6 +48,7 @@ jest.mock('services/calendar/electronExport', () => ({
     ics: 'ELECTRON ICS',
     withoutClasses: false,
   })),
+  defaultExportRange: jest.fn(async () => 'DEFAULT RANGE'),
 }));
 
 const fail = (code: CalendarErrorCode) => async () => {
@@ -306,6 +307,14 @@ describe('exportCalendars', () => {
       'text/calendar',
     );
     expect(exportSyncedCalendarsToICS).not.toHaveBeenCalled();
+    const { buildElectronICS } = jest.requireMock(
+      'services/calendar/electronExport',
+    );
+    // Today to the semester's end, unless dates were picked.
+    expect(buildElectronICS).toHaveBeenLastCalledWith('DEFAULT RANGE');
+    const range = { start: dayjs('2026-11-18'), end: dayjs('2026-11-30') };
+    await exportCalendars(range);
+    expect(buildElectronICS).toHaveBeenLastCalledWith(range);
   });
 
   it('says when the Electron app saved it without the classes', async () => {

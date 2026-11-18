@@ -1,4 +1,4 @@
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Button } from '@fluentui/react-components';
 import { useTheme } from 'theme';
 import type { TextButtonProps } from './TextButton.shared';
@@ -24,7 +24,7 @@ const TextButton: React.FC<TextButtonProps> = ({
 }) => {
   const theme = useTheme();
   return (
-    <View style={[!fill && { alignSelf: 'flex-start' }, style]}>
+    <View style={[!fill && styles.ownSize, style]}>
       <Button
         appearance="transparent"
         size={size === 'small' ? 'small' : 'medium'}
@@ -59,5 +59,14 @@ const TextButton: React.FC<TextButtonProps> = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  // Holds the button at its own size wherever it's placed, without taking
+  // the place itself (`alignSelf` would override a row's centering).
+  ownSize: {
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+  },
+});
 
 export default TextButton;

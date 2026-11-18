@@ -12,7 +12,7 @@ import { isAndroid, isElectron } from 'helpers/platform';
  * File detail's header buttons: full screen (split view, outside search),
  * refresh, Quick Look (Mac), share (Apple, Android), download (Mac), open
  * (Android), and in the Electron app Open in Default App and Save As instead
- * of sharing (the file's info has Show in Folder and Copy Link too), and
+ * of sharing (the file's info has Show in Folder too), and
  * info/preview (when the file shows inline).
  */
 const useFileDetailHeader = ({

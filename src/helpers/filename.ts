@@ -104,7 +104,3 @@ export const displayFileSize = (size: string) => {
     ? `${value} ${unit.toUpperCase()}B`
     : formatFileSize(Number(value));
 };
-
-/** Whether a file has a web link to copy: a picked file has none. */
-export const hasLink = (file: { downloadUrl: string }) =>
-  /^https?:\/\//i.test(file.downloadUrl);

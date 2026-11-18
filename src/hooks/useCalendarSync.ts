@@ -13,7 +13,7 @@ import {
 } from 'services/calendar/actions';
 import { refreshSurfaces } from 'services/surfaces';
 import { t } from 'helpers/i18n';
-import { isApple } from 'helpers/platform';
+import { isApple, isElectron } from 'helpers/platform';
 
 const show = (message?: ToastMessage) => {
   if (message) {
@@ -140,13 +140,53 @@ export const useAssignmentSync = () => {
 export const useCalendarExport = () => {
   const [exporting, setExporting] = useState(false);
 
-  const exportToICS = async () => {
+  const exportToICS = async (range?: { startDate: Date; endDate: Date }) => {
     setExporting(true);
-    show(await exportCalendars());
+    show(
+      await exportCalendars(
+        range && { start: dayjs(range.startDate), end: dayjs(range.endDate) },
+      ),
+    );
     setExporting(false);
   };
 
   return { exporting, exportToICS };
+};
+
+/**
+ * The Electron app's export: the dates to export are picked first, starting
+ * from today to the semester's end.
+ */
+export const useCalendarExportRange = () => {
+  const { exporting, exportToICS } = useCalendarExport();
+  const [range, setRange] = useState<{ startDate: Date; endDate: Date }>();
+
+  const openPicker = async () => {
+    // Required only here, so the phones' bundles leave it out.
+    const electronExport = isElectron()
+      ? (require('services/calendar/electronExport') as typeof import('services/calendar/electronExport'))
+      : undefined;
+    if (!electronExport) {
+      return;
+    }
+    const { start, end } = await electronExport.defaultExportRange();
+    setRange({ startDate: start.toDate(), endDate: end.toDate() });
+  };
+
+  return {
+    exporting,
+    picker: {
+      open: !!range,
+      startDate: range?.startDate,
+      endDate: range?.endDate,
+      openPicker,
+      closePicker: () => setRange(undefined),
+      onRangeConfirm: (picked: { startDate: Date; endDate: Date }) => {
+        setRange(undefined);
+        void exportToICS(picked);
+      },
+    },
+  };
 };
 
 /** Asks first, then deletes every learnX calendar and reminder list */

@@ -79,7 +79,6 @@ const download = {
   save: jest.fn(),
   open: jest.fn(),
   showInFolder: jest.fn(),
-  copyLink: jest.fn(),
 };
 const downloaded = (overrides: Partial<typeof download> = {}) =>
   jest
@@ -342,7 +341,7 @@ describe('in the Electron app', () => {
     jest.replaceProperty(Platform, 'OS', 'web');
   });
 
-  it('opens, saves, shows and copies instead of sharing', async () => {
+  it('opens, saves and shows instead of sharing', async () => {
     mockFile = zip;
     downloaded({ path: 'file:///c/a.zip' });
     await renderScreen({ id: zip.id });
@@ -355,14 +354,9 @@ describe('in the Electron app', () => {
     expect(download.save).toHaveBeenCalled();
     await user.press(screen.getByText(t('showInFolder')));
     expect(download.showInFolder).toHaveBeenCalled();
-    await user.press(screen.getByText(t('copyLink')));
-    expect(download.copyLink).toHaveBeenCalled();
-    expect(
-      jest.mocked(useFileDetailHeader).mock.lastCall![0],
-    ).not.toHaveProperty('onCopyLink');
   });
 
-  it('has no link to copy for a picked file, and no caption for a previewable one', async () => {
+  it('has no caption for a previewable file', async () => {
     downloaded({ path: 'file:///c/a.pdf' });
     await renderScreen({
       attachment: { ...pdf, downloadUrl: 'file:///c/picked/a.pdf' },
@@ -370,7 +364,6 @@ describe('in the Electron app', () => {
     // The info of a file shown inline.
     const { onToggleInfo } = jest.mocked(useFileDetailHeader).mock.lastCall![0];
     await act(async () => onToggleInfo());
-    expect(screen.queryByText(t('copyLink'))).toBeNull();
     expect(screen.queryByText(t('fileOpensInDefaultApp'))).toBeNull();
     expect(screen.getByText(t('showInFolder'))).toBeTruthy();
   });

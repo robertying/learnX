@@ -41,7 +41,7 @@ import {
 } from 'hooks/useAssignmentSubmission';
 import useSaveSubmissionDraft from 'hooks/useSaveSubmissionDraft';
 import { AssignmentSubmissionParamList } from 'navigation/types';
-import { isApple } from 'helpers/platform';
+import { isApple, isElectron } from 'helpers/platform';
 
 type Props = NativeStackScreenProps<
   AssignmentSubmissionParamList,
@@ -191,6 +191,12 @@ const AssignmentSubmissionContent: React.FC<{
 
   const handlePickerOpen = () => {
     Keyboard.dismiss();
+    // Windows and Linux have no photo library apart from their files: the
+    // open dialog it is, as a desktop app's Attach does.
+    if (isElectron()) {
+      void handleDocumentPick();
+      return;
+    }
     showChoices({
       title: t('pickAttachment'),
       choices: [

@@ -14,6 +14,7 @@ import {
   confirmDeleteCalendars,
   useAssignmentSync,
   useCalendarExport,
+  useCalendarExportRange,
   useCourseScheduleSync,
 } from 'hooks/useCalendarSync';
 import useCalendarAccess from 'hooks/useCalendarAccess';
@@ -27,8 +28,18 @@ jest.mock('hooks/useCalendarSync', () => ({
   confirmDeleteCalendars: jest.fn(),
   useAssignmentSync: jest.fn(),
   useCalendarExport: jest.fn(),
+  useCalendarExportRange: jest.fn(),
   useCourseScheduleSync: jest.fn(),
 }));
+
+const exportPicker = {
+  open: false,
+  startDate: undefined,
+  endDate: undefined,
+  openPicker: jest.fn(async () => {}),
+  closePicker: jest.fn(),
+  onRangeConfirm: jest.fn(),
+};
 
 const picker = {
   open: false,
@@ -76,6 +87,9 @@ beforeEach(() => {
   jest
     .mocked(useCalendarExport)
     .mockReturnValue({ exporting: false, exportToICS });
+  jest
+    .mocked(useCalendarExportRange)
+    .mockReturnValue({ exporting: false, picker: exportPicker });
 });
 
 it('turns course schedule sync on through the sync hook', async () => {
@@ -330,5 +344,7 @@ it('only exports to an .ics file in the Electron app', async () => {
   expect(screen.queryByText(t('openSystemSettings'))).toBeNull();
   expect(screen.getByText(t('exportCalendarDescription'))).toBeTruthy();
   await userEvent.setup().press(screen.getByText(t('exportCalendar')));
-  expect(exportToICS).toHaveBeenCalled();
+  // The dates come first.
+  expect(exportPicker.openPicker).toHaveBeenCalled();
+  expect(exportToICS).not.toHaveBeenCalled();
 });

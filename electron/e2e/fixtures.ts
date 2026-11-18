@@ -169,7 +169,7 @@ const launchApp = async (
     },
   });
   // Nothing reaches the system from here on: dialogs, notifications, the
-  // shell, menus and the clipboard are stand-ins.
+  // shell and menus are stand-ins.
   const main = mainProcess(app);
   await main.stub();
   return { app, window: await app.firstWindow(), main };

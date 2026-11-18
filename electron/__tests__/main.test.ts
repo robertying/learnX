@@ -140,7 +140,6 @@ const fakeElectron = (dataDir: string, { packaged = false } = {}) => {
       ],
     },
     dialog: {},
-    clipboard: {},
     Tray: class {
       setToolTip() {}
       setContextMenu() {}

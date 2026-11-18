@@ -53,22 +53,28 @@ const IconButton: React.FC<IconButtonProps> = ({
   );
   return (
     <View style={[styles.root, style]}>
-      {accessibilityLabel ? (
-        // The button has its own label: the tooltip only shows it.
-        <Tooltip content={accessibilityLabel} relationship="inaccessible">
-          {button}
-        </Tooltip>
-      ) : (
-        button
-      )}
-      {badge && <BadgeDot style={styles.badge} />}
+      {/* The button's own box, which the badge sits on. */}
+      <View>
+        {accessibilityLabel ? (
+          // The button has its own label: the tooltip only shows it.
+          <Tooltip content={accessibilityLabel} relationship="inaccessible">
+            {button}
+          </Tooltip>
+        ) : (
+          button
+        )}
+        {badge && <BadgeDot style={styles.badge} />}
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  // Holds the button at its own size wherever it's placed, without taking
+  // the place itself (`alignSelf` would override a row's centering).
   root: {
-    alignSelf: 'flex-start',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
   },
   badge: {
     position: 'absolute',

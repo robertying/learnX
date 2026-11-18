@@ -233,6 +233,7 @@ function TabNavigator({
             aria-expanded={expanded}
             data-testid="navigation-pane-toggle"
             onClick={() => setExpandedChoice(!expanded)}
+            style={toggleSize}
             icon={
               <SystemIcon
                 name="sidebar"
@@ -278,6 +279,19 @@ function TabNavigator({
   );
 }
 
+const ITEM_HEIGHT = 40;
+
+/**
+ * The menu button, square at an item's height: its icon's center is then
+ * 20 px in, as a tab's is (10 px padding and half a 20 px icon), so the
+ * icons line up in the rail.
+ */
+const toggleSize = {
+  width: ITEM_HEIGHT,
+  minWidth: ITEM_HEIGHT,
+  height: ITEM_HEIGHT,
+};
+
 const styles = StyleSheet.create({
   window: {
     flex: 1,
@@ -311,7 +325,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    height: 40,
+    height: ITEM_HEIGHT,
     marginHorizontal: 4,
     paddingLeft: 10,
     paddingRight: 8,

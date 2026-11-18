@@ -1,6 +1,6 @@
 // Stand-ins in the app's main process for what Playwright can't click: native
-// dialogs, notifications, opening files and links, native menus, the tray,
-// the clipboard and Start at login. Each helper patches Electron's modules in
+// dialogs, notifications, opening files and links, native menus, the tray
+// and Start at login. Each helper patches Electron's modules in
 // the running app (electronApp.evaluate) and records what the app asked for,
 // for the test to read back. The fixtures install them before a test starts,
 // so nothing reaches the system.
@@ -14,7 +14,6 @@ export interface MainRecord {
   shownInFolder: string[];
   dialogs: { type: string; options: unknown }[];
   menus: { labels: string[] }[];
-  clipboard: string[];
   loginItems: unknown[];
   installs: number;
 }
@@ -60,16 +59,13 @@ const exactly = (label: string) => ({
 export const mainProcess = (app: ElectronApplication) => ({
   /**
    * Installs every stand-in. Dialogs answer with `answers` (cancelled by
-   * default); notifications, opened paths and links, menus, the clipboard
-   * and Start at login are recorded instead of reaching the system. Call it
+   * default); notifications, opened paths and links, menus and Start at
+   * login are recorded instead of reaching the system. Call it
    * again to change the answers.
    */
   stub: (answers: DialogAnswers = {}) =>
     app.evaluate(
-      (
-        { app: electronApp, clipboard, dialog, Menu, Notification, shell },
-        given,
-      ) => {
+      ({ app: electronApp, dialog, Menu, Notification, shell }, given) => {
         const state = globalThis as unknown as State;
         const record = (state.learnxE2E ??= {
           notifications: [],
@@ -78,7 +74,6 @@ export const mainProcess = (app: ElectronApplication) => ({
           shownInFolder: [],
           dialogs: [],
           menus: [],
-          clipboard: [],
           loginItems: [],
           installs: 0,
         });
@@ -111,9 +106,6 @@ export const mainProcess = (app: ElectronApplication) => ({
         };
         shell.showItemInFolder = (target: string) => {
           record.shownInFolder.push(target);
-        };
-        clipboard.writeText = async (written: string) => {
-          record.clipboard.push(written);
         };
         // Start at login as Windows keeps it, in the data folder so a
         // relaunch reads it back: on only when read with the arguments it

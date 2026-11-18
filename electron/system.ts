@@ -277,10 +277,6 @@ export const setUpSystem = ({
     fromApp(event);
     return fileShell.pickFiles(windowOf(event), options);
   });
-  ipcMain.handle('shell:copyText', (event, text) => {
-    fromApp(event);
-    return electron.clipboard.writeText(String(text));
-  });
 
   // Notifications. A dev run never shows system ones (on a Mac, a learnX
   // entry would stay in System Settings › Notifications): it logs them and

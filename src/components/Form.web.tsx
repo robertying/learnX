@@ -14,6 +14,7 @@ import {
   ScrollView,
   StyleSheet,
   View,
+  type DimensionValue,
   type PressableStateCallbackType,
   type ViewProps,
 } from 'react-native';
@@ -699,6 +700,9 @@ export const FormProfile: React.FC<FormProfileProps> = ({ name, detail }) => {
   );
 };
 
+/** CSS's `min-content`, which React Native's types don't know. */
+const minContent = 'min-content' as DimensionValue;
+
 const styles = StyleSheet.create({
   fill: {
     flex: 1,
@@ -750,11 +754,14 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   // The label takes the row; when the row is short of room, it and the
-  // detail both wrap, each by its length.
+  // detail both wrap, each by its length, between words: neither gets
+  // narrower than its longest word (React Native Web lets a view shrink to
+  // nothing, and its text then breaks inside a word).
   label: {
     flexGrow: 1,
     flexShrink: 1,
     flexBasis: 'auto',
+    minWidth: minContent,
     gap: 2,
   },
   overline: {
@@ -769,6 +776,7 @@ const styles = StyleSheet.create({
   detail: {
     textAlign: 'right',
     flexShrink: 1,
+    minWidth: minContent,
   },
   tinted: {
     fontWeight: '600',

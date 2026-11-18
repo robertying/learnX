@@ -249,7 +249,6 @@ export interface Bridge {
       images?: boolean;
       multiple?: boolean;
     }) => Promise<BridgePickedFile[] | null>;
-    copyText: (text: string) => Promise<void>;
   };
   notifications: {
     supported: () => Promise<boolean>;

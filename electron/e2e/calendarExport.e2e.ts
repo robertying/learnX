@@ -6,7 +6,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { expect, test } from './fixtures.ts';
-import { text } from './maestroEnv.ts';
+import { exact, text } from './maestroEnv.ts';
 import { byId, openSettings, openSettingsPage } from './steps.ts';
 
 test('exports the classes and deadlines as an .ics file', async ({
@@ -21,8 +21,27 @@ test('exports the classes and deadlines as an .ics file', async ({
   // No calendar sync on the desktop: only the export.
   await expect(window.getByTestId('calendar-course-sync')).toHaveCount(0);
 
-  // Cancelled: nothing saved.
+  // The dates come first, from today; cancelling them asks nothing more.
+  const dates = window.getByRole('dialog');
   await byId(window, 'calendar-export').click();
+  await expect(
+    dates.getByRole('heading', { name: exact('T_exportRangeTitle') }),
+  ).toBeVisible();
+  await expect(dates.locator('input[type="date"]').first()).toHaveValue(
+    new Date().toLocaleDateString('sv'),
+  );
+  await dates.getByRole('button', { name: exact('T_cancel') }).click();
+  await expect(dates).toHaveCount(0);
+  expect((await main.record()).dialogs).toHaveLength(0);
+  const exportDates = async () => {
+    await byId(window, 'calendar-export').click();
+    await dates
+      .getByRole('button', { name: exact('T_exportRangeSave') })
+      .click();
+  };
+
+  // The save dialog cancelled: nothing saved.
+  await exportDates();
   await expect.poll(async () => (await main.record()).dialogs.length).toBe(1);
   const [cancelled] = (await main.record()).dialogs;
   expect(cancelled).toMatchObject({
@@ -32,7 +51,7 @@ test('exports the classes and deadlines as an .ics file', async ({
 
   const saved = path.join(dataDir, 'learnX.ics');
   await main.stub({ save: saved });
-  await byId(window, 'calendar-export').click();
+  await exportDates();
   // Read once it's all there: writeFile creates the file before it writes
   // to it, and Windows runners caught it empty in between.
   const read = () =>

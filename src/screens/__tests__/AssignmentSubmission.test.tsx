@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { Alert, Keyboard } from 'react-native';
+import { Alert, Keyboard, Platform } from 'react-native';
 import { act, render, screen, userEvent } from '@testing-library/react-native';
 import { showChoices } from 'components/choiceSheet';
 import { mockAssignments } from 'data/mock';
@@ -191,6 +191,14 @@ it('picks from documents or photos, with the keyboard down', async () => {
   expect(picker.pickDocument).toHaveBeenCalled();
   choices[1].onPress();
   expect(picker.pickPhoto).toHaveBeenCalled();
+});
+
+it('goes straight to the open dialog in the Electron app', async () => {
+  await renderScreen();
+  jest.replaceProperty(Platform, 'OS', 'web');
+  await userEvent.press(screen.getByTestId('pickAttachment'));
+  expect(showChoices).not.toHaveBeenCalled();
+  expect(picker.pickDocument).toHaveBeenCalled();
 });
 
 it('shows a picked file, which can be renamed, opened or removed', async () => {

@@ -110,7 +110,6 @@ const fakeElectron = () => {
     },
     dialog: { showOpenDialog: jest.fn(), showSaveDialog: jest.fn() },
     shell: { openPath: jest.fn(), showItemInFolder: jest.fn() },
-    clipboard: { writeText: jest.fn() },
     ipcMain: {
       handle: (channel: string, handler: Handler) =>
         handlers.set(channel, handler),
@@ -605,12 +604,8 @@ describe('files', () => {
     );
     await expect(invoke('shell:pickFiles', {})).resolves.toBeNull();
     await expect(invoke('shell:saveText', 'a.ics', 'x')).resolves.toBeNull();
-    await invoke('shell:copyText', 'https://learn.tsinghua.edu.cn/f');
-    expect(electron.clipboard.writeText).toHaveBeenCalledWith(
-      'https://learn.tsinghua.edu.cn/f',
-    );
     // Each checks that it comes from the app's window.
-    expect(fromApp).toHaveBeenCalledTimes(6);
+    expect(fromApp).toHaveBeenCalledTimes(5);
     await expect(invoke('shell:open', 'https://x')).rejects.toThrow('ENOENT');
     await expect(invoke('shell:showInFolder', 'https://x')).rejects.toThrow(
       'ENOENT',

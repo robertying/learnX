@@ -44,19 +44,18 @@ test('submits a file chosen in the open dialog', async ({
   await login();
   await openSubmission(window);
 
+  // No choice of where from: Windows and Linux keep photos in files, so
+  // Choose Attachment goes straight to the open dialog.
   await main.stub({ open: [report] });
   await byId(window, 'pickAttachment').click();
-  await window
-    .getByRole('dialog')
-    .getByRole('button', { name: exact('T_documents') })
-    .click();
   await expect(byId(window, 'submissionFilename')).toBeVisible();
+  await expect(window.getByRole('dialog')).toHaveCount(0);
   const pickAgain = shown(
     window.getByRole('button', { name: exact('T_reUploadAttachment') }),
   );
   await expect(pickAgain).toBeVisible();
 
-  // Another one, from Photo Library: the same open dialog, for pictures.
+  // Another one, a picture: the same open dialog.
   const photo = path.join(dataDir, 'photo.png');
   fs.copyFileSync(
     path.join(import.meta.dirname, '..', 'icons', 'icon.png'),
@@ -64,10 +63,6 @@ test('submits a file chosen in the open dialog', async ({
   );
   await main.stub({ open: [photo] });
   await pickAgain.click();
-  await window
-    .getByRole('dialog')
-    .getByRole('button', { name: exact('T_photos') })
-    .click();
   await expect
     .poll(async () =>
       (await main.record()).dialogs.filter(d => d.type === 'open'),

@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { act, renderHook } from '@testing-library/react-native';
 import dayjs from 'dayjs';
 import { toast } from 'components/Toast';
@@ -15,6 +15,7 @@ import {
   confirmDeleteCalendars,
   useAssignmentSync,
   useCalendarExport,
+  useCalendarExportRange,
   useCourseScheduleSync,
 } from 'hooks/useCalendarSync';
 
@@ -26,6 +27,15 @@ jest.mock('services/calendar/actions', () => ({
   exportCalendars: jest.fn(async () => undefined),
   deleteCalendars: jest.fn(async () => ({ text: 'Deleted', type: 'success' })),
 }));
+jest.mock('services/calendar/electronExport', () => {
+  const day = jest.requireActual('dayjs');
+  return {
+    defaultExportRange: jest.fn(async () => ({
+      start: day('2026-11-18'),
+      end: day('2027-01-10'),
+    })),
+  };
+});
 jest.mock('services/surfaces', () => ({
   refreshSurfaces: jest.fn(async () => {}),
 }));
@@ -150,6 +160,36 @@ it('exports the calendars, showing the result', async () => {
   await act(() => result.current.exportToICS());
   expect(toast).toHaveBeenCalledWith('Saved', 'success');
   expect(result.current.exporting).toBe(false);
+});
+
+it('exports the dates picked, offered from today to the semester end', async () => {
+  const { result } = await renderHook(() => useCalendarExportRange());
+  expect(result.current.picker.open).toBe(false);
+  // The Electron app's alone.
+  await act(() => result.current.picker.openPicker());
+  expect(result.current.picker.open).toBe(false);
+  jest.replaceProperty(Platform, 'OS', 'web');
+  await act(() => result.current.picker.openPicker());
+  expect(result.current.picker).toMatchObject({
+    open: true,
+    startDate: new Date('2026-11-18T00:00:00'),
+    endDate: new Date('2027-01-10T00:00:00'),
+  });
+  await act(async () => result.current.picker.closePicker());
+  expect(result.current.picker.open).toBe(false);
+  expect(exportCalendars).not.toHaveBeenCalled();
+
+  await act(() => result.current.picker.openPicker());
+  const picked = {
+    startDate: new Date('2026-11-20T00:00:00'),
+    endDate: new Date('2026-11-30T00:00:00'),
+  };
+  await act(async () => result.current.picker.onRangeConfirm(picked));
+  expect(result.current.picker.open).toBe(false);
+  expect(exportCalendars).toHaveBeenCalledWith({
+    start: dayjs(picked.startDate),
+    end: dayjs(picked.endDate),
+  });
 });
 
 it('deletes the calendars only once confirmed', async () => {

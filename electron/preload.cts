@@ -74,7 +74,6 @@ const learnx: Bridge = {
       ipcRenderer.invoke('shell:saveText', name, content),
     pickDirectory: () => ipcRenderer.invoke('shell:pickDirectory'),
     pickFiles: options => ipcRenderer.invoke('shell:pickFiles', options),
-    copyText: text => ipcRenderer.invoke('shell:copyText', text),
   },
   notifications: {
     supported: () => ipcRenderer.invoke('notifications:supported'),

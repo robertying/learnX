@@ -234,7 +234,6 @@ export const systemIcons = {
     android: 'open_in_new',
     windows: 'OpenRegular',
   },
-  copyLink: { ios: 'link', android: 'link', windows: 'LinkRegular' },
   share: {
     ios: 'square.and.arrow.up',
     android: 'share',
@@ -533,7 +532,6 @@ export const materialCodepoints: Record<SystemIconAndroidName, number> = {
   info: 0xe88e,
   key: 0xe73c,
   lan: 0xeb2f,
-  link: 0xe157,
   light_mode: 0xe518,
   location_off: 0xe0c7,
   login: 0xea77,
