@@ -17,18 +17,28 @@ const popupProperties = { clippingEnabled: false };
 
 /**
  * The card's actions in a Material 3 dropdown menu, opened by a long press and
- * anchored at the card's bottom right, each with its icon as in the header's
- * filter menu.
+ * anchored where the finger is (as `View.showContextMenu(x, y)`), each with
+ * its icon as in the header's filter menu. Anchored at the card's bottom edge,
+ * it would open over the next card and read as that card's menu.
  */
 const CardMenu: React.FC<CardMenuProps> = ({
   visible,
   actions,
   onAction,
   onDismiss,
+  anchor,
 }) => {
   const theme = useMaterialTheme();
   return (
-    <ThemedHost matchContents style={styles.anchor} pointerEvents="box-none">
+    <ThemedHost
+      testID="card-menu-anchor"
+      matchContents
+      style={[
+        styles.anchor,
+        anchor ? { left: anchor.x, top: anchor.y } : styles.defaultAnchor,
+      ]}
+      pointerEvents="box-none"
+    >
       <DropdownMenu
         expanded={visible}
         onDismissRequest={onDismiss}
@@ -68,8 +78,11 @@ const CardMenu: React.FC<CardMenuProps> = ({
 const styles = StyleSheet.create({
   anchor: {
     position: 'absolute',
+  },
+  // Without a touch point: the card's top right, over the card itself.
+  defaultAnchor: {
     right: 16,
-    bottom: 0,
+    top: 0,
   },
 });
 

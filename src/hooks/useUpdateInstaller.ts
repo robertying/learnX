@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Alert } from 'react-native';
 import { queryClient } from 'data/queryClient';
+import { latestReleaseQuery } from 'data/latestRelease';
 import type { Release } from 'helpers/update';
 import { formatFileSize } from 'helpers/filename';
 import { t, type TextKey } from 'helpers/i18n';
 import { openLink } from 'helpers/openLink';
-import { latestReleaseQuery } from 'hooks/useAvailableUpdate';
 import {
   installsUpdate,
   installUpdate,
@@ -26,7 +26,7 @@ const failureMessages: Record<
 };
 
 /**
- * `latest.json` again, not the copy kept for a day: after a failure, the
+ * `latest.json` again, not the copy kept for a few hours: after a failure, the
  * mirror may have been between a release's files.
  */
 const freshRelease = (current: Release) =>

@@ -1,5 +1,6 @@
 internal import Expo
 internal import LearnXMenus
+internal import LearnXWindows
 import ObjectiveC
 import React
 import ReactAppDependencyProvider
@@ -22,6 +23,7 @@ class AppDelegate: ExpoAppDelegate, @MainActor ExpoReactNativeFactoryProvider {
     UIScrollView.preferSoftTopEdgeEffect()
     UICollectionView.keepRefreshControlAboveRows()
     TextInputRecycling.disable()
+    WindowTracker.start(application)
 
     let delegate = ReactNativeDelegate()
     let factory = ExpoReactNativeFactory(delegate: delegate)
@@ -34,6 +36,11 @@ class AppDelegate: ExpoAppDelegate, @MainActor ExpoReactNativeFactoryProvider {
       application,
       didFinishLaunchingWithOptions: launchOptions
     )
+  }
+
+  /// Windows closed for good (swiped away in App Exposé) have nothing left to restore.
+  func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
+    WindowTracker.forget(sceneSessions.map(\.persistentIdentifier))
   }
 
   // Refresh, Search, Settings… and next/previous item in the menu bar, with their shortcuts.

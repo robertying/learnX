@@ -3,13 +3,16 @@ import { Linking } from 'react-native';
 import { getUrlTarget } from 'helpers/openTarget';
 import useOpenTarget from 'hooks/useOpenTarget';
 import { applyMockNetworkLink } from 'services/launchOptions';
+import { isTargetWindow } from 'services/windows';
+import { useWindow } from 'hooks/useWindow';
 
 /**
- * The link that launched the app stays the initial URL for as long as the app
- * runs; it's opened once, not again on a later mount (e.g. after logging in
- * again).
+ * The link that launched the app (or a window) stays its initial URL for as
+ * long as the app runs; it's opened once, not again on a later mount (e.g.
+ * after logging in again). By window id; the empty string where there's only
+ * one window.
  */
-let initialUrlHandled = false;
+const initialUrlHandled = new Set<string>();
 
 /**
  * Opens learnx:// links: those of tapped widget rows (the assignment's detail,
@@ -21,6 +24,7 @@ let initialUrlHandled = false;
  */
 const useLinkTaps = () => {
   const open = useEffectEvent(useOpenTarget());
+  const { windowId, initialURL } = useWindow();
 
   useEffect(() => {
     const handle = (url: string | null | undefined) => {
@@ -33,17 +37,26 @@ const useLinkTaps = () => {
       }
     };
 
-    if (!initialUrlHandled) {
-      initialUrlHandled = true;
-      Linking.getInitialURL()
-        .then(handle)
-        .catch(() => {});
+    if (!initialUrlHandled.has(windowId ?? '')) {
+      initialUrlHandled.add(windowId ?? '');
+      // A window of its own (iPad, Mac) is told its link by the scene
+      // delegate: React Native only knows the one that launched the app.
+      if (windowId) {
+        handle(initialURL);
+      } else {
+        Linking.getInitialURL()
+          .then(handle)
+          .catch(() => {});
+      }
     }
-    const subscription = Linking.addEventListener('url', ({ url }) =>
-      handle(url),
-    );
+    // Every window hears every link; the one it was delivered to opens it.
+    const subscription = Linking.addEventListener('url', ({ url }) => {
+      if (isTargetWindow(windowId)) {
+        handle(url);
+      }
+    });
     return () => subscription.remove();
-  }, []);
+  }, [windowId, initialURL]);
 };
 
 export default useLinkTaps;

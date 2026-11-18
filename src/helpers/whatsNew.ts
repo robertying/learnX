@@ -3,6 +3,7 @@ import semverGt from 'semver/functions/gt';
 import semverLte from 'semver/functions/lte';
 import semverValid from 'semver/functions/valid';
 import DeviceInfo from 'constants/DeviceInfo';
+import Urls from 'constants/Urls';
 import type { TextKey } from 'helpers/i18n';
 import type { SystemIconName } from 'helpers/systemIcons';
 import { isApple, isElectron } from 'helpers/platform';
@@ -15,6 +16,8 @@ export interface Highlight {
   icon: SystemIconName;
   title: TextKey;
   body: TextKey;
+  /** A web page linked under the body, such as where to download an app. */
+  link?: string;
   /**
    * The native app version this needs (a widget, an App Intent, a native
    * module). Left out when an over-the-air update to the JS can deliver it.
@@ -95,6 +98,8 @@ export const releases: Release[] = [
         icon: 'desktop',
         title: 'whatsNew19ElectronTitle',
         body: 'whatsNew19ElectronBody',
+        // The website lists the downloads.
+        link: Urls.website,
         platforms: ['ios', 'mac', 'android'],
       },
     ],

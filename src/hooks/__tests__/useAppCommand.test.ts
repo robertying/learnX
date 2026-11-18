@@ -1,6 +1,9 @@
+import { createElement } from 'react';
 import { act, renderHook } from '@testing-library/react-native';
 import useAppCommand from 'hooks/useAppCommand';
 import type { AppCommand } from 'modules/menus';
+import { Windows } from 'modules/windows';
+import { WindowProvider } from 'hooks/useWindow';
 
 // The native module's events, as AppCommands.swift sends them.
 const mockListeners = new Set<(event: { command: AppCommand }) => void>();
@@ -21,6 +24,7 @@ const choose = (command: AppCommand) =>
 
 afterEach(() => {
   mockListeners.clear();
+  jest.mocked(Windows!.targetWindowId).mockReturnValue(null);
 });
 
 describe('useAppCommand', () => {
@@ -60,5 +64,25 @@ describe('useAppCommand', () => {
 
     await view.unmount();
     expect(mockListeners.size).toBe(0);
+  });
+
+  it('runs only in the key window when there are several', async () => {
+    const inA = jest.fn();
+    const inB = jest.fn();
+    const inWindow =
+      (windowId: string) =>
+      ({ children }: React.PropsWithChildren) =>
+        createElement(WindowProvider, { windowId }, children);
+    await renderHook(() => useAppCommand('search', inA), {
+      wrapper: inWindow('a'),
+    });
+    await renderHook(() => useAppCommand('search', inB), {
+      wrapper: inWindow('b'),
+    });
+    jest.mocked(Windows!.targetWindowId).mockReturnValue('b');
+
+    await choose('search');
+    expect(inA).not.toHaveBeenCalled();
+    expect(inB).toHaveBeenCalledTimes(1);
   });
 });

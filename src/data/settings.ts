@@ -36,6 +36,9 @@ export const defaultSettings: SettingsState = {
     deadlineReminderOffset: 24 * 60,
     classReminders: false,
     classReminderOffset: 15,
+    // Once a release, and only where learnX updates itself: the one
+    // notification that starts on (it never asks for the permission).
+    appUpdates: true,
   },
   courseInformationSharing: false,
   openFileAfterDownload: false,

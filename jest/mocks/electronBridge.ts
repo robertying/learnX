@@ -52,6 +52,7 @@ export const installBridge = (overrides: Partial<Bridge> = {}): Bridge => {
       set: jest.fn(async () => true),
     },
     updates: {
+      checks: jest.fn(() => true),
       pending: jest.fn(() => null),
       onReady: jest.fn(),
       install: jest.fn(),

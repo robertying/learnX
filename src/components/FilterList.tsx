@@ -39,6 +39,7 @@ import FlatList from './FlatList';
 import ListBackground from './ListBackground';
 import { playHaptic } from 'services/haptics';
 import { useTheme } from 'theme';
+import { useWindowRestoration } from 'hooks/useWindow';
 
 export type { ItemComponentProps };
 
@@ -105,6 +106,8 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   const detailRoot = useDetailRoot();
   const openedId =
     detailRoot?.name === detailScreens[type] ? detailRoot.id : undefined;
+  // A window on iPad or Mac comes back to this list and item after a relaunch.
+  useWindowRestoration({ type, id: openedId });
 
   // Only this tab's selection, so changing another tab's filter does not
   // re-render this list
@@ -330,6 +333,10 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
           key={`${filterSelected}-${reorderMode}`}
           {...listProps}
           dragEnabled={reorderMode}
+          // Only reorder mode drags. Outside it the list's pan would still
+          // activate on a long press and cancel the card's own, so Android's
+          // card menu never opened on Courses.
+          panEnabled={reorderMode}
           panActivateAfterLongPress={520}
           onReorder={handleReorderDone}
           onDragStart={handleDragStart}

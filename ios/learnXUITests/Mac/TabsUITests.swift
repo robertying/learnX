@@ -34,6 +34,26 @@ final class TabsUITests: LearnXUITestCase {
     try waitFor(card: "notice-card", "MOCK_NOTICE")
   }
 
+  /// The sidebar opens as it was left (`sidebarHidden` in `data/appState.ts`): UIKit only keeps it with the window's
+  /// saved state, which quitting discards unless "Close windows when quitting an application" is off.
+  func testSidebarStaysAsItWasLeft() throws {
+    let tab = try waitFor(id: "tab-notices")
+    // View › Hide Sidebar.
+    app.typeKey("s", modifierFlags: [.command, .control])
+    let hidden = expectation(for: NSPredicate(format: "isHittable == false"), evaluatedWith: tab)
+    wait(for: [hidden], timeout: 5)
+
+    try launch()
+    try waitFor(id: "today", timeout: 60)
+    XCTAssertFalse(element(id: "tab-notices").isHittable, "the sidebar came back after a relaunch")
+
+    // Show it again for the tests after this one, and check that sticks too.
+    app.typeKey("s", modifierFlags: [.command, .control])
+    try launch()
+    try logIn()
+    XCTAssertTrue(try waitFor(id: "tab-notices").isHittable, "the sidebar stayed hidden after showing it")
+  }
+
   /// patches/react-native-screens@4.30.1.patch: in a split view each column keeps its bar, as on iPad, instead of
   /// every bar competing for the window's toolbar.
   func testEachColumnHasItsOwnBar() throws {

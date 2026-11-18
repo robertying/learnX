@@ -5,4 +5,9 @@ export interface CardMenuProps {
   actions: CardAction[];
   onAction: (action: CardAction) => void;
   onDismiss: () => void;
+  /**
+   * Where the long press was, in the card's coordinates: Android's menu opens
+   * there, as a View's context menu does, so it reads as the pressed card's.
+   */
+  anchor?: { x: number; y: number };
 }

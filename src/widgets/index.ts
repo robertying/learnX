@@ -1,6 +1,13 @@
 import type { Widget } from 'expo-widgets';
 import { Assignment } from 'data/types/state';
-import { formatDate, formatTime, isLocaleChinese, t } from 'helpers/i18n';
+import {
+  formatDate,
+  formatLiteral,
+  formatTime,
+  isLocaleChinese,
+  t,
+  type FormatKey,
+} from 'helpers/i18n';
 import { getTargetUrl } from 'helpers/openTarget';
 import { classTimeRange } from 'helpers/schedule';
 import { beijingWallClock } from 'helpers/serverTime';
@@ -93,28 +100,38 @@ export function updateDeadlineWidget(
 
 /** The Up Next widget's props, for the classes still ahead. */
 export const upNextProps = (classes: UpcomingClass[]): UpNextWidgetProps => ({
-  classes: classes.map(c => ({
-    key: c.key,
-    courseName: c.courseName,
-    location: c.location,
-    start: c.start,
-    end: c.end,
+  classes: classes.map(c => {
     // Beijing times and days, as Today and Schedule show them
-    time: classTimeRange(c),
-    startTime: formatTime(beijingWallClock(c.start)),
-    weekday: formatDate(beijingWallClock(c.start), 'widgetClassWeekdayFormat'),
-    day: formatDate(beijingWallClock(c.start), 'widgetClassDayFormat'),
-    url: c.courseId
-      ? getTargetUrl({ type: 'course', id: c.courseId })
-      : undefined,
-  })),
+    const start = beijingWallClock(c.start);
+    const time = classTimeRange(c);
+    const startTime = formatTime(start);
+    const withDay = (key: FormatKey, at: string) =>
+      formatDate(start, key, { time: formatLiteral(at) });
+    return {
+      key: c.key,
+      courseName: c.courseName,
+      location: c.location,
+      start: c.start,
+      end: c.end,
+      time,
+      startTime,
+      tomorrow: withDay('widgetClassTomorrowFormat', time),
+      tomorrowStart: withDay('widgetClassTomorrowFormat', startTime),
+      weekday: withDay('widgetClassWeekdayFormat', time),
+      weekdayStart: withDay('widgetClassWeekdayFormat', startTime),
+      day: withDay('widgetClassDayFormat', time),
+      dayStart: withDay('widgetClassDayFormat', startTime),
+      url: c.courseId
+        ? getTargetUrl({ type: 'course', id: c.courseId })
+        : undefined,
+    };
+  }),
   title: t('widgetUpNext'),
   now: t('todayNow'),
   next: t('widgetUpNext'),
   later: t('widgetLater'),
   startsIn: t('widgetStartsIn'),
   endsIn: t('widgetEndsIn'),
-  tomorrow: t('widgetTomorrow'),
   noClasses: t('widgetNoClasses'),
   url: getTargetUrl({ type: 'today' }),
   locale: widgetLocale(),

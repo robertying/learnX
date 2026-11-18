@@ -2,8 +2,9 @@
 // A local stand-in for the TUNA mirror's LatestRelease/ folder, to try the
 // Electron app's updates (updater.ts) without publishing anything, as
 // scripts/e2e/updater-e2e-server.mjs does for the Android APKs. It serves the
-// files in <dir> as they are, byte ranges too (differential downloads read
-// the .blockmap files):
+// files in <dir> as they are, byte ranges too, several at once as the
+// mirror's nginx does (differential downloads read the .blockmap files, then
+// the parts of the installer that changed):
 //
 //   GET /<file>    latest.yml, latest-linux.yml, an installer, a .blockmap
 //
@@ -21,27 +22,44 @@ import { parseArgs } from 'node:util';
 
 export const DEFAULT_PORT = 8299;
 
-/**
- * A byte range of a file of `size` bytes from a Range header, or null for
- * the whole file; 'invalid' when it can't be served.
- */
-export const byteRange = (
-  header: string | undefined,
-  size: number,
-): { start: number; end: number } | null | 'invalid' => {
-  if (!header) {
-    return null;
-  }
-  const match = /^bytes=(\d*)-(\d*)$/.exec(header);
+type Range = { start: number; end: number };
+
+/** One range of a Range header (`0-9`, `5-`, `-10`), or null if invalid. */
+const parseRange = (spec: string, size: number): Range | null => {
+  const match = /^(\d*)-(\d*)$/.exec(spec.trim());
   if (!match || (!match[1] && !match[2])) {
-    return 'invalid';
+    return null;
   }
   const start = match[1] ? Number(match[1]) : size - Number(match[2]);
   const end = match[1] && match[2] ? Number(match[2]) : size - 1;
-  return start < 0 || start > end || end >= size
-    ? 'invalid'
-    : { start, end: Math.min(end, size - 1) };
+  return start < 0 || start > end || end >= size ? null : { start, end };
 };
+
+/**
+ * The byte ranges of a file of `size` bytes a Range header asks for, or null
+ * for the whole file; 'invalid' when they can't be served. Several ranges at
+ * once are how electron-updater's differential downloads read the parts of
+ * an installer that changed.
+ */
+export const byteRanges = (
+  header: string | undefined,
+  size: number,
+): Range[] | null | 'invalid' => {
+  if (!header) {
+    return null;
+  }
+  const match = /^bytes=(.+)$/.exec(header);
+  if (!match) {
+    return 'invalid';
+  }
+  const ranges = match[1].split(',').map(spec => parseRange(spec, size));
+  return ranges.every(range => range !== null)
+    ? (ranges as Range[])
+    : 'invalid';
+};
+
+/** The boundary between the parts of a multipart/byteranges response. */
+const BOUNDARY = 'learnx-update-server';
 
 /** A server for the files in `dir`. */
 export const createUpdateServer = (
@@ -63,17 +81,55 @@ export const createUpdateServer = (
       return;
     }
     const { size } = statSync(file);
-    const range = byteRange(req.headers.range, size);
-    if (range === 'invalid') {
+    const ranges = byteRanges(req.headers.range, size);
+    if (ranges === 'invalid') {
       res.writeHead(416, { 'content-range': `bytes */${size}` }).end();
       return;
     }
-    const { start, end } = range ?? { start: 0, end: size - 1 };
-    res.writeHead(range ? 206 : 200, {
+    if (ranges && ranges.length > 1) {
+      // As nginx, which the mirror runs, answers several ranges: each part
+      // with its own Content-Range.
+      const heads = ranges.map(
+        ({ start, end }) =>
+          `--${BOUNDARY}\r\ncontent-type: application/octet-stream\r\ncontent-range: bytes ${start}-${end}/${size}\r\n\r\n`,
+      );
+      const tail = `--${BOUNDARY}--\r\n`;
+      res.writeHead(206, {
+        'content-type': `multipart/byteranges; boundary=${BOUNDARY}`,
+        'content-length':
+          ranges.reduce(
+            (total, { start, end }, index) =>
+              total + Buffer.byteLength(heads[index]) + end - start + 1 + 2,
+            0,
+          ) + Buffer.byteLength(tail),
+        'accept-ranges': 'bytes',
+      });
+      if (req.method === 'HEAD') {
+        res.end();
+        return;
+      }
+      const writePart = (index: number) => {
+        if (index === ranges.length) {
+          res.end(tail);
+          return;
+        }
+        res.write(heads[index]);
+        const part = createReadStream(file, ranges[index]);
+        part.pipe(res, { end: false });
+        part.on('end', () => {
+          res.write('\r\n');
+          writePart(index + 1);
+        });
+      };
+      writePart(0);
+      return;
+    }
+    const { start, end } = ranges?.[0] ?? { start: 0, end: size - 1 };
+    res.writeHead(ranges ? 206 : 200, {
       'content-type': 'application/octet-stream',
       'content-length': end - start + 1,
       'accept-ranges': 'bytes',
-      ...(range ? { 'content-range': `bytes ${start}-${end}/${size}` } : {}),
+      ...(ranges ? { 'content-range': `bytes ${start}-${end}/${size}` } : {}),
     });
     if (req.method === 'HEAD') {
       res.end();

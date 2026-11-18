@@ -6,11 +6,14 @@
 #
 #   scripts/ci/changed-files.sh android >> "$GITHUB_OUTPUT"
 #   scripts/ci/changed-files.sh electron >> "$GITHUB_OUTPUT"
+#   scripts/ci/changed-files.sh electron-updates >> "$GITHUB_OUTPUT"
 #
 # Prints `changed=true` or `changed=false`, comparing the merge commit with its
 # base (checkout's default). Anything else (a push, a manual run) counts as
 # changed. Needs actions/checkout with fetch-depth: 2.
 set -euo pipefail
+
+output=changed
 
 case "${1:-}" in
 android)
@@ -29,14 +32,23 @@ electron)
   pattern='^(ios/|android/|modules/[^/]+/(ios|android)/|\.maestro/|fastlane/|docs/|\.github/workflows/(js|android|apple|caches)\.yml$)|\.md$'
   match=outside
   ;;
+electron-updates)
+  # The Electron app's updates from packaging to install (electron.yml's
+  # Update E2E tests, which isn't required): the updater and what wires it in, the
+  # packaging and the installer, electron-updater's and electron-builder's
+  # versions, and the test itself. Prints `updates=…`.
+  pattern='^(electron/(updater|updateSignature|updateServer|updateE2E|main|package|packageConfig|buildInfo)\.ts$|electron/(installer\.nsh|package\.json)$|electron/e2e/(installUpdate\.e2e|fixtures|steps)\.ts$|patches/electron-|pnpm-lock\.yaml$|\.github/workflows/electron\.yml$|scripts/ci/changed-files\.sh$)'
+  match=any
+  output=updates
+  ;;
 *)
-  echo "Usage: $0 android|electron" >&2
+  echo "Usage: $0 android|electron|electron-updates" >&2
   exit 2
   ;;
 esac
 
 if [ "${GITHUB_EVENT_NAME:-}" != pull_request ]; then
-  echo "changed=true"
+  echo "$output=true"
   exit 0
 fi
 
@@ -50,7 +62,7 @@ flags=-Eq
 status=0
 echo "$files" | grep "$flags" "$pattern" || status=$?
 case $status in
-0) echo "changed=true" ;;
-1) echo "changed=false" ;;
+0) echo "$output=true" ;;
+1) echo "$output=false" ;;
 *) exit "$status" ;;
 esac

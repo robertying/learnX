@@ -22,6 +22,7 @@
     "e2e:ios": "scripts/e2e/e2e.sh ios",
     "e2e:android": "scripts/e2e/e2e.sh android",
     "e2e:electron": "playwright test -c electron/playwright.config.ts",
+    "e2e:electron:update": "node electron/updateE2E.ts",
     "e2e:mac": "scripts/e2e/e2e-mac.sh",
     "e2e:devices": "scripts/e2e/e2e-devices.sh",
     "bump": "scripts/release/bump.sh",

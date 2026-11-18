@@ -48,12 +48,14 @@ export interface TabBarFrame {
 }
 
 const ToastModule = requireNativeModule<{
-  tabBarFrame: () => Promise<TabBarFrame | null>;
+  tabBarFrame: (windowId?: string) => Promise<TabBarFrame | null>;
 }>('LearnXToast');
 
 /**
  * Where the tab bar the person sees is, wherever UIKit put it, or null when
  * none shows: on the login, under a sheet, at the top on iPad (where it
- * floats and the bar itself is hidden) and on the Mac. iOS only.
+ * floats and the bar itself is hidden) and on the Mac. In the window
+ * `windowId` (`services/windows`), or with none, in any. iOS only.
  */
-export const tabBarFrame = () => ToastModule.tabBarFrame();
+export const tabBarFrame = (windowId?: string) =>
+  ToastModule.tabBarFrame(windowId);

@@ -14,12 +14,14 @@ import { renderDetailContainer } from './DetailStack';
 import MainTab from './MainTab';
 import WindowFrame from './WindowFrame';
 import { initialTab, nativeSplit } from './layout';
+import { rootNavigation } from './rootNavigation';
 import Setup from 'screens/Setup';
 import {
   AssignmentSubmissionStack,
   CourseXStack,
   LoginStack,
   SearchStack,
+  SemesterSelectionStack,
   WhatsNewStack,
 } from './stacks';
 import { isAndroid, isApple } from 'helpers/platform';
@@ -74,15 +76,19 @@ const Modals =
   createNativeStackNavigator<
     Pick<
       RootStackParams,
-      'CourseXStack' | 'SearchStack' | 'AssignmentSubmissionStack'
+      | 'CourseXStack'
+      | 'SearchStack'
+      | 'SemesterSelectionStack'
+      | 'AssignmentSubmissionStack'
     >
   >();
 
 /**
- * Search, CourseX and a submission, over the whole window: page sheets on
- * iOS, iPadOS and Mac, and on Android above the split view (the root
- * navigator there), not inside the list's pane. A page about the whole app
- * (Search, every course's CourseX) always opens here; one about the item open
+ * Search, CourseX, the semesters and a submission, over the whole window:
+ * page sheets on iOS, iPadOS and Mac, and on Android above the split view
+ * (the root navigator there), not inside the list's pane. A page about the
+ * whole app (Search, every course's CourseX, the semesters from an item that
+ * isn't in the semester shown) always opens here; one about the item open
  * in a split view's detail pane (a course's CourseX, an assignment's
  * submission) is pushed in that pane, and opens here only where there is none.
  */
@@ -90,6 +96,10 @@ const renderModals = () => (
   <Modals.Group screenOptions={sheetOptions}>
     <Modals.Screen name="CourseXStack" component={CourseXStack} />
     <Modals.Screen name="SearchStack" component={SearchStack} />
+    <Modals.Screen
+      name="SemesterSelectionStack"
+      component={SemesterSelectionStack}
+    />
     {/* The draft is saved as it's written, so a swipe down loses nothing
         (the screen holds it while uploading). */}
     <Modals.Screen
@@ -138,7 +148,11 @@ const Navigation: React.FC<{ showMain: boolean }> = ({ showMain }) => {
   const theme = useNavigationTheme();
 
   return (
-    <NavigationContainer theme={theme} onStateChange={trackScreen}>
+    <NavigationContainer
+      ref={rootNavigation}
+      theme={theme}
+      onStateChange={trackScreen}
+    >
       {nativeSplit ? (
         <RootNavigator.Navigator screenOptions={rootScreenOptions}>
           {showMain ? (

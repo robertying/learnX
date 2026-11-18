@@ -1,10 +1,16 @@
-import { PropsWithChildren, useState } from 'react';
-import { AccessibilityActionEvent, View, StyleSheet } from 'react-native';
+import { PropsWithChildren, useRef, useState } from 'react';
+import {
+  AccessibilityActionEvent,
+  GestureResponderEvent,
+  View,
+  StyleSheet,
+} from 'react-native';
 import { SharedValue, useSharedValue } from 'react-native-reanimated';
 import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import DeviceInfo from 'constants/DeviceInfo';
 import { useSettings } from 'data/settings';
 import { CardAction, cardActions, swipeAction } from 'helpers/cardActions';
+import { cardMenuAnchor } from 'helpers/cardMenuAnchor';
 import { t } from 'helpers/i18n';
 import { systemIcons } from 'helpers/systemIcons';
 import useBackSwipeEdge, { backSwipeEdgeWidth } from 'hooks/useBackSwipeEdge';
@@ -16,7 +22,9 @@ import SelectionMark from './SelectionMark';
 import SystemIcon from './SystemIcon';
 import { useTheme } from 'theme';
 import { ContextMenuView } from 'modules/menus';
+import type { SFSymbol } from 'sf-symbols-typescript';
 import { playHaptic } from 'services/haptics';
+import { canOpenWindows, openWindow } from 'services/windows';
 import { isApple, isElectron } from 'helpers/platform';
 
 // A long press (or a pointer's right-click) shows the actions in a menu: the
@@ -27,6 +35,11 @@ const contextMenuSupported = isApple() || isElectron();
 // The window's menus offer the moves in reorder mode where there's a pointer
 // (the Mac, Windows); a long press drags on iPhone and iPad.
 const pointerMoves = DeviceInfo.isMac() || isElectron();
+
+// "Open in New Window" on iPad and Mac, first in the menu as in Mail and
+// Files. Only Apple's menus have it, so its symbol isn't in `systemIcons`.
+const openInNewWindowKey = 'openInNewWindow';
+const newWindowSymbol: SFSymbol = 'macwindow.badge.plus';
 
 export interface CardWrapperProps {
   fav?: boolean;
@@ -71,6 +84,11 @@ export interface CardWrapperProps {
    * otherwise sit on the tab bar or the next section's header.
    */
   last?: boolean;
+  /**
+   * The learnx:// link of the card's item, which the menu's "Open in New
+   * Window" opens (iPad and Mac).
+   */
+  link?: string;
 }
 
 const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
@@ -95,6 +113,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
   opened,
   actionsDisabled,
   last,
+  link,
 }) => {
   const theme = useTheme();
   const swipeSettings = useSettings(settings => settings.swipeActions);
@@ -104,6 +123,9 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
   // Android's menu is a Compose view: mounted on the card's first long press,
   // not with every row.
   const [menuMounted, setMenuMounted] = useState(false);
+  const [menuAnchor, setMenuAnchor] = useState<{ x: number; y: number }>();
+  // The card's box, which the menu is placed in (`cardMenuAnchor`).
+  const menuBoxRef = useRef<React.ComponentRef<typeof View>>(null);
 
   const actions = cardActions({
     fav,
@@ -191,11 +213,28 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
     if (runMove(nativeEvent.key)) {
       return;
     }
+    if (nativeEvent.key === openInNewWindowKey && link) {
+      openWindow(link);
+      return;
+    }
     const action = actions.find(a => a.key === nativeEvent.key);
     if (action) {
       runAction(action);
     }
   };
+
+  // Also on cards that only open (search results), not while selecting or
+  // reordering.
+  const windowActions =
+    link && !selectionMode && !reorderMode && canOpenWindows()
+      ? [
+          {
+            key: openInNewWindowKey,
+            title: t('openInNewWindow'),
+            systemImage: newWindowSymbol,
+          },
+        ]
+      : [];
 
   const runSwipe = (side: SwipeSide) => {
     const action = swipeActions[side];
@@ -260,11 +299,17 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
     onPress?.();
   };
 
-  const handleLongPress = () => {
+  const handleLongPress = (event?: GestureResponderEvent) => {
     if (reorderMode) {
       onDrag?.();
     } else if (actionsEnabled && !contextMenuSupported) {
       playHaptic('longPress');
+      setMenuAnchor(
+        cardMenuAnchor(
+          event?.nativeEvent,
+          menuBoxRef.current?.getBoundingClientRect?.(),
+        ),
+      );
       setMenuMounted(true);
       setMenuVisible(true);
     }
@@ -342,8 +387,9 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
 
   const content = contextMenuSupported ? (
     <ContextMenuView
-      actions={
-        actionsEnabled
+      actions={[
+        ...windowActions,
+        ...(actionsEnabled
           ? actions.map(a => ({
               key: a.key,
               title: a.label,
@@ -357,8 +403,8 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
                 title: m.label,
                 systemImage: m.systemImage,
               }))
-            : []
-      }
+            : []),
+      ]}
       onAction={handleContextMenuAction}
       // A keyboard moves between cards with the arrow keys and opens (or
       // checks) one with Return, as in Mail (Mac, iPad with a keyboard).
@@ -368,7 +414,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
       {touchable}
     </ContextMenuView>
   ) : (
-    <View collapsable={false}>
+    <View ref={menuBoxRef} collapsable={false}>
       {touchable}
       {menuMounted ? (
         <CardMenu
@@ -376,6 +422,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
           actions={actions}
           onAction={handleMenuAction}
           onDismiss={closeMenu}
+          anchor={menuAnchor}
         />
       ) : null}
     </View>

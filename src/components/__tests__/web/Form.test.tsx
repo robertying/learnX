@@ -62,6 +62,21 @@ it('shows a text row done, with a progress bar and an action', () => {
   expect(screen.getByLabelText(t('a11yDone'))).toBeTruthy();
 });
 
+it('keeps a status on one line, so the label wraps instead', () => {
+  renderForm(
+    <FormLink
+      item
+      title="Assignment"
+      detail="Due in 1 day"
+      detailTint="red"
+      onPress={jest.fn()}
+    />,
+  );
+  const status = getComputedStyle(screen.getByText('Due in 1 day'));
+  expect(status.whiteSpace).toBe('nowrap');
+  expect(status.flexShrink).toBe('0');
+});
+
 it('opens a link row and shows its badge', () => {
   const onPress = jest.fn();
   renderForm(

@@ -20,6 +20,7 @@ import {
   pickContentItems,
 } from 'helpers/contentNotifications';
 import { recordError, setCustomKey } from 'services/crashReporting';
+import { checkForUpdate } from 'services/updateNotifications';
 import {
   getNotificationPermission,
   postNotification,
@@ -346,6 +347,9 @@ const FETCH_ALL_CONTENT_TASK = 'FETCH_ALL_CONTENT_TASK';
 // launch too.
 
 TaskManager.defineTask(FETCH_ALL_CONTENT_TASK, async () => {
+  // A new version of the APKs, at most every few hours; next to the sync, so
+  // a slow mirror doesn't eat its time.
+  const updateChecked = checkForUpdate();
   const result = await syncContent();
   if (result.status === 'synced') {
     try {
@@ -354,6 +358,7 @@ TaskManager.defineTask(FETCH_ALL_CONTENT_TASK, async () => {
       recordError(error, 'Posting new content notifications');
     }
   }
+  await updateChecked;
   return result.status === 'failed'
     ? BackgroundTask.BackgroundTaskResult.Failed
     : BackgroundTask.BackgroundTaskResult.Success;
