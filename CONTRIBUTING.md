@@ -6,17 +6,17 @@ Once you're set up, the code conventions and architecture are in [AGENTS.md](AGE
 
 ## What you need
 
-| Tool                 | Version                                                             | Notes                                                                                                                    |
-| -------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Node.js              | Latest; 26 or newer (`.node-version`, `engines` in `package.json`)  | Any version manager works, but Xcode and Gradle must find `node` too (see [Troubleshooting](#troubleshooting)).          |
-| pnpm                 | Any recent pnpm                                                     | pnpm switches itself to the version in `packageManager`. Node 26 doesn't ship Corepack: use `npm i -g pnpm` or Homebrew. |
-| macOS + Xcode        | Latest stable Xcode (26 or newer)                                   | Only for iOS, iPadOS and Mac. Install an iOS simulator runtime from Xcode › Settings › Components.                       |
-| Ruby + Bundler       | Ruby 4 (`.ruby-version`), from Homebrew                             | Only for iOS and Mac. CocoaPods (1.17, locked in `Gemfile.lock`) runs through Bundler.                                   |
-| Android Studio + SDK | SDK Platform 37, Build-Tools 37.0.0, NDK 30.0.16248370, CMake 4.1.2 | Only for Android. Versions are in `android/build.gradle`.                                                                |
-| JDK                  | 17 or newer to run Gradle                                           | Android Studio's bundled JDK works. The build compiles with a JDK 17 toolchain, which Gradle downloads if missing.       |
-| Electron             | Downloaded by `pnpm electron`                                       | Only for the Windows and Linux app. Nothing else to install; a Mac dev run also needs Xcode.                             |
+| Tool                 | Version                                                                                  | Notes                                                                                                                        |
+| -------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Node.js              | `.node-version` (`engines` in `package.json` is the minimum)                             | Any version manager works, but Xcode and Gradle must find `node` too (see [Troubleshooting](#troubleshooting)).              |
+| pnpm                 | Any recent pnpm                                                                          | pnpm switches itself to the version in `packageManager`. Recent Node doesn't ship Corepack: use `npm i -g pnpm` or Homebrew. |
+| macOS + Xcode        | Latest stable Xcode                                                                      | Only for iOS, iPadOS and Mac. Install an iOS simulator runtime from Xcode › Settings › Components.                           |
+| Ruby + Bundler       | `.ruby-version`, from Homebrew                                                           | Only for iOS and Mac. CocoaPods (locked in `Gemfile.lock`) runs through Bundler.                                             |
+| Android Studio + SDK | The SDK Platform, Build-Tools, NDK and CMake versions in `ext` in `android/build.gradle` | Only for Android.                                                                                                            |
+| JDK                  | 17 or newer to run Gradle                                                                | Android Studio's bundled JDK works. The build compiles with a JDK 17 toolchain, which Gradle downloads if missing.           |
+| Electron             | Downloaded by `pnpm electron`                                                            | Only for the Windows and Linux app. Nothing else to install; a Mac dev run also needs Xcode.                                 |
 
-The app supports iOS / iPadOS 17.6, macOS 14.6 (Mac Catalyst) and Android 10 (API 29) and later, so use a simulator or emulator at least that new.
+Use a simulator or emulator at least as new as the oldest OS the app supports (in the README).
 
 You can build Android on macOS or Linux, and run the Windows and Linux app on any of the three. iOS and Mac builds need a Mac.
 
@@ -57,7 +57,7 @@ Install Ruby with Homebrew and put it first on your `PATH`:
 brew install ruby
 echo 'export PATH="$(brew --prefix ruby)/bin:$PATH"' >> ~/.zshrc   # then open a new terminal
 echo 'export LANG=en_US.UTF-8' >> ~/.zshrc   # CocoaPods needs a UTF-8 locale
-ruby -v             # should print 4.x
+ruby -v             # should match .ruby-version
 bundle install      # installs the locked CocoaPods (and fastlane) into Homebrew Ruby's gems
 ```
 
@@ -114,7 +114,7 @@ Debug builds load JavaScript from Metro, so JS changes show up on reload. Rebuil
 
 ### SDK and JDK
 
-1. Install [Android Studio](https://developer.android.com/studio). In its SDK Manager, install Android SDK Platform 37, Build-Tools 37.0.0, NDK 30.0.16248370, CMake 4.1.2 and the platform tools. Gradle can download missing SDK pieces itself once you've accepted the licenses, but installing them up front gives clearer errors.
+1. Install [Android Studio](https://developer.android.com/studio). In its SDK Manager, install the SDK Platform, Build-Tools, NDK and CMake versions in `ext` in `android/build.gradle`, and the platform tools. Gradle can download missing SDK pieces itself once you've accepted the licenses, but installing them up front gives clearer errors.
 2. Point your shell at the SDK and put adb on your `PATH`:
 
    ```sh
@@ -125,7 +125,7 @@ Debug builds load JavaScript from Metro, so JS changes show up on reload. Rebuil
    If Gradle still can't find the SDK, copy `android/local.properties.example` to `android/local.properties` and set `sdk.dir`. Debug builds need only `sdk.dir` from that file.
 
 3. Make sure `java -version` prints 17 or newer, or set `JAVA_HOME` to Android Studio's bundled JDK (`/Applications/Android Studio.app/Contents/jbr/Contents/Home` on a Mac).
-4. Create an emulator in Android Studio's Device Manager with Android 10 or later. On an Apple silicon Mac, use an arm64-v8a system image.
+4. Create an emulator in Android Studio's Device Manager with a supported Android version. On an Apple silicon Mac, use an arm64-v8a system image.
 
 ### Build and run
 
@@ -162,28 +162,18 @@ Mock data details, and how to add to it, are in [src/data/AGENTS.md](src/data/AG
 
 ## Checks
 
-The pull request checks `JS / Checks` and `JS / Release bundles` (`.github/workflows/js.yml`) run these, and all of them must pass. `pnpm check` runs the first six in one go:
+The pull request checks `JS / Checks` and `JS / Release bundles` (`.github/workflows/js.yml`) run these, and both must pass:
 
 ```sh
-pnpm typecheck                   # TypeScript (tsc)
-pnpm lint --deny-warnings        # Oxlint, type-aware; config in .oxlintrc.json and lint/plugin.mjs
-pnpm format --check              # Oxfmt; run `pnpm format` to fix
-pnpm ota:check                   # The over-the-air runtime version changes when native code does (AGENTS.md)
-pnpm test --coverage             # Jest: the iOS, Android, web (Electron) and tooling projects; fails below the coverage thresholds in jest.config.js
-pnpm lint:shell                  # ShellCheck, for every shell script in git
-scripts/checks/check-release-bundle.sh  # The Android and iOS release JS bundles, with no .env value but the mock login and no other platform's code in them
+pnpm check                              # typecheck, lint, format check, over-the-air runtime check, Jest with coverage, ShellCheck
+scripts/checks/check-release-bundle.sh  # the Android and iOS release JS bundles
 ```
 
-The first six need neither `.env` nor any native setup, so you can run them anywhere Node runs (ShellCheck comes from your package manager, for example `brew install shellcheck`). The bundle check needs a `.env` with the mock login and takes about two minutes. Lint is strict about a few project rules: Chinese text belongs in `src/assets/translations` (`en.ts` and `zh.ts`), and an intentionally unawaited promise is marked with `void`.
+`pnpm check` (see `package.json` for its parts) needs neither `.env` nor any native setup, so you can run it anywhere Node runs (ShellCheck comes from your package manager, for example `brew install shellcheck`); run `pnpm format` to fix formatting. The bundle check needs a `.env` with the mock login and takes a couple of minutes. Lint is strict about a few project rules: Chinese text belongs in `src/assets/translations`, and an intentionally unawaited promise is marked with `void`.
 
 End-to-end flows use [Maestro](https://docs.maestro.dev) against a Release build with the mock login: install it with `scripts/e2e/e2e-build.sh ios <simulator udid>` or `scripts/e2e/e2e-build.sh android <emulator serial>`, then run `pnpm e2e:ios` or `pnpm e2e:android`. See [.maestro/AGENTS.md](.maestro/AGENTS.md).
 
-Other CI jobs (none of them build a signed app or run on a device, so still build and try the app yourself on each platform your change touches, and say in the pull request what you checked):
-
-- `Android / Build` (required, `.github/workflows/android.yml`) runs `scripts/checks/test-android.sh` and builds a release APK (R8 and the JS bundle included, debug-signed) when a pull request touches Android paths; otherwise it skips its steps and passes.
-- `Android / E2E tests` runs the Maestro flows in an emulator on that APK, by hand only, and saves a screenshot of each screen they reach with the results: Actions › Android › Run workflow, on `main` or a branch.
-- `Apple / iOS` builds the app and runs the native iOS tests (`scripts/checks/test-ios.sh`), by hand only: Actions › Apple › Run workflow, on `main` (which also refreshes its compilation cache) or on a branch. Pick Mac, or iOS and Mac, to build Mac Catalyst (`Apple / Mac`).
-- `Electron / Web build`, `Electron / E2E tests (Linux)` and `Electron / E2E tests (Windows)` (required, `.github/workflows/electron.yml`) export the web build and run the Playwright tests, one app per core, on Linux (under X11, then the window test under Wayland) and on Windows at the same time; a pull request that can't affect the Windows and Linux app (only native code, Maestro flows, fastlane, docs or the other workflows) skips their steps and passes. By hand only (Actions › Electron › Run workflow), `Electron / Installers` checks that the installers still build; those builds are never released (releases are built by hand, see the release skill).
+The other CI jobs are in `.github/workflows/`. The required ones skip their steps (and pass) when a pull request can't affect what they check; the device E2E runs, the Apple builds and the Electron installers run only by hand (Actions › Run workflow). None of them builds a signed app or runs on a device, so still build and try the app yourself on each platform your change touches, and say in the pull request what you checked.
 
 ## Pull requests
 
@@ -193,7 +183,7 @@ Other CI jobs (none of them build a signed app or run on a device, so still buil
 4. Open the pull request against `main`. Describe what changed and why, how you tested it (platforms, simulators or devices, mock or real account), and add screenshots for visible changes.
 5. Changing a patched dependency? Follow [patches/README.md](patches/README.md) (`pnpm patch` / `pnpm patch-commit`) rather than editing `node_modules` by hand.
 
-Pull requests are squash-merged once `JS / Checks`, `JS / Release bundles`, `Android / Build`, `Electron / Web build`, `Electron / E2E tests (Linux)` and `Electron / E2E tests (Windows)` pass and the change has been reviewed. For bugs and feature ideas, open an issue with one of the templates first.
+Pull requests are squash-merged once the required checks pass and the change has been reviewed. For bugs and feature ideas, open an issue with one of the templates first.
 
 ## Troubleshooting
 

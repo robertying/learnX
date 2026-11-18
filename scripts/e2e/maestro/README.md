@@ -45,7 +45,7 @@ kept its stream open, and on API 29 emulators Android's llkd kills adbd once
 a child has been a zombie for 10 minutes: every session longer than that lost
 the device (the `android-min` profile, from `08-settings` on).
 
-Until a Maestro release includes all six, build
+Until a Maestro release includes all of them, build
 it from source and put it first on `PATH`:
 
 ```sh

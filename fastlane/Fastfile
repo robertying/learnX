@@ -593,8 +593,6 @@ end
 # ---------------------------------------------------------------------------
 # Electron (Windows and Linux)
 #
-# Untested: written to the release skill's procedure, not yet run.
-#
 # This Mac builds the installers (electron-builder's tools run natively on
 # Apple silicon, no Rosetta), or installers built elsewhere
 # (`pnpm electron:package --win` on a Windows PC, `--linux` on Linux) are

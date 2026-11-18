@@ -1,14 +1,11 @@
 name: Electron
 
-# The Windows and Linux app (electron/). Web build, E2E tests (Linux) and
-# E2E tests (Windows) are required: they bundle the web build and run the
-# Playwright E2E tests on Linux (under X11, then the window test under
-# Wayland) and on Windows, side by side, on every pull request; one that
-# changes nothing the app uses (only native code, Maestro flows, fastlane,
-# docs or the other workflows) skips their steps and passes. Manual runs
-# also check that the installers still build on Windows and Linux
-# (Installers); those builds are never released: releases are built, signed and uploaded by hand with
-# fastlane (the release skill). js.yml's Checks run the `web` Jest project.
+# The Windows and Linux app (electron/). The web build and the E2E tests are
+# required; a pull request that can't affect the app (the `changes` step)
+# skips their steps and passes. Manual runs also check that the installers
+# still build (Installers); those builds are never released: releases are
+# built, signed and uploaded by hand with fastlane (the release skill).
+# js.yml's Checks run the `web` Jest project.
 on:
   pull_request:
   push:
@@ -103,11 +100,9 @@ jobs:
 
   e2e:
     # The whole Playwright E2E suite (electron/e2e) in a dev run of the app
-    # on the web build: the Maestro flows that apply to the desktop and what
-    # only it does (files, submissions, notifications, the tray, the .ics
-    # export, updates against updateServer.ts, the SSO page). It needs the
-    # network, as the flows do: the mock files download from GitHub and the
-    # SSO test opens id.tsinghua.edu.cn.
+    # on the web build. It needs the network, as the Maestro flows do: the
+    # mock files download from GitHub and the SSO test opens
+    # id.tsinghua.edu.cn.
     # - Linux (required): one app per core (playwright.config.ts), each
     #   worker's on a virtual X display of its own (e2e/fixtures.ts). Then
     #   the window test once more under Wayland (window.e2e.ts): under X11
