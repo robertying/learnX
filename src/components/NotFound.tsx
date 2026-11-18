@@ -1,7 +1,7 @@
 import SafeArea from 'components/SafeArea';
 import { useUserData } from 'data/userData';
 import { t } from 'helpers/i18n';
-import { rootNavigation } from 'navigation/rootNavigation';
+import { useRootNavigation } from 'navigation/rootNavigation';
 import StatusView from './StatusView';
 
 /**
@@ -12,6 +12,8 @@ import StatusView from './StatusView';
  * they are about the whole app.
  */
 const NotFound: React.FC = () => {
+  // This window's, so the sheet opens where the person tapped.
+  const rootNavigation = useRootNavigation();
   const earlierSemester = useUserData(
     ({ currentSemester, latestSemester }) =>
       !!latestSemester && currentSemester !== latestSemester,
@@ -29,7 +31,7 @@ const NotFound: React.FC = () => {
                 {
                   label: t('switchSemester'),
                   onPress: () =>
-                    rootNavigation.isReady() &&
+                    rootNavigation?.isReady() &&
                     rootNavigation.navigate('SemesterSelectionStack'),
                 },
               ]

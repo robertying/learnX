@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import DeviceInfo from 'constants/DeviceInfo';
 import { NavigationContainer } from '@react-navigation/native';
 import {
@@ -14,7 +15,7 @@ import { renderDetailContainer } from './DetailStack';
 import MainTab from './MainTab';
 import WindowFrame from './WindowFrame';
 import { initialTab, nativeSplit } from './layout';
-import { rootNavigation } from './rootNavigation';
+import { createRootNavigation, RootNavigationContext } from './rootNavigation';
 import Setup from 'screens/Setup';
 import {
   AssignmentSubmissionStack,
@@ -146,8 +147,10 @@ const AndroidMain = () => {
  */
 const Navigation: React.FC<{ showMain: boolean }> = ({ showMain }) => {
   const theme = useNavigationTheme();
+  const [rootNavigation] = useState(createRootNavigation);
 
   return (
+    <RootNavigationContext.Provider value={rootNavigation}>
     <NavigationContainer
       ref={rootNavigation}
       theme={theme}
@@ -194,6 +197,7 @@ const Navigation: React.FC<{ showMain: boolean }> = ({ showMain }) => {
         </AndroidRootNavigator.Navigator>
       )}
     </NavigationContainer>
+    </RootNavigationContext.Provider>
   );
 };
 
