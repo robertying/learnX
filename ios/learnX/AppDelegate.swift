@@ -20,6 +20,7 @@ class AppDelegate: ExpoAppDelegate, @MainActor ExpoReactNativeFactoryProvider {
   ) -> Bool {
     CrashReporting.start()
     UIScrollView.preferSoftTopEdgeEffect()
+    UICollectionView.keepRefreshControlAboveRows()
     TextInputRecycling.disable()
 
     let delegate = ReactNativeDelegate()

@@ -4,7 +4,8 @@ import XCTest
 /// Today on an iPhone. The header follows Today's list, which needs the list inside `FormScreen`'s view
 /// (`components/Form.tsx`): mounted beside it, the header found no scroll view, so scrolling left the large title over
 /// the rows. Following the list, the header collapses the large title as it scrolls and holds the pull-to-refresh
-/// spinner above it.
+/// spinner above it. On the closed iPhone Duo the tab bar runs down the side and the header keeps the title in one row
+/// that neither stretches nor collapses; the spinner shows at the top of the list, in the same spot.
 @MainActor
 final class TodayUITests: SimulatorUITestCase {
   func testPullToRefreshShowsTheSpinner() throws {
@@ -31,6 +32,10 @@ final class TodayUITests: SimulatorUITestCase {
     }
     try open(tab: "tab-today")
     try waitFor(id: "today-schedule", timeout: 30)
+    // The tabs are one above another in a tab bar down the side.
+    if abs(element(id: "tab-today").frame.midX - element(id: "tab-notices").frame.midX) < 1 {
+      throw XCTSkip("Beside a tab bar down the side (the closed iPhone Duo), the title has no collapsed form")
+    }
     let bar = try waitFor(idMatching: "今天")
 
     // Scrolled, the title is the bar's small one, centered at its top, where the expanded bar has nothing. Today's
