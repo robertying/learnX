@@ -32,6 +32,12 @@ import { ORIGIN, createServeApp, fromApp } from './appOrigin.ts';
 import { aboutPanelOptions, readBuildInfo } from './buildInfo.ts';
 import { createFileStore, loggedWrites } from './fileStore.ts';
 import { createFiles, runFileOperation } from './files.ts';
+import {
+  applyLanguage,
+  languageSupported,
+  readLanguage,
+  saveLanguage,
+} from './language.ts';
 import { popupMenu } from './menus.ts';
 import { mainFetch } from './net.ts';
 import { PRELOADS_DIR, stripPreloads } from './preloads.ts';
@@ -135,6 +141,16 @@ if (devDataDir) {
   if (process.platform === 'linux') {
     app.commandLine.appendSwitch('password-store', 'basic');
   }
+}
+// The language chosen in Settings (language.ts), where the app offers one,
+// for this launch: Chromium reads `--lang` once the app is ready.
+const languageFile = path.join(app.getPath('userData'), 'language.json');
+const offersLanguage = languageSupported(
+  process.platform,
+  dev && process.env.LEARNX_LANGUAGE_SETTING === '1',
+);
+if (offersLanguage) {
+  applyLanguage(app.commandLine, readLanguage(languageFile));
 }
 /**
  * False in a second launch, which hands its arguments over and quits. Its
@@ -695,6 +711,23 @@ const unsandboxed =
 ipcMain.on('app:info', event => {
   fromApp(event);
   event.returnValue = { ...buildInfo, unsandboxed };
+});
+ipcMain.handle('language:get', event => {
+  fromApp(event);
+  return {
+    supported: offersLanguage,
+    language: offersLanguage ? readLanguage(languageFile) : 'system',
+  };
+});
+ipcMain.handle('language:set', (event, language) => {
+  fromApp(event);
+  return offersLanguage && saveLanguage(languageFile, language);
+});
+// Quits and starts learnX again, with its arguments, for a new language.
+ipcMain.on('app:relaunch', event => {
+  fromApp(event);
+  app.relaunch();
+  app.quit();
 });
 ipcMain.on('updates:pending', event => {
   fromApp(event);

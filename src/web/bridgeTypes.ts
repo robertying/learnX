@@ -151,6 +151,12 @@ export interface TrayLabels {
 export type LaunchTarget = 'today' | 'schedule';
 
 /**
+ * The app's language: the system's, or one chosen (electron/language.ts,
+ * `APP_LANGUAGES`).
+ */
+export type AppLanguage = 'system' | 'zh-CN' | 'en-US';
+
+/**
  * What the Electron app's main process offers the page, as `window.learnx`
  * (electron/preload.cts).
  */
@@ -222,6 +228,17 @@ export interface Bridge {
   };
   /** The app's version and its build number (electron/buildInfo.ts). */
   appInfo: () => { version: string; build: string; unsandboxed?: boolean };
+  /** Quits and starts learnX again. */
+  relaunch: () => void;
+  /**
+   * The app's own language setting, on Windows and Linux (`supported`):
+   * the system's or one chosen, which takes effect at the next launch.
+   */
+  language: {
+    get: () => Promise<{ supported: boolean; language: AppLanguage }>;
+    /** Resolves to whether it was saved. */
+    set: (language: AppLanguage) => Promise<boolean>;
+  };
   /** Updates of the packaged app (electron/updater.ts). */
   updates: {
     /** The update downloaded and waiting for a restart, or null. */

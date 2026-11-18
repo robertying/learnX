@@ -72,6 +72,7 @@ const settingDetails = [
   'SemesterSelection',
   'Downloads',
   'NotificationSettings',
+  'LanguageSettings',
   'SwipeActions',
   'Maintainer',
   'Help',
