@@ -1,0 +1,62 @@
+From 5c7a54e2c104101a11978ad058ef2c48ab5b996b Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 18 Nov 2026 11:02:56 -0800
+Subject: [PATCH] fix(ios): keep the whole app in the hierarchy on the open
+ iPhone Duo
+
+On the open iPhone Duo simulator, XCUITest's tree of an app leaves out the
+elements right of a width: learnX's tab column at the right edge.
+
+- UIKit gives the app's accessibility element the inner display's portrait
+  size while the app runs in landscape. With MAESTRO_IOS_INSERT_LIBRARIES
+  set, launchApp passes those libraries to the app as DYLD_INSERT_LIBRARIES
+  on a simulator, and learnX's scripts/e2e/sim-ax-frame.m gives the app
+  element the size of the screen it is on.
+- The tree keeps the bounds the app had when the runner first read it, so
+  an app that started closed lost the right side once opened.
+  setFoldPosture now starts a new runner after moving the hinge.
+---
+ maestro-client/src/main/java/maestro/drivers/IOSDriver.kt     | 4 ++++
+ .../src/main/kotlin/util/LocalSimulatorUtils.kt               | 4 ++++
+ 2 files changed, 8 insertions(+)
+
+diff --git a/maestro-client/src/main/java/maestro/drivers/IOSDriver.kt b/maestro-client/src/main/java/maestro/drivers/IOSDriver.kt
+index 9fdaf576..ab304b71 100644
+--- a/maestro-client/src/main/java/maestro/drivers/IOSDriver.kt
++++ b/maestro-client/src/main/java/maestro/drivers/IOSDriver.kt
+@@ -574,6 +574,10 @@ class IOSDriver(
+             runDeviceCall("setFoldPosture") {
+                 try {
+                     iosDevice.setHingeAngle(posture.hingeAngle)
++                    // The app's accessibility tree keeps leaving out what lies outside the bounds
++                    // it had when the runner first read it (the open iPhone Duo's right side,
++                    // after the app started closed). A new runner reads it afresh.
++                    iosDevice.open()
+                 } catch (deviceError: IOSDeviceErrors) {
+                     throw deviceError
+                 } catch (e: Throwable) {
+diff --git a/maestro-ios-driver/src/main/kotlin/util/LocalSimulatorUtils.kt b/maestro-ios-driver/src/main/kotlin/util/LocalSimulatorUtils.kt
+index a7555c7c..b7e2edd6 100644
+--- a/maestro-ios-driver/src/main/kotlin/util/LocalSimulatorUtils.kt
++++ b/maestro-ios-driver/src/main/kotlin/util/LocalSimulatorUtils.kt
+@@ -362,6 +362,9 @@ class LocalSimulatorUtils(private val tempFileHandler: TempFileHandler) {
+         bundleId: String,
+         launchArguments: List<String> = emptyList(),
+     ) {
++        // MAESTRO_IOS_INSERT_LIBRARIES names libraries to load into the app, such as a fix for
++        // what its accessibility tree reports on a particular simulator.
++        val libraries = System.getenv("MAESTRO_IOS_INSERT_LIBRARIES")?.takeIf { it.isNotBlank() }
+         runCommand(
+             listOf(
+                 "xcrun",
+@@ -370,6 +373,7 @@ class LocalSimulatorUtils(private val tempFileHandler: TempFileHandler) {
+                 deviceId,
+                 bundleId,
+             ) + launchArguments,
++            params = libraries?.let { mapOf("SIMCTL_CHILD_DYLD_INSERT_LIBRARIES" to it) } ?: emptyMap(),
+         )
+     }
+ 
+-- 
+2.56.1
+
