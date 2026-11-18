@@ -1,4 +1,4 @@
-import { PropsWithChildren, useRef, useState } from 'react';
+import { PropsWithChildren, useEffect, useRef, useState } from 'react';
 import {
   AccessibilityActionEvent,
   GestureResponderEvent,
@@ -31,6 +31,8 @@ import { isApple, isElectron } from 'helpers/platform';
 // system context menu on iOS, iPadOS and Mac, a Material dropdown on Android,
 // and a native menu in the Electron app (right-click, with hover buttons in
 // place of swipes).
+// Longer than Material 3's menu exit animation (75 ms in Compose).
+const MENU_CLOSE_MS = 300;
 const contextMenuSupported = isApple() || isElectron();
 // The window's menus offer the moves in reorder mode where there's a pointer
 // (the Mac, Windows); a long press drags on iPhone and iPad.
@@ -120,11 +122,19 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
   const backSwipeEdge = useBackSwipeEdge();
 
   const [menuVisible, setMenuVisible] = useState(false);
-  // Android's menu is a Compose view, mounted on a long press, not with every
-  // row. Each long press mounts a new one (keyed by this count): a Compose
-  // menu that was dismissed didn't open again, so a card's menu only opened
-  // once. The last one stays mounted to finish its closing animation.
-  const [menuOpens, setMenuOpens] = useState(0);
+  // Android's menu is a Compose view: mounted on a long press, not with every
+  // row, and unmounted once it has closed. Left mounted, its host took the
+  // card's touches where the menu had opened, so the card's next taps and
+  // long presses there did nothing.
+  const [menuMounted, setMenuMounted] = useState(false);
+  useEffect(() => {
+    if (menuVisible || !menuMounted) {
+      return;
+    }
+    // After the menu's closing animation.
+    const timer = setTimeout(() => setMenuMounted(false), MENU_CLOSE_MS);
+    return () => clearTimeout(timer);
+  }, [menuVisible, menuMounted]);
   const [menuAnchor, setMenuAnchor] = useState<{ x: number; y: number }>();
   // The card's box, which the menu is placed in (`cardMenuAnchor`).
   const menuBoxRef = useRef<React.ComponentRef<typeof View>>(null);
@@ -312,7 +322,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
           menuBoxRef.current?.getBoundingClientRect?.(),
         ),
       );
-      setMenuOpens(count => count + 1);
+      setMenuMounted(true);
       setMenuVisible(true);
     }
   };
@@ -418,9 +428,8 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
   ) : (
     <View ref={menuBoxRef} collapsable={false}>
       {touchable}
-      {menuOpens ? (
+      {menuMounted ? (
         <CardMenu
-          key={menuOpens}
           visible={menuVisible}
           actions={actions}
           onAction={handleMenuAction}

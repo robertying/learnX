@@ -62,17 +62,18 @@ it('closes the menu on a tap instead of opening the item', async () => {
   expect(onPress).toHaveBeenCalledTimes(1);
 });
 
-it('opens a new menu on each long press, after one was dismissed', async () => {
-  await render(card({}));
+it('unmounts the menu once it has closed, so the card takes touches again', async () => {
+  const onPress = jest.fn();
+  await render(card({ onPress }));
   await longPress();
-  const first = screen.getByTestId('card-menu-anchor');
   await user.press(screen.getByTestId('dropdown-dismiss'));
-  expect(screen.queryByTestId('card-archive')).toBeNull();
+  // Still there for its closing animation.
+  expect(screen.getByTestId('card-menu-anchor')).toBeTruthy();
+  await act(() => jest.advanceTimersByTime(300));
+  expect(screen.queryByTestId('card-menu-anchor')).toBeNull();
 
   await longPress();
   expect(screen.getByTestId('card-archive')).toBeTruthy();
-  // Mounted again: a dismissed Compose menu didn't open a second time.
-  expect(screen.getByTestId('card-menu-anchor')).not.toBe(first);
 });
 
 it('closes the menu when selecting starts', async () => {
