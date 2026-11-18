@@ -1,10 +1,16 @@
-import { PropsWithChildren, useState } from 'react';
-import { AccessibilityActionEvent, View, StyleSheet } from 'react-native';
+import { PropsWithChildren, useRef, useState } from 'react';
+import {
+  AccessibilityActionEvent,
+  GestureResponderEvent,
+  View,
+  StyleSheet,
+} from 'react-native';
 import { SharedValue, useSharedValue } from 'react-native-reanimated';
 import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import DeviceInfo from 'constants/DeviceInfo';
 import { useSettings } from 'data/settings';
 import { CardAction, cardActions, swipeAction } from 'helpers/cardActions';
+import { cardMenuAnchor } from 'helpers/cardMenuAnchor';
 import { t } from 'helpers/i18n';
 import { systemIcons } from 'helpers/systemIcons';
 import useBackSwipeEdge, { backSwipeEdgeWidth } from 'hooks/useBackSwipeEdge';
@@ -117,6 +123,9 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
   // Android's menu is a Compose view: mounted on the card's first long press,
   // not with every row.
   const [menuMounted, setMenuMounted] = useState(false);
+  const [menuAnchor, setMenuAnchor] = useState<{ x: number; y: number }>();
+  // The card's box, which the menu is placed in (`cardMenuAnchor`).
+  const menuBoxRef = useRef<React.ComponentRef<typeof View>>(null);
 
   const actions = cardActions({
     fav,
@@ -290,11 +299,17 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
     onPress?.();
   };
 
-  const handleLongPress = () => {
+  const handleLongPress = (event?: GestureResponderEvent) => {
     if (reorderMode) {
       onDrag?.();
     } else if (actionsEnabled && !contextMenuSupported) {
       playHaptic('longPress');
+      setMenuAnchor(
+        cardMenuAnchor(
+          event?.nativeEvent,
+          menuBoxRef.current?.getBoundingClientRect?.(),
+        ),
+      );
       setMenuMounted(true);
       setMenuVisible(true);
     }
@@ -399,7 +414,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
       {touchable}
     </ContextMenuView>
   ) : (
-    <View collapsable={false}>
+    <View ref={menuBoxRef} collapsable={false}>
       {touchable}
       {menuMounted ? (
         <CardMenu
@@ -407,6 +422,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
           actions={actions}
           onAction={handleMenuAction}
           onDismiss={closeMenu}
+          anchor={menuAnchor}
         />
       ) : null}
     </View>

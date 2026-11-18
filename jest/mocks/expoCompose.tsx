@@ -83,8 +83,9 @@ export const Host = ({
   children,
   style,
   accessibilityLabel,
+  testID,
 }: ViewProps & { children?: ReactNode }) => (
-  <View style={style} accessibilityLabel={accessibilityLabel}>
+  <View style={style} accessibilityLabel={accessibilityLabel} testID={testID}>
     {children}
   </View>
 );
