@@ -34,8 +34,9 @@ final class TabsUITests: LearnXUITestCase {
     try waitFor(card: "notice-card", "MOCK_NOTICE")
   }
 
-  /// The sidebar opens as it was left (`sidebarHidden` in `data/appState.ts`): UIKit only keeps it with the window's
-  /// saved state, which quitting discards unless "Close windows when quitting an application" is off.
+  /// The sidebar opens as it was left (`sidebarAutosaveName` in patches/react-native-screens@4.30.1.patch): UIKit only
+  /// keeps it with the window's saved state, which quitting discards unless "Close windows when quitting an
+  /// application" is off.
   func testSidebarStaysAsItWasLeft() throws {
     let tab = try waitFor(id: "tab-notices")
     // View › Hide Sidebar.
@@ -73,11 +74,25 @@ final class TabsUITests: LearnXUITestCase {
     try resizeWindow(by: CGVector(dx: 120, dy: 80))
   }
 
-  /// Drags the window's bottom right corner by `offset`.
+  /// Drags the window's right edge by `offset.dx` and its bottom edge by `offset.dy`. The edges, not the corner: the
+  /// corner is rounded, so a point near it misses the resize handle.
   private func resizeWindow(by offset: CGVector) throws {
+    try drag(edge: CGVector(dx: 1, dy: 0.5), outward: CGVector(dx: 1, dy: 0), by: CGVector(dx: offset.dx, dy: 0))
+    try drag(edge: CGVector(dx: 0.5, dy: 1), outward: CGVector(dx: 0, dy: 1), by: CGVector(dx: 0, dy: offset.dy))
+  }
+
+  /// Drags the window edge at the normalized point `edge`, grabbing it just outside the window and then just inside,
+  /// until the window's size changes.
+  private func drag(edge: CGVector, outward: CGVector, by offset: CGVector) throws {
     let window = app.windows.firstMatch
-    let corner = window.coordinate(withNormalizedOffset: CGVector(dx: 1, dy: 1)).withOffset(CGVector(dx: -2, dy: -2))
-    corner.press(forDuration: 0.3, thenDragTo: corner.withOffset(offset))
+    let before = window.frame.size
+    for distance in [3.0, -1.0] {
+      let grab = window.coordinate(withNormalizedOffset: edge)
+        .withOffset(CGVector(dx: outward.dx * distance, dy: outward.dy * distance))
+      grab.press(forDuration: 0.3, thenDragTo: grab.withOffset(offset))
+      if window.frame.size != before { return }
+    }
+    XCTFail("dragging the window's edge didn't resize it")
   }
 
   /// patches/react-native-screens@4.30.1.patch: in a split view each column keeps its bar, as on iPad, instead of
