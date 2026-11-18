@@ -57,7 +57,10 @@ export const notifyUpdate = async ({
  */
 export const notifyOnLogin = (notify: () => void) =>
   useCredentialsStore.subscribe((state, previous) => {
-    if (hasSavedLogin(state.credentials) && !hasSavedLogin(previous.credentials)) {
+    if (
+      hasSavedLogin(state.credentials) &&
+      !hasSavedLogin(previous.credentials)
+    ) {
       notify();
     }
   });
