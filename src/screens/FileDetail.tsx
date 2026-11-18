@@ -105,8 +105,8 @@ const FileDetailContent: React.FC<{
   };
 
   const kind = previewKind(file.fileType);
-  const canRender =
-    !!path && !!kind && !(kind === 'quickLook' && quickLookUnavailable);
+  const previewable = !!kind && !(kind === 'quickLook' && quickLookUnavailable);
+  const canRender = !!path && previewable;
 
   const handleShowInfo = () => setShowInfo(shown => !shown);
 
@@ -128,7 +128,7 @@ const FileDetailContent: React.FC<{
     path,
     progress,
     error,
-    canRender,
+    previewable,
     showInfo,
     onRefresh: handleRedownload,
     onQuickLook: handleQuickLook,
