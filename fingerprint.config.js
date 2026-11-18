@@ -11,7 +11,8 @@ const { execFileSync } = require('child_process');
 // native code any different to the JS it runs, so these lines of the files
 // that hold it don't count (the version does: it's the runtime version).
 const buildNumbers = {
-  'ios/learnX.xcodeproj/project.pbxproj': /^\s*CURRENT_PROJECT_VERSION = \d+;\n/gm,
+  'ios/learnX.xcodeproj/project.pbxproj':
+    /^\s*CURRENT_PROJECT_VERSION = \d+;\n/gm,
   'android/app/build.gradle': /^\s*versionCode = \d+\n/gm,
 };
 
@@ -67,12 +68,14 @@ const gitIgnored = () => {
     // Not a Git checkout
     return [];
   }
-  return listed
-    .split('\0')
-    .filter(Boolean)
-    // As glob patterns, matching a folder's files
-    .map(file => file.replace(/[[\]{}()*?!+@]/g, '\\$&'))
-    .map(file => (file.endsWith('/') ? `${file}**/*` : file));
+  return (
+    listed
+      .split('\0')
+      .filter(Boolean)
+      // As glob patterns, matching a folder's files
+      .map(file => file.replace(/[[\]{}()*?!+@]/g, '\\$&'))
+      .map(file => (file.endsWith('/') ? `${file}**/*` : file))
+  );
 };
 
 /** @type {import('@expo/fingerprint').Config} */

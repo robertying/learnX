@@ -36,18 +36,18 @@ const bumped = (text: string) =>
     .replace(/(CURRENT_PROJECT_VERSION = )\d+/g, '$19999')
     .replace(/(versionCode = )\d+\n/, '$19209999\n');
 
-it.each([
-  'ios/learnX.xcodeproj/project.pbxproj',
-  'android/app/build.gradle',
-])('hashes %s the same after a build bump', filePath => {
-  const text = readFileSync(join(__dirname, '../..', filePath), 'utf8');
-  expect(bumped(text)).not.toBe(text);
-  // Small chunks split the build number's lines.
-  expect(hashed(filePath, bumped(text), 7)).toBe(hashed(filePath, text));
-  expect(hashed(filePath, text)).not.toMatch(
-    /CURRENT_PROJECT_VERSION = \d|versionCode = \d+\n/,
-  );
-});
+it.each(['ios/learnX.xcodeproj/project.pbxproj', 'android/app/build.gradle'])(
+  'hashes %s the same after a build bump',
+  filePath => {
+    const text = readFileSync(join(__dirname, '../..', filePath), 'utf8');
+    expect(bumped(text)).not.toBe(text);
+    // Small chunks split the build number's lines.
+    expect(hashed(filePath, bumped(text), 7)).toBe(hashed(filePath, text));
+    expect(hashed(filePath, text)).not.toMatch(
+      /CURRENT_PROJECT_VERSION = \d|versionCode = \d+\n/,
+    );
+  },
+);
 
 it('keeps the rest of those files', () => {
   expect(
