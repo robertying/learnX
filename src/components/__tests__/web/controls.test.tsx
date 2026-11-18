@@ -99,6 +99,14 @@ it("shows the web page's buttons as a command bar below it", () => {
     ['courseXReload', false],
     ['courseXOpen', false],
   ]);
+  // Opening the page elsewhere sits apart, at the bar's end.
+  const pushedToEnd = (element: Element | null): boolean =>
+    !!element &&
+    // jsdom reads a start margin as a left one
+    (getComputedStyle(element).marginLeft === 'auto' ||
+      pushedToEnd(element.parentElement));
+  expect(pushedToEnd(screen.getByTestId('courseXOpen'))).toBe(true);
+  expect(pushedToEnd(screen.getByTestId('courseXReload'))).toBe(false);
   fireEvent.click(screen.getByTestId('courseXBack'));
   fireEvent.click(screen.getByTestId('courseXReload'));
   expect(onBack).toHaveBeenCalledTimes(1);
