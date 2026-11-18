@@ -41,15 +41,12 @@ it('opens a Material menu of the actions on long press', async () => {
   expect(onPress).not.toHaveBeenCalled();
 });
 
-it('opens the menu where the finger is, not under the card', async () => {
+it("opens the menu at the card's top right without the touch's position", async () => {
   await render(card({}));
-  await fireEvent(cardElement(), 'longPress', {
-    nativeEvent: { locationX: 120, locationY: 30 },
-  });
-  expect(screen.getByTestId('card-archive')).toBeTruthy();
+  await longPress();
   expect(screen.getByTestId('card-menu-anchor')).toHaveStyle({
-    left: 120,
-    top: 30,
+    right: 16,
+    top: 0,
   });
 });
 

@@ -1,4 +1,4 @@
-import { PropsWithChildren, useState } from 'react';
+import { PropsWithChildren, useRef, useState } from 'react';
 import {
   AccessibilityActionEvent,
   GestureResponderEvent,
@@ -10,6 +10,7 @@ import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeabl
 import DeviceInfo from 'constants/DeviceInfo';
 import { useSettings } from 'data/settings';
 import { CardAction, cardActions, swipeAction } from 'helpers/cardActions';
+import { cardMenuAnchor } from 'helpers/cardMenuAnchor';
 import { t } from 'helpers/i18n';
 import { systemIcons } from 'helpers/systemIcons';
 import useBackSwipeEdge, { backSwipeEdgeWidth } from 'hooks/useBackSwipeEdge';
@@ -123,6 +124,8 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
   // not with every row.
   const [menuMounted, setMenuMounted] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<{ x: number; y: number }>();
+  // The card's box, which the menu is placed in (`cardMenuAnchor`).
+  const menuBoxRef = useRef<React.ComponentRef<typeof View>>(null);
 
   const actions = cardActions({
     fav,
@@ -301,11 +304,11 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
       onDrag?.();
     } else if (actionsEnabled && !contextMenuSupported) {
       playHaptic('longPress');
-      const location = event?.nativeEvent;
       setMenuAnchor(
-        location && Number.isFinite(location.locationX)
-          ? { x: location.locationX, y: location.locationY }
-          : undefined,
+        cardMenuAnchor(
+          event?.nativeEvent,
+          menuBoxRef.current?.getBoundingClientRect?.(),
+        ),
       );
       setMenuMounted(true);
       setMenuVisible(true);
@@ -411,7 +414,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
       {touchable}
     </ContextMenuView>
   ) : (
-    <View collapsable={false}>
+    <View ref={menuBoxRef} collapsable={false}>
       {touchable}
       {menuMounted ? (
         <CardMenu
