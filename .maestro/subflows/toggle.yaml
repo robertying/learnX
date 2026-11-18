@@ -5,6 +5,9 @@
 # page's list: the row is scrolled to first (down only), since how many rows
 # a page shows depends on the screen (fewer on the closed iPhone Duo). A flow
 # going back up to an earlier row scrolls there itself (scroll-to-top.yaml).
+# On a busy emulator (the min-SDK one) a tap on a page that just opened can be
+# lost: Maestro taps the row again when nothing changed, and only then, since
+# a tap that took shows the switch flipped, its spinner or an alert.
 appId: ${APP_ID}
 ---
 - runFlow:
@@ -37,6 +40,7 @@ appId: ${APP_ID}
     commands:
       - tapOn:
           id: ${ID}
+          retryTapIfNoChange: true
       - runFlow:
           when:
             true: ${!!CONFIRM}
