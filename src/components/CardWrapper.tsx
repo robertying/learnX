@@ -112,11 +112,15 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
     canHide: !!onToggleHidden,
   });
   const actionsEnabled = !actionsDisabled && !selectionMode && !reorderMode;
-  // One action each way, as chosen in Settings › Swipe Actions
-  const swipeActions: Record<SwipeSide, CardAction | undefined> = {
-    leading: swipeAction(actions, swipeSettings.right),
-    trailing: swipeAction(actions, swipeSettings.left),
-  };
+  // One action each way, as chosen in Settings › Swipe Actions. None with a
+  // mouse (Electron), which has the menu and hover buttons instead: the
+  // swipe's buttons would sit hidden in the page, still reached by Tab.
+  const swipeActions: Record<SwipeSide, CardAction | undefined> = isElectron()
+    ? { leading: undefined, trailing: undefined }
+    : {
+        leading: swipeAction(actions, swipeSettings.right),
+        trailing: swipeAction(actions, swipeSettings.left),
+      };
   const rowWidth = useSharedValue(0);
   const moveActions =
     reorderMode && onMove
@@ -392,11 +396,8 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
       // full-swipe point and beyond.
       overshootLeft={isApple()}
       overshootRight={isApple()}
-      // No swipes with a mouse (Electron): the menu and hover buttons.
       enabled={
-        actionsEnabled &&
-        !isElectron() &&
-        !!(swipeActions.leading || swipeActions.trailing)
+        actionsEnabled && !!(swipeActions.leading || swipeActions.trailing)
       }
       // A swipe that starts at the screen's edge goes back, not to the card.
       hitSlop={backSwipeEdge ? { left: -backSwipeEdgeWidth } : undefined}

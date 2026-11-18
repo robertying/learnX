@@ -453,6 +453,13 @@ const createWindow = (ses: Electron.Session) => {
       backgroundThrottling: !captureDir && !background,
     },
   });
+  // An E2E run's window takes no input from the system's pointer, only the
+  // tests' (sent to the page, not the system): windows of parallel runs
+  // that open and close under the pointer, or a person's mouse passing over,
+  // would otherwise end a hover a test made (a card's hover buttons).
+  if (background) {
+    win.setIgnoreMouseEvents(true);
+  }
   win.on('close', () => saveWindowState(stateFile, win));
   // Zoom from the keyboard, kept with the window's state, and again after
   // the page loads anew (a crash's reload). Keys typed in a web view (a

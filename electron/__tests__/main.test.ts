@@ -66,6 +66,7 @@ const fakeElectron = (dataDir: string, { packaged = false } = {}) => {
     maximize = jest.fn();
     show = jest.fn();
     showInactive = jest.fn();
+    setIgnoreMouseEvents = jest.fn();
     hide = jest.fn();
     isVisible = () => this.show.mock.calls.length > 0;
     focus = jest.fn();
@@ -754,6 +755,12 @@ describe('an E2E run', () => {
     expect(fake.app.dock.hide).not.toHaveBeenCalled();
   });
 
+  it("takes no input from the system's pointer, only the tests'", async () => {
+    await onPlatform('win32', () => loadMain());
+    const [win] = fake.windows;
+    expect(win.setIgnoreMouseEvents.mock.calls).toEqual([[true]]);
+  });
+
   it('shows the window behind the others on Linux, where Wayland draws no hidden window', async () => {
     await onPlatform('linux', () => loadMain());
     const [win] = fake.windows;
@@ -766,6 +773,7 @@ describe('an E2E run', () => {
 describe('a dev run on a Mac', () => {
   it('stays a regular app, in the Dock', async () => {
     await onPlatform('darwin', () => loadMain());
+    expect(fake.windows[0].setIgnoreMouseEvents).not.toHaveBeenCalled();
     expect(fake.app.setActivationPolicy.mock.calls).toEqual([['regular']]);
     expect(fake.app.dock.hide).not.toHaveBeenCalled();
   });
