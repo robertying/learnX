@@ -146,14 +146,23 @@ fi
 # The patched Maestro (scripts/e2e/maestro) sends its touches and typing through
 # scripts/e2e/sim-touch.swift while a display other than the main one is lit,
 # such as the open iPhone Duo's inner display, which XCUITest's events don't
-# reach. Built here when the source is newer.
+# reach, and loads scripts/e2e/sim-ax-frame.m into the app, so its tree there
+# has the elements at the right of the screen. Built here when the source is
+# newer.
 if [ "$platform" = ios ] && [ "$ui_only" = false ]; then
+  mkdir -p build/e2e
   sim_touch=build/e2e/sim-touch
   if [ ! -x "$sim_touch" ] || [ scripts/e2e/sim-touch.swift -nt "$sim_touch" ]; then
-    mkdir -p build/e2e
     xcrun swiftc -O scripts/e2e/sim-touch.swift -o "$sim_touch"
   fi
   export MAESTRO_IOS_SIM_TOUCH="$PWD/$sim_touch"
+  ax_frame=build/e2e/sim-ax-frame.dylib
+  if [ ! -f "$ax_frame" ] || [ scripts/e2e/sim-ax-frame.m -nt "$ax_frame" ]; then
+    xcrun -sdk iphonesimulator clang -dynamiclib -arch "$(uname -m)" \
+      -mios-simulator-version-min=17.0 -fobjc-arc -framework UIKit \
+      scripts/e2e/sim-ax-frame.m -o "$ax_frame"
+  fi
+  export MAESTRO_IOS_INSERT_LIBRARIES="$PWD/$ax_frame"
 fi
 
 # Run every flow unless a flow file or folder was passed (options alone, e.g.
