@@ -1,6 +1,7 @@
 import { Notice } from 'data/types/state';
 import { listTime } from 'helpers/listTime';
 import { useToday } from 'hooks/useClock';
+import { getTargetUrl } from 'helpers/openTarget';
 import ContentCard, { cardPreview, type ContentCardProps } from './ContentCard';
 
 export interface NoticeCardProps extends ContentCardProps {
@@ -9,6 +10,7 @@ export interface NoticeCardProps extends ContentCardProps {
 
 const NoticeCard: React.FC<NoticeCardProps> = ({
   data: {
+    id,
     title,
     content,
     courseName,
@@ -29,6 +31,7 @@ const NoticeCard: React.FC<NoticeCardProps> = ({
   return (
     <ContentCard
       {...restProps}
+      link={getTargetUrl({ type: 'notice', id })}
       testID="notice-card"
       overline={hideCourseName ? publisher : courseName}
       unread={!hasRead}

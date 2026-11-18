@@ -20,14 +20,17 @@ import useLinkTaps from 'hooks/useLinkTaps';
 import useNotificationTaps from 'hooks/useNotificationTaps';
 import useSpotlightTaps from 'hooks/useSpotlightTaps';
 import useJumpListTaps from 'hooks/useJumpListTaps';
+import { useIsPrimaryWindow } from 'hooks/useWindow';
 
 /**
  * What the main UI starts once logged in. The widgets, reminders and
  * Spotlight aren't started here: they follow the data by themselves
- * (services/surfaces).
+ * (services/surfaces). With several windows (iPad, Mac), each opens what was
+ * tapped for it, and one does the rest (`services/windows`).
  */
 const useMainStartup = () => {
-  const loggedIn = useLoggedIn();
+  const primary = useIsPrimaryWindow();
+  const loggedIn = useLoggedIn() && primary;
 
   // Shows the school's current semester, and moves to the next one when a
   // new term starts, unless the user picked an earlier semester.
@@ -50,10 +53,12 @@ const useMainStartup = () => {
   useUpNext();
   useEffect(
     () =>
-      subscribeSurfaceErrors(({ text, type }) =>
-        toast(text, type, { haptic: false }),
-      ),
-    [],
+      primary
+        ? subscribeSurfaceErrors(({ text, type }) =>
+            toast(text, type, { haptic: false }),
+          )
+        : undefined,
+    [primary],
   );
 
   useEffect(() => {
@@ -90,9 +95,11 @@ const useMainStartup = () => {
   useJumpListTaps();
 
   useEffect(() => {
-    void configureNotifications();
-    removeLegacyDownloads();
-  }, []);
+    if (primary) {
+      void configureNotifications();
+      removeLegacyDownloads();
+    }
+  }, [primary]);
 };
 
 export default useMainStartup;

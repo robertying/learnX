@@ -71,4 +71,8 @@ import UIKit
     tabs.tabBar.frame.origin.y = 2000
     #expect(TabBarLocator.frame(in: window) == nil)
   }
+
+  @Test func looksOnlyInTheWindowAsked() {
+    #expect(TabBarLocator.frame(windowId: "no-such-window") == nil)
+  }
 }

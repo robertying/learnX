@@ -2,6 +2,7 @@ import { displayFileSize } from 'helpers/filename';
 import { File } from 'data/types/state';
 import { listTime } from 'helpers/listTime';
 import { useToday } from 'hooks/useClock';
+import { getTargetUrl } from 'helpers/openTarget';
 import ContentCard, { cardPreview, type ContentCardProps } from './ContentCard';
 
 export interface FileCardProps extends ContentCardProps {
@@ -10,6 +11,7 @@ export interface FileCardProps extends ContentCardProps {
 
 const FileCard: React.FC<FileCardProps> = ({
   data: {
+    id,
     title,
     description,
     courseName,
@@ -39,6 +41,7 @@ const FileCard: React.FC<FileCardProps> = ({
   return (
     <ContentCard
       {...restProps}
+      link={getTargetUrl({ type: 'file', id })}
       testID="file-card"
       overline={hideCourseName ? undefined : courseName}
       unread={!!isNew}

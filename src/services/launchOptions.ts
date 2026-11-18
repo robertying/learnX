@@ -8,6 +8,7 @@ import {
 } from 'data/mockSource';
 import env from 'helpers/env';
 import { isApple } from 'helpers/platform';
+import type { WindowProps } from 'hooks/useWindow';
 
 /**
  * Launch arguments that set up the app for a test run, e.g. Maestro's
@@ -194,15 +195,29 @@ export const applyMockNetworkLink = (url: string) => {
  * renders, so they're in place before the saved login is used. Only once, so
  * a later change (e.g. from the Debug page) sticks.
  */
-export const withLaunchOptions = (App: ComponentType) => {
-  let Root: ComponentType | null = null;
-  return (initialProps: LaunchOptions) => {
+export const withLaunchOptions = (App: ComponentType<WindowProps>) => {
+  let Root: ComponentType<WindowProps> | null = null;
+  return (initialProps: LaunchOptions & WindowRootProps) => {
     if (!Root) {
       Root = applyLaunchOptions(initialProps).storeReport
         ? // Loaded only for it, so a normal launch never does.
-          (require('screens/StoreReport') as { default: ComponentType }).default
+          (require('screens/StoreReport') as { default: ComponentType })
+            .default
         : App;
     }
-    return createElement(Root);
+    // Each window on iPad and Mac is a root of its own (`hooks/useWindow`).
+    return createElement(Root, {
+      windowId: stringProp(initialProps.windowId),
+      initialURL: stringProp(initialProps.initialURL),
+    });
   };
 };
+
+/** A window's root props, as the scene delegate passes them. */
+interface WindowRootProps {
+  windowId?: unknown;
+  initialURL?: unknown;
+}
+
+const stringProp = (value: unknown) =>
+  typeof value === 'string' && value ? value : undefined;

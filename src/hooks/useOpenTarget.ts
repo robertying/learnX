@@ -6,6 +6,7 @@ import type { MainTabParams } from 'navigation/types';
 import { OpenTarget, targetRoutes } from 'helpers/openTarget';
 import { noteOpenedFromOutside } from 'hooks/useLaunchSheet';
 import { setPendingTarget } from 'hooks/usePendingTarget';
+import { useWindow } from 'hooks/useWindow';
 
 /**
  * Opens what a tapped notification, widget row or Spotlight result points
@@ -14,12 +15,14 @@ import { setPendingTarget } from 'hooks/usePendingTarget';
  */
 const useOpenTarget = () => {
   const navigation = useNavigation();
+  const { windowId } = useWindow();
 
   return (target: OpenTarget) => {
     noteOpenedFromOutside();
     if (target.type === 'today' || target.type === 'schedule') {
       setPendingTarget(
         target.type === 'schedule' ? { type: 'schedule', id: 'week' } : null,
+        windowId,
       );
       return navigation.navigate('MainTab', {
         screen: 'TodayStack',
@@ -28,7 +31,7 @@ const useOpenTarget = () => {
     }
     // The list opens the item, as a tap on it would, so it lands in the
     // detail pane of a split view and on top of the list on a phone.
-    setPendingTarget(target.id ? target : null);
+    setPendingTarget(target.id ? target : null, windowId);
     const { tab, list } = targetRoutes[target.type];
     // Each tab with its own list; TypeScript can't pair the two unions.
     return navigation.navigate('MainTab', {

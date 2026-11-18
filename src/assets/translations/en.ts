@@ -561,6 +561,7 @@ export default {
   a11yNewBadge: 'New',
   a11yDone: 'Ended',
   a11yStruck: 'Will be replaced or removed',
+  openInNewWindow: 'Open in New Window',
   moveUp: 'Move Up',
   moveDown: 'Move Down',
   courseUnfinishedAssignments: '{count} unfinished assignments',

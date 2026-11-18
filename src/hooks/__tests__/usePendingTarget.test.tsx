@@ -4,6 +4,7 @@ import { DetailStackParams } from 'navigation/types';
 import { SplitViewContext } from 'navigation/SplitView';
 import SplitSizes from 'constants/SplitSizes';
 import usePendingTarget, { setPendingTarget } from 'hooks/usePendingTarget';
+import { WindowProvider } from 'hooks/useWindow';
 
 // The split view's divider pulls in the theme, which isn't needed here.
 jest.mock('components/Divider', () => () => null);
@@ -25,6 +26,7 @@ const splitContext = (
 
 afterEach(() => {
   setPendingTarget(null);
+  setPendingTarget(null, 'window-a');
 });
 
 it('opens a pending item of its type once', async () => {
@@ -108,4 +110,24 @@ it('lets Today open a pending Schedule', async () => {
   setPendingTarget({ type: 'schedule', id: 'week' });
   await renderHook(() => usePendingTarget('schedule', open));
   expect(open).toHaveBeenCalledWith('week');
+});
+
+it('opens an item only in the window it was opened for', async () => {
+  const inA = jest.fn();
+  const inB = jest.fn();
+  const window =
+    (windowId: string) =>
+    ({ children }: React.PropsWithChildren) => (
+      <WindowProvider windowId={windowId}>{children}</WindowProvider>
+    );
+  await renderHook(() => usePendingTarget('notice', inA), {
+    wrapper: window('window-a'),
+  });
+  await renderHook(() => usePendingTarget('notice', inB), {
+    wrapper: window('window-b'),
+  });
+
+  await act(() => setPendingTarget({ type: 'notice', id: 'n1' }, 'window-a'));
+  expect(inA.mock.calls).toEqual([['n1']]);
+  expect(inB).not.toHaveBeenCalled();
 });

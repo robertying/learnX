@@ -9,17 +9,27 @@ import { ListTarget } from 'helpers/openTarget';
  */
 export type PendingTarget = ListTarget | { type: 'schedule'; id: 'week' };
 import useDetailNavigator from 'hooks/useDetailNavigator';
+import { useWindow } from 'hooks/useWindow';
 
 /**
  * The item a tapped notification, widget row, learnx:// link or Spotlight
- * result points to, until its list screen opens it (`useOpenTarget`).
+ * result points to, until its list screen opens it (`useOpenTarget`), with
+ * the window it opens in (iPad, Mac; `hooks/useWindow`).
  */
-const usePendingTargetStore = create<{ target: PendingTarget | null }>(() => ({
-  target: null,
+const usePendingTargetStore = create<{
+  /** By window id; the empty string where there's only one window. */
+  targets: Partial<Record<string, PendingTarget>>;
+}>(() => ({
+  targets: {},
 }));
 
-export const setPendingTarget = (target: PendingTarget | null) =>
-  usePendingTargetStore.setState({ target });
+export const setPendingTarget = (
+  target: PendingTarget | null,
+  windowId = '',
+) =>
+  usePendingTargetStore.setState(({ targets }) => ({
+    targets: { ...targets, [windowId]: target ?? undefined },
+  }));
 
 /**
  * Lets a list screen open the pending item (`setPendingTarget`) with `open`,
@@ -31,7 +41,10 @@ const usePendingTarget = (
   type: PendingTarget['type'],
   open: (id: string) => void,
 ) => {
-  const target = usePendingTargetStore(state => state.target);
+  const { windowId } = useWindow();
+  const target = usePendingTargetStore(
+    state => state.targets[windowId ?? ''] ?? null,
+  );
   const { showDetail, laidOut } = useContext(SplitViewContext);
   const detailNavigator = useDetailNavigator();
   // A native split that hasn't been on screen yet may still collapse (on an
@@ -44,9 +57,9 @@ const usePendingTarget = (
     if (target?.type !== type || !target.id || waitingForDetail) {
       return;
     }
-    setPendingTarget(null);
+    setPendingTarget(null, windowId);
     openTarget(target.id);
-  }, [target, type, waitingForDetail]);
+  }, [target, type, waitingForDetail, windowId]);
 };
 
 export default usePendingTarget;

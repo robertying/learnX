@@ -12,27 +12,47 @@ import useHelpCommands from 'hooks/useHelpCommands';
 import useReLogin from 'hooks/useReLogin';
 import useShareHandler from 'hooks/useShareHandler';
 import useStoresLoaded from 'hooks/useStoresLoaded';
+import {
+  useIsPrimaryWindow,
+  WindowProvider,
+  type WindowProps,
+} from 'hooks/useWindow';
 import Navigation from 'navigation';
 import { isApple } from 'helpers/platform';
+
+/**
+ * What the app does once for all its windows (`services/windows`), in one of
+ * them: logging in again and coming back to the app, a file shared to
+ * learnX, the Help menu.
+ */
+const AppWide = () => {
+  useReLogin();
+  useShareHandler();
+  useHelpCommands();
+  return null;
+};
 
 const Container = () => {
   const reloginRequested = useReloginRequested();
   const credentials = useCredentials();
   const hasCredentials = hasSavedLogin(credentials);
+  const primary = useIsPrimaryWindow();
 
-  useReLogin();
-  useShareHandler();
-  useHelpCommands();
-
-  return <Navigation showMain={hasCredentials && !reloginRequested} />;
+  return (
+    <>
+      {primary && <AppWide />}
+      <Navigation showMain={hasCredentials && !reloginRequested} />
+    </>
+  );
 };
 
-const App = () => {
+const App = (windowProps: WindowProps) => {
   const colorScheme = useColorScheme();
   const loaded = useStoresLoaded();
 
   return (
-    <GestureHandlerRootView>
+    <WindowProvider {...windowProps}>
+      <GestureHandlerRootView>
       <ErrorBoundary>
         <SafeAreaProvider>
           <QueryClientProvider client={queryClient}>
@@ -52,7 +72,8 @@ const App = () => {
         }
         animated
       />
-    </GestureHandlerRootView>
+      </GestureHandlerRootView>
+    </WindowProvider>
   );
 };
 

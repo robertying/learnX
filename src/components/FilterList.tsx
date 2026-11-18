@@ -39,6 +39,7 @@ import FlatList from './FlatList';
 import ListBackground from './ListBackground';
 import { playHaptic } from 'services/haptics';
 import { useTheme } from 'theme';
+import { useWindowRestoration } from 'hooks/useWindow';
 
 export type { ItemComponentProps };
 
@@ -105,6 +106,8 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   const detailRoot = useDetailRoot();
   const openedId =
     detailRoot?.name === detailScreens[type] ? detailRoot.id : undefined;
+  // A window on iPad or Mac comes back to this list and item after a relaunch.
+  useWindowRestoration({ type, id: openedId });
 
   // Only this tab's selection, so changing another tab's filter does not
   // re-render this list

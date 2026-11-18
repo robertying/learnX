@@ -535,6 +535,7 @@ const zh: typeof en = {
   a11yNewBadge: '有新内容',
   a11yDone: '已结束',
   a11yStruck: '将被替换或删除',
+  openInNewWindow: '在新窗口中打开',
   moveUp: '上移',
   moveDown: '下移',
   courseUnfinishedAssignments: '{count}项未完成作业',
