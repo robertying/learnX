@@ -6,19 +6,23 @@ import { DownloadableFile } from 'data/types/state';
 import { fileNameOf, sanitizeFileName } from 'helpers/filename';
 import { t } from 'helpers/i18n';
 import { bridge } from 'web/bridge';
+import { systemTexts } from 'web/systemText';
 
 /**
  * Opens a downloaded file in its default app; throws if it couldn't. One
  * that would run a program asks first, in a dialog of the system's.
  */
 export const openInDefaultApp = async (uri: string) => {
-  const error = await bridge().shell.open(uri, {
-    // The main process fills in the file's name.
-    message: t('openRunnableTitle', { name: '{name}' }),
-    detail: t('openRunnableMessage'),
-    open: t('open'),
-    cancel: t('cancel'),
-  });
+  const error = await bridge().shell.open(
+    uri,
+    systemTexts({
+      // The main process fills in the file's name.
+      message: t('openRunnableTitle', { name: '{name}' }),
+      detail: t('openRunnableMessage'),
+      open: t('open'),
+      cancel: t('cancel'),
+    }),
+  );
   if (error) {
     throw new Error(error);
   }

@@ -46,13 +46,16 @@ test.describe('in Chinese', () => {
     await expect(card(window, 'MOCK_COURSE')).toBeVisible();
 
     // Only a dev run lets the test reach the tray's menu.
+    // Windows and Linux draw no gap between Chinese and Latin text in the
+    // tray's menu, so it's typed in there (web/systemText); macOS draws it.
     if (!packagedApp) {
+      const gapped = /\p{Script=Han}\u2005[A-Za-z]/u;
       await expect
-        .poll(async () => (await main.trayLabels())[0])
+        .poll(async () => (await main.trayLabels())[0].replaceAll('\u2005', ''))
         .toMatch(chinese('T_trayOpen'));
-      expect((await main.trayLabels())[1]).toMatch(
-        chinese('T_trayCheckForNewItems'),
-      );
+      const [open, checkForNewItems] = await main.trayLabels();
+      expect(gapped.test(open)).toBe(process.platform !== 'darwin');
+      expect(checkForNewItems).toMatch(chinese('T_trayCheckForNewItems'));
     }
 
     await openSettings(window);

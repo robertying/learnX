@@ -8,7 +8,7 @@ import path from 'node:path';
 import type { ElectronApplication } from '@playwright/test';
 import { expect, test } from './fixtures.ts';
 import { exact, text } from './maestroEnv.ts';
-import { byId, card, openCard, openTab, shown } from './steps.ts';
+import { byId, card, goBack, openCard, openTab, shown } from './steps.ts';
 
 /** The URLs of the window's frames: the PDF preview is one of them. */
 const frameUrls = (app: ElectronApplication) =>
@@ -130,5 +130,29 @@ test("keeps Full Screen to the file's own tab", async ({ window, login }) => {
   await openTab(window, 'files');
   await expect(list).not.toBeInViewport();
   await header('T_exitFullscreen').click();
+  await expect(list).toBeInViewport();
+});
+
+test('brings the list back when going back from a full screen file', async ({
+  window,
+  login,
+}) => {
+  await login();
+  await openTab(window, 'courses');
+  await openCard(window, 'MOCK_COURSE', 'course-detail');
+  const course = byId(window, 'course-detail');
+  await course.getByRole('tab', { name: exact('T_files') }).click();
+  await shown(course.getByRole('button', { name: text('MOCK_FILE') })).click();
+  await expect(byId(window, 'file-detail')).toBeVisible();
+
+  const list = card(window, 'MOCK_COURSE');
+  await shown(
+    window.getByRole('button', { name: exact('T_fullscreen') }),
+  ).click();
+  await expect(list).not.toBeInViewport();
+
+  // The header's back leaves full screen with the file.
+  await goBack(window);
+  await expect(byId(window, 'course-detail')).toBeVisible();
   await expect(list).toBeInViewport();
 });
