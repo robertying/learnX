@@ -41,13 +41,10 @@ const webAliases = Object.fromEntries(
 );
 
 /**
- * Four runs: everything in src/ with each split component's iOS file (Jest's
- * default platform here); the component tests under `__tests__/android` with
- * the `.android.tsx` files, Compose stand-ins (`jest/mocks/expoCompose.tsx`)
- * and `Platform.OS` 'android'; and `tooling`, the tests of the repo's scripts,
- * Maestro flows and lint rules in `scripts/__tests__` and of the Electron
- * app's main process in `electron/__tests__`, typed with Node
- * (`scripts/tsconfig.json`).
+ * One project per platform, each resolving that platform's files (iOS is
+ * Jest's default platform here; Android's and the Electron app's tests live in
+ * `__tests__/android` and `__tests__/web`), and `tooling` for the repo's own
+ * scripts and the Electron main process, typed with Node.
  */
 // Node's own localStorage (on by default since Node 25) warns in every worker
 // whose environment reads the globals (Jest copies them), and the tests use

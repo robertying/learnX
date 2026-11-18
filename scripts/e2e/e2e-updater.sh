@@ -148,10 +148,11 @@ if [ "$sdk" -ge 37 ]; then
   confirms=false
 fi
 # Images with the Play Store (Phonesky; google_apis images only have a
-# com.android.vending stub) have Google Play Protect, which offers to scan an
-# app it hasn't seen before it installs.
+# com.android.vending stub, LicenseChecker) have Google Play Protect, which
+# offers to scan an app it hasn't seen before it installs. Once the Play Store
+# has updated itself, its path only names its split_phonesky_* splits.
 play_protect=false
-if adb_ shell pm path com.android.vending | grep -q Phonesky; then
+if adb_ shell pm path com.android.vending | grep -qi phonesky; then
   play_protect=true
 fi
 flow_env=(-e UPDATER_SERVER="http://localhost:$port" -e CONFIRMS="$confirms"

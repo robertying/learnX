@@ -3,8 +3,9 @@ name: Open every other screen
 # Mock content only: the assignment it opens must take online submissions.
 ---
 # The screens the other flows don't reach: the timetable, an assignment's
-# submission sheet, a course's courseX page and every Settings page apart from
-# Changelog and About (13-settings-logout). Each is checked by its id.
+# submission sheet, a course's courseX page, every course's courseX (from the
+# Courses list) and every Settings page apart from Changelog and About
+# (13-settings-logout). Each is checked by its id.
 - runFlow: subflows/login.yaml
 
 # Today › Schedule
@@ -23,7 +24,7 @@ name: Open every other screen
     env:
       LIST: '.*(${T_todayDueSoon}).*'
 
-# An open assignment's submission sheet, closed without sending
+# An open assignment's submission, closed without sending
 - runFlow:
     file: subflows/tab.yaml
     env:
@@ -40,7 +41,7 @@ name: Open every other screen
     timeout: 10000
 - assertVisible:
     id: pickAttachment
-- runFlow: subflows/close.yaml
+- runFlow: subflows/close-item-page.yaml
 - extendedWaitUntil:
     notVisible:
       id: assignmentSubmission
@@ -66,8 +67,8 @@ name: Open every other screen
     visible:
       id: courseXReload
     timeout: 10000
-# It opens as a sheet.
-- runFlow: subflows/close.yaml
+# It's about the open course: beside the course on iPad, a sheet elsewhere.
+- runFlow: subflows/close-item-page.yaml
 - extendedWaitUntil:
     notVisible:
       id: courseXReload
@@ -76,6 +77,36 @@ name: Open every other screen
     file: subflows/back.yaml
     env:
       LIST: '${T_filter}'
+
+# Every course's courseX, from the Courses list's More (…) menu. It's about
+# the whole app, not the open course, so it opens over the whole window even
+# beside a detail pane (iPad, unfolded Android): Close (the system back on
+# Android) shuts it.
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: '${T_more}'
+      - waitForAnimationToEnd
+      - tapOn: '${T_courseX}'
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn:
+          id: more
+      - waitForAnimationToEnd
+      - tapOn:
+          id: courseX
+- extendedWaitUntil:
+    visible:
+      id: courseXReload
+    timeout: 10000
+- runFlow: subflows/close.yaml
+- extendedWaitUntil:
+    notVisible:
+      id: courseXReload
+    timeout: 10000
 
 # Every Settings page, from the top of the list down
 - runFlow: subflows/settings.yaml

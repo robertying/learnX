@@ -42,7 +42,10 @@ import UIKit
         "windowWidth": 402,
         "windowHeight": 874,
       ])
-    #expect(bar.minY > 437, "along the bottom")
+    // Where UIKit puts it: along the bottom on most iPhones, down the right side on the closed iPhone Duo.
+    let bounds = window.bounds
+    #expect(bar.maxY == bounds.maxY || bar.maxX == bounds.maxX, "along the bottom or the right side")
+    #expect(bar.width == bounds.width || bar.height == bounds.height, "across the window")
   }
 
   @Test func skipsAHiddenTabBar() {

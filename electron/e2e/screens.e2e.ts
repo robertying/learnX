@@ -1,5 +1,6 @@
 // .maestro/07-screens.yaml: opens every other screen: the Schedule, the
-// submission page, courseX's course information and every Settings page.
+// submission page, courseX's course information, every course's courseX and
+// every Settings page.
 // Swipe Actions isn't in the Electron app's Settings (cards don't swipe).
 import { expect, test } from './fixtures.ts';
 import { exact } from './maestroEnv.ts';
@@ -35,6 +36,14 @@ test('opens every other screen', async ({ window, login }) => {
   ).click();
   await expect(byId(window, 'courseXReload')).toBeVisible();
   await goBack(window);
+  await expect(byId(window, 'courseXReload')).toBeHidden();
+
+  // Every course's courseX, from the Courses list's More menu: about the
+  // whole app, so over the whole window (with Close) even beside a course.
+  await byId(window, 'more').click();
+  await byId(window, 'more-courseX').click();
+  await expect(byId(window, 'courseXReload')).toBeVisible();
+  await shown(window.getByRole('button', { name: exact('T_close') })).click();
   await expect(byId(window, 'courseXReload')).toBeHidden();
 
   await openSettings(window);

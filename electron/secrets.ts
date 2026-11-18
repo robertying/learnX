@@ -32,7 +32,7 @@ type SafeStorage = Pick<
 const FALLBACK_KEY_TAG = 'v10';
 
 /**
- * The encryption: safeStorage's asynchronous APIs, as Electron 45
+ * The encryption: safeStorage's asynchronous APIs, as Electron
  * recommends, which never ask the keyring on the main process's thread (the
  * synchronous ones block it, and the window, for as long as GNOME's unlock
  * prompt is up). `ready` waits for that prompt. On

@@ -4,7 +4,9 @@
 # swipes to 10% from the screen's edge: from the card's middle that's short of
 # it to the left, but to the right it's past it where the list ends before the
 # screen does (the closed iPhone Duo, with its bars at the right), so a right
-# swipe starts further along the card.
+# swipe starts further along the card. On iPad the list is a column on the
+# left, so a right swipe crosses the whole card whatever its start: that's the
+# full swipe, which runs the action by itself, with no button left to tap.
 appId: ${APP_ID}
 ---
 - runFlow:
@@ -26,6 +28,10 @@ appId: ${APP_ID}
             point: 70%, 50%
           direction: RIGHT
           duration: 300
-- tapOn:
-    id: ${ACTION}
+- runFlow:
+    when:
+      true: ${DIRECTION == 'LEFT' || IPAD != 'true'}
+    commands:
+      - tapOn:
+          id: ${ACTION}
 - waitForAnimationToEnd
