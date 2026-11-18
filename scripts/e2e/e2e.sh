@@ -143,6 +143,19 @@ if [ "$platform" = ios ]; then
   fi
 fi
 
+# The patched Maestro (scripts/e2e/maestro) sends its touches and typing through
+# scripts/e2e/sim-touch.swift while a display other than the main one is lit,
+# such as the open iPhone Duo's inner display, which XCUITest's events don't
+# reach. Built here when the source is newer.
+if [ "$platform" = ios ] && [ "$ui_only" = false ]; then
+  sim_touch=build/e2e/sim-touch
+  if [ ! -x "$sim_touch" ] || [ scripts/e2e/sim-touch.swift -nt "$sim_touch" ]; then
+    mkdir -p build/e2e
+    xcrun swiftc -O scripts/e2e/sim-touch.swift -o "$sim_touch"
+  fi
+  export MAESTRO_IOS_SIM_TOUCH="$PWD/$sim_touch"
+fi
+
 # Run every flow unless a flow file or folder was passed (options alone, e.g.
 # --test-output-dir <dir>, still run them all).
 has_flow=false

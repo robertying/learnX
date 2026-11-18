@@ -1,0 +1,181 @@
+From 1f3fe04d5c34ae8e5c52f376506f0a57395eed73 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 18 Nov 2026 10:11:07 -0800
+Subject: [PATCH] feat(ios): send touches and typing through an outside helper
+ when the app is on another display
+
+XCUITest synthesizes events on the main display only, so nothing reached an app on the inner
+display of an open iPhone Duo simulator. With MAESTRO_IOS_SIM_TOUCH set to a helper that speaks
+the simulator's HID service (learnX's scripts/e2e/sim-touch.swift), taps, long presses, swipes,
+typing and erasing go through it whenever a display other than the primary one is lit.
+---
+ .../main/java/maestro/drivers/IOSDriver.kt    | 27 +++++--
+ .../src/main/java/maestro/drivers/SimTouch.kt | 77 +++++++++++++++++++
+ 2 files changed, 99 insertions(+), 5 deletions(-)
+ create mode 100644 maestro-client/src/main/java/maestro/drivers/SimTouch.kt
+
+diff --git a/maestro-client/src/main/java/maestro/drivers/IOSDriver.kt b/maestro-client/src/main/java/maestro/drivers/IOSDriver.kt
+index 4ab48f80..9fdaf576 100644
+--- a/maestro-client/src/main/java/maestro/drivers/IOSDriver.kt
++++ b/maestro-client/src/main/java/maestro/drivers/IOSDriver.kt
+@@ -83,6 +83,10 @@ class IOSDriver(
+     private var proxySet = false
+     private val xcRunnerCLIUtils = XCRunnerCLIUtils(tempFileHandler = TempFileHandler())
+ 
++    // XCUITest's events land on the main display only; this sends them to the lit one instead
++    // when it is another (the open iPhone Duo's inner display).
++    private val simTouch = SimTouch.forSimulator(iosDevice.deviceId)
++
+     private var deviceLogStream: Process? = null
+     private var deviceLogFile: java.io.File? = null
+ 
+@@ -104,6 +108,7 @@ class IOSDriver(
+                 resetProxy()
+             }
+             iosDevice.close()
++            simTouch?.stop()
+             appId = null
+         }
+         try { deviceLogStream?.destroy() } catch (e: Exception) { LOGGER.warn("Failed to stop device log stream on close", e) }
+@@ -155,13 +160,17 @@ class IOSDriver(
+ 
+     override fun tap(point: Point) {
+         metrics.measured("operation", mapOf("command" to "tap")) {
+-            runDeviceCall("tap") { iosDevice.tap(point.x, point.y) }
++            if (simTouch?.send("tap ${point.x} ${point.y}") != true) {
++                runDeviceCall("tap") { iosDevice.tap(point.x, point.y) }
++            }
+         }
+     }
+ 
+     override fun longPress(point: Point) {
+         metrics.measured("operation", mapOf("command" to "longPress")) {
+-            runDeviceCall("longPress") { iosDevice.longPress(point.x, point.y, 3000) }
++            if (simTouch?.send("tap ${point.x} ${point.y} 3") != true) {
++                runDeviceCall("longPress") { iosDevice.longPress(point.x, point.y, 3000) }
++            }
+         }
+     }
+ 
+@@ -269,8 +278,12 @@ class IOSDriver(
+             val startPoint = start.coerceIn(maxWidth = deviceInfo.widthGrid, maxHeight = deviceInfo.heightGrid)
+             val endPoint = end.coerceIn(maxWidth = deviceInfo.widthGrid, maxHeight = deviceInfo.heightGrid)
+ 
++            runDeviceCall("swipe") { waitForAppToSettle(null, null) }
++            val seconds = durationMs.toDouble() / 1000
++            if (simTouch?.send("swipe ${startPoint.x} ${startPoint.y} ${endPoint.x} ${endPoint.y} $seconds") == true) {
++                return@measured
++            }
+             runDeviceCall("swipe") {
+-                waitForAppToSettle(null, null)
+                 iosDevice.scroll(
+                     xStart = startPoint.x.toDouble(),
+                     yStart = startPoint.y.toDouble(),
+@@ -447,7 +460,9 @@ class IOSDriver(
+ 
+     override fun inputText(text: String) {
+         metrics.measured("operation", mapOf("command" to "inputText")) {
+-            runDeviceCall("inputText") { iosDevice.input(text = text) }
++            if (simTouch?.send("type ${SimTouch.escaped(text)}") != true) {
++                runDeviceCall("inputText") { iosDevice.input(text = text) }
++            }
+         }
+     }
+ 
+@@ -471,7 +486,9 @@ class IOSDriver(
+ 
+     override fun eraseText(charactersToErase: Int) {
+         metrics.measured("operation", mapOf("command" to "eraseText")) {
+-            runDeviceCall("eraseText") { iosDevice.eraseText(charactersToErase) }
++            if (simTouch?.send("erase $charactersToErase") != true) {
++                runDeviceCall("eraseText") { iosDevice.eraseText(charactersToErase) }
++            }
+         }
+     }
+ 
+diff --git a/maestro-client/src/main/java/maestro/drivers/SimTouch.kt b/maestro-client/src/main/java/maestro/drivers/SimTouch.kt
+new file mode 100644
+index 00000000..3a0b9247
+--- /dev/null
++++ b/maestro-client/src/main/java/maestro/drivers/SimTouch.kt
+@@ -0,0 +1,77 @@
++package maestro.drivers
++
++import org.slf4j.LoggerFactory
++import java.io.BufferedReader
++import java.io.BufferedWriter
++
++/**
++ * Touches and typing for an app on a display XCUITest's events don't reach, such as the inner
++ * display of an open iPhone Duo simulator.
++ *
++ * Runs an outside helper, the executable named by MAESTRO_IOS_SIM_TOUCH, as `<helper> <udid> serve`
++ * and keeps it for the session, since connecting to the simulator's HID service takes seconds. It
++ * reads one command per line (`tap <x> <y> [seconds]`, `swipe <x1> <y1> <x2> <y2> <seconds>`,
++ * `type <text>`, `erase <count>`, each after `--secondary-only `) and answers each with one line:
++ * `ok` when it sent the events, `primary` when the primary display is lit, so the caller sends its
++ * own events there, or `error: <why>`. Text escapes a newline as \n and a backslash as \\.
++ */
++class SimTouch private constructor(private val command: List<String>) {
++
++    private var process: Process? = null
++    private var input: BufferedWriter? = null
++    private var output: BufferedReader? = null
++
++    /** Sends one command; true when the helper handled it, false when the primary display is lit. */
++    @Synchronized
++    fun send(line: String): Boolean {
++        val answer = try {
++            exchange(line)
++        } catch (e: Exception) {
++            // The helper may have quit; one fresh start, then give up.
++            stop()
++            exchange(line)
++        }
++        return when {
++            answer == "ok" -> true
++            answer == "primary" -> false
++            else -> throw IllegalStateException("${command.first()}: ${answer ?: "no answer"}")
++        }
++    }
++
++    private fun exchange(line: String): String? {
++        val writer = input ?: start().let { input!! }
++        writer.write("--secondary-only $line")
++        writer.newLine()
++        writer.flush()
++        return output!!.readLine()
++    }
++
++    private fun start() {
++        LOGGER.info("Starting ${command.joinToString(" ")}")
++        val started = ProcessBuilder(command).redirectError(ProcessBuilder.Redirect.INHERIT).start()
++        process = started
++        input = started.outputStream.bufferedWriter()
++        output = started.inputStream.bufferedReader()
++    }
++
++    @Synchronized
++    fun stop() {
++        try { input?.close() } catch (_: Exception) {}
++        process?.let { if (!it.waitFor(2, java.util.concurrent.TimeUnit.SECONDS)) it.destroy() }
++        process = null
++        input = null
++        output = null
++    }
++
++    companion object {
++        private val LOGGER = LoggerFactory.getLogger(SimTouch::class.java)
++
++        /** The helper for simulator `udid`, when MAESTRO_IOS_SIM_TOUCH names one. */
++        fun forSimulator(udid: String?): SimTouch? {
++            val helper = System.getenv("MAESTRO_IOS_SIM_TOUCH")?.takeIf { it.isNotBlank() } ?: return null
++            return udid?.let { SimTouch(listOf(helper, it, "serve")) }
++        }
++
++        fun escaped(text: String) = text.replace("\\", "\\\\").replace("\n", "\\n")
++    }
++}
+-- 
+2.56.1
+
