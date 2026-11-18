@@ -3,7 +3,6 @@ import { AppState, AppStateStatus, Text } from 'react-native';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { act, render, screen } from '@testing-library/react-native';
 import SplitSizes from 'constants/SplitSizes';
-import { useAppStateStore } from 'data/appState';
 import NativeSplitViewProvider, {
   useSplitLaidOut,
 } from 'navigation/NativeSplitView';
@@ -119,14 +118,14 @@ it('shows a full screen master pane while in the background, so it is not saved 
 });
 
 describe('with a sidebar', () => {
-  beforeEach(() => useAppStateStore.setState({ sidebarHidden: false }));
-
   it('lets the system show and hide the sidebar, in its own column', async () => {
     await renderSplit({ sidebar: <Text>sidebar</Text> });
     expect(screen.getByText('sidebar')).toBeTruthy();
     expect(mockColumns).toHaveLength(3);
     expect(mockHost).toMatchObject({
-      preferredDisplayMode: 'twoBesideSecondary',
+      // As it was last left, natively.
+      preferredDisplayMode: 'automatic',
+      sidebarAutosaveName: 'Main',
       displayModeButtonVisibility: 'automatic',
       primaryBackgroundStyle: 'sidebar',
       topColumnForCollapsing: 'supplementary',
@@ -149,27 +148,7 @@ describe('with a sidebar', () => {
     expect(mockHost.preferredDisplayMode).toBe('oneBesideSecondary');
 
     await displayMode('secondaryOnly');
-    expect(mockHost.preferredDisplayMode).toBe('oneBesideSecondary');
-  });
-
-  it('opens with the sidebar as it was last left', async () => {
-    const { unmount } = await renderSplit({ sidebar: <Text>sidebar</Text> });
-    await displayMode('oneBesideSecondary');
-    expect(useAppStateStore.getState().sidebarHidden).toBe(true);
-    // Full screen leaves the sidebar as it was.
-    await act(() => context().toggleMaster(false));
-    await displayMode('secondaryOnly');
-    expect(useAppStateStore.getState().sidebarHidden).toBe(true);
-    await unmount();
-
-    await renderSplit({ sidebar: <Text>sidebar</Text> });
-    expect(mockHost.preferredDisplayMode).toBe('oneBesideSecondary');
-    // A master pane restored hidden comes back without the sidebar.
-    await displayMode('secondaryOnly');
-    expect(mockHost.preferredDisplayMode).toBe('oneBesideSecondary');
-
-    await displayMode('twoBesideSecondary');
-    expect(useAppStateStore.getState().sidebarHidden).toBe(false);
+    expect(mockHost.preferredDisplayMode).toBe('twoBesideSecondary');
   });
 });
 

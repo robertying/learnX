@@ -78,7 +78,6 @@ describe('resetAppState', () => {
       setupSeen: true,
       whatsNewSeenVersion: '19.0.0',
       courseSharingSeen: true,
-      sidebarHidden: true,
     });
     resetAppState();
     expect(useAppStateStore.getState()).toMatchObject({
@@ -86,7 +85,6 @@ describe('resetAppState', () => {
       setupSeen: false,
       whatsNewSeenVersion: '19.0.0',
       courseSharingSeen: false,
-      sidebarHidden: true,
     });
   });
 });
