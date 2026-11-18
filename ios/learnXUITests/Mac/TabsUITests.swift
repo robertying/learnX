@@ -54,6 +54,32 @@ final class TabsUITests: LearnXUITestCase {
     XCTAssertTrue(try waitFor(id: "tab-notices").isHittable, "the sidebar stayed hidden after showing it")
   }
 
+  /// The window opens at the size it was left at (`WindowFrameAutosave` in modules/windows), also when the window's
+  /// saved state is thrown away, as quitting does by default (`ApplePersistenceIgnoreState` stands in for that).
+  func testWindowKeepsItsSize() throws {
+    try waitFor(id: "tab-notices")
+    let original = app.windows.firstMatch.frame
+    try resizeWindow(by: CGVector(dx: -120, dy: -80))
+    let resized = app.windows.firstMatch.frame
+    XCTAssertNotEqual(resized.size, original.size, "the window didn't resize")
+
+    try launch(["ApplePersistenceIgnoreState": "YES"])
+    try waitFor(id: "today", timeout: 60)
+    let reopened = app.windows.firstMatch.frame
+    XCTAssertEqual(reopened.width, resized.width, accuracy: 2, "the window didn't keep its width")
+    XCTAssertEqual(reopened.height, resized.height, accuracy: 2, "the window didn't keep its height")
+
+    // Back to the size the tests after this one expect.
+    try resizeWindow(by: CGVector(dx: 120, dy: 80))
+  }
+
+  /// Drags the window's bottom right corner by `offset`.
+  private func resizeWindow(by offset: CGVector) throws {
+    let window = app.windows.firstMatch
+    let corner = window.coordinate(withNormalizedOffset: CGVector(dx: 1, dy: 1)).withOffset(CGVector(dx: -2, dy: -2))
+    corner.press(forDuration: 0.3, thenDragTo: corner.withOffset(offset))
+  }
+
   /// patches/react-native-screens@4.30.1.patch: in a split view each column keeps its bar, as on iPad, instead of
   /// every bar competing for the window's toolbar.
   func testEachColumnHasItsOwnBar() throws {
