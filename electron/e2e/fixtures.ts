@@ -41,6 +41,26 @@ const mockLogin = () => {
 };
 
 /**
+ * Logs in with the mock account and closes the set-up page, as the Maestro
+ * flows' subflows/login-form.yaml does.
+ */
+export const logIn = async (page: Page) => {
+  const { username, password } = mockLogin();
+  // A new install opens on the welcome page, then the login page.
+  const welcome = page.getByTestId('welcome-continue');
+  const usernameField = page.getByTestId('login-username');
+  await welcome.or(usernameField).first().waitFor();
+  if (await welcome.isVisible()) {
+    await welcome.click();
+  }
+  await usernameField.fill(username);
+  await page.getByTestId('login-password').fill(password);
+  await page.getByTestId('login-password').press('Enter');
+  await page.getByRole('button', { name: text('T_notNow') }).click();
+  await page.getByTestId('today').waitFor();
+};
+
+/**
  * On CI under Linux's X11, which has no display, each worker's apps get an
  * X server of their own (Xvfb, from the xvfb package). The Wayland run
  * (WAYLAND_DISPLAY) has its own compositor; locally the apps use your
@@ -244,21 +264,7 @@ export const test = base.extend<Fixtures, WorkerFixtures>({
   },
 
   login: async ({ window }, provide) => {
-    await provide(async (page = window) => {
-      const { username, password } = mockLogin();
-      // A new install opens on the welcome page, then the login page.
-      const welcome = page.getByTestId('welcome-continue');
-      const usernameField = page.getByTestId('login-username');
-      await welcome.or(usernameField).first().waitFor();
-      if (await welcome.isVisible()) {
-        await welcome.click();
-      }
-      await usernameField.fill(username);
-      await page.getByTestId('login-password').fill(password);
-      await page.getByTestId('login-password').press('Enter');
-      await page.getByRole('button', { name: text('T_notNow') }).click();
-      await page.getByTestId('today').waitFor();
-    });
+    await provide(async (page = window) => logIn(page));
   },
 
   relaunch: async ({ language, dataDir, launched, xDisplay }, provide) => {
