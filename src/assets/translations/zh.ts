@@ -580,8 +580,7 @@ const zh: typeof en = {
   whatsNew19DesignMacBody:
     '更简洁的界面，遵循macOS设计风格，并可用快速查看预览课程文件。',
   whatsNew19ElectronTitle: 'Windows与Linux',
-  whatsNew19ElectronBody:
-    '试用实验性的Windows和Linux桌面版，可从TUNA镜像或GitHub Releases下载。',
+  whatsNew19ElectronBody: '试用实验性的Windows和Linux桌面版。',
 };
 
 export default zh;
