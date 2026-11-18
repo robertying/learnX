@@ -330,6 +330,10 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
           key={`${filterSelected}-${reorderMode}`}
           {...listProps}
           dragEnabled={reorderMode}
+          // Only reorder mode drags. Outside it the list's pan would still
+          // activate on a long press and cancel the card's own, so Android's
+          // card menu never opened on Courses.
+          panEnabled={reorderMode}
           panActivateAfterLongPress={520}
           onReorder={handleReorderDone}
           onDragStart={handleDragStart}

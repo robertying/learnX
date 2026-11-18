@@ -248,6 +248,15 @@ it('taps when a course lifts and as it passes others', async () => {
   ]);
 });
 
+// Its pan would otherwise activate on a long press and cancel the card's, so
+// Android's card menu didn't open on Courses.
+it('lets the course list pan only in reorder mode', async () => {
+  await renderList({ type: 'course' });
+  expect(screen.getByTestId('filter-list').props.panEnabled).toBe(false);
+  await act(() => header().onReorder());
+  expect(screen.getByTestId('filter-list').props.panEnabled).toBe(true);
+});
+
 it('shows a spinner for the first load and an empty state after', async () => {
   const view = await renderList({ all: [], loading: true });
   expect(screen.queryByText(t('noNotices'))).toBeNull();

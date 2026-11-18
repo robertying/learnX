@@ -1,5 +1,10 @@
 import { PropsWithChildren, useState } from 'react';
-import { AccessibilityActionEvent, View, StyleSheet } from 'react-native';
+import {
+  AccessibilityActionEvent,
+  GestureResponderEvent,
+  View,
+  StyleSheet,
+} from 'react-native';
 import { SharedValue, useSharedValue } from 'react-native-reanimated';
 import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -104,6 +109,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
   // Android's menu is a Compose view: mounted on the card's first long press,
   // not with every row.
   const [menuMounted, setMenuMounted] = useState(false);
+  const [menuAnchor, setMenuAnchor] = useState<{ x: number; y: number }>();
 
   const actions = cardActions({
     fav,
@@ -260,11 +266,17 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
     onPress?.();
   };
 
-  const handleLongPress = () => {
+  const handleLongPress = (event?: GestureResponderEvent) => {
     if (reorderMode) {
       onDrag?.();
     } else if (actionsEnabled && !contextMenuSupported) {
       playHaptic('longPress');
+      const location = event?.nativeEvent;
+      setMenuAnchor(
+        location && Number.isFinite(location.locationX)
+          ? { x: location.locationX, y: location.locationY }
+          : undefined,
+      );
       setMenuMounted(true);
       setMenuVisible(true);
     }
@@ -376,6 +388,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
           actions={actions}
           onAction={handleMenuAction}
           onDismiss={closeMenu}
+          anchor={menuAnchor}
         />
       ) : null}
     </View>

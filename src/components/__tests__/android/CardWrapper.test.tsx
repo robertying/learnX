@@ -41,6 +41,18 @@ it('opens a Material menu of the actions on long press', async () => {
   expect(onPress).not.toHaveBeenCalled();
 });
 
+it('opens the menu where the finger is, not under the card', async () => {
+  await render(card({}));
+  await fireEvent(cardElement(), 'longPress', {
+    nativeEvent: { locationX: 120, locationY: 30 },
+  });
+  expect(screen.getByTestId('card-archive')).toBeTruthy();
+  expect(screen.getByTestId('card-menu-anchor')).toHaveStyle({
+    left: 120,
+    top: 30,
+  });
+});
+
 it('closes the menu on a tap instead of opening the item', async () => {
   const onPress = jest.fn();
   await render(card({ onPress }));
