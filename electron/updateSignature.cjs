@@ -4,7 +4,7 @@
 // signature. So each update file is signed at release time, on the
 // maintainer's Mac, with learnX's own Ed25519 update key, into a detached
 // `<file>.sig` next to it (scripts/sign-electron-update.mjs); the app carries
-// the public half (certs/electron-update.pem). It reads an update file only
+// the public half (certs/electron-public-key.pem). It reads an update file only
 // through `signedProvider`, which refuses one without a valid signature: no
 // update is offered, and the reason is logged.
 const { createPublicKey, sign, verify } = require('node:crypto');

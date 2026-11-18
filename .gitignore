@@ -71,4 +71,4 @@ node_modules/
 .claude/skills/local-*/
 
 # The Electron update key's private half, while it's being made (electron/AGENTS.md): it belongs in 1Password.
-/learnx-electron-update.pem
+/learnx-electron-private-key.pem

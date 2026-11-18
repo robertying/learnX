@@ -3,7 +3,7 @@
 // latest-linux-arm64.yml) in a folder before they're uploaded to the GitHub
 // release: a detached Ed25519 signature, `<file>.sig`, next to each, which
 // the app checks before it reads the file (electron/updateSignature.cjs)
-// against the public key it carries, certs/electron-update.pem.
+// against the public key it carries, certs/electron-public-key.pem.
 //
 //   node scripts/sign-electron-update.mjs <dir> [--key <private key PEM>] [--version <x.y.z>]
 //
@@ -48,7 +48,7 @@ export const updateFileVersion = (/** @type {string} */ text) =>
 export const signUpdateFiles = (dir, privateKey, publicKey, version) => {
   if (isPlaceholderKey(publicKey)) {
     throw new Error(
-      'certs/electron-update.pem is a placeholder, not the update key: commit its real public key (electron/AGENTS.md)',
+      'certs/electron-public-key.pem is a placeholder, not the update key: commit its real public key (electron/AGENTS.md)',
     );
   }
   const files = updateFiles(dir);
@@ -96,7 +96,7 @@ const main = () => {
     for (const name of signUpdateFiles(
       dir,
       readFileSync(keyFile),
-      readFileSync(path.join(root, 'certs', 'electron-update.pem')),
+      readFileSync(path.join(root, 'certs', 'electron-public-key.pem')),
       values.version ??
         JSON.parse(readFileSync(path.join(root, 'package.json'), 'utf8'))
           .version,

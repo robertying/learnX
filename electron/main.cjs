@@ -520,7 +520,7 @@ const createWindow = (/** @type {Electron.Session} */ ses) => {
 // The version, the About panel and updates (buildInfo.cjs, updater.cjs). A
 // packaged build carries its build number and where it looks for updates in
 // its package.json (written by packageConfig.cjs), and the public key its
-// update files are signed with (electron-update.pem); a dev run reads the
+// update files are signed with (electron-public-key.pem); a dev run reads the
 // checkout's, and checks for updates only on a local test server at
 // `LEARNX_UPDATE_URL` (updateServer.mjs), signed by the key whose public half
 // is at `LEARNX_UPDATE_PUBLIC_KEY` if set.
@@ -610,8 +610,8 @@ const updater =
         const publicKey = fs.readFileSync(
           dev
             ? process.env.LEARNX_UPDATE_PUBLIC_KEY ||
-                path.join(__dirname, '..', 'certs', 'electron-update.pem')
-            : path.join(__dirname, 'electron-update.pem'),
+                path.join(__dirname, '..', 'certs', 'electron-public-key.pem')
+            : path.join(__dirname, 'electron-public-key.pem'),
         );
         const feedUrl = devUpdateUrl || packaged.updateUrl || '';
         return createUpdater({
