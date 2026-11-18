@@ -81,8 +81,9 @@ end
 # ---------------------------------------------------------------------------
 # Release notes (written by the release-notes skill)
 #
-# Four sections split by `====` lines: GitHub, Google Play, App Store (iOS),
-# Mac App Store. Each store section is English, a `---` line, then Chinese.
+# Four labeled sections, each opened by a `==== <name> ====` line (any order):
+# GitHub Releases, Google Play, App Store (iOS), Mac App Store. Each store
+# section has a `---- 中文 ----` and a `---- English ----` block.
 
 def default_notes_path
   File.join(out_dir, "release-notes.md")
@@ -122,15 +123,12 @@ def release_notes(path)
   if text.include?(NOTES_TODO)
     UI.user_error!("#{file} still has #{NOTES_TODO} placeholders. Finish the notes and delete them first.")
   end
-  sections = text.split(/^={4,}[ \t]*$/).map(&:strip)
-  UI.user_error!("#{file} needs 4 sections split by `====` lines, found #{sections.size}") unless sections.size == 4
-
-  github, play, ios, mac = sections
+  sections = notes_sections(text, file)
   notes = {
-    github: github,
-    play: split_languages(play, "Google Play"),
-    ios: split_languages(ios, "App Store"),
-    mac: split_languages(mac, "Mac App Store"),
+    github: sections.fetch("GitHub Releases"),
+    play: split_languages(sections.fetch("Google Play"), "Google Play"),
+    ios: split_languages(sections.fetch("App Store (iOS)"), "App Store (iOS)"),
+    mac: split_languages(sections.fetch("Mac App Store"), "Mac App Store"),
   }
   notes[:play].each do |lang, text|
     UI.user_error!("Google Play notes (#{lang}) are #{text.length} characters; the limit is 500") if text.length > 500
@@ -138,12 +136,35 @@ def release_notes(path)
   notes
 end
 
-def split_languages(section, name)
-  en, zh, *rest = section.split(/^---[ \t]*$/).map(&:strip)
-  if rest.any? || en.to_s.empty? || zh.to_s.empty?
-    UI.user_error!("#{name} notes need English, a `---` line, then Chinese")
+NOTES_SECTIONS = ["GitHub Releases", "Google Play", "App Store (iOS)", "Mac App Store"].freeze
+NOTES_SECTION_LINE = /^={4,}[ \t]*(.*?)[ \t]*=*[ \t]*$/
+
+# { "GitHub Releases" => text, ... } from the `==== <name> ====` lines.
+def notes_sections(text, file)
+  parts = text.split(NOTES_SECTION_LINE, -1)
+  parts.shift # Anything before the first section line, such as a comment.
+  sections = parts.each_slice(2).to_h { |name, body| [name, body.to_s.strip] }
+  unknown = sections.keys - NOTES_SECTIONS
+  missing = NOTES_SECTIONS - sections.keys
+  if unknown.any? || missing.any? || parts.size != NOTES_SECTIONS.size * 2
+    UI.user_error!("#{file} needs one `==== <name> ====` line for each of #{NOTES_SECTIONS.join(', ')}; found #{parts.each_slice(2).map(&:first).inspect}")
   end
-  { en: en, zh: zh }
+  sections
+end
+
+NOTES_LANGUAGE_LINE = /^-{4,}[ \t]*(.*?)[ \t]*-*[ \t]*$/
+
+# { en:, zh: } from a store section's `---- 中文 ----` and `---- English ----` blocks.
+def split_languages(section, name)
+  parts = section.split(NOTES_LANGUAGE_LINE, -1)
+  parts.shift
+  blocks = parts.each_slice(2).to_h { |label, body| [label, body.to_s.strip] }
+  zh = blocks.select { |label, _| label.start_with?("中文") }.values
+  en = blocks.select { |label, _| label.start_with?("English") }.values
+  if blocks.size != 2 || zh.size != 1 || en.size != 1 || zh.first.empty? || en.first.empty?
+    UI.user_error!("#{name} notes need a `---- 中文 ----` block and a `---- English ----` block, found #{blocks.keys.inspect}")
+  end
+  { en: en.first, zh: zh.first }
 end
 
 # The fallback draft marks what's left to write with this, and the release
@@ -229,31 +250,37 @@ def write_fallback_notes(path)
   list = commits.empty? ? "- #{NOTES_TODO}" : commits.map { |line| "- #{line}" }.join("\n")
   short = commits.empty? ? "- #{NOTES_TODO}" : commits.map { |line| "- #{line.sub(/\s*\(#\d+\)\z/, '')}" }.join("\n")
 
-  store = <<~STORE.strip
-    # Features
+  store = lambda do |zh_locale, en_locale|
+    <<~STORE.strip
+      ---- 中文（#{zh_locale}）----
 
-    - #{NOTES_TODO}: only this platform's changes, or "Fix minor issues." under # Fixes
+      # 功能
 
-    # Fixes
+      - #{NOTES_TODO}：只写这个平台的改动，没有就在 # 修复 下写“修复若干小问题。”
 
-    - #{NOTES_TODO}
+      # 修复
 
-    ---
+      - #{NOTES_TODO}
 
-    # 功能
+      ---- English (#{en_locale}) ----
 
-    - #{NOTES_TODO}：中文，全角标点
+      # Features
 
-    # 修复
+      - #{NOTES_TODO}: only this platform's changes, or "Fix minor issues." under # Fixes
 
-    - #{NOTES_TODO}
-  STORE
+      # Fixes
+
+      - #{NOTES_TODO}
+    STORE
+  end
 
   File.write(path, <<~NOTES)
     <!-- #{NOTES_TODO}: Claude Code didn't write these. Commits since #{tag || 'the first commit'}; keep what users see: -->
     <!--
     #{short}
     -->
+
+    ==== GitHub Releases ====
 
     # 功能
 
@@ -273,17 +300,17 @@ def write_fallback_notes(path)
 
     - #{NOTES_TODO}
 
-    ====
+    ==== Google Play ====
 
-    #{store}
+    #{store.call('zh-CN', 'en-US')}
 
-    ====
+    ==== App Store (iOS) ====
 
-    #{store}
+    #{store.call('zh-Hans', 'en-US')}
 
-    ====
+    ==== Mac App Store ====
 
-    #{store}
+    #{store.call('zh-Hans', 'en-US')}
   NOTES
 end
 
