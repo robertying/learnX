@@ -10,7 +10,9 @@ export interface HeaderTitleProps {
   /**
    * Where a title too long for the bar is shortened: at the end for a
    * screen's name, in the middle for an item's (a course or file name,
-   * whose end tells it apart).
+   * whose end tells it apart). The subtitle (a date, a filter, a course)
+   * always shortens at its end, as the system's do, so it keeps its start
+   * ("11月18日 星期三 · 第9…", not "11月18日 星…三 · 第9周").
    * @default 'tail'
    */
   ellipsizeMode?: 'tail' | 'middle';
@@ -64,7 +66,6 @@ const HeaderTitle: React.FC<HeaderTitleProps> = ({
           maxFontSizeMultiplier={maxFontSizeMultiplier}
           style={styles.subtitle}
           numberOfLines={1}
-          ellipsizeMode="middle"
         >
           {subtitle}
         </Text>
