@@ -186,6 +186,15 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             />
           )}
         </FormSection>
+        <FormSection>
+          <FormLink
+            icon="info"
+            badge={!courseSharingSeen}
+            testID="settings-course-sharing"
+            title={t('courseInformationSharing')}
+            {...linkTo('CourseInformationSharing')}
+          />
+        </FormSection>
         {loginItem && (
           <FormSection footer={t('startAtLoginCaption')}>
             <FormToggle
@@ -209,15 +218,6 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             />
           </FormSection>
         )}
-        <FormSection>
-          <FormLink
-            icon="info"
-            badge={!courseSharingSeen}
-            testID="settings-course-sharing"
-            title={t('courseInformationSharing')}
-            {...linkTo('CourseInformationSharing')}
-          />
-        </FormSection>
         <FormSection footer={sandboxNote ?? undefined}>
           {whatsNew && (
             <FormLink
