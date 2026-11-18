@@ -209,8 +209,8 @@ test('says a downloaded update in a notification that opens Settings', async ({
   relaunch,
   dataDir,
 }) => {
-  const served = await serve(path.join(dataDir, 'release'), []);
   writeRelease(path.join(dataDir, 'release'));
+  const served = await serve(path.join(dataDir, 'release'), []);
   server = served.server;
   await login();
   const { window, main } = await relaunch({
@@ -236,8 +236,8 @@ test('holds the notification until someone logs in', async ({
   relaunch,
   dataDir,
 }) => {
-  const served = await serve(path.join(dataDir, 'release'), []);
   writeRelease(path.join(dataDir, 'release'));
+  const served = await serve(path.join(dataDir, 'release'), []);
   server = served.server;
   // A new install, on the welcome page.
   const { window, main } = await relaunch({
