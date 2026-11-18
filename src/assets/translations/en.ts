@@ -612,5 +612,5 @@ export default {
     'A cleaner look that follows macOS, and Quick Look for course files.',
   whatsNew19ElectronTitle: 'Windows & Linux',
   whatsNew19ElectronBody:
-    'Try the experimental desktop app for Windows and Linux, from the TUNA mirror or GitHub Releases.',
+    'Try the experimental desktop app for Windows and Linux.',
 };
