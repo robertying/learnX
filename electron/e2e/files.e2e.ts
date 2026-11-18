@@ -8,7 +8,7 @@ import path from 'node:path';
 import type { ElectronApplication } from '@playwright/test';
 import { expect, test } from './fixtures.ts';
 import { exact, text } from './maestroEnv.ts';
-import { byId, openCard, openTab, shown } from './steps.ts';
+import { byId, card, openCard, openTab, shown } from './steps.ts';
 
 /** The URLs of the window's frames: the PDF preview is one of them. */
 const frameUrls = (app: ElectronApplication) =>
@@ -62,7 +62,7 @@ test('previews a PDF and a picture, and shows details for the rest', async ({
   ).toBeVisible();
 });
 
-test('opens, saves, shows and copies the link of a file', async ({
+test('opens, saves and shows a file in its folder', async ({
   window,
   main,
   dataDir,
@@ -107,4 +107,28 @@ test('opens, saves, shows and copies the link of a file', async ({
   await expect
     .poll(async () => (await main.record()).shownInFolder)
     .toEqual([opened]);
+});
+
+test("keeps Full Screen to the file's own tab", async ({ window, login }) => {
+  await login();
+  await openTab(window, 'files');
+  await openCard(window, 'MOCK_FILE', 'file-detail');
+  const header = (name: string) =>
+    shown(window.getByRole('button', { name: exact(name) }));
+
+  // The list moves off the window's edge.
+  const list = card(window, 'MOCK_OTHER_FILE');
+  await header('T_fullscreen').click();
+  await expect(list).not.toBeInViewport();
+  await expect(header('T_exitFullscreen')).toBeVisible();
+
+  // Another tab still shows its list, to pick something from.
+  await openTab(window, 'notices');
+  await expect(card(window, 'MOCK_NOTICE')).toBeInViewport();
+
+  // Back in Files, the file is still full screen.
+  await openTab(window, 'files');
+  await expect(list).not.toBeInViewport();
+  await header('T_exitFullscreen').click();
+  await expect(list).toBeInViewport();
 });

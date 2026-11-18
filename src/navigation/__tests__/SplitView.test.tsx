@@ -146,6 +146,47 @@ describe('tabs', () => {
     expect(context().detailNavigationContainerRef).toBe(refB);
   });
 
+  it('keeps full screen to the tab that went full screen', async () => {
+    await renderSplit(
+      true,
+      <>
+        <NavigationContainer>
+          <Tabs.Navigator>
+            <Tabs.Screen name="A" component={TabA} />
+            <Tabs.Screen name="B" component={TabB} />
+          </Tabs.Navigator>
+        </NavigationContainer>
+        <Master />
+      </>,
+    );
+    await act(() => context().toggleMaster(false));
+    expect(context().showMaster).toBe(false);
+    // Again changes nothing.
+    await act(() => context().toggleMaster(false));
+    expect(context().showMaster).toBe(false);
+
+    // B shows its list beside its own detail.
+    await act(() =>
+      screen
+        .getByText('go from A', { includeHiddenElements: true })
+        .props.onPress(),
+    );
+    expect(context().showMaster).toBe(true);
+    expect(screen.getByText('master')).toBeTruthy();
+    await act(() => context().toggleMaster(true));
+    expect(context().showMaster).toBe(true);
+
+    // A is still full screen when it's back.
+    await act(() =>
+      screen
+        .getByText('go from B', { includeHiddenElements: true })
+        .props.onPress(),
+    );
+    expect(context().showMaster).toBe(false);
+    await act(() => context().toggleMaster(true));
+    expect(context().showMaster).toBe(true);
+  });
+
   it('renders a tab as it is outside the split', async () => {
     await render(
       <NavigationContainer>
