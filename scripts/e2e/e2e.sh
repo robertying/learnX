@@ -34,7 +34,9 @@
 # E2E_SCREENSHOTS=1 saves a screenshot of each tab, detail and settings page
 # the flows reach, and of search results and failures (.maestro/subflows/
 # shot.yaml), numbered in order, to build/e2e/screenshots/<run start time>/;
-# E2E_SCREENSHOTS=<folder> saves them there instead.
+# E2E_SCREENSHOTS=<folder> saves them there instead. The UI tests' screenshots
+# (their attachments) go to its ui-tests/ folder, with xcresulttool's
+# manifest.json naming each test's.
 # E2E_STATE_CLEARED=1 skips the reset (subflows/reset.yaml), for a caller that
 # cleared the app's data itself (scripts/e2e/store-screenshots.sh on Android).
 set -euo pipefail
@@ -166,7 +168,8 @@ fi
 # Screenshots (E2E_SCREENSHOTS). Never on live runs, whose screens show the
 # real account. Maestro only saves takeScreenshot's files inside the run's
 # output folder (--test-output-dir: the caller's, else one in the screenshots
-# folder), from which number_shots moves them.
+# folder), from which number_shots moves them. With --ui the arguments are
+# xcodebuild's, so only export_ui_shots applies.
 shots_dir=
 if [ "$live" = false ]; then
   case "${E2E_SCREENSHOTS:-}" in
@@ -177,7 +180,7 @@ if [ "$live" = false ]; then
 fi
 test_out=
 shots_test_out=
-if [ -n "$shots_dir" ]; then
+if [ -n "$shots_dir" ] && [ "$ui_only" = false ]; then
   mkdir -p "$shots_dir"
   previous=
   for arg in "$@"; do
@@ -246,7 +249,7 @@ ui_device() {
 }
 
 run_ui_tests() {
-  local device result derived
+  local device result derived status
   device="$(ui_device)" || return 1
   result="${E2E_UI_RESULT:-build/e2e/ios-ui.xcresult}"
   derived="${DERIVED_DATA:-$HOME/Library/Developer/Xcode/DerivedData/learnX-e2e-ui}"
@@ -265,7 +268,20 @@ run_ui_tests() {
     -resultBundlePath "$result" \
     -test-timeouts-enabled YES \
     -default-test-execution-time-allowance 180 \
-    "$@"
+    "$@" || status=$?
+  export_ui_shots "$result"
+  return "${status:-0}"
+}
+
+# The UI tests' attachments (screenshots they keep), from the result bundle.
+export_ui_shots() {
+  [ -n "$shots_dir" ] && [ -d "$1" ] || return 0
+  mkdir -p "$shots_dir/ui-tests"
+  if xcrun xcresulttool export attachments --path "$1" --output-path "$shots_dir/ui-tests" >/dev/null; then
+    echo "UI test screenshots: $shots_dir/ui-tests" >&2
+  else
+    echo "Couldn't export the UI tests' screenshots from $1" >&2
+  fi
 }
 
 if [ "$ui_only" = true ]; then
