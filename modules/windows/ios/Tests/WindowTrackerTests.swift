@@ -63,4 +63,20 @@ import UIKit
     WindowTracker.start(.shared)
     #expect(WindowTracker.supportsMultipleWindows == UIApplication.shared.supportsMultipleScenes)
   }
+
+  @MainActor @Test func targetsTheWindowATouchStartsIn() throws {
+    let scene = try #require(UIApplication.shared.connectedScenes.first as? UIWindowScene)
+    let window = UIWindow(windowScene: scene)
+    WindowTracker.track(window)
+    WindowTracker.track(window)
+    let recognizers = window.gestureRecognizers?.compactMap { $0 as? TouchTargetRecognizer } ?? []
+    #expect(recognizers.count == 1)
+    let recognizer = try #require(recognizers.first)
+    #expect(!recognizer.cancelsTouchesInView)
+
+    WindowTracker.setTarget("another-window")
+    recognizer.touchesBegan([], with: UIEvent())
+    #expect(WindowTracker.targetWindowId == scene.session.persistentIdentifier)
+  }
 }
+

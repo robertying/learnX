@@ -39,6 +39,9 @@ class SceneDelegate: ExpoAppSceneDelegate {
     windowProperties = properties
 
     super.scene(scene, willConnectTo: session, options: connectionOptions)
+    if let window {
+      WindowTracker.track(window)
+    }
     #if targetEnvironment(macCatalyst)
     if let restrictions = (scene as? UIWindowScene)?.sizeRestrictions {
       restrictions.minimumSize.width = max(

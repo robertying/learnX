@@ -1,11 +1,13 @@
 import UIKit
+import UIKit.UIGestureRecognizerSubclass
 
 /// The app's windows on iPad and Mac. Each window is a scene with its own React root on the one JS runtime, and its
 /// id is its scene session's persistent identifier, which the scene delegate hands JS as the root's `windowId`.
 ///
 /// Links, menu commands, notification taps and toasts reach JS through emitters every root listens to, so JS asks
-/// which window they're for (`targetWindowId`): the key window, which takes the menu bar's commands and the keyboard,
-/// or the one a link, activity or quick action was just delivered to.
+/// which window they're for (`targetWindowId`): the window the person last touched, clicked or brought to the front,
+/// which takes the menu bar's commands and the keyboard, or the one a link, activity or quick action was just
+/// delivered to.
 public enum WindowTracker {
   /// The activity that `open(_:)` starts a window with.
   public static let openActivityType = "io.robertying.learnx.openWindow"
@@ -31,6 +33,14 @@ public enum WindowTracker {
   @MainActor public static func start(_ application: UIApplication) {
     state.supportsMultipleWindows = application.supportsMultipleScenes
     KeyWindowObserver.shared.start()
+  }
+
+  /// Makes `window` the target whenever the person touches or clicks in it. On iPad each window on screen stays the
+  /// key window of its own scene, so moving to another window posts no `didBecomeKeyNotification`.
+  @MainActor public static func track(_ window: UIWindow) {
+    if window.gestureRecognizers?.contains(where: { $0 is TouchTargetRecognizer }) != true {
+      window.addGestureRecognizer(TouchTargetRecognizer())
+    }
   }
 
   // MARK: Restoring windows
@@ -145,5 +155,22 @@ final class WindowState: @unchecked Sendable {
     if let scene = (notification.object as? UIWindow)?.windowScene {
       WindowTracker.setTarget(scene)
     }
+  }
+}
+
+/// Notes the window a touch starts in, then fails at once, so it never holds up or cancels the window's own gestures.
+final class TouchTargetRecognizer: UIGestureRecognizer {
+  init() {
+    super.init(target: nil, action: nil)
+    cancelsTouchesInView = false
+    delaysTouchesEnded = false
+  }
+
+  override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
+    // Added to the window itself (`track(_:)`).
+    if let scene = (view as? UIWindow ?? view?.window)?.windowScene {
+      WindowTracker.setTarget(scene)
+    }
+    state = .failed
   }
 }
