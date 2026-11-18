@@ -15,7 +15,11 @@
 // edge to edge on Windows, 108 of 128 on Linux (between GNOME's squares, 104,
 // and circles, 112: a squircle is between the two, and at 104 its round
 // corners and dark fill look small). ictool writes Display P3 at 16 bits a channel; `sips` turns
-// each into 8-bit sRGB, which Windows and Linux assume. The .ico holds 16 to
+// each into 8-bit sRGB, which Windows and Linux assume. macOS also lights the
+// shape's top and bottom edges (its Liquid Glass rim), which ictool can't
+// leave out (no option or icon property turns it off): on a dark window or
+// taskbar it shows as a white line, so `flattenRim` gives that band the
+// color just inside it. The .ico holds 16 to
 // 256; the 256 is stored as a PNG, the others as 32-bit bitmaps, which every
 // Windows reads.
 import { execFileSync } from 'node:child_process';
@@ -164,6 +168,71 @@ export const encodePng = ({ width, height, pixels }: Image): Buffer => {
     chunk('IDAT', zlib.deflateSync(raw, { level: 9 })),
     chunk('IEND', Buffer.alloc(0)),
   ]);
+};
+
+/**
+ * How deep macOS's rim of light along the shape's top and bottom edges is,
+ * as a share of the shape's width (about 6 px of 432).
+ */
+export const RIM_FRACTION = 0.014;
+
+/**
+ * `shape` without the light rim macOS draws along its top and bottom edges:
+ * in each column, the pixels within the rim's depth of the shape's edge take
+ * the color just past it, keeping their alpha (the edge's antialiasing).
+ * Where the edge slants (the rounded corners), a column crosses the rim
+ * over more rows, up to three times its depth. The sides have no rim.
+ */
+export const flattenRim = (shape: Image): Image => {
+  const { width, height, pixels } = shape;
+  const out = Buffer.from(pixels);
+  const depth = Math.max(1, Math.round(width * RIM_FRACTION));
+  const opaque = (x: number, y: number) => pixels[(y * width + x) * 4 + 3] > 0;
+  const tops: number[] = [];
+  const bottoms: number[] = [];
+  for (let x = 0; x < width; x += 1) {
+    let top = 0;
+    while (top < height && !opaque(x, top)) top += 1;
+    let bottom = height - 1;
+    while (bottom >= 0 && !opaque(x, bottom)) bottom -= 1;
+    tops.push(top < height ? top : -1);
+    bottoms.push(bottom);
+  }
+  /** Rows the rim covers in column `x` of an edge at `edges`. */
+  const band = (edges: number[], x: number) => {
+    const before = edges[x - 1] ?? -1;
+    const after = edges[x + 1] ?? -1;
+    const slope = before < 0 || after < 0 ? 0 : Math.abs(after - before) / 2;
+    return Math.min(depth * 3, Math.ceil(depth * Math.hypot(1, slope)));
+  };
+  const copy = (x: number, from: number, to: number) => {
+    const source = (from * width + x) * 4;
+    const target = (to * width + x) * 4;
+    out[target] = pixels[source];
+    out[target + 1] = pixels[source + 1];
+    out[target + 2] = pixels[source + 2];
+  };
+  for (let x = 0; x < width; x += 1) {
+    const top = tops[x];
+    const bottom = bottoms[x];
+    if (top < 0) {
+      continue;
+    }
+    // A column too short for both bands (only at the corners' very ends)
+    // is left as it is.
+    const topBand = band(tops, x);
+    const bottomBand = band(bottoms, x);
+    if (bottom - top < topBand + bottomBand + 1) {
+      continue;
+    }
+    for (let y = top; y < top + topBand; y += 1) {
+      copy(x, top + topBand, y);
+    }
+    for (let y = bottom; y > bottom - bottomBand; y -= 1) {
+      copy(x, bottom - bottomBand, y);
+    }
+  }
+  return { width, height, pixels: out };
 };
 
 /** `shape` centered on a transparent square canvas of `size`. */
@@ -334,7 +403,7 @@ const main = () => {
     execFileSync('sips', ['--matchTo', SRGB_PROFILE, file, '--out', srgb], {
       stdio: 'ignore',
     });
-    return centerOn(decodePng(fs.readFileSync(srgb)), size);
+    return centerOn(flattenRim(decodePng(fs.readFileSync(srgb))), size);
   };
   try {
     const out = import.meta.dirname;
