@@ -7,3 +7,11 @@ export const Menus = null;
 export const ContextMenuView = jest.fn(
   ({ children }: { children: ReactNode }) => children,
 );
+// Like `@expo/ui/swift-ui/modifiers`' stand-ins; the TextField stand-in passes
+// the handler on as its `tabKey` prop.
+export const onTabKey = jest.fn(
+  (handler: () => void, options?: { backward?: boolean }) => ({
+    modifier: 'onTabKey',
+    args: [handler, options],
+  }),
+);

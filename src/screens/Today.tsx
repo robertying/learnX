@@ -37,6 +37,7 @@ import useDetailNavigator, {
 } from 'hooks/useDetailNavigator';
 import useItemStepping from 'hooks/useItemStepping';
 import usePendingTarget from 'hooks/usePendingTarget';
+import { useWindowRestoration } from 'hooks/useWindow';
 import { useMinute } from 'hooks/useClock';
 import usePullToRefresh from 'hooks/usePullToRefresh';
 import useRefreshCommand from 'hooks/useRefreshCommand';
@@ -57,6 +58,8 @@ const Today: React.FC<Props> = ({ navigation }) => {
   const now = useMinute();
   // The Schedule a Jump List task asked for (Electron).
   usePendingTarget('schedule', () => show('Schedule'));
+  // A window on iPad or Mac comes back to Today after a relaunch.
+  useWindowRestoration({ type: 'today' });
 
   // the timetable follows Beijing days, also on a phone in another time zone
   const schedule = useWeekSchedule(beijingDate(now));

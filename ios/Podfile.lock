@@ -192,8 +192,10 @@ PODS:
     - ExpoModulesCore
   - LearnXMenus (1.0.0):
     - ExpoModulesCore
+    - ExpoUI
   - LearnXMenus/Tests (1.0.0):
     - ExpoModulesCore
+    - ExpoUI
   - LearnXQuickLook (1.0.0):
     - ExpoModulesCore
   - LearnXQuickLook/Tests (1.0.0):
@@ -213,6 +215,10 @@ PODS:
   - LearnXToast (1.0.0):
     - ExpoModulesCore
   - LearnXToast/Tests (1.0.0):
+    - ExpoModulesCore
+  - LearnXWindows (1.0.0):
+    - ExpoModulesCore
+  - LearnXWindows/Tests (1.0.0):
     - ExpoModulesCore
   - RCT-Folly (2024.11.18.00):
     - RCT-Folly/Default (= 2024.11.18.00)
@@ -2520,6 +2526,8 @@ DEPENDENCIES:
   - LearnXSpotlight/Tests (from `../modules/spotlight/ios`)
   - LearnXToast (from `../modules/toast/ios`)
   - LearnXToast/Tests (from `../modules/toast/ios`)
+  - LearnXWindows (from `../modules/windows/ios`)
+  - LearnXWindows/Tests (from `../modules/windows/ios`)
   - RCT-Folly (from `build/rndeps-facades/RCT-Folly`)
   - RCTDeprecation (from `build/rncore-facades/RCTDeprecation`)
   - RCTRequired (from `build/rncore-facades/RCTRequired`)
@@ -2719,6 +2727,8 @@ EXTERNAL SOURCES:
     :path: "../modules/spotlight/ios"
   LearnXToast:
     :path: "../modules/toast/ios"
+  LearnXWindows:
+    :path: "../modules/windows/ios"
   RCT-Folly:
     :path: build/rndeps-facades/RCT-Folly
   RCTDeprecation:
@@ -2949,12 +2959,13 @@ SPEC CHECKSUMS:
   glog: 3cf7cb46f743c4bc758ae3e6d9c15bd1b4cfd6d4
   hermes-engine: 79484fc4e58f328d01b9339ef899ca633d3702ee
   LearnXCrashlytics: f54c9b50163ce8255ee9148b00819a6203273c3e
-  LearnXMenus: d16bcb91222edad364a10a271fe1a3aaad78786a
+  LearnXMenus: 2dcfdffd7d21297d1235b14669f1256ec039f030
   LearnXQuickLook: 5a07c6af2e517166ac3e4a896533d7f0e308abfb
   LearnXShare: 593f47ced0cdb48861422731919d6f541c5e8085
   LearnXShortcuts: f7d94d3eab97e8ecb2feaaf05c27ca59f6ef6cd9
   LearnXSpotlight: 149cdd723faf121ec4ebc8549cc072b50ccd1806
   LearnXToast: 1d1d0eaea35574578f5e3af391df8d694c89e4ea
+  LearnXWindows: 614ff953a32e8db3e1d68aeda4932e003d75107a
   RCT-Folly: 82921e585c0400eda46fac1068297aa9dfb035e4
   RCTDeprecation: c62b9b3fbf0d26b76755f3ebd1c913a4fb469dde
   RCTRequired: d0563e2484633b657976195f0543e180133afd3a

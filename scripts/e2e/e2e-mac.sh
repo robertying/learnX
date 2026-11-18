@@ -28,7 +28,7 @@ if [ -z "$username" ] || [ -z "$password" ]; then
   exit 1
 fi
 
-if pgrep -f '/learnX\.app/Contents/MacOS/learnX$' >/dev/null; then
+if pgrep -f '/learnX\.app/Contents/MacOS/learnX( |$)' >/dev/null; then
   echo "A learnX Mac app is running; quit it first (the tests share its data)." >&2
   exit 1
 fi

@@ -16,6 +16,7 @@ import { defaultSettings, setSetting } from 'data/settings';
 import useBackSwipeEdge from 'hooks/useBackSwipeEdge';
 import * as menus from 'test-utils/mocks/menus';
 import { mockSwipeableMethods } from 'test-utils/mocks/swipeable';
+import { Windows } from 'test-utils/mocks/windows';
 
 // The real component, its props recorded
 jest.mock('components/CardSwipeAction', () => ({
@@ -86,6 +87,22 @@ describe('CardWrapper', () => {
     await longPress();
     expect(mockSwipeableMethods.openRight).not.toHaveBeenCalled();
     expect(mockSwipeableMethods.openLeft).not.toHaveBeenCalled();
+  });
+
+  it('opens the item in a new window from the menu where windows can open', async () => {
+    const link = 'learnx://notice/n1';
+    await render(card({ onPress: jest.fn(), link }));
+    expect(menu().actions.map(a => a.key)).toEqual(['fav', 'archive']);
+
+    Windows.supportsMultipleWindows.mockReturnValue(true);
+    await render(card({ onPress: jest.fn(), link, actionsDisabled: true }));
+    expect(menu().actions.map(a => a.key)).toEqual(['openInNewWindow']);
+    menu().onAction({ nativeEvent: { key: 'openInNewWindow' } });
+    expect(Windows.openWindow).toHaveBeenCalledWith(link);
+
+    await render(card({ onPress: jest.fn(), link, selectionMode: true }));
+    expect(menu().actions).toEqual([]);
+    Windows.supportsMultipleWindows.mockReturnValue(false);
   });
 
   it('stays filled and reads as selected while open beside the list', async () => {

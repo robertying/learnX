@@ -15,6 +15,7 @@ import { login, loginWithOfflineMode } from 'data/login';
 import { getSettings, resetSettings } from 'data/settings';
 import { clearLoginCookies } from 'data/source';
 import { MOCK_FINGER_PRINT } from 'helpers/mock';
+import { onTabKey } from 'modules/menus';
 import Login from 'screens/Login';
 import env from 'test-utils/mocks/env';
 import { screenProps } from 'test-utils/screenProps';
@@ -99,6 +100,19 @@ describe('Login', () => {
       'Enter your username or student ID',
       'error',
     );
+  });
+
+  it('moves between the fields with Tab and Shift-Tab', async () => {
+    await setup();
+    const username = screen.getByTestId('login-username');
+    const password = screen.getByTestId('login-password');
+    await act(() => username.props.tabKey());
+    expect(password.props.focus).toHaveBeenCalledTimes(1);
+    await act(() => password.props.tabKey());
+    expect(username.props.focus).toHaveBeenCalledTimes(1);
+    expect(onTabKey).toHaveBeenLastCalledWith(expect.any(Function), {
+      backward: true,
+    });
   });
 
   it('names its fields for screen readers', async () => {

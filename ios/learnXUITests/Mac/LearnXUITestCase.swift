@@ -78,7 +78,14 @@ class LearnXUITestCase: XCTestCase {
       welcome.click()
     }
     try type(username, into: waitFor(id: "login-username"))
-    try type(password + "\n", into: waitFor(id: "login-password"))
+    // Tab moves on to the password, as in any Mac sign-in form.
+    app.typeKey(.tab, modifierFlags: [])
+    let passwordField = try waitFor(id: "login-password")
+    XCTAssertTrue(
+      passwordField.value(forKey: "hasKeyboardFocus") as? Bool ?? false, "Tab didn't move to the password")
+    passwordField.typeKey("a", modifierFlags: .command)
+    passwordField.typeKey(.delete, modifierFlags: [])
+    passwordField.typeText(password + "\n")
 
     // The set-up page opens over Today after the first login.
     try waitFor(idMatching: "tab-notices|setup-not-now", timeout: 30)

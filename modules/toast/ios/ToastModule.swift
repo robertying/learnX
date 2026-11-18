@@ -8,9 +8,10 @@ public final class ToastModule: Module {
     Name("LearnXToast")
 
     // Where the tab bar is, so the toast keeps clear of it wherever UIKit put it.
-    AsyncFunction("tabBarFrame") { () -> [String: Double]? in
+    // In the toast's own window when there are several (iPad, Mac).
+    AsyncFunction("tabBarFrame") { (windowId: String?) -> [String: Double]? in
       MainActor.assumeIsolated {
-        TabBarLocator.frame()
+        TabBarLocator.frame(windowId: windowId)
       }
     }.runOnQueue(.main)
 
@@ -189,9 +190,12 @@ final class ToastSymbolView: ExpoView {
 /// small display, at the top on iPad, where it floats and the bar itself is hidden), and nothing shows it on the
 /// login, under a sheet or on the Mac.
 enum TabBarLocator {
-  /// The visible tab bar's frame in its window, with the window's size, or nil when none shows.
-  @MainActor static func frame() -> [String: Double]? {
-    let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+  /// The visible tab bar's frame in its window, with the window's size, or nil when none shows. Only in the scene
+  /// whose session has the id `windowId`, when given.
+  @MainActor static func frame(windowId: String? = nil) -> [String: Double]? {
+    let scenes = UIApplication.shared.connectedScenes
+      .compactMap { $0 as? UIWindowScene }
+      .filter { windowId == nil || $0.session.persistentIdentifier == windowId }
     for window in scenes.flatMap(\.windows) {
       if let frame = frame(in: window) {
         return frame
