@@ -31,11 +31,15 @@ jest.mock('data/source', () => ({
   },
 }));
 
-const renderScreen = () =>
+const goBack = jest.fn();
+const renderScreen = (params?: { closeOnSelect?: boolean }) =>
   render(
     <QueryClientProvider client={queryClient}>
       <SemesterSelection
-        {...screenProps({ navigation: { setOptions: jest.fn() } })}
+        {...screenProps({
+          navigation: { setOptions: jest.fn(), goBack },
+          route: { params },
+        })}
       />
     </QueryClientProvider>,
   );
@@ -61,6 +65,17 @@ it('lists the semesters, checking the current one, and switches on tap', async (
 
   await userEvent.press(screen.getByText(getSemesterTextFromId('2025-2026-1')));
   expect(useUserDataStore.getState().currentSemester).toBe('2025-2026-1');
+});
+
+it('stays open on a pick in Settings, and closes as a sheet', async () => {
+  await renderScreen();
+  await userEvent.press(screen.getByText(getSemesterTextFromId('2025-2026-1')));
+  expect(goBack).not.toHaveBeenCalled();
+
+  await renderScreen({ closeOnSelect: true });
+  await userEvent.press(screen.getByText(getSemesterTextFromId('2025-2026-2')));
+  expect(useUserDataStore.getState().currentSemester).toBe('2025-2026-2');
+  expect(goBack).toHaveBeenCalledTimes(1);
 });
 
 it("puts the school's latest semester first before it is listed", async () => {
