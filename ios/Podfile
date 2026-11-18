@@ -67,11 +67,18 @@ target 'learnX' do
       File.write(path, contents) unless File.read(path) == contents
     end
 
-    # pod install can drop hermes-engine/.last_build_configuration while leaving a
-    # Release binary from an earlier archive in place, so Debug builds fail to link.
-    # An unknown value makes the next build always extract the matching tarball.
-    hermes_dir = File.join(installer.sandbox.root.to_s, 'hermes-engine')
-    File.write(File.join(hermes_dir, '.last_build_configuration'), 'Unknown') if Dir.exist?(hermes_dir)
+    # React Native's prebuilt pods (Hermes, the React core and its third-party
+    # dependencies) each swap in the Debug or Release framework at build time,
+    # going by a .last_build_configuration marker in the pod. pod install can
+    # drop that marker while leaving a Release framework from an earlier
+    # archive in place, and with no marker a Debug build assumes the framework
+    # is Debug: it then fails to link against debug-only symbols (React's
+    # Sealable and getDebugProps). An unknown value makes the next build always
+    # extract the matching tarball.
+    %w[hermes-engine React-Core-prebuilt ReactNativeDependencies].each do |pod|
+      pod_dir = File.join(installer.sandbox.root.to_s, pod)
+      File.write(File.join(pod_dir, '.last_build_configuration'), 'Unknown') if Dir.exist?(pod_dir)
+    end
 
     # A pod whose podspec names no Swift version would take the app's (Swift 6
     # language mode, for learnX's own Swift); keep those in Swift 5 mode.
