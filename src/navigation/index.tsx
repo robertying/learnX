@@ -151,52 +151,54 @@ const Navigation: React.FC<{ showMain: boolean }> = ({ showMain }) => {
 
   return (
     <RootNavigationContext.Provider value={rootNavigation}>
-    <NavigationContainer
-      ref={rootNavigation}
-      theme={theme}
-      onStateChange={trackScreen}
-    >
-      {nativeSplit ? (
-        <RootNavigator.Navigator screenOptions={rootScreenOptions}>
-          {showMain ? (
-            renderMainScreens()
-          ) : (
-            <RootNavigator.Screen
-              name="LoginStack"
-              component={LoginStack}
-              options={{ gestureEnabled: false }}
-            />
-          )}
-        </RootNavigator.Navigator>
-      ) : (
-        <AndroidRootNavigator.Navigator screenOptions={{ headerShown: false }}>
-          {showMain ? (
-            <>
-              <AndroidRootNavigator.Screen
-                name="Main"
-                component={AndroidMain}
-                // Login slides away to reveal the main UI.
-                options={{ animationTypeForReplace: 'pop' }}
+      <NavigationContainer
+        ref={rootNavigation}
+        theme={theme}
+        onStateChange={trackScreen}
+      >
+        {nativeSplit ? (
+          <RootNavigator.Navigator screenOptions={rootScreenOptions}>
+            {showMain ? (
+              renderMainScreens()
+            ) : (
+              <RootNavigator.Screen
+                name="LoginStack"
+                component={LoginStack}
+                options={{ gestureEnabled: false }}
               />
-              {/* Over the whole window, not inside the list's pane */}
-              {renderModals()}
-              {renderSheets()}
-            </>
-          ) : (
-            // Beside the split rather than in its master pane, so it always
-            // covers the whole window and the panes never resize under it.
-            <AndroidRootNavigator.Screen
-              name="LoginStack"
-              component={LoginStack}
-              options={{
-                animation: 'slide_from_bottom',
-                gestureEnabled: false,
-              }}
-            />
-          )}
-        </AndroidRootNavigator.Navigator>
-      )}
-    </NavigationContainer>
+            )}
+          </RootNavigator.Navigator>
+        ) : (
+          <AndroidRootNavigator.Navigator
+            screenOptions={{ headerShown: false }}
+          >
+            {showMain ? (
+              <>
+                <AndroidRootNavigator.Screen
+                  name="Main"
+                  component={AndroidMain}
+                  // Login slides away to reveal the main UI.
+                  options={{ animationTypeForReplace: 'pop' }}
+                />
+                {/* Over the whole window, not inside the list's pane */}
+                {renderModals()}
+                {renderSheets()}
+              </>
+            ) : (
+              // Beside the split rather than in its master pane, so it always
+              // covers the whole window and the panes never resize under it.
+              <AndroidRootNavigator.Screen
+                name="LoginStack"
+                component={LoginStack}
+                options={{
+                  animation: 'slide_from_bottom',
+                  gestureEnabled: false,
+                }}
+              />
+            )}
+          </AndroidRootNavigator.Navigator>
+        )}
+      </NavigationContainer>
     </RootNavigationContext.Provider>
   );
 };
