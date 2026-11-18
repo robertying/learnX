@@ -62,6 +62,19 @@ it('closes the menu on a tap instead of opening the item', async () => {
   expect(onPress).toHaveBeenCalledTimes(1);
 });
 
+it('opens a new menu on each long press, after one was dismissed', async () => {
+  await render(card({}));
+  await longPress();
+  const first = screen.getByTestId('card-menu-anchor');
+  await user.press(screen.getByTestId('dropdown-dismiss'));
+  expect(screen.queryByTestId('card-archive')).toBeNull();
+
+  await longPress();
+  expect(screen.getByTestId('card-archive')).toBeTruthy();
+  // Mounted again: a dismissed Compose menu didn't open a second time.
+  expect(screen.getByTestId('card-menu-anchor')).not.toBe(first);
+});
+
 it('closes the menu when selecting starts', async () => {
   const { rerender } = await render(card({}));
   await longPress();

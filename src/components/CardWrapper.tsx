@@ -120,9 +120,11 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
   const backSwipeEdge = useBackSwipeEdge();
 
   const [menuVisible, setMenuVisible] = useState(false);
-  // Android's menu is a Compose view: mounted on the card's first long press,
-  // not with every row.
-  const [menuMounted, setMenuMounted] = useState(false);
+  // Android's menu is a Compose view, mounted on a long press, not with every
+  // row. Each long press mounts a new one (keyed by this count): a Compose
+  // menu that was dismissed didn't open again, so a card's menu only opened
+  // once. The last one stays mounted to finish its closing animation.
+  const [menuOpens, setMenuOpens] = useState(0);
   const [menuAnchor, setMenuAnchor] = useState<{ x: number; y: number }>();
   // The card's box, which the menu is placed in (`cardMenuAnchor`).
   const menuBoxRef = useRef<React.ComponentRef<typeof View>>(null);
@@ -310,7 +312,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
           menuBoxRef.current?.getBoundingClientRect?.(),
         ),
       );
-      setMenuMounted(true);
+      setMenuOpens(count => count + 1);
       setMenuVisible(true);
     }
   };
@@ -416,8 +418,9 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
   ) : (
     <View ref={menuBoxRef} collapsable={false}>
       {touchable}
-      {menuMounted ? (
+      {menuOpens ? (
         <CardMenu
+          key={menuOpens}
           visible={menuVisible}
           actions={actions}
           onAction={handleMenuAction}
