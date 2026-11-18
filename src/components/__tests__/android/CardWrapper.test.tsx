@@ -62,6 +62,20 @@ it('closes the menu on a tap instead of opening the item', async () => {
   expect(onPress).toHaveBeenCalledTimes(1);
 });
 
+it('unmounts the menu once it has closed, so the card takes touches again', async () => {
+  const onPress = jest.fn();
+  await render(card({ onPress }));
+  await longPress();
+  await user.press(screen.getByTestId('dropdown-dismiss'));
+  // Still there for its closing animation.
+  expect(screen.getByTestId('card-menu-anchor')).toBeTruthy();
+  await act(() => jest.advanceTimersByTime(300));
+  expect(screen.queryByTestId('card-menu-anchor')).toBeNull();
+
+  await longPress();
+  expect(screen.getByTestId('card-archive')).toBeTruthy();
+});
+
 it('closes the menu when selecting starts', async () => {
   const { rerender } = await render(card({}));
   await longPress();

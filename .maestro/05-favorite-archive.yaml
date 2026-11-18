@@ -121,6 +121,18 @@ name: Favorite and archive a notice, hide a course
     file: subflows/tab.yaml
     env:
       TAB: 'tab-courses'
+# Android: the menu opens again on the same card after it was dismissed
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - runFlow:
+          file: subflows/card-actions.yaml
+          env:
+            CARD: '.*(${MOCK_COURSE}).*'
+      - assertVisible: '${T_hide}'
+      - back
+      - assertNotVisible: '${T_hide}'
 - runFlow:
     file: subflows/card-actions.yaml
     env:
