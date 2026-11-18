@@ -91,9 +91,10 @@ module.exports = {
     '!src/widgets/kit{,.android}.tsx',
     // The Electron app's main process (the `tooling` project's tests). The
     // dev runner, its Mac app, the packaging and clean-up scripts and the
-    // E2E tests' Electron download only run on a developer's machine.
+    // E2E tests' Electron download only run on a developer's machine, and
+    // the real update test (updateE2E.ts) in its own CI job.
     'electron/*.{ts,cts}',
-    '!electron/{dev,clean,package,macDevApp,devTraces,webExport,electronApp}.ts',
+    '!electron/{dev,clean,package,macDevApp,devTraces,webExport,electronApp,updateE2E}.ts',
     '!electron/playwright.config.ts',
   ],
   // CI runs `pnpm test --coverage` and fails below these, so coverage can't
