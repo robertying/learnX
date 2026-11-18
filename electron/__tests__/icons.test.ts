@@ -1,4 +1,4 @@
-// The committed icons (icons/generate.mjs makes them on a Mac with Xcode).
+// The committed icons (icons/generate.ts makes them on a Mac with Xcode).
 import fs from 'node:fs';
 import path from 'node:path';
 import {
@@ -9,7 +9,7 @@ import {
   icoEntries,
   icoImages,
   shapeSize,
-} from '../icons/generate.mjs';
+} from '../icons/generate.ts';
 
 const icons = path.join(__dirname, '..', 'icons');
 

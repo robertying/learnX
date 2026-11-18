@@ -1,4 +1,4 @@
-// Updates (updater.cjs) against updateServer.mjs, the local stand-in for the
+// Updates (updater.ts) against updateServer.ts, the local stand-in for the
 // TUNA mirror's LatestRelease/ folder: a dev run with LEARNX_UPDATE_URL
 // checks 10 seconds after launch, downloads the installer named in
 // latest*.yml and checks its SHA-512; Settings then offers it, and Restart
@@ -6,16 +6,16 @@
 // here is made-up bytes: what's tested is learnX's side, not the installer.
 // The update file is signed with a throwaway key whose public half the run
 // trusts (LEARNX_UPDATE_PUBLIC_KEY), as a release's are with the update key
-// (updateSignature.cjs); without a valid signature nothing is downloaded.
+// (updateSignature.ts); without a valid signature nothing is downloaded.
 import { type ChildProcess, spawn } from 'node:child_process';
 import { createHash, generateKeyPairSync, randomBytes } from 'node:crypto';
 import fs from 'node:fs';
 import net from 'node:net';
 import path from 'node:path';
-import updateSignature from '../updateSignature.cjs';
-import { expect, packagedApp, test } from './fixtures';
-import { exact, text } from './maestroEnv';
-import { byId, openSettings, shown } from './steps';
+import { SIGNATURE_SUFFIX, signUpdateFile } from '../updateSignature.ts';
+import { expect, packagedApp, test } from './fixtures.ts';
+import { exact, text } from './maestroEnv.ts';
+import { byId, openSettings, shown } from './steps.ts';
 
 const VERSION = '99.0.0';
 
@@ -79,8 +79,8 @@ const writeRelease = (
   if (signature !== 'missing') {
     const data = fs.readFileSync(path.join(dir, yml));
     fs.writeFileSync(
-      path.join(dir, yml + updateSignature.SIGNATURE_SUFFIX),
-      updateSignature.signUpdateFile(
+      path.join(dir, yml + SIGNATURE_SUFFIX),
+      signUpdateFile(
         signature === 'bad' ? Buffer.from('something else') : data,
         (signature === 'wrong key' ? otherKey : trustedKey).privateKey.export({
           type: 'pkcs8',
@@ -102,13 +102,13 @@ const freePort = () =>
     });
   });
 
-/** Serves `dir` with updateServer.mjs; its request log lines go to `log`. */
+/** Serves `dir` with updateServer.ts; its request log lines go to `log`. */
 const serve = async (dir: string, log: string[]) => {
   const port = await freePort();
   const server = spawn(
     process.execPath,
     [
-      path.join(__dirname, '..', 'updateServer.mjs'),
+      path.join(import.meta.dirname, '..', 'updateServer.ts'),
       dir,
       '--port',
       String(port),
@@ -117,7 +117,7 @@ const serve = async (dir: string, log: string[]) => {
   );
   await new Promise<void>((resolve, reject) => {
     server.once('exit', code =>
-      reject(new Error(`updateServer.mjs exited with ${code}`)),
+      reject(new Error(`updateServer.ts exited with ${code}`)),
     );
     server.stdout!.setEncoding('utf8');
     server.stdout!.on('data', (chunk: string) => {

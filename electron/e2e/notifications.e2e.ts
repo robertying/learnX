@@ -1,11 +1,11 @@
 // Notifications in the Electron app: Settings' deadline reminders schedule
-// in the main process (notifications.cjs), and a click on one shows the
+// in the main process (notifications.ts), and a click on one shows the
 // window and opens its assignment, from the tray too. A dev run never posts
 // a system notification: it logs it, and the page shows it as a toast
-// (system.cjs), which the test reads back and clicks through the same path.
+// (system.ts), which the test reads back and clicks through the same path.
 import type { Page } from '@playwright/test';
-import { expect, packagedApp, test } from './fixtures';
-import { text } from './maestroEnv';
+import { expect, packagedApp, test } from './fixtures.ts';
+import { text } from './maestroEnv.ts';
 import {
   byId,
   openSettings,
@@ -13,7 +13,7 @@ import {
   openTab,
   shown,
   toggle,
-} from './steps';
+} from './steps.ts';
 
 test.skip(
   !!packagedApp,

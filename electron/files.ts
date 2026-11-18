@@ -5,10 +5,10 @@
 // as on the phone, or, for what an export does, in a folder the user picked
 // for it (`grant`).
 // Downloads run here with the window session's cookies.
-const fs = require('node:fs');
-const path = require('node:path');
-const { fileURLToPath, pathToFileURL } = require('node:url');
-const { TIMEOUT_MS, allowedUrl } = require('./net.cjs');
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { TIMEOUT_MS, allowedUrl } from './net.ts';
 
 /** Where the mock account's files come from (src/data/mock.ts). */
 const MOCK_FILES =
@@ -17,19 +17,18 @@ const MOCK_FILES =
 /**
  * Whether a download may come from `url`: Tsinghua's sites and courseX, as
  * every request, or the mock account's files.
- * @param {string} url
  */
-const downloadAllowedUrl = url => allowedUrl(url) || url.startsWith(MOCK_FILES);
+export const downloadAllowedUrl = (url: string): boolean =>
+  allowedUrl(url) || url.startsWith(MOCK_FILES);
 
-/**
- * @typedef {object} EntryInfo
- * @property {boolean} exists
- * @property {boolean} isDirectory
- * @property {number} size bytes; a folder's is everything in it
- */
+type EntryInfo = {
+  exists: boolean;
+  isDirectory: boolean;
+  /** Bytes; a folder's is everything in it. */
+  size: number;
+};
 
-/** @param {string} dir */
-const sizeOf = dir => {
+const sizeOf = (dir: string): number => {
   let total = 0;
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
@@ -44,11 +43,13 @@ const sizeOf = dir => {
  * Office treat it as they would a browser's download: a warning before a
  * program runs, Protected View for a document. Nothing elsewhere, or where
  * the disk keeps no such streams.
- * @param {string} file
- * @param {string} url where it came from; only its origin is kept
- * @param {string} platform
+ * @param url where it came from; only its origin is kept
  */
-const markDownloaded = (file, url, platform) => {
+export const markDownloaded = (
+  file: string,
+  url: string,
+  platform: string,
+): void => {
   if (platform !== 'win32') {
     return;
   }
@@ -66,15 +67,15 @@ const markDownloaded = (file, url, platform) => {
  * How long a folder picked for an export stays open to the page after its
  * last use: an export runs right after the folder is picked.
  */
-const GRANT_IDLE_MS = 10 * 60 * 1000;
+export const GRANT_IDLE_MS = 10 * 60 * 1000;
 
-/**
- * @param {{ cache: string, document: string }} roots absolute folder paths
- * @param {{ platform?: string, now?: () => number }} [options]
- */
-const createFiles = (
-  roots,
-  { platform = process.platform, now = Date.now } = {},
+/** @param roots absolute folder paths */
+export const createFiles = (
+  roots: { cache: string; document: string },
+  {
+    platform = process.platform,
+    now = Date.now,
+  }: { platform?: string; now?: () => number } = {},
 ) => {
   const rootPaths = Object.values(roots).map(root => path.resolve(root));
   for (const root of rootPaths) {
@@ -85,16 +86,14 @@ const createFiles = (
    * was last used. The page may only look in them, make folders and copy
    * its own files in (`exporting`): never read, change or delete what's
    * there, and only for a while.
-   * @type {Map<string, number>}
    */
-  const granted = new Map();
+  const granted = new Map<string, number>();
 
-  /** @param {string} resolved @param {string} root */
-  const isIn = (resolved, root) =>
+  const isIn = (resolved: string, root: string) =>
     resolved === root || resolved.startsWith(root + path.sep);
 
   /** The granted folder `resolved` lies in, if one still is. */
-  const grantOf = (/** @type {string} */ resolved) => {
+  const grantOf = (resolved: string) => {
     for (const [root, used] of granted) {
       if (now() - used > GRANT_IDLE_MS) {
         granted.delete(root);
@@ -109,10 +108,11 @@ const createFiles = (
   /**
    * The path of a file URI inside the app's folders, or with `exporting`
    * inside a granted folder; throws for anything else.
-   * @param {unknown} uri
-   * @param {{ exporting?: boolean }} [options]
    */
-  const pathOf = (uri, { exporting = false } = {}) => {
+  const pathOf = (
+    uri: unknown,
+    { exporting = false }: { exporting?: boolean } = {},
+  ) => {
     if (typeof uri !== 'string' || !uri.startsWith('file:')) {
       throw new Error('Not a file URI');
     }
@@ -126,12 +126,8 @@ const createFiles = (
     return resolved;
   };
 
-  /**
-   * A path that may be changed: inside a folder, never a folder itself.
-   * @param {unknown} uri
-   * @param {{ exporting?: boolean }} [options]
-   */
-  const innerPathOf = (uri, options) => {
+  /** A path that may be changed: inside a folder, never a folder itself. */
+  const innerPathOf = (uri: unknown, options?: { exporting?: boolean }) => {
     const resolved = pathOf(uri, options);
     if (rootPaths.includes(resolved) || granted.has(resolved)) {
       throw new Error('The app folders themselves stay');
@@ -144,9 +140,9 @@ const createFiles = (
     /**
      * Lets the page work in a folder the user picked (a dialog in the main
      * process, never the page's own choice), and returns its URI.
-     * @param {string} dir an absolute path
+     * @param dir an absolute path
      */
-    grant: dir => {
+    grant: (dir: string): string => {
       const resolved = path.resolve(dir);
       granted.set(resolved, now());
       return pathToFileURL(resolved + path.sep).href;
@@ -156,22 +152,17 @@ const createFiles = (
      * The path of a file URI in the app's folders, for the main process's
      * own use (opening, saving and previewing a download); throws for
      * anything else.
-     * @param {string} uri
      */
-    localPath: uri => pathOf(uri),
+    localPath: (uri: string): string => pathOf(uri),
 
     /** The folders' URIs, ending in a slash. */
     roots: () => {
-      const uriOf = (/** @type {string} */ root) =>
+      const uriOf = (root: string) =>
         pathToFileURL(path.resolve(root) + path.sep).href;
       return { cache: uriOf(roots.cache), document: uriOf(roots.document) };
     },
 
-    /**
-     * @param {string} uri
-     * @returns {EntryInfo}
-     */
-    info: uri => {
+    info: (uri: string): EntryInfo => {
       const target = pathOf(uri, exporting);
       let stat;
       try {
@@ -186,23 +177,18 @@ const createFiles = (
       };
     },
 
-    /**
-     * @param {string} uri
-     * @returns {{ name: string, isDirectory: boolean }[]}
-     */
-    list: uri =>
+    list: (uri: string): { name: string; isDirectory: boolean }[] =>
       fs
         .readdirSync(pathOf(uri, exporting), { withFileTypes: true })
         .map(entry => ({ name: entry.name, isDirectory: entry.isDirectory() })),
 
-    /**
-     * @param {string} uri
-     * @param {{ intermediates?: boolean, idempotent?: boolean }} [options]
-     */
     makeDirectory: (
-      uri,
-      { intermediates = false, idempotent = false } = {},
-    ) => {
+      uri: string,
+      {
+        intermediates = false,
+        idempotent = false,
+      }: { intermediates?: boolean; idempotent?: boolean } = {},
+    ): void => {
       const target = pathOf(uri, exporting);
       if (fs.existsSync(target)) {
         if (idempotent && fs.statSync(target).isDirectory()) {
@@ -213,17 +199,11 @@ const createFiles = (
       fs.mkdirSync(target, { recursive: intermediates });
     },
 
-    /** @param {string} uri */
-    remove: uri => {
+    remove: (uri: string): void => {
       fs.rmSync(innerPathOf(uri), { recursive: true, force: true });
     },
 
-    /**
-     * @param {string} from
-     * @param {string} to
-     * @param {boolean} [overwrite]
-     */
-    move: (from, to, overwrite = false) => {
+    move: (from: string, to: string, overwrite = false): void => {
       const source = innerPathOf(from);
       const target = innerPathOf(to);
       if (!overwrite && fs.existsSync(target)) {
@@ -233,12 +213,7 @@ const createFiles = (
       fs.renameSync(source, target);
     },
 
-    /**
-     * @param {string} from
-     * @param {string} to
-     * @param {boolean} [overwrite]
-     */
-    copy: (from, to, overwrite = false) => {
+    copy: (from: string, to: string, overwrite = false): void => {
       fs.cpSync(pathOf(from), innerPathOf(to, exporting), {
         recursive: true,
         force: overwrite,
@@ -246,32 +221,22 @@ const createFiles = (
       });
     },
 
-    /**
-     * @param {string} uri
-     * @param {string | Uint8Array} content
-     */
-    write: (uri, content) => {
+    write: (uri: string, content: string | Uint8Array): void => {
       fs.writeFileSync(innerPathOf(uri), content);
     },
 
     /**
      * Adds bytes to the end of a file (creating it), so the page can copy a
      * large one in pieces without holding it whole (a dropped file).
-     * @param {string} uri
-     * @param {Uint8Array} content
      */
-    append: (uri, content) => {
+    append: (uri: string, content: Uint8Array): void => {
       if (!(content instanceof Uint8Array)) {
         throw new Error('Not bytes');
       }
       fs.appendFileSync(innerPathOf(uri), content);
     },
 
-    /**
-     * @param {string} uri
-     * @param {'utf8' | 'bytes'} as
-     */
-    read: (uri, as) => {
+    read: (uri: string, as: 'utf8' | 'bytes'): string | Uint8Array => {
       const data = fs.readFileSync(pathOf(uri));
       return as === 'utf8' ? data.toString('utf8') : new Uint8Array(data);
     },
@@ -282,20 +247,23 @@ const createFiles = (
      * expo-file-system does ("Unable to download a file: server returned
      * HTTP 403"), leaving no file behind.
      *
-     * @param {Pick<typeof import('electron').net, 'request'>} net
-     * @param {Electron.Session} session
-     * @param {{ url: string, uri: string, headers?: Record<string, string> }} req
      * A download that hears nothing from the server for a minute (before the
-     * response or between its pieces) fails, as a request does (net.cjs).
-     * @param {{ signal?: AbortSignal, onProgress?: (written: number, total: number) => void, idleMs?: number }} [options]
-     * @returns {Promise<{ status: number }>}
+     * response or between its pieces) fails, as a request does (net.ts).
      */
     download: (
-      net,
-      session,
-      req,
-      { signal, onProgress, idleMs = TIMEOUT_MS.idle } = {},
-    ) =>
+      net: Pick<typeof Electron.net, 'request'>,
+      session: Electron.Session,
+      req: { url: string; uri: string; headers?: Record<string, string> },
+      {
+        signal,
+        onProgress,
+        idleMs = TIMEOUT_MS.idle,
+      }: {
+        signal?: AbortSignal;
+        onProgress?: (written: number, total: number) => void;
+        idleMs?: number;
+      } = {},
+    ): Promise<{ status: number }> =>
       new Promise((resolve, reject) => {
         const target = innerPathOf(req.uri);
         if (!downloadAllowedUrl(req.url)) {
@@ -308,13 +276,11 @@ const createFiles = (
           credentials: 'include',
           redirect: 'manual',
         });
-        /** @type {fs.WriteStream | undefined} */
-        let out;
+        let out: fs.WriteStream | undefined;
         let done = false;
         let finalUrl = req.url;
         const onAbort = () => fail(new Error('Aborted'));
-        /** @type {ReturnType<typeof setTimeout> | undefined} */
-        let timer;
+        let timer: ReturnType<typeof setTimeout> | undefined;
         const wait = () => {
           clearTimeout(timer);
           timer = setTimeout(
@@ -327,7 +293,7 @@ const createFiles = (
             idleMs,
           );
         };
-        const fail = (/** @type {Error} */ error) => {
+        const fail = (error: Error) => {
           if (done) {
             return;
           }
@@ -399,7 +365,7 @@ const createFiles = (
 };
 
 /** What the page may ask of `createFiles` by name (the `files` channel). */
-const FILE_OPERATIONS = new Set([
+export const FILE_OPERATIONS = new Set([
   'roots',
   'info',
   'list',
@@ -415,31 +381,23 @@ const FILE_OPERATIONS = new Set([
  * Runs one of the page's synchronous file operations: its result, or its
  * error's message (an unknown operation's too), as the page's stand-in reads
  * them (src/web/packages/fileSystem.ts).
- * @param {ReturnType<typeof createFiles>} files
- * @param {unknown} op
- * @param {unknown[]} args
- * @returns {{ result: unknown } | { error: string }}
  */
-const runFileOperation = (files, op, args) => {
+export const runFileOperation = (
+  files: Files,
+  op: unknown,
+  args: unknown[],
+): { result: unknown } | { error: string } => {
   try {
     if (typeof op !== 'string' || !FILE_OPERATIONS.has(op)) {
       throw new Error(`Unknown file operation: ${String(op)}`);
     }
-    return {
-      result: /** @type {(...args: unknown[]) => unknown} */ (
-        files[/** @type {keyof typeof files} */ (op)]
-      )(...args),
-    };
+    const operation = files[op as keyof Files] as (
+      ...args: unknown[]
+    ) => unknown;
+    return { result: operation(...args) };
   } catch (error) {
-    return { error: String(/** @type {Error} */ (error).message) };
+    return { error: String((error as Error).message) };
   }
 };
 
-module.exports = {
-  FILE_OPERATIONS,
-  GRANT_IDLE_MS,
-  createFiles,
-  downloadAllowedUrl,
-  markDownloaded,
-  runFileOperation,
-};
+export type Files = ReturnType<typeof createFiles>;

@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import type { AddressInfo } from 'node:net';
 import os from 'node:os';
 import path from 'node:path';
-import { byteRange, createUpdateServer } from '../updateServer.mjs';
+import { byteRange, createUpdateServer } from '../updateServer.ts';
 
 let dir: string;
 let base: string;

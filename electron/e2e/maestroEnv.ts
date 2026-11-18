@@ -4,7 +4,7 @@
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 
-const root = path.join(__dirname, '..', '..');
+const root = path.join(import.meta.dirname, '..', '..');
 
 let cached: Record<string, string> | undefined;
 

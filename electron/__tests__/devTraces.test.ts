@@ -1,4 +1,4 @@
-import { devRunRegistrations, isDevRunName } from '../devTraces.mjs';
+import { devRunRegistrations, isDevRunName } from '../devTraces.ts';
 
 describe('isDevRunName', () => {
   it.each([

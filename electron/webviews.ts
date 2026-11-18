@@ -2,29 +2,29 @@
 // the SSO login, notice and assignment bodies, courseX and the changelog.
 // Each runs sandboxed and context-isolated on the window's session, so it
 // shares the cookies the app's requests use, with only learnX's own preload
-// (webviewPreload.cjs). The page decides which loads go ahead, as a React
+// (webviewPreload.cts). The page decides which loads go ahead, as a React
 // Native web view's `onShouldStartLoadWithRequest` does, and this process
 // keeps every page on the sites below whatever it decides.
-const { allowedHost } = require('./net.cjs');
-const { readShared } = require('./shared.cjs');
+import { allowedHost } from './net.ts';
+import { readShared } from './shared.ts';
+
 /**
  * The session every web view shares with the app's requests (the page names
  * it too, from the same file).
  */
-const { partition: PARTITION } = readShared('webviewPartition.json');
+export const PARTITION = readShared('webviewPartition.json').partition;
 
 /** How long a load waits for the page to decide before it's refused. */
 const DECISION_TIMEOUT_MS = 15_000;
 
 /** How long an HTML load (`loadHtml`) may take before it's given up. */
-const HTML_LOAD_TIMEOUT_MS = 30_000;
+export const HTML_LOAD_TIMEOUT_MS = 30_000;
 
 /**
  * Whether a web view may show `url`: Tsinghua's sites and courseX, as the
- * app's requests (net.cjs), and learnX's GitHub pages for the changelog.
- * @param {string} url
+ * app's requests (net.ts), and learnX's GitHub pages for the changelog.
  */
-const webviewAllowedUrl = url => {
+export const webviewAllowedUrl = (url: string): boolean => {
   let parsed;
   try {
     parsed = new URL(url);
@@ -47,46 +47,43 @@ const webviewAllowedUrl = url => {
  * write to the clipboard (a copy button), on the sites it may show. Nothing
  * else (camera, microphone, location, notifications…), and nothing for the
  * app's own window.
- * @param {Electron.WebContents | null} contents the page asking
- * @param {string} permission
- * @param {string} url the page's URL
+ * @param contents the page asking
+ * @param url the page's URL
  */
-const webviewPermission = (contents, permission, url) =>
+export const webviewPermission = (
+  contents: Electron.WebContents | null,
+  permission: string,
+  url: string,
+): boolean =>
   !!contents &&
   !contents.isDestroyed() &&
   contents.getType() === 'webview' &&
   ['fullscreen', 'clipboard-sanitized-write'].includes(permission) &&
   webviewAllowedUrl(url);
 
-/**
- * Links a web view may hand to the system's browser or mail app.
- * @param {string} url
- */
-const externalUrl = url => /^(https?|mailto):/i.test(url);
+/** Links a web view may hand to the system's browser or mail app. */
+export const externalUrl = (url: string): boolean =>
+  /^(https?|mailto):/i.test(url);
 
 /**
  * Hardens a `<webview>` before it attaches (`will-attach-webview`): it must
  * start blank on the window's session, and gets learnX's preload, the
  * sandbox and context isolation whatever its attributes asked for. A page
  * may only turn JavaScript off. Returns false to refuse the web view.
- *
- * @param {Electron.WebPreferences} webPreferences
- * @param {Record<string, string>} params
- * @param {string} preload
- * @param {{ backgroundThrottling?: boolean }} [options] as the window's
+ * @param options as the window's
  */
-const hardenWebview = (
-  webPreferences,
-  params,
-  preload,
-  { backgroundThrottling = true } = {},
-) => {
+export const hardenWebview = (
+  webPreferences: Electron.WebPreferences,
+  params: Record<string, string>,
+  preload: string,
+  { backgroundThrottling = true }: { backgroundThrottling?: boolean } = {},
+): boolean => {
   if (params.partition !== PARTITION || params.src !== 'about:blank') {
     return false;
   }
   const javascript = webPreferences.javascript !== false;
   for (const key of Object.keys(webPreferences)) {
-    delete webPreferences[/** @type {keyof Electron.WebPreferences} */ (key)];
+    delete webPreferences[key as keyof Electron.WebPreferences];
   }
   Object.assign(webPreferences, {
     // Electron reads the session from here, not from the attribute.
@@ -106,66 +103,65 @@ const hardenWebview = (
   return true;
 };
 
-/**
- * @typedef {object} LoadRequest
- * @property {number} guestId the web view's web contents
- * @property {number} requestId
- * @property {string} url
- * @property {string} method
- * @property {boolean} isTopFrame
- *
- * @typedef {object} Scripts
- * @property {string} [before] runs before the page's own scripts
- * @property {string} [after] runs once the document has loaded
- */
+type LoadRequest = {
+  /** The web view's web contents. */
+  guestId: number;
+  requestId: number;
+  url: string;
+  method: string;
+  isTopFrame: boolean;
+};
+
+export type Scripts = {
+  /** Runs before the page's own scripts. */
+  before?: string;
+  /** Runs once the document has loaded. */
+  after?: string;
+};
 
 /**
  * The web views' state in the main process: the scripts each one injects,
  * and the loads waiting for the page to decide on them.
- *
- * @param {object} options
- * @param {(url: string) => void} options.openExternal
- * @param {number} [options.timeoutMs]
  */
-const createWebviews = ({ openExternal, timeoutMs = DECISION_TIMEOUT_MS }) => {
-  /** @type {Map<number, Scripts>} */
-  const scripts = new Map();
-  /**
-   * @type {Map<number, {host: Electron.WebContents, resolve: (allow: boolean) => void}>}
-   */
-  const pending = new Map();
+export const createWebviews = ({
+  openExternal,
+  timeoutMs = DECISION_TIMEOUT_MS,
+}: {
+  openExternal: (url: string) => void;
+  timeoutMs?: number;
+}) => {
+  const scripts = new Map<number, Scripts>();
+  const pending = new Map<
+    number,
+    { host: Electron.WebContents; resolve: (allow: boolean) => void }
+  >();
   let nextRequestId = 1;
   /**
    * Loads `loadHtml` started, by web view and URL: the app's own, so they
    * aren't asked about.
-   * @type {Set<string>}
    */
-  const htmlLoads = new Set();
+  const htmlLoads = new Set<string>();
   /**
    * The HTML load under way in each web view, by its id, ended (and its
    * debugger detached) when another starts there: the newer one wins.
-   * @type {Map<number, () => void>}
    */
-  const htmlLoadsByGuest = new Map();
+  const htmlLoadsByGuest = new Map<number, () => void>();
 
-  /**
-   * Whether `guest` is a web view that `host` shows.
-   * @param {Electron.WebContents | undefined | null} guest
-   * @param {Electron.WebContents} host
-   */
-  const isGuestOf = (guest, host) =>
+  /** Whether `guest` is a web view that `host` shows. */
+  const isGuestOf = (
+    guest: Electron.WebContents | undefined | null,
+    host: Electron.WebContents,
+  ): guest is Electron.WebContents =>
     !!guest &&
     !guest.isDestroyed() &&
     guest.getType() === 'webview' &&
     guest.hostWebContents === host;
 
-  /**
-   * Asks the page whether `guest` may load `url`, and waits for its answer.
-   * @param {Electron.WebContents} guest
-   * @param {Omit<LoadRequest, 'guestId' | 'requestId'>} request
-   * @returns {Promise<boolean>}
-   */
-  const ask = (guest, request) =>
+  /** Asks the page whether `guest` may load `url`, and waits for its answer. */
+  const ask = (
+    guest: Electron.WebContents,
+    request: Omit<LoadRequest, 'guestId' | 'requestId'>,
+  ): Promise<boolean> =>
     new Promise(resolve => {
       const host = guest.hostWebContents;
       if (!host || host.isDestroyed()) {
@@ -174,14 +170,13 @@ const createWebviews = ({ openExternal, timeoutMs = DECISION_TIMEOUT_MS }) => {
       }
       const requestId = nextRequestId++;
       const timer = setTimeout(() => settle(false), timeoutMs);
-      const settle = (/** @type {boolean} */ allow) => {
+      const settle = (allow: boolean) => {
         clearTimeout(timer);
         pending.delete(requestId);
         resolve(allow);
       };
       pending.set(requestId, { host, resolve: settle });
-      /** @type {LoadRequest} */
-      const message = { ...request, guestId: guest.id, requestId };
+      const message: LoadRequest = { ...request, guestId: guest.id, requestId };
       host.send('webview:ask', message);
     });
 
@@ -189,12 +184,13 @@ const createWebviews = ({ openExternal, timeoutMs = DECISION_TIMEOUT_MS }) => {
     /**
      * Stores the scripts a web view injects from its next load on, for the
      * host page that shows it; false when it isn't that page's web view.
-     * @param {Electron.WebContents} host
-     * @param {Electron.WebContents | undefined} guest
-     * @param {Scripts} given
      */
-    configure: (host, guest, given) => {
-      if (!guest || !isGuestOf(guest, host)) {
+    configure: (
+      host: Electron.WebContents,
+      guest: Electron.WebContents | undefined,
+      given: Scripts | undefined,
+    ): boolean => {
+      if (!isGuestOf(guest, host)) {
         return false;
       }
       if (!scripts.has(guest.id)) {
@@ -207,12 +203,8 @@ const createWebviews = ({ openExternal, timeoutMs = DECISION_TIMEOUT_MS }) => {
       return true;
     },
 
-    /**
-     * The scripts for a web view's preload to inject.
-     * @param {Electron.WebContents} guest
-     * @returns {Scripts}
-     */
-    scriptsFor: guest =>
+    /** The scripts for a web view's preload to inject. */
+    scriptsFor: (guest: Electron.WebContents): Scripts =>
       guest.getType() === 'webview' ? (scripts.get(guest.id) ?? {}) : {},
 
     /**
@@ -224,16 +216,14 @@ const createWebviews = ({ openExternal, timeoutMs = DECISION_TIMEOUT_MS }) => {
      * the page has the base URL's origin. Resolves to false when it can't
      * (not the page's web view, a base URL off the allowed sites, or a
      * debugger already attached).
-     *
-     * @param {Electron.WebContents} host
-     * @param {Electron.WebContents | undefined} guest
-     * @param {string} html
-     * @param {string} baseUrl
-     * @returns {Promise<boolean>}
      */
-    loadHtml: async (host, guest, html, baseUrl) => {
+    loadHtml: async (
+      host: Electron.WebContents,
+      guest: Electron.WebContents | undefined,
+      html: string,
+      baseUrl: string,
+    ): Promise<boolean> => {
       if (
-        !guest ||
         !isGuestOf(guest, host) ||
         typeof html !== 'string' ||
         !webviewAllowedUrl(baseUrl)
@@ -267,12 +257,15 @@ const createWebviews = ({ openExternal, timeoutMs = DECISION_TIMEOUT_MS }) => {
       };
       htmlLoadsByGuest.set(guest.id, finish);
       const timer = setTimeout(finish, HTML_LOAD_TIMEOUT_MS);
-      /**
-       * @param {unknown} _event
-       * @param {string} method
-       * @param {{ requestId: string; request: { url: string; method: string }; resourceType: string }} params
-       */
-      const onMessage = (_event, method, params) => {
+      const onMessage = (
+        _event: unknown,
+        method: string,
+        params: {
+          requestId: string;
+          request: { url: string; method: string };
+          resourceType: string;
+        },
+      ) => {
         if (method !== 'Fetch.requestPaused') {
           return;
         }
@@ -325,11 +318,12 @@ const createWebviews = ({ openExternal, timeoutMs = DECISION_TIMEOUT_MS }) => {
     /**
      * The page's answer to a load it was asked about; ignored unless it
      * comes from the page that was asked.
-     * @param {Electron.WebContents} host
-     * @param {number} requestId
-     * @param {boolean} allow
      */
-    answer: (host, requestId, allow) => {
+    answer: (
+      host: Electron.WebContents,
+      requestId: number,
+      allow: unknown,
+    ): void => {
       const entry = pending.get(requestId);
       if (entry && entry.host === host) {
         entry.resolve(allow === true);
@@ -341,11 +335,11 @@ const createWebviews = ({ openExternal, timeoutMs = DECISION_TIMEOUT_MS }) => {
      * for main frames, so a form's POST goes ahead as it was sent): the page
      * decides, and a load it allows off the allowed sites opens in the
      * system's browser instead. Anything else passes.
-     *
-     * @param {Electron.OnBeforeRequestListenerDetails} details
-     * @param {(response: Electron.CallbackResponse) => void} callback
      */
-    onBeforeRequest: (details, callback) => {
+    onBeforeRequest: (
+      details: Electron.OnBeforeRequestListenerDetails,
+      callback: (response: Electron.CallbackResponse) => void,
+    ): void => {
       const guest = details.webContents;
       if (
         details.resourceType !== 'mainFrame' ||
@@ -381,9 +375,8 @@ const createWebviews = ({ openExternal, timeoutMs = DECISION_TIMEOUT_MS }) => {
      * Keeps a newly attached web view's pages to themselves: new windows open
      * in the system's browser, and it never leaves the web for another
      * scheme (the app's own pages, files).
-     * @param {Electron.WebContents} guest
      */
-    guard: guest => {
+    guard: (guest: Electron.WebContents): void => {
       guest.setWindowOpenHandler(({ url }) => {
         if (externalUrl(url)) {
           openExternal(url);
@@ -400,14 +393,4 @@ const createWebviews = ({ openExternal, timeoutMs = DECISION_TIMEOUT_MS }) => {
       });
     },
   };
-};
-
-module.exports = {
-  HTML_LOAD_TIMEOUT_MS,
-  PARTITION,
-  createWebviews,
-  externalUrl,
-  hardenWebview,
-  webviewAllowedUrl,
-  webviewPermission,
 };

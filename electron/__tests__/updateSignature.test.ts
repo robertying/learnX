@@ -6,7 +6,7 @@ import {
   signUpdateFile,
   signatureProblem,
   signedProvider,
-} from '../updateSignature.cjs';
+} from '../updateSignature.ts';
 
 const keys = () => {
   const { privateKey, publicKey } = generateKeyPairSync('ed25519');

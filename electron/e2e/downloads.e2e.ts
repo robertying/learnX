@@ -3,8 +3,8 @@
 // the flow does) and deletes them.
 import fs from 'node:fs';
 import path from 'node:path';
-import { expect, test } from './fixtures';
-import { exact, text } from './maestroEnv';
+import { expect, test } from './fixtures.ts';
+import { exact, text } from './maestroEnv.ts';
 import {
   byId,
   openCard,
@@ -12,7 +12,7 @@ import {
   openSettingsPage,
   openTab,
   shown,
-} from './steps';
+} from './steps.ts';
 
 test('downloads a file, exports it, then deletes it', async ({
   window,

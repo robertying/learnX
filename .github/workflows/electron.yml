@@ -105,7 +105,7 @@ jobs:
     # The whole Playwright E2E suite (electron/e2e) in a dev run of the app
     # on the web build: the Maestro flows that apply to the desktop and what
     # only it does (files, submissions, notifications, the tray, the .ics
-    # export, updates against updateServer.mjs, the SSO page). It needs the
+    # export, updates against updateServer.ts, the SSO page). It needs the
     # network, as the flows do: the mock files download from GitHub and the
     # SSO test opens id.tsinghua.edu.cn.
     # - Linux (required): one app per core (playwright.config.ts), each
@@ -157,7 +157,7 @@ jobs:
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: build/electron/cache
-          key: electron-e2e-${{ runner.os }}-${{ hashFiles('electron/package.json', 'electron/packageConfig.cjs') }}
+          key: electron-e2e-${{ runner.os }}-${{ hashFiles('electron/package.json', 'electron/packageConfig.ts') }}
 
       # The same mock login as the web build's. On Linux each worker starts
       # an Xvfb of its own (e2e/fixtures.ts).
@@ -232,7 +232,7 @@ jobs:
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: build/electron/cache
-          key: electron-package-${{ runner.os }}-${{ hashFiles('electron/package.json', 'electron/packageConfig.cjs') }}
+          key: electron-package-${{ runner.os }}-${{ hashFiles('electron/package.json', 'electron/packageConfig.ts') }}
 
       # Its own web build with the mock login from the repository's
       # DUMMY_USERNAME and DUMMY_PASSWORD secrets (none without them),

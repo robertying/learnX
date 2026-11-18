@@ -2,7 +2,7 @@ import { bridge } from 'web/bridge';
 
 /**
  * Stands in for expo-document-picker in the Electron app: the system's open
- * dialog in the main process (electron/fileShell.cjs), which copies the
+ * dialog in the main process (electron/fileShell.ts), which copies the
  * picked file into the app's cache, as `copyToCacheDirectory` does.
  */
 

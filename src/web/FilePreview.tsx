@@ -6,7 +6,7 @@ import electronFileTypes from 'constants/electronFileTypes.json';
 /**
  * Where the preview loads one of learnX's own files from: `app://files/`, an
  * origin of its own that the main process serves PDFs and pictures on
- * (electron/fileShell.cjs), so a file never runs in the app's page. Null for
+ * (electron/fileShell.ts), so a file never runs in the app's page. Null for
  * anything outside the app's folders.
  */
 export const previewUrlOf = (uri: string) => {

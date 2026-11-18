@@ -2,8 +2,8 @@
 // same steps by the same test IDs and texts. The window is wide enough for
 // the split views, so a detail opens beside its list and there's no back.
 import type { Locator, Page } from '@playwright/test';
-import { expect } from './fixtures';
-import { exact, text } from './maestroEnv';
+import { expect } from './fixtures.ts';
+import { exact, text } from './maestroEnv.ts';
 
 /**
  * The first of these that shows: tabs and split panes stay mounted when

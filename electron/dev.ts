@@ -14,15 +14,15 @@
 //   pnpm electron -- <args>         pass the rest to Electron, such as
 //                                   --remote-debugging-port=9222
 //
-// The first run downloads Electron itself (electronApp.cjs). On a Mac it opens
+// The first run downloads Electron itself (electronApp.ts). On a Mac it opens
 // build/electron/learnX.app, a copy of Electron.app named and drawn as learnX
-// (macDevApp.mjs); `pnpm electron:clean` removes what dev runs leave on the
-// Mac (clean.mjs).
+// (macDevApp.ts); `pnpm electron:clean` removes what dev runs leave on the
+// Mac (clean.ts).
 import { spawn } from 'node:child_process';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
-import { electronExecutable, outDir } from './electronApp.cjs';
-import { exportWeb } from './webExport.mjs';
+import { electronExecutable, outDir } from './electronApp.ts';
+import { exportWeb } from './webExport.ts';
 
 const electronDir = import.meta.dirname;
 const webDir = path.join(outDir, 'web');
@@ -58,6 +58,6 @@ const child = spawn(electron, [electronDir, ...sandboxArgs, ...positionals], {
   },
 });
 child.on('exit', code => process.exit(code ?? 0));
-for (const signal of /** @type {const} */ (['SIGINT', 'SIGTERM'])) {
+for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.on(signal, () => child.kill(signal));
 }

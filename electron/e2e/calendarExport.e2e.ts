@@ -5,9 +5,9 @@
 // classes in room 6A118 and the mock assignment's deadline.
 import fs from 'node:fs';
 import path from 'node:path';
-import { expect, test } from './fixtures';
-import { text } from './maestroEnv';
-import { byId, openSettings, openSettingsPage } from './steps';
+import { expect, test } from './fixtures.ts';
+import { text } from './maestroEnv.ts';
+import { byId, openSettings, openSettingsPage } from './steps.ts';
 
 test('exports the classes and deadlines as an .ics file', async ({
   window,

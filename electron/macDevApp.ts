@@ -1,4 +1,4 @@
-// The app the dev runner (dev.mjs) opens on a Mac: build/electron/learnX.app,
+// The app the dev runner (dev.ts) opens on a Mac: build/electron/learnX.app,
 // a copy of the downloaded Electron.app named, identified and drawn as learnX,
 // so the Dock, the menu bar, Activity Monitor, LaunchServices and the
 // preferences it writes say learnX, not Electron. It's renamed the way
@@ -34,7 +34,7 @@ export const renames = () => ({
     CFBundleIconFile: 'AppIcon',
     CFBundleIconName: 'AppIcon',
     // Starts as an accessory, with no Dock icon, so an E2E run never shows
-    // one even for a moment; main.cjs makes other dev runs regular apps.
+    // one even for a moment; main.ts makes other dev runs regular apps.
     LSUIElement: '1',
   },
   helpers: HELPER_SUFFIXES.map(suffix => ({
@@ -54,9 +54,9 @@ export const renames = () => ({
 });
 
 /** A hash of every file in a folder, by relative path and contents. */
-export const hashFolder = (/** @type {string} */ dir) => {
+export const hashFolder = (dir: string): string => {
   const hash = createHash('sha256');
-  const walk = (/** @type {string} */ sub) => {
+  const walk = (sub: string) => {
     for (const entry of fs
       .readdirSync(path.join(dir, sub), { withFileTypes: true })
       .sort((a, b) => a.name.localeCompare(b.name))) {
@@ -73,10 +73,7 @@ export const hashFolder = (/** @type {string} */ dir) => {
   return hash.digest('hex');
 };
 
-const setPlist = (
-  /** @type {string} */ file,
-  /** @type {Record<string, string>} */ values,
-) => {
+const setPlist = (file: string, values: Record<string, string>) => {
   for (const [key, value] of Object.entries(values)) {
     execFileSync('plutil', ['-replace', key, '-string', value, file]);
   }
@@ -86,14 +83,17 @@ const setPlist = (
  * Makes `<outDir>/learnX.app` from `electronApp` unless the one there was
  * made from the same Electron version and icon, and returns its executable.
  */
-export const macDevApp = (
-  /** @type {{ electronApp: string, electronVersion: string, iconSource: string, outDir: string }} */ {
-    electronApp,
-    electronVersion,
-    iconSource,
-    outDir,
-  },
-) => {
+export const macDevApp = ({
+  electronApp,
+  electronVersion,
+  iconSource,
+  outDir,
+}: {
+  electronApp: string;
+  electronVersion: string;
+  iconSource: string;
+  outDir: string;
+}): string => {
   const app = path.join(outDir, `${APP_NAME}.app`);
   const stampFile = path.join(outDir, `${APP_NAME}.app.json`);
   const stamp = JSON.stringify({

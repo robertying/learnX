@@ -1,0 +1,27 @@
+{
+  // The Electron app's main process, preloads, and dev and packaging
+  // scripts: TypeScript that Node and Electron run as is, stripping the types
+  // as they load (no build step), so only syntax they can strip is allowed
+  // (`erasableSyntaxOnly`), and imports name the .ts files they load. Its
+  // tests, which Jest and Playwright load, are typed with the repo's tooling
+  // (scripts/tsconfig.json). `pnpm typecheck` checks both.
+  "include": ["*.ts", "*.cts", "icons/*.ts"],
+  "exclude": ["playwright.config.ts"],
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "nodenext",
+    // The page's side of the preload's bridge (src/web/bridge.ts) and
+    // Playwright's page scripts are typed with the DOM.
+    "lib": ["esnext", "dom"],
+    "types": ["node"],
+    "strict": true,
+    "noUnusedLocals": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  }
+}
