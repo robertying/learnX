@@ -53,7 +53,7 @@ The app can be used without a real Tsinghua account: enter `DUMMY_USERNAME` / `D
 
 - These two values are not real credentials, so they can be typed and shown freely. Keep the live test login in `.env` out of logs and commits.
 - `dataSource` (`data/source`) is the one place that picks the real or the emulated server (`data/mockSource.ts`), by the account the session's login named. Add a request the app wraps to `AppSource` and both sources, rather than checking for the mock account elsewhere. The emulated server answers after a network-like delay, emulates failures and session expiry, and keeps favorites and read notices in memory only. Course information sharing talks to courseX directly and isn't emulated.
-- Test runs control the emulated server with launch arguments, applied before the first render (`services/launchOptions.ts`, which lists them). Android takes them only in debug and E2E builds, so other apps can't set them in a store build.
+- Test runs control the emulated server with launch arguments, applied before the first render (`services/launchOptions.ts`, which lists them). Android takes them only in debug and E2E builds, so other apps can't set them in a store build. Debug and E2E builds also take `learnx://mock-network?latency=…&failure=…` while running, for a test that needs the launch's login and catch-up over before the server slows down (`TodayUITests`).
 - Debug builds have a Debug page (the wrench button in Today's header) with Network Emulation, Allow Server Writes and notification tools. Its choices reset when the JS reloads.
 - The mock login is saved like a real one, so relaunches, failed logins and logging in again can be tested too. Typing it on the login screen again starts over from the mock data.
 

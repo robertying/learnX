@@ -166,6 +166,30 @@ export const applyLaunchOptions = (initialProps?: LaunchOptions) => {
 };
 
 /**
+ * `learnx://mock-network?latency=slow` (and `failure=…`) sets the mock
+ * account's emulated server while the app runs, as Network Emulation does.
+ * A test that needs a slow request launches with none, so the launch's login
+ * and catch-up are over at once, then slows the requests it starts itself
+ * (`TodayUITests`). Only debug and E2E builds take it. Returns whether the
+ * link was one.
+ */
+export const applyMockNetworkLink = (url: string) => {
+  const match = /^learnx:\/\/mock-network\?(.*)$/i.exec(url);
+  if (!match || !(__DEV__ || env.TEST_LOGIN)) {
+    return false;
+  }
+  for (const pair of match[1].split('&')) {
+    const [key, value] = pair.split('=');
+    if (key === 'latency' && isLatency(value)) {
+      setMockNetworkConfig({ latency: value });
+    } else if (key === 'failure' && isFailure(value)) {
+      setMockNetworkConfig({ failure: value });
+    }
+  }
+  return true;
+};
+
+/**
  * The root component: applies the launch arguments before the app first
  * renders, so they're in place before the saved login is used. Only once, so
  * a later change (e.g. from the Debug page) sticks.

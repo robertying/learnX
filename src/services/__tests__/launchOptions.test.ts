@@ -8,6 +8,7 @@ import {
 } from 'data/mockSource';
 import {
   applyLaunchOptions,
+  applyMockNetworkLink,
   getLiveLogin,
   takeLaunchNotification,
   withLaunchOptions,
@@ -190,6 +191,50 @@ describe('postNotification', () => {
     (env as { TEST_LOGIN?: boolean }).TEST_LOGIN = true;
     applyLaunchOptions({ postNotification: 'notice:n1' });
     expect(takeLaunchNotification()).toBe('notice:n1');
+  });
+});
+
+describe('mock network link', () => {
+  const dev = __DEV__;
+
+  afterEach(() => {
+    (globalThis as unknown as { __DEV__: boolean }).__DEV__ = dev;
+    delete (env as { TEST_LOGIN?: boolean }).TEST_LOGIN;
+  });
+
+  it('sets the latency and failure while the app runs', () => {
+    expect(
+      applyMockNetworkLink(
+        'learnx://mock-network?latency=slow&failure=offline',
+      ),
+    ).toBe(true);
+    expect(getMockNetworkConfig()).toMatchObject({
+      latency: 'slow',
+      failure: 'offline',
+    });
+  });
+
+  it('takes the link but ignores unknown values', () => {
+    expect(
+      applyMockNetworkLink('learnx://mock-network?latency=fast&other=1'),
+    ).toBe(true);
+    expect(getMockNetworkConfig()).toEqual(defaultMockNetworkConfig);
+  });
+
+  it('leaves other links alone', () => {
+    expect(applyMockNetworkLink('learnx://today')).toBe(false);
+  });
+
+  it('is ignored by release builds other than E2E builds', () => {
+    (globalThis as unknown as { __DEV__: boolean }).__DEV__ = false;
+    expect(applyMockNetworkLink('learnx://mock-network?latency=slow')).toBe(
+      false,
+    );
+    expect(getMockNetworkConfig().latency).toBe('normal');
+
+    (env as { TEST_LOGIN?: boolean }).TEST_LOGIN = true;
+    applyMockNetworkLink('learnx://mock-network?latency=slow');
+    expect(getMockNetworkConfig().latency).toBe('slow');
   });
 });
 
