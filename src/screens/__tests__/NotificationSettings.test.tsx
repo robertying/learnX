@@ -201,10 +201,9 @@ describe('New Versions', () => {
     jest.mocked(checksForUpdates).mockReturnValue(true);
     permission({ permission: 'undetermined' });
     await renderScreen();
-    expect(screen.getByTestId('notifications-appUpdates')).toHaveProp(
-      'value',
-      true,
-    );
+    expect(
+      screen.getByRole('switch', { name: t('notifyAppUpdates') }),
+    ).toBeChecked();
     expect(screen.getByTestId('notifications-turn-on')).toBeTruthy();
   });
 });

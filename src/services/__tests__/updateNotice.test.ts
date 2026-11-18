@@ -5,9 +5,17 @@ import { getSettings, resetSettings, setSetting } from 'data/settings';
 import { t } from 'helpers/i18n';
 import { notifyUpdate } from 'services/updateNotice';
 
+// Loads expo-updates and the Crashlytics module, neither of which Jest can.
+jest.mock('services/crashReporting', () => ({ recordError: jest.fn() }));
+
 const schedule = jest.mocked(Notifications.scheduleNotificationAsync);
 const update = (overrides: { version?: string; inFront?: boolean } = {}) =>
-  notifyUpdate({ version: '19.1.0', body: 'Body', inFront: false, ...overrides });
+  notifyUpdate({
+    version: '19.1.0',
+    body: 'Body',
+    inFront: false,
+    ...overrides,
+  });
 
 beforeEach(() => {
   resetNotified();

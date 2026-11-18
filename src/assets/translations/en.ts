@@ -441,7 +441,8 @@ export default {
   notifyAppUpdates: 'New Versions',
   notifyAppUpdatesCaption: 'Lets you know when a new version of learnX is out.',
   updateNotificationBody: 'Download and install it in Settings.',
-  updateNotificationReadyBody: "It's downloaded and installs when you quit learnX.",
+  updateNotificationReadyBody:
+    "It's downloaded and installs when you quit learnX.",
   notifyClassReminders: 'Class Reminders',
   classReminderOffset: 'Remind Before (Minutes)',
   classStartsAt: 'Starts at {time}',

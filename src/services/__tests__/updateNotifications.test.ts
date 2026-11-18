@@ -7,6 +7,9 @@ import { getLatestRelease } from 'helpers/update';
 import Updater from 'modules/updater';
 import { checkForUpdate, watchUpdates } from 'services/updateNotifications';
 
+// Loads expo-updates and the Crashlytics module, neither of which Jest can.
+jest.mock('services/crashReporting', () => ({ recordError: jest.fn() }));
+
 jest.mock('helpers/update', () => ({
   ...jest.requireActual('helpers/update'),
   getLatestRelease: jest.fn(),
@@ -30,7 +33,7 @@ const latest = (version: string) =>
 beforeEach(() => {
   clearQueryCache();
   resetNotified();
-  jest.replaceProperty(AppState, 'currentState', 'background');
+  // React Native's AppState mock never reads 'active': the app is behind.
 });
 
 describe('checkForUpdate', () => {

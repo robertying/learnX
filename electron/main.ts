@@ -696,7 +696,8 @@ let updater: ReturnType<typeof createUpdater> | null = null;
  * Versions then). E2E runs (electron/e2e) turn checks off with
  * LEARNX_NO_UPDATES, and a second launch only hands its arguments over.
  */
-const updaterRunning = !process.env.LEARNX_NO_UPDATES && primaryInstance && !!mode;
+const updaterRunning =
+  !process.env.LEARNX_NO_UPDATES && primaryInstance && !!mode;
 const updaterLoaded =
   updaterRunning && mode
     ? loadUpdater(mode).then(

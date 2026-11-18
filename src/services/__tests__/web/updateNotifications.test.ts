@@ -11,6 +11,9 @@ import {
   uninstallBridge,
 } from 'test-utils/mocks/electronBridge';
 
+// Loads expo-updates and the Crashlytics module, neither of which Jest can.
+jest.mock('services/crashReporting', () => ({ recordError: jest.fn() }));
+
 let bridge: Bridge;
 
 /** The main process reports an update (electron/updater.ts). */
@@ -18,7 +21,7 @@ const ready = async (update: BridgeUpdate) => {
   pendingUpdate();
   jest.mocked(bridge.updates.pending).mockReturnValue(update);
   jest.mocked(bridge.updates.onReady).mock.calls[0]?.[0](update);
-  await new Promise(setImmediate);
+  await new Promise(resolve => setTimeout(resolve));
 };
 
 /** The notification's text, as the main process got it. */
