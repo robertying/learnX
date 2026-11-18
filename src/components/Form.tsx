@@ -245,10 +245,11 @@ export const FormScreen: React.FC<ViewProps> = ({ style, ...props }) => (
 // in an iPad split view's other columns the automatic style is an opaque band.
 const glassHeaderModifiers = [scrollEdgeEffectStyle('soft', 'top')];
 
-// More room between sections than SwiftUI's default, which leaves a footer
-// close above the next section's title: a settings screen whose sections
-// all have both (Calendars & Reminders) read as one block.
-const iosFormModifiers = [...glassHeaderModifiers, listSectionSpacing(28)];
+// The default's 35 pt between sections, as in the Settings app, given as a
+// number: SwiftUI then adds it to a footer and the next section's title
+// rather than leaving them 21 pt apart, which ran a screen whose sections
+// all have both (Calendars & Reminders) into one block.
+const iosFormModifiers = [...glassHeaderModifiers, listSectionSpacing(35)];
 
 const macRowBackground = listRowBackground(
   PlatformColor('quaternarySystemFill'),
