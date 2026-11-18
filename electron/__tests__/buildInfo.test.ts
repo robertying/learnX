@@ -37,7 +37,11 @@ it("reads the checkout's version and build number", () => {
 
 it('shows the version and build number in the About panel', () => {
   expect(
-    aboutPanelOptions({ version: '19.0.0', build: '4544' }, '/icon.png'),
+    aboutPanelOptions(
+      { version: '19.0.0', build: '4544' },
+      '/icon.png',
+      'linux',
+    ),
   ).toEqual({
     applicationName: 'learnX',
     applicationVersion: '19.0.0 (4544)',
@@ -45,4 +49,14 @@ it('shows the version and build number in the About panel', () => {
     website: 'https://github.com/robertying/learnX',
     iconPath: '/icon.png',
   });
+});
+
+it("leaves the build number to the About panel's version on macOS", () => {
+  expect(
+    aboutPanelOptions(
+      { version: '19.0.0', build: '4544' },
+      '/icon.png',
+      'darwin',
+    ),
+  ).toMatchObject({ applicationVersion: '19.0.0', version: '4544' });
 });
