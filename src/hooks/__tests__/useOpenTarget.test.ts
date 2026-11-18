@@ -57,3 +57,12 @@ it('opens Today for its Schedule to open (the Jump List)', async () => {
     params: { screen: 'Today', pop: true },
   });
 });
+
+it('opens Settings for a new version, with its row on top', async () => {
+  (await open())({ type: 'update' });
+  expect(setPendingTarget).toHaveBeenCalledWith(null);
+  expect(mockNavigate).toHaveBeenCalledWith('MainTab', {
+    screen: 'SettingStack',
+    params: { screen: 'Settings', pop: true },
+  });
+});

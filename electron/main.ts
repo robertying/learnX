@@ -691,10 +691,14 @@ const loadUpdater = async (updaterMode: UpdateMode) => {
 };
 /** The updater, once it's loaded; null in a run without updates. */
 let updater: ReturnType<typeof createUpdater> | null = null;
+/**
+ * Whether this run checks for updates (Settings › Notifications offers New
+ * Versions then). E2E runs (electron/e2e) turn checks off with
+ * LEARNX_NO_UPDATES, and a second launch only hands its arguments over.
+ */
+const updaterRunning = !process.env.LEARNX_NO_UPDATES && primaryInstance && !!mode;
 const updaterLoaded =
-  // E2E runs (electron/e2e) turn checks off with LEARNX_NO_UPDATES, and a
-  // second launch only hands its arguments over.
-  !process.env.LEARNX_NO_UPDATES && primaryInstance && mode
+  updaterRunning && mode
     ? loadUpdater(mode).then(
         loaded => {
           updater = loaded;
@@ -735,6 +739,10 @@ ipcMain.on('app:relaunch', event => {
   fromApp(event);
   app.relaunch();
   app.quit();
+});
+ipcMain.on('updates:checks', event => {
+  fromApp(event);
+  event.returnValue = updaterRunning;
 });
 ipcMain.on('updates:pending', event => {
   fromApp(event);
