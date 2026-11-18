@@ -19,7 +19,7 @@ final class TodayUITests: SimulatorUITestCase {
     // The refresh lasts as long as its requests, so it has to outlast the screenshot below. The app launched with no
     // emulated delay, so its login and catch-up are over; from here on each request takes 3 to 6 s, and the refresh
     // makes requests of its own rather than joining ones under way.
-    app.open(try XCTUnwrap(URL(string: "learnx://mock-network?latency=slow")))
+    try open(link: "learnx://mock-network?latency=slow")
 
     // The spinner shows while the list is held down, and isn't in the accessibility tree: look at the gap the pull
     // opens in the bar, from a screenshot taken while the finger is still down.
