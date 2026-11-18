@@ -185,7 +185,7 @@ export default {
   unsandboxedNote:
     "learnX is running without Chromium's sandbox, as the AppImage does on Ubuntu 24.04 and later. For better security, install the .deb instead.",
   startAtLoginCaption:
-    'learnX starts in the system tray when you sign in, so it keeps syncing and sends reminders. Closing its window keeps it there; Quit in the tray menu ends it.',
+    'Starts learnX in the system tray when you log in to your computer, so it keeps syncing and sending reminders. Closing the window keeps it running there; to quit, choose Quit learnX in the tray menu.',
   language: 'Language',
   followSystem: 'Follow System',
   languageRestartTitle: 'Restart learnX?',
@@ -371,7 +371,7 @@ export default {
   download: 'Download',
   saveFileSucceeded: 'Saved {name}',
   calendarExportWithoutClasses:
-    "Saved {name} without your classes: the timetable couldn't be loaded.",
+    "Saved {name}, but without your classes: the course schedule couldn't be loaded.",
   saveFileFailed: "Couldn't save the file",
   sso: 'Electronic ID Service System of Tsinghua University',
   ssoNote:
@@ -513,7 +513,7 @@ export default {
   downloads: 'Downloads',
   downloadsTotal: 'All Downloads',
   downloadsCaption:
-    'Files downloaded in learnX, by course. Tap a course to export or delete its files.',
+    'Files downloaded in learnX, by course. Open a course to export or delete its files.',
   downloadsExport: 'Export All Downloads',
   downloadsExportCaption:
     'Copies the files to a "learnX" folder in a place you choose, sorted by semester and course. Exporting again updates that folder.',
@@ -562,6 +562,7 @@ export default {
   a11yNewBadge: 'New',
   a11yDone: 'Ended',
   a11yStruck: 'Will be replaced or removed',
+  a11yListWidth: 'List width',
   moveUp: 'Move Up',
   moveDown: 'Move Down',
   courseUnfinishedAssignments: '{count} unfinished assignments',
