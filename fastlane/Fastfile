@@ -83,7 +83,7 @@ end
 #
 # Four labeled sections, each opened by a `==== <name> ====` line (any order):
 # GitHub Releases, Google Play, App Store (iOS), Mac App Store. Each store
-# section has a `---- 中文 ----` and a `---- English ----` block.
+# section has a `---- English ----` block, then a `---- 中文 ----` block.
 
 def default_notes_path
   File.join(out_dir, "release-notes.md")
@@ -154,7 +154,7 @@ end
 
 NOTES_LANGUAGE_LINE = /^-{4,}[ \t]*(.*?)[ \t]*-*[ \t]*$/
 
-# { en:, zh: } from a store section's `---- 中文 ----` and `---- English ----` blocks.
+# { en:, zh: } from a store section's `---- English ----` and `---- 中文 ----` blocks.
 def split_languages(section, name)
   parts = section.split(NOTES_LANGUAGE_LINE, -1)
   parts.shift
@@ -162,7 +162,7 @@ def split_languages(section, name)
   zh = blocks.select { |label, _| label.start_with?("中文") }.values
   en = blocks.select { |label, _| label.start_with?("English") }.values
   if blocks.size != 2 || zh.size != 1 || en.size != 1 || zh.first.empty? || en.first.empty?
-    UI.user_error!("#{name} notes need a `---- 中文 ----` block and a `---- English ----` block, found #{blocks.keys.inspect}")
+    UI.user_error!("#{name} notes need a `---- English ----` block and a `---- 中文 ----` block, found #{blocks.keys.inspect}")
   end
   { en: en.first, zh: zh.first }
 end
@@ -252,16 +252,6 @@ def write_fallback_notes(path)
 
   store = lambda do |zh_locale, en_locale|
     <<~STORE.strip
-      ---- 中文（#{zh_locale}）----
-
-      # 功能
-
-      - #{NOTES_TODO}：只写这个平台的改动，没有就在 # 修复 下写“修复若干小问题。”
-
-      # 修复
-
-      - #{NOTES_TODO}
-
       ---- English (#{en_locale}) ----
 
       # Features
@@ -269,6 +259,16 @@ def write_fallback_notes(path)
       - #{NOTES_TODO}: only this platform's changes, or "Fix minor issues." under # Fixes
 
       # Fixes
+
+      - #{NOTES_TODO}
+
+      ---- 中文（#{zh_locale}）----
+
+      # 功能
+
+      - #{NOTES_TODO}：只写这个平台的改动，没有就在 # 修复 下写“修复若干小问题。”
+
+      # 修复
 
       - #{NOTES_TODO}
     STORE
