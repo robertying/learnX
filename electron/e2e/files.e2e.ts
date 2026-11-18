@@ -142,7 +142,8 @@ test('brings the list back when going back from a full screen file', async ({
   await openCard(window, 'MOCK_COURSE', 'course-detail');
   const course = byId(window, 'course-detail');
   await course.getByRole('tab', { name: exact('T_files') }).click();
-  await shown(course.getByRole('button', { name: text('MOCK_FILE') })).click();
+  // The course's own file (MOCK_FILE is another course's).
+  await shown(course.getByTestId('file-card')).click();
   await expect(byId(window, 'file-detail')).toBeVisible();
 
   const list = card(window, 'MOCK_COURSE');
