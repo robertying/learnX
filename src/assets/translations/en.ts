@@ -437,6 +437,13 @@ export default {
   sampleGradeComment: 'Well done. Part 2 misses the empty-tree case.',
   notificationChannelClasses: 'Class reminders',
   notificationChannelClassesDescription: 'Reminders before your classes start',
+  notificationChannelUpdates: 'New versions',
+  notificationChannelUpdatesDescription: 'When a new version of learnX is out',
+  notifyAppUpdates: 'New Versions',
+  notifyAppUpdatesCaption: 'Lets you know when a new version of learnX is out.',
+  updateNotificationBody: 'Download and install it in Settings.',
+  updateNotificationReadyBody:
+    "It's downloaded and installs when you quit learnX.",
   notifyClassReminders: 'Class Reminders',
   classReminderOffset: 'Remind Before (Minutes)',
   classStartsAt: 'Starts at {time}',

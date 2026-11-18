@@ -18,13 +18,15 @@ export interface CourseTarget {
 export type ListTarget = ItemTarget | CourseTarget;
 
 /**
- * What a learnx:// link opens: an item, a course or a list, or Today; and
- * from the Electron app's Jump List, the week's Schedule.
+ * What a learnx:// link opens: an item, a course or a list, or Today; from
+ * the Electron app's Jump List, the week's Schedule; and from a new version's
+ * notification, Settings, where its row is on top.
  */
 export type OpenTarget =
   | ListTarget
   | { type: 'today'; id?: undefined }
-  | { type: 'schedule'; id?: undefined };
+  | { type: 'schedule'; id?: undefined }
+  | { type: 'update'; id?: undefined };
 
 /** Where each kind of item opens: its tab, the tab's list, and the item's page. */
 export const targetRoutes = {

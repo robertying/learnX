@@ -38,6 +38,12 @@ describe('getNotificationTarget', () => {
     ).toEqual({ type: 'course', id: 'c1' });
   });
 
+  it('opens Settings from a new version', () => {
+    expect(getNotificationTarget(response({ type: 'update' }))).toEqual({
+      type: 'update',
+    });
+  });
+
   it("ignores notifications that aren't ours", () => {
     expect(getNotificationTarget(response(null))).toBeNull();
     expect(getNotificationTarget(response({ type: 'class' }))).toBeNull();
@@ -87,7 +93,7 @@ describe('permission', () => {
     const channels = jest
       .mocked(Notifications.setNotificationChannelAsync)
       .mock.calls.map(([id]) => id);
-    expect(channels).toEqual(['content', 'deadlines', 'classes']);
+    expect(channels).toEqual(['content', 'deadlines', 'classes', 'updates']);
     expect(
       jest.mocked(Notifications.setNotificationChannelAsync).mock
         .invocationCallOrder[0],
@@ -274,6 +280,6 @@ describe('configureNotifications', () => {
       jest
         .mocked(Notifications.setNotificationChannelAsync)
         .mock.calls.map(([id]) => id),
-    ).toEqual(['content', 'deadlines', 'classes']);
+    ).toEqual(['content', 'deadlines', 'classes', 'updates']);
   });
 });

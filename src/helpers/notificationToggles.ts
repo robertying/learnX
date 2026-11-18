@@ -33,6 +33,7 @@ export const notificationToggles: Record<
     icon: 'groupSubmission',
     title: () => t('notifyGroupSubmissions'),
   },
+  appUpdates: { icon: 'update', title: () => t('notifyAppUpdates') },
 };
 
 /** New content, in the tabs' order: the first section on both pages. */

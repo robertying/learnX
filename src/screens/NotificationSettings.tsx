@@ -20,6 +20,7 @@ import { openSystemSettings } from 'helpers/systemSettings';
 import useNotificationPermission from 'hooks/useNotificationPermission';
 import { SettingsStackParams } from 'navigation/types';
 import { isApple, isElectron } from 'helpers/platform';
+import { checksForUpdates } from 'services/updateNotifications';
 
 type Props = NativeStackScreenProps<
   SettingsStackParams,
@@ -67,8 +68,11 @@ const NotificationSettings: React.FC<Props> = () => {
     />
   );
 
+  // Only where learnX updates itself: the APKs and the Windows and Linux app.
+  const showUpdates = checksForUpdates();
+
   const anyOn = (Object.keys(notificationToggles) as NotificationToggle[]).some(
-    key => notifications[key],
+    key => notifications[key] && (key !== 'appUpdates' || showUpdates),
   );
 
   /**
@@ -149,6 +153,11 @@ const NotificationSettings: React.FC<Props> = () => {
           )}
           {assignmentToggles.map(renderToggle)}
         </FormSection>
+        {showUpdates && (
+          <FormSection footer={t('notifyAppUpdatesCaption')}>
+            {renderToggle('appUpdates')}
+          </FormSection>
+        )}
         {/* Windows and Linux ask learnX for no permission to notify. */}
         {!isElectron() && (
           <FormSection footer={t('notificationAccessCaption')}>

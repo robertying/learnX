@@ -40,6 +40,11 @@ export interface NotificationSettings {
   classReminders: boolean;
   /** Minutes before a class starts to remind the user. */
   classReminderOffset: number;
+  /**
+   * A new version of learnX, where the app updates itself: the APKs and the
+   * Windows and Linux app.
+   */
+  appUpdates: boolean;
 }
 export interface SettingsState {
   /**

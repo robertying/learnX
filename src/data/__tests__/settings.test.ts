@@ -37,6 +37,7 @@ describe('settings', () => {
        "courseInformationSharing": false,
        "graduate": false,
        "notifications": {
+         "appUpdates": true,
          "assignments": false,
          "classReminderOffset": 15,
          "classReminders": false,
