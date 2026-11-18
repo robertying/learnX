@@ -32,6 +32,7 @@ import Login from 'screens/Login';
 import Welcome from 'screens/Welcome';
 import WhatsNew from 'screens/WhatsNew';
 import SemesterSelection from 'screens/SemesterSelection';
+import LanguageSettings from 'screens/LanguageSettings';
 import CalendarSettings from 'screens/CalendarSettings';
 import { calendarSettingsTitle } from 'helpers/calendar/details';
 import Downloads from 'screens/Downloads';
@@ -137,6 +138,7 @@ const settingDetailScreens: {
   SemesterSelection: [SemesterSelection, () => t('semesterSelection')],
   Downloads: [Downloads, () => t('downloads')],
   NotificationSettings: [NotificationSettings, () => t('notifications')],
+  LanguageSettings: [LanguageSettings, () => t('language')],
   SwipeActions: [SwipeActions, () => t('swipeActions')],
   Maintainer: [Maintainer, () => t('becomeMaintainer')],
   Help: [Help, () => t('helpAndFeedback')],

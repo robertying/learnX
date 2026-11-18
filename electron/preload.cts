@@ -58,6 +58,12 @@ const learnx: Bridge = {
   // The app's version and build number, and the update waiting for a
   // restart (updater.ts): null until one has downloaded.
   appInfo: () => ipcRenderer.sendSync('app:info'),
+  relaunch: () => ipcRenderer.send('app:relaunch'),
+  // The app's own language, where it has one (language.ts).
+  language: {
+    get: () => ipcRenderer.invoke('language:get'),
+    set: language => ipcRenderer.invoke('language:set', language),
+  },
   updates: {
     pending: () => ipcRenderer.sendSync('updates:pending'),
     onReady: listener => {

@@ -184,6 +184,13 @@ export default {
     "learnX is running without Chromium's sandbox, as the AppImage does on Ubuntu 24.04 and later. For better security, install the .deb instead.",
   startAtLoginCaption:
     'learnX starts in the system tray when you sign in, so it keeps syncing and sends reminders. Closing its window keeps it there; Quit in the tray menu ends it.',
+  language: 'Language',
+  followSystem: 'Follow System',
+  languageRestartTitle: 'Restart learnX?',
+  languageRestartMessage:
+    'The new language takes effect after learnX restarts.',
+  later: 'Later',
+  restartNow: 'Restart Now',
   trayOpen: 'Open learnX',
   trayCheckForNewItems: 'Check for New Items',
   trayQuit: 'Quit learnX',

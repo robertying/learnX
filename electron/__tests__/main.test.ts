@@ -27,6 +27,7 @@ const fakeElectron = (dataDir: string, { packaged = false } = {}) => {
     },
     requestSingleInstanceLock: () => true,
     quit: jest.fn(),
+    relaunch: jest.fn(),
     whenReady: () => Promise.resolve(),
     getVersion: () => '19.0.0',
     getAppPath: () => path.join(__dirname, '..'),
@@ -831,4 +832,74 @@ it('zooms from keys typed in a web view too', async () => {
   });
   expect(event.preventDefault).toHaveBeenCalled();
   expect(win.webContents.setZoomLevel).toHaveBeenLastCalledWith(0.5);
+});
+
+describe('the app’s own language', () => {
+  const call = async (channel: string, ...args: unknown[]) =>
+    fake.handlers.get(channel)!(eventFrom('window', 'app://learnx/'), ...args);
+  const langSwitches = () =>
+    fake.app.commandLine.appendSwitch.mock.calls.filter(
+      ([name]) => name === 'lang',
+    );
+
+  it('is saved, and set as Chromium’s language at the next launch', async () => {
+    await onPlatform('linux', () => loadMain());
+    await expect(call('language:get')).resolves.toEqual({
+      supported: true,
+      language: 'system',
+    });
+    expect(langSwitches()).toEqual([]);
+    await expect(call('language:set', 'fr-FR')).resolves.toBe(false);
+    await expect(call('language:set', 'zh-CN')).resolves.toBe(true);
+    await expect(call('language:get')).resolves.toEqual({
+      supported: true,
+      language: 'zh-CN',
+    });
+    // Takes effect only from the next launch.
+    expect(langSwitches()).toEqual([]);
+
+    await call('app:relaunch');
+    expect(fake.app.relaunch).toHaveBeenCalled();
+    expect(fake.app.quit).toHaveBeenCalled();
+
+    await onPlatform('win32', () => loadMain());
+    expect(langSwitches()).toEqual([['lang', 'zh-CN']]);
+  });
+
+  it('isn’t offered on a Mac, which has a per-app language, unless a dev run asks', async () => {
+    fs.mkdirSync(path.join(dataDir, 'userData'), { recursive: true });
+    fs.writeFileSync(
+      path.join(dataDir, 'userData', 'language.json'),
+      JSON.stringify({ language: 'zh-CN' }),
+    );
+    await onPlatform('darwin', () => loadMain());
+    await expect(call('language:get')).resolves.toEqual({
+      supported: false,
+      language: 'system',
+    });
+    await expect(call('language:set', 'en-US')).resolves.toBe(false);
+    expect(langSwitches()).toEqual([]);
+
+    jest.replaceProperty(process, 'env', {
+      ...process.env,
+      LEARNX_LANGUAGE_SETTING: '1',
+    });
+    await onPlatform('darwin', () => loadMain());
+    await expect(call('language:get')).resolves.toEqual({
+      supported: true,
+      language: 'zh-CN',
+    });
+    expect(langSwitches()).toEqual([['lang', 'zh-CN']]);
+  });
+
+  it('isn’t offered on a Mac by a packaged build, whatever the environment', async () => {
+    jest.replaceProperty(process, 'env', {
+      ...process.env,
+      LEARNX_LANGUAGE_SETTING: '1',
+    });
+    await onPlatform('darwin', () => loadMain({ packaged: true }));
+    await expect(call('language:get')).resolves.toMatchObject({
+      supported: false,
+    });
+  });
 });

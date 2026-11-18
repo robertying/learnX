@@ -15,6 +15,7 @@ import { isElectron } from 'helpers/platform';
 import useAvailableUpdate from 'hooks/useAvailableUpdate';
 import useUpdateInstaller from 'hooks/useUpdateInstaller';
 import useLoginItem from 'hooks/useLoginItem';
+import useAppLanguage from 'hooks/useAppLanguage';
 import useSandboxNote from 'hooks/useSandboxNote';
 import { logout } from 'data/login';
 import { userQuery } from 'data/queries';
@@ -75,6 +76,8 @@ const Settings: React.FC<Props> = ({ navigation }) => {
   const whatsNew = latestWhatsNew();
   // Electron on Windows (and a Mac dev run): off until the user turns it on.
   const loginItem = useLoginItem();
+  // Electron on Windows and Linux, which have no per-app language.
+  const appLanguage = useAppLanguage();
   const sandboxNote = useSandboxNote();
 
   const handleLogout = () => {
@@ -172,6 +175,14 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             title={t('downloads')}
             {...linkTo('Downloads')}
           />
+          {appLanguage && (
+            <FormLink
+              icon="language"
+              testID="settings-language"
+              title={t('language')}
+              {...linkTo('LanguageSettings')}
+            />
+          )}
           {/* The Mac and Windows have no swipe: their cards' actions are in a
               right-click menu. */}
           {!DeviceInfo.isMac() && !isElectron() && (

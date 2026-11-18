@@ -20,6 +20,7 @@ import * as whatsNew from 'helpers/whatsNew';
 import { setServerWritesAllowed } from 'helpers/serverWrites';
 import useAvailableUpdate from 'hooks/useAvailableUpdate';
 import useLoginItem from 'hooks/useLoginItem';
+import useAppLanguage from 'hooks/useAppLanguage';
 import { useDetailRoot, useShowDetail } from 'hooks/useDetailNavigator';
 import Settings from 'screens/Settings';
 import { installsUpdate, installUpdate } from 'services/update';
@@ -28,6 +29,7 @@ import { screenProps } from 'test-utils/screenProps';
 jest.mock('data/login', () => ({ logout: jest.fn() }));
 jest.mock('hooks/useAvailableUpdate', () => jest.fn(() => null));
 jest.mock('hooks/useLoginItem', () => jest.fn(() => null));
+jest.mock('hooks/useAppLanguage', () => jest.fn(() => null));
 jest.mock('services/update', () => ({
   ...jest.requireActual<typeof import('services/update')>('services/update'),
   installsUpdate: jest.fn(() => false),
@@ -248,5 +250,23 @@ describe('Start at login', () => {
       true,
     );
     expect(set).toHaveBeenCalledWith(true);
+  });
+});
+
+describe('Language', () => {
+  it('is left out where the system has a per-app language', async () => {
+    await renderScreen();
+    expect(screen.queryByTestId('settings-language')).toBeNull();
+  });
+
+  it('opens its page where learnX has its own', async () => {
+    jest.mocked(useAppLanguage).mockReturnValue({
+      language: 'system',
+      set: jest.fn(),
+      relaunch: jest.fn(),
+    });
+    await renderScreen();
+    await userEvent.press(screen.getByTestId('settings-language'));
+    expect(mockShow).toHaveBeenCalledWith('LanguageSettings');
   });
 });
