@@ -65,10 +65,7 @@ export const mainProcess = (app: ElectronApplication) => ({
    */
   stub: (answers: DialogAnswers = {}) =>
     app.evaluate(
-      (
-        { app: electronApp, dialog, Menu, Notification, shell },
-        given,
-      ) => {
+      ({ app: electronApp, dialog, Menu, Notification, shell }, given) => {
         const state = globalThis as unknown as State;
         const record = (state.learnxE2E ??= {
           notifications: [],

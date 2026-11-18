@@ -80,16 +80,8 @@ const FileDetailContent: React.FC<{
   courseFileId?: string;
   navigation: Props['navigation'];
 }> = ({ file, courseFileId, navigation }) => {
-  const {
-    path,
-    progress,
-    error,
-    redownload,
-    share,
-    save,
-    open,
-    showInFolder,
-  } = useFileDownload(file);
+  const { path, progress, error, redownload, share, save, open, showInFolder } =
+    useFileDownload(file);
 
   // A course file downloaded here no longer shows as new.
   useEffect(() => {

@@ -86,7 +86,10 @@ const assignmentEvents = (range: ExportRange, now: dayjs.Dayjs): ICSEvent[] => {
 };
 
 /** The classes in `range`, fetched week by week. */
-const classEvents = async ({ start, end }: ExportRange): Promise<ICSEvent[]> => {
+const classEvents = async ({
+  start,
+  end,
+}: ExportRange): Promise<ICSEvent[]> => {
   const settings = getSettings();
   const { classes } = await fetchCalendarRange(
     start.startOf('day'),
