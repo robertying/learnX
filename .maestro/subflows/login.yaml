@@ -41,7 +41,7 @@ appId: ${APP_ID}
 # page, a logged-in one on its tabs.
 - extendedWaitUntil:
     visible:
-      id: 'welcome-continue|login-username|tab-notices|bell\.fill'
+      id: 'welcome-continue|login-username|tab-notices'
     timeout: 60000
 # Logged in already: an absent element costs Maestro's optional lookup (up to
 # 7 s from the launch), still far less than a login.
@@ -54,4 +54,4 @@ appId: ${APP_ID}
 - runFlow:
     file: tab.yaml
     env:
-      TAB: 'tab-notices|bell\.fill'
+      TAB: 'tab-notices'

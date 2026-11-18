@@ -5,7 +5,7 @@ appId: ${APP_ID}
 - runFlow:
     file: tab.yaml
     env:
-      TAB: 'tab-today|(sunrise|sun\.max|sunset|moon\.stars)\.fill'
+      TAB: 'tab-today'
 # The iOS header button only exposes its label; Android's has the same one.
 # With the "new" badge, Maestro reads the iOS button as the badge's value,
 # UIKit's own text, not the label; Android reads the badge after the label.

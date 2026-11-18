@@ -52,7 +52,7 @@ name: Show no results and failures
 - runFlow:
     file: subflows/tab.yaml
     env:
-      TAB: 'tab-files|folder\.fill'
+      TAB: 'tab-files'
 - runFlow:
     file: subflows/open.yaml
     env:
@@ -180,7 +180,7 @@ name: Show no results and failures
 - tapOn: '${T_retryLogin}'
 - extendedWaitUntil:
     visible:
-      id: 'tab-notices|bell\.fill'
+      id: 'tab-notices'
     timeout: 30000
 - assertNotVisible:
     id: login-username

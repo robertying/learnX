@@ -51,7 +51,7 @@ name: App Store screenshots on the iPad
 - runFlow:
     file: ../subflows/tab.yaml
     env:
-      TAB: 'tab-assignments|list\.bullet\.clipboard\.fill'
+      TAB: 'tab-assignments'
 - runFlow:
     file: ../subflows/filter.yaml
     env:
@@ -77,7 +77,7 @@ name: App Store screenshots on the iPad
 - runFlow:
     file: ../subflows/tab.yaml
     env:
-      TAB: 'tab-files|folder\.fill'
+      TAB: 'tab-files'
 - runFlow: subflows/file.yaml
 - runFlow:
     file: ../subflows/screenshot.yaml
@@ -88,7 +88,7 @@ name: App Store screenshots on the iPad
 - runFlow:
     file: ../subflows/tab.yaml
     env:
-      TAB: 'tab-courses|books\.vertical\.fill'
+      TAB: 'tab-courses'
 - runFlow:
     file: ../subflows/open.yaml
     env:
@@ -115,7 +115,7 @@ name: App Store screenshots on the iPad
 - runFlow:
     file: ../subflows/tab.yaml
     env:
-      TAB: 'tab-notices|bell\.fill'
+      TAB: 'tab-notices'
 - runFlow:
     file: ../subflows/search.yaml
     env:

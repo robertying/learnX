@@ -25,7 +25,7 @@
 
 ## Platform quirks
 
-- iOS: after a `clearState` launch the native tab bar buttons lose their identifiers in Maestro's snapshot, so tabs are matched by testID or their filled SF Symbol. Header buttons are native bar items and only expose their label. `hideKeyboard` is flaky, so tap something inert instead. Maestro can't type CJK on Android, so search for ASCII mock content.
+- iOS: header buttons are native bar items and only expose their label. `hideKeyboard` is flaky, so tap something inert instead. Maestro can't type CJK on Android, so search for ASCII mock content.
 - Bring a list row on screen before tapping it with `subflows/scroll-list.yaml`: `scrollUntilVisible` swipes the middle of the screen, which is the detail pane in a split view. A row counts as visible under the floating tab bar or navigation bar, where a tap lands on the bar, so scroll one swipe more than it takes to show it.
 - iPad: Maestro only sees SpringBoard with Windowed Apps unless it's the patched build, so the `ipad` profile needs Full Screen Apps and `ipad-windowed` a second iPad.
 - Android foldable: unfolded, it has the tablet layout, so it stands in for Android tablets.

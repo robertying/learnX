@@ -6,7 +6,7 @@ name: Download a file, then delete it
 - runFlow:
     file: subflows/tab.yaml
     env:
-      TAB: 'tab-files|folder\.fill'
+      TAB: 'tab-files'
 - runFlow:
     file: subflows/open.yaml
     env:
