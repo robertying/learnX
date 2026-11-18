@@ -1,4 +1,4 @@
-# Runs on 18.0.3 (scripts/e2e-upgrade.sh installs it): logs in with its
+# Runs on 18.0.3 (scripts/e2e/e2e-upgrade.sh installs it): logs in with its
 # persistent mock account, which saves 18.0.3's mock data (favorites, archives,
 # a hidden course), then changes settings and turns on the assignment syncs so
 # 18.0.3 makes its calendar, reminders and their ids. 18.0.3 has no testIDs:

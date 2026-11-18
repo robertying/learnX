@@ -171,18 +171,18 @@ pnpm format --check              # Oxfmt; run `pnpm format` to fix
 pnpm ota:check                   # The over-the-air runtime version changes when native code does (AGENTS.md)
 pnpm test --coverage             # Jest: the iOS, Android, web (Electron) and tooling projects; fails below the coverage thresholds in jest.config.js
 pnpm lint:shell                  # ShellCheck, for every shell script in git
-scripts/check-release-bundle.sh  # The Android and iOS release JS bundles, with no .env value but the mock login and no other platform's code in them
+scripts/checks/check-release-bundle.sh  # The Android and iOS release JS bundles, with no .env value but the mock login and no other platform's code in them
 ```
 
 The first six need neither `.env` nor any native setup, so you can run them anywhere Node runs (ShellCheck comes from your package manager, for example `brew install shellcheck`). The bundle check needs a `.env` with the mock login and takes about two minutes. Lint is strict about a few project rules: Chinese text belongs in `src/assets/translations` (`en.ts` and `zh.ts`), and an intentionally unawaited promise is marked with `void`.
 
-End-to-end flows use [Maestro](https://docs.maestro.dev) against a Release build with the mock login: install it with `scripts/e2e-build.sh ios <simulator udid>` or `scripts/e2e-build.sh android <emulator serial>`, then run `pnpm e2e:ios` or `pnpm e2e:android`. See [.maestro/AGENTS.md](.maestro/AGENTS.md).
+End-to-end flows use [Maestro](https://docs.maestro.dev) against a Release build with the mock login: install it with `scripts/e2e/e2e-build.sh ios <simulator udid>` or `scripts/e2e/e2e-build.sh android <emulator serial>`, then run `pnpm e2e:ios` or `pnpm e2e:android`. See [.maestro/AGENTS.md](.maestro/AGENTS.md).
 
 Other CI jobs (none of them build a signed app or run on a device, so still build and try the app yourself on each platform your change touches, and say in the pull request what you checked):
 
-- `Android / Build` (required, `.github/workflows/android.yml`) runs `scripts/test-android.sh` and builds a release APK (R8 and the JS bundle included, debug-signed) when a pull request touches Android paths; otherwise it skips its steps and passes.
+- `Android / Build` (required, `.github/workflows/android.yml`) runs `scripts/checks/test-android.sh` and builds a release APK (R8 and the JS bundle included, debug-signed) when a pull request touches Android paths; otherwise it skips its steps and passes.
 - `Android / E2E tests` runs the Maestro flows in an emulator on that APK, by hand only, and saves a screenshot of each screen they reach with the results: Actions › Android › Run workflow, on `main` or a branch.
-- `Apple / iOS` builds the app and runs the native iOS tests (`scripts/test-ios.sh`), by hand only: Actions › Apple › Run workflow, on `main` (which also refreshes its compilation cache) or on a branch. Pick Mac, or iOS and Mac, to build Mac Catalyst (`Apple / Mac`).
+- `Apple / iOS` builds the app and runs the native iOS tests (`scripts/checks/test-ios.sh`), by hand only: Actions › Apple › Run workflow, on `main` (which also refreshes its compilation cache) or on a branch. Pick Mac, or iOS and Mac, to build Mac Catalyst (`Apple / Mac`).
 - `Electron / Web build`, `Electron / E2E tests (Linux)` and `Electron / E2E tests (Windows)` (required, `.github/workflows/electron.yml`) export the web build and run the Playwright tests, one app per core, on Linux (under X11, then the window test under Wayland) and on Windows at the same time; a pull request that can't affect the Windows and Linux app (only native code, Maestro flows, fastlane, docs or the other workflows) skips their steps and passes. By hand only (Actions › Electron › Run workflow), `Electron / Installers` checks that the installers still build; those builds are never released (releases are built by hand, see the release skill).
 
 ## Pull requests

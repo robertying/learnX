@@ -1,6 +1,6 @@
 appId: ${APP_ID}
 name: Update the Android app again without a confirmation
-# Run by scripts/e2e-updater.sh after update.yaml, on Android 12+ only, with
+# Run by scripts/e2e/e2e-updater.sh after update.yaml, on Android 12+ only, with
 # the next version (VERSION, 99.0.1) served: learnX installed the running
 # version, so Android installs the next update without asking.
 ---

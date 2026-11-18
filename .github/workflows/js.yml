@@ -56,7 +56,7 @@ jobs:
         run: pnpm format --check
 
       # The over-the-air runtime version changes exactly when native code does
-      # (scripts/check-ota-runtime.mjs); on failure it prints what to record.
+      # (scripts/checks/check-ota-runtime.mjs); on failure it prints what to record.
       - name: Runtime version
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm ota:check
@@ -117,4 +117,4 @@ jobs:
           LIVE_FINGERPRINT=ci-canary-live-fingerprint
           UNLISTED_KEY=ci-canary-unlisted-key
           ENV
-          scripts/check-release-bundle.sh
+          scripts/checks/check-release-bundle.sh

@@ -1,4 +1,4 @@
-// scripts/prune-caches.sh groups the repo's Actions caches by key without
+// scripts/ci/prune-caches.sh groups the repo's Actions caches by key without
 // its trailing hash, commit or timestamp and keeps the newest of each group,
 // so a key it groups wrong would delete a cache still in use. `gh` is a
 // stand-in that lists the caches below (newest first) and logs deletions.
@@ -13,7 +13,7 @@ import {
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const script = join(__dirname, '../prune-caches.sh');
+const script = join(__dirname, '../ci/prune-caches.sh');
 const sha = (n: number) => `${n}`.repeat(40).slice(0, 40);
 const hash = (n: number) => `${n}`.repeat(64).slice(0, 64);
 

@@ -5,7 +5,7 @@ module LearnXModule
   DEPLOYMENT_TARGET = '17.6'
 
   # An Expo module of Swift files next to the podspec, with Swift Testing tests
-  # in Tests/ as the 'Tests' test spec (run with scripts/test-ios.sh). The tests
+  # in Tests/ as the 'Tests' test spec (run with scripts/checks/test-ios.sh). The tests
   # are hosted in an app, which some UIKit APIs need.
   def self.podspec(s, name:, summary:)
     s.name           = name

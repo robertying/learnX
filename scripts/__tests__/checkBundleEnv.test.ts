@@ -1,9 +1,9 @@
-// scripts/check-bundle-env.mjs: release bundles carry the mock login and no
+// scripts/checks/check-bundle-env.mjs: release bundles carry the mock login and no
 // other .env value. Run in Node (ESM).
 import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 
-const script = join(__dirname, '../check-bundle-env.mjs');
+const script = join(__dirname, '../checks/check-bundle-env.mjs');
 
 const problems = (code: string, env: Record<string, string>): string[] =>
   JSON.parse(

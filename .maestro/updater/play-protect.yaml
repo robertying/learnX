@@ -2,7 +2,7 @@
 # to scan an app it hasn't seen before installing it: install without the
 # scan. "More details" shows "Install without scanning", the last line of the
 # text above the buttons, not a view of its own. PLAY_PROTECT is set by
-# scripts/e2e-updater.sh.
+# scripts/e2e/e2e-updater.sh.
 appId: ${APP_ID}
 ---
 - runFlow:

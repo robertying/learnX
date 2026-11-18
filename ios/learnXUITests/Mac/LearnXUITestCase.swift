@@ -2,11 +2,11 @@
 import XCTest
 
 /// The base of the Mac app's UI tests, which follow the Maestro flows in `.maestro/` (Maestro can't drive Mac
-/// Catalyst) and run with `scripts/e2e-mac.sh`. It launches the app in Chinese (`-AppleLanguages`) with no emulated
+/// Catalyst) and run with `scripts/e2e/e2e-mac.sh`. It launches the app in Chinese (`-AppleLanguages`) with no emulated
 /// server delay, logs in with the mock account the script passes from `.env`, and has the steps and queries the tests
 /// share. The tests move the real pointer and type on the real keyboard, so the Mac can't be used while they run.
 ///
-/// Labels and mock texts come from the same values the flows use (`scripts/e2e-env.mjs`, which the script passes to
+/// Labels and mock texts come from the same values the flows use (`scripts/e2e/e2e-env.mjs`, which the script passes to
 /// the test runner): `value("T_favorite")` is the translation as `English|中文`, `value("MOCK_NOTICE")` the mock
 /// notice's title in both languages. Name them as string literals: the script prints only the keys it finds.
 @MainActor
@@ -66,8 +66,8 @@ class LearnXUITestCase: XCTestCase {
   /// Logs in with the mock account from the welcome or login page.
   func logInAgain() throws {
     let env = ProcessInfo.processInfo.environment
-    let username = try XCTUnwrap(env["E2E_USERNAME"], "E2E_USERNAME missing; run scripts/e2e-mac.sh")
-    let password = try XCTUnwrap(env["E2E_PASSWORD"], "E2E_PASSWORD missing; run scripts/e2e-mac.sh")
+    let username = try XCTUnwrap(env["E2E_USERNAME"], "E2E_USERNAME missing; run scripts/e2e/e2e-mac.sh")
+    let password = try XCTUnwrap(env["E2E_PASSWORD"], "E2E_PASSWORD missing; run scripts/e2e/e2e-mac.sh")
 
     let welcome = element(id: "welcome-continue")
     if welcome.exists {
@@ -172,11 +172,11 @@ class LearnXUITestCase: XCTestCase {
 
   // MARK: - Values
 
-  /// A value from `scripts/e2e-env.mjs`: a translation (`T_<key>`) or mock text (`MOCK_*`), as Maestro takes it: a
+  /// A value from `scripts/e2e/e2e-env.mjs`: a translation (`T_<key>`) or mock text (`MOCK_*`), as Maestro takes it: a
   /// regex alternation of its English and Chinese text.
   func value(_ name: String) -> String {
     guard let value = ProcessInfo.processInfo.environment[name] else {
-      XCTFail("\(name) missing; run scripts/e2e-mac.sh")
+      XCTFail("\(name) missing; run scripts/e2e/e2e-mac.sh")
       return name
     }
     return value

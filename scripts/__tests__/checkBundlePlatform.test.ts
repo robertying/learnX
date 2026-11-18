@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { MARKERS, problems } from '../check-bundle-platform.mjs';
+import { MARKERS, problems } from '../checks/check-bundle-platform.mjs';
 
 const src = (file: string) =>
   readFileSync(path.join(__dirname, '..', '..', 'src', file), 'utf8');

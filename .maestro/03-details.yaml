@@ -1,6 +1,6 @@
 appId: ${APP_ID}
 name: Open a notice, an assignment and a file
-# Live runs (scripts/e2e.sh --live) open the first item of each list instead,
+# Live runs (scripts/e2e/e2e.sh --live) open the first item of each list instead,
 # so the account needs a notice, an assignment and a file this semester.
 tags:
   - live

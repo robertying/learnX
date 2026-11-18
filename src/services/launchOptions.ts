@@ -43,7 +43,7 @@ export interface LaunchOptions {
   /**
    * A test login: typing this username signs in with `liveFingerprint`
    * instead of opening the SSO page, which adds a device each time. The live
-   * test account (`scripts/e2e.sh --live`) passes the fingerprint of an
+   * test account (`scripts/e2e/e2e.sh --live`) passes the fingerprint of an
    * earlier SSO login; the login check flow passes an account that doesn't
    * exist. Only debug builds and E2E builds (TEST_LOGIN) take them.
    */

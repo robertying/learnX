@@ -6,7 +6,7 @@ version bump fails the install until the patch is updated or dropped.
 
 To change one: `pnpm patch <pkg>@<version>`, edit the folder it prints, then
 `pnpm patch-commit <folder>`. Paths in a patch are relative to the package
-folder. `scripts/check-patches.sh` fails the iOS and Android builds when a
+folder. `scripts/checks/check-patches.sh` fails the iOS and Android builds when a
 patch isn't applied to `node_modules` (`pnpm install --force` fixes that; then run `pod install` in `ios/` again,
 since the reinstall wipes the `sqlite3.h` that expo-sqlite's pod copies in). It also fails when a patch changes Android code that Expo ships prebuilt (`local-maven-repo` in the package) and its Gradle project (the package name without the scope's `@`, `/` as `-`: `expo-ui` for `@expo/ui`) isn't in `expo.autolinking.android.buildFromSource` in `package.json`, since the app would link the unpatched build.
 
@@ -15,7 +15,7 @@ issue upstream; drop the patch if so.
 
 Each patch has tests of what it changes, listed under "Tested by": Jest
 (`patches/__tests__`, the JS), hosted unit tests (`ios/learnXTests/Patches`)
-and Robolectric (`android/patch-tests`, run by `scripts/test-android.sh`) for
+and Robolectric (`android/patch-tests`, run by `scripts/checks/test-android.sh`) for
 native code, and the E2E flows for what only shows in the running app. A change
 to a patch comes with a test that fails without it.
 `scripts/__tests__/patches.test.ts` checks that every patch has a row here and

@@ -1,11 +1,11 @@
-// scripts/symbolicate.mjs: which source map decodes a Crashlytics report, and
+// scripts/release/symbolicate.mjs: which source map decodes a Crashlytics report, and
 // the decoding itself, run in Node (ESM) like the script.
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const script = join(__dirname, '../symbolicate.mjs');
+const script = join(__dirname, '../release/symbolicate.mjs');
 
 /** Calls one of the script's exports with JSON arguments, in Node. */
 const call = (name: string, ...args: unknown[]): unknown =>

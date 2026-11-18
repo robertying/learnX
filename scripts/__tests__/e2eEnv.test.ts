@@ -1,6 +1,6 @@
 // The Maestro flows (and the Electron app's Playwright tests and the Mac app's
 // UI tests) match labels
-// and mock texts through env values that scripts/e2e-env.mjs reads from the
+// and mock texts through env values that scripts/e2e/e2e-env.mjs reads from the
 // translations and the mock data, and they only run on a device (or in
 // Electron). This catches a mock data or translation edit that
 // would leave a flow without its value.
@@ -62,7 +62,7 @@ const env = new Map(
     'node',
     [
       '--disable-warning=MODULE_TYPELESS_PACKAGE_JSON',
-      join(root, 'scripts/e2e-env.mjs'),
+      join(root, 'scripts/e2e/e2e-env.mjs'),
     ],
     { encoding: 'utf8' },
   )

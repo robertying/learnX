@@ -5,7 +5,7 @@ type InlinedEnv = {
   DUMMY_USERNAME?: string;
   DUMMY_PASSWORD?: string;
   /**
-   * A build for E2E runs (TEST_LOGIN=1, scripts/e2e-build.sh): it takes a test
+   * A build for E2E runs (TEST_LOGIN=1, scripts/e2e/e2e-build.sh): it takes a test
    * login from launch arguments and says why a login failed. Never set in a
    * shipped build.
    */

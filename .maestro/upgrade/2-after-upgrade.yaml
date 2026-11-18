@@ -1,4 +1,4 @@
-# Runs on the current build installed over 18.0.3 (scripts/e2e-upgrade.sh),
+# Runs on the current build installed over 18.0.3 (scripts/e2e/e2e-upgrade.sh),
 # after 1-use-18.0.3.yaml. Nothing is cleared between the two.
 appId: ${APP_ID}
 ---

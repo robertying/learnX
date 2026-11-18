@@ -50,7 +50,7 @@ jobs:
       # themselves when nothing the app uses changed.
       - name: Detect changed files
         id: changes
-        run: scripts/changed-files.sh electron >> "$GITHUB_OUTPUT"
+        run: scripts/ci/changed-files.sh electron >> "$GITHUB_OUTPUT"
 
       - name: Set up JS
         if: steps.changes.outputs.changed == 'true'
@@ -79,7 +79,7 @@ jobs:
         id: export
         if: steps.changes.outputs.changed == 'true'
         run: |
-          bash scripts/write-e2e-env.sh
+          bash scripts/ci/write-e2e-env.sh
           pnpm exec expo export --platform web --output-dir build/electron/web
         env:
           CI: '1'
@@ -166,7 +166,7 @@ jobs:
         if: env.CHANGED == 'true'
         shell: bash
         run: |
-          bash scripts/write-e2e-env.sh
+          bash scripts/ci/write-e2e-env.sh
           pnpm e2e:electron
 
       # Runs even if the tests above failed, so one push shows both. Its
@@ -248,7 +248,7 @@ jobs:
           fi
           pnpm electron:package --${{ matrix.platform == 'Windows' && 'win' || 'linux' }}
           if [ -f .env ]; then
-            node scripts/check-bundle-env.mjs build/electron/web/_expo/static/js/web/*.js
+            node scripts/checks/check-bundle-env.mjs build/electron/web/_expo/static/js/web/*.js
           fi
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'

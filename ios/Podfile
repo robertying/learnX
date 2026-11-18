@@ -23,7 +23,7 @@ config_command = [
 
 target 'learnX' do
   # The local modules' unit tests (modules/*/ios/Tests) are CocoaPods test specs;
-  # scripts/test-ios.sh runs them. use_expo_modules! leaves pods added before it
+  # scripts/checks/test-ios.sh runs them. use_expo_modules! leaves pods added before it
   # as they are.
   Dir.glob('../modules/*/ios/*.podspec', base: Pod::Config.instance.installation_root).sort.each do |podspec|
     pod File.basename(podspec, '.podspec'), :path => File.dirname(podspec), :testspecs => ['Tests']
@@ -183,7 +183,7 @@ target 'learnX' do
     # versioned macOS bundle layout, which the Catalyst build needs to embed
     # and sign them. Fix them now, and again whenever a pod's build phase swaps
     # in the other configuration's copy of its framework.
-    fix_catalyst_frameworks = File.expand_path('../scripts/fix-catalyst-frameworks.sh', __dir__)
+    fix_catalyst_frameworks = File.expand_path('../scripts/xcode/fix-catalyst-frameworks.sh', __dir__)
     system('bash', fix_catalyst_frameworks, installer.sandbox.root.to_s, exception: true)
     catalyst_frameworks = {
       'hermes-engine' => 'hermesvm',
@@ -194,7 +194,7 @@ target 'learnX' do
       framework = catalyst_frameworks[target.name] or next
       target.shell_script_build_phases
         .select { |phase| phase.name.to_s.include?('for the right configuration') }
-        .each { |phase| phase.shell_script += "\nbash \"${PODS_ROOT}/../../scripts/fix-catalyst-frameworks.sh\" \"${PODS_ROOT}\" #{framework}\n" }
+        .each { |phase| phase.shell_script += "\nbash \"${PODS_ROOT}/../../scripts/xcode/fix-catalyst-frameworks.sh\" \"${PODS_ROOT}\" #{framework}\n" }
     end
   end
 

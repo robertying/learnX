@@ -1,7 +1,7 @@
 appId: ${APP_ID}
 name: App Store screenshots on the iPhone
 ---
-# Run by scripts/store-screenshots.sh (iphone, duo-folded): the iPhone shots
+# Run by scripts/e2e/store-screenshots.sh (iphone, duo-folded): the iPhone shots
 # of the store listing, as STORE_OUT/NN-<slug>.png.
 - runFlow: subflows/start.yaml
 

@@ -1,6 +1,6 @@
 // The over-the-air update settings: the URL, request headers and runtime
 // version in app.json and the code-signing certificate in
-// certs/ota-certificate.pem. scripts/ota-config-ios.sh writes
+// certs/ota-certificate.pem. scripts/xcode/ota-config-ios.sh writes
 // them into Expo.plist and android/app/build.gradle into resources the
 // manifest reads; the rest is in Expo.plist and the build.gradle. A mismatch
 // shows up only as updates that never arrive, so keep them in step.
@@ -71,7 +71,7 @@ test('the build writes the URL, runtime version, headers and certificate', () =>
     '@string/expo_updates_certificate',
   );
   for (const file of [
-    'scripts/ota-config-ios.sh',
+    'scripts/xcode/ota-config-ios.sh',
     'android/app/build.gradle',
   ]) {
     const text = read(file);
