@@ -4,7 +4,7 @@
 import dayjs from 'dayjs';
 import { ensureSession } from 'data/source';
 import { assignmentsQuery } from 'data/content';
-import { getCachedCourses, schoolSemesterQuery } from 'data/queries';
+import { getCachedCourses } from 'data/queries';
 import { queryClient } from 'data/queryClient';
 import { fetchCalendarRange } from 'data/schedule';
 import { getSettings } from 'data/settings';
@@ -35,26 +35,6 @@ export interface ExportRange {
   start: dayjs.Dayjs;
   end: dayjs.Dayjs;
 }
-
-/**
- * What Export offers first: today to the semester's end, or four weeks from
- * today once the semester has ended or its dates can't be fetched.
- */
-export const defaultExportRange = async (
-  now = dayjs(),
-): Promise<ExportRange> => {
-  const start = now.startOf('day');
-  const fallback = { start, end: start.add(28, 'day') };
-  try {
-    const semester = await queryClient.fetchQuery(schoolSemesterQuery);
-    const end = dayjs(semester.endDate);
-    return end.isValid() && !end.isBefore(start, 'day')
-      ? { start, end }
-      : fallback;
-  } catch {
-    return fallback;
-  }
-};
 
 const inRange = (time: dayjs.Dayjs, { start, end }: ExportRange) =>
   !time.isBefore(start.startOf('day')) && !time.isAfter(end.endOf('day'));

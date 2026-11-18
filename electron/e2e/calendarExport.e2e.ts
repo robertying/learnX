@@ -21,15 +21,20 @@ test('exports the classes and deadlines as an .ics file', async ({
   // No calendar sync on the desktop: only the export.
   await expect(window.getByTestId('calendar-course-sync')).toHaveCount(0);
 
-  // The dates come first, from today; cancelling them asks nothing more.
+  // The dates come first, today and the next four weeks as on the phones;
+  // cancelling them asks nothing more.
   const dates = window.getByRole('dialog');
   await byId(window, 'calendar-export').click();
   await expect(
     dates.getByRole('heading', { name: exact('T_exportRangeTitle') }),
   ).toBeVisible();
-  await expect(dates.locator('input[type="date"]').first()).toHaveValue(
-    new Date().toLocaleDateString('sv'),
-  );
+  const day = (offset: number) => {
+    const date = new Date();
+    date.setDate(date.getDate() + offset);
+    return date.toLocaleDateString('sv');
+  };
+  await expect(dates.locator('input[type="date"]').first()).toHaveValue(day(0));
+  await expect(dates.locator('input[type="date"]').last()).toHaveValue(day(28));
   await dates.getByRole('button', { name: exact('T_cancel') }).click();
   await expect(dates).toHaveCount(0);
   expect((await main.record()).dialogs).toHaveLength(0);

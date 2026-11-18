@@ -5,10 +5,7 @@ import { queryClient } from 'data/queryClient';
 import { assignmentsQuery } from 'data/content';
 import { coursesQuery, schoolSemesterQuery } from 'data/queries';
 import { setCurrentSemester, setArchived, resetUserData } from 'data/userData';
-import {
-  buildElectronICS,
-  defaultExportRange,
-} from 'services/calendar/electronExport';
+import { buildElectronICS } from 'services/calendar/electronExport';
 import { CalendarError } from 'services/calendar/errors';
 import type { Assignment, Course } from 'data/types/state';
 
@@ -113,26 +110,6 @@ it('leaves out assignments due outside the range', async () => {
       now,
     ),
   ).rejects.toBeInstanceOf(CalendarError);
-});
-
-it("offers today to the semester's end, or four weeks once it's over", async () => {
-  await expect(defaultExportRange(now)).resolves.toEqual({
-    start: now.startOf('day'),
-    end: dayjs(semester.endDate),
-  });
-  const later = dayjs('2027-02-01T10:00:00+08:00');
-  await expect(defaultExportRange(later)).resolves.toEqual({
-    start: later.startOf('day'),
-    end: later.startOf('day').add(28, 'day'),
-  });
-  // From the current day by default.
-  expect((await defaultExportRange()).start.isSame(dayjs(), 'day')).toBe(true);
-  queryClient.clear();
-  jest.spyOn(queryClient, 'fetchQuery').mockRejectedValueOnce(new Error('x'));
-  await expect(defaultExportRange(now)).resolves.toEqual({
-    start: now.startOf('day'),
-    end: now.startOf('day').add(28, 'day'),
-  });
 });
 
 it('fails when there is nothing to export or the login fails', async () => {

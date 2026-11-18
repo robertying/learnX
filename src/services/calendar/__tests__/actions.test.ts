@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import { resetCalendarSync, useCalendarSyncStore } from 'data/calendarSync';
 import { ensureSession } from 'data/source';
 import { fetchCalendarRange } from 'data/schedule';
+import { defaultCalendarRange } from 'helpers/calendar/range';
 import { Assignment } from 'data/types/state';
 import {
   allowAssignmentSync,
@@ -48,7 +49,6 @@ jest.mock('services/calendar/electronExport', () => ({
     ics: 'ELECTRON ICS',
     withoutClasses: false,
   })),
-  defaultExportRange: jest.fn(async () => 'DEFAULT RANGE'),
 }));
 
 const fail = (code: CalendarErrorCode) => async () => {
@@ -310,8 +310,8 @@ describe('exportCalendars', () => {
     const { buildElectronICS } = jest.requireMock(
       'services/calendar/electronExport',
     );
-    // Today to the semester's end, unless dates were picked.
-    expect(buildElectronICS).toHaveBeenLastCalledWith('DEFAULT RANGE');
+    // Today and the next four weeks, unless dates were picked.
+    expect(buildElectronICS).toHaveBeenLastCalledWith(defaultCalendarRange());
     const range = { start: dayjs('2026-11-18'), end: dayjs('2026-11-30') };
     await exportCalendars(range);
     expect(buildElectronICS).toHaveBeenLastCalledWith(range);
