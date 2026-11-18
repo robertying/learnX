@@ -1,8 +1,8 @@
 // A notice body too large for a data URL (Chromium refuses URLs over 2 MB):
-// the main process serves it at its base URL instead (webviews.cjs,
+// the main process serves it at its base URL instead (webviews.ts,
 // `loadHtml`), as the phones' web views load HTML of any size.
-import { expect, test } from './fixtures';
-import { byId, openCard, openTab } from './steps';
+import { expect, test } from './fixtures.ts';
+import { byId, openCard, openTab } from './steps.ts';
 
 test('shows a 3 MB notice body at its base URL', async ({ window, login }) => {
   await login();

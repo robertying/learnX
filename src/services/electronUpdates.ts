@@ -2,7 +2,7 @@ import type { Bridge, BridgeUpdate } from 'web/bridge';
 import { bridge } from 'web/bridge';
 
 /**
- * The Electron app's update waiting for a restart (electron/updater.cjs), as
+ * The Electron app's update waiting for a restart (electron/updater.ts), as
  * an external store for `useSyncExternalStore`: read from the main process
  * once, then kept as it reports downloads.
  */

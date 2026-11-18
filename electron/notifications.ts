@@ -7,28 +7,40 @@
 // which it was.
 
 /** How often a pending reminder is checked at most, so sleep can't skip one. */
-const CHECK_MS = 60 * 1000;
+export const CHECK_MS = 60 * 1000;
 
 /**
  * A reminder found this late (the computer slept through it) still goes
  * off; one older than this is dropped as stale.
  */
-const STALE_MS = 6 * 60 * 60 * 1000;
+export const STALE_MS = 6 * 60 * 60 * 1000;
 
-/**
- * @typedef {object} NotificationRequest
- * @property {string} identifier
- * @property {{ title?: string, subtitle?: string, body?: string, data?: Record<string, unknown>, categoryIdentifier?: string, threadIdentifier?: string }} content
- * @property {null | { type?: string, date?: number | string, seconds?: number, channelId?: string }} trigger
- */
+export type NotificationRequest = {
+  identifier: string;
+  content: {
+    title?: string;
+    subtitle?: string;
+    body?: string;
+    data?: Record<string, unknown>;
+    categoryIdentifier?: string;
+    threadIdentifier?: string;
+  };
+  trigger: null | {
+    type?: string;
+    date?: number | string;
+    seconds?: number;
+    channelId?: string;
+  };
+};
 
 /**
  * When a trigger goes off (ms), or null for right away. Unknown kinds (the
  * daily and calendar ones the app doesn't use) go off right away too.
- * @param {NotificationRequest['trigger']} trigger
- * @param {number} now
  */
-const dueAt = (trigger, now) => {
+export const dueAt = (
+  trigger: NotificationRequest['trigger'],
+  now: number,
+): number | null => {
   if (trigger?.type === 'date' && trigger.date !== undefined) {
     const at = new Date(trigger.date).getTime();
     return Number.isNaN(at) ? null : at;
@@ -44,10 +56,11 @@ const dueAt = (trigger, now) => {
  * course (the subtitle in the approved format) leads the body there: on a
  * line of its own on Windows, and before a " · " on Linux, where GNOME's
  * banner shows the body as one line and would run the two together.
- * @param {NotificationRequest['content']} content
- * @param {string} platform
  */
-const shownContent = (content, platform) => {
+export const shownContent = (
+  content: NotificationRequest['content'],
+  platform: string,
+): ShownContent => {
   const title = content.title ?? '';
   const body = content.body ?? '';
   if (platform === 'darwin') {
@@ -61,40 +74,46 @@ const shownContent = (content, platform) => {
   };
 };
 
-/**
- * @typedef {object} NotifierDeps
- * @property {(options: { title: string, subtitle?: string, body: string }) => { show: () => void, on: (event: 'click' | 'close' | 'failed', listener: () => void) => void, close?: () => void }} createNotification
- *   a system notification, or (in development) a stand-in that only logs
- * @property {(request: NotificationRequest) => void} onClick
- * @property {string} [platform]
- * @property {() => number} [now]
- * @property {typeof setTimeout} [setTimer]
- * @property {typeof clearTimeout} [clearTimer]
- */
+type ShownContent = { title: string; subtitle?: string; body: string };
 
-/** @param {NotifierDeps} deps */
-const createNotifier = ({
+/** A notification as the notifier uses one. */
+export type ShownNotification = {
+  show: () => void;
+  on: (event: 'click' | 'close' | 'failed', listener: () => void) => void;
+  close?: () => void;
+};
+
+export type NotifierDeps = {
+  /** A system notification, or (in development) a stand-in that only logs. */
+  createNotification: (options: ShownContent) => ShownNotification;
+  onClick: (request: NotificationRequest) => void;
+  platform?: string;
+  now?: () => number;
+  setTimer?: typeof setTimeout;
+  clearTimer?: typeof clearTimeout;
+};
+
+export const createNotifier = ({
   createNotification,
   onClick,
   platform = process.platform,
   now = Date.now,
   setTimer = setTimeout,
   clearTimer = clearTimeout,
-}) => {
+}: NotifierDeps) => {
   /** Reminders waiting for their time, by identifier. */
-  const pending = new Map(
-    /** @type {[string, { request: NotificationRequest, at: number }][]} */ ([]),
-  );
+  const pending = new Map<
+    string,
+    { request: NotificationRequest; at: number }
+  >();
   /**
    * Notifications on screen, kept so they aren't garbage-collected before
    * they're clicked (which would drop the click).
    */
-  const shown = new Set();
-  /** @type {ReturnType<typeof setTimeout> | undefined} */
-  let timer;
+  const shown = new Set<ShownNotification>();
+  let timer: ReturnType<typeof setTimeout> | undefined;
 
-  /** @param {NotificationRequest} request */
-  const post = request => {
+  const post = (request: NotificationRequest) => {
     const notification = createNotification(
       shownContent(request.content, platform),
     );
@@ -109,7 +128,7 @@ const createNotifier = ({
     notification.show();
   };
 
-  const check = () => {
+  const check = (): void => {
     clearTimer(timer);
     timer = undefined;
     const time = now();
@@ -133,9 +152,8 @@ const createNotifier = ({
     /**
      * Posts a notification now, or keeps it for its trigger's time.
      * Scheduling an identifier again replaces it.
-     * @param {NotificationRequest} request
      */
-    schedule: request => {
+    schedule: (request: NotificationRequest): string => {
       if (!request || typeof request.identifier !== 'string') {
         throw new Error('A notification needs an identifier');
       }
@@ -150,8 +168,7 @@ const createNotifier = ({
       return request.identifier;
     },
 
-    /** @param {string} identifier */
-    cancel: identifier => {
+    cancel: (identifier: string) => {
       pending.delete(identifier);
       check();
     },
@@ -174,5 +191,3 @@ const createNotifier = ({
     },
   };
 };
-
-module.exports = { createNotifier, dueAt, shownContent, CHECK_MS, STALE_MS };

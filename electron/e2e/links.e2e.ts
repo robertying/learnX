@@ -3,9 +3,9 @@
 // Schedule instead (`--learnx-open=`), in the launch it starts or, through
 // the single instance, in the learnX already running. Links in the app open
 // in the browser.
-import { expect, test } from './fixtures';
-import { exact } from './maestroEnv';
-import { byId, openSettings, openTab, shown } from './steps';
+import { expect, test } from './fixtures.ts';
+import { exact } from './maestroEnv.ts';
+import { byId, openSettings, openTab, shown } from './steps.ts';
 
 test('opens the Schedule and Today from the Jump List', async ({
   login,

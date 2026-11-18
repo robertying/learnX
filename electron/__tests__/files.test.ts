@@ -13,14 +13,14 @@ import {
   GRANT_IDLE_MS,
   createFiles,
   runFileOperation,
-} from '../files.cjs';
+} from '../files.ts';
 
 let root: string;
 let bridge: Bridge;
 let fileSystem: typeof import('web/packages/fileSystem');
 
 // expo-file-system's stand-in in the page (src/web/packages/fileSystem.ts)
-// over the main process's real file operations (files.cjs), in a temporary
+// over the main process's real file operations (files.ts), in a temporary
 // folder.
 beforeEach(() => {
   root = fs.mkdtempSync(path.join(os.tmpdir(), 'learnx-files-'));
@@ -145,7 +145,7 @@ it('picks a folder in the system dialog, and opens no file handles', async () =>
   const { Directory, File, Paths } = fileSystem;
   expect(() => new File(Paths.cache, 'a').open()).toThrow('Not available');
 
-  // A folder the main process granted (fileShell.cjs) can be written in.
+  // A folder the main process granted (fileShell.ts) can be written in.
   const picked = path.join(root, 'Picked');
   fs.mkdirSync(picked);
   const files = createFiles({

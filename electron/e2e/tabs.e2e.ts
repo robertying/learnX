@@ -1,8 +1,8 @@
 // .maestro/04-tabs.yaml: a new install logs in with the mock account, opens
 // on Today and visits every tab, a course among them.
-import { expect, test } from './fixtures';
-import { text } from './maestroEnv';
-import { byId, card, openCard, openSettings, openTab, shown } from './steps';
+import { expect, test } from './fixtures.ts';
+import { text } from './maestroEnv.ts';
+import { byId, card, openCard, openSettings, openTab, shown } from './steps.ts';
 
 test('logs in and visits every tab', async ({ window, main, login }) => {
   await login();

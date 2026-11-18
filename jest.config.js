@@ -82,9 +82,9 @@ module.exports = {
     // The Electron app's main process (the `tooling` project's tests). The
     // dev runner, its Mac app, the packaging and clean-up scripts and the
     // E2E tests' Electron download only run on a developer's machine.
-    'electron/*.{cjs,mjs}',
-    '!electron/{dev,clean,package,macDevApp,devTraces,webExport}.mjs',
-    '!electron/electronApp.cjs',
+    'electron/*.{ts,cts}',
+    '!electron/{dev,clean,package,macDevApp,devTraces,webExport,electronApp}.ts',
+    '!electron/playwright.config.ts',
   ],
   // CI runs `pnpm test --coverage` and fails below these, so coverage can't
   // slip unnoticed. Keep them just under the current numbers; raise them as
@@ -137,6 +137,27 @@ module.exports = {
       ...base,
       displayName: 'tooling',
       roots: ['<rootDir>/scripts', '<rootDir>/electron'],
+      transform: {
+        // The preloads: Node strips their types, as for what ships.
+        '/electron/[^/]+\\.cts$': '<rootDir>/jest/stripTypes.js',
+        // The rest of the Electron app runs as ES modules in Node, so its
+        // tests import it as Node does: `import.meta` as there, and a
+        // CommonJS module's default import its `module.exports`
+        // (electron-updater's sets `__esModule`).
+        '/electron/.+\\.ts$': [
+          'babel-jest',
+          {
+            plugins: [
+              './babel/jest-node-esm',
+              [
+                '@babel/plugin-transform-modules-commonjs',
+                { importInterop: 'node' },
+              ],
+            ],
+          },
+        ],
+        ...base.transform,
+      },
       // Playwright's (`pnpm e2e:electron`).
       testPathIgnorePatterns: ['/node_modules/', '/electron/e2e/'],
       testEnvironment: 'node',

@@ -2,7 +2,7 @@
 // dev app) once, so workers that launch apps at the same time don't each
 // start the download and run a binary another one is still writing
 // (`spawn ETXTBSY`). A packaged app needs neither.
-import { electronExecutable } from '../electronApp.cjs';
+import { electronExecutable } from '../electronApp.ts';
 
 export default function setup() {
   // fixtures.ts's packagedApp; importing it here would load Playwright's

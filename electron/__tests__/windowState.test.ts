@@ -7,7 +7,7 @@ import {
   loadWindowState,
   saveWindowState,
   zoomForKey,
-} from '../windowState.cjs';
+} from '../windowState.ts';
 
 let file: string;
 beforeEach(() => {

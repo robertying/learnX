@@ -1,4 +1,5 @@
 import { EventEmitter } from 'node:events';
+import type { Logger } from 'electron-updater';
 import {
   CHECK_INTERVAL,
   FIRST_CHECK_DELAY,
@@ -6,17 +7,17 @@ import {
   createUpdater,
   debFileName,
   updateMode,
-} from '../updater.cjs';
-import { packageConfig } from '../packageConfig.cjs';
+} from '../updater.ts';
+import { packageConfig } from '../packageConfig.ts';
 
-/** electron-updater's autoUpdater, as far as updater.cjs uses it. */
+/** electron-updater's autoUpdater, as far as updater.ts uses it. */
 const fakeAutoUpdater = () =>
   Object.assign(new EventEmitter(), {
     autoDownload: false,
     autoInstallOnAppQuit: false,
     allowPrerelease: true,
     allowDowngrade: true,
-    logger: null as null | Record<string, (message: string) => void>,
+    logger: null as Logger | null,
     setFeedURL: jest.fn(),
     checkForUpdates: jest.fn(async () => null),
     quitAndInstall: jest.fn(),

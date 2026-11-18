@@ -1,11 +1,11 @@
 // The window really shows, and its page draws, on Windows and Linux: an E2E
-// run shows it there behind the others (system.cjs, `present`), since a
+// run shows it there behind the others (system.ts, `present`), since a
 // window that was never shown hardly draws: under Wayland it gets no frames,
 // so its page never draws, and on Windows about two a second, which made every
 // test crawl. CI runs this under a headless Wayland compositor too
 // (electron.yml, "Electron window on Wayland"), where such a window fails
 // every check; under xvfb's X11 a window draws whether it shows or not.
-import { expect, test } from './fixtures';
+import { expect, test } from './fixtures.ts';
 
 test('shows the window, with its page drawn at full rate', async ({
   app,

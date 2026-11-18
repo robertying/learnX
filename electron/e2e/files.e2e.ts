@@ -6,9 +6,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { ElectronApplication } from '@playwright/test';
-import { expect, test } from './fixtures';
-import { exact, text } from './maestroEnv';
-import { byId, openCard, openTab, shown } from './steps';
+import { expect, test } from './fixtures.ts';
+import { exact, text } from './maestroEnv.ts';
+import { byId, openCard, openTab, shown } from './steps.ts';
 
 /** The URLs of the window's frames: the PDF preview is one of them. */
 const frameUrls = (app: ElectronApplication) =>

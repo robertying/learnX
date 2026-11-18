@@ -35,7 +35,7 @@ const documentTypes = new Set([
 
 /**
  * PDFs and pictures, which the Electron app shows inline: the list its main
- * process serves to the preview (electron/fileShell.cjs). SVGs are left out:
+ * process serves to the preview (electron/fileShell.ts). SVGs are left out:
  * they can carry scripts.
  */
 export const canRenderInElectron = (ext?: string | null) =>

@@ -1,14 +1,15 @@
-// main.cjs and preload.cjs with a stand-in for Electron: what the main
+// main.ts and preload.cts with a stand-in for Electron: what the main
 // process sets up, and that every IPC channel the page uses is handled and
 // refuses callers other than the app's own page.
 import { EventEmitter } from 'node:events';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { PRELOADS_DIR } from '../preloads.ts';
 
 type Handler = (event: unknown, ...args: unknown[]) => unknown;
 
-/** Just enough of Electron for main.cjs, system.cjs and preload.cjs. */
+/** Just enough of Electron for main.ts, system.ts and preload.cts. */
 const fakeElectron = (dataDir: string, { packaged = false } = {}) => {
   const paths = new Map<string, string>([
     ['userData', dataDir],
@@ -172,13 +173,19 @@ const fakeElectron = (dataDir: string, { packaged = false } = {}) => {
 
 let dataDir: string;
 let fake: ReturnType<typeof fakeElectron>;
+/** The preloads a dev run strips (preloads.ts), left unwritten here. */
+const stripPreloads = jest.fn();
 
-/** Loads main.cjs on the stand-in, and lets its `whenReady` work run. */
+/** Loads main.ts on the stand-in, and lets its `whenReady` work run. */
 const loadMain = async (options?: { packaged?: boolean }) => {
   fake = fakeElectron(dataDir, options);
   jest.resetModules();
   jest.doMock('electron', () => fake.electron, { virtual: true });
-  require('../main.cjs');
+  jest.doMock('../preloads.ts', () => ({
+    ...jest.requireActual('../preloads.ts'),
+    stripPreloads,
+  }));
+  require('../main.ts');
   await new Promise(resolve => setImmediate(resolve));
   return fake;
 };
@@ -196,6 +203,7 @@ beforeEach(() => {
 
 afterEach(() => {
   jest.dontMock('electron');
+  jest.dontMock('../preloads.ts');
   fs.rmSync(dataDir, { recursive: true, force: true });
   delete (globalThis as Record<string, unknown>).learnxDev;
   delete (globalThis as Record<string, unknown>).learnxUpdaterLog;
@@ -210,7 +218,7 @@ const eventFrom = (type: string, url: string) => ({
 
 /** Every function in the page's API, with the channels each uses. */
 const preloadChannels = () => {
-  require('../preload.cjs');
+  require('../preload.cts');
   const [[name, api]] = fake.contextBridge.exposeInMainWorld.mock.calls;
   expect(name).toBe('learnx');
   const call = (value: unknown) => {
@@ -427,8 +435,10 @@ describe('the window', () => {
       contextIsolation: true,
       sandbox: true,
       nodeIntegration: false,
-      preload: path.join(__dirname, '..', 'preload.cjs'),
+      // Stripped of its types from the checkout's as the dev run starts.
+      preload: path.join(PRELOADS_DIR, 'preload.cjs'),
     });
+    expect(stripPreloads).toHaveBeenCalledWith(PRELOADS_DIR);
     expect(appSession.protocol.handle).toHaveBeenCalledWith(
       'app',
       expect.any(Function),
@@ -662,6 +672,11 @@ describe('the application menu', () => {
     expect(fake.electron.Menu.setApplicationMenu).toHaveBeenCalledWith(null);
     // A packaged build ignores the dev runner's data folder.
     expect(fake.app.commandLine.appendSwitch).not.toHaveBeenCalled();
+    // Its preloads were stripped as it was packaged, next to main.ts.
+    expect(stripPreloads).not.toHaveBeenCalled();
+    expect(fake.windows[0].options.webPreferences.preload).toBe(
+      path.join(__dirname, '..', 'preload.cjs'),
+    );
   });
 });
 

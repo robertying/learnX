@@ -1,8 +1,8 @@
 // .maestro/03-details.yaml: opens a notice, an assignment and a file, each
 // beside its list.
-import { expect, test } from './fixtures';
-import { text } from './maestroEnv';
-import { byId, openCard, openTab } from './steps';
+import { expect, test } from './fixtures.ts';
+import { text } from './maestroEnv.ts';
+import { byId, openCard, openTab } from './steps.ts';
 
 test('opens a notice, an assignment and a file', async ({ window, login }) => {
   await login();
