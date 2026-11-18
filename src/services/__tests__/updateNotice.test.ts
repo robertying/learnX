@@ -37,7 +37,6 @@ it('says it once a version', async () => {
   expect(schedule).toHaveBeenCalledTimes(2);
 });
 
-
 it('stays quiet with New Versions off', async () => {
   expect(getSettings().notifications.appUpdates).toBe(true);
   setSetting('notifications', {
