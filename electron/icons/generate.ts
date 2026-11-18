@@ -10,10 +10,11 @@
 // Each size is exported on its own by Xcode's Icon Composer CLI (`ictool`)
 // as macOS draws the icon: the squircle with its Liquid Glass shading, edge
 // to edge on a transparent canvas. Windows and Linux don't mask icons, so
-// each platform gets the share of the canvas its own square icons take, and
+// each platform gets about the share of the canvas its own icons take, and
 // the shape is exported at that size and centered on a transparent canvas:
-// edge to edge on Windows, about 81% on Linux (GNOME's square icons are 104
-// of 128). ictool writes Display P3 at 16 bits a channel; `sips` turns
+// edge to edge on Windows, 108 of 128 on Linux (between GNOME's squares, 104,
+// and circles, 112: a squircle is between the two, and at 104 its round
+// corners and dark fill look small). ictool writes Display P3 at 16 bits a channel; `sips` turns
 // each into 8-bit sRGB, which Windows and Linux assume. The .ico holds 16 to
 // 256; the 256 is stored as a PNG, the others as 32-bit bitmaps, which every
 // Windows reads.
@@ -29,8 +30,8 @@ export const ICO_SIZES = [16, 20, 24, 32, 40, 48, 64, 96, 128, 256];
 export const PNG_SIZE = 512;
 /** How much of the canvas the shape takes in the .ico: all of it. */
 export const ICO_SHAPE_FRACTION = 1;
-/** And in the Linux PNG: GNOME's square icons, 104 of 128. */
-export const PNG_SHAPE_FRACTION = 104 / 128;
+/** And in the Linux PNG: between GNOME's squares (104) and circles (112). */
+export const PNG_SHAPE_FRACTION = 108 / 128;
 
 /** An 8-bit RGBA image, its rows top to bottom. */
 type Image = { width: number; height: number; pixels: Buffer };

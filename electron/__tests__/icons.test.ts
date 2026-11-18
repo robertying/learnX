@@ -70,7 +70,7 @@ it('centers the shape at its share of the canvas, on whole pixels', () => {
   }
   expect(shapeSize(256, ICO_SHAPE_FRACTION)).toBe(256);
   expect(shapeSize(16, ICO_SHAPE_FRACTION)).toBe(16);
-  expect(shapeSize(512, PNG_SHAPE_FRACTION)).toBe(416);
+  expect(shapeSize(512, PNG_SHAPE_FRACTION)).toBe(432);
 });
 
 /** The shape's width in the middle row: where alpha starts and ends. */
