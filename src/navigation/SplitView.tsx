@@ -1,6 +1,7 @@
 import {
   createContext,
   createRef,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -137,10 +138,32 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
   renderDetail,
   children,
 }) => {
-  const [showMaster, setShowMaster] = useState(true);
-  const masterHidden = showDetail && !showMaster;
-
   const [selectedTab, setSelectedTab] = useState(initialTab);
+  // Full screen (the master pane hidden) is each tab's own, as each tab's
+  // native split keeps its own on iPad and Mac: the other tabs still show
+  // their lists, rather than an empty detail pane with no way to pick one.
+  const [fullScreenTabs, setFullScreenTabs] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
+  const showMaster = !fullScreenTabs.has(selectedTab);
+  const masterHidden = showDetail && !showMaster;
+  const toggleMaster = useCallback(
+    (show: boolean) =>
+      setFullScreenTabs(tabs => {
+        if (tabs.has(selectedTab) === !show) {
+          return tabs;
+        }
+        const next = new Set(tabs);
+        if (show) {
+          next.delete(selectedTab);
+        } else {
+          next.add(selectedTab);
+        }
+        return next;
+      }),
+    [selectedTab],
+  );
+
   // Each tab's detail stack mounts once the tab is first selected.
   const [loadedTabs, setLoadedTabs] = useState([initialTab]);
   // Created as tabs ask for theirs, and kept for good.
@@ -176,7 +199,7 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
         showDetail,
         laidOut: true,
         showMaster,
-        toggleMaster: setShowMaster,
+        toggleMaster,
         masterWidth: SplitSizes.masterWidth,
         tabs,
       }}
