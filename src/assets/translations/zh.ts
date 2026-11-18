@@ -175,7 +175,7 @@ const zh: typeof en = {
   unsandboxedNote:
     'AppImage版learnX在Ubuntu 24.04及更高版本上无法启用Chromium沙盒。为提高运行时安全，建议改用deb安装包（.deb）。',
   startAtLoginCaption:
-    '登录电脑时在系统托盘中启动learnX，以便持续同步并发送提醒。关闭窗口后learnX仍在托盘中运行，可在托盘菜单中退出。',
+    '登录电脑时在系统托盘中启动learnX，以便持续同步并发送提醒。关闭窗口后learnX仍在托盘中运行，可在托盘菜单中选择“退出learnX”。',
   language: '语言',
   followSystem: '跟随系统',
   languageRestartTitle: '重新启动learnX？',
@@ -488,7 +488,7 @@ const zh: typeof en = {
   downloads: '已下载文件',
   downloadsTotal: '全部已下载文件',
   downloadsCaption:
-    '在learnX中下载的文件，按课程分类。轻点课程可导出或删除其文件。',
+    '在learnX中下载的文件，按课程分类。打开课程可导出或删除其中的文件。',
   downloadsExport: '导出全部已下载文件',
   downloadsExportCaption:
     '将文件复制到你选择的位置下的“learnX”文件夹，按学期和课程分类。再次导出会更新该文件夹。',
@@ -535,6 +535,7 @@ const zh: typeof en = {
   a11yNewBadge: '有新内容',
   a11yDone: '已结束',
   a11yStruck: '将被替换或删除',
+  a11yListWidth: '列表宽度',
   moveUp: '上移',
   moveDown: '下移',
   courseUnfinishedAssignments: '{count}项未完成作业',

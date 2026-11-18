@@ -24,6 +24,7 @@ import SystemIcon from 'components/SystemIcon';
 import { Text } from 'components/Text';
 import { t } from 'helpers/i18n';
 import { systemIcons, type SystemIconName } from 'helpers/systemIcons';
+import { savePaneExpanded, savedPaneExpanded } from 'navigation/paneLayout';
 import { useNavigationPaneSlot } from 'navigation/WindowFrame';
 import { useTheme } from 'theme';
 
@@ -146,7 +147,7 @@ const PaneItem = ({
  * Windows' navigation pane (NavigationView) at the window's leading edge,
  * drawn into `WindowFrame`'s slot. It shows the tabs' icons and titles,
  * expanded in a wide window and as a rail of icons in a narrower one, with
- * the menu button switching between them, and Settings at its foot. Each
+ * the menu button switching between them for good, and Settings at its foot. Each
  * tab's screen stays mounted once shown.
  */
 function TabNavigator({
@@ -160,8 +161,9 @@ function TabNavigator({
   const theme = useTheme();
   const slot = useNavigationPaneSlot();
   const { width } = useWindowDimensions();
-  // The user's choice of the menu button, or the window's width.
-  const [expandedChoice, setExpandedChoice] = useState<boolean | null>(null);
+  // The user's choice of the menu button, kept across launches, or the
+  // window's width until they make one.
+  const [expandedChoice, setExpandedChoice] = useState(savedPaneExpanded);
   const expanded = expandedChoice ?? width >= EXPANDED_FROM;
   const { state, descriptors, navigation, NavigationContent } =
     useNavigationBuilder<
@@ -232,7 +234,10 @@ function TabNavigator({
             appearance="subtle"
             aria-expanded={expanded}
             data-testid="navigation-pane-toggle"
-            onClick={() => setExpandedChoice(!expanded)}
+            onClick={() => {
+              setExpandedChoice(!expanded);
+              savePaneExpanded(!expanded);
+            }}
             style={toggleSize}
             icon={
               <SystemIcon

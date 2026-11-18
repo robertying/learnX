@@ -778,9 +778,14 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     minWidth: minContent,
   },
+  // A status (a deadline's countdown) reads as one piece, so it keeps its
+  // line and the label wraps instead: in Chinese, min-content would break
+  // it between any two characters ("还剩1" / "天").
   tinted: {
     fontWeight: '600',
-  },
+    flexShrink: 0,
+    whiteSpace: 'nowrap',
+  } as object,
   badge: {
     width: DOT_SIZE,
     height: DOT_SIZE,
