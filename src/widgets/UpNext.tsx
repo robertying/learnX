@@ -55,14 +55,16 @@ function UpNextWidget(
   // its time: the range, or where that doesn't fit, the start.
   const when = (c: UpNextWidgetProps['classes'][number], start?: boolean) => {
     const days = daysAway(c.start);
-    const time = start ? c.startTime : c.time;
-    return days === 0
-      ? time
-      : days === 1
-        ? `${props.tomorrow} ${time}`
-        : days < 7
-          ? `${c.weekday} ${time}`
-          : `${c.day} ${time}`;
+    if (days === 0) {
+      return start ? c.startTime : c.time;
+    }
+    if (days === 1) {
+      return start ? c.tomorrowStart : c.tomorrow;
+    }
+    if (days < 7) {
+      return start ? c.weekdayStart : c.weekday;
+    }
+    return start ? c.dayStart : c.day;
   };
   // Rooms can be long ("建华/经管新楼 A101"): cut in the middle to keep the
   // room number.
@@ -372,7 +374,6 @@ const initialProps: UpNextWidgetProps = {
   later: '',
   startsIn: '',
   endsIn: '',
-  tomorrow: '',
   noClasses: '',
   url: '',
 };

@@ -15,6 +15,7 @@ import {
   LoginStackParams,
   NoticeStackParams,
   SearchStackParams,
+  SemesterSelectionStackParams,
   SettingDetailParams,
   TodayDetailParams,
   SettingsStackParams,
@@ -74,6 +75,8 @@ const LoginNavigator = createNativeStackNavigator<LoginStackParams>();
 const CourseXNavigator = createNativeStackNavigator<CourseXStackParams>();
 const WhatsNewNavigator = createNativeStackNavigator<WhatsNewStackParams>();
 const SearchNavigator = createNativeStackNavigator<SearchStackParams>();
+const SemesterSelectionNavigator =
+  createNativeStackNavigator<SemesterSelectionStackParams>();
 const AssignmentSubmissionNavigator =
   createNativeStackNavigator<AssignmentSubmissionStackParams>();
 
@@ -358,6 +361,21 @@ export const SearchStack = () => (
     />
     {renderItemDetails(['NoticeDetail', 'AssignmentDetail', 'FileDetail'])}
   </SearchNavigator.Navigator>
+);
+
+/** The semesters, from an item that isn't in the semester shown (NotFound). */
+export const SemesterSelectionStack = () => (
+  <SemesterSelectionNavigator.Navigator
+    screenLayout={screenLayout}
+    screenOptions={stackScreenOptions}
+  >
+    <SemesterSelectionNavigator.Screen
+      name="SemesterSelection"
+      component={SemesterSelection}
+      options={getModalScreenOptions(t('semesterSelection'))}
+      initialParams={{ closeOnSelect: true }}
+    />
+  </SemesterSelectionNavigator.Navigator>
 );
 
 export const AssignmentSubmissionStack = () => (
