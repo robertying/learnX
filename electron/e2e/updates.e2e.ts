@@ -7,6 +7,8 @@
 // The update file is signed with a throwaway key whose public half the run
 // trusts (LEARNX_UPDATE_PUBLIC_KEY), as a release's are with the update key
 // (updateSignature.ts); without a valid signature nothing is downloaded.
+// A downloaded update is also said in a notification (a dev run records
+// it, system.ts), held back until someone has logged in.
 import { type ChildProcess, spawn } from 'node:child_process';
 import { createHash, generateKeyPairSync, randomBytes } from 'node:crypto';
 import fs from 'node:fs';
@@ -15,7 +17,7 @@ import path from 'node:path';
 import { SIGNATURE_SUFFIX, signUpdateFile } from '../updateSignature.ts';
 import { expect, packagedApp, test } from './fixtures.ts';
 import { exact, text } from './maestroEnv.ts';
-import { byId, openSettings, shown } from './steps.ts';
+import { byId, openSettings, openTab, shown } from './steps.ts';
 
 const VERSION = '99.0.0';
 
@@ -192,6 +194,66 @@ test('downloads an update and restarts into it', async ({
   await expect(dialog).toContainText(VERSION);
   await dialog.getByRole('button', { name: exact('T_restart') }).click();
   await expect.poll(async () => (await main.record()).installs).toBe(1);
+});
+
+/** The notifications that say an update is out. */
+const updateNotifications = async (main: {
+  shownNotifications: () => Promise<{ title?: string; body?: string }[]>;
+}) =>
+  (await main.shownNotifications()).filter(({ title }) =>
+    text('T_foundNewVersion').test(title ?? ''),
+  );
+
+test('says a downloaded update in a notification that opens Settings', async ({
+  login,
+  relaunch,
+  dataDir,
+}) => {
+  writeRelease(path.join(dataDir, 'release'));
+  const served = await serve(path.join(dataDir, 'release'), []);
+  server = served.server;
+  await login();
+  const { window, main } = await relaunch({
+    env: updateEnv(served.url, dataDir),
+  });
+  await openTab(window, 'notices');
+
+  await expect
+    .poll(async () => (await updateNotifications(main)).length, {
+      timeout: 60_000,
+    })
+    .toBe(1);
+  const [notification] = await updateNotifications(main);
+  expect(notification.title).toContain(VERSION);
+  expect(notification.body).toMatch(text('T_updateNotificationReadyBody'));
+
+  await main.clickNotification();
+  await expect(byId(window, 'settings-update')).toBeVisible();
+});
+
+test('holds the notification until someone logs in', async ({
+  login,
+  relaunch,
+  dataDir,
+}) => {
+  writeRelease(path.join(dataDir, 'release'));
+  const served = await serve(path.join(dataDir, 'release'), []);
+  server = served.server;
+  // A new install, on the welcome page.
+  const { window, main } = await relaunch({
+    env: updateEnv(served.url, dataDir),
+  });
+  await expect
+    .poll(async () => (await main.updaterLog()).join('\n'), {
+      timeout: 60_000,
+    })
+    .toContain(`downloaded ${VERSION}`);
+  expect(await updateNotifications(main)).toEqual([]);
+
+  await login(window);
+  await expect
+    .poll(async () => (await updateNotifications(main)).length)
+    .toBe(1);
 });
 
 test('tells a .deb install of an update, with its download', async ({

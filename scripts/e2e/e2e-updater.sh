@@ -2,7 +2,10 @@
 # The Android APK updater end to end: updates the installed E2E build
 # (scripts/e2e/e2e-build.sh) to newer E2E builds of the same checkout, served by
 # the E2E APK mirror (scripts/e2e/updater-e2e-server.mjs), which the build looks
-# for updates at. .maestro/updater/update.yaml updates to 99.0.0: allowing
+# for updates at. .maestro/updater/notification.yaml first checks the new
+# version's notification: none while logged out, then posted on logging in,
+# and tapping it opens Settings. .maestro/updater/update.yaml updates to
+# 99.0.0: allowing
 # learnX to install apps, a download whose SHA-256 doesn't match refused, then
 # the update, with the app in the background while it downloads, installed
 # (through Android's confirmation before Android 17). On Android 12+,
@@ -172,7 +175,12 @@ update() {
 }
 
 status=0
-update .maestro/updater/update.yaml "${versions[0]}" || status=1
+serve "${versions[0]}"
+scripts/e2e/e2e.sh "$platform" "${flow_env[@]}" -e VERSION="${versions[0]}" \
+  .maestro/updater/notification.yaml || status=1
+if [ "$status" = 0 ]; then
+  update .maestro/updater/update.yaml "${versions[0]}" || status=1
+fi
 if [ "$status" = 0 ] && [ "$sdk" -ge 31 ]; then
   update .maestro/updater/update-again.yaml "${versions[1]}" || status=1
 fi

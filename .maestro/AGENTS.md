@@ -48,7 +48,7 @@
 
 ## APK updater (Android)
 
-- `scripts/e2e/e2e-updater.sh` serves newer E2E builds of the same checkout from a local mirror and runs `updater/`: Android's "Install unknown apps" page, a download with the wrong checksum, then real updates, checked with `dumpsys` afterwards. The flows tap the system's own labels in English and Chinese, which change between Android versions; the script tells them which apply. Run it on the oldest Android too.
+- `scripts/e2e/e2e-updater.sh` serves newer E2E builds of the same checkout from a local mirror and runs `updater/`: the new version's notification (none while logged out, posted on logging in, opening Settings), Android's "Install unknown apps" page, a download with the wrong checksum, then real updates, checked with `dumpsys` afterwards. The flows tap the system's own labels in English and Chinese, which change between Android versions; the script tells them which apply. Run it on the oldest Android too.
 
 ## Upgrade test
 

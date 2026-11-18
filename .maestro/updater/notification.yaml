@@ -1,0 +1,52 @@
+appId: ${APP_ID}
+name: Say a new version in a notification once logged in
+# Run by scripts/e2e/e2e-updater.sh before update.yaml, with the APK mirror
+# serving VERSION (99.0.0); not part of the normal runs. Android only: the
+# APKs update themselves, the stores update the other builds.
+---
+- runFlow: ../subflows/reset.yaml
+
+# Logged out, the app checks the mirror on coming to the front, but says
+# nothing: its notification would open no Settings to update from
+# (services/updateNotice).
+- launchApp:
+    arguments:
+      mockLatency: none
+- extendedWaitUntil:
+    visible:
+      id: 'welcome-continue|login-username'
+    timeout: 30000
+- runScript:
+    file: wait-checked.js
+    env:
+      AFTER: '0'
+# Off center, as subflows/notification-action.yaml opens the shade.
+- swipe:
+    start: 25%, 0%
+    end: 25%, 70%
+- assertNotVisible: '.*(${T_updateNotificationBody}).*'
+- pressKey: Back
+
+# Logging in says the version it found, once, and tapping the notification
+# opens Settings with the update on top.
+- runFlow: ../subflows/login.yaml
+- swipe:
+    start: 25%, 0%
+    end: 25%, 70%
+- extendedWaitUntil:
+    visible: '.*(${T_updateNotificationBody}).*'
+    timeout: 15000
+- runFlow:
+    file: ../subflows/shot.yaml
+    env:
+      NAME: updater-notification
+- assertVisible: '.*${VERSION}.*'
+# Not twice, though logging in forgets what was said and checks again.
+- assertNotVisible:
+    text: '.*(${T_updateNotificationBody}).*'
+    index: 1
+- tapOn: '.*(${T_updateNotificationBody}).*'
+- extendedWaitUntil:
+    visible:
+      id: settings-update
+    timeout: 15000
