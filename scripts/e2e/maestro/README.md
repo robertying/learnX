@@ -38,7 +38,14 @@ foreground app while it shows, so flows couldn't see or answer it and their
 taps landed under it. A notifications request is answered as `launchApp`'s
 permissions say, as the driver already did when SpringBoard was in front.
 
-Until a Maestro release includes all five, build
+`maestro-instrumentation-shell.patch` runs the Android driver's
+instrumentation (`am instrument`) in the foreground of its adb shell. Run in
+the background, the shell exited at once and stayed a zombie while Maestro
+kept its stream open, and on API 29 emulators Android's llkd kills adbd once
+a child has been a zombie for 10 minutes: every session longer than that lost
+the device (the `android-min` profile, from `08-settings` on).
+
+Until a Maestro release includes all six, build
 it from source and put it first on `PATH`:
 
 ```sh

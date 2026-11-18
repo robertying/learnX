@@ -17,6 +17,10 @@
 #                               SpringBoard's alerts over an app (a
 #                               notifications request, Save Password) in its
 #                               hierarchy, so flows see and answer them
+#   maestro-instrumentation-shell.patch
+#                               the Android driver's instrumentation in the
+#                               foreground of its adb shell, which otherwise
+#                               stays a zombie until llkd kills adbd (API 29)
 #
 #   scripts/e2e/maestro/build.sh <maestro checkout>
 #
@@ -54,7 +58,8 @@ if [ "${MAESTRO_KEEP:-}" != 1 ]; then
     "$here/maestro-fold-posture.patch" \
     "$here/maestro-hierarchy-fallback.patch" \
     "$here/maestro-tiny-elements.patch" \
-    "$here/maestro-springboard-alerts.patch" >&2
+    "$here/maestro-springboard-alerts.patch" \
+    "$here/maestro-instrumentation-shell.patch" >&2
 fi
 
 if [ -z "${JAVA_HOME:-}" ] && [ -x /usr/libexec/java_home ]; then

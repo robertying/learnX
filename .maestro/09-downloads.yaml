@@ -43,11 +43,24 @@ name: Download a file, then delete it
 - runFlow:
     when:
       platform: iOS
+      true: ${IPAD != 'true'}
     commands:
       - extendedWaitUntil:
           visible: 'Cancel|取消'
           timeout: 10000
       - tapOn: 'Cancel|取消'
+# On iPad the folder picker fills the screen and runs out of process, so
+# Maestro sees none of its elements: tap its close button, the first one at
+# the top left of its sidebar, by position.
+- runFlow:
+    when:
+      platform: iOS
+      true: ${IPAD == 'true'}
+    commands:
+      - waitForAnimationToEnd
+      - tapOn:
+          point: 30,64
+      - waitForAnimationToEnd
 # Android's folder picker goes up a folder on each back before it closes. It's
 # com.google.android.documentsui on images with Google Play, and AOSP's
 # com.android.documentsui on the others (the min-SDK emulator).

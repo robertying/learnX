@@ -1,0 +1,27 @@
+# Leave a page about the open item (an assignment's submission, a course's
+# courseX). Beside a detail pane (iPad) it's pushed in the detail column, so
+# its back button leaves it; elsewhere it's a sheet, which close.yaml closes.
+# App-wide pages (search, every course's courseX) are always sheets: close
+# them with close.yaml.
+appId: ${APP_ID}
+---
+- evalScript: ${output.leftItemPage = false}
+- runFlow:
+    when:
+      platform: iOS
+      true: ${IPAD == 'true'}
+    commands:
+      - runFlow:
+          when:
+            visible:
+              id: BackButton
+          commands:
+            - tapOn:
+                id: BackButton
+            - evalScript: ${output.leftItemPage = true}
+- runFlow:
+    when:
+      true: ${!output.leftItemPage}
+    commands:
+      - runFlow: close.yaml
+- waitForAnimationToEnd

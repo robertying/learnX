@@ -14,12 +14,25 @@ name: Show no results and failures
     file: subflows/shot.yaml
     env:
       NAME: no-results
+# On Android the keyboard is still up: the first back hides it, the next
+# closes search. Maestro's hideKeyboard can't tell when Gboard's split
+# keyboard (an unfolded foldable) has gone, so go back until search has.
 - runFlow:
     when:
       platform: Android
     commands:
-      - hideKeyboard
-- runFlow: subflows/close.yaml
+      - repeat:
+          times: 3
+          while:
+            visible:
+              id: search-tabs
+          commands:
+            - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - runFlow: subflows/close.yaml
 
 # Offline: the mockFailure launch argument makes the emulated server fail
 # every request. The lists keep what they had and say they're offline.
