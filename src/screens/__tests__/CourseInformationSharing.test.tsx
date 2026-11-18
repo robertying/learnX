@@ -11,6 +11,7 @@ import { useCredentialsStore } from 'data/credentials';
 import { getSettings, resetSettings, setSetting } from 'data/settings';
 import { t } from 'helpers/i18n';
 import CourseInformationSharing from 'screens/CourseInformationSharing';
+import { mockLocale } from 'test-utils/locale';
 import { screenProps } from 'test-utils/screenProps';
 
 const signIn = (username: string) =>
@@ -83,4 +84,14 @@ it('opens CourseX in the browser', async () => {
   await renderScreen();
   await userEvent.press(screen.getByText(t('courseX')));
   expect(openURL).toHaveBeenCalledWith('https://tsinghua.app/courses');
+});
+
+it('opens the privacy policy in the app language', async () => {
+  const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue();
+  mockLocale.current = 'zh-CN';
+  await renderScreen();
+  await userEvent.press(screen.getByText(t('privacyPolicy')));
+  expect(openURL).toHaveBeenCalledWith(
+    'https://github.com/robertying/learnX/blob/main/docs/PRIVACY_POLICY_CN.md',
+  );
 });

@@ -8,6 +8,7 @@ import Splash from 'components/Splash';
 import { hasSavedLogin, useCredentials } from 'data/credentials';
 import { useReloginRequested } from 'data/auth';
 import { queryClient } from 'data/queryClient';
+import useHelpCommands from 'hooks/useHelpCommands';
 import useReLogin from 'hooks/useReLogin';
 import useShareHandler from 'hooks/useShareHandler';
 import useStoresLoaded from 'hooks/useStoresLoaded';
@@ -21,6 +22,7 @@ const Container = () => {
 
   useReLogin();
   useShareHandler();
+  useHelpCommands();
 
   return <Navigation showMain={hasCredentials && !reloginRequested} />;
 };

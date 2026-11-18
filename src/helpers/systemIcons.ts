@@ -322,6 +322,12 @@ export const systemIcons = {
     android: 'code',
     windows: 'CodeRegular',
   },
+  website: { ios: 'house', android: 'home', windows: 'HomeRegular' },
+  privacyPolicy: {
+    ios: 'hand.raised',
+    android: 'privacy_tip',
+    windows: 'ShieldLockRegular',
+  },
   license: {
     ios: 'checkmark.shield',
     android: 'verified_user',
@@ -533,6 +539,7 @@ export const materialCodepoints: Record<SystemIconAndroidName, number> = {
   hard_drive: 0xf80e,
   heart_minus: 0xf883,
   help: 0xe887,
+  home: 0xe88a,
   inbox: 0xe156,
   info: 0xe88e,
   key: 0xe73c,
@@ -556,6 +563,7 @@ export const materialCodepoints: Record<SystemIconAndroidName, number> = {
   package_2: 0xf569,
   password: 0xf042,
   person: 0xe7fd,
+  privacy_tip: 0xf0dc,
   radio_button_unchecked: 0xe836,
   refresh: 0xe5d5,
   routine: 0xe20c,

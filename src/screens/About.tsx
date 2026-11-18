@@ -9,6 +9,7 @@ import {
   FormText,
 } from 'components/Form';
 import { t } from 'helpers/i18n';
+import Urls, { privacyPolicyUrl } from 'constants/Urls';
 import { openLink } from 'helpers/openLink';
 import { SettingsStackParams } from 'navigation/types';
 import packageJson from '../../package.json';
@@ -46,10 +47,21 @@ const About: React.FC<Props> = () => (
           detail={version()}
         />
         <FormButton
+          icon="website"
+          title={t('website')}
+          detail="tsinghua.app/learnX"
+          onPress={() => openLink(Urls.website)}
+        />
+        <FormButton
           icon="code"
           title={t('sourceCode')}
           detail="robertying/learnX"
           onPress={() => openGitHub('robertying/learnX')}
+        />
+        <FormButton
+          icon="privacyPolicy"
+          title={t('privacyPolicy')}
+          onPress={() => openLink(privacyPolicyUrl())}
         />
         <FormButton
           icon="license"

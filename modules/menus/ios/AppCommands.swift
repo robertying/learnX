@@ -36,6 +36,17 @@ public enum AppCommands {
     id: "quickLook", title: "Quick Look", systemImage: "eye.circle",
     input: "y", modifiers: .command)
 
+  /// The Help menu's links, which have no shortcut.
+  struct Link {
+    let id: String
+    /// English; the app's `Localizable.xcstrings` translates it.
+    let title: String
+    let systemImage: String
+  }
+
+  static let website = Link(id: "website", title: "Website", systemImage: "house")
+  static let privacyPolicy = Link(id: "privacyPolicy", title: "Privacy Policy", systemImage: "hand.raised")
+
   /// Call from the app delegate's `buildMenu(with:)`, after `super`.
   public static func buildMenu(with builder: UIMenuBuilder) {
     buildMenu(in: SystemMenuBuilder(builder: builder))
@@ -87,6 +98,21 @@ public enum AppCommands {
         atStartOfMenu: .view
       )
     }
+
+    // The Help menu links to the website and the privacy policy, where Mac apps have them, in place of UIKit's
+    // "learnX Help", which only says that help isn't available.
+    if let help = builder.menu(for: .help) {
+      builder.replace(menu: .help, with: help.replacingChildren([command(website), command(privacyPolicy)]))
+    }
+  }
+
+  static func command(_ link: Link) -> UICommand {
+    UICommand(
+      title: NSLocalizedString(link.title, bundle: .main, comment: "A Help menu item"),
+      image: UIImage(systemName: link.systemImage),
+      action: #selector(UIApplication.learnXPerformAppCommand(_:)),
+      propertyList: link.id
+    )
   }
 
   static func keyCommand(_ command: Command) -> UIKeyCommand {

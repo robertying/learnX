@@ -11,6 +11,7 @@ import {
   FormToggle,
 } from 'components/Form';
 import { t } from 'helpers/i18n';
+import { privacyPolicyUrl } from 'constants/Urls';
 import { openLink } from 'helpers/openLink';
 import { SettingsStackParams } from 'navigation/types';
 
@@ -77,6 +78,11 @@ const CourseInformationSharing: React.FC<Props> = () => {
             icon="openInBrowser"
             title={t('courseX')}
             onPress={() => openLink('https://tsinghua.app/courses')}
+          />
+          <FormButton
+            icon="privacyPolicy"
+            title={t('privacyPolicy')}
+            onPress={() => openLink(privacyPolicyUrl())}
           />
         </FormSection>
       </Form>

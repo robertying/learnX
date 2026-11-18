@@ -42,6 +42,8 @@ export default {
     "Couldn't log in. Check your connection and that your Tsinghua ID login still works.",
   versionInformation: 'Version',
   sourceCode: 'Source Code',
+  website: 'Website',
+  privacyPolicy: 'Privacy Policy',
   appIcon: 'App Icon',
   specialThanks: 'Special Thanks',
   opensourceDependencies: 'Open Source Libraries',

@@ -33,12 +33,15 @@ it('adds the over-the-air update it runs to the version', async () => {
   ).toBeTruthy();
 });
 
-it('opens the source, contributors, thanks and filing pages', async () => {
+it('opens the website, source, privacy policy, contributors, thanks and filing pages', async () => {
   const user = userEvent.setup();
   const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue();
   await render(<About {...screenProps()} />);
   const links = {
+    [t('website')]: 'https://tsinghua.app/learnX',
     [t('sourceCode')]: 'https://github.com/robertying/learnX',
+    [t('privacyPolicy')]:
+      'https://github.com/robertying/learnX/blob/main/docs/PRIVACY_POLICY_EN.md',
     'Rui Ying': 'https://github.com/robertying',
     'Junbo Niu': 'https://github.com/lyrenius',
     'Harry Chen': 'https://github.com/Harry-Chen/thu-learn-lib',

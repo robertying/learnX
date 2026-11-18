@@ -63,6 +63,7 @@ import { FolderFilled, FolderRegular } from '@fluentui/react-icons/svg/folder';
 import { FullScreenMaximizeRegular } from '@fluentui/react-icons/svg/full-screen-maximize';
 import { FullScreenMinimizeRegular } from '@fluentui/react-icons/svg/full-screen-minimize';
 import { GlobeRegular } from '@fluentui/react-icons/svg/globe';
+import { HomeRegular } from '@fluentui/react-icons/svg/home';
 import { GridRegular } from '@fluentui/react-icons/svg/grid';
 import { HandDrawRegular } from '@fluentui/react-icons/svg/hand-draw';
 import { HardDriveRegular } from '@fluentui/react-icons/svg/hard-drive';
@@ -104,6 +105,7 @@ import {
 import { ShareRegular } from '@fluentui/react-icons/svg/share';
 import { ShieldCheckmarkRegular } from '@fluentui/react-icons/svg/shield-checkmark';
 import { ShieldErrorRegular } from '@fluentui/react-icons/svg/shield-error';
+import { ShieldLockRegular } from '@fluentui/react-icons/svg/shield-lock';
 import { SignOutRegular } from '@fluentui/react-icons/svg/sign-out';
 import { SparkleRegular } from '@fluentui/react-icons/svg/sparkle';
 import { StarRegular } from '@fluentui/react-icons/svg/star';
@@ -189,6 +191,7 @@ export const fluentIcons: Record<SystemIconWindowsName, FluentIcon> = {
   FullScreenMaximizeRegular,
   FullScreenMinimizeRegular,
   GlobeRegular,
+  HomeRegular,
   GridRegular,
   HandDrawRegular,
   HardDriveRegular,
@@ -227,6 +230,7 @@ export const fluentIcons: Record<SystemIconWindowsName, FluentIcon> = {
   ShareRegular,
   ShieldCheckmarkRegular,
   ShieldErrorRegular,
+  ShieldLockRegular,
   SignOutRegular,
   SparkleRegular,
   StarRegular,
