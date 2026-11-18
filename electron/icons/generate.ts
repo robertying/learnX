@@ -10,9 +10,11 @@
 // Each size is exported on its own by Xcode's Icon Composer CLI (`ictool`)
 // as macOS draws the icon: the squircle with its Liquid Glass shading, edge
 // to edge on a transparent canvas. Windows and Linux don't mask icons, so
-// the shape is exported at about 92% of the size and centered on a
-// transparent canvas, which also keeps it the size of the system's own icons
-// beside it. ictool writes Display P3 at 16 bits a channel; `sips` turns
+// each platform gets about the share of the canvas its own icons take, and
+// the shape is exported at that size and centered on a transparent canvas:
+// edge to edge on Windows, 108 of 128 on Linux (between GNOME's squares, 104,
+// and circles, 112: a squircle is between the two, and at 104 its round
+// corners and dark fill look small). ictool writes Display P3 at 16 bits a channel; `sips` turns
 // each into 8-bit sRGB, which Windows and Linux assume. The .ico holds 16 to
 // 256; the 256 is stored as a PNG, the others as 32-bit bitmaps, which every
 // Windows reads.
@@ -26,18 +28,20 @@ import zlib from 'node:zlib';
 export const ICO_SIZES = [16, 20, 24, 32, 40, 48, 64, 96, 128, 256];
 /** Linux's: electron-builder scales it down for the hicolor theme. */
 export const PNG_SIZE = 512;
-/** How much of the canvas the shape takes. */
-export const SHAPE_FRACTION = 0.92;
+/** How much of the canvas the shape takes in the .ico: all of it. */
+export const ICO_SHAPE_FRACTION = 1;
+/** And in the Linux PNG: between GNOME's squares (104) and circles (112). */
+export const PNG_SHAPE_FRACTION = 108 / 128;
 
 /** An 8-bit RGBA image, its rows top to bottom. */
 type Image = { width: number; height: number; pixels: Buffer };
 
 /**
- * The shape's size on a canvas of `size`: about 92%, in whole pixels, with
- * the margin even so it sits exactly in the middle.
+ * The shape's size on a canvas of `size`: about `fraction` of it, in whole
+ * pixels, with the margin even so it sits exactly in the middle.
  */
-export const shapeSize = (size: number): number => {
-  const ideal = size * SHAPE_FRACTION;
+export const shapeSize = (size: number, fraction: number): number => {
+  const ideal = size * fraction;
   const below = Math.floor(ideal);
   const candidates = [below - 1, below, below + 1, below + 2].filter(
     n => n > 0 && n <= size && (size - n) % 2 === 0,
@@ -306,9 +310,9 @@ const main = () => {
     throw new Error('Making the icons needs a Mac (sips and its sRGB profile)');
   }
   const work = fs.mkdtempSync(path.join(os.tmpdir(), 'learnx-icons-'));
-  /** The icon at `size`, its shape exported at that size and centered. */
-  const render = (size: number) => {
-    const shape = shapeSize(size);
+  /** The icon at `size`, its shape exported at `fraction` and centered. */
+  const render = (size: number, fraction: number) => {
+    const shape = shapeSize(size, fraction);
     const file = path.join(work, `${shape}.png`);
     const srgb = path.join(work, `${shape}-srgb.png`);
     execFileSync(tool, [
@@ -336,9 +340,12 @@ const main = () => {
     const out = import.meta.dirname;
     fs.writeFileSync(
       path.join(out, 'icon.ico'),
-      encodeIco(ICO_SIZES.map(render)),
+      encodeIco(ICO_SIZES.map(size => render(size, ICO_SHAPE_FRACTION))),
     );
-    fs.writeFileSync(path.join(out, 'icon.png'), encodePng(render(PNG_SIZE)));
+    fs.writeFileSync(
+      path.join(out, 'icon.png'),
+      encodePng(render(PNG_SIZE, PNG_SHAPE_FRACTION)),
+    );
     console.log(`Wrote ${path.join(out, 'icon.ico')} and icon.png`);
   } finally {
     fs.rmSync(work, { recursive: true, force: true });
