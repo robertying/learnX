@@ -175,14 +175,6 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             title={t('downloads')}
             {...linkTo('Downloads')}
           />
-          {appLanguage && (
-            <FormLink
-              icon="language"
-              testID="settings-language"
-              title={t('language')}
-              {...linkTo('LanguageSettings')}
-            />
-          )}
           {/* The Mac and Windows have no swipe: their cards' actions are in a
               right-click menu. */}
           {!DeviceInfo.isMac() && !isElectron() && (
@@ -204,6 +196,16 @@ const Settings: React.FC<Props> = ({ navigation }) => {
               onValueChange={value => {
                 void loginItem.set(value);
               }}
+            />
+          </FormSection>
+        )}
+        {appLanguage && (
+          <FormSection>
+            <FormLink
+              icon="language"
+              testID="settings-language"
+              title={t('language')}
+              {...linkTo('LanguageSettings')}
             />
           </FormSection>
         )}
