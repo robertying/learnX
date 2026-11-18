@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Platform } from 'react-native';
-import { renderHook } from '@testing-library/react-native';
+import { act, renderHook } from '@testing-library/react-native';
 import DeviceInfo from 'constants/DeviceInfo';
 import SplitSizes from 'constants/SplitSizes';
 import { t } from 'helpers/i18n';
@@ -10,8 +10,17 @@ import { SplitViewContext } from 'navigation/SplitView';
 jest.mock('components/Divider', () => () => null);
 
 const setOptions = jest.fn();
+const blurListeners = new Set<() => void>();
 const navigation = (routeNames = ['Files', 'FileDetail']) =>
-  ({ setOptions, getState: () => ({ routeNames }) }) as never;
+  ({
+    setOptions,
+    getState: () => ({ routeNames }),
+    addListener: (_event: 'blur', listener: () => void) => {
+      blurListeners.add(listener);
+      return () => blurListeners.delete(listener);
+    },
+  }) as never;
+const blur = () => blurListeners.forEach(listener => listener());
 
 const handlers = {
   onRefresh: jest.fn(),
@@ -175,6 +184,47 @@ it('brings the list back from full screen, and the preview back from the info', 
   expect(items().find(item => item.identifier === 'info')?.label).toBe(
     t('preview'),
   );
+});
+
+it('brings the list back once the screen that went full screen is left', async () => {
+  const wrapper = ({ children }: { children: ReactNode }) => (
+    <SplitViewContext.Provider value={{ ...split, showMaster: false }}>
+      {children}
+    </SplitViewContext.Provider>
+  );
+  split.toggleMaster.mockClear();
+  // Another screen over it
+  await renderHook(
+    () => useFileDetailHeader({ navigation: navigation(), ...props }),
+    { wrapper },
+  );
+  await act(blur);
+  expect(split.toggleMaster).toHaveBeenCalledWith(true);
+
+  // Back, which the Electron app's header shows even in full screen
+  split.toggleMaster.mockClear();
+  const { unmount } = await renderHook(
+    () => useFileDetailHeader({ navigation: navigation(), ...props }),
+    { wrapper },
+  );
+  await act(unmount);
+  expect(split.toggleMaster).toHaveBeenCalledWith(true);
+});
+
+it('leaves the list as it is when leaving a screen that is not full screen', async () => {
+  const wrapper = ({ children }: { children: ReactNode }) => (
+    <SplitViewContext.Provider value={split}>
+      {children}
+    </SplitViewContext.Provider>
+  );
+  split.toggleMaster.mockClear();
+  const { unmount } = await renderHook(
+    () => useFileDetailHeader({ navigation: navigation(), ...props }),
+    { wrapper },
+  );
+  await act(blur);
+  await act(unmount);
+  expect(split.toggleMaster).not.toHaveBeenCalled();
 });
 
 it('opens and saves instead of sharing in the Electron app', async () => {

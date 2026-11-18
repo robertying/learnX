@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import BrowserToolbar from 'components/BrowserToolbar';
 import CardMenu from 'components/CardMenu';
 import ContainedButton from 'components/ContainedButton';
 import DateRangePicker from 'components/DateRangePicker';
@@ -70,6 +71,38 @@ it('labels an icon button, with its badge and toggled state', () => {
   ).toBe('true');
   fireEvent.click(screen.getByTestId('bare'));
   expect(onPress).toHaveBeenCalledTimes(1);
+});
+
+it("shows the web page's buttons as a command bar below it", () => {
+  const onBack = jest.fn();
+  const onReload = jest.fn();
+  renderFluent(
+    <BrowserToolbar
+      canGoBack
+      canGoForward={false}
+      loading={false}
+      onBack={onBack}
+      onForward={jest.fn()}
+      onReload={onReload}
+      onOpenInBrowser={jest.fn()}
+    />,
+  );
+  const bar = screen.getByRole('toolbar');
+  expect(
+    [...bar.querySelectorAll('button')].map(b => [
+      b.getAttribute('data-testid'),
+      b.disabled,
+    ]),
+  ).toEqual([
+    ['courseXBack', false],
+    ['courseXForward', true],
+    ['courseXReload', false],
+    ['courseXOpen', false],
+  ]);
+  fireEvent.click(screen.getByTestId('courseXBack'));
+  fireEvent.click(screen.getByTestId('courseXReload'));
+  expect(onBack).toHaveBeenCalledTimes(1);
+  expect(onReload).toHaveBeenCalledTimes(1);
 });
 
 it('flips a switch and shows a selection mark', () => {

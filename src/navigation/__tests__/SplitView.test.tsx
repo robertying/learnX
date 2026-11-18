@@ -26,7 +26,17 @@ const renderDetail = (ref: DetailNavigationContainerRef) => {
   if (!detailRefs.includes(ref)) {
     detailRefs.push(ref);
   }
-  return <Text>{`detail ${detailRefs.indexOf(ref)}`}</Text>;
+  return <Detail index={detailRefs.indexOf(ref)} />;
+};
+const seenDetail = jest.fn<
+  void,
+  [number, React.ContextType<typeof SplitViewContext>]
+>();
+const detailContext = (index: number) =>
+  seenDetail.mock.calls.findLast(([i]) => i === index)![1];
+const Detail = ({ index }: { index: number }) => {
+  seenDetail(index, useContext(SplitViewContext));
+  return <Text>{`detail ${index}`}</Text>;
 };
 beforeEach(() => {
   detailRefs.length = 0;
@@ -184,6 +194,43 @@ describe('tabs', () => {
     );
     expect(context().showMaster).toBe(false);
     await act(() => context().toggleMaster(true));
+    expect(context().showMaster).toBe(true);
+  });
+
+  it("lets a tab's detail stack leave its own full screen while another tab shows", async () => {
+    await renderSplit(
+      true,
+      <>
+        <NavigationContainer>
+          <Tabs.Navigator>
+            <Tabs.Screen name="A" component={TabA} />
+            <Tabs.Screen name="B" component={TabB} />
+          </Tabs.Navigator>
+        </NavigationContainer>
+        <Master />
+      </>,
+    );
+    await act(() => detailContext(0).toggleMaster(false));
+    expect(detailContext(0).showMaster).toBe(false);
+    expect(context().showMaster).toBe(false);
+
+    await act(() =>
+      screen
+        .getByText('go from A', { includeHiddenElements: true })
+        .props.onPress(),
+    );
+    expect(detailContext(1).showMaster).toBe(true);
+    // A's File detail closes while B shows: A's list comes back, B's stays.
+    expect(detailContext(0).showMaster).toBe(false);
+    await act(() => detailContext(0).toggleMaster(true));
+    expect(detailContext(0).showMaster).toBe(true);
+    expect(context().showMaster).toBe(true);
+
+    await act(() =>
+      screen
+        .getByText('go from B', { includeHiddenElements: true })
+        .props.onPress(),
+    );
     expect(context().showMaster).toBe(true);
   });
 
