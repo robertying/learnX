@@ -15,7 +15,8 @@ executionOrder:
     - Start from a fresh install
     # Logs in. Right after the reset, because released Maestro only reads
     # the notice detail's deep accessibility tree on iOS after a login in the
-    # same launch (AGENTS.md; the patched Maestro doesn't need this).
+    # same launch (scripts/e2e/maestro/README.md; the patched Maestro doesn't
+    # need this).
     - Open a notice, an assignment and a file
     - Log in and visit every tab
     - Favorite and archive a notice

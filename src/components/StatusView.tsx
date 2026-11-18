@@ -30,9 +30,7 @@ export interface StatusViewProps {
  * A screen or list with nothing to show, or that failed, and why: a large
  * dimmed icon, a title, an optional description and optional buttons,
  * centered in the space it has, as in iOS's `ContentUnavailableView` and
- * Material's empty states. Every empty and error state is this view: `Empty`,
- * `NotFound`, Search's prompt and No Results, a file that couldn't download,
- * the error boundary's fallback and the empty detail pane.
+ * Material's empty states. Every empty and error state is this view.
  */
 // The large dimmed icon: 56 pt beside iOS's text and Material's, and as
 // much smaller on the Mac as its large title (26 pt for 34) is.

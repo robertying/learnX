@@ -189,5 +189,5 @@ export const placeholderKeyProblem = (
   !options.dir &&
   !isLocalUrl(options.updateUrl) &&
   !options.allowPlaceholderKey
-    ? 'certs/electron-public-key.pem is a placeholder, so these installs could never update: commit the update key\'s public half (electron/AGENTS.md, "Signing updates"), or pass --allow-placeholder-key for a build that will never be released'
+    ? 'certs/electron-public-key.pem is a placeholder, so these installs could never update: commit the update key\'s public half (electron/AGENTS.md, "Packaging and updates"), or pass --allow-placeholder-key for a build that will never be released'
     : null;

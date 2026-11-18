@@ -16,21 +16,21 @@ import { isAndroid, isApple, isElectron } from 'helpers/platform';
  * and Mac, the Material 3 type scale on Android, and Fluent 2's type ramp in
  * the Electron app (Windows and Linux).
  *
- * | variant       | iOS / Mac (default size)  | Android (M3)   | Fluent 2      |
- * | ------------- | ------------------------- | -------------- | ------------- |
- * | `largeTitle`  | Large Title, 34/41 bold   | headlineMedium | Title 2       |
- * | `title`       | Title 3, 20/25 semibold   | titleLarge     | Subtitle 1    |
- * | `headline`    | Headline, 17/22 semibold  | titleMedium    | Subtitle 2    |
- * | `body`        | Body, 17/22               | bodyLarge      | Body 1        |
- * | `subheadline` | Subheadline, 15/20        | bodyMedium     | Body 1        |
- * | `label`       | Subheadline, 15/20 medium | labelLarge     | Body 1 Strong |
- * | `footnote`    | Footnote, 13/18           | bodySmall      | Caption 1     |
- * | `caption`     | Caption 2, 11/13          | labelSmall     | Caption 2     |
+ * | variant       | iOS / Mac           | Android (M3)   | Fluent 2      |
+ * | ------------- | ------------------- | -------------- | ------------- |
+ * | `largeTitle`  | Large Title         | headlineMedium | Title 2       |
+ * | `title`       | Title 3             | titleLarge     | Subtitle 1    |
+ * | `headline`    | Headline            | titleMedium    | Subtitle 2    |
+ * | `body`        | Body                | bodyLarge      | Body 1        |
+ * | `subheadline` | Subheadline         | bodyMedium     | Body 1        |
+ * | `label`       | Subheadline, medium | labelLarge     | Body 1 Strong |
+ * | `footnote`    | Footnote            | bodySmall      | Caption 1     |
+ * | `caption`     | Caption 2           | labelSmall     | Caption 2     |
  *
  * On iOS each variant scales with the user's text size along its own Dynamic
  * Type curve (`dynamicTypeRamp`), as UIKit's text styles do. The Mac
- * ("Optimize for Mac") takes the same styles at macOS's own sizes (body 13 pt,
- * `macStyles`), as SwiftUI's text styles (`Form`) and the system's controls
+ * ("Optimize for Mac") takes the same styles at macOS's own sizes
+ * (`macStyles`), as SwiftUI's text styles (`Form`) and the system's controls
  * are drawn there. Android scales them with the system font scale.
  */
 export type TextVariant =
@@ -60,8 +60,7 @@ const iosStyles: Record<TextVariant, TextStyle> = {
   caption: { fontSize: 11, lineHeight: 13, fontWeight: '400' },
 };
 
-// macOS's text styles: Title 3 15/20, Headline 13/16 bold, Body 13/16,
-// Subheadline 11/14, Footnote 10/13, Caption 2 10/13, Large Title 26/32.
+// macOS's text styles.
 const macStyles: Record<TextVariant, TextStyle> = {
   largeTitle: { fontSize: 26, lineHeight: 32, fontWeight: '700' },
   title: { fontSize: 15, lineHeight: 20, fontWeight: '600' },

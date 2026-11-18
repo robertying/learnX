@@ -4,9 +4,9 @@ name: Apple
 # module change shows up in CI rather than on a Mac later, and runs the native
 # iOS tests. By hand only (Actions > Apple > Run workflow), for the platforms
 # picked; not required checks. No signing secrets, no uploads.
-# - iOS, build + native tests (~47 min cold): run it on main to refresh the
-#   compilation cache, or on a branch to check it.
-# - Mac, build (~35 min, uncached).
+# - iOS, build + native tests: run it on main to refresh the compilation
+#   cache, or on a branch to check it.
+# - Mac, build (uncached).
 # Android builds and E2E are in android.yml.
 on:
   workflow_dispatch:
