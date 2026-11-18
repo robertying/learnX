@@ -27,8 +27,8 @@ name: Say a new version in a notification once logged in
 - assertNotVisible: '.*(${T_updateNotificationBody}).*'
 - pressKey: Back
 
-# Logging in says the version it found, and tapping the notification opens
-# Settings with the update on top.
+# Logging in says the version it found, once, and tapping the notification
+# opens Settings with the update on top.
 - runFlow: ../subflows/login.yaml
 - swipe:
     start: 25%, 0%
@@ -41,6 +41,10 @@ name: Say a new version in a notification once logged in
     env:
       NAME: updater-notification
 - assertVisible: '.*${VERSION}.*'
+# Not twice, though logging in forgets what was said and checks again.
+- assertNotVisible:
+    text: '.*(${T_updateNotificationBody}).*'
+    index: 1
 - tapOn: '.*(${T_updateNotificationBody}).*'
 - extendedWaitUntil:
     visible:

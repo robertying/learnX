@@ -1,9 +1,6 @@
 import * as Notifications from 'expo-notifications';
-import {
-  hasSavedLogin,
-  loadCredentials,
-  useCredentialsStore,
-} from 'data/credentials';
+import { useAuthStore } from 'data/auth';
+import { hasSavedLogin, loadCredentials } from 'data/credentials';
 import { addNotifiedKeys, getNotifiedKeys } from 'data/notified';
 import { getSettings } from 'data/settings';
 import { t } from 'helpers/i18n';
@@ -52,15 +49,16 @@ export const notifyUpdate = async ({
 };
 
 /**
- * Calls `notify` when someone logs in (a login is saved), for the version
- * found while nobody was. Returns the unsubscribe.
+ * Calls `notify` when someone logs in, for the version found while nobody
+ * was. Only once the login has gone through: `data/login` saves the login
+ * before it claims the data, which forgets what was said (`data/notified`) and
+ * cached, so a version said at the save would be said again after it. Also
+ * after logging in again, where `notifyUpdate` says nothing twice. Returns the
+ * unsubscribe.
  */
 export const notifyOnLogin = (notify: () => void) =>
-  useCredentialsStore.subscribe((state, previous) => {
-    if (
-      hasSavedLogin(state.credentials) &&
-      !hasSavedLogin(previous.credentials)
-    ) {
+  useAuthStore.subscribe((state, previous) => {
+    if (state.loggedIn && !previous.loggedIn) {
       notify();
     }
   });

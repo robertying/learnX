@@ -43,12 +43,11 @@ export const watchUpdates = () => {
       void notifyRelease(event.query.state.data as Release);
     }
   });
-  // A version found before logging in, said once someone does.
+  // A version found before logging in, said once someone does. Logging in
+  // empties the query cache, so this asks again (or takes the cached answer
+  // when there is still one).
   notifyOnLogin(() => {
-    const release = queryClient.getQueryData(latestReleaseQuery.queryKey);
-    if (release) {
-      void notifyRelease(release);
-    }
+    void checkForUpdate();
   });
   AppState.addEventListener('change', state => {
     if (state === 'active') {

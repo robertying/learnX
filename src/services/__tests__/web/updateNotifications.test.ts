@@ -1,4 +1,5 @@
 import { t } from 'helpers/i18n';
+import { initialAuth, useAuthStore } from 'data/auth';
 import { useCredentialsStore } from 'data/credentials';
 import { resetNotified } from 'data/notified';
 import type { Bridge, BridgeUpdate } from 'web/bridge';
@@ -15,6 +16,9 @@ import {
 
 // Loads expo-updates and the Crashlytics module, neither of which Jest can.
 jest.mock('services/crashReporting', () => ({ recordError: jest.fn() }));
+// data/auth's import, whose cheerio resolves to an ES module in the web
+// project.
+jest.mock('@robertying/thu-learn-lib', () => ({ FailReason: {} }));
 
 let bridge: Bridge;
 
@@ -82,12 +86,18 @@ it('says so while the window is in front too', async () => {
   expect(posted()).toHaveLength(1);
 });
 
-it('says an update found before logging in once someone logs in', async () => {
+it('says an update found before logging in once, after the login', async () => {
+  useAuthStore.setState(initialAuth);
   useCredentialsStore.setState({ credentials: null });
   await ready({ version: '19.4.0' });
   expect(posted()).toEqual([]);
 
+  // As data/login logs in: the login saved, then the account's data
+  // claimed, which forgets what was said, then through.
   logIn();
+  await new Promise(resolve => setTimeout(resolve));
+  resetNotified();
+  useAuthStore.setState({ loggedIn: true });
   await new Promise(resolve => setTimeout(resolve));
   expect(posted()).toEqual([
     expect.objectContaining({

@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
+import { initialAuth, useAuthStore } from 'data/auth';
 import { useCredentialsStore } from 'data/credentials';
 import { getNotifiedKeys, resetNotified } from 'data/notified';
 import { getSettings, resetSettings, setSetting } from 'data/settings';
@@ -84,14 +85,17 @@ describe('before logging in', () => {
     expect(schedule).toHaveBeenCalledTimes(1);
   });
 
-  it('calls back once someone logs in, not on later changes', () => {
+  it('calls back once a login goes through, not on later changes', () => {
+    useAuthStore.setState(initialAuth);
     const notify = jest.fn();
     const unsubscribe = notifyOnLogin(notify);
-    useCredentialsStore.setState({ credentials: { ...login, password: '' } });
-    expect(notify).not.toHaveBeenCalled();
+    // Saved, but not through yet (data/login).
     logIn();
+    useAuthStore.setState({ loggingIn: true });
+    expect(notify).not.toHaveBeenCalled();
+    useAuthStore.setState({ loggingIn: false, loggedIn: true });
     expect(notify).toHaveBeenCalledTimes(1);
-    useCredentialsStore.setState({ credentials: { ...login } });
+    useAuthStore.setState({ reloginRequested: false });
     expect(notify).toHaveBeenCalledTimes(1);
     unsubscribe();
   });
