@@ -6,7 +6,6 @@ import {
   PanResponder,
   PlatformColor,
   StyleSheet,
-  useWindowDimensions,
   View,
 } from 'react-native';
 import Animated, {
@@ -14,7 +13,10 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  useSafeAreaFrame,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
 import { FullWindowOverlay } from 'react-native-screens';
 import { create } from 'zustand';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -28,6 +30,8 @@ import {
 } from 'modules/toast';
 
 import { playHaptic } from 'services/haptics';
+import { targetWindow } from 'services/windows';
+import { useWindow } from 'hooks/useWindow';
 import { toastHaptic, type ToastOptions, type ToastType } from './Toast.shared';
 
 export type { ToastOptions, ToastType } from './Toast.shared';
@@ -40,6 +44,11 @@ interface ToastState {
   duration: number;
   /** False while the toast animates away; `text` empties once it is gone. */
   visible: boolean;
+  /**
+   * The window it shows in, with several (iPad, Mac): the one the person is
+   * using (`services/windows`).
+   */
+  windowId?: string;
 }
 
 const useToastStore = create<ToastState>(() => ({
@@ -90,6 +99,7 @@ export const toast = (
     type,
     duration: options?.duration ?? defaultDurations[type],
     visible: true,
+    windowId: targetWindow(),
   }));
   const haptic = toastHaptic(type, options);
   if (haptic) {
@@ -226,7 +236,10 @@ const toastInsets = (insets: Margins, bar: TabBarFrame | null): Margins => {
  * changes size. Undefined until UIKit answers, a moment after the toast mounts.
  */
 const useTabBarFrame = () => {
-  const { width, height } = useWindowDimensions();
+  // This window's size: React Native's window dimensions are the key
+  // window's.
+  const { width, height } = useSafeAreaFrame();
+  const { windowId } = useWindow();
   const [frame, setFrame] = useState<TabBarFrame | null>();
   useEffect(() => {
     let current = true;
@@ -235,11 +248,11 @@ const useTabBarFrame = () => {
         setFrame(value);
       }
     };
-    tabBarFrame().then(answer, () => answer(null));
+    tabBarFrame(windowId).then(answer, () => answer(null));
     return () => {
       current = false;
     };
-  }, [width, height]);
+  }, [width, height, windowId]);
   return frame;
 };
 
@@ -268,7 +281,7 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
   visible,
 }) => {
   const insets = useSafeAreaInsets();
-  const { width: windowWidth } = useWindowDimensions();
+  const { width: windowWidth } = useSafeAreaFrame();
   const keyboardHeight = useKeyboardHeight();
   const tabBar = useTabBarFrame();
   const margins = toastInsets(insets, tabBar ?? null);
@@ -373,17 +386,20 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
  * shows over modals and sheets too. Mount once.
  */
 export const Toast: React.FC = () => {
-  const { id, text, type, duration, visible } = useToastStore();
+  const { id, text, type, duration, visible, windowId } = useToastStore();
+  const window = useWindow();
+  // With several windows, only the one it's for shows it.
+  const shown = !!text && (!windowId || windowId === window.windowId);
 
   useEffect(() => {
-    if (!text || !visible) {
+    if (!shown || !visible) {
       return;
     }
     const timer = setTimeout(() => dismiss(id), duration);
     return () => clearTimeout(timer);
-  }, [id, text, visible, duration]);
+  }, [id, shown, visible, duration]);
 
-  if (!text) {
+  if (!shown) {
     return null;
   }
 

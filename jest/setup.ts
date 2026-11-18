@@ -53,6 +53,7 @@ jest.mock('expo-sqlite/kv-store', () => require('./mocks/sqliteKvStore'));
 jest.mock('expo-updates', () => require('./mocks/expoUpdates'));
 jest.mock('expo-widgets', () => require('./mocks/widgets'));
 jest.mock('../modules/menus', () => require('./mocks/menus'));
+jest.mock('../modules/windows', () => require('./mocks/windows'));
 // The system cookie store, empty.
 jest.mock('@preeternal/react-native-cookie-manager', () => ({
   __esModule: true,

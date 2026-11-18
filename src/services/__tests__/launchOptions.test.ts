@@ -266,6 +266,31 @@ describe('withLaunchOptions', () => {
 
     expect(getMockNetworkConfig().latency).toBe('slow');
   });
+
+  it("hands the app its window's id and link, ignoring empty or odd values", async () => {
+    const received: unknown[] = [];
+    const Root = withLaunchOptions(props => {
+      received.push(props);
+      return createElement(Text, null, 'app');
+    });
+
+    const screen = await render(
+      createElement(Root, {
+        windowId: 'window-a',
+        initialURL: 'learnx://notice/n1',
+      }),
+    );
+    await screen.rerender(createElement(Root, { windowId: '', initialURL: 7 }));
+
+    expect(received[0]).toEqual({
+      windowId: 'window-a',
+      initialURL: 'learnx://notice/n1',
+    });
+    expect(received.at(-1)).toEqual({
+      windowId: undefined,
+      initialURL: undefined,
+    });
+  });
 });
 
 describe('store report', () => {

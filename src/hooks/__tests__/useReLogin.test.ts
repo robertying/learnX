@@ -6,7 +6,7 @@ import { saveCredentials, clearCredentials } from 'data/credentials';
 import { login } from 'data/login';
 import { queryClient } from 'data/queryClient';
 import { flushServerActionsWithin } from 'data/serverActions';
-import useReLogin from 'hooks/useReLogin';
+import useReLogin, { resetReLogin } from 'hooks/useReLogin';
 
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
 jest.mock('data/login', () => ({ login: jest.fn(async () => {}) }));
@@ -27,6 +27,7 @@ beforeEach(async () => {
   // The preset's AppState has no state of its own.
   (AppState as { currentState: string }).currentState = 'active';
   useAuthStore.setState(initialAuth);
+  resetReLogin();
   await saveCredentials(credentials);
 });
 
@@ -60,6 +61,15 @@ describe('useReLogin', () => {
   it('logs in at launch', async () => {
     await renderHook(useReLogin);
     expect(login).toHaveBeenCalledWith({});
+  });
+
+  it('lets the next window carry on without logging in again', async () => {
+    const first = await renderHook(useReLogin);
+    await first.unmount();
+    jest.mocked(login).mockClear();
+
+    await renderHook(useReLogin);
+    expect(login).not.toHaveBeenCalled();
   });
 
   it('retries less and less often while offline', async () => {

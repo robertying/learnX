@@ -29,6 +29,19 @@ const catchUp = async () => {
     .catch(() => {});
 };
 
+/**
+ * When the app was last left, and whether the launch login has run. Kept for
+ * the JS runtime: with several windows (iPad, Mac), the one running this hook
+ * can close, and the next one carries on rather than logging in as at launch.
+ */
+const lastActive = { time: dayjs(0), launched: false };
+
+/** For tests: as at launch. */
+export const resetReLogin = () => {
+  lastActive.time = dayjs(0);
+  lastActive.launched = false;
+};
+
 /** Whether a login may start on its own now. */
 const canLogIn = () => {
   const auth = getAuth();
@@ -54,7 +67,6 @@ const canLogIn = () => {
 const useReLogin = () => {
   const appState = useRef(AppState.currentState);
   const [active, setActive] = useState(AppState.currentState === 'active');
-  const lastActiveTime = useRef(dayjs(0));
   const retries = useRef(0);
 
   const failure = useAuthStore(state => state.failure);
@@ -67,7 +79,7 @@ const useReLogin = () => {
       return;
     }
     const auth = getAuth();
-    if (dayjs().diff(lastActiveTime.current, 'minute') >= 10) {
+    if (dayjs().diff(lastActive.time, 'minute') >= 10) {
       toast(t('loggingIn'), 'none', { duration: 1 * 1000 });
       // At launch there's no session yet; after a break the session may
       // still be good, which saves a full SSO login.
@@ -86,7 +98,7 @@ const useReLogin = () => {
   });
 
   const handleReturn = useEffectEvent(async () => {
-    const away = dayjs().diff(lastActiveTime.current);
+    const away = dayjs().diff(lastActive.time);
     if (await updateOnReturn(away, isUpdatePending)) {
       return;
     }
@@ -94,11 +106,14 @@ const useReLogin = () => {
   });
 
   useEffect(() => {
-    void handleReLogin();
+    if (!lastActive.launched) {
+      lastActive.launched = true;
+      void handleReLogin();
+    }
 
     const sub = AppState.addEventListener('change', nextAppState => {
       if (appState.current === 'active' && nextAppState !== 'active') {
-        lastActiveTime.current = dayjs();
+        lastActive.time = dayjs();
       }
 
       if (
