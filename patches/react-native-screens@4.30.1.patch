@@ -572,18 +572,19 @@ index dca7ea15e381a33b6d66cd777985b2374b511f54..afcd704ed9cb4b4109478b236682f9bb
  @property (nonatomic, readonly) BOOL hasCustomTopColumnForCollapsing;
  @property (nonatomic, readonly) UISplitViewControllerColumn topColumnForCollapsingColumn;
 diff --git a/ios/gamma/split/RNSSplitHostComponentView.mm b/ios/gamma/split/RNSSplitHostComponentView.mm
-index e2d5259add5d8ad00b1acdde27cd013e70ce6013..75ec291bda5004f31773c219643128ff5a431333 100644
+index e2d5259add5d8ad00b1acdde27cd013e70ce6013..8d61a19eb55500456f8e6b2c223315772b476a66 100644
 --- a/ios/gamma/split/RNSSplitHostComponentView.mm
 +++ b/ios/gamma/split/RNSSplitHostComponentView.mm
-@@ -33,6 +33,7 @@ static const CGFloat epsilon = 1e-6;
+@@ -33,6 +33,8 @@ static const CGFloat epsilon = 1e-6;
    bool _needsSplitOrientationUpdate;
    // We need this information to warn users about dynamic changes to behavior being currently unsupported.
    bool _isShowSecondaryToggleButtonSet;
 +  CGFloat _lastHingeLayoutWidth;
++  BOOL _needsTabSafeAreaNudge;
  }
  
  - (instancetype)initWithFrame:(CGRect)frame
-@@ -55,6 +56,19 @@ static const CGFloat epsilon = 1e-6;
+@@ -55,6 +57,19 @@ static const CGFloat epsilon = 1e-6;
    _needsSplitDisplayModeUpdate = false;
    _needsSplitOrientationUpdate = false;
    _reactSubviews = [NSMutableArray new];
@@ -603,7 +604,7 @@ index e2d5259add5d8ad00b1acdde27cd013e70ce6013..75ec291bda5004f31773c219643128ff
  }
  
  - (void)resetProps
-@@ -72,6 +86,7 @@ static const CGFloat epsilon = 1e-6;
+@@ -72,6 +87,7 @@ static const CGFloat epsilon = 1e-6;
  #endif // !TARGET_OS_TV
    _presentsWithGesture = true;
    _showSecondaryToggleButton = false;
@@ -611,7 +612,7 @@ index e2d5259add5d8ad00b1acdde27cd013e70ce6013..75ec291bda5004f31773c219643128ff
    _showInspector = false;
  
    _minimumPrimaryColumnWidth = -1.0;
-@@ -122,14 +137,86 @@ static const CGFloat epsilon = 1e-6;
+@@ -122,14 +138,107 @@ static const CGFloat epsilon = 1e-6;
  
  - (void)didMoveToWindow
  {
@@ -638,16 +639,33 @@ index e2d5259add5d8ad00b1acdde27cd013e70ce6013..75ec291bda5004f31773c219643128ff
 +  // tab is already being shown, the columns can be left without theirs until the tab transition is
 +  // over, their bars sitting underneath the tab bar. Laying the tab bar controller out isn't the
 +  // answer: where it isn't late, that hands the columns theirs before the tab's is taken back.
-+  // A change to the tab's safe area makes it do both at once.
-+  if (self.window != nil && !hadController && _controller.tabBarController != nil) {
-+    UIViewController *tabViewController = _controller.parentViewController;
-+    UIEdgeInsets insets = tabViewController.additionalSafeAreaInsets;
-+    tabViewController.additionalSafeAreaInsets =
-+        UIEdgeInsetsMake(insets.top + 1, insets.left, insets.bottom, insets.right);
-+    [tabViewController.view layoutIfNeeded];
-+    tabViewController.additionalSafeAreaInsets = insets;
-+    [tabViewController.view layoutIfNeeded];
++  // A change to the tab's safe area makes it do both at once (`nudgeTabSafeArea`).
++  _needsTabSafeAreaNudge = self.window != nil && !hadController && _controller.tabBarController != nil;
++  if (_needsTabSafeAreaNudge) {
++    [self setNeedsLayout];
 +  }
++}
++
++// Runs from the host's first layout rather than from `didMoveToWindow`: a SwiftUI tab view adds the
++// tab while it renders, and laying the tab out there renders a SwiftUI list in it (a Form) inside
++// that render. The list then lays out its rows before SwiftUI gives it its refresh control, which
++// goes in behind them and is covered by the first section's background wherever the navigation bar
++// doesn't hold the spinner (an iPhone Duo's outer screen). The host's layout comes in the same
++// layout pass, once the tab view's render is over, so the columns still have their safe area in
++// the first frame.
++- (void)nudgeTabSafeArea
++{
++  _needsTabSafeAreaNudge = NO;
++  UIViewController *tabViewController = _controller.parentViewController;
++  if (self.window == nil || tabViewController == nil) {
++    return;
++  }
++  UIEdgeInsets insets = tabViewController.additionalSafeAreaInsets;
++  tabViewController.additionalSafeAreaInsets =
++      UIEdgeInsetsMake(insets.top + 1, insets.left, insets.bottom, insets.right);
++  [tabViewController.view layoutIfNeeded];
++  tabViewController.additionalSafeAreaInsets = insets;
++  [tabViewController.view layoutIfNeeded];
 +}
 +
 +- (void)setHingePartiallyOpen:(BOOL)hingePartiallyOpen
@@ -675,6 +693,10 @@ index e2d5259add5d8ad00b1acdde27cd013e70ce6013..75ec291bda5004f31773c219643128ff
 +
 +- (void)layoutSubviews
 +{
++  if (_needsTabSafeAreaNudge) {
++    // Lays this view out again, inside the tab's layout.
++    [self nudgeTabSafeArea];
++  }
 +  [super layoutSubviews];
 +  // Both go by the bounds, so a resize brings the collapse and the hinge up to date together, before the
 +  // split lays out its columns. Coming from React, either would arrive after the resize.
@@ -698,7 +720,7 @@ index e2d5259add5d8ad00b1acdde27cd013e70ce6013..75ec291bda5004f31773c219643128ff
  }
  
  RNS_IGNORE_SUPER_CALL_BEGIN
-@@ -230,6 +317,12 @@ RNS_IGNORE_SUPER_CALL_END
+@@ -230,6 +339,12 @@ RNS_IGNORE_SUPER_CALL_END
      _presentsWithGesture = newComponentProps.presentsWithGesture;
    }
  

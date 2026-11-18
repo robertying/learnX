@@ -4,7 +4,8 @@ import XCTest
 /// Today on an iPhone. The header follows Today's list, which needs the list inside `FormScreen`'s view
 /// (`components/Form.tsx`): mounted beside it, the header found no scroll view, so scrolling left the large title over
 /// the rows. Following the list, the header collapses the large title as it scrolls and holds the pull-to-refresh
-/// spinner above it.
+/// spinner above it. On an iPhone Duo's outer screen the tab bar runs down the side, and the header keeps the title in
+/// one row that neither stretches nor collapses: the spinner shows in the list, under the header.
 @MainActor
 final class TodayUITests: SimulatorUITestCase {
   func testPullToRefreshShowsTheSpinner() throws {
@@ -12,7 +13,7 @@ final class TodayUITests: SimulatorUITestCase {
       throw XCTSkip("Today's list is the same on an iPad; the iPhone is enough")
     }
     try open(tab: "tab-today")
-    try waitFor(id: "today-schedule", timeout: 30)
+    let row = try waitFor(id: "today-schedule", timeout: 30)
     let bar = try waitFor(idMatching: "今天")
     XCTAssertEqual(bar.elementType, .navigationBar)
 
@@ -20,8 +21,10 @@ final class TodayUITests: SimulatorUITestCase {
     // opens in the bar, from a screenshot taken while the finger is still down.
     let held = holdingScreenshot(dragging: element(id: "today"), by: 300, after: 2.5)
     // The bar stretches with the pull and holds the spinner between its top row and the large title, which moves
-    // down; before the pull that spot is the large title's row, empty in the middle.
-    let gap = CGRect(x: bar.frame.midX - 40, y: bar.frame.minY + 44, width: 80, height: 80)
+    // down; before the pull that spot is the large title's row, empty in the middle. Where the bar doesn't stretch,
+    // the spinner is at the top of the list, in the same spot. It's centered on the rows, which beside a tab bar down
+    // the side are narrower than the bar.
+    let gap = CGRect(x: row.frame.midX - 40, y: bar.frame.minY + 44, width: 80, height: 80)
     XCTAssertGreaterThan(try XCTUnwrap(held).markedPixels(in: gap), 50, "no spinner in the gap above the list")
   }
 
@@ -31,6 +34,10 @@ final class TodayUITests: SimulatorUITestCase {
     }
     try open(tab: "tab-today")
     try waitFor(id: "today-schedule", timeout: 30)
+    // The tabs are one above another in a tab bar down the side.
+    if abs(element(id: "tab-today").frame.midX - element(id: "tab-notices").frame.midX) < 1 {
+      throw XCTSkip("Beside a tab bar down the side (an iPhone Duo's outer screen), the title has no collapsed form")
+    }
     let bar = try waitFor(idMatching: "今天")
 
     // Scrolled, the title is the bar's small one, centered at its top, where the expanded bar has nothing. Today's
