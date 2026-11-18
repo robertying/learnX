@@ -47,6 +47,7 @@ const WhatsNew: React.FC<Props> = ({ navigation, route }) => {
         icon: highlight.icon,
         title: t(highlight.title),
         body: t(highlight.body),
+        link: highlight.link,
       }))}
       action={{
         label: t('continue'),

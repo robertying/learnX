@@ -6,6 +6,9 @@ import {
   within,
 } from '@testing-library/react-native';
 import FeatureList from 'components/FeatureList';
+import { openLink } from 'helpers/openLink';
+
+jest.mock('helpers/openLink', () => ({ openLink: jest.fn() }));
 
 // Hidden from screen readers, so looked up with hidden elements included.
 const dividerShown = (testID: string) => {
@@ -87,4 +90,34 @@ it('grows the symbols with the text size, up to a limit', async () => {
   expect(await symbolSizes(1.2)).toBeCloseTo(48);
   expect(await symbolSizes(3)).toBeCloseTo(64);
   jest.restoreAllMocks();
+});
+
+it('links a web page under a feature, for touch and screen readers', async () => {
+  await render(
+    <FeatureList
+      title="What's New"
+      features={[
+        {
+          icon: 'desktop',
+          title: 'Windows & Linux',
+          body: 'Try the desktop app.',
+          link: 'https://tsinghua.app/learnX',
+        },
+        { icon: 'afternoon', title: 'Today', body: 'Your day.' },
+      ]}
+      action={{ label: 'Continue', onPress: jest.fn() }}
+    />,
+  );
+  const row = screen.getByRole('link');
+  expect(row.props.accessibilityLabel).toBe(
+    'Windows & Linux, Try the desktop app., tsinghua.app/learnX',
+  );
+  await fireEvent.press(screen.getByText('tsinghua.app/learnX'));
+  expect(openLink).toHaveBeenLastCalledWith('https://tsinghua.app/learnX');
+  jest.mocked(openLink).mockClear();
+  await fireEvent(row, 'accessibilityAction', {
+    nativeEvent: { actionName: 'activate' },
+  });
+  expect(openLink).toHaveBeenLastCalledWith('https://tsinghua.app/learnX');
+  expect(screen.getAllByTestId('feature-link')).toHaveLength(1);
 });

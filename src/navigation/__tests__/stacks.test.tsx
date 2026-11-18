@@ -13,6 +13,7 @@ import {
   LoginStack,
   NoticeStack,
   SearchStack,
+  SemesterSelectionStack,
   SettingStack,
   TodayStack,
   WhatsNewStack,
@@ -124,6 +125,7 @@ it('titles the screens, and every screen has a component and the error layout', 
     WhatsNewStack,
     CourseXStack,
     SearchStack,
+    SemesterSelectionStack,
     AssignmentSubmissionStack,
   ]) {
     const config = await configOf(Stack);
@@ -159,6 +161,7 @@ it('leaves the glass header to every stack, with no screen of its own', async ()
     WhatsNewStack,
     CourseXStack,
     SearchStack,
+    SemesterSelectionStack,
     AssignmentSubmissionStack,
   ]) {
     const config = await configOf(Stack);
@@ -176,6 +179,7 @@ it('opens the modal stacks with a close button', async () => {
   for (const [Stack, first, title] of [
     [CourseXStack, 'CourseX', t('courseX')],
     [SearchStack, 'Search', t('search')],
+    [SemesterSelectionStack, 'SemesterSelection', t('semesterSelection')],
     [
       AssignmentSubmissionStack,
       'AssignmentSubmission',
