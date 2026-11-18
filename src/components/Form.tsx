@@ -6,7 +6,7 @@ import {
   useState,
   type ReactElement,
   type ReactNode,
-} from 'react';
+} from "react";
 import {
   Keyboard,
   PlatformColor,
@@ -14,9 +14,9 @@ import {
   useWindowDimensions,
   View,
   type ViewProps,
-} from 'react-native';
-import { NavigationContext } from '@react-navigation/native';
-import { TextInput } from '@expo/ui';
+} from "react-native";
+import { NavigationContext } from "@react-navigation/native";
+import { TextInput } from "@expo/ui";
 import {
   Button,
   Circle,
@@ -36,7 +36,7 @@ import {
   useNativeState,
   VStack,
   ZStack,
-} from '@expo/ui/swift-ui';
+} from "@expo/ui/swift-ui";
 import {
   accessibilityAddTraits,
   accessibilityElement,
@@ -69,18 +69,18 @@ import {
   textInputAutocapitalization,
   autocorrectionDisabled,
   toggleStyle,
-} from '@expo/ui/swift-ui/modifiers';
-import { BADGE_COLOR, DOT_SIZE } from 'components/Badge';
-import DeviceInfo from 'constants/DeviceInfo';
-import Spacing from 'constants/Spacing';
-import { t } from 'helpers/i18n';
-import { useFieldText } from 'hooks/useFieldText';
+} from "@expo/ui/swift-ui/modifiers";
+import { BADGE_COLOR, DOT_SIZE } from "components/Badge";
+import DeviceInfo from "constants/DeviceInfo";
+import Spacing from "constants/Spacing";
+import { t } from "helpers/i18n";
+import { useFieldText } from "hooks/useFieldText";
 import useNumberFieldDone, {
   NumberFieldFocusContext,
   useNumberFieldFocus,
-} from 'hooks/useNumberFieldDone';
-import { systemIcons } from 'helpers/systemIcons';
-import { useTheme } from 'theme';
+} from "hooks/useNumberFieldDone";
+import { systemIcons } from "helpers/systemIcons";
+import { useTheme } from "theme";
 import {
   parseNumberInput,
   sectionRows,
@@ -101,49 +101,49 @@ import {
   type FormTitleProps,
   type FormToggleProps,
   type FormViewProps,
-} from './Form.shared';
-import ThemedHost from 'components/ThemedHost';
-import { textStyles } from 'components/Text';
-import { rowHighlight } from 'components/Touchable';
+} from "./Form.shared";
+import ThemedHost from "components/ThemedHost";
+import { textStyles } from "components/Text";
+import { rowHighlight } from "components/Touchable";
 
-export * from './Form.shared';
+export * from "./Form.shared";
 
 // Concrete system colors: inside a Button, hierarchical styles resolve to
 // the tint.
-const primaryText = foregroundStyle(PlatformColor('label'));
+const primaryText = foregroundStyle(PlatformColor("label"));
 // A button reads the names of the symbols in it ("Forward", "Checkmark"):
 // the chevron is decoration, and a choice says Selected with its trait.
 const checkmarkModifiers = [
-  font({ textStyle: 'body', weight: 'semibold' }),
+  font({ textStyle: "body", weight: "semibold" }),
   accessibilityHidden(true),
 ];
 const chevronModifiers = [
-  font({ textStyle: 'footnote', weight: 'semibold' }),
-  foregroundStyle(PlatformColor('tertiaryLabel')),
+  font({ textStyle: "footnote", weight: "semibold" }),
+  foregroundStyle(PlatformColor("tertiaryLabel")),
   accessibilityHidden(true),
 ];
-const selectedModifiers = [accessibilityAddTraits(['isSelected'])];
+const selectedModifiers = [accessibilityAddTraits(["isSelected"])];
 // A row whose page is open beside the Form, in the gray of a list's
 // selected row, without the separators above and below it, as UIKit leaves
 // them out beside a selected cell.
 const openedModifiers = [
   ...selectedModifiers,
-  listRowBackground(rowHighlight ?? PlatformColor('systemGray4')),
-  listRowSeparator('hidden', 'all'),
+  listRowBackground(rowHighlight ?? PlatformColor("systemGray4")),
+  listRowSeparator("hidden", "all"),
 ];
 
 // Mac apps draw grouped rows in light gray on the window's white (black in
 // Dark Mode), not white rows on gray as on iOS.
 const macFormModifiers = [
-  scrollContentBackground('hidden'),
-  background(PlatformColor('systemBackground')),
-  // Sections close together, as System Settings groups them: with a
-  // section's title or footer, SwiftUI's own spacing is already wide.
-  listSectionSpacing(12),
+  scrollContentBackground("hidden"),
+  background(PlatformColor("systemBackground")),
+  // Space between groups as System Settings leaves it, so a footer doesn't
+  // run into the next group's title.
+  listSectionSpacing(20),
 ];
 
 // Behind iOS's inset grouped rows
-const groupedBackground = PlatformColor('systemGroupedBackground');
+const groupedBackground = PlatformColor("systemGroupedBackground");
 
 // The last section would otherwise end right at the floating tab bar's top
 // edge when scrolled to the end (on Mac, its footer at the window's bottom
@@ -151,7 +151,7 @@ const groupedBackground = PlatformColor('systemGroupedBackground');
 // footer a little less), as one more section would. (Android's list has its
 // own bottom padding.)
 const lastSectionModifiers = [
-  listSectionMargins({ edges: 'bottom', length: Spacing.l }),
+  listSectionMargins({ edges: "bottom", length: Spacing.l }),
 ];
 
 // The space above the first section, as iOS spaces it under an inline title.
@@ -159,7 +159,7 @@ const lastSectionModifiers = [
 // of the screen pushed from (Today, the lists), and grows as the push ends:
 // the rows slid down as the screen came in.
 const firstSectionModifiers = [
-  listSectionMargins({ edges: 'top', length: 35 }),
+  listSectionMargins({ edges: "top", length: 35 }),
 ];
 
 /** Marks the first and last sections for their margins. */
@@ -208,8 +208,8 @@ export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
         <SwiftUIForm
           modifiers={[
             // Dragging the form down pulls the keyboard away, as in Notes.
-            scrollDismissesKeyboard('interactively'),
-            ...(DeviceInfo.isMac() ? macFormModifiers : glassHeaderModifiers),
+            scrollDismissesKeyboard("interactively"),
+            ...(DeviceInfo.isMac() ? macFormModifiers : iosFormModifiers),
             ...(onRefresh ? [refreshable(onRefresh)] : []),
           ]}
         >
@@ -243,14 +243,22 @@ export const FormScreen: React.FC<ViewProps> = ({ style, ...props }) => (
 // The header's glass over what scrolls under it, as for the app's other
 // scroll views (`ScrollEdgeEffect.swift`, which SwiftUI's own style overrides):
 // in an iPad split view's other columns the automatic style is an opaque band.
-const glassHeaderModifiers = [scrollEdgeEffectStyle('soft', 'top')];
+const glassHeaderModifiers = [scrollEdgeEffectStyle("soft", "top")];
+
+// A Form's sections are compact by default from iOS 17, so a footer runs
+// into the next section's title. The Settings app spaces them as a list
+// does.
+const iosFormModifiers = [
+  ...glassHeaderModifiers,
+  listSectionSpacing("default"),
+];
 
 const macRowBackground = listRowBackground(
-  PlatformColor('quaternarySystemFill'),
+  PlatformColor("quaternarySystemFill"),
 );
 // Clear of the toolbar, as System Settings starts its first group.
 const macFirstSectionModifiers = [
-  listSectionMargins({ edges: 'top', length: 20 }),
+  listSectionMargins({ edges: "top", length: 20 }),
 ];
 // System Settings sets a row's symbol and text close to the group's edges.
 const macRowInset = 12;
@@ -266,7 +274,7 @@ const macSectionModifiers = [
 // System Settings on the Mac: bold titles in the label color above the
 // group. (Catalyst ignores headerProminence, so the title is our own Text.)
 const macHeaderModifiers = [
-  font({ textStyle: 'headline', weight: 'bold' }),
+  font({ textStyle: "headline", weight: "bold" }),
   primaryText,
 ];
 
@@ -322,7 +330,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
 };
 
 // The Mac's footnote is set tight, which crowds Chinese lines.
-const macFooterModifiers = [font({ textStyle: 'footnote' }), lineSpacing(3)];
+const macFooterModifiers = [font({ textStyle: "footnote" }), lineSpacing(3)];
 
 // A footer that keeps its place while hidden (`footerHidden`)
 const hiddenFooterModifiers = [opacity(0), accessibilityHidden(true)];
@@ -330,18 +338,18 @@ const hiddenFooterModifiers = [opacity(0), accessibilityHidden(true)];
 // A row's title and detail set the body style themselves: on the Mac, text
 // left to the Form's default draws smaller in some rows (a link's or
 // button's label in the list column) than body's 13 pt.
-const bodyFont = font({ textStyle: 'body' });
-const itemTitleFont = font({ textStyle: 'body', weight: 'medium' });
-const secondaryText = foregroundStyle(PlatformColor('secondaryLabel'));
-const subtitleModifiers = [font({ textStyle: 'subheadline' }), secondaryText];
+const bodyFont = font({ textStyle: "body" });
+const itemTitleFont = font({ textStyle: "body", weight: "medium" });
+const secondaryText = foregroundStyle(PlatformColor("secondaryLabel"));
+const subtitleModifiers = [font({ textStyle: "subheadline" }), secondaryText];
 const struckText = [
   secondaryText,
-  strikethrough({ isActive: true, pattern: 'solid' }),
+  strikethrough({ isActive: true, pattern: "solid" }),
 ];
 
-const unavailableModifiers = [foregroundStyle(PlatformColor('tertiaryLabel'))];
+const unavailableModifiers = [foregroundStyle(PlatformColor("tertiaryLabel"))];
 
-const overlineModifiers = [font({ textStyle: 'caption', weight: 'semibold' })];
+const overlineModifiers = [font({ textStyle: "caption", weight: "semibold" })];
 
 const RowLabel: React.FC<{
   title: string;
@@ -375,10 +383,10 @@ const RowLabel: React.FC<{
     ? unavailableModifiers
     : struck
       ? // the strikethrough isn't read out
-        [...struckText, accessibilityValue(t('a11yStruck'))]
+        [...struckText, accessibilityValue(t("a11yStruck"))]
       : plain
         ? done
-          ? [primaryText, accessibilityValue(t('a11yDone'))]
+          ? [primaryText, accessibilityValue(t("a11yDone"))]
           : [primaryText]
         : undefined;
   const text = (
@@ -424,7 +432,7 @@ const RowLabel: React.FC<{
         // is, and otherwise as the text (red in a destructive button).
         color={
           unavailable
-            ? PlatformColor('tertiaryLabel')
+            ? PlatformColor("tertiaryLabel")
             : plain
               ? theme.colors.primary
               : undefined
@@ -448,15 +456,15 @@ const macIconSpacing = 14;
 const macIconModifiers = [frame({ width: macIconWidth })];
 // The separator under the row starts where its text does, past the symbol.
 const macIconRowModifiers = [
-  alignmentGuide('listRowSeparatorLeading', macIconWidth + macIconSpacing),
+  alignmentGuide("listRowSeparatorLeading", macIconWidth + macIconSpacing),
 ];
 // Every row is as wide as the row, with its separator ending at the row's
 // end, past the chevron or switch, as in System Settings. (SwiftUI on the
 // Mac ends it short of what's at the end of the row.)
 const rowEnd = DeviceInfo.isMac()
   ? [
-      frame({ maxWidth: 100_000, alignment: 'leading' }),
-      alignmentGuide('listRowSeparatorTrailing', 0, { fromTrailing: true }),
+      frame({ maxWidth: 100_000, alignment: "leading" }),
+      alignmentGuide("listRowSeparatorTrailing", 0, { fromTrailing: true }),
     ]
   : [];
 
@@ -466,21 +474,21 @@ const useStackedDetail = (subtitle?: string, detail?: string) =>
 
 const RowDetail: React.FC<{
   detail?: string;
-  tint?: FormItemRowProps['detailTint'];
+  tint?: FormItemRowProps["detailTint"];
 }> = ({ detail, tint }) => {
   const theme = useTheme();
   if (!detail) {
     return null;
   }
   const modifiers =
-    tint === 'accent'
+    tint === "accent"
       ? [
-          font({ textStyle: 'title3', weight: 'bold' }),
+          font({ textStyle: "title3", weight: "bold" }),
           foregroundStyle(theme.colors.primary),
         ]
       : tint
         ? [
-            font({ textStyle: 'body', weight: 'semibold' }),
+            font({ textStyle: "body", weight: "semibold" }),
             // The text shade of the hue, readable on the row
             foregroundStyle(theme.colors.onStatusContainer[tint]),
           ]
@@ -547,7 +555,7 @@ const ItemRow: React.FC<
 };
 
 // Borderless, so that only the button takes taps and not the whole row.
-const actionModifiers = [buttonStyle('borderless')];
+const actionModifiers = [buttonStyle("borderless")];
 
 export const FormText: React.FC<FormTextProps> = ({
   testID,
@@ -563,7 +571,7 @@ export const FormText: React.FC<FormTextProps> = ({
       modifiers={[
         ...rowEnd,
         ...(testID
-          ? [accessibilityElement('contain'), accessibilityIdentifier(testID)]
+          ? [accessibilityElement("contain"), accessibilityIdentifier(testID)]
           : []),
       ]}
     >
@@ -624,7 +632,7 @@ export const FormLink: React.FC<FormLinkProps> = ({
               modifiers={[
                 foregroundStyle(BADGE_COLOR),
                 frame({ width: DOT_SIZE, height: DOT_SIZE }),
-                accessibilityLabel(t('a11yNewBadge')),
+                accessibilityLabel(t("a11yNewBadge")),
               ]}
             />
           ) : null
@@ -654,7 +662,7 @@ export const FormButton: React.FC<FormButtonProps> = ({
   return (
     <Button
       onPress={onPress}
-      role={destructive ? 'destructive' : undefined}
+      role={destructive ? "destructive" : undefined}
       testID={testID}
       modifiers={[
         ...(loading || isDisabled ? [disabled(true)] : []),
@@ -711,11 +719,11 @@ export const FormChoiceButton: React.FC<FormChoiceButtonProps> = ({
         <FormButton {...row} onPress={() => handlePresentedChange(true)} />
       </ConfirmationDialog.Trigger>
       <ConfirmationDialog.Actions>
-        {choices.map(choice => (
+        {choices.map((choice) => (
           <Button
             key={choice.label}
             label={choice.label}
-            role={choice.destructive ? 'destructive' : undefined}
+            role={choice.destructive ? "destructive" : undefined}
             onPress={() => {
               chose.current = true;
               choice.onPress();
@@ -771,12 +779,12 @@ export const FormFile: React.FC<FormFileProps> = ({
 const multilineModifiers = [lineLimit({ min: 6, max: 10000 })];
 const macMultilineModifiers = [...multilineModifiers, padding({ vertical: 6 })];
 const plainTextModifiers = [
-  textInputAutocapitalization('never'),
+  textInputAutocapitalization("never"),
   autocorrectionDisabled(true),
 ];
 
 /** Text the user writes, the whole width of the row. */
-export const FormTextField: React.FC<FormTextFieldProps> = props => {
+export const FormTextField: React.FC<FormTextFieldProps> = (props) => {
   const {
     placeholder,
     label,
@@ -792,7 +800,7 @@ export const FormTextField: React.FC<FormTextFieldProps> = props => {
     <TextField
       text={text}
       placeholder={placeholder}
-      axis={multiline ? 'vertical' : 'horizontal'}
+      axis={multiline ? "vertical" : "horizontal"}
       testID={testID}
       modifiers={[
         ...(multiline
@@ -811,7 +819,7 @@ export const FormTextField: React.FC<FormTextFieldProps> = props => {
 
 // A switch at the end of the row, as in System Settings. (The Mac's default
 // toggle is a checkbox before the label.)
-const switchStyle = toggleStyle('switch');
+const switchStyle = toggleStyle("switch");
 
 export const FormToggle: React.FC<FormToggleProps> = ({
   title,
@@ -881,7 +889,7 @@ export const FormNumberField: React.FC<FormNumberFieldProps> = ({
 
 const paragraphModifiers = [primaryText, textSelection(true)];
 const headlineModifiers = [
-  font({ textStyle: 'headline' }),
+  font({ textStyle: "headline" }),
   ...paragraphModifiers,
 ];
 
@@ -903,10 +911,10 @@ export const FormParagraph: React.FC<FormParagraphProps> = ({
 );
 
 const titleModifiers = [
-  font({ textStyle: 'title2', weight: 'bold' }),
+  font({ textStyle: "title2", weight: "bold" }),
   ...paragraphModifiers,
   // A heading, as a section's header is, so the rotor jumps to it.
-  accessibilityAddTraits(['isHeader']),
+  accessibilityAddTraits(["isHeader"]),
 ];
 
 /** The title of a detail page, as in Calendar's event details. */
@@ -942,7 +950,7 @@ export const FormProfile: React.FC<FormProfileProps> = ({ name, detail }) => {
   const isMac = DeviceInfo.isMac();
   const avatarSize = isMac ? 40 : 56;
   // Title 2: 22 pt on iOS, 17 pt on the Mac, a step above its 13 pt rows.
-  const nameFont = font({ textStyle: 'title2', weight: 'semibold' });
+  const nameFont = font({ textStyle: "title2", weight: "semibold" });
   return (
     <HStack spacing={12} modifiers={rowEnd}>
       <ZStack modifiers={[frame({ width: avatarSize, height: avatarSize })]}>
@@ -958,8 +966,8 @@ export const FormProfile: React.FC<FormProfileProps> = ({ name, detail }) => {
         {detail ? (
           <Text
             modifiers={[
-              font({ textStyle: 'subheadline' }),
-              foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
+              font({ textStyle: "subheadline" }),
+              foregroundStyle({ type: "hierarchical", style: "secondary" }),
             ]}
           >
             {detail}
@@ -977,7 +985,7 @@ const styles = StyleSheet.create({
   // The Form's own background, also behind a title above it (Setup).
   screen: {
     backgroundColor: DeviceInfo.isMac()
-      ? PlatformColor('systemBackground')
+      ? PlatformColor("systemBackground")
       : groupedBackground,
   },
   numberField: {
