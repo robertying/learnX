@@ -37,9 +37,20 @@ final class SettingsUITests: LearnXUITestCase {
   func testOpensSettingsPagesAndLogsOut() throws {
     try open(tab: "tab-settings")
     try waitFor(id: "settings-changelog").click()
+    if !element(id: "settings-about").waitForExistence(timeout: 2) {
+      try fillTheScreen()
+    }
     try waitFor(id: "settings-about").click()
     try waitFor(matching: ".*© \\d+ Rui Ying.*")
     try logOut()
+  }
+
+  /// Window › Move & Resize › Fill. In a short window (a new window's default size) the last Settings rows are below
+  /// the fold, where the list leaves them out of the accessibility tree, and the tests' scrolling doesn't reach it.
+  private func fillTheScreen() throws {
+    try wait(app.menuBars.menuBarItems["com.apple.menu.window"], "the Window menu", 5).click()
+    try wait(app.menuItems["移动与调整大小"], "Move & Resize", 5).hover()
+    try wait(app.menuItems["_zoomFill:"], "Fill", 5).click()
   }
 
   private func waitFor(selected id: String) throws {
