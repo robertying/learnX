@@ -1,5 +1,5 @@
 appId: ${APP_ID}
-name: Favorite and archive a notice
+name: Favorite and archive a notice, hide a course
 ---
 # Checks the outcome of each action, not its toast: on iOS the Liquid Glass
 # toast keeps the screen from settling, so Maestro's settle wait outlasts a
@@ -115,3 +115,42 @@ name: Favorite and archive a notice
           env:
             LABEL: '(${T_all})(, .*)?'
       - assertVisible: '.*(${MOCK_NOTICE}).*'
+
+# Hide a course from its long-press menu and show it again
+- runFlow:
+    file: subflows/tab.yaml
+    env:
+      TAB: 'tab-courses'
+# Android: the menu opens again on the same card after it was dismissed
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - runFlow:
+          file: subflows/card-actions.yaml
+          env:
+            CARD: '.*(${MOCK_COURSE}).*'
+      - assertVisible: '${T_hide}'
+      - back
+      - assertNotVisible: '${T_hide}'
+- runFlow:
+    file: subflows/card-actions.yaml
+    env:
+      CARD: '.*(${MOCK_COURSE}).*'
+- tapOn: '${T_hide}'
+- assertNotVisible: '.*(${MOCK_COURSE}).*'
+- runFlow:
+    file: subflows/filter.yaml
+    env:
+      LABEL: '(${T_hidden})(, .*)?'
+- runFlow:
+    file: subflows/card-actions.yaml
+    env:
+      CARD: '.*(${MOCK_COURSE}).*'
+- tapOn: '${T_unhide}'
+- assertNotVisible: '.*(${MOCK_COURSE}).*'
+- runFlow:
+    file: subflows/filter.yaml
+    env:
+      LABEL: '(${T_all})(, .*)?'
+- assertVisible: '.*(${MOCK_COURSE}).*'

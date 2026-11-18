@@ -35,7 +35,7 @@ const props = {
   path: 'file:///f.pdf',
   progress: 0,
   error: false,
-  canRender: true,
+  previewable: true,
   showInfo: false,
   ...handlers,
 };
@@ -74,7 +74,7 @@ it('shows refresh, share and info for a downloaded file', async () => {
   expect(handlers.onToggleInfo).toHaveBeenCalled();
 });
 
-it('disables the file actions until it has downloaded', async () => {
+it('disables the file actions until it has downloaded, in their places', async () => {
   await renderHook(() =>
     useFileDetailHeader({
       navigation: navigation(),
@@ -83,7 +83,12 @@ it('disables the file actions until it has downloaded', async () => {
       progress: 0.5,
     }),
   );
-  expect(items().every(i => i.disabled)).toBe(true);
+  // Info too: none of them move as the download ends.
+  expect(items().map(i => [i.identifier, !!i.disabled])).toEqual([
+    ['refresh', true],
+    ['share', true],
+    ['info', true],
+  ]);
 });
 
 it('adds download on the Mac and open on Android, info only when shown inline', async () => {
@@ -93,7 +98,7 @@ it('adds download on the Mac and open on Android, info only when shown inline', 
     useFileDetailHeader({
       navigation: navigation(),
       ...props,
-      canRender: false,
+      previewable: false,
     }),
   );
   expect(items().map(i => i.identifier)).toEqual([

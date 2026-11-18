@@ -41,6 +41,15 @@ it('opens a Material menu of the actions on long press', async () => {
   expect(onPress).not.toHaveBeenCalled();
 });
 
+it("opens the menu at the card's top right without the touch's position", async () => {
+  await render(card({}));
+  await longPress();
+  expect(screen.getByTestId('card-menu-anchor')).toHaveStyle({
+    right: 16,
+    top: 0,
+  });
+});
+
 it('closes the menu on a tap instead of opening the item', async () => {
   const onPress = jest.fn();
   await render(card({ onPress }));
@@ -51,6 +60,20 @@ it('closes the menu on a tap instead of opening the item', async () => {
   expect(screen.queryByTestId('card-archive')).toBeNull();
   await tap();
   expect(onPress).toHaveBeenCalledTimes(1);
+});
+
+it('unmounts the menu once it has closed, so the card takes touches again', async () => {
+  const onPress = jest.fn();
+  await render(card({ onPress }));
+  await longPress();
+  await user.press(screen.getByTestId('dropdown-dismiss'));
+  // Still there for its closing animation.
+  expect(screen.getByTestId('card-menu-anchor')).toBeTruthy();
+  await act(() => jest.advanceTimersByTime(300));
+  expect(screen.queryByTestId('card-menu-anchor')).toBeNull();
+
+  await longPress();
+  expect(screen.getByTestId('card-archive')).toBeTruthy();
 });
 
 it('closes the menu when selecting starts', async () => {

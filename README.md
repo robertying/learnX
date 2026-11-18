@@ -44,21 +44,21 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
       <img align="center" height=52 alt="下载应用，请到 Google Play" src="docs/assets/google-play-badge.png" />
   </a>
 
-- **[TUNA 镜像（推荐）](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/)**
+- **[TUNA 镜像站（推荐）](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/)**
   - 一般下载 `learnX-arm64-v8a-vX.X.X.apk`
   - 无法安装时，改用 `learnX-universal-vX.X.X.apk`
 
 - [GitHub Releases](https://github.com/robertying/learnX/releases)
 
-从 TUNA 镜像或 GitHub 安装的版本会在 App 内提示更新，并可直接下载安装。
+从 TUNA 镜像站或 GitHub 安装的版本会在 learnX 内提示更新，并可直接下载安装。
 
 ### Windows / Linux
 
-从 [TUNA 镜像（推荐）](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/)或 [GitHub Releases](https://github.com/robertying/learnX/releases) 下载，App 会自动更新。
+从 [TUNA 镜像站（推荐）](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/) 或 [GitHub Releases](https://github.com/robertying/learnX/releases) 下载，learnX 会自动更新。
 
 - **Windows**
   - 下载 `learnX-windows-vX.X.X.exe`（x64 和 ARM64 通用）
-  - 安装程序没有签名，如果提示“Windows 已保护你的电脑”，请点按“更多信息”，再点按“仍要运行”
+  - 安装程序没有签名，如果提示“Windows 已保护你的电脑”，请点击“更多信息”，再点击“仍要运行”
 
 - **Ubuntu / Debian**
   - x64 下载 `learnX-linux-amd64-vX.X.X.deb`，ARM64 下载 `learnX-linux-arm64-vX.X.X.deb`
@@ -78,7 +78,7 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 ### 今天
 
 - 打开就能看到今天的课程、快截止的作业和各门课的新内容
-- 课程表：查看未来七天的课
+- 课表：查看未来七天的课
 
 ### 课程内容
 
@@ -116,8 +116,8 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 
 以 MIT 许可证开源，但**不包含**下列情况：
 
-- 您过去或者目前为清华大学信息化技术中心工作；
-- 您的项目受到任何与清华大学有关的机构的经济资助。
+- 你过去或者目前为清华大学信息化技术中心工作；
+- 你的项目受到任何与清华大学有关的机构的经济资助。
 
 如果上述任意条件成立，任何未经授权的对本项目中代码的使用将会被认为是侵权。上文中的“使用”包括对项目的源代码或衍生品制作拷贝、修改、重新分发，无论是否用作商业用途。
 
@@ -133,16 +133,16 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 
 ### Download
 
-Requires iOS / iPadOS 17.6, macOS 14.6, Android 10 or Windows 10 and later, or Linux on x64 / ARM64.
+Requires iOS / iPadOS 17.6, macOS 14.6, Android 10, or Windows 10 and later, or Linux on x64 / ARM64.
 
-- **iPhone, iPad and Mac:** [App Store](https://apps.apple.com/cn/app/learnx-thu-web-learning/id1459073115)
+- **iPhone, iPad, and Mac:** [App Store](https://apps.apple.com/cn/app/learnx-thu-web-learning/id1459073115)
 
-- **Android:** [Google Play](https://play.google.com/store/apps/details?id=io.robertying.learnx), the [TUNA Mirror (recommended)](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/) or [GitHub Releases](https://github.com/robertying/learnX/releases)
+- **Android:** [Google Play](https://play.google.com/store/apps/details?id=io.robertying.learnx), the [TUNA mirror (recommended)](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/) or [GitHub Releases](https://github.com/robertying/learnX/releases)
   - From the mirror or GitHub, download `learnX-arm64-v8a-vX.X.X.apk`
   - If it doesn't install, use `learnX-universal-vX.X.X.apk` instead
   - Versions from the mirror or GitHub let you update from inside the app
 
-- **Windows and Linux:** the [TUNA Mirror (recommended)](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/) or [GitHub Releases](https://github.com/robertying/learnX/releases), and the app updates itself
+- **Windows and Linux:** the [TUNA mirror (recommended)](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/) or [GitHub Releases](https://github.com/robertying/learnX/releases), and the app updates itself
 
 - **Windows**
   - Download `learnX-windows-vX.X.X.exe` (one installer for x64 and ARM64)
@@ -159,16 +159,16 @@ Requires iOS / iPadOS 17.6, macOS 14.6, Android 10 or Windows 10 and later, or L
 
 ### Features
 
-learnX brings your Web Learning notices, assignments and files together, and tells you when something new is posted or a deadline is near.
+learnX brings your Web Learning notices, assignments, and files together, and tells you when something new is posted or a deadline is near.
 
-- **Today:** the day's classes, upcoming deadlines and new items in every course, and a schedule of the next seven days
+- **Today:** the day's classes, upcoming deadlines, and new items in every course, and a schedule of the next seven days
 - **Course content:** notices with their attachments, file previews and downloads, assignment details, grading and submission, and offline reading
-- **Notifications and reminders:** new notices, files, assignments and grades, moved deadlines, late submission windows and grader comments, deadline and class reminders, and calendar sync (plus Reminders on iPhone, iPad and Mac)
-- **More:** widgets (iPhone, iPad and Android), Spotlight and Siri (iPhone, iPad and Mac), global search, favorites synced with Web Learning, archiving, hiding courses, switching semesters, and courseX Course Information Sharing
+- **Notifications and reminders:** new notices, files, assignments, and grades, moved deadlines, late submission windows, and grader comments, deadline and class reminders, and calendar sync (plus Reminders on iPhone, iPad, and Mac)
+- **More:** widgets (iPhone, iPad, and Android), Spotlight and Siri (iPhone, iPad, and Mac), global search, favorites synced with Web Learning, archiving, hiding courses, switching semesters, and courseX Course Information Sharing
 
 ### Privacy
 
-Except for Tsinghua's servers, learnX sends your account and course content nowhere; they stay on your device. The one exception is Course Information Sharing: when you turn it on, learnX uploads public information about your courses this semester to courseX, and nothing about you. See the [privacy policy](docs/PRIVACY_POLICY_EN.md).
+learnX sends your account and course content only to Tsinghua's servers, and keeps them on your device. The one exception is Course Information Sharing: when you turn it on, learnX uploads public information about your courses this semester to courseX, and nothing about you. See the [privacy policy](docs/PRIVACY_POLICY_EN.md).
 
 ### Development
 
@@ -181,7 +181,7 @@ MIT licensed, except for anyone who:
 - works or has worked for the Computer and Information Management Center of Tsinghua University (清华大学信息化技术中心); or
 - has a project funded by any institution affiliated with Tsinghua University.
 
-For them, any use of code from this project without the author's explicit permission is copyright infringement. "Use" includes copying, modifying or redistributing the source code or any derivative of this project, for commercial or non-commercial purposes.
+For them, any use of code from this project without the author's explicit permission is copyright infringement. "Use" includes copying, modifying, or redistributing the source code or any derivative of this project, for commercial or non-commercial purposes.
 
 Open-source code used in this project remains under its own licenses.
 

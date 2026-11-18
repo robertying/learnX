@@ -2,7 +2,7 @@
 
 生效日期：2026 年 11 月
 
-learnX 是 Rui Ying（下称“我”）开发的免费开源清华大学网络学堂 App。本政策说明本应用会处理哪些信息、这些信息去往何处，以及你可以做出的选择。本应用的源代码公开在 [github.com/robertying/learnX](https://github.com/robertying/learnX)，你可以核对本政策所述的一切。
+learnX 是 Rui Ying（下称“我”）开发的免费开源清华大学网络学堂应用。本政策说明本应用会处理哪些信息、这些信息去往何处，以及你可以做出的选择。本应用的源代码公开在 [github.com/robertying/learnX](https://github.com/robertying/learnX)，你可以核对本政策所述的一切。
 
 ## 概要
 
@@ -13,7 +13,7 @@ learnX 是 Rui Ying（下称“我”）开发的免费开源清华大学网络�
 
 ## 你的清华账号
 
-登录时，learnX 需要你的清华账号和密码。通过清华统一身份认证页面登录时，learnX 还会保存该页面用于识别受信任设备的设备标识。
+登录时，learnX 需要你的清华账号和密码。通过清华大学用户电子身份服务系统的登录页面登录时，learnX 还会保存该页面用于识别受信任设备的设备标识。
 
 - 它们保存在设备的安全存储中（iOS、iPadOS 和 macOS 上为钥匙串，Android 上为受 Keystore 保护的存储），不会包含在备份中，也不会同步到其他设备。
 - Windows 和 Linux 版使用系统为你的账户提供的保护对其加密（Windows 数据保护；Linux 上为通过 Secret Service 或 KWallet 使用的密钥环），并保存在电脑上的应用数据文件夹中：Windows 上位于本地用户配置文件，不会随漫游配置文件同步到其他电脑。Linux 上没有密钥环时不会保存，你每次都需要登录。备份主文件夹时可能包含其加密副本。

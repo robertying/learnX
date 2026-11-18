@@ -313,7 +313,7 @@ const introNotice = (n: number, c: Course, body: string, weekAgo = 8): Notice =>
     hasRead: true,
     markedImportant: false,
     publishTime: dateTime(-7 * weekAgo, 10, 5),
-    content: `<p>各位同学好！欢迎选修本课程。</p><p>${body}</p><p>课程答疑时间为每周四下午4:00–5:30，地点见课程大纲。有问题也可以在网络学堂课程讨论区留言。</p>`,
+    content: `<p>各位同学好！欢迎选修本课程。</p><p>${body}</p><p>课程答疑时间为每周四下午 4:00–5:30，地点见课程大纲。有问题也可以在网络学堂课程讨论区留言。</p>`,
   });
 
 export const mockNotices: Notice[] = [
@@ -335,7 +335,7 @@ export const mockNotices: Notice[] = [
     content:
       '<p>根据学校放假调课安排，' +
       sundayText +
-      '补上周五的课，量子与统计课时间为早上<strong>8:00</strong>，地点不变（六教6A118）。</p>',
+      '补上周五的课，量子与统计课时间为早上 <strong>8:00</strong>，地点不变（六教6A118）。</p>',
   }),
   notice(3, audioVisual, {
     title: '第一次大作业',
@@ -344,7 +344,7 @@ export const mockNotices: Notice[] = [
     markedImportant: false,
     publishTime: dateTime(-2, 16, 22),
     content:
-      '<p>第一次大作业已布置，题目是“利用灭点灭线估计建筑物高度”。请同学们仔细阅读附件中的作业说明，注意截止日期，合理安排时间。</p><p>本次作业以小组为单位完成，每组不超过3人，请在下周三前把分组名单发给助教。</p>',
+      '<p>第一次大作业已布置，题目是“利用灭点灭线估计建筑物高度”。请同学们仔细阅读附件中的作业说明，注意截止日期，合理安排时间。</p><p>本次作业以小组为单位完成，每组不超过 3 人，请在下周三前把分组名单发给助教。</p>',
     attachment: attachment(
       '1998990181_ZY_17312650012260f4c1a6d-0a3c-4f6e-9b1c-2f7e8a1d5b31',
       '第一次大作业说明.pdf',
@@ -358,18 +358,18 @@ export const mockNotices: Notice[] = [
     markedImportant: true,
     publishTime: dateTime(-2, 9, 30),
     expireTime: examDay.hour(23).minute(59).second(0).format(),
-    content: `<p>期中考试安排如下，请各位同学按照学号所在考场参加考试，<strong>携带学生证</strong>，提前15分钟入场。</p>
+    content: `<p>期中考试安排如下，请各位同学按照学号所在考场参加考试，<strong>携带学生证</strong>，提前 15 分钟入场。</p>
 <table border="1" cellpadding="4" cellspacing="0" style="width:760px">
   <thead>
     <tr><th>日期</th><th>时间</th><th>学号范围</th><th>考场</th><th>考试范围</th><th>答疑</th></tr>
   </thead>
   <tbody>
-    <tr><td>${monthDay(examDay)}</td><td>19:20–21:20</td><td>尾号0–4</td><td>六教6A015</td><td>第1–6讲（随机过程基本概念、平稳过程、泊松过程）</td><td>考前周三晚，四教4101</td></tr>
-    <tr><td>${monthDay(examDay)}</td><td>19:20–21:20</td><td>尾号5–9</td><td>六教6A017</td><td>第1–6讲（随机过程基本概念、平稳过程、泊松过程）</td><td>考前周三晚，四教4101</td></tr>
+    <tr><td>${monthDay(examDay)}</td><td>19:20–21:20</td><td>尾号 0–4</td><td>六教6A015</td><td>第 1–6 讲（随机过程基本概念、平稳过程、泊松过程）</td><td>考前周三晚，四教4101</td></tr>
+    <tr><td>${monthDay(examDay)}</td><td>19:20–21:20</td><td>尾号 5–9</td><td>六教6A017</td><td>第 1–6 讲（随机过程基本概念、平稳过程、泊松过程）</td><td>考前周三晚，四教4101</td></tr>
     <tr><td>另行通知</td><td>—</td><td>缓考同学</td><td>—</td><td>同上</td><td>—</td></tr>
   </tbody>
 </table>
-<p>考试为闭卷，可携带一张A4手写公式纸，不得使用计算器。</p>`,
+<p>考试为闭卷，可携带一张 A4 手写公式纸，不得使用计算器。</p>`,
   }),
   notice(5, digitalSystem, {
     title: '实验4时序参考图',
@@ -377,8 +377,8 @@ export const mockNotices: Notice[] = [
     hasRead: false,
     markedImportant: false,
     publishTime: dateTime(-3, 20, 12),
-    content: `<p>有同学问到实验4中计数器的时序，下面是参考仿真波形。复位释放后，使能信号拉高，计数器在每个时钟上升沿加一：</p>
-<p><img alt="4位同步计数器时序图" src="${sampleUrl('timingPng')}" style="width:800px; height:380px" /></p>
+    content: `<p>有同学问到实验 4 中计数器的时序，下面是参考仿真波形。复位释放后，使能信号拉高，计数器在每个时钟上升沿加一：</p>
+<p><img alt="4 位同步计数器时序图" src="${sampleUrl('timingPng')}" style="width:800px; height:380px" /></p>
 <p>请在实验报告中附上自己的仿真波形，并标出建立时间和保持时间。</p>`,
   }),
   notice(6, machineLearning, {
@@ -401,7 +401,7 @@ export const mockNotices: Notice[] = [
     content:
       '<p>各位同学：</p><p>为方便同学们做实验，' +
       roomChangeDay +
-      '课程地点改为<span style="color:#c0392b"><span style="font-size:16px">中央主楼916机房</span></span>，时间还是原上课时间（13:30开始），请各位同学相互转告~</p><p>祝 好！</p>',
+      '课程地点改为<span style="color:#c0392b"><span style="font-size:16px">中央主楼 916 机房</span></span>，时间还是原上课时间（13:30 开始），请各位同学相互转告~</p><p>祝 好！</p>',
   }),
   notice(8, electronicSystem, {
     title: '关于本学期实验课开放时间调整及实验室预约的说明',
@@ -409,10 +409,10 @@ export const mockNotices: Notice[] = [
     hasRead: true,
     markedImportant: false,
     publishTime: dateTime(-6, 11, 20),
-    content: `<p>从第10周起，东主楼10区实验室开放时间调整为：</p>
+    content: `<p>从第 10 周起，东主楼 10 区实验室开放时间调整为：</p>
 <ul>
-  <li>周一至周五8:00–22:00</li>
-  <li>周六9:00–17:00（需提前一天预约）</li>
+  <li>周一至周五 8:00–22:00</li>
+  <li>周六 9:00–17:00（需提前一天预约）</li>
 </ul>
 <p>实验报告请使用附件中的模板，按“目的、原理、电路、数据、分析”的顺序撰写。查阅器件手册和论文可通过<a href="https://lib.tsinghua.edu.cn/">图书馆电子资源</a>。</p>`,
     attachment: attachment(
@@ -436,9 +436,9 @@ export const mockNotices: Notice[] = [
     hasRead: true,
     markedImportant: false,
     publishTime: dateTime(-9, 18, 3),
-    content: `<p>第2题中泊松过程的分布律为</p>
+    content: `<p>第 2 题中泊松过程的分布律为</p>
 <p>$$P\\{N(t)=k\\}=\\frac{(\\lambda t)^k}{k!}e^{-\\lambda t},\\quad k=0,1,2,\\ldots$$</p>
-<p>第3题可以先求出两步转移矩阵\\(P^{(2)} = P^2\\)，再解\\(\\pi P = \\pi\\)得到平稳分布。</p>`,
+<p>第 3 题可以先求出两步转移矩阵 \\(P^{(2)} = P^2\\)，再解 \\(\\pi P = \\pi\\) 得到平稳分布。</p>`,
   }),
   notice(11, dsp, {
     title: '实验3测量数据记录表',
@@ -447,7 +447,7 @@ export const mockNotices: Notice[] = [
     markedImportant: false,
     publishTime: dateTime(-10, 15, 40),
     content:
-      '<p>实验3（FIR滤波器设计与实现）请用附件表格记录各频点的输入、输出幅度，表格会自动计算增益，报告中请附上幅频特性曲线。</p>',
+      '<p>实验 3（FIR 滤波器设计与实现）请用附件表格记录各频点的输入、输出幅度，表格会自动计算增益，报告中请附上幅频特性曲线。</p>',
     attachment: attachment(
       '1996990293_ZY_1730620944512b3e8c7d2-9f41-4a6b-8e5d-7c1b2a3f4e5d',
       '实验3测量数据记录表.xlsx',
@@ -461,7 +461,7 @@ export const mockNotices: Notice[] = [
     markedImportant: false,
     publishTime: dateTime(-11, 8, 15),
     content:
-      '<p>第11周周六上课时进行期中测试：200米自由泳计时，以及蛙泳技术评定。请自备泳帽和泳镜，提前10分钟到陈明游泳馆签到。</p>',
+      '<p>第 11 周周六上课时进行期中测试：200 米自由泳计时，以及蛙泳技术评定。请自备泳帽和泳镜，提前 10 分钟到陈明游泳馆签到。</p>',
   }),
   notice(13, communication, {
     title: '课程讨论区里，发了一条关于第1讲作业的提示',
@@ -478,7 +478,7 @@ export const mockNotices: Notice[] = [
     markedImportant: false,
     publishTime: dateTime(-13, 17, 50),
     content:
-      '<p><span style="font-size:xx-large"><span style="color:black">原：固定事件个数</span><span style="color:black"><em>M</em></span><span style="color:black">的离散信源，均匀分布熵最大，为1/<em>M</em></span></span></p><p><span style="font-size:24pt"><span style="color:black">更正为：固定事件个数<em>M</em>的离散信源，均匀分布熵最大，为log<em>M</em></span></span></p>',
+      '<p><span style="font-size:xx-large"><span style="color:black">原：固定事件个数</span><span style="color:black"><em>M</em></span><span style="color:black">的离散信源，均匀分布熵最大，为 1/<em>M</em></span></span></p><p><span style="font-size:24pt"><span style="color:black">更正为：固定事件个数<em>M</em>的离散信源，均匀分布熵最大，为 log<em>M</em></span></span></p>',
   }),
   notice(15, engineeringGraphics, {
     title: 'AutoCAD上机安排',
@@ -489,7 +489,7 @@ export const mockNotices: Notice[] = [
     content:
       '<p>' +
       lastMonday +
-      '上课时间在李兆基科技大楼A302集中上机，请提前在自己的电脑上安装好AutoCAD教育版，或使用机房电脑。</p>',
+      '上课时间在李兆基科技大楼 A302 集中上机，请提前在自己的电脑上安装好 AutoCAD 教育版，或使用机房电脑。</p>',
   }),
   introNotice(
     16,
@@ -538,7 +538,7 @@ export const mockNotices: Notice[] = [
     hasRead: true,
     markedImportant: false,
     publishTime: dateTime(-140, 9, 0),
-    content: '<p>考前答疑安排在考试周的周一和周三晚上7点，三教3100。</p>',
+    content: '<p>考前答疑安排在考试周的周一和周三晚上 7 点，三教 3100。</p>',
   }),
 ];
 
@@ -621,7 +621,7 @@ export const mockAssignments: Assignment[] = [
     submitted: false,
     graded: false,
     description:
-      '<p>用MATLAB或Python搭建一个OFDM收发系统，在AWGN和多径信道下仿真误码率曲线，并与理论值比较。</p><p>提交报告（PDF）和代码，仿真参数见附件。</p>',
+      '<p>用 MATLAB 或 Python 搭建一个 OFDM 收发系统，在 AWGN 和多径信道下仿真误码率曲线，并与理论值比较。</p><p>提交报告（PDF）和代码，仿真参数见附件。</p>',
     attachment: attachment(
       '1298990181_ZY_1731316692859411626215e-c233-4663-a567-a932bf4d4962',
       '附件1：仿真参数说明.pdf',
@@ -635,7 +635,7 @@ export const mockAssignments: Assignment[] = [
     submitted: false,
     graded: false,
     description:
-      '<p>教材习题4.3、4.7、5.2，提交电子版。</p><p>提示：第2题先由独立增量性质写出泊松过程的分布律，再求条件概率。</p>',
+      '<p>教材习题 4.3、4.7、5.2，提交电子版。</p><p>提示：第 2 题先由独立增量性质写出泊松过程的分布律，再求条件概率。</p>',
   }),
   assignment(3, quantum, {
     title: '第4讲课后习题（纸质）',
@@ -643,25 +643,25 @@ export const mockAssignments: Assignment[] = [
     submissionType: HomeworkSubmissionType.OFFLINE,
     submitted: false,
     graded: false,
-    description: '<p>习题2.5、2.9、2.14。手写，下次课前交到讲台上。</p>',
+    description: '<p>习题 2.5、2.9、2.14。手写，下次课前交到讲台上。</p>',
   }),
   assignment(4, digitalSystem, {
     title: '实验4：有限状态机设计',
     deadline: iso(4, 23, 59),
     submitted: false,
     graded: false,
-    description: `<p>设计一个自动售货机控制器，支持1元和5元硬币，商品3元，能找零。引脚分配如下：</p>
+    description: `<p>设计一个自动售货机控制器，支持 1 元和 5 元硬币，商品 3 元，能找零。引脚分配如下：</p>
 <table border="1" cellpadding="4" cellspacing="0" style="width:680px">
-  <thead><tr><th>信号</th><th>方向</th><th>FPGA引脚</th><th>说明</th></tr></thead>
+  <thead><tr><th>信号</th><th>方向</th><th>FPGA 引脚</th><th>说明</th></tr></thead>
   <tbody>
-    <tr><td>clk</td><td>输入</td><td>P17</td><td>100 MHz系统时钟</td></tr>
-    <tr><td>rst_n</td><td>输入</td><td>R15</td><td>低电平复位（按键S6）</td></tr>
+    <tr><td>clk</td><td>输入</td><td>P17</td><td>100 MHz 系统时钟</td></tr>
+    <tr><td>rst_n</td><td>输入</td><td>R15</td><td>低电平复位（按键 S6）</td></tr>
     <tr><td>coin1 / coin5</td><td>输入</td><td>U4 / V1</td><td>投币按键，需要消抖</td></tr>
     <tr><td>dispense</td><td>输出</td><td>F6</td><td>出货指示灯</td></tr>
     <tr><td>change[2:0]</td><td>输出</td><td>G4 / G3 / J4</td><td>找零金额</td></tr>
   </tbody>
 </table>
-<p>提交Verilog源码、仿真波形截图和实验报告。</p>`,
+<p>提交 Verilog 源码、仿真波形截图和实验报告。</p>`,
     attachment: attachment(
       '1234990181_ZY_1731312692859211626215e-c233-4663-a567-a932bf4d4962',
       '实验报告模板.docx',
@@ -684,7 +684,7 @@ export const mockAssignments: Assignment[] = [
     submitTime: iso(-1, 21, 32),
     submitted: true,
     graded: false,
-    description: '<p>完成课件第三章习题1、3、5，提交电子版。</p>',
+    description: '<p>完成课件第三章习题 1、3、5，提交电子版。</p>',
     submittedContent: submittedText('第3题的推导见附件。'),
     submittedAttachment: attachment(
       '1234990182_ZY_1731316692859411626215e-c233-4663-a567-a932bf4d4962',
@@ -727,7 +727,7 @@ export const mockAssignments: Assignment[] = [
     deadline: iso(-5, 12, 0),
     submitted: false,
     graded: false,
-    description: '<p>阅读实验2讲义，完成预习思考题，实验课前提交。</p>',
+    description: '<p>阅读实验 2 讲义，完成预习思考题，实验课前提交。</p>',
   }),
   assignment(10, dsp, {
     // Handed in after the deadline.
@@ -739,7 +739,7 @@ export const mockAssignments: Assignment[] = [
     submitted: true,
     graded: false,
     description:
-      '<p>用窗函数法设计截止频率1 kHz的低通FIR滤波器，在DSP开发板上实现并测量幅频特性。</p>',
+      '<p>用窗函数法设计截止频率 1 kHz 的低通 FIR 滤波器，在 DSP 开发板上实现并测量幅频特性。</p>',
     submittedContent: submittedText('数据记录表和报告都在附件里。'),
     submittedAttachment: attachment(
       '1234990183_ZY_1731316692859411626215e-c233-4663-a567-a932bf4d4962',
@@ -758,8 +758,8 @@ export const mockAssignments: Assignment[] = [
     graderName: '程一帆',
     gradeTime: iso(-3, 15, 20),
     gradeContent:
-      '<p>整体完成得很好。第2题求自相关函数时漏掉了\\(\\cos\\)的相位项，扣8分。</p>',
-    description: '<p>教材习题3.4、3.8、3.12、3.15。</p>',
+      '<p>整体完成得很好。第 2 题求自相关函数时漏掉了 \\(\\cos\\) 的相位项，扣 8 分。</p>',
+    description: '<p>教材习题 3.4、3.8、3.12、3.15。</p>',
     submittedContent: submittedText('解答见附件PDF。'),
     submittedAttachment: attachment(
       '1238990181_ZY_1731316692859411626215e-c233-4663-a567-a932bf4d4962',
@@ -823,7 +823,7 @@ export const mockAssignments: Assignment[] = [
     description:
       '<p>' +
       lastMonday +
-      '上课的时间，在李兆基科技大楼A302集中上机，内容和要求如下：</p><p>1. 请参考上机指导书，完成并提交练习3。请在截止时间之前提交到网络学堂。</p><p>2. 需标注尺寸，并请按照原图中尺寸的方式标注。</p><p>3. 文件名可以自取，但请注意提交文件的后缀为 .dwg</p><p>注：如果同学们有时间，可以在完成练习3之后，尝试练习1和2（不用提交），以熟悉绘图模版是如何设置的。</p>',
+      '上课的时间，在李兆基科技大楼 A302 集中上机，内容和要求如下：</p><p>1. 请参考上机指导书，完成并提交练习 3。请在截止时间之前提交到网络学堂。</p><p>2. 需标注尺寸，并请按照原图中尺寸的方式标注。</p><p>3. 文件名可以自取，但请注意提交文件的后缀为 .dwg</p><p>注：如果同学们有时间，可以在完成练习 3 之后，尝试练习 1 和 2（不用提交），以熟悉绘图模版是如何设置的。</p>',
     submittedAttachment: attachment(
       '1234990185_ZY_1731316692859411626215e-c233-4663-a567-a932bf4d4962',
       '练习3.pdf',
@@ -839,7 +839,7 @@ export const mockAssignments: Assignment[] = [
     graded: true,
     grade: 85,
     gradeTime: iso(-4, 17, 30),
-    description: '<p>习题1.8、1.11、1.13。</p>',
+    description: '<p>习题 1.8、1.11、1.13。</p>',
   }),
   assignment(15, communication, {
     // Old, graded and archived.
@@ -851,7 +851,7 @@ export const mockAssignments: Assignment[] = [
     grade: 100,
     graderName: '陆星辰',
     gradeTime: iso(-24, 10, 0),
-    description: '<p>完成课件第一章习题2、4。</p>',
+    description: '<p>完成课件第一章习题 2、4。</p>',
   }),
   assignment(16, signals, {
     title: '期末大作业：语音信号的滤波与增强',
@@ -870,7 +870,7 @@ export const mockAssignments: Assignment[] = [
     submitted: true,
     graded: true,
     grade: 96,
-    description: '<p>实现AVL树的插入、删除和查找，并通过OJ测试。</p>',
+    description: '<p>实现 AVL 树的插入、删除和查找，并通过 OJ 测试。</p>',
   }),
 ];
 

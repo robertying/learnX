@@ -43,14 +43,29 @@ class SceneDelegate: ExpoAppSceneDelegate {
       WindowTracker.track(window)
     }
     #if targetEnvironment(macCatalyst)
-    if let restrictions = (scene as? UIWindowScene)?.sizeRestrictions {
-      restrictions.minimumSize.width = max(
-        restrictions.minimumSize.width,
-        Self.minimumWindowWidth
-      )
+    if let windowScene = scene as? UIWindowScene {
+      if let restrictions = windowScene.sizeRestrictions {
+        restrictions.minimumSize.width = max(
+          restrictions.minimumSize.width,
+          Self.minimumWindowWidth
+        )
+      }
+      WindowFrameAutosave.restore(windowScene)
     }
     #endif
   }
+
+  #if targetEnvironment(macCatalyst)
+  /// Called after the window moves or is resized, among other changes.
+  func windowScene(
+    _ windowScene: UIWindowScene,
+    didUpdate previousCoordinateSpace: any UICoordinateSpace,
+    interfaceOrientation previousInterfaceOrientation: UIInterfaceOrientation,
+    traitCollection previousTraitCollection: UITraitCollection
+  ) {
+    WindowFrameAutosave.save(windowScene)
+  }
+  #endif
 
   override func sceneDidDisconnect(_ scene: UIScene) {
     // Expo mirrors the newest window onto the app delegate. Left there, a closed window would keep its React root

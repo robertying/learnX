@@ -26,6 +26,7 @@ jest.mock('services/files/downloads', () => ({
 }));
 jest.mock('services/files/export', () => ({ exportDownloads: jest.fn() }));
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
+jest.mock('services/crashReporting', () => ({ recordError: jest.fn() }));
 jest.mock('@react-navigation/native', () => ({
   ...jest.requireActual('@react-navigation/native'),
   useFocusEffect: (effect: () => void) =>
@@ -118,10 +119,7 @@ it('clears the file cache, and says why when it fails', async () => {
   jest.mocked(removeFileDir).mockRejectedValueOnce(new Error('busy'));
   await userEvent.press(screen.getByText(t('clearFileCacheEllipsis')));
   await confirmDelete();
-  expect(toast).toHaveBeenLastCalledWith(
-    t('deleteFailed', { error: 'busy' }),
-    'error',
-  );
+  expect(toast).toHaveBeenLastCalledWith(t('deleteFailed'), 'error');
 });
 
 it('exports all downloads or one course, and says how it went', async () => {
@@ -158,10 +156,7 @@ it('says nothing when the folder picker is cancelled, and why export failed', as
 
   jest.mocked(exportDownloads).mockRejectedValueOnce(new Error('denied'));
   await userEvent.press(screen.getByText(t('downloadsExport')));
-  expect(toast).toHaveBeenCalledWith(
-    t('downloadsExportFailed', { error: 'denied' }),
-    'error',
-  );
+  expect(toast).toHaveBeenCalledWith(t('downloadsExportFailed'), 'error');
 });
 
 describe('open files after downloading', () => {

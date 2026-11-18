@@ -4,9 +4,10 @@ Every user-visible string is a key in `en.ts` and `zh.ts`, with the same keys in
 
 ## English
 
-- Title Case for titles, rows, buttons and menu items; sentence case for messages, captions, footers and toasts.
+- Title Case for titles, rows, buttons and menu items; sentence case for messages, captions, footers and toasts. That is how Apple platforms show them. Android (Material 3) and the Electron app (Windows' Fluent) write titles in sentence case too, and `t()` turns a Title Case string into it there (`helpers/sentenceCase`): write each string once, in Title Case, and add a name that keeps its capitals to `PROPER_NAMES` there.
+- Lists of three or more take a serial comma ("Notices, assignments, and files"), as Apple's, Google's and Microsoft's style guides do.
 - A string shown on its own starts with a capital letter, also after a " · " ("Fri, Nov 20 · Due in 3 hours"), so no code capitalizes a translated string. Only a piece filled into another string (`graduateSchedule`) starts lowercase.
-- Only a button, row or menu item that asks to confirm a destructive action ends with an ellipsis, "…" in both languages ("Log Out…", "Delete…", "Discard Draft…"). Nothing else does: not other confirmations (Submit), pickers, share sheets or menus. Alert titles and buttons never do, so a label used both ways has an `…Ellipsis` key for the one that asks (`logout` / `logoutEllipsis`).
+- Only a button, row or menu item that asks to confirm a destructive action ends with an ellipsis, "…" in both languages ("Log Out…", "Delete…", "Discard Draft…"). Nothing else does: not other confirmations (Submit), pickers, share sheets or menus. Alert titles and buttons never do, so a label used both ways has an `…Ellipsis` key for the one that asks (`logout` / `logoutEllipsis`). The Mac menu bar's Settings… is the exception: a macOS command that opens a window ends with one.
 - Errors start with "Couldn't …". Success toasts are short ("Deleted").
 - Use the platform's own words: Log In / Log Out, OK, Full Screen, Show in Finder (Mac), Photo Library, Choose File, and "System Settings" for the OS settings app. Android never mentions Reminders.
 - Archive's opposite is Unarchive (key `restore`). A grader's comment is "Grader Comments".

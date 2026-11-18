@@ -1,8 +1,11 @@
 import { t } from 'helpers/i18n';
+import { initialAuth, useAuthStore } from 'data/auth';
+import { useCredentialsStore } from 'data/credentials';
 import { resetNotified } from 'data/notified';
 import type { Bridge, BridgeUpdate } from 'web/bridge';
 import { pendingUpdate } from 'services/electronUpdates';
 import {
+  checkForUpdate,
   checksForUpdates,
   watchUpdates,
 } from 'services/updateNotifications.web';
@@ -13,6 +16,9 @@ import {
 
 // Loads expo-updates and the Crashlytics module, neither of which Jest can.
 jest.mock('services/crashReporting', () => ({ recordError: jest.fn() }));
+// data/auth's import, whose cheerio resolves to an ES module in the web
+// project.
+jest.mock('@robertying/thu-learn-lib', () => ({ FailReason: {} }));
 
 let bridge: Bridge;
 
@@ -31,10 +37,21 @@ const posted = () =>
     body: request.content.body,
   }));
 
+const logIn = () =>
+  useCredentialsStore.setState({
+    credentials: {
+      username: 'user',
+      password: 'password',
+      fingerPrint: 'fp',
+      fingerGenPrint: 'fp2',
+      fingerGenPrint3: 'fp3',
+    },
+  });
+
 beforeEach(() => {
   bridge = installBridge();
   resetNotified();
-  jest.spyOn(document, 'hasFocus').mockReturnValue(false);
+  logIn();
   watchUpdates();
 });
 
@@ -63,8 +80,36 @@ it('says when a .deb is out', async () => {
   ]);
 });
 
-it('stays quiet while the window is in front', async () => {
-  jest.mocked(document.hasFocus).mockReturnValue(true);
+it('says so while the window is in front too', async () => {
+  jest.spyOn(document, 'hasFocus').mockReturnValue(true);
   await ready({ version: '19.3.0' });
+  expect(posted()).toHaveLength(1);
+});
+
+it('says an update found before logging in once, after the login', async () => {
+  useAuthStore.setState(initialAuth);
+  useCredentialsStore.setState({ credentials: null });
+  await ready({ version: '19.4.0' });
   expect(posted()).toEqual([]);
+
+  // As data/login logs in: the login saved, then the account's data
+  // claimed, which forgets what was said, then through.
+  logIn();
+  await new Promise(resolve => setTimeout(resolve));
+  resetNotified();
+  useAuthStore.setState({ loggedIn: true });
+  await new Promise(resolve => setTimeout(resolve));
+  expect(posted()).toEqual([
+    expect.objectContaining({
+      title: t('foundNewVersion', { version: '19.4.0' }),
+    }),
+  ]);
+});
+
+it('says nothing when the main process has nothing pending', async () => {
+  jest.mocked(bridge.updates.onReady).mock.calls[0]?.[0]({ version: '19.4.0' });
+  await new Promise(resolve => setTimeout(resolve));
+  expect(posted()).toEqual([]);
+  // The main process checks on its own timer.
+  await expect(checkForUpdate()).resolves.toBeUndefined();
 });

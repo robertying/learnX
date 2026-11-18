@@ -247,8 +247,8 @@ run_ios_suite() {
 }
 
 # Log in on the closed Duo, then run each posture flow: it opens its screen
-# while closed (iOS asks before opening a link, and nothing can tap on the
-# inner display) and opens the Duo to $2. Saves the inner display after each.
+# while closed (iOS asks before opening a link, in a prompt Maestro can't see
+# and taps by position on the outer display) and opens the Duo to $2. Saves the inner display after each.
 run_duo_postures() {
   local udid="$1" posture="$2" out="$3" flow name status=0
   set_hinge "$udid" closed || return 1

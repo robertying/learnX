@@ -1,21 +1,13 @@
 import { t } from 'helpers/i18n';
 import { bridge } from 'web/bridge';
 import { pendingUpdate, subscribeToUpdates } from 'services/electronUpdates';
-import { notifyUpdate } from 'services/updateNotice';
+import { notifyOnLogin, notifyUpdate } from 'services/updateNotice';
 
 /**
  * Whether this run of the Electron app takes updates (electron/updater.ts):
  * a packaged Windows or Linux build.
  */
 export const checksForUpdates = () => bridge().updates.checks();
-
-/**
- * The window is in front: shown and focused. A window behind others is
- * still "visible" to the page, but nobody sees its Settings badge.
- */
-const inFront = () =>
-  globalThis.document?.visibilityState === 'visible' &&
-  globalThis.document.hasFocus();
 
 let watching = false;
 
@@ -31,7 +23,7 @@ export const watchUpdates = () => {
     return;
   }
   watching = true;
-  subscribeToUpdates(() => {
+  const notifyPending = () => {
     const update = pendingUpdate();
     if (update) {
       void notifyUpdate({
@@ -39,10 +31,13 @@ export const watchUpdates = () => {
         body: update.download
           ? t('updateNotificationBody')
           : t('updateNotificationReadyBody'),
-        inFront: inFront(),
       });
     }
-  });
+  };
+  subscribeToUpdates(notifyPending);
+  // An update found before logging in, said once someone does. It installs
+  // on quit either way.
+  notifyOnLogin(notifyPending);
 };
 
 /** The main process checks on its own timer (electron/updater.ts). */

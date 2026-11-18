@@ -7,7 +7,8 @@ import zhCn from 'dayjs/locale/zh-cn';
 import en from 'assets/translations/en';
 import zh from 'assets/translations/zh';
 import { addCjkGaps, joinWithCjkGaps } from './cjk';
-import { isAndroid } from 'helpers/platform';
+import { formatToSentenceCase, toSentenceCase } from './sentenceCase';
+import { isAndroid, isElectron } from 'helpers/platform';
 
 let locale: string | undefined;
 
@@ -97,6 +98,13 @@ export type FormatKey = Extract<TranslationKey, `${string}Format`>;
 /** A string shown as it is, read with `t()`. */
 export type TextKey = Exclude<TranslationKey, FormatKey>;
 
+/**
+ * Whether English is written in sentence case: on Android (Material 3) and in
+ * the Electron app (Windows' Fluent), not on Apple platforms (helpers/sentenceCase).
+ */
+const usesSentenceCase = () =>
+  !isLocaleChinese() && (isAndroid() || isElectron());
+
 /** The translations for a locale, Chinese or English. */
 export const translationsFor = (chinese: boolean) => (chinese ? zh : en);
 
@@ -137,6 +145,12 @@ const timeFormat = () =>
 const inAppLanguage = (time: dayjs.ConfigType) =>
   dayjs(time).locale(isLocaleChinese() ? 'zh-cn' : 'en');
 
+/** The dayjs format `key`, its literal text in this platform's case. */
+const dateFormatOf = (key: FormatKey) => {
+  const format = translationsFor(isLocaleChinese())[key];
+  return usesSentenceCase() ? formatToSentenceCase(format) : format;
+};
+
 /**
  * `time` written with the format `key` in the app's language ("周一 下午9:30"):
  * its `{time}` is the time of day as the device shows it (`timeFormat()`),
@@ -151,7 +165,7 @@ export const formatDate = (
 ) =>
   spaceCjk(
     inAppLanguage(time).format(
-      interpolate(translationsFor(isLocaleChinese())[key], {
+      interpolate(dateFormatOf(key), {
         time: timeFormat(),
         ...params,
       }),
@@ -216,7 +230,8 @@ export function t(
   key: TextKey,
   params?: Record<string, string | number>,
 ): string {
-  const text = translationsFor(isLocaleChinese())[key];
+  const written = translationsFor(isLocaleChinese())[key];
+  const text = usesSentenceCase() ? toSentenceCase(written) : written;
   const pieces: string[] = [];
   let rest = 0;
   for (const match of text.matchAll(/\{(\w+)\}/g)) {

@@ -2,12 +2,10 @@ name: Electron
 
 # The Windows and Linux app (electron/). The web build and the E2E tests are
 # required; a pull request that can't affect the app (the `changes` step)
-# skips their steps and passes. Update E2E, not required, runs on pull
-# requests that change how the app updates, and by hand. Manual runs also
-# check that the installers still build (Installers); those builds are never
-# released: releases are built, signed and uploaded by hand with fastlane
-# (the release skill).
-# js.yml's Checks run the `web` Jest project.
+# skips their steps and passes. Manual runs also run a real update (Update
+# E2E tests) and check that the installers still build (Installers); those
+# builds are never released: releases are built, signed and uploaded by hand
+# with fastlane (the release skill). js.yml's Checks run the `web` Jest project.
 on:
   pull_request:
   push:
@@ -22,15 +20,14 @@ concurrency:
   group: electron-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
-# Electron's downloads (build/electron/cache: Electron for each platform and
-# CPU, and electron-builder's NSIS and AppImage tools) are cached, saved only
-# from main, as the other workflows' caches are; caches.yml prunes superseded
-# ones.
-env:
-  SAVE_CACHE: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
-
 permissions:
   contents: read
+
+# Only main saves caches (Metro, Electron's downloads), so other refs start
+# from main's and can't evict or poison them. caches.yml prunes superseded
+# ones after each main run.
+env:
+  SAVE_CACHE: ${{ github.ref == 'refs/heads/main' }}
 
 jobs:
   web:
@@ -39,7 +36,6 @@ jobs:
     timeout-minutes: 20
     outputs:
       changed: ${{ steps.changes.outputs.changed }}
-      updates: ${{ steps.updates.outputs.updates }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -51,11 +47,6 @@ jobs:
       - name: Detect changed files
         id: changes
         run: scripts/ci/changed-files.sh electron >> "$GITHUB_OUTPUT"
-
-      # Whether Update E2E runs.
-      - name: Detect update changes
-        id: updates
-        run: scripts/ci/changed-files.sh electron-updates >> "$GITHUB_OUTPUT"
 
       - name: Set up JS
         if: steps.changes.outputs.changed == 'true'
@@ -148,11 +139,45 @@ jobs:
           name: electron-web
           path: build/electron/web
 
+      # Weston's ~90 packages come from main's cache, since Ubuntu's mirror
+      # can take over 15 minutes to serve them. The key follows the runner
+      # image, whose installed packages decide which ones Weston needs.
+      - name: Weston cache key
+        id: weston-key
+        if: env.CHANGED == 'true' && matrix.run == 'Linux'
+        run: echo "key=weston-debs-$ImageOS-$(echo "$ImageVersion" | sha256sum | cut -c1-40)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Weston packages
+        id: weston-cache
+        if: env.CHANGED == 'true' && matrix.run == 'Linux'
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/weston-debs
+          key: ${{ steps.weston-key.outputs.key }}
+
       - name: Install Weston
         if: env.CHANGED == 'true' && matrix.run == 'Linux'
+        env:
+          DEBS: ${{ runner.temp }}/weston-debs
+          CACHED: ${{ steps.weston-cache.outputs.cache-hit }}
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends weston
+          if [ "$CACHED" != 'true' ]; then
+            mkdir -p "$DEBS/partial"
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends --download-only \
+              -o Dir::Cache::archives="$DEBS" weston
+            sudo chmod -R a+r "$DEBS"
+          fi
+          # Exactly the packages this image lacks, so dpkg installs them
+          # with no network and no package lists.
+          sudo dpkg -i "$DEBS"/*.deb
+
+      - name: Save Weston packages
+        if: env.SAVE_CACHE == 'true' && matrix.run == 'Linux' && steps.weston-cache.outcome == 'success' && steps.weston-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/weston-debs
+          key: ${{ steps.weston-key.outputs.key }}
 
       - name: Restore Electron download cache
         id: electron-cache
@@ -161,6 +186,7 @@ jobs:
         with:
           path: build/electron/cache
           key: electron-e2e-${{ runner.os }}-${{ hashFiles('electron/package.json', 'electron/packageConfig.ts') }}
+          restore-keys: electron-e2e-${{ runner.os }}-
 
       # The same mock login as the web build's. On Linux each worker starts
       # an Xvfb of its own (e2e/fixtures.ts).
@@ -195,7 +221,7 @@ jobs:
 
       # Traces and screenshots of failed tests, and the HTML report.
       - name: Upload results
-        if: ${{ !cancelled() && env.CHANGED == 'true' }}
+        if: always() && env.CHANGED == 'true'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: electron-e2e-${{ matrix.run }}
@@ -216,14 +242,13 @@ jobs:
     # made for the run, installs 99.0.0 (the NSIS installer on Windows, the
     # AppImage on Linux), serves 99.0.1 and checks that the app updates from
     # Settings and comes back as 99.0.1. Two packagings make it the slowest
-    # Electron job, and it tests what few changes touch, so it isn't
-    # required: it runs on pull requests that change the update path
-    # (scripts/ci/changed-files.sh electron-updates) and by hand, not on main
-    # pushes. A static name: rows show as "Update E2E (Linux)" and "Update
-    # E2E (Windows)".
-    name: Update E2E
+    # Electron job, so by hand only, as Android's updater test (android.yml's
+    # E2E tests): the release and upgrade-dependencies skills run it. A static
+    # name: rows show as "Update E2E tests (Linux)" and "Update E2E tests
+    # (Windows)", and the job skipped on other runs as "Update E2E tests".
+    name: Update E2E tests
     needs: web
-    if: github.event_name != 'push' && needs.web.outputs.updates == 'true' && needs.web.outputs.changed == 'true'
+    if: github.event_name == 'workflow_dispatch'
     strategy:
       fail-fast: false
       matrix:
@@ -243,8 +268,9 @@ jobs:
           name: electron-web
           path: build/electron/web
 
-      # Electron and electron-builder's tools, as Installers saves them.
+      # Electron and electron-builder's tools, shared with Installers.
       - name: Restore Electron download cache
+        id: electron-cache
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: build/electron/cache
@@ -263,7 +289,8 @@ jobs:
 
       # The web build above has the mock login the test logs in with. On
       # Linux the test's app gets an Xvfb of its own (e2e/fixtures.ts).
-      - name: Update E2E
+      - name: Update E2E tests
+        id: update
         shell: bash
         run: |
           bash scripts/ci/write-e2e-env.sh
@@ -272,13 +299,20 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
 
       - name: Upload results
-        if: ${{ !cancelled() }}
+        if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: electron-update-e2e-${{ matrix.run }}
           path: build/electron/e2e
           if-no-files-found: ignore
           retention-days: 14
+
+      - name: Save Electron download cache
+        if: env.SAVE_CACHE == 'true' && steps.update.outcome == 'success' && steps.electron-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: build/electron/cache
+          key: ${{ steps.electron-cache.outputs.cache-primary-key }}
 
   installers:
     # Checks that the installers still build: each platform on its own
@@ -306,6 +340,7 @@ jobs:
         with:
           path: build/electron/cache
           key: electron-package-${{ runner.os }}-${{ hashFiles('electron/package.json', 'electron/packageConfig.ts') }}
+          restore-keys: electron-package-${{ runner.os }}-
 
       # Its own web build with the mock login from the repository's
       # DUMMY_USERNAME and DUMMY_PASSWORD secrets (none without them),
@@ -331,7 +366,7 @@ jobs:
       - name: Upload installers
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: electron-${{ matrix.platform }}-check
+          name: electron-installers-${{ matrix.platform }}
           path: |
             build/electron/dist/*.exe
             build/electron/dist/*.blockmap

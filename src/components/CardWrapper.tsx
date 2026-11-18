@@ -1,10 +1,16 @@
-import { PropsWithChildren, useState } from 'react';
-import { AccessibilityActionEvent, View, StyleSheet } from 'react-native';
+import { PropsWithChildren, useEffect, useRef, useState } from 'react';
+import {
+  AccessibilityActionEvent,
+  GestureResponderEvent,
+  View,
+  StyleSheet,
+} from 'react-native';
 import { SharedValue, useSharedValue } from 'react-native-reanimated';
 import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import DeviceInfo from 'constants/DeviceInfo';
 import { useSettings } from 'data/settings';
 import { CardAction, cardActions, swipeAction } from 'helpers/cardActions';
+import { cardMenuAnchor } from 'helpers/cardMenuAnchor';
 import { t } from 'helpers/i18n';
 import { systemIcons } from 'helpers/systemIcons';
 import useBackSwipeEdge, { backSwipeEdgeWidth } from 'hooks/useBackSwipeEdge';
@@ -25,6 +31,8 @@ import { isApple, isElectron } from 'helpers/platform';
 // system context menu on iOS, iPadOS and Mac, a Material dropdown on Android,
 // and a native menu in the Electron app (right-click, with hover buttons in
 // place of swipes).
+// Longer than Material 3's menu exit animation (75 ms in Compose).
+const MENU_CLOSE_MS = 300;
 const contextMenuSupported = isApple() || isElectron();
 // The window's menus offer the moves in reorder mode where there's a pointer
 // (the Mac, Windows); a long press drags on iPhone and iPad.
@@ -114,9 +122,22 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
   const backSwipeEdge = useBackSwipeEdge();
 
   const [menuVisible, setMenuVisible] = useState(false);
-  // Android's menu is a Compose view: mounted on the card's first long press,
-  // not with every row.
+  // Android's menu is a Compose view: mounted on a long press, not with every
+  // row, and unmounted once it has closed. Left mounted, its host took the
+  // card's touches where the menu had opened, so the card's next taps and
+  // long presses there did nothing.
   const [menuMounted, setMenuMounted] = useState(false);
+  useEffect(() => {
+    if (menuVisible || !menuMounted) {
+      return;
+    }
+    // After the menu's closing animation.
+    const timer = setTimeout(() => setMenuMounted(false), MENU_CLOSE_MS);
+    return () => clearTimeout(timer);
+  }, [menuVisible, menuMounted]);
+  const [menuAnchor, setMenuAnchor] = useState<{ x: number; y: number }>();
+  // The card's box, which the menu is placed in (`cardMenuAnchor`).
+  const menuBoxRef = useRef<React.ComponentRef<typeof View>>(null);
 
   const actions = cardActions({
     fav,
@@ -290,11 +311,17 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
     onPress?.();
   };
 
-  const handleLongPress = () => {
+  const handleLongPress = (event?: GestureResponderEvent) => {
     if (reorderMode) {
       onDrag?.();
     } else if (actionsEnabled && !contextMenuSupported) {
       playHaptic('longPress');
+      setMenuAnchor(
+        cardMenuAnchor(
+          event?.nativeEvent,
+          menuBoxRef.current?.getBoundingClientRect?.(),
+        ),
+      );
       setMenuMounted(true);
       setMenuVisible(true);
     }
@@ -399,7 +426,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
       {touchable}
     </ContextMenuView>
   ) : (
-    <View collapsable={false}>
+    <View ref={menuBoxRef} collapsable={false}>
       {touchable}
       {menuMounted ? (
         <CardMenu
@@ -407,6 +434,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
           actions={actions}
           onAction={handleMenuAction}
           onDismiss={closeMenu}
+          anchor={menuAnchor}
         />
       ) : null}
     </View>

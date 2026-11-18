@@ -44,6 +44,7 @@ jest.mock('services/calendar/classes', () => ({
   saveClassesToCalendar: jest.fn(),
 }));
 jest.mock('services/files/share', () => ({ exportTextFile: jest.fn() }));
+jest.mock('services/crashReporting', () => ({ recordError: jest.fn() }));
 jest.mock('services/calendar/electronExport', () => ({
   buildElectronICS: jest.fn(async () => ({
     ics: 'ELECTRON ICS',
@@ -92,7 +93,7 @@ describe('error toasts', () => {
       type: 'error',
     });
     expect(assignmentSyncErrorToast(new Error('Boom'))).toEqual({
-      text: t('assignmentSyncFailed', { error: 'Boom' }),
+      text: t('assignmentSyncFailed'),
       type: 'error',
     });
   });
@@ -107,7 +108,7 @@ describe('error toasts', () => {
       type: 'warning',
     });
     expect(calendarExportErrorToast(new Error('Boom'))).toEqual({
-      text: t('calendarExportFailed', { error: 'Boom' }),
+      text: t('calendarExportFailed'),
       type: 'error',
     });
   });
@@ -122,14 +123,14 @@ describe('error toasts', () => {
       type: 'error',
     });
     expect(calendarDeleteErrorToast(new Error('Boom'))).toEqual({
-      text: t('deleteFailed', { error: 'Boom' }),
+      text: t('deleteFailed'),
       type: 'error',
     });
   });
 
-  it('says what was thrown when it is not an Error', () => {
+  it('says only what failed when what was thrown is not an Error', () => {
     expect(assignmentSyncErrorToast('Boom')).toEqual({
-      text: t('assignmentSyncFailed', { error: 'Boom' }),
+      text: t('assignmentSyncFailed'),
       type: 'error',
     });
   });

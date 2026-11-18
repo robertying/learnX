@@ -80,7 +80,7 @@ describe('times of day', () => {
   it('keep other placeholders of a format', () => {
     expect(
       formatDate(evening, 'gradedByAtFormat', { grader: formatLiteral('Li') }),
-    ).toBe('Graded by Li, Thu, Nov 12, 2026 21:30');
+    ).toBe('Graded by Li, Thu, Nov 12, 2026 at 21:30');
   });
 
   it('say how far off a time is', () => {
@@ -220,6 +220,49 @@ describe('spacing between Chinese and Latin', () => {
         : TYPED_CJK_SPACE.test(text),
     );
     expect(typed).toEqual([]);
+  });
+});
+
+// Title Case on Apple platforms; sentence case on Android (Material 3) and in
+// the Electron app (Fluent), from the same strings (helpers/sentenceCase).
+describe('English capitalization', () => {
+  beforeEach(() => {
+    mockLocale.current = 'en-US';
+    mockClock.uses24hourClock = true;
+  });
+
+  it('keeps Title Case on Apple platforms', () => {
+    expect(t('clearFileCache')).toBe('Delete All Downloads');
+    expect(t('notifyNoticeCount', { count: 3 })).toBe('3 New Notices');
+  });
+
+  it.each(['android', 'web'] as const)('uses sentence case on %s', os => {
+    jest.replaceProperty(Platform, 'OS', os);
+    expect(t('clearFileCache')).toBe('Delete all downloads');
+    expect(t('clearFileCacheEllipsis')).toBe('Delete all downloads…');
+    expect(t('notifyNoticeCount', { count: 3 })).toBe('3 new notices');
+    expect(t('createNewGitHubIssue')).toBe('Open a GitHub issue');
+    expect(t('classStartsAtBeijing', { time: '9:50' })).toBe(
+      'Starts at 9:50 Beijing time',
+    );
+    expect(t('openSystemSettings')).toBe('Open System Settings');
+    expect(t('sso')).toBe(
+      'Electronic ID Service System of Tsinghua University',
+    );
+    // A sentence and a filled-in value are left as they are.
+    expect(t('loginFailed')).toContain('Tsinghua ID');
+    expect(t('saveFileSucceeded', { name: 'Lab Report.pdf' })).toBe(
+      'Saved Lab Report.pdf',
+    );
+    expect(formatDate(dayjs('2026-11-20T15:00'), 'lateDeadlineFormat')).toBe(
+      'Late deadline Fri, Nov 20, 2026 at 15:00',
+    );
+  });
+
+  it('leaves Chinese as it is', () => {
+    jest.replaceProperty(Platform, 'OS', 'android');
+    mockLocale.current = 'zh-CN';
+    expect(t('clearFileCache')).toBe('删除全部已下载文件');
   });
 });
 

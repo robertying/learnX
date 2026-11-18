@@ -12,6 +12,18 @@ import { exact, text } from './maestroEnv.ts';
 export const shown = (locator: Locator) =>
   locator.filter({ visible: true }).first();
 
+/**
+ * Waits for the window to draw what the page shows now. Playwright acts once
+ * the page's DOM has changed, and the page finds what a click lands on from
+ * its DOM, except over a web view: the window sends input to a web view by
+ * the last frame it drew. So a click on a page that just covered one (the
+ * submission page pushed over an assignment's description) could reach the
+ * web view, a frame late. A screenshot waits for a new frame.
+ */
+export const drawn = async (window: Page) => {
+  await window.screenshot();
+};
+
 /** An element by its testID, where it shows. */
 export const byId = (window: Page, id: string) => shown(window.getByTestId(id));
 
@@ -40,6 +52,8 @@ export const card = (window: Page, mock: string) =>
 export const openCard = async (window: Page, mock: string, detail: string) => {
   await card(window, mock).click();
   await expect(byId(window, detail)).toBeVisible();
+  // It may have replaced a page with a web view.
+  await drawn(window);
 };
 
 /**

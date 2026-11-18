@@ -16,8 +16,9 @@
 //                      latest.json stays the same as in update mode, since
 //                      the app keeps it for a day
 //   GET /mode/none     no release (latest.json answers 404)
-//   GET /status        the mode, how many APK downloads came in and how
-//                      many were sent in full, as JSON
+//   GET /status        the mode, how many times latest.json was asked for,
+//                      how many APK downloads came in and how many were
+//                      sent in full, as JSON
 //
 //   node scripts/e2e/updater-e2e-server.mjs <apk> [--port 8198] [--version 99.0.0]
 import { createHash } from 'node:crypto';
@@ -102,10 +103,16 @@ const main = () => {
   const version = option('--version', DEFAULT_VERSION);
   const apk = readFileSync(apkPath);
   let mode = 'update';
+  let checks = 0;
   let downloads = 0;
   let sent = 0;
   const status = () =>
-    JSON.stringify({ mode, apkDownloads: downloads, apkSent: sent });
+    JSON.stringify({
+      mode,
+      latestChecks: checks,
+      apkDownloads: downloads,
+      apkSent: sent,
+    });
 
   /** @type {import('node:http').RequestListener} */
   const handle = (req, res) => {
@@ -121,6 +128,9 @@ const main = () => {
       return;
     }
     const answer = respond(pathname, mode, apk, version);
+    if (pathname === '/latest.json') {
+      checks += 1;
+    }
     if (answer.apk) {
       downloads += 1;
       res.on('finish', () => {

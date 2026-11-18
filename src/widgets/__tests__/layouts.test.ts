@@ -548,12 +548,12 @@ describe('Up Next on iOS', () => {
     const english = layout(initial, { locale: 'en_US', date: new Date(now) });
     expect(texts(english)).toEqual([
       'Next Up',
-      'Open learnX to see your classes',
+      'Open learnX to show your classes here',
     ]);
     expect(modifier(english, 'widgetURL')).toBeUndefined();
     expect(
       texts(layout(initial, { locale: 'zh-Hans_CN', date: new Date(now) })),
-    ).toEqual(['下一节课', '打开 learnX 以显示课程']);
+    ).toEqual(['下一节课', '打开learnX后，这里会显示课程']);
     expect(
       texts(
         layout(initial, {
@@ -561,7 +561,7 @@ describe('Up Next on iOS', () => {
           date: new Date(now),
         }),
       ),
-    ).toEqual(['Open learnX to see your classes']);
+    ).toEqual(['Open learnX to show your classes here']);
   });
 });
 
@@ -760,12 +760,12 @@ describe('Deadlines on iOS', () => {
     const english = layout(initial, { locale: 'en_US', date: new Date(now) });
     expect(texts(english)).toEqual([
       'Deadlines',
-      'Open learnX to see deadlines',
+      'Open learnX to show your deadlines here',
     ]);
     expect(modifier(english, 'widgetURL')).toBeUndefined();
     expect(
       texts(layout(initial, { locale: 'zh-Hans_CN', date: new Date(now) })),
-    ).toEqual(['作业截止', '打开 learnX 以显示作业']);
+    ).toEqual(['作业截止', '打开learnX后，这里会显示作业']);
     expect(
       texts(
         layout(initial, {
@@ -773,7 +773,7 @@ describe('Deadlines on iOS', () => {
           date: new Date(now),
         }),
       ),
-    ).toEqual(['Open learnX to see deadlines']);
+    ).toEqual(['Open learnX to show your deadlines here']);
   });
 });
 
@@ -868,13 +868,13 @@ describe('Deadlines on Android', () => {
     const english = layout(initial, { locale: 'en-US' });
     expect(texts(english)).toEqual([
       'Deadlines',
-      'Open learnX to see deadlines',
+      'Open learnX to show your deadlines here',
     ]);
     expect(openUrls(english)).toEqual([]);
     expect(modifier(english, 'background')).toBe('#FFF7FA');
     expect(texts(layout(initial, { locale: 'zh-Hans-CN' }))).toEqual([
       '作业截止',
-      '打开 learnX 以显示作业',
+      '打开 learnX 后，这里会显示作业',
     ]);
     expect(
       texts(
@@ -883,7 +883,7 @@ describe('Deadlines on Android', () => {
           {},
         ),
       ),
-    ).toEqual(['Deadlines', 'Open learnX to see deadlines']);
+    ).toEqual(['Deadlines', 'Open learnX to show your deadlines here']);
   });
 });
 
@@ -958,12 +958,12 @@ describe('Up Next on Android', () => {
       url: '',
     } as never;
     expect(texts(layout(initial, {}))).toEqual([
-      'Next Up',
-      'Open learnX to see your classes',
+      'Next up',
+      'Open learnX to show your classes here',
     ]);
     expect(texts(layout(initial, { locale: 'zh-Hans' }))).toEqual([
       '下一节课',
-      '打开 learnX 以显示课程',
+      '打开 learnX 后，这里会显示课程',
     ]);
   });
 });

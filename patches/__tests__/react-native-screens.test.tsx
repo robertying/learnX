@@ -37,6 +37,17 @@ it("takes the 'automatic' display mode with any split behavior", async () => {
   expect(host().props.maxCollapsedWidth).toBe(700);
 });
 
+it('passes the sidebar autosave name to the native split', async () => {
+  await render(
+    <Split.Host sidebarAutosaveName="Main">
+      <Split.Column>
+        <Text>primary</Text>
+      </Split.Column>
+    </Split.Host>,
+  );
+  expect(host().props.sidebarAutosaveName).toBe('Main');
+});
+
 it('still warns about a display mode the split behavior has no room for', async () => {
   await render(
     <Split.Host

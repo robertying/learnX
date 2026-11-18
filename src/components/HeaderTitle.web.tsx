@@ -25,11 +25,7 @@ const HeaderTitle: React.FC<HeaderTitleProps> = ({
     >
       {title}
     </Text>
-    {subtitle ? (
-      <Caption numberOfLines={1} ellipsizeMode="middle">
-        {subtitle}
-      </Caption>
-    ) : null}
+    {subtitle ? <Caption numberOfLines={1}>{subtitle}</Caption> : null}
   </View>
 );
 

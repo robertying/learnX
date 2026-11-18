@@ -21,6 +21,15 @@
 #                               the Android driver's instrumentation in the
 #                               foreground of its adb shell, which otherwise
 #                               stays a zombie until llkd kills adbd (API 29)
+#   maestro-sim-touch.patch     touches and typing through scripts/e2e/
+#                               sim-touch.swift (MAESTRO_IOS_SIM_TOUCH) when a
+#                               display other than the main one is lit, which
+#                               XCUITest's events don't reach (iPhone Duo open)
+#   maestro-inner-display-tree.patch
+#                               the open iPhone Duo's right side in the app's
+#                               hierarchy: loads scripts/e2e/sim-ax-frame.m into
+#                               the app (MAESTRO_IOS_INSERT_LIBRARIES) and starts
+#                               a new runner after setFoldPosture
 #
 #   scripts/e2e/maestro/build.sh <maestro checkout>
 #
@@ -59,7 +68,9 @@ if [ "${MAESTRO_KEEP:-}" != 1 ]; then
     "$here/maestro-hierarchy-fallback.patch" \
     "$here/maestro-tiny-elements.patch" \
     "$here/maestro-springboard-alerts.patch" \
-    "$here/maestro-instrumentation-shell.patch" >&2
+    "$here/maestro-instrumentation-shell.patch" \
+    "$here/maestro-sim-touch.patch" \
+    "$here/maestro-inner-display-tree.patch" >&2
 fi
 
 if [ -z "${JAVA_HOME:-}" ] && [ -x /usr/libexec/java_home ]; then

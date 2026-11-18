@@ -3,7 +3,9 @@
 // follow every translation or mock data edit:
 //
 // - `T_<key>`: the translation `<key>` in English and Chinese, as a regex
-//   alternation (`T_search` = `Search|搜索`). Only keys the flows (and the
+//   alternation (`T_search` = `Search|搜索`), with the English also in
+//   sentence case where Android and the Electron app write it so
+//   (`T_logout` = `Log out|Log Out|退出登录`). Only keys the flows (and the
 //   Electron app's Playwright tests, electron/e2e) use are printed.
 // - `MOCK_*`: mock items (`data/mock.ts`, `data/mockEnglish.ts`) the flows
 //   open, as an alternation of their English and Chinese texts. A flow matches
@@ -48,6 +50,7 @@ const { default: en } = await import('../../src/assets/translations/en.ts');
 const { default: zh } = await import('../../src/assets/translations/zh.ts');
 const zhMock = await import('../../src/data/mock.ts');
 const { mockInEnglish } = await import('../../src/data/mockEnglish.ts');
+const { toSentenceCase } = await import('../../src/helpers/sentenceCase.ts');
 const enMock = mockInEnglish();
 
 const escape = text => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -175,6 +178,11 @@ for (const key of [...keys].sort()) {
   if (typeof en[key] !== 'string' || typeof zh[key] !== 'string') {
     throw new Error(`No translation "${key}" (used as \${T_${key}})`);
   }
-  lines.push(`T_${key}=${either(en[key], zh[key])}`);
+  // Android and the Electron app write English in sentence case
+  // (helpers/sentenceCase), Apple platforms in Title Case: either matches.
+  const sentence = toSentenceCase(en[key]);
+  lines.push(
+    `T_${key}=${sentence === en[key] ? '' : `${escape(sentence)}|`}${either(en[key], zh[key])}`,
+  );
 }
 console.log(lines.join('\n'));

@@ -141,3 +141,25 @@ it('ignores a drag with another button, and a press or click that moves nothing'
   pointer('pointerup', 6000);
   expect(store.get('splitMasterWidth')).toBe(String(SplitSizes.maxMasterWidth));
 });
+
+it('darkens the line while the pointer is over the divider', () => {
+  renderSplit();
+  const line = () => getComputedStyle(divider().previousSibling as Element);
+  const resting = line().backgroundColor;
+  // React makes enter and leave from over and out.
+  act(() => {
+    fireEvent(divider(), new MouseEvent('pointerover', { bubbles: true }));
+  });
+  const hovered = line().backgroundColor;
+  expect(hovered).not.toBe(resting);
+  act(() => {
+    fireEvent(
+      divider(),
+      new MouseEvent('pointerout', {
+        bubbles: true,
+        relatedTarget: document.body,
+      }),
+    );
+  });
+  expect(line().backgroundColor).toBe(resting);
+});

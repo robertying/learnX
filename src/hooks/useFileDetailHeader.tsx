@@ -20,7 +20,7 @@ const useFileDetailHeader = ({
   path,
   progress,
   error,
-  canRender,
+  previewable,
   showInfo,
   onRefresh,
   onQuickLook,
@@ -33,7 +33,12 @@ const useFileDetailHeader = ({
   path: string;
   progress: number;
   error: boolean;
-  canRender: boolean;
+  /**
+   * Whether the file has a preview here, once it has downloaded: Info is in
+   * the header from the start, disabled until then, so the buttons don't
+   * move under the pointer as the download ends.
+   */
+  previewable: boolean;
   showInfo: boolean;
   onRefresh: () => void;
   onQuickLook: () => void;
@@ -131,7 +136,7 @@ const useFileDetailHeader = ({
       onPress: onOpen,
       disabled: unavailable,
     },
-    canRender && {
+    previewable && {
       id: 'info',
       label: showInfo ? t('preview') : t('info'),
       icon: showInfo ? 'preview' : 'info',

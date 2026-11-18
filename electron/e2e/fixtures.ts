@@ -157,6 +157,12 @@ const launchApp = async (
   { launchOptions = { mockLatency: 'none' }, args = [], env = {} }: Launch,
 ): Promise<Running> => {
   const app = await electron.launch({
+    // A launch takes a second or two. Without a limit of its own, one that
+    // hangs (twice on Windows CI in a day of runs) waits out the test's
+    // 90 s, and nothing ends the app: it keeps the data folder open, so its
+    // deletion fails too. At its limit Playwright ends the app and reports
+    // what it printed, which says where the launch stopped.
+    timeout: 30_000,
     executablePath: packagedApp || electronExecutable(),
     // A packaged app reads no dev settings: Chromium's own switches keep
     // its data in the throwaway folder and its secrets out of the system's

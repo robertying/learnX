@@ -30,7 +30,7 @@
 - iPad: Maestro only sees SpringBoard with Windowed Apps unless it's the patched build, so the `ipad` profile needs Full Screen Apps and `ipad-windowed` a second iPad.
 - Android foldable: unfolded, it has the tablet layout, so it stands in for Android tablets.
 - iPhone Duo closed: the outer display is short and its bars sit at the side, so bring rows on screen before using them and expect a toast to cover the lower buttons until it goes. Bar buttons moved to the side lose their ids, so system apps' are tapped by label.
-- iPhone Duo open: no public tool sends touches to the inner display, so the open profiles log in while closed, open the hinge (`subflows/fold.yaml`, patched Maestro only) and run `.maestro/postures/`, which open screens by `learnx://` link and check only their ids.
+- iPhone Duo open: XCUITest's events don't reach the inner display, so the patched Maestro sends its taps, swipes and typing there through `scripts/e2e/sim-touch.swift` (`scripts/e2e/maestro/README.md`). It also loads `scripts/e2e/sim-ax-frame.m` into the app and starts a new runner after each hinge move, without which the tree there lacks everything right of x = 669, such as the tab column. The other flows don't yet follow the open Duo's split layout, so the open profiles log in while closed, open the hinge (`subflows/fold.yaml`, patched Maestro only) and run `.maestro/postures/`, which open screens by `learnx://` link and check only their ids.
 
 ## XCUITest (Mac and iOS)
 
@@ -48,7 +48,7 @@
 
 ## APK updater (Android)
 
-- `scripts/e2e/e2e-updater.sh` serves newer E2E builds of the same checkout from a local mirror and runs `updater/`: Android's "Install unknown apps" page, a download with the wrong checksum, then real updates, checked with `dumpsys` afterwards. The flows tap the system's own labels in English and Chinese, which change between Android versions; the script tells them which apply. Run it on the oldest Android too.
+- `scripts/e2e/e2e-updater.sh` serves newer E2E builds of the same checkout from a local mirror and runs `updater/`: the new version's notification (none while logged out, posted on logging in, opening Settings), Android's "Install unknown apps" page, a download with the wrong checksum, then real updates, checked with `dumpsys` afterwards. The flows tap the system's own labels in English and Chinese, which change between Android versions; the script tells them which apply. Run it on the oldest Android too.
 
 ## Upgrade test
 

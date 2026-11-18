@@ -7,8 +7,25 @@ setups:
 - the iPhone Duo simulator open, where the app is on the inner display;
 - iPadOS windowed apps, where the app is in a window smaller than the screen.
 
-`maestro-display.patch` fixes the driver (upstream issue
-mobile-dev-inc/Maestro#3623). `maestro-fold-posture.patch` adds the
+`maestro-display.patch` fixes the positions (upstream issue
+mobile-dev-inc/Maestro#3623), but no event XCUITest makes reaches the inner
+display. Xcode 27's simulators take touches and keys from `dtuhidd`, a daemon
+inside the simulator, which names the display each touch is for.
+`maestro-sim-touch.patch` sends taps, long presses, swipes, typing and erasing
+through `scripts/e2e/sim-touch.swift`, which talks to it, whenever a display
+other than the main one is lit. `scripts/e2e/e2e.sh` builds the helper and
+names it in `MAESTRO_IOS_SIM_TOUCH`; without it, or on the main display,
+Maestro sends its own events. The helper only types ASCII.
+
+`maestro-inner-display-tree.patch` keeps the whole app in the hierarchy on the open iPhone
+Duo, whose tree left out every element right of a width, such as learnX's tab column. UIKit
+gives the app's accessibility element the inner display's portrait size while the app runs in
+landscape: `launchApp` loads the libraries `MAESTRO_IOS_INSERT_LIBRARIES` names into the app on
+a simulator, and `scripts/e2e/e2e.sh` names `scripts/e2e/sim-ax-frame.m`, which gives the app
+element the size of the screen it is on. The tree also keeps the bounds the app had when the
+runner first read it, so `setFoldPosture` starts a new runner after moving the hinge.
+
+`maestro-fold-posture.patch` adds the
 `setFoldPosture` command from upstream PR mobile-dev-inc/Maestro#3621, so a
 flow can set the iPhone Duo's hinge:
 

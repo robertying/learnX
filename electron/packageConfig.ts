@@ -161,7 +161,12 @@ export const packageConfig = (options: PackageOptions = {}): Configuration => {
       // (desktopName above).
       syncDesktopName: true,
       desktop: {
-        entry: { Name: 'learnX', Comment: 'Tsinghua Web Learning' },
+        entry: {
+          Name: 'learnX',
+          Comment: 'Tsinghua Web Learning',
+          // Shown in the app grid; most people use the system in Chinese.
+          'Comment[zh_CN]': '清华大学网络学堂',
+        },
       },
     },
     // The AppImage's runtime: the static one (type2-runtime), which needs

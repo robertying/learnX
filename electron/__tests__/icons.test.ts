@@ -8,6 +8,7 @@ import {
   PNG_SIZE,
   decodePng,
   encodeIco,
+  flattenRim,
   icoEntries,
   icoImages,
   shapeSize,
@@ -104,4 +105,81 @@ it('reads back the .ico it writes', () => {
   });
   const written = [image(16), image(256)];
   expect(icoImages(encodeIco(written))).toEqual(written);
+});
+
+/** The mean of a pixel's red, green and blue. */
+const lightness = (image: Image, x: number, y: number) => {
+  const i = (y * image.width + x) * 4;
+  return (image.pixels[i] + image.pixels[i + 1] + image.pixels[i + 2]) / 3;
+};
+
+it('gives the rim along the top and bottom edges the color inside it', () => {
+  // A 100 px shape (rim 1.4 px, so 1 row), white at its top and bottom rows
+  // and gray inside, on a clear canvas with a soft edge.
+  const width = 100;
+  const pixels = Buffer.alloc(width * width * 4);
+  for (let y = 2; y < width - 2; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const i = (y * width + x) * 4;
+      const edge = y === 2 || y === width - 3;
+      pixels.fill(edge ? 255 : 100, i, i + 3);
+      pixels[i + 3] = edge ? 128 : 255;
+    }
+  }
+  const flat = flattenRim({ width, height: width, pixels });
+  expect(lightness(flat, 50, 2)).toBe(100);
+  expect(lightness(flat, 50, width - 3)).toBe(100);
+  // Alpha stays, so the antialiased edge does too; the clear canvas, the
+  // inside and the original are untouched.
+  expect(alphaAt(flat, 50, 2)).toBe(128);
+  expect(alphaAt(flat, 50, 0)).toBe(0);
+  expect(lightness(flat, 50, 50)).toBe(100);
+  expect(lightness({ width, height: width, pixels }, 50, 2)).toBe(255);
+});
+
+it('reaches further down a slanted edge, and leaves short columns', () => {
+  // A diamond: edges at 45 degrees, so its 2-row rim (140 px) takes 3 rows
+  // of a column. Its top 3 rows in each column are white.
+  const width = 140;
+  const middle = width / 2;
+  const pixels = Buffer.alloc(width * width * 4);
+  for (let y = 0; y < width; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const top = Math.abs(x - middle);
+      if (top + Math.abs(y - middle) <= middle) {
+        const i = (y * width + x) * 4;
+        pixels.fill(y - top < 3 ? 255 : 100, i, i + 3);
+        pixels[i + 3] = 255;
+      }
+    }
+  }
+  const flat = flattenRim({ width, height: width, pixels });
+  const x = middle - 40;
+  expect([40, 41, 42].map(y => lightness(flat, x, y))).toEqual([100, 100, 100]);
+  // The diamond's tips are too short a column for both bands.
+  expect(lightness(flat, 0, middle)).toBe(255);
+  // An empty image stays empty.
+  const clear = { width: 4, height: 4, pixels: Buffer.alloc(64) };
+  expect(flattenRim(clear)).toEqual(clear);
+});
+
+it('draws the committed icons without a light rim at the top and bottom', () => {
+  const ico = icoImages(fs.readFileSync(path.join(icons, 'icon.ico')));
+  const png = decodePng(fs.readFileSync(path.join(icons, 'icon.png')));
+  for (const image of [png, ...ico.filter(i => i.width >= 32)]) {
+    const x = Math.floor(image.width / 2);
+    const rows = Array.from({ length: image.height }, (_, y) => y).filter(
+      y => alphaAt(image, x, y) === 255,
+    );
+    const [top, bottom] = [rows[0], rows[rows.length - 1]];
+    const inset = Math.ceil(image.width * 0.05);
+    const rim = Math.max(
+      lightness(image, x, top) - lightness(image, x, top + inset),
+      lightness(image, x, bottom) - lightness(image, x, bottom - inset),
+    );
+    expect({ size: image.width, rimFree: rim < 25 }).toEqual({
+      size: image.width,
+      rimFree: true,
+    });
+  }
 });
