@@ -335,7 +335,9 @@ describe('what each state of the assignment shows', () => {
       }),
     );
     expect(screen.getByText('x = 2')).toBeTruthy();
-    expect(screen.getByText(/Submitted Thu, Oct 1, 2026 at 10:00/)).toBeTruthy();
+    expect(
+      screen.getByText(/Submitted Thu, Oct 1, 2026 at 10:00/),
+    ).toBeTruthy();
   });
 
   it('names an excellent homework by its title without an attachment', async () => {
