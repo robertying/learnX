@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { APP_ID, hashFolder, renames } from '../macDevApp.mjs';
+import { APP_ID, hashFolder, renames } from '../macDevApp.ts';
 
 describe('renames', () => {
   it('names the app, its executable and its helpers learnX', () => {
@@ -15,7 +15,7 @@ describe('renames', () => {
       CFBundleDisplayName: 'learnX',
       CFBundleExecutable: 'learnX',
       CFBundleIdentifier: APP_ID,
-      // No Dock icon until main.cjs says (E2E runs never get one).
+      // No Dock icon until main.ts says (E2E runs never get one).
       LSUIElement: '1',
     });
     expect(plan.helpers.map(helper => helper.to)).toEqual([

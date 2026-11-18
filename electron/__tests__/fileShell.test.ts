@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { createFiles } from '../files.cjs';
+import { createFiles } from '../files.ts';
 import fileTypes from '../../src/constants/electronFileTypes.json';
 import {
   DEFAULT_RUN_LABELS,
@@ -11,7 +11,7 @@ import {
   clearPicked,
   createFileShell,
   safeName,
-} from '../fileShell.cjs';
+} from '../fileShell.ts';
 
 let root: string;
 let elsewhere: string;

@@ -92,7 +92,7 @@ test('one Android path among others builds Android', () => {
 
 test.each([
   'src/screens/Today.tsx',
-  'electron/main.cjs',
+  'electron/main.ts',
   'modules/share/src/index.ts',
   'patches/react-native@0.88.1.patch',
   'package.json',

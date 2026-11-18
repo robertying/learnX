@@ -6,7 +6,7 @@ import {
   createServeApp,
   fromApp,
   webFileOf,
-} from '../appOrigin.cjs';
+} from '../appOrigin.ts';
 
 let webDir: string;
 let outside: string;

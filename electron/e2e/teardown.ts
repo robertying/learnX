@@ -9,7 +9,7 @@ export default function teardown() {
   if (process.platform === 'darwin') {
     spawnSync(
       process.execPath,
-      [path.join(__dirname, '..', 'clean.mjs'), '--keep-data'],
+      [path.join(import.meta.dirname, '..', 'clean.ts'), '--keep-data'],
       { stdio: 'inherit' },
     );
   }

@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { createFileStore } from '../fileStore.cjs';
-import { createSecrets } from '../secrets.cjs';
+import { createFileStore } from '../fileStore.ts';
+import { createSecrets } from '../secrets.ts';
 
 /**
  * safeStorage's asynchronous APIs, which tag a value with the key that

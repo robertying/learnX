@@ -1,6 +1,6 @@
 // Stand-ins in the app's main process for what Playwright can't click: native
-// dialogs, notifications, opening files and links, native menus, the tray,
-// the clipboard and Start at login. Each helper patches Electron's modules in
+// dialogs, notifications, opening files and links, native menus, the tray
+// and Start at login. Each helper patches Electron's modules in
 // the running app (electronApp.evaluate) and records what the app asked for,
 // for the test to read back. The fixtures install them before a test starts,
 // so nothing reaches the system.
@@ -14,7 +14,6 @@ export interface MainRecord {
   shownInFolder: string[];
   dialogs: { type: string; options: unknown }[];
   menus: { labels: string[] }[];
-  clipboard: string[];
   loginItems: unknown[];
   installs: number;
 }
@@ -29,7 +28,7 @@ export interface DialogAnswers {
   messageBox?: number;
 }
 
-/** A notification the app showed: on a dev run, logged instead (system.cjs). */
+/** A notification the app showed: on a dev run, logged instead (system.ts). */
 export interface ShownNotification {
   title?: string;
   subtitle?: string;
@@ -60,14 +59,14 @@ const exactly = (label: string) => ({
 export const mainProcess = (app: ElectronApplication) => ({
   /**
    * Installs every stand-in. Dialogs answer with `answers` (cancelled by
-   * default); notifications, opened paths and links, menus, the clipboard
-   * and Start at login are recorded instead of reaching the system. Call it
+   * default); notifications, opened paths and links, menus and Start at
+   * login are recorded instead of reaching the system. Call it
    * again to change the answers.
    */
   stub: (answers: DialogAnswers = {}) =>
     app.evaluate(
       (
-        { app: electronApp, clipboard, dialog, Menu, Notification, shell },
+        { app: electronApp, dialog, Menu, Notification, shell },
         given,
       ) => {
         const state = globalThis as unknown as State;
@@ -78,7 +77,6 @@ export const mainProcess = (app: ElectronApplication) => ({
           shownInFolder: [],
           dialogs: [],
           menus: [],
-          clipboard: [],
           loginItems: [],
           installs: 0,
         });
@@ -111,9 +109,6 @@ export const mainProcess = (app: ElectronApplication) => ({
         };
         shell.showItemInFolder = (target: string) => {
           record.shownInFolder.push(target);
-        };
-        clipboard.writeText = async (written: string) => {
-          record.clipboard.push(written);
         };
         // Start at login as Windows keeps it, in the data folder so a
         // relaunch reads it back: on only when read with the arguments it
@@ -212,7 +207,7 @@ export const mainProcess = (app: ElectronApplication) => ({
 
   /**
    * The notifications the app showed, oldest first: a dev run logs them
-   * instead of showing them (system.cjs). Dev runs only.
+   * instead of showing them (system.ts). Dev runs only.
    */
   shownNotifications: () =>
     app.evaluate(() =>
@@ -221,7 +216,7 @@ export const mainProcess = (app: ElectronApplication) => ({
       ),
     ),
 
-  /** What the updater logged (updater.cjs), oldest first. Dev runs only. */
+  /** What the updater logged (updater.ts), oldest first. Dev runs only. */
   updaterLog: () =>
     app.evaluate(() => [
       ...((globalThis as unknown as State).learnxUpdaterLog ?? []),
@@ -241,7 +236,7 @@ export const mainProcess = (app: ElectronApplication) => ({
 
   /**
    * Whether the app means its window to show: an E2E run shows it behind
-   * the others on Windows and Linux and never on a Mac (system.cjs,
+   * the others on Windows and Linux and never on a Mac (system.ts,
    * `present`), so this is what the app asked for, not the OS (window.e2e.ts
    * checks the OS on Windows and Linux).
    */
@@ -279,10 +274,10 @@ export const mainProcess = (app: ElectronApplication) => ({
   stubInstall: () =>
     app.evaluate(({ app: electronApp }) => {
       const state = globalThis as unknown as Required<State>;
-      // The copy main.cjs loaded: required from the app's own folder.
+      // The copy main.ts loaded: required from the app's own folder.
       const { createRequire } = process.getBuiltinModule('node:module');
       const { autoUpdater } = createRequire(
-        `${electronApp.getAppPath()}/main.cjs`,
+        `${electronApp.getAppPath()}/main.ts`,
       )('electron-updater') as {
         autoUpdater: {
           quitAndInstall: () => void;
@@ -292,7 +287,7 @@ export const mainProcess = (app: ElectronApplication) => ({
       autoUpdater.quitAndInstall = () => {
         state.learnxE2E.installs += 1;
       };
-      // Nor when the test closes the app (updater.cjs turns it on).
+      // Nor when the test closes the app (updater.ts turns it on).
       autoUpdater.autoInstallOnAppQuit = false;
     }),
 });

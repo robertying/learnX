@@ -17,7 +17,7 @@ const load = (scripts: unknown) => {
     addEventListener: page.addEventListener.bind(page),
   });
   jest.isolateModules(() => {
-    require('../webviewPreload.cjs');
+    require('../webviewPreload.cts');
   });
   return page;
 };

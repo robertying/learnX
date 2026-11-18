@@ -6,7 +6,7 @@ import {
   hardenWebview,
   webviewAllowedUrl,
   webviewPermission,
-} from '../webviews.cjs';
+} from '../webviews.ts';
 
 describe('webviewAllowedUrl', () => {
   it.each([

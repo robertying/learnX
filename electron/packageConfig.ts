@@ -1,25 +1,49 @@
-// electron-builder's config for Windows and Linux, which package.mjs
+// electron-builder's config for Windows and Linux, which package.ts
 // (`pnpm electron:package`) passes it after exporting the web build. Not
 // named electron-builder.config.*, which electron-builder would also load
 // itself. Builds are unsigned, and never for macOS, which has the Mac
 // Catalyst app. Installers go to build/electron/dist.
-const path = require('node:path');
-const updateMirror = require('../src/constants/updateMirror.json');
-const { readBuildInfo } = require('./buildInfo.cjs');
-const { SHARED_FILES } = require('./shared.cjs');
-const { isPlaceholderKey } = require('./updateSignature.cjs');
+import fs from 'node:fs';
+import path from 'node:path';
+import type { Configuration } from 'electron-builder';
+import updateMirror from '../src/constants/updateMirror.json' with { type: 'json' };
+import { readBuildInfo } from './buildInfo.ts';
+import { PRELOADS } from './preloads.ts';
+import { SHARED_FILES } from './shared.ts';
+import { isPlaceholderKey } from './updateSignature.ts';
 
-const { version, build } = readBuildInfo(path.join(__dirname, '..'));
+const electronDir = import.meta.dirname;
+const { version, build } = readBuildInfo(path.join(electronDir, '..'));
+
+/**
+ * The main process's files: main.ts and what it imports, file by file. Only
+ * these are packaged, so the dev runner, the packaging scripts and the tests
+ * next to them stay out.
+ */
+export const mainProcessFiles = (entry = 'main.ts'): string[] => {
+  const found = new Set<string>();
+  const visit = (name: string) => {
+    if (found.has(name)) {
+      return;
+    }
+    found.add(name);
+    const source = fs.readFileSync(path.join(electronDir, name), 'utf8');
+    for (const [, imported] of source.matchAll(/\bfrom '\.\/([\w.-]+\.ts)'/g)) {
+      visit(imported);
+    }
+  };
+  visit(entry);
+  return [...found].sort();
+};
 
 /**
  * The config for a version and build number (the checkout's unless a test
- * build sets them, package.mjs), and `updateUrl`, a test server standing in
- * for the mirror (updateServer.mjs).
- *
- * @param {{ version?: string; build?: string; updateUrl?: string }} [options]
- * @returns {import('electron-builder').Configuration}
+ * build sets them, package.ts), and `updateUrl`, a test server standing in
+ * for the mirror (updateServer.ts).
  */
-const config = (options = {}) => {
+export const packageConfig = (
+  options: { version?: string; build?: string; updateUrl?: string } = {},
+): Configuration => {
   const appVersion = options.version ?? version;
   const buildNumber = options.build ?? build;
   const updateUrl = options.updateUrl ?? `${updateMirror.latestRelease}/`;
@@ -28,14 +52,14 @@ const config = (options = {}) => {
     productName: 'learnX',
     copyright: `Copyright © ${new Date().getFullYear()} Rui Ying`,
     // Written into the packaged app's package.json: the version and the build
-    // number (main.cjs, Settings › About). The
+    // number (main.ts, Settings › About). The
     // description is what Windows shows as the file's (Task Manager), with the
     // author as its company.
     extraMetadata: {
       version: appVersion,
       buildNumber,
       // Where updates come from, as app-update.yml has it (`publish`), for
-      // the provider that checks their signature (updater.cjs).
+      // the provider that checks their signature (updater.ts).
       updateUrl,
       description: 'learnX',
       // Linux: Electron names the window after it (Wayland's app_id, X11's
@@ -50,18 +74,27 @@ const config = (options = {}) => {
     directories: { output: '../build/electron/dist', buildResources: 'icons' },
     // Electron's downloads for each platform, kept with the dev runner's.
     electronDownload: {
-      cache: path.join(__dirname, '..', 'build', 'electron', 'cache'),
+      cache: path.join(electronDir, '..', 'build', 'electron', 'cache'),
     },
     files: [
-      '*.cjs',
-      '!packageConfig.cjs',
-      '!electronApp.cjs',
+      // Run as TypeScript: Electron's Node strips the types as it loads them.
+      ...mainProcessFiles(),
       'icons/icon.png',
       'icons/icon.ico',
       { from: '../build/electron/web', to: 'web' },
-      // What the main process shares with the page (shared.cjs).
-      { from: '../src/constants', to: 'constants', filter: SHARED_FILES },
-      // The key update files are signed with (updateSignature.cjs).
+      // The preloads, stripped of their types (preloads.ts, package.ts).
+      {
+        from: '../build/electron/preloads',
+        to: '.',
+        filter: PRELOADS.map(({ output }) => output),
+      },
+      // What the main process shares with the page (shared.ts).
+      {
+        from: '../src/constants',
+        to: 'constants',
+        filter: [...SHARED_FILES],
+      },
+      // The key update files are signed with (updateSignature.ts).
       { from: '../certs', to: '.', filter: ['electron-public-key.pem'] },
     ],
     // Where the packaged app finds updates (app-update.yml): the TUNA
@@ -130,8 +163,8 @@ const config = (options = {}) => {
   };
 };
 
-/** Whether `url` is an update server on this computer (updateServer.mjs). */
-const isLocalUrl = (/** @type {string | undefined} */ url) => {
+/** Whether `url` is an update server on this computer (updateServer.ts). */
+const isLocalUrl = (url: string | undefined) => {
   try {
     return ['localhost', '127.0.0.1'].includes(new URL(url ?? '').hostname);
   } catch {
@@ -146,17 +179,15 @@ const isLocalUrl = (/** @type {string | undefined} */ url) => {
  * build (`--dir`), a test build for an update server on this computer
  * (`--update-url` on localhost or 127.0.0.1: any other could pass for a
  * release) and a build that says so (`--allow-placeholder-key`) may go ahead.
- *
- * @param {{ dir?: boolean; updateUrl?: string; allowPlaceholderKey?: boolean }} options
- * @param {string | Buffer} publicKey the committed key
- * @returns {string | null}
+ * @param publicKey the committed key
  */
-const placeholderKeyProblem = (options, publicKey) =>
+export const placeholderKeyProblem = (
+  options: { dir?: boolean; updateUrl?: string; allowPlaceholderKey?: boolean },
+  publicKey: string | Buffer,
+): string | null =>
   isPlaceholderKey(publicKey) &&
   !options.dir &&
   !isLocalUrl(options.updateUrl) &&
   !options.allowPlaceholderKey
     ? 'certs/electron-public-key.pem is a placeholder, so these installs could never update: commit the update key\'s public half (electron/AGENTS.md, "Signing updates"), or pass --allow-placeholder-key for a build that will never be released'
     : null;
-
-module.exports = { packageConfig: config, placeholderKeyProblem };

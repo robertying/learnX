@@ -2,7 +2,7 @@ import { bridge } from 'web/bridge';
 
 /**
  * Stands in for expo-sqlite's kv-store in the Electron app: each database is
- * a folder of files in the app's data folder (electron/fileStore.cjs). It's
+ * a folder of files in the app's data folder (electron/fileStore.ts). It's
  * read once, synchronously, when first used, and kept in memory; writes go to
  * the main process in order without waiting, so the sync calls stay sync.
  */

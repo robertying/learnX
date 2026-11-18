@@ -3,8 +3,8 @@
 // switch runs, as on Android. Its Calendar page only exports an .ics file
 // (calendarExport.e2e.ts) and it has no Swipe Actions; Start at Login is its
 // own, and never reaches the system here (mainProcess.ts).
-import { expect, test } from './fixtures';
-import { text } from './maestroEnv';
+import { expect, test } from './fixtures.ts';
+import { text } from './maestroEnv.ts';
 import {
   backToSettings,
   byId,
@@ -13,7 +13,7 @@ import {
   shown,
   toggle,
   toggleOf,
-} from './steps';
+} from './steps.ts';
 
 test('changes every setting', async ({ window, login }) => {
   await login();

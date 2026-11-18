@@ -1,9 +1,9 @@
 // .maestro/10-errors.yaml: failures, each after a mock login and a relaunch
 // with the failure's launch option (services/launchOptions.ts), as the flow's
 // `launchApp` does. No results is in search.e2e.ts.
-import { expect, packagedApp, test } from './fixtures';
-import { exact, text } from './maestroEnv';
-import { byId, openCard, openTab, shown } from './steps';
+import { expect, packagedApp, test } from './fixtures.ts';
+import { exact, text } from './maestroEnv.ts';
+import { byId, openCard, openTab, shown } from './steps.ts';
 
 test.skip(!!packagedApp, 'a packaged app takes no launch options');
 

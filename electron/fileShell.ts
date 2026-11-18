@@ -3,36 +3,40 @@
 // its default app, showing it in the file manager, saving a copy where the
 // user picks (Save As), picking a folder for an export, picking files to
 // submit, and serving a download to the file preview (`app://files/`).
-const fs = require('node:fs');
-const path = require('node:path');
-const { pathToFileURL } = require('node:url');
-const { readShared } = require('./shared.cjs');
+import fs from 'node:fs';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { readShared } from './shared.ts';
 
 const fileTypes = readShared('electronFileTypes.json');
 
 /** Where picked files are copied, under the cache folder. */
-const PICKED_DIR = 'picked';
+export const PICKED_DIR = 'picked';
 
 /**
  * What the file preview may show (`app://files/`), by extension: PDFs in
  * Chromium's viewer, and images. Anything else (a page, a script, an SVG
  * that could run one) is refused. The page reads the same list.
  */
-const PREVIEW_TYPES = /** @type {Record<string, string>} */ (fileTypes.preview);
+export const PREVIEW_TYPES: Record<string, string> = fileTypes.preview;
 
 /**
  * What opening in its default app would run as a program (an .exe, a
  * script, a shortcut, a Linux .desktop file): asked about first.
  */
-const RUNNABLE_TYPES = new Set(fileTypes.runnable);
+export const RUNNABLE_TYPES = new Set(fileTypes.runnable);
 
 /**
  * The confirmation before opening a file that would run, in the page's
  * language (`shell:open`); English until it sends its own.
- * @typedef {{ message: string; detail: string; open: string; cancel: string }} RunLabels
  */
-/** @type {RunLabels} */
-const DEFAULT_RUN_LABELS = {
+type RunLabels = {
+  message: string;
+  detail: string;
+  open: string;
+  cancel: string;
+};
+export const DEFAULT_RUN_LABELS: RunLabels = {
   message: 'Open “{name}”?',
   detail:
     'This file can run programs on your computer. Open it only if you trust it.',
@@ -41,12 +45,10 @@ const DEFAULT_RUN_LABELS = {
 };
 
 /** The labels the page sent, where they're text, over the defaults. */
-const runLabelsOf = (/** @type {unknown} */ given) => {
+const runLabelsOf = (given: unknown): RunLabels => {
   const labels = { ...DEFAULT_RUN_LABELS };
-  for (const key of /** @type {(keyof RunLabels)[]} */ (
-    Object.keys(DEFAULT_RUN_LABELS)
-  )) {
-    const value = /** @type {Record<string, unknown> | null} */ (given)?.[key];
+  for (const key of Object.keys(DEFAULT_RUN_LABELS) as (keyof RunLabels)[]) {
+    const value = (given as Record<string, unknown> | null)?.[key];
     if (typeof value === 'string' && value) {
       labels[key] = value;
     }
@@ -55,7 +57,7 @@ const runLabelsOf = (/** @type {unknown} */ given) => {
 };
 
 /** Types a picked file is reported as, by extension; others are generic. */
-const PICKED_TYPES = /** @type {Record<string, string>} */ ({
+const PICKED_TYPES: Record<string, string> = {
   ...PREVIEW_TYPES,
   txt: 'text/plain',
   zip: 'application/zip',
@@ -68,29 +70,45 @@ const PICKED_TYPES = /** @type {Record<string, string>} */ ({
   mp4: 'video/mp4',
   mov: 'video/quicktime',
   heic: 'image/heic',
-});
+};
 
-const extensionOf = (/** @type {string} */ name) =>
-  path.extname(name).slice(1).toLowerCase();
+const extensionOf = (name: string) => path.extname(name).slice(1).toLowerCase();
 
 /** A name for a file the user saves: no folders, nothing the system forbids. */
-const safeName = (/** @type {unknown} */ name) => {
-  const base = path.basename(String(name ?? '')).replace(/[\\/:*?"<>|]/g, '_');
+export const safeName = (name: unknown): string => {
+  const base = path
+    .basename(typeof name === 'string' ? name : '')
+    .replace(/[\\/:*?"<>|]/g, '_');
   return base.trim() || 'learnX';
 };
 
-/**
- * @typedef {object} FileShellDeps
- * @property {Pick<Electron.Dialog, 'showOpenDialog' | 'showSaveDialog' | 'showMessageBox'>} dialog
- * @property {Pick<Electron.Shell, 'openPath' | 'showItemInFolder'>} shell
- * @property {{ grant: (dir: string) => string, localPath: (uri: string) => string, roots: () => { cache: string, document: string } }} files
- * @property {string} cacheDir the cache folder's path
- * @property {() => string} [defaultDir] where save dialogs start
- * @property {() => string} [uniqueId]
- */
+/** A file picked to submit, copied into the cache. */
+export type PickedFile = {
+  uri: string;
+  name: string;
+  size: number;
+  mimeType: string | null;
+};
 
-/** @param {FileShellDeps} deps */
-const createFileShell = ({
+export type FileShellDeps = {
+  dialog: Pick<
+    Electron.Dialog,
+    'showOpenDialog' | 'showSaveDialog' | 'showMessageBox'
+  >;
+  shell: Pick<Electron.Shell, 'openPath' | 'showItemInFolder'>;
+  files: {
+    grant: (dir: string) => string;
+    localPath: (uri: string) => string;
+    roots: () => { cache: string; document: string };
+  };
+  /** The cache folder's path. */
+  cacheDir: string;
+  /** Where save dialogs start. */
+  defaultDir?: () => string;
+  uniqueId?: () => string;
+};
+
+export const createFileShell = ({
   dialog,
   shell,
   files,
@@ -98,25 +116,23 @@ const createFileShell = ({
   defaultDir = () => '',
   uniqueId = () =>
     `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`,
-}) => {
+}: FileShellDeps) => {
   /**
    * The path of one of learnX's own files; throws for a folder or anything
    * outside its folders.
-   * @param {unknown} uri
    */
-  const ownFile = uri => {
-    const file = files.localPath(/** @type {string} */ (uri));
+  const ownFile = (uri: unknown) => {
+    const file = files.localPath(uri as string);
     if (!fs.statSync(file).isFile()) {
       throw new Error('Not a file');
     }
     return file;
   };
 
-  /**
-   * @param {Electron.BrowserWindow | null} win
-   * @param {Electron.SaveDialogOptions} options
-   */
-  const askWhereToSave = async (win, options) => {
+  const askWhereToSave = async (
+    win: Electron.BrowserWindow | null,
+    options: Electron.SaveDialogOptions,
+  ) => {
     const result = win
       ? await dialog.showSaveDialog(win, options)
       : await dialog.showSaveDialog(options);
@@ -130,16 +146,17 @@ const createFileShell = ({
      * the system's (Cancel first), which the page can't answer for them;
      * Windows also knows it came from the internet (`markDownloaded`).
      * Resolves to an error message, or '' when it opened or was cancelled.
-     * @param {Electron.BrowserWindow | null} win
-     * @param {unknown} uri
-     * @param {unknown} [labels] the dialog's text, `{name}` the file's
+     * @param labels the dialog's text, `{name}` the file's
      */
-    open: async (win, uri, labels) => {
+    open: async (
+      win: Electron.BrowserWindow | null,
+      uri: unknown,
+      labels?: unknown,
+    ): Promise<string> => {
       const file = ownFile(uri);
       if (RUNNABLE_TYPES.has(extensionOf(file))) {
         const text = runLabelsOf(labels);
-        /** @type {Electron.MessageBoxOptions} */
-        const options = {
+        const options: Electron.MessageBoxOptions = {
           type: 'warning',
           message: text.message.replace('{name}', path.basename(file)),
           detail: text.detail,
@@ -158,19 +175,19 @@ const createFileShell = ({
       return shell.openPath(file);
     },
 
-    /** @param {unknown} uri */
-    showInFolder: uri => {
+    showInFolder: (uri: unknown) => {
       shell.showItemInFolder(ownFile(uri));
     },
 
     /**
      * Asks where to save a copy of a download, named `name`, and copies it
      * there. Resolves to the path saved to, or null when cancelled.
-     * @param {Electron.BrowserWindow | null} win
-     * @param {unknown} uri
-     * @param {unknown} name
      */
-    saveAs: async (win, uri, name) => {
+    saveAs: async (
+      win: Electron.BrowserWindow | null,
+      uri: unknown,
+      name: unknown,
+    ): Promise<string | null> => {
       const source = ownFile(uri);
       const fileName = safeName(name);
       const target = await askWhereToSave(win, {
@@ -186,11 +203,12 @@ const createFileShell = ({
     /**
      * Asks where to save text (an exported calendar) named `name`, and
      * writes it there. Resolves to the path, or null when cancelled.
-     * @param {Electron.BrowserWindow | null} win
-     * @param {unknown} name
-     * @param {unknown} content
      */
-    saveText: async (win, name, content) => {
+    saveText: async (
+      win: Electron.BrowserWindow | null,
+      name: unknown,
+      content: unknown,
+    ): Promise<string | null> => {
       const fileName = safeName(name);
       const extension = extensionOf(fileName);
       const target = await askWhereToSave(win, {
@@ -209,13 +227,14 @@ const createFileShell = ({
     /**
      * Asks for a folder (an export's destination) and lets the page write
      * in it. Resolves to its URI, or null when cancelled.
-     * @param {Electron.BrowserWindow | null} win
-     * @param {string} [title] the dialog's title, in the app's language
-     *   (GTK's own says "Open File")
+     * @param title the dialog's title, in the app's language (GTK's own says
+     *   "Open File")
      */
-    pickDirectory: async (win, title) => {
-      /** @type {Electron.OpenDialogOptions} */
-      const options = {
+    pickDirectory: async (
+      win: Electron.BrowserWindow | null,
+      title?: string,
+    ): Promise<string | null> => {
+      const options: Electron.OpenDialogOptions = {
         ...(title ? { title } : {}),
         properties: ['openDirectory', 'createDirectory'],
       };
@@ -231,12 +250,15 @@ const createFileShell = ({
      * and copies each into the cache, as expo-document-picker's
      * `copyToCacheDirectory` does. Resolves to the copies, or null when
      * cancelled.
-     * @param {Electron.BrowserWindow | null} win
-     * @param {{ images?: boolean, multiple?: boolean }} [options]
      */
-    pickFiles: async (win, { images = false, multiple = false } = {}) => {
-      /** @type {Electron.OpenDialogOptions} */
-      const options = {
+    pickFiles: async (
+      win: Electron.BrowserWindow | null,
+      {
+        images = false,
+        multiple = false,
+      }: { images?: boolean; multiple?: boolean } = {},
+    ): Promise<PickedFile[] | null> => {
+      const options: Electron.OpenDialogOptions = {
         properties: multiple ? ['openFile', 'multiSelections'] : ['openFile'],
         filters: images
           ? [
@@ -286,13 +308,14 @@ const createFileShell = ({
      * `app://files/<cache|document>/<path>`, PDFs and images only, on an
      * origin of its own so a file never reaches the app's page or its
      * bridge.
-     * @param {Request} request
-     * @param {(url: string) => Promise<Response>} fetchFile
      */
-    servePreview: async (request, fetchFile) => {
+    servePreview: async (
+      request: Request,
+      fetchFile: (url: string) => Promise<Response>,
+    ): Promise<Response> => {
       const { pathname } = new URL(request.url);
       const [, root, ...rest] = pathname.split('/');
-      const roots = /** @type {Record<string, string>} */ (files.roots());
+      const roots = files.roots();
       const rootUri =
         root === 'cache' || root === 'document' ? roots[root] : '';
       try {
@@ -325,18 +348,9 @@ const createFileShell = ({
  * each copy is only needed until its submission draft keeps its own
  * (data/submissionDrafts), and the desktop has no system that clears caches
  * as the phones' do.
- * @param {string} cacheDir
  */
-const clearPicked = cacheDir => {
+export const clearPicked = (cacheDir: string): void => {
   fs.rmSync(path.join(cacheDir, PICKED_DIR), { recursive: true, force: true });
 };
 
-module.exports = {
-  clearPicked,
-  createFileShell,
-  DEFAULT_RUN_LABELS,
-  PICKED_DIR,
-  PREVIEW_TYPES,
-  RUNNABLE_TYPES,
-  safeName,
-};
+export type FileShell = ReturnType<typeof createFileShell>;

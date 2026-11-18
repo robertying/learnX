@@ -21,11 +21,11 @@ import {
   test as base,
 } from '@playwright/test';
 import { parse } from 'dotenv';
-import { electronExecutable, outDir } from '../electronApp.cjs';
-import { text } from './maestroEnv';
-import { mainProcess, type MainProcess } from './mainProcess';
+import { electronExecutable, outDir } from '../electronApp.ts';
+import { text } from './maestroEnv.ts';
+import { mainProcess, type MainProcess } from './mainProcess.ts';
 
-const electronDir = path.join(__dirname, '..');
+const electronDir = path.join(import.meta.dirname, '..');
 const root = path.join(electronDir, '..');
 
 /** The packaged app under test, if any (LEARNX_E2E_APP). */
@@ -157,19 +157,19 @@ const launchApp = async (
       ...(xDisplay ? { DISPLAY: xDisplay } : {}),
       LEARNX_DATA_DIR: dataDir,
       // Never in front: no Dock icon on a Mac, and the window never focused,
-      // shown behind the others on Windows and Linux (electron/main.cjs,
-      // system.cjs).
+      // shown behind the others on Windows and Linux (electron/main.ts,
+      // system.ts).
       LEARNX_E2E: '1',
       LEARNX_WEB_DIR: path.join(outDir, 'web'),
       LEARNX_LAUNCH_OPTIONS: JSON.stringify(launchOptions),
-      // No update checks while testing (updater.cjs), unless a test serves
+      // No update checks while testing (updater.ts), unless a test serves
       // one (LEARNX_UPDATE_URL).
       ...(env.LEARNX_UPDATE_URL ? {} : { LEARNX_NO_UPDATES: '1' }),
       ...env,
     },
   });
   // Nothing reaches the system from here on: dialogs, notifications, the
-  // shell, menus and the clipboard are stand-ins.
+  // shell and menus are stand-ins.
   const main = mainProcess(app);
   await main.stub();
   return { app, window: await app.firstWindow(), main };

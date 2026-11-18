@@ -2,10 +2,10 @@
 // Makes the Electron app's icons from the app's Icon Composer source
 // (ios/learnX/AppIcon.icon): icon.ico for Windows and icon.png (512) for
 // Linux, from which electron-builder makes the hicolor sizes; the window and
-// the tray use them too (main.cjs, system.cjs). The outputs are committed:
+// the tray use them too (main.ts, system.ts). The outputs are committed:
 // only a Mac with Xcode can make them.
 //
-//   node electron/icons/generate.mjs
+//   node electron/icons/generate.ts
 //
 // Each size is exported on its own by Xcode's Icon Composer CLI (`ictool`)
 // as macOS draws the icon: the squircle with its Liquid Glass shading, edge
@@ -29,12 +29,14 @@ export const PNG_SIZE = 512;
 /** How much of the canvas the shape takes. */
 export const SHAPE_FRACTION = 0.92;
 
+/** An 8-bit RGBA image, its rows top to bottom. */
+type Image = { width: number; height: number; pixels: Buffer };
+
 /**
  * The shape's size on a canvas of `size`: about 92%, in whole pixels, with
  * the margin even so it sits exactly in the middle.
- * @param {number} size
  */
-export const shapeSize = size => {
+export const shapeSize = (size: number): number => {
   const ideal = size * SHAPE_FRACTION;
   const below = Math.floor(ideal);
   const candidates = [below - 1, below, below + 1, below + 2].filter(
@@ -47,20 +49,14 @@ export const shapeSize = size => {
 
 const PNG_SIGNATURE = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
 
-/**
- * The pixels of an 8-bit RGBA, non-interlaced PNG, as ictool writes them.
- * @param {Buffer} png
- * @returns {{ width: number; height: number; pixels: Buffer }} RGBA rows
- */
-export const decodePng = png => {
+/** The pixels of an 8-bit RGBA, non-interlaced PNG, as ictool writes them. */
+export const decodePng = (png: Buffer): Image => {
   if (!png.subarray(0, 8).equals(PNG_SIGNATURE)) {
     throw new Error('Not a PNG');
   }
   let offset = 8;
-  /** @type {Buffer | undefined} */
-  let header;
-  /** @type {Buffer[]} */
-  const data = [];
+  let header: Buffer | undefined;
+  const data: Buffer[] = [];
   while (offset < png.length) {
     const length = png.readUInt32BE(offset);
     const type = png.toString('ascii', offset + 4, offset + 8);
@@ -106,7 +102,7 @@ export const decodePng = png => {
   return { width, height, pixels };
 };
 
-const chunk = (/** @type {string} */ type, /** @type {Buffer} */ data) => {
+const chunk = (type: string, data: Buffer) => {
   const length = Buffer.alloc(4);
   length.writeUInt32BE(data.length);
   const body = Buffer.concat([Buffer.from(type, 'ascii'), data]);
@@ -115,11 +111,8 @@ const chunk = (/** @type {string} */ type, /** @type {Buffer} */ data) => {
   return Buffer.concat([length, body, crc]);
 };
 
-/**
- * An 8-bit RGBA PNG of `pixels`.
- * @param {{ width: number; height: number; pixels: Buffer }} image
- */
-export const encodePng = ({ width, height, pixels }) => {
+/** An 8-bit RGBA PNG of `pixels`. */
+export const encodePng = ({ width, height, pixels }: Image): Buffer => {
   const header = Buffer.alloc(13);
   header.writeUInt32BE(width, 0);
   header.writeUInt32BE(height, 4);
@@ -169,12 +162,8 @@ export const encodePng = ({ width, height, pixels }) => {
   ]);
 };
 
-/**
- * `shape` centered on a transparent square canvas of `size`.
- * @param {{ width: number; height: number; pixels: Buffer }} shape
- * @param {number} size
- */
-export const centerOn = (shape, size) => {
+/** `shape` centered on a transparent square canvas of `size`. */
+export const centerOn = (shape: Image, size: number): Image => {
   const pixels = Buffer.alloc(size * size * 4);
   const left = (size - shape.width) / 2;
   const top = (size - shape.height) / 2;
@@ -192,9 +181,8 @@ export const centerOn = (shape, size) => {
 /**
  * A 32-bit bitmap as an .ico stores one: the header with twice the height,
  * bottom-up BGRA rows, then an all-clear AND mask (alpha does the work).
- * @param {{ width: number; height: number; pixels: Buffer }} image
  */
-const icoBitmap = ({ width, height, pixels }) => {
+const icoBitmap = ({ width, height, pixels }: Image) => {
   const header = Buffer.alloc(40);
   header.writeUInt32LE(40, 0);
   header.writeInt32LE(width, 4);
@@ -216,11 +204,8 @@ const icoBitmap = ({ width, height, pixels }) => {
   return Buffer.concat([header, colors, Buffer.alloc(maskStride * height)]);
 };
 
-/**
- * An .ico of square images, the 256 as a PNG and the rest as bitmaps.
- * @param {{ width: number; height: number; pixels: Buffer }[]} images
- */
-export const encodeIco = images => {
+/** An .ico of square images, the 256 as a PNG and the rest as bitmaps. */
+export const encodeIco = (images: Image[]): Buffer => {
   const entries = images.map(image =>
     image.width >= 256 ? encodePng(image) : icoBitmap(image),
   );
@@ -242,11 +227,8 @@ export const encodeIco = images => {
   return Buffer.concat([header, ...directory, ...entries]);
 };
 
-/**
- * The sizes and kinds an .ico holds, by its directory.
- * @param {Buffer} ico
- */
-export const icoEntries = ico => {
+/** The sizes and kinds an .ico holds, by its directory. */
+export const icoEntries = (ico: Buffer): { size: number; png: boolean }[] => {
   const count = ico.readUInt16LE(4);
   return Array.from({ length: count }, (_, index) => {
     const entry = ico.subarray(6 + index * 16, 6 + (index + 1) * 16);
@@ -258,11 +240,8 @@ export const icoEntries = ico => {
   });
 };
 
-/**
- * The images an .ico holds, as RGBA, from its PNGs and 32-bit bitmaps.
- * @param {Buffer} ico
- */
-export const icoImages = ico =>
+/** The images an .ico holds, as RGBA, from its PNGs and 32-bit bitmaps. */
+export const icoImages = (ico: Buffer): Image[] =>
   Array.from({ length: ico.readUInt16LE(4) }, (_, index) => {
     const entry = ico.subarray(6 + index * 16, 6 + (index + 1) * 16);
     const data = ico.subarray(
@@ -328,7 +307,7 @@ const main = () => {
   }
   const work = fs.mkdtempSync(path.join(os.tmpdir(), 'learnx-icons-'));
   /** The icon at `size`, its shape exported at that size and centered. */
-  const render = (/** @type {number} */ size) => {
+  const render = (size: number) => {
     const shape = shapeSize(size);
     const file = path.join(work, `${shape}.png`);
     const srgb = path.join(work, `${shape}-srgb.png`);
@@ -366,7 +345,6 @@ const main = () => {
   }
 };
 
-// Run as a script (Jest's transform leaves `import.meta` out).
-if (process.argv[1]?.endsWith(`${path.sep}generate.mjs`)) {
+if (import.meta.main) {
   main();
 }

@@ -1,8 +1,8 @@
 // .maestro/06-search.yaml: searches, switches the result tabs, leaves out
 // archived items with the filter menu and opens a result.
-import { expect, test } from './fixtures';
-import { exact, maestroEnv, text } from './maestroEnv';
-import { byId, card, openTab, search, shown } from './steps';
+import { expect, test } from './fixtures.ts';
+import { exact, maestroEnv, text } from './maestroEnv.ts';
+import { byId, card, openTab, search, shown } from './steps.ts';
 
 test('searches and opens a result', async ({ window, login }) => {
   await login();

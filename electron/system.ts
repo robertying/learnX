@@ -1,31 +1,30 @@
 // learnX around its window on Windows and Linux: the tray icon, closing to the tray,
-// the background sync's timer, notifications (notifications.cjs), files
-// opened, saved and picked (fileShell.cjs), Start at login and the Windows
-// Jump List. main.cjs sets it up; the page reaches it through preload.cjs.
+// the background sync's timer, notifications (notifications.ts), files
+// opened, saved and picked (fileShell.ts), Start at login and the Windows
+// Jump List. main.ts sets it up; the page reaches it through preload.cts.
 //
 // Nothing is registered with the system unless the user asks: Start at login
 // is written only when its switch in Settings changes, and never from a dev
 // run unless LEARNX_ALLOW_LOGIN_ITEM=1.
-const { clearPicked, createFileShell } = require('./fileShell.cjs');
-const { createNotifier } = require('./notifications.cjs');
+import { clearPicked, createFileShell } from './fileShell.ts';
+import type { FileShellDeps } from './fileShell.ts';
+import { createNotifier } from './notifications.ts';
+import type { NotifierDeps, ShownNotification } from './notifications.ts';
 
 /** How often the background sync runs while learnX is open, as on the phone. */
-const SYNC_INTERVAL_MS = 15 * 60 * 1000;
+export const SYNC_INTERVAL_MS = 15 * 60 * 1000;
 
 /** The argument a Jump List task (or a second launch) opens a screen with. */
-const OPEN_ARG = '--learnx-open=';
+export const OPEN_ARG = '--learnx-open=';
 
 /** What a Jump List task may open. */
 const OPEN_TARGETS = new Set(['today', 'schedule']);
 
 /** The argument Start at login launches with on Windows: start in the tray. */
-const HIDDEN_ARG = '--hidden';
+export const HIDDEN_ARG = '--hidden';
 
-/**
- * The screen a launch's arguments ask for, if any.
- * @param {readonly string[]} argv
- */
-const openTargetOf = argv => {
+/** The screen a launch's arguments ask for, if any. */
+export const openTargetOf = (argv: readonly string[]): string | null => {
   const arg = argv.find(a => a.startsWith(OPEN_ARG));
   const target = arg?.slice(OPEN_ARG.length);
   return target && OPEN_TARGETS.has(target) ? target : null;
@@ -35,7 +34,7 @@ const openTargetOf = argv => {
  * The tray's, the Jump List's and the export folder picker's labels, in
  * English until the page sends them in the app's language.
  */
-const DEFAULT_LABELS = {
+export const DEFAULT_LABELS = {
   open: 'Open learnX',
   checkForNewItems: 'Check for New Items',
   quit: 'Quit learnX',
@@ -47,34 +46,32 @@ const DEFAULT_LABELS = {
 /**
  * Whether Start at login is offered: Electron sets it on Windows and macOS,
  * not on Linux.
- * @param {string} platform
  */
-const loginItemSupported = platform =>
+export const loginItemSupported = (platform: string): boolean =>
   platform === 'win32' || platform === 'darwin';
 
 /**
  * The login item's options, the same for reading and writing it: on Windows
  * it's the Run key's command line, which only reads back as on when the
  * arguments match.
- * @param {string} platform
  */
-const loginItemOptions = platform =>
+export const loginItemOptions = (platform: string): { args?: string[] } =>
   platform === 'win32' ? { args: [HIDDEN_ARG] } : {};
 
 /**
  * Whether closing the window keeps learnX running (in the tray on Windows,
  * the Dock on macOS); on Linux it quits.
- * @param {string} platform
  */
-const closesToTray = platform => platform !== 'linux';
+export const closesToTray = (platform: string): boolean => platform !== 'linux';
 
 /**
  * Claims the single instance before the app is ready: a second launch (a
  * Jump List task, or opening learnX again) quits and hands its arguments to
  * this one. Returns false in the second launch.
- * @param {Pick<Electron.App, 'requestSingleInstanceLock' | 'quit'>} app
  */
-const claimSingleInstance = app => {
+export const claimSingleInstance = (
+  app: Pick<Electron.App, 'requestSingleInstanceLock' | 'quit'>,
+): boolean => {
   if (app.requestSingleInstanceLock()) {
     return true;
   }
@@ -82,25 +79,36 @@ const claimSingleInstance = app => {
   return false;
 };
 
-/**
- * @typedef {object} SystemDeps
- * @property {typeof import('electron')} electron
- * @property {(event: Electron.IpcMainEvent | Electron.IpcMainInvokeEvent) => void} fromApp
- *   throws for IPC from anywhere but the app's window
- * @property {import('./fileShell.cjs').FileShellDeps['files']} files
- * @property {string} cacheDir
- * @property {string} iconFile
- * @property {boolean} dev
- * @property {boolean} [background] an E2E run: never focus a window or
- *   bring it to the front (it only records that it would have), so the
- *   tests never take the foreground
- * @property {Record<string, string | undefined>} [env]
- * @property {string} [platform]
- * @property {readonly string[]} [argv] this launch's arguments
- */
+type Labels = typeof DEFAULT_LABELS;
 
-/** @param {SystemDeps} deps */
-const setUpSystem = ({
+/** A dev run's stand-in for a notification, which only logs it. */
+type DevNotification = ShownNotification & {
+  /** For a dev run's inspector and E2E tests: what was shown. */
+  options: object;
+  /** For a dev run's inspector: what a click on it would do. */
+  click: () => void;
+};
+
+export type SystemDeps = {
+  electron: typeof import('electron');
+  /** Throws for IPC from anywhere but the app's window. */
+  fromApp: (event: Electron.IpcMainEvent | Electron.IpcMainInvokeEvent) => void;
+  files: FileShellDeps['files'];
+  cacheDir: string;
+  iconFile: string;
+  dev: boolean;
+  /**
+   * An E2E run: never focus a window or bring it to the front (it only
+   * records that it would have), so the tests never take the foreground.
+   */
+  background?: boolean;
+  env?: Record<string, string | undefined>;
+  platform?: string;
+  /** This launch's arguments. */
+  argv?: readonly string[];
+};
+
+export const setUpSystem = ({
   electron,
   fromApp,
   files,
@@ -111,7 +119,7 @@ const setUpSystem = ({
   env = process.env,
   platform = process.platform,
   argv = process.argv,
-}) => {
+}: SystemDeps) => {
   const {
     app,
     BrowserWindow,
@@ -131,10 +139,7 @@ const setUpSystem = ({
     BrowserWindow.getAllWindows().find(win => !win.isDestroyed()) ?? null;
 
   /** Sends to the page, if the window is there. */
-  const send = (
-    /** @type {string} */ channel,
-    /** @type {unknown[]} */ ...args
-  ) => {
+  const send = (channel: string, ...args: unknown[]) => {
     const win = appWindow();
     if (win && !win.webContents.isDestroyed()) {
       win.webContents.send(channel, ...args);
@@ -152,10 +157,14 @@ const setUpSystem = ({
    * Shows the window (maximized when asked), and with `focus` brings it to
    * the front. In an E2E run (`background`) it only records that it would
    * (on Windows and Linux it shows the window behind the others).
-   * @param {Electron.BrowserWindow} win
-   * @param {{ maximize?: boolean; focus?: boolean }} [options]
    */
-  const present = (win, { maximize = false, focus = true } = {}) => {
+  const present = (
+    win: Electron.BrowserWindow,
+    {
+      maximize = false,
+      focus = true,
+    }: { maximize?: boolean; focus?: boolean } = {},
+  ): void => {
     windowShown = true;
     if (background) {
       // A window that was never shown hardly draws: under Wayland it gets no
@@ -204,9 +213,8 @@ const setUpSystem = ({
    * the reminders keep going. On Linux it quits: GNOME shows no tray icons
    * without an extension, and nothing tells whether one would show, so a
    * hidden window could have no way back.
-   * @param {Electron.BrowserWindow} win
    */
-  const keepOnClose = win => {
+  const keepOnClose = (win: Electron.BrowserWindow) => {
     if (!closesToTray(platform)) {
       return;
     }
@@ -243,7 +251,7 @@ const setUpSystem = ({
     cacheDir,
     defaultDir: () => app.getPath('downloads'),
   });
-  const windowOf = (/** @type {Electron.IpcMainInvokeEvent} */ event) =>
+  const windowOf = (event: Electron.IpcMainInvokeEvent) =>
     BrowserWindow.fromWebContents(event.sender);
   ipcMain.handle('shell:open', (event, uri, labels) => {
     fromApp(event);
@@ -269,50 +277,44 @@ const setUpSystem = ({
     fromApp(event);
     return fileShell.pickFiles(windowOf(event), options);
   });
-  ipcMain.handle('shell:copyText', (event, text) => {
-    fromApp(event);
-    electron.clipboard.writeText(String(text));
-  });
 
   // Notifications. A dev run never shows system ones (on a Mac, a learnX
   // entry would stay in System Settings › Notifications): it logs them and
   // the page shows them as toasts, unless LEARNX_NOTIFICATIONS=system.
   const systemNotifications = !dev || env.LEARNX_NOTIFICATIONS === 'system';
   const icon = nativeImage.createFromPath(iconFile);
-  /** @type {import('./notifications.cjs').NotifierDeps['createNotification']} */
-  const createNotification = systemNotifications
-    ? options =>
-        // Electron's overloads of `on` don't fit a plain listener's type.
-        /** @type {any} */ (new Notification({ ...options, icon }))
-    : options => {
-        /** @type {Map<string, () => void>} */
-        const listeners = new Map();
-        const notification = {
-          show: () => {
-            console.log(
-              `[notification] ${[options.title, options.subtitle, options.body]
-                .filter(Boolean)
-                .join(' | ')
-                .replaceAll('\n', ' / ')}`,
-            );
-            send('notifications:devShown', options);
-          },
-          on: (
-            /** @type {string} */ event,
-            /** @type {() => void} */ listener,
-          ) => {
-            listeners.set(event, listener);
-          },
-          /** For a dev run's inspector and E2E tests: what was shown. */
-          options,
-          /** For a dev run's inspector: what a click on it would do. */
-          click: () => listeners.get('click')?.(),
+  const createNotification: NotifierDeps['createNotification'] =
+    systemNotifications
+      ? options =>
+          // Electron's overloads of `on` don't fit a plain listener's type.
+          new Notification({ ...options, icon }) as ShownNotification
+      : options => {
+          const listeners = new Map<string, () => void>();
+          const notification: DevNotification = {
+            show: () => {
+              console.log(
+                `[notification] ${[
+                  options.title,
+                  options.subtitle,
+                  options.body,
+                ]
+                  .filter(Boolean)
+                  .join(' | ')
+                  .replaceAll('\n', ' / ')}`,
+              );
+              send('notifications:devShown', options);
+            },
+            on: (event, listener) => {
+              listeners.set(event, listener);
+            },
+            options,
+            click: () => listeners.get('click')?.(),
+          };
+          devShown.push(notification);
+          return notification;
         };
-        devShown.push(notification);
-        return notification;
-      };
   /** A dev run's logged notifications, newest last (`--inspect` can click one). */
-  const devShown = /** @type {{ options: object; click: () => void }[]} */ ([]);
+  const devShown: DevNotification[] = [];
   if (dev) {
     // For a dev run's inspector (`--inspect`) and the E2E tests (which drive
     // the main process the same way): its logged notifications, to click
@@ -357,10 +359,8 @@ const setUpSystem = ({
 
   // The background sync: the page runs it (services/background), when this
   // timer says, since a hidden window's own timers are slowed down.
-  const runSync = (/** @type {boolean} */ manual) =>
-    send('background:run', { manual });
-  /** @type {ReturnType<typeof setInterval> | undefined} */
-  let syncTimer;
+  const runSync = (manual: boolean) => send('background:run', { manual });
+  let syncTimer: ReturnType<typeof setInterval> | undefined;
   ipcMain.handle('background:start', (event, minutes) => {
     fromApp(event);
     clearInterval(syncTimer);
@@ -402,11 +402,9 @@ const setUpSystem = ({
   });
 
   // The tray icon and the Jump List, in the page's language once it says.
-  let labels = DEFAULT_LABELS;
-  /** @type {Electron.Tray | null} */
-  let tray = null;
-  /** @type {Electron.Menu | null} */
-  let trayMenu = null;
+  let labels: Labels = DEFAULT_LABELS;
+  let tray: Electron.Tray | null = null;
+  let trayMenu: Electron.Menu | null = null;
   const updateMenus = () => {
     if (!tray) {
       const image = nativeImage.createFromPath(iconFile);
@@ -432,7 +430,7 @@ const setUpSystem = ({
       // A dev run starts Electron with the app's folder first.
       const appArgs = dev ? `"${app.getAppPath()}" ` : '';
       app.setUserTasks(
-        /** @type {const} */ (['today', 'schedule']).map(target => ({
+        (['today', 'schedule'] as const).map(target => ({
           program: process.execPath,
           arguments: `${appArgs}${OPEN_ARG}${target}`,
           title: labels[target],
@@ -446,11 +444,10 @@ const setUpSystem = ({
   ipcMain.handle('system:setLabels', (event, next) => {
     fromApp(event);
     labels = { ...DEFAULT_LABELS };
-    for (const key of /** @type {(keyof typeof DEFAULT_LABELS)[]} */ (
-      Object.keys(DEFAULT_LABELS)
-    )) {
-      if (typeof next?.[key] === 'string' && next[key]) {
-        labels[key] = next[key];
+    for (const key of Object.keys(DEFAULT_LABELS) as (keyof Labels)[]) {
+      const value: unknown = next?.[key];
+      if (typeof value === 'string' && value) {
+        labels[key] = value;
       }
     }
     updateMenus();
@@ -492,24 +489,10 @@ const setUpSystem = ({
     present,
     /** A dev run's logged notifications, for its inspector. */
     devShown,
-    /**
-     * Serves a download to the file preview (`app://files/…`).
-     * @param {Request} request
-     */
-    servePreview: request =>
+    /** Serves a download to the file preview (`app://files/…`). */
+    servePreview: (request: Request): Promise<Response> =>
       fileShell.servePreview(request, url => net.fetch(url)),
   };
 };
 
-module.exports = {
-  setUpSystem,
-  claimSingleInstance,
-  closesToTray,
-  openTargetOf,
-  loginItemSupported,
-  loginItemOptions,
-  DEFAULT_LABELS,
-  HIDDEN_ARG,
-  OPEN_ARG,
-  SYNC_INTERVAL_MS,
-};
+export type System = ReturnType<typeof setUpSystem>;

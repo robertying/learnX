@@ -6,18 +6,14 @@
 /**
  * The only sites the app talks to: Tsinghua's (Web Learning, the SSO login,
  * the registrar, the mirror the updater reads) and courseX (tsinghua.app).
- * @param {string} host
  */
-const allowedHost = host =>
+export const allowedHost = (host: string): boolean =>
   host === 'tsinghua.edu.cn' ||
   host.endsWith('.tsinghua.edu.cn') ||
   host === 'tsinghua.app';
 
-/**
- * Whether the main process may fetch `url`: http(s) to an allowed host.
- * @param {string} url
- */
-const allowedUrl = url => {
+/** Whether the main process may fetch `url`: http(s) to an allowed host. */
+export const allowedUrl = (url: string): boolean => {
   let parsed;
   try {
     parsed = new URL(url);
@@ -30,21 +26,22 @@ const allowedUrl = url => {
   );
 };
 
-/**
- * @typedef {object} FetchRequest
- * @property {string} url
- * @property {string} method
- * @property {[string, string][]} headers
- * @property {ArrayBuffer} [body]
- *
- * @typedef {object} FetchResponse
- * @property {string} url the final URL, after redirects
- * @property {number} status
- * @property {string} statusText
- * @property {boolean} redirected
- * @property {[string, string][]} headers
- * @property {ArrayBuffer} body
- */
+export type FetchRequest = {
+  url: string;
+  method: string;
+  headers: [string, string][];
+  body?: ArrayBuffer;
+};
+
+export type FetchResponse = {
+  /** The final URL, after redirects. */
+  url: string;
+  status: number;
+  statusText: string;
+  redirected: boolean;
+  headers: [string, string][];
+  body: ArrayBuffer;
+};
 
 /**
  * How long a request may go without hearing from the server before it fails,
@@ -52,29 +49,27 @@ const allowedUrl = url => {
  * forever: until the response starts, and between its pieces. One that
  * uploads (a submission's attachment) gets longer to send its body first.
  */
-const TIMEOUT_MS = { idle: 60_000, upload: 5 * 60_000 };
+export const TIMEOUT_MS = { idle: 60_000, upload: 5 * 60_000 };
 
 /**
  * Sends a request with `net.request`, following redirects itself to record
  * the final URL: Electron's `net.fetch` leaves `Response.url` empty and can't
  * take `redirect: 'manual'`, and thu-learn-lib reads the final URL (an expired
  * session ends on login_timeout). A redirect off the allowed sites is refused.
- *
- * @param {Pick<typeof import('electron').net, 'request'>} net
- * @param {import('electron').Session} session
- * @param {FetchRequest} req
- * @param {AbortSignal} [signal]
- * @param {{ idle: number, upload: number }} [timeoutMs]
- * @returns {Promise<FetchResponse>}
  */
-const mainFetch = (net, session, req, signal, timeoutMs = TIMEOUT_MS) =>
+export const mainFetch = (
+  net: Pick<typeof Electron.net, 'request'>,
+  session: Electron.Session,
+  req: FetchRequest,
+  signal?: AbortSignal,
+  timeoutMs: { idle: number; upload: number } = TIMEOUT_MS,
+): Promise<FetchResponse> =>
   new Promise((resolve, reject) => {
     if (!allowedUrl(req.url)) {
       reject(new Error(`Not an allowed URL: ${req.url}`));
       return;
     }
-    /** @type {ReturnType<typeof setTimeout> | undefined} */
-    let timer;
+    let timer: ReturnType<typeof setTimeout> | undefined;
     const onAbort = () => fail(new Error('Aborted'));
     /** Ends the request and its timer and listener, once. */
     let settled = false;
@@ -87,13 +82,13 @@ const mainFetch = (net, session, req, signal, timeoutMs = TIMEOUT_MS) =>
       signal?.removeEventListener('abort', onAbort);
       return true;
     };
-    const fail = (/** @type {Error} */ error) => {
+    const fail = (error: Error) => {
       if (settle()) {
         request.abort();
         reject(error);
       }
     };
-    const wait = (/** @type {number} */ ms) => {
+    const wait = (ms: number) => {
       clearTimeout(timer);
       timer = setTimeout(
         () => fail(new Error(`Timed out: no answer from ${new URL(url).host}`)),
@@ -124,8 +119,7 @@ const mainFetch = (net, session, req, signal, timeoutMs = TIMEOUT_MS) =>
       request.followRedirect();
     });
     request.on('response', response => {
-      /** @type {Buffer[]} */
-      const chunks = [];
+      const chunks: Buffer[] = [];
       wait(timeoutMs.idle);
       response.on('data', chunk => {
         chunks.push(chunk);
@@ -137,8 +131,7 @@ const mainFetch = (net, session, req, signal, timeoutMs = TIMEOUT_MS) =>
           return;
         }
         const body = Buffer.concat(chunks);
-        /** @type {[string, string][]} */
-        const headers = [];
+        const headers: [string, string][] = [];
         for (const [name, value] of Object.entries(response.headers)) {
           for (const v of [value].flat()) {
             headers.push([name, v]);
@@ -164,5 +157,3 @@ const mainFetch = (net, session, req, signal, timeoutMs = TIMEOUT_MS) =>
     wait(req.body ? timeoutMs.upload : timeoutMs.idle);
     request.end();
   });
-
-module.exports = { TIMEOUT_MS, allowedHost, allowedUrl, mainFetch };

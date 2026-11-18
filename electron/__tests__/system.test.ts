@@ -8,12 +8,12 @@ import {
   loginItemSupported,
   openTargetOf,
   setUpSystem,
-} from '../system.cjs';
+} from '../system.ts';
 
 type Handler = (event: unknown, ...args: unknown[]) => unknown;
 type MenuItem = { label?: string; type?: string; click?: () => void };
 
-/** A window as system.cjs uses one. */
+/** A window as system.ts uses one. */
 class FakeWindow extends EventEmitter {
   visible = true;
   minimized = true;
@@ -36,7 +36,7 @@ class FakeWindow extends EventEmitter {
   });
 }
 
-/** Just enough of Electron for system.cjs, recording what it's asked. */
+/** Just enough of Electron for system.ts, recording what it's asked. */
 const fakeElectron = () => {
   const app = Object.assign(new EventEmitter(), {
     getPath: jest.fn(() => '/Users/me/Downloads'),
@@ -110,7 +110,6 @@ const fakeElectron = () => {
     },
     dialog: { showOpenDialog: jest.fn(), showSaveDialog: jest.fn() },
     shell: { openPath: jest.fn(), showItemInFolder: jest.fn() },
-    clipboard: { writeText: jest.fn() },
     ipcMain: {
       handle: (channel: string, handler: Handler) =>
         handlers.set(channel, handler),
@@ -127,7 +126,7 @@ const fakeElectron = () => {
     }
     return handler({ sender: {} }, ...args);
   };
-  /** A window as main.cjs makes one. */
+  /** A window as main.ts makes one. */
   const createWindow = () => {
     const win = new FakeWindow();
     windows.push(win);
@@ -605,12 +604,8 @@ describe('files', () => {
     );
     await expect(invoke('shell:pickFiles', {})).resolves.toBeNull();
     await expect(invoke('shell:saveText', 'a.ics', 'x')).resolves.toBeNull();
-    await invoke('shell:copyText', 'https://learn.tsinghua.edu.cn/f');
-    expect(electron.clipboard.writeText).toHaveBeenCalledWith(
-      'https://learn.tsinghua.edu.cn/f',
-    );
     // Each checks that it comes from the app's window.
-    expect(fromApp).toHaveBeenCalledTimes(6);
+    expect(fromApp).toHaveBeenCalledTimes(5);
     await expect(invoke('shell:open', 'https://x')).rejects.toThrow('ENOENT');
     await expect(invoke('shell:showInFolder', 'https://x')).rejects.toThrow(
       'ENOENT',

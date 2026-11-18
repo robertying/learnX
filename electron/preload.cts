@@ -1,8 +1,16 @@
-// What the app's web build may ask of the main process (main.cjs), as
+// What the app's web build may ask of the main process (main.ts), as
 // `window.learnx`: the page runs sandboxed and context-isolated, without Node.
-const { contextBridge, ipcRenderer } = require('electron');
+// CommonJS, as a sandboxed preload must be, and run without its types
+// (preloads.ts strips them): the page's own declaration of the bridge
+// (src/web/bridgeTypes.ts) types it.
+import type { Bridge } from '../src/web/bridgeTypes.ts';
 
-contextBridge.exposeInMainWorld('learnx', {
+const {
+  contextBridge,
+  ipcRenderer,
+}: typeof import('electron') = require('electron');
+
+const learnx: Bridge = {
   platform: process.platform,
   fetch: (id, req) => ipcRenderer.invoke('fetch', id, req),
   abortFetch: id => ipcRenderer.send('fetch:abort', id),
@@ -48,7 +56,7 @@ contextBridge.exposeInMainWorld('learnx', {
       ipcRenderer.invoke('webview:loadHtml', guestId, html, baseUrl),
   },
   // The app's version and build number, and the update waiting for a
-  // restart (updater.cjs): null until one has downloaded.
+  // restart (updater.ts): null until one has downloaded.
   appInfo: () => ipcRenderer.sendSync('app:info'),
   updates: {
     pending: () => ipcRenderer.sendSync('updates:pending'),
@@ -57,7 +65,7 @@ contextBridge.exposeInMainWorld('learnx', {
     },
     install: () => ipcRenderer.send('updates:install'),
   },
-  // Around the window (system.cjs).
+  // Around the window (system.ts).
   shell: {
     open: (uri, labels) => ipcRenderer.invoke('shell:open', uri, labels),
     showInFolder: uri => ipcRenderer.invoke('shell:showInFolder', uri),
@@ -66,7 +74,6 @@ contextBridge.exposeInMainWorld('learnx', {
       ipcRenderer.invoke('shell:saveText', name, content),
     pickDirectory: () => ipcRenderer.invoke('shell:pickDirectory'),
     pickFiles: options => ipcRenderer.invoke('shell:pickFiles', options),
-    copyText: text => ipcRenderer.invoke('shell:copyText', text),
   },
   notifications: {
     supported: () => ipcRenderer.invoke('notifications:supported'),
@@ -103,8 +110,10 @@ contextBridge.exposeInMainWorld('learnx', {
     },
   },
   // Development only: the dev runner's launch options (empty otherwise), and
-  // a window capture, which main.cjs saves when the dev runner asks for them
+  // a window capture, which main.ts saves when the dev runner asks for them
   // and returns null otherwise.
   launchOptions: () => ipcRenderer.sendSync('launchOptions'),
   capture: name => ipcRenderer.invoke('capture', name),
-});
+};
+
+contextBridge.exposeInMainWorld('learnx', learnx);

@@ -1,4 +1,4 @@
-; Part of the NSIS installer and uninstaller (packageConfig.cjs, `nsis.include`).
+; Part of the NSIS installer and uninstaller (packageConfig.ts, `nsis.include`).
 
 ; Always for the current user, never in Program Files: updates then install
 ; without elevation (on quit too), as Start at login writes the current
@@ -11,7 +11,7 @@
 ; goes too. Start at login's Run entry (named after the app id, Electron's
 ; default) and the switch Task Manager keeps for it, learnX's data (the saved
 ; login, settings, cached data, downloads and the browser profile with its
-; cookies; main.cjs keeps them in %LOCALAPPDATA%\learnX) and the updates
+; cookies; main.ts keeps them in %LOCALAPPDATA%\learnX) and the updates
 ; electron-updater downloaded. `deleteAppDataOnUninstall` removes what
 ; Electron may still write in %APPDATA%\learnX.
 !macro customUnInstall

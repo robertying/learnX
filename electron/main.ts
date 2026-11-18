@@ -1,16 +1,21 @@
 // learnX's Electron main process: one window showing the app's web build,
 // served from app://learnx/, and the services the renderer asks for over IPC
-// (preload.cjs): requests to Tsinghua's servers, their cookies, key-value
+// (preload.cts): requests to Tsinghua's servers, their cookies, key-value
 // storage, the saved login, the app's own files and downloads, native menus
-// and the web views the page shows (webviews.cjs), and what's around the
-// window (system.cjs): the tray, notifications, the background sync's timer,
+// and the web views the page shows (webviews.ts), and what's around the
+// window (system.ts): the tray, notifications, the background sync's timer,
 // opening, saving and picking files.
+//
+// Electron's Node runs it, and the modules it imports, as TypeScript, with
+// the types stripped as they load: no build step. Only the preloads, which
+// run without Node's module loader, are stripped ahead (preloads.ts).
 //
 // It registers nothing with the system: no protocol handler, and a login item
 // only when the user turns Start at login on.
-const fs = require('node:fs');
-const path = require('node:path');
-const {
+import fs from 'node:fs';
+import { createRequire } from 'node:module';
+import path from 'node:path';
+import electron, {
   app,
   BrowserWindow,
   ipcMain,
@@ -22,29 +27,35 @@ const {
   session,
   shell,
   webContents,
-} = require('electron');
-const { ORIGIN, createServeApp, fromApp } = require('./appOrigin.cjs');
-const { aboutPanelOptions, readBuildInfo } = require('./buildInfo.cjs');
-const { claimSingleInstance, setUpSystem } = require('./system.cjs');
-const { createFileStore, loggedWrites } = require('./fileStore.cjs');
-const { createFiles, runFileOperation } = require('./files.cjs');
-const { popupMenu } = require('./menus.cjs');
-const { mainFetch } = require('./net.cjs');
-const { createSecrets } = require('./secrets.cjs');
-const { createUpdater, debFileName, updateMode } = require('./updater.cjs');
-const { signedProvider } = require('./updateSignature.cjs');
-const {
+} from 'electron';
+import { ORIGIN, createServeApp, fromApp } from './appOrigin.ts';
+import { aboutPanelOptions, readBuildInfo } from './buildInfo.ts';
+import { createFileStore, loggedWrites } from './fileStore.ts';
+import { createFiles, runFileOperation } from './files.ts';
+import { popupMenu } from './menus.ts';
+import { mainFetch } from './net.ts';
+import { PRELOADS_DIR, stripPreloads } from './preloads.ts';
+import { createSecrets } from './secrets.ts';
+import { claimSingleInstance, setUpSystem } from './system.ts';
+import type { System } from './system.ts';
+import { createUpdater, debFileName, updateMode } from './updater.ts';
+import type { UpdateMode } from './updater.ts';
+import { signedProvider } from './updateSignature.ts';
+import {
   PARTITION,
   createWebviews,
   hardenWebview,
   webviewPermission,
-} = require('./webviews.cjs');
-const {
+} from './webviews.ts';
+import {
   MIN_SIZE,
   loadWindowState,
   saveWindowState,
   zoomForKey,
-} = require('./windowState.cjs');
+} from './windowState.ts';
+import packaged from './package.json' with { type: 'json' };
+
+const electronDir = import.meta.dirname;
 
 /**
  * A top-level app's id, named as the repo's other top-level targets are
@@ -67,7 +78,7 @@ if (process.platform === 'win32') {
 /**
  * A dev run: Electron opening this folder (`electron electron/`, which sets
  * `process.defaultApp`). `app.isPackaged` only looks at the executable's
- * name, so it's true for the Mac dev runner's learnX.app (macDevApp.mjs).
+ * name, so it's true for the Mac dev runner's learnX.app (macDevApp.ts).
  */
 const dev = !app.isPackaged || Boolean(process.defaultApp);
 
@@ -75,7 +86,7 @@ const dev = !app.isPackaged || Boolean(process.defaultApp);
  * An E2E run (electron/e2e sets LEARNX_E2E): it must never take the
  * foreground. On macOS the app starts as an accessory, with no Dock icon, and
  * no run focuses its window or brings it to the front: Windows and Linux show
- * it behind the others, a Mac not at all (system.cjs, `present`).
+ * it behind the others, a Mac not at all (system.ts, `present`).
  */
 const background = dev && process.env.LEARNX_E2E === '1';
 if (process.platform === 'darwin') {
@@ -83,7 +94,7 @@ if (process.platform === 'darwin') {
     app.setActivationPolicy('accessory');
     app.dock?.hide();
   } else if (dev) {
-    // The Mac dev app starts as an accessory (LSUIElement, macDevApp.mjs),
+    // The Mac dev app starts as an accessory (LSUIElement, macDevApp.ts),
     // so an E2E run never flashes a Dock icon; any other dev run is a
     // regular app, in the Dock.
     app.setActivationPolicy('regular');
@@ -102,20 +113,20 @@ if (!dev && process.platform === 'win32' && process.env.LOCALAPPDATA) {
   app.setPath('sessionData', localData);
 }
 
-// The dev runner (dev.mjs) keeps everything Electron writes in one folder
+// The dev runner (dev.ts) keeps everything Electron writes in one folder
 // and out of the system's keychain: a mock one on macOS, Chromium's own key
-// on Linux (`basic`), which secrets.cjs accepts only here, so a dev run and
+// on Linux (`basic`), which secrets.ts accepts only here, so a dev run and
 // the E2E tests keep their login whatever the keyring (locked, or none on
 // CI's runners).
 const devDataDir = dev ? process.env.LEARNX_DATA_DIR : undefined;
 if (devDataDir) {
-  for (const name of /** @type {const} */ ([
+  for (const name of [
     'userData',
     'sessionData',
     'logs',
     'crashDumps',
     'temp',
-  ])) {
+  ] as const) {
     const dir = path.join(devDataDir, name);
     fs.mkdirSync(dir, { recursive: true });
     app.setPath(name, dir);
@@ -130,13 +141,12 @@ if (devDataDir) {
  * lock is in the data folder, so after a dev run has moved that.
  */
 const primaryInstance = claimSingleInstance(app);
-/** @type {ReturnType<typeof setUpSystem> | undefined} */
-let system;
+let system: System | undefined;
 /**
  * Launch options for a test run (src/services/launchOptions), as JSON: the
  * app's root props, as Android's launch extras are. Development only.
  */
-const launchOptions = dev
+const launchOptions: unknown = dev
   ? JSON.parse(process.env.LEARNX_LAUNCH_OPTIONS || '{}')
   : {};
 /** Where dev captures go (`learnx.capture` in the renderer), if anywhere. */
@@ -150,8 +160,17 @@ if (colorScheme === 'light' || colorScheme === 'dark') {
 
 /** The web build: next to this file when packaged, or the dev runner's. */
 const webDir = path.resolve(
-  (dev && process.env.LEARNX_WEB_DIR) || path.join(__dirname, 'web'),
+  (dev && process.env.LEARNX_WEB_DIR) || path.join(electronDir, 'web'),
 );
+
+/**
+ * The preloads, as JavaScript: next to this file when packaged; a dev run
+ * strips the checkout's now, so it never runs a stale copy (preloads.ts).
+ */
+const preloadsDir = dev ? PRELOADS_DIR : electronDir;
+if (dev) {
+  stripPreloads(preloadsDir);
+}
 
 protocol.registerSchemesAsPrivileged([
   {
@@ -173,12 +192,8 @@ const webviews = createWebviews({
   },
 });
 
-/**
- * @param {Electron.Session} ses
- */
-const handleIpc = ses => {
-  const logStorage = (/** @type {string} */ message) =>
-    console.error(`[storage] ${message}`);
+const handleIpc = (ses: Electron.Session) => {
+  const logStorage = (message: string) => console.error(`[storage] ${message}`);
   const store = createFileStore(path.join(app.getPath('userData'), 'storage'), {
     log: logStorage,
   });
@@ -222,7 +237,7 @@ const handleIpc = ses => {
   });
 
   /** Requests in flight, by the renderer's id, so it can abort them. */
-  const inFlight = new Map();
+  const inFlight = new Map<unknown, AbortController>();
   ipcMain.handle('fetch', async (event, id, req) => {
     fromApp(event);
     const controller = new AbortController();
@@ -273,7 +288,7 @@ const handleIpc = ses => {
     document: path.join(app.getPath('userData'), 'Files', 'Documents'),
   });
   system = setUpSystem({
-    electron: require('electron'),
+    electron,
     fromApp,
     files,
     cacheDir: path.join(app.getPath('userData'), 'Files', 'Caches'),
@@ -286,7 +301,7 @@ const handleIpc = ses => {
     event.returnValue = runFileOperation(files, op, args);
   });
   /** Downloads in flight, by the renderer's id, so it can abort them. */
-  const downloads = new Map();
+  const downloads = new Map<unknown, AbortController>();
   ipcMain.handle('files:append', (event, uri, content) => {
     fromApp(event);
     files.append(uri, content);
@@ -334,7 +349,7 @@ const handleIpc = ses => {
     fromApp(event);
     webviews.answer(event.sender, requestId, allow);
   });
-  // From a web view's own preload (webviewPreload.cjs).
+  // From a web view's own preload (webviewPreload.cts).
   ipcMain.on('webview:scripts', event => {
     event.returnValue = webviews.scriptsFor(event.sender);
   });
@@ -381,7 +396,7 @@ const handleIpc = ses => {
 };
 
 const iconFile = path.join(
-  __dirname,
+  electronDir,
   'icons',
   process.platform === 'win32' ? 'icon.ico' : 'icon.png',
 );
@@ -391,14 +406,14 @@ const MAX_PAGE_RELOADS = 3;
 
 /**
  * The window, on the app's own session (`ses`, which serves app://), where it
- * was last time (windowState.cjs).
+ * was last time (windowState.ts).
  */
-const createWindow = (/** @type {Electron.Session} */ ses) => {
+const createWindow = (ses: Electron.Session) => {
   const stateFile = path.join(app.getPath('userData'), 'window-state.json');
-  const { screen } = require('electron');
   const state = loadWindowState(
     stateFile,
-    screen.getAllDisplays().map(display => display.workArea),
+    // Read once the app is ready: Electron's screen module needs it.
+    electron.screen.getAllDisplays().map(display => display.workArea),
   );
   const win = new BrowserWindow({
     ...state.bounds,
@@ -410,11 +425,11 @@ const createWindow = (/** @type {Electron.Session} */ ses) => {
     backgroundColor: nativeTheme.shouldUseDarkColors ? '#1f1f1f' : '#fafafa',
     webPreferences: {
       session: ses,
-      preload: path.join(__dirname, 'preload.cjs'),
+      preload: path.join(preloadsDir, 'preload.cjs'),
       contextIsolation: true,
       sandbox: true,
       nodeIntegration: false,
-      // The page's web views (webviews.cjs), hardened as they attach.
+      // The page's web views (webviews.ts), hardened as they attach.
       webviewTag: true,
       spellcheck: false,
       // Captures, and E2E runs, whose window stays behind the others (or
@@ -427,7 +442,7 @@ const createWindow = (/** @type {Electron.Session} */ ses) => {
   // the page loads anew (a crash's reload). Keys typed in a web view (a
   // notice body, courseX) zoom the window too: web views follow its zoom.
   let zoom = state.zoom;
-  const zoomOnKeys = (/** @type {Electron.WebContents} */ contents) =>
+  const zoomOnKeys = (contents: Electron.WebContents) =>
     contents.on('before-input-event', (event, input) => {
       const level = zoomForKey(
         input,
@@ -495,7 +510,7 @@ const createWindow = (/** @type {Electron.Session} */ ses) => {
       !hardenWebview(
         webPreferences,
         params,
-        path.join(__dirname, 'webviewPreload.cjs'),
+        path.join(preloadsDir, 'webviewPreload.cjs'),
         { backgroundThrottling: !captureDir && !background },
       )
     ) {
@@ -517,27 +532,28 @@ const createWindow = (/** @type {Electron.Session} */ ses) => {
   return win;
 };
 
-// The version, the About panel and updates (buildInfo.cjs, updater.cjs). A
+// The version, the About panel and updates (buildInfo.ts, updater.ts). A
 // packaged build carries its build number and where it looks for updates in
-// its package.json (written by packageConfig.cjs), and the public key its
+// its package.json (written by packageConfig.ts), and the public key its
 // update files are signed with (electron-public-key.pem); a dev run reads the
 // checkout's, and checks for updates only on a local test server at
-// `LEARNX_UPDATE_URL` (updateServer.mjs), signed by the key whose public half
+// `LEARNX_UPDATE_URL` (updateServer.ts), signed by the key whose public half
 // is at `LEARNX_UPDATE_PUBLIC_KEY` if set.
-const packaged = /** @type {{ buildNumber?: string; updateUrl?: string }} */ (
-  require('./package.json')
-);
+const { buildNumber, updateUrl } = packaged as {
+  buildNumber?: string;
+  updateUrl?: string;
+};
 const buildInfo = dev
-  ? readBuildInfo(path.join(__dirname, '..'))
-  : { version: app.getVersion(), build: packaged.buildNumber ?? '' };
+  ? readBuildInfo(path.join(electronDir, '..'))
+  : { version: app.getVersion(), build: buildNumber ?? '' };
 const devUpdateUrl = dev ? process.env.LEARNX_UPDATE_URL : undefined;
 /** A dev run's updater log lines, for the E2E tests (`learnxUpdaterLog`). */
-const devUpdaterLog = dev ? /** @type {string[]} */ ([]) : undefined;
+const devUpdaterLog: string[] | undefined = dev ? [] : undefined;
 if (devUpdaterLog) {
   Object.assign(globalThis, { learnxUpdaterLog: devUpdaterLog });
 }
 /**
- * How this run takes updates (updater.cjs): a packaged build's by how it was
+ * How this run takes updates (updater.ts): a packaged build's by how it was
  * installed, a dev run's on the test server by `LEARNX_UPDATE_MODE` (`notify`
  * for a .deb's). What kind of package it is, electron-builder writes into
  * `package-type` (`deb`).
@@ -551,7 +567,7 @@ const readPackageType = () => {
     return undefined;
   }
 };
-const mode = devUpdateUrl
+const mode: UpdateMode | null = devUpdateUrl
   ? process.env.LEARNX_UPDATE_MODE === 'notify'
     ? 'notify'
     : 'install'
@@ -560,90 +576,113 @@ const mode = devUpdateUrl
       platform: process.platform,
       env: process.env,
       hasUpdateConfig:
-        !!packaged.updateUrl &&
+        !!updateUrl &&
         fs.existsSync(path.join(process.resourcesPath, 'app-update.yml')),
       packageType: readPackageType(),
     });
-const updater =
+/**
+ * The updater, once electron-updater has loaded: only for a run that takes
+ * updates, after its first module has run (it takes a while to load, and
+ * most of it is never used otherwise).
+ */
+const loadUpdater = async (updaterMode: UpdateMode) => {
+  const [
+    { autoUpdater },
+    { GenericProvider },
+    { parseUpdateInfo },
+    { getChannelFilename, newUrlFromBase },
+  ] = await Promise.all([
+    // CommonJS, its `autoUpdater` a getter Node only shows on the default
+    // export.
+    import('electron-updater').then(updaterModule => updaterModule.default),
+    import('electron-updater/out/providers/GenericProvider.js'),
+    import('electron-updater/out/providers/Provider.js'),
+    import('electron-updater/out/util.js'),
+  ]);
+  if (devUpdateUrl && devDataDir) {
+    // What electron-builder writes into a packaged build's app-update.yml:
+    // where updates come from, here the test server, and the cache folder's
+    // name.
+    const config = path.join(devDataDir, 'app-update.yml');
+    fs.writeFileSync(
+      config,
+      [
+        'provider: generic',
+        `url: ${devUpdateUrl}`,
+        'updaterCacheDirName: learnX',
+        '',
+      ].join('\n'),
+    );
+    autoUpdater.updateConfigPath = config;
+    autoUpdater.forceDevUpdateConfig = true;
+    // Its downloads stay in the data folder too, not in the system's caches
+    // (~/Library/Caches/learnX, %LOCALAPPDATA%, ~/.cache): the app adapter's
+    // (protected) cache folder, which it reads them under.
+    Object.defineProperty(
+      (autoUpdater as unknown as { app: object }).app,
+      'baseCachePath',
+      { value: path.join(devDataDir, 'updates') },
+    );
+    // The checkout's version, not this folder's package.json's (0.0.0), as
+    // electron-updater's own copy of semver parses it.
+    const updaterRequire = createRequire(
+      createRequire(import.meta.url).resolve('electron-updater'),
+    );
+    const semver = updaterRequire('semver') as typeof import('semver');
+    Object.assign(autoUpdater, {
+      currentVersion: semver.parse(buildInfo.version),
+    });
+  }
+  const publicKey = fs.readFileSync(
+    dev
+      ? process.env.LEARNX_UPDATE_PUBLIC_KEY ||
+          path.join(electronDir, '..', 'certs', 'electron-public-key.pem')
+      : path.join(electronDir, 'electron-public-key.pem'),
+  );
+  const feedUrl = devUpdateUrl || updateUrl || '';
+  return createUpdater({
+    autoUpdater,
+    mode: updaterMode,
+    downloadUrl: version =>
+      new URL(debFileName(version, process.arch), feedUrl).href,
+    feed: {
+      url: feedUrl,
+      provider: signedProvider({
+        GenericProvider,
+        parseUpdateInfo,
+        getChannelFilename,
+        newUrlFromBase,
+        publicKey,
+      }),
+    },
+    onReady: update => {
+      for (const win of BrowserWindow.getAllWindows()) {
+        win.webContents.send('updates:ready', update);
+      }
+    },
+    log: message => {
+      console.log(`[updater] ${message}`);
+      devUpdaterLog?.push(message);
+    },
+  });
+};
+/** The updater, once it's loaded; null in a run without updates. */
+let updater: ReturnType<typeof createUpdater> | null = null;
+const updaterLoaded =
   // E2E runs (electron/e2e) turn checks off with LEARNX_NO_UPDATES, and a
   // second launch only hands its arguments over.
   !process.env.LEARNX_NO_UPDATES && primaryInstance && mode
-    ? (() => {
-        const { autoUpdater } = require('electron-updater');
-        if (devUpdateUrl && devDataDir) {
-          // What electron-builder writes into a packaged build's
-          // app-update.yml: where updates come from, here the test server,
-          // and the cache folder's name.
-          const config = path.join(devDataDir, 'app-update.yml');
-          fs.writeFileSync(
-            config,
-            [
-              'provider: generic',
-              `url: ${devUpdateUrl}`,
-              'updaterCacheDirName: learnX',
-              '',
-            ].join('\n'),
-          );
-          autoUpdater.updateConfigPath = config;
-          autoUpdater.forceDevUpdateConfig = true;
-          // Its downloads stay in the data folder too, not in the system's
-          // caches (~/Library/Caches/learnX, %LOCALAPPDATA%, ~/.cache): the
-          // app adapter's (protected) cache folder, which it reads them under.
-          Object.defineProperty(
-            /** @type {any} */ (autoUpdater).app,
-            'baseCachePath',
-            {
-              value: path.join(devDataDir, 'updates'),
-            },
-          );
-          // The checkout's version, not this folder's package.json's (0.0.0),
-          // as electron-updater's own copy of semver parses it.
-          const semver = require(
-            require.resolve('semver', {
-              paths: [path.dirname(require.resolve('electron-updater'))],
-            }),
-          );
-          Object.assign(autoUpdater, {
-            currentVersion: semver.parse(buildInfo.version),
-          });
-        }
-        const publicKey = fs.readFileSync(
-          dev
-            ? process.env.LEARNX_UPDATE_PUBLIC_KEY ||
-                path.join(__dirname, '..', 'certs', 'electron-public-key.pem')
-            : path.join(__dirname, 'electron-public-key.pem'),
-        );
-        const feedUrl = devUpdateUrl || packaged.updateUrl || '';
-        return createUpdater({
-          autoUpdater,
-          mode,
-          downloadUrl: version =>
-            new URL(debFileName(version, process.arch), feedUrl).href,
-          feed: {
-            url: feedUrl,
-            provider: signedProvider({
-              GenericProvider:
-                require('electron-updater/out/providers/GenericProvider')
-                  .GenericProvider,
-              parseUpdateInfo:
-                require('electron-updater/out/providers/Provider')
-                  .parseUpdateInfo,
-              ...require('electron-updater/out/util'),
-              publicKey,
-            }),
-          },
-          onReady: update => {
-            for (const win of BrowserWindow.getAllWindows()) {
-              win.webContents.send('updates:ready', update);
-            }
-          },
-          log: message => {
-            console.log(`[updater] ${message}`);
-            devUpdaterLog?.push(message);
-          },
-        });
-      })()
-    : null;
+    ? loadUpdater(mode).then(
+        loaded => {
+          updater = loaded;
+          return loaded;
+        },
+        (error: unknown) => {
+          console.error(`[updater] not loaded: ${String(error)}`);
+          return null;
+        },
+      )
+    : Promise.resolve(null);
 /**
  * A packaged Linux run without Chromium's sandbox: the AppImage's AppRun
  * passes --no-sandbox where unprivileged user namespaces are blocked (Ubuntu
@@ -674,9 +713,9 @@ if (!dev) {
   Menu.setApplicationMenu(null);
 }
 
-void app.whenReady().then(() => {
+void app.whenReady().then(async () => {
   app.setAboutPanelOptions(aboutPanelOptions(buildInfo, iconFile));
-  updater?.start();
+  (await updaterLoaded)?.start();
 });
 
 void app.whenReady().then(() => {
@@ -698,7 +737,7 @@ void app.whenReady().then(() => {
     }),
   );
   // No camera, microphone, location or notifications asked of the system;
-  // a web view's page may only go full screen and copy (webviews.cjs).
+  // a web view's page may only go full screen and copy (webviews.ts).
   ses.setPermissionRequestHandler((contents, permission, callback, details) =>
     callback(
       webviewPermission(contents, permission, details.requestingUrl ?? ''),
@@ -720,6 +759,6 @@ void app.whenReady().then(() => {
   createWindow(appSession);
 });
 
-// Closing the window hides it (system.cjs); with the window gone, so is
+// Closing the window hides it (system.ts); with the window gone, so is
 // learnX.
 app.on('window-all-closed', () => app.quit());
