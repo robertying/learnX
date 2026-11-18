@@ -15,7 +15,7 @@ export const maestroEnv = (): Record<string, string> => {
       process.execPath,
       [
         '--disable-warning=MODULE_TYPELESS_PACKAGE_JSON',
-        path.join(root, 'scripts', 'e2e-env.mjs'),
+        path.join(root, 'scripts', 'e2e', 'e2e-env.mjs'),
       ],
       {
         encoding: 'utf8',
