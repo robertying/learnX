@@ -57,42 +57,39 @@ final class TabsUITests: LearnXUITestCase {
 
   /// The window opens at the size it was left at (`WindowFrameAutosave` in modules/windows), also when the window's
   /// saved state is thrown away, as quitting does by default (`ApplePersistenceIgnoreState` stands in for that).
+  /// XCUITest can't resize a Catalyst window by dragging it, so a launch argument stands in for a saved size, and the
+  /// next launch without it checks that the window saved the size it opened at.
   func testWindowKeepsItsSize() throws {
     try waitFor(id: "tab-notices")
     let original = app.windows.firstMatch.frame
-    try resizeWindow(by: CGVector(dx: -120, dy: -80))
-    let resized = app.windows.firstMatch.frame
-    XCTAssertNotEqual(resized.size, original.size, "the window didn't resize")
+
+    try launch(["ApplePersistenceIgnoreState": "YES", WindowFrame.key: WindowFrame.string(WindowFrame.smaller)])
+    try waitFor(id: "today", timeout: 60)
+    let restored = app.windows.firstMatch.frame
+    XCTAssertEqual(restored.width, WindowFrame.smaller.width, accuracy: 2, "the window didn't open at the saved width")
+    XCTAssertEqual(
+      restored.height, WindowFrame.smaller.height, accuracy: 2, "the window didn't open at the saved height")
 
     try launch(["ApplePersistenceIgnoreState": "YES"])
     try waitFor(id: "today", timeout: 60)
     let reopened = app.windows.firstMatch.frame
-    XCTAssertEqual(reopened.width, resized.width, accuracy: 2, "the window didn't keep its width")
-    XCTAssertEqual(reopened.height, resized.height, accuracy: 2, "the window didn't keep its height")
+    XCTAssertEqual(reopened.width, restored.width, accuracy: 2, "the window didn't keep its width")
+    XCTAssertEqual(reopened.height, restored.height, accuracy: 2, "the window didn't keep its height")
 
-    // Back to the size the tests after this one expect.
-    try resizeWindow(by: CGVector(dx: 120, dy: 80))
+    // Back to the frame the window had before, for the next runs.
+    try launch(["ApplePersistenceIgnoreState": "YES", WindowFrame.key: WindowFrame.string(original)])
+    try waitFor(id: "today", timeout: 60)
   }
 
-  /// Drags the window's right edge by `offset.dx` and its bottom edge by `offset.dy`. The edges, not the corner: the
-  /// corner is rounded, so a point near it misses the resize handle.
-  private func resizeWindow(by offset: CGVector) throws {
-    try drag(edge: CGVector(dx: 1, dy: 0.5), outward: CGVector(dx: 1, dy: 0), by: CGVector(dx: offset.dx, dy: 0))
-    try drag(edge: CGVector(dx: 0.5, dy: 1), outward: CGVector(dx: 0, dy: 1), by: CGVector(dx: 0, dy: offset.dy))
-  }
+  private enum WindowFrame {
+    /// `WindowFrameAutosave.key`. Launch arguments override user defaults for that launch only.
+    static let key = "Window Frame Main"
+    static let smaller = CGRect(x: 200, y: 150, width: 860, height: 640)
 
-  /// Drags the window edge at the normalized point `edge`, grabbing it just outside the window and then just inside,
-  /// until the window's size changes.
-  private func drag(edge: CGVector, outward: CGVector, by offset: CGVector) throws {
-    let window = app.windows.firstMatch
-    let before = window.frame.size
-    for distance in [3.0, -1.0] {
-      let grab = window.coordinate(withNormalizedOffset: edge)
-        .withOffset(CGVector(dx: outward.dx * distance, dy: outward.dy * distance))
-      grab.press(forDuration: 0.3, thenDragTo: grab.withOffset(offset))
-      if window.frame.size != before { return }
+    /// `NSStringFromCGRect`'s format, quoted so the argument reads as a string rather than a property list.
+    static func string(_ frame: CGRect) -> String {
+      "\"{{\(frame.minX), \(frame.minY)}, {\(frame.width), \(frame.height)}}\""
     }
-    XCTFail("dragging the window's edge didn't resize it")
   }
 
   /// patches/react-native-screens@4.30.1.patch: in a split view each column keeps its bar, as on iPad, instead of
