@@ -498,7 +498,7 @@ index 2345734e9142c5f2ace02ba4f1e6463e53783e29..4191a4b57d3614e446591684aff11945
  {
    [self emitOnSearchButtonPressEventWithText:_controller.searchBar.text];
 diff --git a/ios/gamma/split/RNSSplitAppearanceApplicator.mm b/ios/gamma/split/RNSSplitAppearanceApplicator.mm
-index e33c804f732db1cb9f0921aabf70155996b340cd..40cbe0dd2f163a1c0c8b4cde1eb6078fee2affd1 100644
+index e33c804f732db1cb9f0921aabf70155996b340cd..6dd175c7b2efbd0fb2f69fcb451c5c3f10e68378 100644
 --- a/ios/gamma/split/RNSSplitAppearanceApplicator.mm
 +++ b/ios/gamma/split/RNSSplitAppearanceApplicator.mm
 @@ -72,6 +72,18 @@
@@ -555,11 +555,28 @@ index e33c804f732db1cb9f0921aabf70155996b340cd..40cbe0dd2f163a1c0c8b4cde1eb6078f
    }
  
    if (splitHost.minimumSupplementaryColumnWidth >= 0) {
+@@ -167,7 +192,7 @@
+ - (void)updateSplitViewDisplayModeFor:(RNSSplitHostComponentView *)splitHost
+                        withController:(RNSSplitHostController *)splitHostController
+ {
+-  splitHostController.preferredDisplayMode = splitHost.preferredDisplayMode;
++  splitHostController.preferredDisplayMode = [splitHostController resolvedPreferredDisplayMode:splitHost.preferredDisplayMode];
+ }
+ 
+ - (void)validateColumnConstraintsWithMinWidth:(CGFloat)minWidth maxWidth:(CGFloat)maxWidth
 diff --git a/ios/gamma/split/RNSSplitHostComponentView.h b/ios/gamma/split/RNSSplitHostComponentView.h
-index dca7ea15e381a33b6d66cd777985b2374b511f54..afcd704ed9cb4b4109478b236682f9bb40428929 100644
+index dca7ea15e381a33b6d66cd777985b2374b511f54..9b1f73cddf50e7dd85ff9980f4c0eda75cac79e6 100644
 --- a/ios/gamma/split/RNSSplitHostComponentView.h
 +++ b/ios/gamma/split/RNSSplitHostComponentView.h
-@@ -42,6 +42,11 @@ NS_ASSUME_NONNULL_BEGIN
+@@ -36,12 +36,19 @@ NS_ASSUME_NONNULL_BEGIN
+ @property (nonatomic, readonly) UISplitViewControllerSplitBehavior preferredSplitBehavior;
+ @property (nonatomic, readonly) UISplitViewControllerPrimaryEdge primaryEdge;
+ @property (nonatomic, readonly) UISplitViewControllerDisplayMode preferredDisplayMode;
++// Empty when the sidebar's visibility isn't kept.
++@property (nonatomic, readonly, nonnull) NSString *sidebarAutosaveName;
+ @property (nonatomic, readonly) UISplitViewControllerDisplayModeButtonVisibility displayModeButtonVisibility;
+ #if !TARGET_OS_TV
+ @property (nonatomic, readonly) UISplitViewControllerBackgroundStyle primaryBackgroundStyle;
  #endif // !TARGET_OS_TV
  @property (nonatomic, readonly) BOOL presentsWithGesture;
  @property (nonatomic, readonly) BOOL showSecondaryToggleButton;
@@ -572,7 +589,7 @@ index dca7ea15e381a33b6d66cd777985b2374b511f54..afcd704ed9cb4b4109478b236682f9bb
  @property (nonatomic, readonly) BOOL hasCustomTopColumnForCollapsing;
  @property (nonatomic, readonly) UISplitViewControllerColumn topColumnForCollapsingColumn;
 diff --git a/ios/gamma/split/RNSSplitHostComponentView.mm b/ios/gamma/split/RNSSplitHostComponentView.mm
-index e2d5259add5d8ad00b1acdde27cd013e70ce6013..75ec291bda5004f31773c219643128ff5a431333 100644
+index e2d5259add5d8ad00b1acdde27cd013e70ce6013..bcf4272f446d22bca91a89ff4b35524265cb267d 100644
 --- a/ios/gamma/split/RNSSplitHostComponentView.mm
 +++ b/ios/gamma/split/RNSSplitHostComponentView.mm
 @@ -33,6 +33,7 @@ static const CGFloat epsilon = 1e-6;
@@ -603,7 +620,15 @@ index e2d5259add5d8ad00b1acdde27cd013e70ce6013..75ec291bda5004f31773c219643128ff
  }
  
  - (void)resetProps
-@@ -72,6 +86,7 @@ static const CGFloat epsilon = 1e-6;
+@@ -65,6 +79,7 @@ static const CGFloat epsilon = 1e-6;
+   _preferredSplitBehavior = UISplitViewControllerSplitBehaviorAutomatic;
+   _primaryEdge = UISplitViewControllerPrimaryEdgeLeading;
+   _preferredDisplayMode = UISplitViewControllerDisplayModeAutomatic;
++  _sidebarAutosaveName = @"";
+   _displayModeButtonVisibility = UISplitViewControllerDisplayModeButtonVisibilityAutomatic;
+ #if !TARGET_OS_TV
+   UISplitViewController *tempSplitVC = [[UISplitViewController alloc] init];
+@@ -72,6 +87,7 @@ static const CGFloat epsilon = 1e-6;
  #endif // !TARGET_OS_TV
    _presentsWithGesture = true;
    _showSecondaryToggleButton = false;
@@ -611,7 +636,7 @@ index e2d5259add5d8ad00b1acdde27cd013e70ce6013..75ec291bda5004f31773c219643128ff
    _showInspector = false;
  
    _minimumPrimaryColumnWidth = -1.0;
-@@ -122,14 +137,86 @@ static const CGFloat epsilon = 1e-6;
+@@ -122,14 +138,86 @@ static const CGFloat epsilon = 1e-6;
  
  - (void)didMoveToWindow
  {
@@ -698,7 +723,20 @@ index e2d5259add5d8ad00b1acdde27cd013e70ce6013..75ec291bda5004f31773c219643128ff
  }
  
  RNS_IGNORE_SUPER_CALL_BEGIN
-@@ -230,6 +317,12 @@ RNS_IGNORE_SUPER_CALL_END
+@@ -212,6 +300,12 @@ RNS_IGNORE_SUPER_CALL_END
+         rnscreens::conversion::SplitViewPreferredDisplayModeFromHostProp(newComponentProps.preferredDisplayMode);
+   }
+ 
++  if (oldComponentProps.sidebarAutosaveName != newComponentProps.sidebarAutosaveName) {
++    _needsSplitAppearanceUpdate = true;
++    _needsSplitDisplayModeUpdate = true;
++    _sidebarAutosaveName = [NSString stringWithUTF8String:newComponentProps.sidebarAutosaveName.c_str()];
++  }
++
+   if (oldComponentProps.colorScheme != newComponentProps.colorScheme) {
+     _needsSplitAppearanceUpdate = true;
+     _colorScheme = rnscreens::conversion::UIUserInterfaceStyleFromHostProp(newComponentProps.colorScheme);
+@@ -230,6 +324,12 @@ RNS_IGNORE_SUPER_CALL_END
      _presentsWithGesture = newComponentProps.presentsWithGesture;
    }
  
@@ -711,8 +749,25 @@ index e2d5259add5d8ad00b1acdde27cd013e70ce6013..75ec291bda5004f31773c219643128ff
    if (oldComponentProps.showSecondaryToggleButton != newComponentProps.showSecondaryToggleButton) {
      _needsSplitAppearanceUpdate = true;
      _needsSplitSecondaryScreenNavBarUpdate = true;
+diff --git a/ios/gamma/split/RNSSplitHostController.h b/ios/gamma/split/RNSSplitHostController.h
+index 6162b537895d33b0bc2edcdc5bbef8c60db76fb0..1994e0639a34d36e13d597349b1d909c8d793f68 100644
+--- a/ios/gamma/split/RNSSplitHostController.h
++++ b/ios/gamma/split/RNSSplitHostController.h
+@@ -39,6 +39,12 @@ NS_ASSUME_NONNULL_BEGIN
+ 
+ - (void)setNeedsDisplayModeUpdate;
+ 
++/**
++ * @brief The display mode to give UIKit for the one JS prefers: `automatic` with a sidebar autosave name is the
++ * sidebar as it was last left (see `sidebarAutosaveName`), when it was saved.
++ */
++- (UISplitViewControllerDisplayMode)resolvedPreferredDisplayMode:(UISplitViewControllerDisplayMode)displayMode;
++
+ - (void)setNeedsOrientationUpdate;
+ 
+ #pragma mark - Updating
 diff --git a/ios/gamma/split/RNSSplitHostController.mm b/ios/gamma/split/RNSSplitHostController.mm
-index c7d2db75965d2cd661d9a56922d4d201a89564c1..9fb404b9da2a778150111b840b517f90a8377e05 100644
+index c7d2db75965d2cd661d9a56922d4d201a89564c1..32b9ff356d6a9ff929a6caf9a6b53def739fbb8a 100644
 --- a/ios/gamma/split/RNSSplitHostController.mm
 +++ b/ios/gamma/split/RNSSplitHostController.mm
 @@ -41,6 +41,17 @@ static const NSInteger maxNumberOfInspectors = 1;
@@ -741,7 +796,61 @@ index c7d2db75965d2cd661d9a56922d4d201a89564c1..9fb404b9da2a778150111b840b517f90
  
      self.delegate = self;
    }
-@@ -122,14 +134,27 @@ static const NSInteger maxNumberOfInspectors = 1;
+@@ -95,6 +107,53 @@ static const NSInteger maxNumberOfInspectors = 1;
+   [_splitAppearanceCoordinator needs:RNSSplitAppearanceUpdateFlagsDisplayModeUpdate];
+ }
+ 
++// Only a three-column split has a sidebar (its primary column) beside the supplementary column.
++- (NSString *)sidebarDefaultsKey
++{
++  NSString *name = _splitHostComponentView.sidebarAutosaveName;
++  if (name.length == 0 || self.style != UISplitViewControllerStyleTripleColumn) {
++    return nil;
++  }
++  return [@"RNSSplit Sidebar Hidden " stringByAppendingString:name];
++}
++
++- (UISplitViewControllerDisplayMode)resolvedPreferredDisplayMode:(UISplitViewControllerDisplayMode)displayMode
++{
++  NSString *key = [self sidebarDefaultsKey];
++  if (displayMode != UISplitViewControllerDisplayModeAutomatic || key == nil) {
++    return displayMode;
++  }
++  NSNumber *hidden = [NSUserDefaults.standardUserDefaults objectForKey:key];
++  if (![hidden isKindOfClass:NSNumber.class]) {
++    return displayMode;
++  }
++  return hidden.boolValue ? UISplitViewControllerDisplayModeOneBesideSecondary
++                          : UISplitViewControllerDisplayModeTwoBesideSecondary;
++}
++
++// Keeps whether the sidebar is shown, as the user (or the window's width) left it. Full screen hides every column but
++// the secondary one and leaves the sidebar as it was, and a collapsed split shows no sidebar at all.
++- (void)saveSidebarVisibilityForDisplayMode:(UISplitViewControllerDisplayMode)displayMode
++{
++  NSString *key = [self sidebarDefaultsKey];
++  if (key == nil || self.isCollapsed) {
++    return;
++  }
++  switch (displayMode) {
++    case UISplitViewControllerDisplayModeTwoBesideSecondary:
++    case UISplitViewControllerDisplayModeTwoOverSecondary:
++    case UISplitViewControllerDisplayModeTwoDisplaceSecondary:
++      [NSUserDefaults.standardUserDefaults setBool:NO forKey:key];
++      break;
++    case UISplitViewControllerDisplayModeOneBesideSecondary:
++    case UISplitViewControllerDisplayModeOneOverSecondary:
++      [NSUserDefaults.standardUserDefaults setBool:YES forKey:key];
++      break;
++    default:
++      break;
++  }
++}
++
+ - (void)setNeedsOrientationUpdate
+ {
+   [_splitAppearanceCoordinator needs:RNSSplitAppearanceUpdateFlagsOrientationUpdate];
+@@ -122,14 +181,27 @@ static const NSInteger maxNumberOfInspectors = 1;
    [self validateColumns:currentColumns];
    [self validateInspectors:currentInspectors];
  
@@ -774,7 +883,7 @@ index c7d2db75965d2cd661d9a56922d4d201a89564c1..9fb404b9da2a778150111b840b517f90
  
  #if RNS_IPHONE_OS_VERSION_AVAILABLE(26_0)
    if (@available(iOS 26.0, *)) {
-@@ -469,14 +494,44 @@ static const NSInteger maxNumberOfInspectors = 1;
+@@ -469,14 +541,45 @@ static const NSInteger maxNumberOfInspectors = 1;
  
  - (void)splitViewControllerDidCollapse:(UISplitViewController *)svc
  {
@@ -804,6 +913,7 @@ index c7d2db75965d2cd661d9a56922d4d201a89564c1..9fb404b9da2a778150111b840b517f90
 +  if (displayMode != _reportedDisplayMode &&
 +      [[self reactEventEmitter] emitOnDisplayModeWillChangeFrom:_reportedDisplayMode to:displayMode]) {
 +    _reportedDisplayMode = displayMode;
++    [self saveSidebarVisibilityForDisplayMode:displayMode];
 +  }
 +}
 +
@@ -819,7 +929,7 @@ index c7d2db75965d2cd661d9a56922d4d201a89564c1..9fb404b9da2a778150111b840b517f90
  #if RNS_IPHONE_OS_VERSION_AVAILABLE(26_0)
  
  /**
-@@ -520,8 +575,9 @@ static const NSInteger maxNumberOfInspectors = 1;
+@@ -520,9 +623,11 @@ static const NSInteger maxNumberOfInspectors = 1;
  - (void)splitViewController:(UISplitViewController *)svc
      willChangeToDisplayMode:(UISplitViewControllerDisplayMode)displayMode
  {
@@ -829,8 +939,10 @@ index c7d2db75965d2cd661d9a56922d4d201a89564c1..9fb404b9da2a778150111b840b517f90
 +      [[self reactEventEmitter] emitOnDisplayModeWillChangeFrom:self.displayMode to:displayMode]) {
 +    _reportedDisplayMode = displayMode;
    }
++  [self saveSidebarVisibilityForDisplayMode:displayMode];
  
    __weak auto weakSelf = self;
+   void (^notifyColumnPositioningDidChange)(void) = ^{
 diff --git a/ios/gamma/split/RNSSplitNavigationController.h b/ios/gamma/split/RNSSplitNavigationController.h
 index 06c34c7618cfd2ea2c3029e509c5677947420e75..ad9d7586a9aa07bbdc28abb18dd9a9f20c883b0e 100644
 --- a/ios/gamma/split/RNSSplitNavigationController.h
@@ -930,10 +1042,24 @@ index 612a1c037ab7d77b200c395ec849a9f38ad3213a..8a8b4918a13b3cd9917450d0df74d758
  
  - (void)dealloc
 diff --git a/lib/typescript/components/gamma/split/SplitHost.types.d.ts b/lib/typescript/components/gamma/split/SplitHost.types.d.ts
-index 944efd6e51ad0179efbee431d34c09a42cb39937..90d2d08fcb0329b06cb0c4b4992e8b1721c182a7 100644
+index 944efd6e51ad0179efbee431d34c09a42cb39937..47d3f59766f9dd4c78022dd4a450fe3690d8bb9f 100644
 --- a/lib/typescript/components/gamma/split/SplitHost.types.d.ts
 +++ b/lib/typescript/components/gamma/split/SplitHost.types.d.ts
-@@ -293,6 +293,14 @@ export interface SplitHostProps extends ViewProps {
+@@ -230,6 +230,13 @@ export interface SplitHostProps extends ViewProps {
+      * @default automatic
+      */
+     preferredDisplayMode?: SplitDisplayMode | undefined;
++    /**
++     * @summary The name under which a three-column split keeps whether its primary column (the sidebar) is hidden, in
++     * the app's user defaults, as an `NSSplitView` with an autosave name does on the Mac.
++     *
++     * @default '' (not kept)
++     */
++    sidebarAutosaveName?: string | undefined;
+     /**
+      * @summary Specifies the split behavior which will be preferred to use, if the layout requirements are met.
+      *
+@@ -293,6 +300,14 @@ export interface SplitHostProps extends ViewProps {
       * @supported iOS 26 or higher
       */
      showInspector?: boolean | undefined;
@@ -948,6 +1074,18 @@ index 944efd6e51ad0179efbee431d34c09a42cb39937..90d2d08fcb0329b06cb0c4b4992e8b17
      /**
       * @summary Determines whether a button to toggle to and from secondaryOnly display mode is visible.
       */
+diff --git a/lib/typescript/fabric/gamma/split/SplitHostNativeComponent.d.ts b/lib/typescript/fabric/gamma/split/SplitHostNativeComponent.d.ts
+index f57648812e251ff7b28e0376782b09674d7da5e6..4035489295015d43ae2c49658f2e5b15188955df 100644
+--- a/lib/typescript/fabric/gamma/split/SplitHostNativeComponent.d.ts
++++ b/lib/typescript/fabric/gamma/split/SplitHostNativeComponent.d.ts
+@@ -27,6 +27,7 @@ interface ColumnMetrics {
+ }
+ interface NativeProps extends ViewProps {
+     preferredDisplayMode?: CT.WithDefault<SplitViewDisplayMode, 'automatic'>;
++    sidebarAutosaveName?: CT.WithDefault<string, ''>;
+     preferredSplitBehavior?: CT.WithDefault<SplitViewSplitBehavior, 'automatic'>;
+     primaryEdge?: CT.WithDefault<SplitViewPrimaryEdge, 'leading'>;
+     showSecondaryToggleButton?: CT.WithDefault<boolean, false>;
 diff --git a/src/components/gamma/split/SplitHost.tsx b/src/components/gamma/split/SplitHost.tsx
 index 7a5de71374ec4d6c88e50b4c01121b0a55e4be13..d6e18e8a0ccc9e00019a1ec6109b8a931475e8c2 100644
 --- a/src/components/gamma/split/SplitHost.tsx
@@ -964,10 +1102,28 @@ index 7a5de71374ec4d6c88e50b4c01121b0a55e4be13..d6e18e8a0ccc9e00019a1ec6109b8a93
      return true;
    }
 diff --git a/src/components/gamma/split/SplitHost.types.ts b/src/components/gamma/split/SplitHost.types.ts
-index 9039e5a1b1c23308e4417dd6f294a5701e267b1b..131e8ceaa25b017fa5dac5b1689a2f387959b324 100644
+index 9039e5a1b1c23308e4417dd6f294a5701e267b1b..e9eb4e7e92e6ec034705bec5c1a10723771adb32 100644
 --- a/src/components/gamma/split/SplitHost.types.ts
 +++ b/src/components/gamma/split/SplitHost.types.ts
-@@ -320,6 +320,14 @@ export interface SplitHostProps extends ViewProps {
+@@ -257,6 +257,17 @@ export interface SplitHostProps extends ViewProps {
+    * @default automatic
+    */
+   preferredDisplayMode?: SplitDisplayMode | undefined;
++  /**
++   * @summary The name under which a three-column split keeps whether its primary column (the sidebar) is hidden, in
++   * the app's user defaults, as an `NSSplitView` with an autosave name does on the Mac.
++   *
++   * While `preferredDisplayMode` is `automatic`, the split opens with the sidebar as it was last shown or hidden in any
++   * split with this name: UIKit only keeps that with the scene's saved state, which quitting discards by default on the
++   * Mac. Full screen (`secondaryOnly`) and a collapsed split leave it as it was.
++   *
++   * @default '' (not kept)
++   */
++  sidebarAutosaveName?: string | undefined;
+   /**
+    * @summary Specifies the split behavior which will be preferred to use, if the layout requirements are met.
+    *
+@@ -320,6 +331,14 @@ export interface SplitHostProps extends ViewProps {
     * @supported iOS 26 or higher
     */
    showInspector?: boolean | undefined;
@@ -1008,10 +1164,14 @@ index da28c51c6ffd29b996c876742a11cfdf322db969..ef0cb5f6573fbe6d8c994d417ebc0eee
    titleFontSize?: CT.Int32 | undefined;
    titleFontWeight?: string | undefined;
 diff --git a/src/fabric/gamma/split/SplitHostNativeComponent.ts b/src/fabric/gamma/split/SplitHostNativeComponent.ts
-index b3dfa2d5231aea5ec33cb8d889d2510ca459f960..655c93282f5458ceeb3efd821490b57daa1df024 100644
+index b3dfa2d5231aea5ec33cb8d889d2510ca459f960..163cb5874a9e93190cd8488cbeaf201307b5a508 100644
 --- a/src/fabric/gamma/split/SplitHostNativeComponent.ts
 +++ b/src/fabric/gamma/split/SplitHostNativeComponent.ts
-@@ -74,6 +74,7 @@ interface NativeProps extends ViewProps {
+@@ -71,9 +71,11 @@ interface NativeProps extends ViewProps {
+   // Appearance
+ 
+   preferredDisplayMode?: CT.WithDefault<SplitViewDisplayMode, 'automatic'>;
++  sidebarAutosaveName?: CT.WithDefault<string, ''>;
    preferredSplitBehavior?: CT.WithDefault<SplitViewSplitBehavior, 'automatic'>;
    primaryEdge?: CT.WithDefault<SplitViewPrimaryEdge, 'leading'>;
    showSecondaryToggleButton?: CT.WithDefault<boolean, false>;

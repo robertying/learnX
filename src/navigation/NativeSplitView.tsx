@@ -19,7 +19,6 @@ import type { Metrics } from 'react-native-safe-area-context';
 import { Split } from 'react-native-screens/experimental';
 import type { SplitDisplayMode } from 'react-native-screens/experimental';
 import SplitSizes from 'constants/SplitSizes';
-import { setSidebarHidden, useAppStateStore } from 'data/appState';
 import { SplitViewContext } from './SplitView';
 
 export interface NativeSplitViewProps {
@@ -127,14 +126,11 @@ const NativeSplitViewProvider: React.FC<
   // own, e.g. while expanding; were those fed back as the preferred one, the
   // master pane could be left hidden for good.
   // The master pane starts shown: without a sidebar there's no system button
-  // to bring it back. The sidebar starts as it was last left, which UIKit only
-  // restores with the window's saved state, and quitting discards that unless
-  // the user turned off "Close windows when quitting an application".
+  // to bring it back. The sidebar starts as it was last left (natively, see
+  // `sidebarAutosaveName`).
   const [preferredDisplayMode, setPreferredDisplayMode] =
-    useState<SplitDisplayMode>(() =>
-      sidebar !== undefined && !useAppStateStore.getState().sidebarHidden
-        ? 'twoBesideSecondary'
-        : 'oneBesideSecondary',
+    useState<SplitDisplayMode>(
+      sidebar === undefined ? 'oneBesideSecondary' : 'automatic',
     );
   // What UIKit actually shows, for display only.
   const [displayMode, setDisplayMode] = useState<SplitDisplayMode>();
@@ -193,18 +189,10 @@ const NativeSplitViewProvider: React.FC<
   // out; show the master pane again unless it was hidden in this session.
   const handleDisplayModeWillChange = (nextDisplayMode: SplitDisplayMode) => {
     setDisplayMode(nextDisplayMode);
-    if (nextDisplayMode === 'secondaryOnly') {
-      if (!fullScreen) {
-        setPreferredDisplayMode(
-          hasSidebar && !useAppStateStore.getState().sidebarHidden
-            ? 'twoBesideSecondary'
-            : 'oneBesideSecondary',
-        );
-      }
-    } else if (hasSidebar) {
-      // Whether shown with the system's button or by the split itself, the
-      // sidebar is left this way, as an NSSplitView autosaves it on the Mac.
-      setSidebarHidden(!displayModesWithSidebar.has(nextDisplayMode));
+    if (nextDisplayMode === 'secondaryOnly' && !fullScreen) {
+      setPreferredDisplayMode(
+        hasSidebar ? 'twoBesideSecondary' : 'oneBesideSecondary',
+      );
     }
   };
   const fullScreenInBackground = useRef(false);
@@ -236,6 +224,11 @@ const NativeSplitViewProvider: React.FC<
     >
       <Split.Host
         preferredDisplayMode={preferredDisplayMode}
+        // Kept in the app's user defaults, as an NSSplitView's autosave keeps
+        // it on the Mac: UIKit only restores it with the window's saved state,
+        // which quitting discards unless the user turned off "Close windows
+        // when quitting an application".
+        sidebarAutosaveName={hasSidebar ? 'Main' : undefined}
         preferredSplitBehavior="tile"
         // Tiled, UIKit shows the detail pane alone when it can't fit beside
         // the list, and on Mac that leaves no button to bring the list back.
