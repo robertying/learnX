@@ -9,14 +9,6 @@ import { notifyUpdate } from 'services/updateNotice';
  */
 export const checksForUpdates = () => bridge().updates.checks();
 
-/**
- * The window is in front: shown and focused. A window behind others is
- * still "visible" to the page, but nobody sees its Settings badge.
- */
-const inFront = () =>
-  globalThis.document?.visibilityState === 'visible' &&
-  globalThis.document.hasFocus();
-
 let watching = false;
 
 /**
@@ -39,7 +31,6 @@ export const watchUpdates = () => {
         body: update.download
           ? t('updateNotificationBody')
           : t('updateNotificationReadyBody'),
-        inFront: inFront(),
       });
     }
   });

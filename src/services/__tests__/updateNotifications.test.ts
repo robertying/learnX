@@ -33,7 +33,6 @@ const latest = (version: string) =>
 beforeEach(() => {
   clearQueryCache();
   resetNotified();
-  // React Native's AppState mock never reads 'active': the app is behind.
 });
 
 describe('checkForUpdate', () => {

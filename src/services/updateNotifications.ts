@@ -17,7 +17,6 @@ const notifyRelease = (release: Release) =>
     ? notifyUpdate({
         version: release.version,
         body: t('updateNotificationBody'),
-        inFront: AppState.currentState === 'active',
       })
     : Promise.resolve();
 
