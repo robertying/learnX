@@ -3,6 +3,7 @@ import { resetNotified } from 'data/notified';
 import type { Bridge, BridgeUpdate } from 'web/bridge';
 import { pendingUpdate } from 'services/electronUpdates';
 import {
+  checkForUpdate,
   checksForUpdates,
   watchUpdates,
 } from 'services/updateNotifications.web';
@@ -67,4 +68,12 @@ it('stays quiet while the window is in front', async () => {
   jest.mocked(document.hasFocus).mockReturnValue(true);
   await ready({ version: '19.3.0' });
   expect(posted()).toEqual([]);
+});
+
+it('says nothing when the main process has nothing pending', async () => {
+  jest.mocked(bridge.updates.onReady).mock.calls[0]?.[0]({ version: '19.4.0' });
+  await new Promise(resolve => setTimeout(resolve));
+  expect(posted()).toEqual([]);
+  // The main process checks on its own timer.
+  await expect(checkForUpdate()).resolves.toBeUndefined();
 });

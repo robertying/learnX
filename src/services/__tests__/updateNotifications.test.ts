@@ -93,5 +93,15 @@ describe('watchUpdates', () => {
     onChange('active');
     await new Promise(setImmediate);
     expect(getLatestRelease).toHaveBeenCalledTimes(1);
+
+    // Going to the background doesn't check.
+    jest.mocked(getLatestRelease).mockClear();
+    await queryClient.invalidateQueries({
+      queryKey: latestReleaseQuery.queryKey,
+      refetchType: 'none',
+    });
+    onChange('background');
+    await new Promise(setImmediate);
+    expect(getLatestRelease).not.toHaveBeenCalled();
   });
 });
