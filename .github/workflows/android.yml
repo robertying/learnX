@@ -61,11 +61,11 @@ jobs:
 
       - name: Set up JS
         id: install
-        if: steps.changes.outputs.changed != 'false'
+        if: steps.changes.outputs.changed == 'true'
         uses: ./.github/actions/setup-js
 
       - name: Set up Java
-        if: steps.changes.outputs.changed != 'false'
+        if: steps.changes.outputs.changed == 'true'
         uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
         with:
           distribution: temurin
@@ -76,7 +76,7 @@ jobs:
       # Gradle plugins) and only rebuild what changed.
       - name: Set up Gradle
         id: gradle
-        if: steps.changes.outputs.changed != 'false'
+        if: steps.changes.outputs.changed == 'true'
         uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
         with:
           cache-read-only: ${{ env.SAVE_CACHE != 'true' }}
@@ -84,14 +84,14 @@ jobs:
       # Keeps compiled C/C++ between runs.
       - name: Set up ccache
         id: ccache
-        if: steps.changes.outputs.changed != 'false'
+        if: steps.changes.outputs.changed == 'true'
         uses: hendrikmuhs/ccache-action@dbeefd73e8e2ffc1bbc412570072735eb4db3607 # v1.2.25
         with:
           key: android
           save: ${{ env.SAVE_CACHE }}
 
       - name: Unit tests
-        if: steps.changes.outputs.changed != 'false'
+        if: steps.changes.outputs.changed == 'true'
         run: scripts/checks/test-android.sh --build-cache
 
       # The release bundle inlines .env; the mock login is what E2E logs in
@@ -102,7 +102,7 @@ jobs:
       # both, and reuses their Gradle daemon.
       - name: Build release APK
         if: >-
-          !cancelled() && steps.changes.outputs.changed != 'false' &&
+          !cancelled() && steps.changes.outputs.changed == 'true' &&
           steps.install.outcome == 'success' && steps.gradle.outcome == 'success' &&
           steps.ccache.outcome == 'success'
         run: |
@@ -145,7 +145,7 @@ jobs:
         if: env.E2E == 'true'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: apk
+          name: android-apk
           path: build/e2e-apks
           retention-days: 1
 
@@ -154,7 +154,7 @@ jobs:
         if: env.E2E == 'true'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: ota-e2e-key
+          name: android-ota-e2e-key
           path: build/ota-e2e/*.pem
           retention-days: 1
 
@@ -182,13 +182,13 @@ jobs:
       - name: Download APK
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          name: apk
+          name: android-apk
           path: build
 
       - name: Download update signing key
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          name: ota-e2e-key
+          name: android-ota-e2e-key
           path: build/ota-e2e
 
       # scripts/e2e/e2e.sh reads the flows' labels and mock texts from the
@@ -233,7 +233,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: e2e-android
+          name: android-e2e
           path: build/maestro
           if-no-files-found: ignore
           retention-days: 14
