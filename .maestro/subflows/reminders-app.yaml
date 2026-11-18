@@ -23,15 +23,16 @@ appId: com.apple.reminders
     commands:
       - assertNotVisible: ${MATCH}
 # The back button has an id from iOS 26 on (IOS_MAJOR, scripts/e2e/e2e.sh); before,
-# only its label.
+# only its label. On iPad the lists stay in the sidebar beside the open list,
+# with no back button.
 - runFlow:
     when:
-      true: ${IOS_MAJOR >= 26}
+      true: ${IOS_MAJOR >= 26 && IPAD != 'true'}
     commands:
       - tapOn:
           id: BackButton
 - runFlow:
     when:
-      true: ${IOS_MAJOR < 26}
+      true: ${IOS_MAJOR < 26 && IPAD != 'true'}
     commands:
       - tapOn: 'Lists|列表'

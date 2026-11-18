@@ -24,7 +24,7 @@ name: Open every other screen
     env:
       LIST: '.*(${T_todayDueSoon}).*'
 
-# An open assignment's submission sheet, closed without sending
+# An open assignment's submission, closed without sending
 - runFlow:
     file: subflows/tab.yaml
     env:
@@ -41,7 +41,7 @@ name: Open every other screen
     timeout: 10000
 - assertVisible:
     id: pickAttachment
-- runFlow: subflows/close.yaml
+- runFlow: subflows/close-item-page.yaml
 - extendedWaitUntil:
     notVisible:
       id: assignmentSubmission
@@ -67,8 +67,8 @@ name: Open every other screen
     visible:
       id: courseXReload
     timeout: 10000
-# It opens as a sheet.
-- runFlow: subflows/close.yaml
+# It's about the open course: beside the course on iPad, a sheet elsewhere.
+- runFlow: subflows/close-item-page.yaml
 - extendedWaitUntil:
     notVisible:
       id: courseXReload
