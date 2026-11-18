@@ -46,25 +46,56 @@ class SimulatorUITestCase: XCTestCase {
     passwordField.tap()
     passwordField.typeText(password + "\n")
 
-    // The set-up page opens over Today after the first login, maybe after the system's "Save Password?" alert.
-    let next = element(idMatching: "setup-not-now|tab-.*")
-    let deadline = Date().addingTimeInterval(30)
-    while !next.exists, Date() < deadline {
-      let notNow = app.buttons.matching(NSPredicate(format: "label IN %@", ["Not Now", "现在不", "以后"])).firstMatch
-      if notNow.exists {
-        notNow.tap()
-      }
-      _ = next.waitForExistence(timeout: 1)
-    }
+    // The set-up page opens over Today after the first login (`useLaunchSheet`), and the system's "Save Password?"
+    // alert can open before or after it, over either: dismiss whichever is on top until the tabs are uncovered. The
+    // set-up page doesn't open after logging in again, so with no alert or set-up page it's given 5 s to open.
+    let savePassword = app.buttons.matching(
+      NSPredicate(format: "label IN %@ AND identifier != %@", ["Not Now", "现在不", "以后"], "setup-not-now")
+    ).firstMatch
     let setUpLater = element(id: "setup-not-now")
-    if setUpLater.waitForExistence(timeout: 5) {
-      setUpLater.tap()
+    let tabs = element(idMatching: "tab-.*")
+    var setUpClosed = false
+    var uncoveredSince: Date?
+    let deadline = Date().addingTimeInterval(30)
+    while Date() < deadline {
+      if savePassword.exists {
+        savePassword.tap()
+        uncoveredSince = nil
+      } else if setUpLater.exists {
+        if setUpLater.isHittable {
+          setUpLater.tap()
+          setUpClosed = true
+        }
+        uncoveredSince = nil
+      } else if tabs.exists {
+        let since = uncoveredSince ?? Date()
+        uncoveredSince = since
+        if setUpClosed || Date().timeIntervalSince(since) >= 5 {
+          return
+        }
+      }
+      // Polls, returning early when the alert opens.
+      _ = savePassword.waitForExistence(timeout: 1)
     }
+    XCTFail("the tabs didn't show after logging in")
   }
 
   /// Taps a tab in the tab bar or the sidebar, whichever shows it: an iPad has both, one of them hidden.
   func open(tab id: String) throws {
     try self.tab(id).tap()
+  }
+
+  /// Opens a `learnx://` link in the app as it runs. `XCUIApplication.open(_:)` would end the app and launch it again
+  /// with the link, and the new launch logs in and catches up again, with whatever the link set.
+  func open(link: String) throws {
+    let launched = processID
+    XCUIDevice.shared.system.open(try XCTUnwrap(URL(string: link)))
+    XCTAssertEqual(processID, launched, "opening \(link) launched the app again")
+  }
+
+  /// The app's process id, from its description: `XCUIApplication` has no property for it.
+  private var processID: String? {
+    app.debugDescription.firstMatch(of: /pid: (\d+)/).map { String($0.1) }
   }
 
   /// The tab in the tab bar or the sidebar that's on screen.
