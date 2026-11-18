@@ -15,7 +15,7 @@ appId: ${APP_ID}
 - runFlow:
     file: ../../subflows/tab.yaml
     env:
-      TAB: 'tab-notices|bell\.fill'
+      TAB: 'tab-notices'
 - extendedWaitUntil:
     visible: '.*(${MOCK_STORE_NOTICE}).*'
     timeout: 10000

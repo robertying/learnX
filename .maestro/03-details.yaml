@@ -21,7 +21,7 @@ tags:
 - runFlow:
     file: subflows/tab.yaml
     env:
-      TAB: 'tab-assignments|list\.bullet\.clipboard\.fill'
+      TAB: 'tab-assignments'
 - runFlow:
     file: subflows/open.yaml
     env:
@@ -45,7 +45,7 @@ tags:
 - runFlow:
     file: subflows/tab.yaml
     env:
-      TAB: 'tab-files|folder\.fill'
+      TAB: 'tab-files'
 # The screen shows right away; the file itself downloads in the background.
 - runFlow:
     file: subflows/open.yaml

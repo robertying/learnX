@@ -67,26 +67,12 @@ class SimulatorUITestCase: XCTestCase {
     try self.tab(id).tap()
   }
 
-  /// The tab in the tab bar or the sidebar that's on screen. When the tabs mount after a login in the same run of the
-  /// app (a new install, or after logging out), the tab bar buttons have no identifiers until the app is launched
-  /// again: SwiftUI's `TabView` in react-native-bottom-tabs doesn't pass on the `Tab`'s `accessibilityIdentifier`. So a
-  /// tab is also found by its icon's filled SF Symbol, as the flows do (`.maestro/subflows/tab.yaml`).
+  /// The tab in the tab bar or the sidebar that's on screen.
   func tab(_ id: String) throws -> XCUIElement {
-    let ids = [id] + (Self.tabSymbols[id] ?? [])
-    let matches = app.descendants(matching: .any).matching(NSPredicate(format: "identifier IN %@", ids))
+    let matches = app.descendants(matching: .any).matching(identifier: id)
     try wait(matches.firstMatch, "tab \(id)", 10)
     return try XCTUnwrap(matches.allElementsBoundByIndex.first { $0.isHittable }, "tab \(id) isn't on screen")
   }
-
-  /// The tabs' icons (`navigation/MainTab.tsx`, `helpers/systemIcons.ts`); Today's follows the time of day.
-  private static let tabSymbols = [
-    "tab-today": ["sunrise.fill", "sun.max.fill", "sunset.fill", "moon.stars.fill"],
-    "tab-notices": ["bell.fill"],
-    "tab-assignments": ["list.bullet.clipboard.fill"],
-    "tab-files": ["folder.fill"],
-    "tab-courses": ["books.vertical.fill"],
-    "tab-settings": ["gearshape.fill"],
-  ]
 
   /// Drags `element` down by `distance` points (up when negative) and holds it there, and returns a screenshot taken
   /// `delay` seconds in, while the finger is still down. XCUITest's press blocks until it lifts, so the screenshot is

@@ -106,7 +106,7 @@ name: Press notification action buttons
       - runFlow:
           file: subflows/tab.yaml
           env:
-            TAB: 'tab-assignments|list\.bullet\.clipboard\.fill'
+            TAB: 'tab-assignments'
       - runFlow:
           file: subflows/filter.yaml
           env:
@@ -125,4 +125,4 @@ name: Press notification action buttons
       - runFlow:
           file: subflows/tab.yaml
           env:
-            TAB: 'tab-notices|bell\.fill'
+            TAB: 'tab-notices'

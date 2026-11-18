@@ -30,7 +30,7 @@ appId: ${APP_ID}
       mockLatency: none
 - extendedWaitUntil:
     visible:
-      id: 'tab-today|(sunrise|sun\.max|sunset|moon\.stars)\.fill'
+      id: 'tab-today'
     timeout: 30000
 - assertNotVisible:
     id: 'welcome-continue|login-username'
@@ -44,7 +44,7 @@ appId: ${APP_ID}
 - runFlow:
     file: ../subflows/tab.yaml
     env:
-      TAB: 'tab-assignments|list\.bullet\.clipboard\.fill'
+      TAB: 'tab-assignments'
 - waitForAnimationToEnd:
     timeout: 10000
 
@@ -70,7 +70,7 @@ appId: ${APP_ID}
     commands:
       - extendedWaitUntil:
           visible:
-            id: 'tab-today|(sunrise|sun\.max|sunset|moon\.stars)\.fill'
+            id: 'tab-today'
           timeout: 30000
       - assertNotVisible:
           id: 'whats-new|setup-not-now'

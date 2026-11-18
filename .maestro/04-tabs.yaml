@@ -14,7 +14,7 @@ tags:
 - runFlow:
     file: subflows/tab.yaml
     env:
-      TAB: 'tab-today|(sunrise|sun\.max|sunset|moon\.stars)\.fill'
+      TAB: 'tab-today'
 # The section header may carry more text around the label.
 - runFlow:
     when:
@@ -24,7 +24,7 @@ tags:
 - runFlow:
     file: subflows/tab.yaml
     env:
-      TAB: 'tab-assignments|list\.bullet\.clipboard\.fill'
+      TAB: 'tab-assignments'
 - runFlow:
     when:
       true: ${ACCOUNT == 'mock'}
@@ -33,7 +33,7 @@ tags:
 - runFlow:
     file: subflows/tab.yaml
     env:
-      TAB: 'tab-files|folder\.fill'
+      TAB: 'tab-files'
 - runFlow:
     when:
       true: ${ACCOUNT == 'mock'}
@@ -42,7 +42,7 @@ tags:
 - runFlow:
     file: subflows/tab.yaml
     env:
-      TAB: 'tab-courses|books\.vertical\.fill'
+      TAB: 'tab-courses'
 - runFlow:
     when:
       true: ${ACCOUNT == 'mock'}
@@ -81,7 +81,7 @@ tags:
 - runFlow:
     file: subflows/tab.yaml
     env:
-      TAB: 'tab-notices|bell\.fill'
+      TAB: 'tab-notices'
 - runFlow:
     when:
       true: ${ACCOUNT == 'mock'}
