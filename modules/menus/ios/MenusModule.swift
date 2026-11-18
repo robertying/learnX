@@ -7,6 +7,10 @@ public final class MenusModule: Module {
 
     Events("onCommand")
 
+    OnCreate {
+      TabKeyModifier.register()
+    }
+
     OnStartObserving(nil, startObserving)
     OnStopObserving(nil, stopObserving)
 
