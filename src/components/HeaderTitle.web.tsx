@@ -32,9 +32,11 @@ const HeaderTitle: React.FC<HeaderTitleProps> = ({
 );
 
 const styles = StyleSheet.create({
+  // As wide as the header leaves it, so a long title ends in an ellipsis.
   root: {
     justifyContent: 'center',
     alignItems: 'flex-start',
+    maxWidth: '100%',
   },
 });
 

@@ -8,7 +8,7 @@ import type { SFSymbol } from 'sf-symbols-typescript';
 import { headerBarHeight } from 'components/HeaderTitle';
 import IconButton, { type IconButtonIcon } from 'components/IconButton';
 import TextButton from 'components/TextButton';
-import { isAndroid } from 'helpers/platform';
+import { isAndroid, isElectron } from 'helpers/platform';
 import { systemIcons } from 'helpers/systemIcons';
 
 /**
@@ -60,6 +60,8 @@ export type HeaderEntries = (
   | null
   | undefined
 )[];
+
+const electron = isElectron();
 
 const isButton = (
   entry: HeaderButton | CustomHeaderEntry,
@@ -131,7 +133,15 @@ export const headerButtons = (
   );
   const items = () => shown.map(nativeItem).filter(item => item !== undefined);
   const row = () => (
-    <View style={side === 'left' ? styles.left : styles.right}>
+    <View
+      style={[
+        side === 'left' ? styles.left : styles.right,
+        electron && [
+          styles.commandBar,
+          side === 'left' ? styles.commandBarLeft : styles.commandBarRight,
+        ],
+      ]}
+    >
       {shown.map(element)}
     </View>
   );
@@ -153,5 +163,18 @@ const styles = StyleSheet.create({
   right: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
+  },
+  // The Electron app: spaced as a command bar, the buttons 4 apart and
+  // 8 in from the pane's edge, so a hovered or pressed button's fill never
+  // meets the edge or its neighbor's.
+  commandBar: {
+    alignItems: 'center',
+    gap: 4,
+  },
+  commandBarLeft: {
+    marginStart: 8,
+  },
+  commandBarRight: {
+    marginEnd: 8,
   },
 });

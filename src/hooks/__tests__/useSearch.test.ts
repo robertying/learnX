@@ -118,4 +118,34 @@ describe('useSearch', () => {
       files: [],
     });
   });
+
+  it('keeps the order while the query stays, though opening a result reads it', async () => {
+    const read = notice('r', 'Lab 4', '');
+    const unread = { ...notice('u', 'Lab 4', ''), hasRead: false };
+    const list = (items: Notice[]) => items.map(i => i.id);
+    const { result, rerender } = await renderHook(
+      ({ items, query }: { items: Notice[]; query: string }) =>
+        useSearch(items, [], [], query),
+      {
+        initialProps: {
+          items: [{ ...read, hasRead: true }, unread],
+          query: 'lab',
+        },
+      },
+    );
+    // Unread first among results that match as well.
+    expect(list(result.current.notices)).toEqual(['u', 'r']);
+
+    // Opened and so read: it stays where it was.
+    const bothRead = [
+      { ...read, hasRead: true },
+      { ...unread, hasRead: true },
+    ];
+    await rerender({ items: bothRead, query: 'lab' });
+    expect(list(result.current.notices)).toEqual(['u', 'r']);
+
+    // A new query ranks by what's read now.
+    await rerender({ items: bothRead, query: 'lab 4' });
+    expect(list(result.current.notices)).toEqual(['r', 'u']);
+  });
 });

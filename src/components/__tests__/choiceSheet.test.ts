@@ -54,3 +54,14 @@ it('shows a dialog on Android, the first choice as its main button and none in r
   options!.onDismiss!();
   expect(onCancel).toHaveBeenCalled();
 });
+
+it('shows a dialog in the Electron app, the first choice first as its main button', () => {
+  jest.replaceProperty(Platform, 'OS', 'web');
+  const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  show();
+  const [, , buttons] = alert.mock.calls[0];
+  // Cancel goes last in the dialog itself (web/alert's orderedButtons).
+  expect(buttons!.map(b => b.text)).toEqual([t('cancel'), 'Export', 'Delete']);
+  buttons![1].onPress!();
+  expect(first).toHaveBeenCalled();
+});

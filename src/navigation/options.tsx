@@ -3,6 +3,7 @@ import type {
   NativeStackNavigationOptions,
   NativeStackNavigationProp,
 } from '@react-navigation/native-stack';
+import type { ViewStyle } from 'react-native';
 import { t } from 'helpers/i18n';
 import HeaderTitle from 'components/HeaderTitle';
 import { brandColor } from 'theme';
@@ -69,6 +70,15 @@ export const tabRootOptions: NativeStackNavigationOptions =
     ? { headerLargeTitleEnabled: true }
     : {};
 
+/**
+ * Styles for the containers of React Navigation's JS header, the one the
+ * Electron app draws: native-stack hands them on to it without typing them.
+ */
+export const jsHeaderContainers = (styles: {
+  headerTitleContainerStyle?: ViewStyle;
+  headerRightContainerStyle?: ViewStyle;
+}) => styles as NativeStackNavigationOptions;
+
 /** iPhone and iPad from iOS 26, where the header is Liquid Glass; the Mac keeps its own. */
 export const hasGlassHeader =
   DeviceInfo.hasLiquidGlass() && !DeviceInfo.isMac();
@@ -100,8 +110,23 @@ export const hasGlassHeader =
 export const stackScreenOptions: NativeStackNavigationOptions = hasGlassHeader
   ? { headerTransparent: true, headerBackButtonDisplayMode: 'minimal' }
   : isElectron()
-    ? // A Windows page header: the title at the start, the back arrow alone.
-      { headerTitleAlign: 'left', headerBackButtonDisplayMode: 'minimal' }
+    ? {
+        // A Windows page header: the title at the start, the back arrow alone.
+        headerTitleAlign: 'left',
+        headerBackButtonDisplayMode: 'minimal',
+        // The buttons keep their room and the title shortens before them.
+        // React Navigation's header guesses the buttons are 52 wide and lets
+        // their row shrink to nothing, so more buttons than that drew over
+        // the title.
+        ...jsHeaderContainers({
+          headerTitleContainerStyle: {
+            flexShrink: 1,
+            minWidth: 0,
+            maxWidth: '100%',
+          },
+          headerRightContainerStyle: { flexBasis: 'auto', flexShrink: 0 },
+        }),
+      }
     : {};
 
 // Detail screens set their own title from the item they show.

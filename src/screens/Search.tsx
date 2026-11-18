@@ -35,7 +35,7 @@ import ToggleMenu from 'components/ToggleMenu';
 import type { ToggleMenuOption } from 'components/ToggleMenu.shared';
 import { systemIcons } from 'helpers/systemIcons';
 import { headerButtons } from 'navigation/headerButtons';
-import { hasGlassHeader } from 'navigation/options';
+import { hasGlassHeader, jsHeaderContainers } from 'navigation/options';
 import { scrollInsetBehavior } from 'constants/scrollInsetBehavior';
 import { t } from 'helpers/i18n';
 import { SearchStackParams } from 'navigation/types';
@@ -90,6 +90,20 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
     // header's title.
     if (isElectron()) {
       navigation.setOptions({
+        // The box takes the room between Close and Filter (up to its own
+        // width), as a Windows search page's does.
+        ...jsHeaderContainers({
+          headerTitleContainerStyle: {
+            flexGrow: 1,
+            flexShrink: 1,
+            minWidth: 0,
+          },
+          headerRightContainerStyle: {
+            flexGrow: 0,
+            flexShrink: 0,
+            flexBasis: 'auto',
+          },
+        }),
         headerTitle: () => (
           <HeaderSearch
             defaultValue={initialQuery}

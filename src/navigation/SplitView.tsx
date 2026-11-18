@@ -201,7 +201,7 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
         >
           {children}
         </View>
-        {showDetail && <Divider vertical />}
+        {showDetail && !masterHidden && <Divider vertical />}
         <View
           testID="split-detail"
           style={[styles.detail, { display: showDetail ? 'flex' : 'none' }]}
@@ -218,9 +218,12 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
 };
 
 const styles = StyleSheet.create({
+  // Clips the hidden master pane, which sits off its leading edge: in the
+  // Electron app the navigation pane is there, not the window's edge.
   root: {
     flexDirection: 'row',
     flex: 1,
+    overflow: 'hidden',
   },
   master: {
     width: SplitSizes.masterWidth,
