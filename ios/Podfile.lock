@@ -214,6 +214,10 @@ PODS:
     - ExpoModulesCore
   - LearnXToast/Tests (1.0.0):
     - ExpoModulesCore
+  - LearnXWindows (1.0.0):
+    - ExpoModulesCore
+  - LearnXWindows/Tests (1.0.0):
+    - ExpoModulesCore
   - RCT-Folly (2024.11.18.00):
     - RCT-Folly/Default (= 2024.11.18.00)
     - ReactNativeDependencies
@@ -2520,6 +2524,8 @@ DEPENDENCIES:
   - LearnXSpotlight/Tests (from `../modules/spotlight/ios`)
   - LearnXToast (from `../modules/toast/ios`)
   - LearnXToast/Tests (from `../modules/toast/ios`)
+  - LearnXWindows (from `../modules/windows/ios`)
+  - LearnXWindows/Tests (from `../modules/windows/ios`)
   - RCT-Folly (from `build/rndeps-facades/RCT-Folly`)
   - RCTDeprecation (from `build/rncore-facades/RCTDeprecation`)
   - RCTRequired (from `build/rncore-facades/RCTRequired`)
@@ -2719,6 +2725,8 @@ EXTERNAL SOURCES:
     :path: "../modules/spotlight/ios"
   LearnXToast:
     :path: "../modules/toast/ios"
+  LearnXWindows:
+    :path: "../modules/windows/ios"
   RCT-Folly:
     :path: build/rndeps-facades/RCT-Folly
   RCTDeprecation:
@@ -2955,6 +2963,7 @@ SPEC CHECKSUMS:
   LearnXShortcuts: f7d94d3eab97e8ecb2feaaf05c27ca59f6ef6cd9
   LearnXSpotlight: 149cdd723faf121ec4ebc8549cc072b50ccd1806
   LearnXToast: 1d1d0eaea35574578f5e3af391df8d694c89e4ea
+  LearnXWindows: 614ff953a32e8db3e1d68aeda4932e003d75107a
   RCT-Folly: 82921e585c0400eda46fac1068297aa9dfb035e4
   RCTDeprecation: c62b9b3fbf0d26b76755f3ebd1c913a4fb469dde
   RCTRequired: d0563e2484633b657976195f0543e180133afd3a

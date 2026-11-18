@@ -23,10 +23,7 @@ const usePendingTargetStore = create<{
   targets: {},
 }));
 
-export const setPendingTarget = (
-  target: PendingTarget | null,
-  windowId = '',
-) =>
+export const setPendingTarget = (target: PendingTarget | null, windowId = '') =>
   usePendingTargetStore.setState(({ targets }) => ({
     targets: { ...targets, [windowId]: target ?? undefined },
   }));

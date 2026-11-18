@@ -57,4 +57,18 @@ describe('windows', () => {
     setWindowLink('a', 'learnx://today');
     expect(Windows!.setWindowLink).toHaveBeenCalledWith('a', 'learnx://today');
   });
+
+  it("keeps a window's place when its root registers again", () => {
+    open('a');
+    open('b');
+    open('a');
+    expect(targetWindow()).toBe('a');
+  });
+
+  it('ignores a window that fails to open', async () => {
+    jest.mocked(Windows!.openWindow).mockRejectedValueOnce(new Error('no'));
+    openWindow('learnx://notice/n1');
+    await Promise.resolve();
+    expect(Windows!.openWindow).toHaveBeenCalledTimes(1);
+  });
 });

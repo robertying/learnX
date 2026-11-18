@@ -53,25 +53,25 @@ const App = (windowProps: WindowProps) => {
   return (
     <WindowProvider {...windowProps}>
       <GestureHandlerRootView>
-      <ErrorBoundary>
-        <SafeAreaProvider>
-          <QueryClientProvider client={queryClient}>
-            {loaded ? <Container /> : <Splash />}
-          </QueryClientProvider>
-          <Toast />
-        </SafeAreaProvider>
-      </ErrorBoundary>
-      <StatusBar
-        // iOS's default style follows the appearance by itself.
-        barStyle={
-          isApple()
-            ? 'default'
-            : colorScheme === 'dark'
-              ? 'light-content'
-              : 'dark-content'
-        }
-        animated
-      />
+        <ErrorBoundary>
+          <SafeAreaProvider>
+            <QueryClientProvider client={queryClient}>
+              {loaded ? <Container /> : <Splash />}
+            </QueryClientProvider>
+            <Toast />
+          </SafeAreaProvider>
+        </ErrorBoundary>
+        <StatusBar
+          // iOS's default style follows the appearance by itself.
+          barStyle={
+            isApple()
+              ? 'default'
+              : colorScheme === 'dark'
+                ? 'light-content'
+                : 'dark-content'
+          }
+          animated
+        />
       </GestureHandlerRootView>
     </WindowProvider>
   );

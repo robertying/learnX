@@ -201,8 +201,7 @@ export const withLaunchOptions = (App: ComponentType<WindowProps>) => {
     if (!Root) {
       Root = applyLaunchOptions(initialProps).storeReport
         ? // Loaded only for it, so a normal launch never does.
-          (require('screens/StoreReport') as { default: ComponentType })
-            .default
+          (require('screens/StoreReport') as { default: ComponentType }).default
         : App;
     }
     // Each window on iPad and Mac is a root of its own (`hooks/useWindow`).

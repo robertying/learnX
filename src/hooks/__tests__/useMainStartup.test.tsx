@@ -12,6 +12,8 @@ import { takeLaunchNotification } from 'services/launchOptions';
 import { postLaunchNotification } from 'services/notificationSamples';
 import { subscribeSurfaceErrors } from 'services/surfaces';
 import useMainStartup from 'hooks/useMainStartup';
+import { WindowProvider } from 'hooks/useWindow';
+import { registerWindow } from 'services/windows';
 
 jest.mock('@tanstack/react-query', () => ({ useQuery: jest.fn() }));
 jest.mock('data/queries', () => ({
@@ -117,4 +119,21 @@ it('posts nothing on a normal launch', async () => {
   await renderHook(() => useMainStartup());
   expect(takeLaunchNotification).toHaveBeenCalled();
   expect(postLaunchNotification).not.toHaveBeenCalled();
+});
+
+it('leaves the app-wide work to the oldest window in another one', async () => {
+  useAuthStore.setState({ loggedIn: true });
+  const removeFirst = registerWindow('first');
+  const hook = await renderHook(() => useMainStartup(), {
+    wrapper: ({ children }: React.PropsWithChildren) => (
+      <WindowProvider windowId="second">{children}</WindowProvider>
+    ),
+  });
+  expect(configureNotifications).not.toHaveBeenCalled();
+  expect(removeLegacyDownloads).not.toHaveBeenCalled();
+  expect(subscribeSurfaceErrors).not.toHaveBeenCalled();
+  expect(setUpBackgroundFetch).not.toHaveBeenCalled();
+  expect(flushServerActions).not.toHaveBeenCalled();
+  await hook.unmount();
+  removeFirst();
 });

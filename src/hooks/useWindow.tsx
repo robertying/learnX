@@ -34,11 +34,12 @@ export const WindowProvider: React.FC<PropsWithChildren<WindowProps>> = ({
     () => (windowId ? registerWindow(windowId) : undefined),
     [windowId],
   );
-  const value = useMemo(() => ({ windowId, initialURL }), [windowId, initialURL]);
+  const value = useMemo(
+    () => ({ windowId, initialURL }),
+    [windowId, initialURL],
+  );
   return (
-    <WindowContext.Provider value={value}>
-      {children}
-    </WindowContext.Provider>
+    <WindowContext.Provider value={value}>{children}</WindowContext.Provider>
   );
 };
 
