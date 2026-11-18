@@ -386,7 +386,8 @@ name: Change every setting
       LIST: calendar-settings
       ID: calendar-assignment-sync
       ON: 'false'
-# Delete what the syncs wrote; the alert's button has the label alone.
+# Delete what the syncs wrote: the alert's button, right of its Cancel (it has
+# the label alone, and on iOS 17 the row's trash icon reads Delete too).
 - runFlow:
     file: subflows/scroll-to-id.yaml
     env:
@@ -394,7 +395,9 @@ name: Change every setting
       ID: calendar-delete
 - tapOn:
     id: calendar-delete
-- tapOn: '${T_delete}'
+- tapOn:
+    text: '${T_delete}'
+    rightOf: '${T_cancel}'
 - runFlow:
     when:
       platform: Android

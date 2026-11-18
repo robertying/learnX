@@ -18,7 +18,7 @@ const keys = () => {
 const trusted = keys();
 const other = keys();
 
-const YML = 'version: 99.0.0\npath: learnX-Setup-99.0.0.exe\nsha512: abc\n';
+const YML = 'version: 99.0.0\npath: learnX-windows-v99.0.0.exe\nsha512: abc\n';
 const signed = (data: string, key = trusted.privateKey) =>
   signUpdateFile(Buffer.from(data), key);
 

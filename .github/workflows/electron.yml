@@ -274,7 +274,7 @@ jobs:
         if: matrix.platform == 'Windows'
         shell: pwsh
         run: |
-          $setup = (Get-ChildItem build/electron/dist/learnX-Setup-*.exe).FullName
+          $setup = (Get-ChildItem build/electron/dist/learnX-windows-v*.exe).FullName
           Start-Process -FilePath $setup -ArgumentList '/S' -Wait
           $dir = Join-Path $env:LOCALAPPDATA 'Programs\learnX'
           $exe = Join-Path $dir 'learnX.exe'

@@ -654,9 +654,10 @@ def verify_electron_files!(platforms)
       problems << "#{file}'s SHA-512 doesn't match #{name}" if expected && Digest::SHA512.file(path).base64digest != expected
     end
   end
-  # The .debs aren't in any update file: their names carry the version.
+  # The .debs aren't in any update file: their names carry the version
+  # (learnX-<target>-v<version>, electron/packageConfig.cjs).
   Dir[File.join(electron_out_dir, "*.{exe,AppImage,deb}")].each do |path|
-    problems << "#{File.basename(path)} isn't version #{version}" unless File.basename(path).include?("-#{version}")
+    problems << "#{File.basename(path)} isn't version #{version}" unless File.basename(path).include?("-v#{version}.")
   end
   problems << "no .deb for Linux" if platforms.include?("linux") && Dir[File.join(electron_out_dir, "*.deb")].empty?
   UI.user_error!("Electron release files in #{electron_out_dir}: #{problems.join('; ')}") unless problems.empty?

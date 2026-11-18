@@ -23,14 +23,14 @@ const VERSION = '99.0.0';
 const release = () => {
   switch (process.platform) {
     case 'win32':
-      return { yml: 'latest.yml', installer: `learnX-Setup-${VERSION}.exe` };
+      return { yml: 'latest.yml', installer: `learnX-windows-v${VERSION}.exe` };
     case 'linux':
       return {
         yml:
           process.arch === 'arm64'
             ? 'latest-linux-arm64.yml'
             : 'latest-linux.yml',
-        installer: `learnX-${VERSION}-${process.arch}.AppImage`,
+        installer: `learnX-linux-${process.arch === 'x64' ? 'x86_64' : process.arch}-v${VERSION}.AppImage`,
       };
     default:
       return { yml: 'latest-mac.yml', installer: `learnX-${VERSION}.zip` };
@@ -226,7 +226,7 @@ test('tells a .deb install of an update, with its download', async ({
     dialog.getByRole('button', { name: exact('T_restart') }),
   ).toHaveCount(0);
   await dialog.getByRole('button', { name: exact('T_download') }).click();
-  const deb = `learnX-${VERSION}-${process.arch === 'x64' ? 'amd64' : process.arch}.deb`;
+  const deb = `learnX-linux-${process.arch === 'x64' ? 'amd64' : process.arch}-v${VERSION}.deb`;
   await expect
     .poll(async () => (await main.record()).openedUrls)
     .toEqual([`${served.url}${deb}`]);

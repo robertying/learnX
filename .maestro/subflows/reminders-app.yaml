@@ -22,5 +22,16 @@ appId: com.apple.reminders
       true: ${FOUND != 'true'}
     commands:
       - assertNotVisible: ${MATCH}
-- tapOn:
-    id: BackButton
+# The back button has an id from iOS 26 on (IOS_MAJOR, scripts/e2e.sh); before,
+# only its label.
+- runFlow:
+    when:
+      true: ${IOS_MAJOR >= 26}
+    commands:
+      - tapOn:
+          id: BackButton
+- runFlow:
+    when:
+      true: ${IOS_MAJOR < 26}
+    commands:
+      - tapOn: 'Lists|列表'

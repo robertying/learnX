@@ -90,7 +90,7 @@ describe('useUpdateInstaller', () => {
 
   it('offers a .deb’s download instead of a restart', () => {
     const deb =
-      'https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/learnX-19.1.0-amd64.deb';
+      'https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/learnX-linux-amd64-v19.1.0.deb';
     load({ version: '19.1.0', download: deb });
     const openURL = jest
       .spyOn(Linking, 'openURL')
