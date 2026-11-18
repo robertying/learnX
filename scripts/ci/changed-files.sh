@@ -34,7 +34,7 @@ electron)
   ;;
 electron-updates)
   # The Electron app's updates from packaging to install (electron.yml's
-  # Update E2E, which isn't required): the updater and what wires it in, the
+  # Update E2E tests, which isn't required): the updater and what wires it in, the
   # packaging and the installer, electron-updater's and electron-builder's
   # versions, and the test itself. Prints `updates=…`.
   pattern='^(electron/(updater|updateSignature|updateServer|updateE2E|main|package|packageConfig|buildInfo)\.ts$|electron/(installer\.nsh|package\.json)$|electron/e2e/(installUpdate\.e2e|fixtures|steps)\.ts$|patches/electron-|pnpm-lock\.yaml$|\.github/workflows/electron\.yml$|scripts/ci/changed-files\.sh$)'

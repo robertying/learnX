@@ -2,12 +2,11 @@ name: Electron
 
 # The Windows and Linux app (electron/). The web build and the E2E tests are
 # required; a pull request that can't affect the app (the `changes` step)
-# skips their steps and passes. Update E2E, not required, runs on pull
+# skips their steps and passes. Update E2E tests, not required, run on pull
 # requests that change how the app updates, and by hand. Manual runs also
 # check that the installers still build (Installers); those builds are never
 # released: releases are built, signed and uploaded by hand with fastlane
-# (the release skill).
-# js.yml's Checks run the `web` Jest project.
+# (the release skill). js.yml's Checks run the `web` Jest project.
 on:
   pull_request:
   push:
@@ -22,15 +21,14 @@ concurrency:
   group: electron-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
-# Electron's downloads (build/electron/cache: Electron for each platform and
-# CPU, and electron-builder's NSIS and AppImage tools) are cached, saved only
-# from main, as the other workflows' caches are; caches.yml prunes superseded
-# ones.
-env:
-  SAVE_CACHE: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
-
 permissions:
   contents: read
+
+# Only main saves caches (Metro, Electron's downloads), so other refs start
+# from main's and can't evict or poison them. caches.yml prunes superseded
+# ones after each main run.
+env:
+  SAVE_CACHE: ${{ github.ref == 'refs/heads/main' }}
 
 jobs:
   web:
@@ -52,7 +50,7 @@ jobs:
         id: changes
         run: scripts/ci/changed-files.sh electron >> "$GITHUB_OUTPUT"
 
-      # Whether Update E2E runs.
+      # Whether Update E2E tests run.
       - name: Detect update changes
         id: updates
         run: scripts/ci/changed-files.sh electron-updates >> "$GITHUB_OUTPUT"
@@ -161,6 +159,7 @@ jobs:
         with:
           path: build/electron/cache
           key: electron-e2e-${{ runner.os }}-${{ hashFiles('electron/package.json', 'electron/packageConfig.ts') }}
+          restore-keys: electron-e2e-${{ runner.os }}-
 
       # The same mock login as the web build's. On Linux each worker starts
       # an Xvfb of its own (e2e/fixtures.ts).
@@ -195,7 +194,7 @@ jobs:
 
       # Traces and screenshots of failed tests, and the HTML report.
       - name: Upload results
-        if: ${{ !cancelled() && env.CHANGED == 'true' }}
+        if: always() && env.CHANGED == 'true'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: electron-e2e-${{ matrix.run }}
@@ -219,9 +218,9 @@ jobs:
     # Electron job, and it tests what few changes touch, so it isn't
     # required: it runs on pull requests that change the update path
     # (scripts/ci/changed-files.sh electron-updates) and by hand, not on main
-    # pushes. A static name: rows show as "Update E2E (Linux)" and "Update
-    # E2E (Windows)".
-    name: Update E2E
+    # pushes. A static name: rows show as "Update E2E tests (Linux)" and
+    # "Update E2E tests (Windows)".
+    name: Update E2E tests
     needs: web
     if: github.event_name != 'push' && needs.web.outputs.updates == 'true' && needs.web.outputs.changed == 'true'
     strategy:
@@ -243,8 +242,9 @@ jobs:
           name: electron-web
           path: build/electron/web
 
-      # Electron and electron-builder's tools, as Installers saves them.
+      # Electron and electron-builder's tools, shared with Installers.
       - name: Restore Electron download cache
+        id: electron-cache
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: build/electron/cache
@@ -263,7 +263,8 @@ jobs:
 
       # The web build above has the mock login the test logs in with. On
       # Linux the test's app gets an Xvfb of its own (e2e/fixtures.ts).
-      - name: Update E2E
+      - name: Update E2E tests
+        id: update
         shell: bash
         run: |
           bash scripts/ci/write-e2e-env.sh
@@ -272,13 +273,20 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
 
       - name: Upload results
-        if: ${{ !cancelled() }}
+        if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: electron-update-e2e-${{ matrix.run }}
           path: build/electron/e2e
           if-no-files-found: ignore
           retention-days: 14
+
+      - name: Save Electron download cache
+        if: env.SAVE_CACHE == 'true' && steps.update.outcome == 'success' && steps.electron-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: build/electron/cache
+          key: ${{ steps.electron-cache.outputs.cache-primary-key }}
 
   installers:
     # Checks that the installers still build: each platform on its own
@@ -306,6 +314,7 @@ jobs:
         with:
           path: build/electron/cache
           key: electron-package-${{ runner.os }}-${{ hashFiles('electron/package.json', 'electron/packageConfig.ts') }}
+          restore-keys: electron-package-${{ runner.os }}-
 
       # Its own web build with the mock login from the repository's
       # DUMMY_USERNAME and DUMMY_PASSWORD secrets (none without them),
@@ -331,7 +340,7 @@ jobs:
       - name: Upload installers
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: electron-${{ matrix.platform }}-check
+          name: electron-installers-${{ matrix.platform }}
           path: |
             build/electron/dist/*.exe
             build/electron/dist/*.blockmap

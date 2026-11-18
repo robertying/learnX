@@ -1,5 +1,5 @@
 // scripts/ci/changed-files.sh decides whether the required Android and Electron
-// jobs build a pull request, and whether Electron's Update E2E runs. A path it misses lets a break merge with the
+// jobs build a pull request, and whether Electron's Update E2E tests run. A path it misses lets a break merge with the
 // required checks green, so each kind of path is listed here.
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
