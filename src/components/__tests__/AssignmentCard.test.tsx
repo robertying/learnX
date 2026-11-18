@@ -89,7 +89,7 @@ describe('AssignmentCard', () => {
         data={assignment({ deadline: daysFromNow(-2) } as Partial<Assignment>)}
       />,
     );
-    expect(screen.getByText('Closed 2 days ago')).toBeTruthy();
+    expect(screen.getByText('Was due 2 days ago')).toBeTruthy();
   });
 
   it('words the deadline in Chinese', async () => {

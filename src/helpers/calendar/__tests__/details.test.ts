@@ -122,7 +122,7 @@ describe('buildAssignmentReminderDetails', () => {
       // Reminders shows the earliest alert's time, so the deadline opens the
       // notes, and the link only shows in them.
       notes:
-        'Deadline: Fri, Mar 20, 2026 23:59\n\nRead chapter 2\n\nlearnx://assignment/a1',
+        'Deadline: Fri, Mar 20, 2026 at 23:59\n\nRead chapter 2\n\nlearnx://assignment/a1',
       url: 'learnx://assignment/a1',
     });
   });
@@ -130,7 +130,7 @@ describe('buildAssignmentReminderDetails', () => {
   it('has only the deadline and the link for notes when the assignment has none', () => {
     expect(
       buildAssignmentReminderDetails(settingsWith(), input({ note: '' })).notes,
-    ).toBe('Deadline: Fri, Mar 20, 2026 23:59\n\nlearnx://assignment/a1');
+    ).toBe('Deadline: Fri, Mar 20, 2026 at 23:59\n\nlearnx://assignment/a1');
   });
 
   it('alerts at the deadline, and early by the offset, a day by default', () => {

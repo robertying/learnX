@@ -284,7 +284,7 @@ describe('the window', () => {
 });
 
 describe('the tray and the Jump List', () => {
-  it('offers Open, Check for New Items and Quit, in the page’s language once it says', async () => {
+  it('offers Open, Check for New Content and Quit, in the page’s language once it says', async () => {
     const { trays, invoke, createWindow, app } = setUp();
     const win = createWindow();
     win.visible = false;
@@ -327,7 +327,7 @@ describe('the tray and the Jump List', () => {
     ['win32', false, false],
     ['linux', true, false],
   ] as const)(
-    'on %s (E2E run: %s), Check for New Items and Quit bring the window forward: %s',
+    'on %s (E2E run: %s), Check for New Content and Quit bring the window forward: %s',
     (platform, background, focuses) => {
       const { trays, createWindow, app } = setUp({ platform, background });
       const win = createWindow();
@@ -617,7 +617,7 @@ describe('files', () => {
     // Titled in the page's language once it says (GTK's own says "Open File").
     expect(electron.dialog.showOpenDialog).toHaveBeenLastCalledWith(
       expect.anything(),
-      expect.objectContaining({ title: 'Choose Export Folder' }),
+      expect.objectContaining({ title: 'Choose export folder' }),
     );
     await invoke('system:setLabels', { exportFolder: '选择导出文件夹' });
     await invoke('shell:pickDirectory');

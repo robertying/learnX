@@ -56,7 +56,7 @@ test('keeps running in the tray, and comes back from it', async ({
   await expect(byId(window, 'today')).toBeVisible();
 });
 
-test('syncs in the background from the tray’s Check for New Items', async ({
+test('syncs in the background from the tray’s Check for New Content', async ({
   main,
   dataDir,
   login,
@@ -66,7 +66,7 @@ test('syncs in the background from the tray’s Check for New Items', async ({
   await main.hideWindow();
   await expect.poll(() => main.windowVisible()).toBe(false);
 
-  // The timer's first run is 15 minutes away: this one is Check for New Items'.
+  // The timer's first run is 15 minutes away: this one is Check for New Content'.
   expect(syncRuns(dataDir)).toEqual([]);
   await main.chooseTrayItem(exact('T_trayCheckForNewItems'));
   await expect

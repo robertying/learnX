@@ -41,7 +41,7 @@ import {
 } from 'hooks/useAssignmentSubmission';
 import useSaveSubmissionDraft from 'hooks/useSaveSubmissionDraft';
 import { AssignmentSubmissionParamList } from 'navigation/types';
-import { isApple, isElectron } from 'helpers/platform';
+import { isAndroid, isApple, isElectron } from 'helpers/platform';
 
 type Props = NativeStackScreenProps<
   AssignmentSubmissionParamList,
@@ -207,7 +207,8 @@ const AssignmentSubmissionContent: React.FC<{
           },
         },
         {
-          label: t('photos'),
+          // Android's photo picker is "Photos"; Photo Library is Apple's.
+          label: isAndroid() ? t('photosAndroid') : t('photos'),
           onPress: () => {
             void handlePhotoPick();
           },

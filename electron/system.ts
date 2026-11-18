@@ -36,11 +36,11 @@ export const openTargetOf = (argv: readonly string[]): string | null => {
  */
 export const DEFAULT_LABELS = {
   open: 'Open learnX',
-  checkForNewItems: 'Check for New Items',
+  checkForNewItems: 'Check for new content',
   quit: 'Quit learnX',
   today: 'Today',
   schedule: 'Schedule',
-  exportFolder: 'Choose Export Folder',
+  exportFolder: 'Choose export folder',
 };
 
 /**

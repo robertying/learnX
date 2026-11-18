@@ -43,18 +43,18 @@ Four sections, each opened by its label line exactly as written here, in this or
 
 ==== App Store (iOS) ====
 
----- 中文（zh-Hans）----
+---- English (en-US) ----
 …
 
----- English (en-US) ----
+---- 中文（zh-Hans）----
 …
 
 ==== Mac App Store ====
 
----- 中文（zh-Hans）----
+---- English (en-US) ----
 …
 
----- English (en-US) ----
+---- 中文（zh-Hans）----
 …
 ```
 

@@ -112,15 +112,15 @@ export function widgetKit() {
       (locale ?? '').startsWith('zh')
         ? {
             deadlines: '作业截止',
-            noDeadlines: '打开 learnX 以显示作业',
+            noDeadlines: '打开learnX后，这里会显示作业',
             upNext: '下一节课',
-            noClasses: '打开 learnX 以显示课程',
+            noClasses: '打开learnX后，这里会显示课程',
           }
         : {
             deadlines: 'Deadlines',
-            noDeadlines: 'Open learnX to see deadlines',
+            noDeadlines: 'Open learnX to show your deadlines here',
             upNext: 'Next Up',
-            noClasses: 'Open learnX to see your classes',
+            noClasses: 'Open learnX to show your classes here',
           },
     /* oxlint-enable learnx/no-han-outside-translations */
     /** The brand color (brandColors in src/theme), which a widget can't import. */

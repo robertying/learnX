@@ -83,7 +83,7 @@ describe('deadlineText', () => {
 
   it('says how long ago a past deadline closed', () => {
     expect(deadlineText('2026-03-15T10:00:00Z', now)).toBe(
-      'Closed 2 hours ago',
+      'Was due 2 hours ago',
     );
   });
 
@@ -91,7 +91,7 @@ describe('deadlineText', () => {
     const deadline = '2026-03-15T12:30:00Z';
     expect(deadlineText(deadline, now)).toBe('Due in 30 minutes');
     expect(deadlineText(deadline, '2026-03-15T12:45:00Z')).toBe(
-      'Closed 15 minutes ago',
+      'Was due 15 minutes ago',
     );
   });
 });

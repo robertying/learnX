@@ -14,7 +14,7 @@ body:
   - type: textarea
     id: reproduction-steps
     attributes:
-      label: 复现过程
+      label: 复现步骤
       value: |
         1.
         2.
@@ -43,7 +43,7 @@ body:
   - type: input
     id: app-version
     attributes:
-      label: App 版本
+      label: 应用版本
       description: '设置 › 关于 › 版本'
       placeholder: 'X.Y.Z (构建号)'
     validations:
@@ -68,4 +68,4 @@ body:
   - type: textarea
     id: additional-information
     attributes:
-      label: 补充内容
+      label: 补充信息

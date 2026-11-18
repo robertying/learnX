@@ -327,7 +327,7 @@ export const mockNotices: Notice[] = [
       '<p>助教已安排好了交作业方式：纸质作业请在周四课前交到讲台上的收作业袋，电子版请在网络学堂提交。</p><p>请不要再交到理科楼的作业箱，以免造成丢失或延误批改。</p>',
   }),
   notice(2, quantum, {
-    title: '调课提醒：' + sundayText + '8:00 有课（补周五的课）',
+    title: '调课提醒：' + sundayText + '8:00有课（补周五的课）',
     publisher: quantum.teacherName,
     hasRead: false,
     markedImportant: true,
@@ -372,7 +372,7 @@ export const mockNotices: Notice[] = [
 <p>考试为闭卷，可携带一张 A4 手写公式纸，不得使用计算器。</p>`,
   }),
   notice(5, digitalSystem, {
-    title: '实验 4 时序参考图',
+    title: '实验4时序参考图',
     publisher: '唐景行',
     hasRead: false,
     markedImportant: false,
@@ -431,7 +431,7 @@ export const mockNotices: Notice[] = [
       '<p>统一作业为四个班都要求的作业，<strong>全部计入课程成绩</strong>；除了统一作业之外，其它是本班专属作业，建议尽量按时完成，期末根据整体完成情况，<strong>酌情加分</strong>。</p>',
   }),
   notice(10, probability, {
-    title: '第 6 次作业提示',
+    title: '第6次作业提示',
     publisher: '程一帆',
     hasRead: true,
     markedImportant: false,
@@ -441,7 +441,7 @@ export const mockNotices: Notice[] = [
 <p>第 3 题可以先求出两步转移矩阵 \\(P^{(2)} = P^2\\)，再解 \\(\\pi P = \\pi\\) 得到平稳分布。</p>`,
   }),
   notice(11, dsp, {
-    title: '实验 3 测量数据记录表',
+    title: '实验3测量数据记录表',
     publisher: dsp.teacherName,
     hasRead: true,
     markedImportant: false,
@@ -450,7 +450,7 @@ export const mockNotices: Notice[] = [
       '<p>实验 3（FIR 滤波器设计与实现）请用附件表格记录各频点的输入、输出幅度，表格会自动计算增益，报告中请附上幅频特性曲线。</p>',
     attachment: attachment(
       '1996990293_ZY_1730620944512b3e8c7d2-9f41-4a6b-8e5d-7c1b2a3f4e5d',
-      '实验3 测量数据记录表.xlsx',
+      '实验3测量数据记录表.xlsx',
       'dataXlsx',
     ),
   }),
@@ -464,7 +464,7 @@ export const mockNotices: Notice[] = [
       '<p>第 11 周周六上课时进行期中测试：200 米自由泳计时，以及蛙泳技术评定。请自备泳帽和泳镜，提前 10 分钟到陈明游泳馆签到。</p>',
   }),
   notice(13, communication, {
-    title: '课程讨论区里，发了一条关于第 1 讲作业的提示',
+    title: '课程讨论区里，发了一条关于第1讲作业的提示',
     publisher: communication.teacherName,
     hasRead: true,
     markedImportant: false,
@@ -472,7 +472,7 @@ export const mockNotices: Notice[] = [
     content: '<p>可跟贴讨论。</p>',
   }),
   notice(14, communication, {
-    title: '信源的信息度量课件第 19 页更正',
+    title: '信源的信息度量课件第19页更正',
     publisher: communication.teacherName,
     hasRead: true,
     markedImportant: false,
@@ -481,7 +481,7 @@ export const mockNotices: Notice[] = [
       '<p><span style="font-size:xx-large"><span style="color:black">原：固定事件个数</span><span style="color:black"><em>M</em></span><span style="color:black">的离散信源，均匀分布熵最大，为 1/<em>M</em></span></span></p><p><span style="font-size:24pt"><span style="color:black">更正为：固定事件个数<em>M</em>的离散信源，均匀分布熵最大，为 log<em>M</em></span></span></p>',
   }),
   notice(15, engineeringGraphics, {
-    title: 'AutoCAD 上机安排',
+    title: 'AutoCAD上机安排',
     publisher: engineeringGraphics.teacherName,
     hasRead: true,
     markedImportant: false,
@@ -494,22 +494,22 @@ export const mockNotices: Notice[] = [
   introNotice(
     16,
     quantum,
-    '成绩构成：平时作业 20%，期中考试 30%，期末考试 50%。教材为《量子力学》（第二版）和《热力学与统计物理》。',
+    '成绩构成：平时作业20%，期中考试30%，期末考试50%。教材为《量子力学》（第二版）和《热力学与统计物理》。',
   ),
   introNotice(
     17,
     communication,
-    '成绩构成：作业 25%，大作业 25%，期末考试 50%。课件会在每次课前上传到课程文件。',
+    '成绩构成：作业25%，大作业25%，期末考试50%。课件会在每次课前上传到课程文件。',
   ),
   introNotice(
     18,
     probability,
-    '成绩构成：作业 20%，期中考试 30%，期末考试 50%。迟交作业按每天 10% 扣分，超过一周不再接收。',
+    '成绩构成：作业20%，期中考试30%，期末考试50%。迟交作业按每天10%扣分，超过一周不再接收。',
   ),
   introNotice(
     19,
     digitalSystem,
-    '本课程共 6 次实验，使用 Verilog 和 FPGA 开发板完成。开发板在第一次实验课时领取，期末归还。',
+    '本课程共6次实验，使用Verilog和FPGA开发板完成。开发板在第一次实验课时领取，期末归还。',
   ),
   notice(20, machineLearning, {
     // The course is taught in English, so its texts are English in both
@@ -522,11 +522,7 @@ export const mockNotices: Notice[] = [
     content:
       '<p>Hello everyone, and welcome to the course!</p><p>Grading: homework 40%, course project 40%, participation 20%. Homework is done in Python; reports can be written in Chinese or English.</p><p>Office hours are every Thursday from 4:00 to 5:30 p.m.; the location is in the syllabus. You can also leave a message in the course discussion forum.</p>',
   }),
-  introNotice(
-    21,
-    audioVisual,
-    '成绩构成：两次大作业各 30%，期末开卷考试 40%。',
-  ),
+  introNotice(21, audioVisual, '成绩构成：两次大作业各30%，期末开卷考试40%。'),
   notice(22, signals, {
     title: '期末考试成绩已发布',
     publisher: signals.teacherName,
@@ -618,7 +614,7 @@ const excellentHomework = (
 
 export const mockAssignments: Assignment[] = [
   assignment(1, communication, {
-    title: '大作业1：OFDM 系统仿真',
+    title: '大作业1：OFDM系统仿真',
     // Due tomorrow, so Today lists it under Due Soon.
     deadline: iso(1, 23, 59),
     completionType: HomeworkCompletionType.GROUP,
@@ -633,7 +629,7 @@ export const mockAssignments: Assignment[] = [
     ),
   }),
   assignment(2, probability, {
-    title: '第 6 次作业',
+    title: '第6次作业',
     // Due tonight: due soon, with hours left.
     deadline: iso(0, 23, 59),
     submitted: false,
@@ -642,7 +638,7 @@ export const mockAssignments: Assignment[] = [
       '<p>教材习题 4.3、4.7、5.2。</p><p>提示：泊松过程满足 $$P\\{N(t)=k\\}=\\frac{(\\lambda t)^k}{k!}e^{-\\lambda t}.$$</p>',
   }),
   assignment(3, quantum, {
-    title: '第 4 讲课后习题（纸质）',
+    title: '第4讲课后习题（纸质）',
     deadline: iso(3, 8, 0),
     submissionType: HomeworkSubmissionType.OFFLINE,
     submitted: false,
@@ -650,7 +646,7 @@ export const mockAssignments: Assignment[] = [
     description: '<p>习题 2.5、2.9、2.14。手写，下次课前交到讲台上。</p>',
   }),
   assignment(4, digitalSystem, {
-    title: '实验 4：有限状态机设计',
+    title: '实验4：有限状态机设计',
     deadline: iso(4, 23, 59),
     submitted: false,
     graded: false,
@@ -689,7 +685,7 @@ export const mockAssignments: Assignment[] = [
     submitted: true,
     graded: false,
     description: '<p>完成课件第三章习题 1、3、5，提交电子版。</p>',
-    submittedContent: submittedText('第 3 题的推导见附件。'),
+    submittedContent: submittedText('第3题的推导见附件。'),
     submittedAttachment: attachment(
       '1234990182_ZY_1731316692859411626215e-c233-4663-a567-a932bf4d4962',
       '第二次书面作业.pdf',
@@ -727,7 +723,7 @@ export const mockAssignments: Assignment[] = [
   }),
   assignment(9, electronicSystem, {
     // Past due and closed: missed.
-    title: '实验 2 预习报告',
+    title: '实验2预习报告',
     deadline: iso(-5, 12, 0),
     submitted: false,
     graded: false,
@@ -735,7 +731,7 @@ export const mockAssignments: Assignment[] = [
   }),
   assignment(10, dsp, {
     // Handed in after the deadline.
-    title: '实验 3 报告：FIR 滤波器设计',
+    title: '实验3报告：FIR滤波器设计',
     deadline: iso(-3, 23, 59),
     lateSubmissionDeadline: iso(4, 23, 59),
     submitTime: iso(-1, 10, 18),
@@ -747,13 +743,13 @@ export const mockAssignments: Assignment[] = [
     submittedContent: submittedText('数据记录表和报告都在附件里。'),
     submittedAttachment: attachment(
       '1234990183_ZY_1731316692859411626215e-c233-4663-a567-a932bf4d4962',
-      '实验3 测量数据.xlsx',
+      '实验3测量数据.xlsx',
       'dataXlsx',
     ),
   }),
   assignment(11, probability, {
     // Graded with a score, feedback, the answer and excellent homework.
-    title: '第 5 次作业',
+    title: '第5次作业',
     deadline: iso(-7, 23, 59),
     submitTime: iso(-8, 22, 41),
     submitted: true,
@@ -764,7 +760,7 @@ export const mockAssignments: Assignment[] = [
     gradeContent:
       '<p>整体完成得很好。第 2 题求自相关函数时漏掉了 \\(\\cos\\) 的相位项，扣 8 分。</p>',
     description: '<p>教材习题 3.4、3.8、3.12、3.15。</p>',
-    submittedContent: submittedText('解答见附件 PDF。'),
+    submittedContent: submittedText('解答见附件PDF。'),
     submittedAttachment: attachment(
       '1238990181_ZY_1731316692859411626215e-c233-4663-a567-a932bf4d4962',
       '第5次作业.pdf',
@@ -782,12 +778,12 @@ export const mockAssignments: Assignment[] = [
       'solutionPdf',
     ),
     excellentHomeworkList: [
-      excellentHomework(11, 1, '第 5 次作业', {
+      excellentHomework(11, 1, '第5次作业', {
         name: '周雨桐',
         anonymous: false,
       }),
-      excellentHomework(11, 2, '第 5 次作业', { name: '', anonymous: true }),
-      excellentHomework(11, 3, '第 5 次作业', {
+      excellentHomework(11, 2, '第5次作业', { name: '', anonymous: true }),
+      excellentHomework(11, 3, '第5次作业', {
         name: '邱子墨',
         anonymous: false,
       }),
@@ -836,7 +832,7 @@ export const mockAssignments: Assignment[] = [
   }),
   assignment(14, quantum, {
     // Graded with a score only, and handed in on paper.
-    title: '第 3 讲课后习题（纸质）',
+    title: '第3讲课后习题（纸质）',
     deadline: iso(-10, 8, 0),
     submissionType: HomeworkSubmissionType.OFFLINE,
     submitted: true,
@@ -868,7 +864,7 @@ export const mockAssignments: Assignment[] = [
     description: '<p>对给定的含噪语音信号设计滤波器进行增强，并分析频谱。</p>',
   }),
   assignment(17, dataStructures, {
-    title: '第 3 次上机：平衡二叉树',
+    title: '第3次上机：平衡二叉树',
     deadline: dayjs().subtract(150, 'day').toISOString(),
     submitTime: dayjs().subtract(151, 'day').toISOString(),
     submitted: true,
@@ -953,7 +949,7 @@ export const mockFiles: File[] = [
     digitalSystem,
     'timingPng',
     {
-      title: '实验 4 参考时序图',
+      title: '实验4参考时序图',
       uploadTime: dateTime(-3, 20, 15),
       isNew: true,
     },
@@ -965,7 +961,7 @@ export const mockFiles: File[] = [
     'audioZip',
     {
       title: '第四次实验用音频信号',
-      description: 'DTMF 双音多频信号，8 kHz 采样，每个按键一个 wav 文件。',
+      description: 'DTMF双音多频信号，8 kHz采样，每个按键一个wav文件。',
       uploadTime: dateTime(-4, 20, 18),
     },
     '实验',
@@ -975,7 +971,7 @@ export const mockFiles: File[] = [
     dsp,
     'dataXlsx',
     {
-      title: '实验 3 测量数据记录表',
+      title: '实验3测量数据记录表',
       uploadTime: dateTime(-10, 15, 42),
     },
     '实验',
@@ -996,7 +992,7 @@ export const mockFiles: File[] = [
     probability,
     'solutionPdf',
     {
-      title: '第 5 次作业参考答案',
+      title: '第5次作业参考答案',
       uploadTime: dateTime(-3, 15, 30),
       isNew: true,
     },
@@ -1019,7 +1015,7 @@ export const mockFiles: File[] = [
     'lecturePdf',
     {
       title: '量子7（测量几率、不确定关系）',
-      description: '24-26 页有关于不确定度的补充解释（紫色字体）',
+      description: '24-26页有关于不确定度的补充解释（紫色字体）',
       uploadTime: dateTime(-5, 16, 16),
       size: '2.0M',
     },
@@ -1030,7 +1026,7 @@ export const mockFiles: File[] = [
     communication,
     'lecturePdf',
     {
-      title: '第 5 讲 信源的信息度量（更正版）',
+      title: '第5讲 信源的信息度量（更正版）',
       uploadTime: dateTime(-13, 18, 2),
       size: '3.1M',
     },
@@ -1041,7 +1037,7 @@ export const mockFiles: File[] = [
     communication,
     'handoutPdf',
     {
-      title: '大作业 1 仿真参数说明',
+      title: '大作业1仿真参数说明',
       uploadTime: dateTime(-14, 21, 31),
     },
     '作业',
@@ -1068,12 +1064,12 @@ export const mockFiles: File[] = [
     'Slides',
   ),
   file(15, engineeringGraphics, 'handoutPdf', {
-    title: 'AutoCAD 上机指导书',
+    title: 'AutoCAD上机指导书',
     uploadTime: dateTime(-16, 14, 0),
     size: '12.7M',
   }),
   file(16, digitalSystem, 'lecturePdf', {
-    title: 'Verilog 语法速查',
+    title: 'Verilog语法速查',
     uploadTime: dateTime(-50, 10, 30),
     size: '1.1M',
   }),

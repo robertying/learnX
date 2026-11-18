@@ -162,7 +162,7 @@ Mock data details, and how to add to it, are in [src/data/AGENTS.md](src/data/AG
 
 ## Checks
 
-The pull request checks `JS / Checks` and `JS / Release bundles` (`.github/workflows/js.yml`) run these, and both must pass:
+Every required pull request check must pass. The JavaScript ones (`.github/workflows/js.yml`) run these:
 
 ```sh
 pnpm check                              # typecheck, lint, format check, over-the-air runtime check, Jest with coverage, ShellCheck
