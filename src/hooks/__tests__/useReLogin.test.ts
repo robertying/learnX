@@ -17,6 +17,7 @@ import {
 import { flushServerActionsWithin } from 'data/serverActions';
 import useReLogin, { resetReLogin } from 'hooks/useReLogin';
 import env from 'test-utils/mocks/env';
+import { toast } from 'components/Toast';
 
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
 jest.mock('data/login', () => ({ login: jest.fn(async () => {}) }));
@@ -162,6 +163,21 @@ describe('useReLogin', () => {
     expect(login).not.toHaveBeenCalled();
     await leaveAndComeBack(REFUSED_LOGIN_RETRY_MS / 60_000);
     expect(login).toHaveBeenCalledWith({});
+  });
+
+  it('says it logs in only when the server is asked', async () => {
+    await noteSavedLoginRefused('badCredential');
+    await launch();
+    // The remembered refusal fails at once, without a request.
+    expect(toast).not.toHaveBeenCalled();
+
+    await act(() => jest.advanceTimersByTime(REFUSED_LOGIN_RETRY_MS));
+    await fail('badCredential');
+    await leaveAndComeBack(11);
+    expect(login).toHaveBeenCalledWith({});
+    expect(toast).toHaveBeenCalledWith('Logging in…', 'none', {
+      duration: 1000,
+    });
   });
 
   it('does not retry a failed login on a timer', async () => {

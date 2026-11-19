@@ -68,3 +68,15 @@ it('fails when the mirror answers with an error', async () => {
   });
   await expect(getLatestRelease()).rejects.toThrow('503');
 });
+
+it.each([{}, { version: 19 }, { version: '19.1' }])(
+  'fails when latest.json has no version semver reads: %j',
+  async json => {
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => json,
+    });
+    await expect(getLatestRelease()).rejects.toThrow('no version');
+  },
+);

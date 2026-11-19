@@ -262,6 +262,14 @@ describe('per-item details', () => {
     expect(
       second.find(a => a.id === withExcellent.id)!.excellentHomeworkList,
     ).toEqual(withExcellent.excellentHomeworkList);
+
+    // Refreshing the course on its own keeps it too.
+    await refreshCourseAssignments(semesterId, withExcellent.courseId);
+    expect(
+      queryClient
+        .getQueryData(query.queryKey)!
+        .find(a => a.id === withExcellent.id)!.excellentHomeworkList,
+    ).toEqual(withExcellent.excellentHomeworkList);
   });
 
   it('fetches notice attachments only for new or changed notices', async () => {

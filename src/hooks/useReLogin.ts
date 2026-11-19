@@ -6,7 +6,11 @@ import { t } from 'helpers/i18n';
 import { isRefusal } from 'helpers/errors';
 import { loginRetryDelay, retriesOnTimer } from 'helpers/loginRetry';
 import { toast } from 'components/Toast';
-import { hasSavedLogin, refusedLoginRetryDue } from 'data/credentials';
+import {
+  hasSavedLogin,
+  refusedLoginRetryDue,
+  savedLoginRefusal,
+} from 'data/credentials';
 import { getAuth, useAuthStore } from 'data/auth';
 import { login } from 'data/login';
 import { queryClient } from 'data/queryClient';
@@ -90,7 +94,11 @@ const useReLogin = () => {
     }
     const auth = getAuth();
     if (dayjs().diff(lastActive.time, 'minute') >= 10) {
-      toast(t('loggingIn'), 'none', { duration: 1 * 1000 });
+      // Not for a refused login the server isn't asked about again yet
+      // (`data/source`): it fails at once, and its status row says why.
+      if (!savedLoginRefusal() || refusedLoginRetryDue()) {
+        toast(t('loggingIn'), 'none', { duration: 1 * 1000 });
+      }
       // At launch there's no session yet; after a break the session may
       // still be good, which saves a full SSO login.
       await login(auth.loggedIn ? { resume: true } : {});

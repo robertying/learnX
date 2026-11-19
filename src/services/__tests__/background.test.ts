@@ -278,6 +278,28 @@ it('skips when the login fails', async () => {
   expect(await syncContent()).toEqual({ status: 'skipped' });
 });
 
+it('skips when the login takes longer than the budget', async () => {
+  await seed();
+  jest.mocked(ensureSession).mockReturnValueOnce(new Promise(() => {}));
+  expect(await syncContent({ budget: 50 })).toEqual({ status: 'skipped' });
+  const [run] = useSyncLogStore.getState().runs;
+  expect(run).toMatchObject({ status: 'skipped', timedOut: true });
+  expect(recordError).toHaveBeenCalledWith(
+    new Error('Background sync ran out of time'),
+    expect.any(String),
+  );
+});
+
+it('stays on the shown semester when its check takes the budget', async () => {
+  await seed();
+  jest
+    .spyOn(mockSource, 'getCurrentSemester')
+    .mockImplementation(() => new Promise(() => {}));
+  expect(await syncContent({ budget: 50 })).toEqual({ status: 'failed' });
+  expect(getUserData().currentSemester).toBe(semesterId);
+  expect(useSyncLogStore.getState().runs[0].timedOut).toBe(true);
+});
+
 it("moves to the school's new semester when a term starts", async () => {
   const previous = '2025-2026-2';
   useUserDataStore.setState({

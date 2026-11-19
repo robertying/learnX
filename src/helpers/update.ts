@@ -1,5 +1,6 @@
 import { nativeApplicationVersion } from 'expo-application';
 import semverGt from 'semver/functions/gt';
+import semverValid from 'semver/functions/valid';
 import DeviceInfo from 'constants/DeviceInfo';
 import updateMirror from 'constants/updateMirror.json';
 import env from 'helpers/env';
@@ -50,6 +51,11 @@ export const getLatestRelease = async (): Promise<Release> => {
     throw new Error(`Mirror answered ${response.status}`);
   }
   const { version, files } = (await response.json()) as LatestJson;
+  // Compared with the installed version as it renders: a version semver
+  // can't read would throw there.
+  if (typeof version !== 'string' || !semverValid(version)) {
+    throw new Error(`Mirror gave no version: ${String(version)}`);
+  }
   const name = `learnX-${DeviceInfo.abi()}-v${version}.apk`;
   const file = files?.find(entry => entry.name === name);
   return {
