@@ -18,13 +18,15 @@ import expo.modules.kotlin.modules.ModuleDefinition
 import expo.modules.kotlin.viewevent.EventDispatcher
 import expo.modules.kotlin.views.ExpoView
 import java.io.File
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.NonCancellable
 import androidx.pdf.view.PdfView as JetpackPdfView
 import io.legere.pdfiumandroid.api.PdfPasswordException as PdfiumPasswordException
 
@@ -125,13 +127,18 @@ class PdfView @JvmOverloads constructor(
   private fun openWithJetpack(uri: Uri) {
     opening = scope.launch {
       try {
-        val opened = loader.openDocument(uri)
+        // Not cancelled midway: the service may have opened the document by then, and only closing it here frees it.
+        val opened = withContext(NonCancellable) { loader.openDocument(uri) }
+        if (!isActive) {
+          // Another file, or none, since.
+          opened.close()
+          return@launch
+        }
         document = opened
         show(JetpackPdfView(context).apply { pdfDocument = opened })
-      } catch (e: CancellationException) {
-        throw e
       } catch (e: Exception) {
-        fail(errorMessage(e))
+        // Only for the file still wanted.
+        if (isActive) fail(errorMessage(e))
       }
     }
   }
