@@ -13,6 +13,9 @@ import { screenProps } from 'test-utils/screenProps';
 jest.mock('data/source', () => ({
   dataSource: { getCSRFToken: () => 'token' },
 }));
+jest.mock('helpers/webViewCookies', () => ({
+  syncWebViewCookies: jest.fn(async () => ''),
+}));
 jest.mock('components/AutoHeightWebView', () => {
   const { Text } = require('react-native');
   return ({ source }: { source: { html: string } }) => (

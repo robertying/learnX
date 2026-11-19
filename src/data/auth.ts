@@ -26,6 +26,12 @@ export interface AuthState {
   failure: LoginFailure | null;
   /** The user asked to log in again from the main UI. */
   reloginRequested: boolean;
+  /**
+   * The session's CSRF token, empty without one. Every login changes it,
+   * thu-learn-lib's own for an expired session too, so web content that loads
+   * from Web Learning knows to load again (`useWebSession`).
+   */
+  sessionToken: string;
 }
 
 export const initialAuth: AuthState = {
@@ -36,6 +42,7 @@ export const initialAuth: AuthState = {
   errorDetail: null,
   failure: null,
   reloginRequested: false,
+  sessionToken: '',
 };
 
 export const useAuthStore = create<AuthState>()(() => initialAuth);
@@ -58,6 +65,16 @@ export const requestRelogin = () =>
 /** Goes back from the login screen to the saved data. */
 export const cancelRelogin = () =>
   useAuthStore.setState({ reloginRequested: false });
+
+/**
+ * Notes the session's CSRF token after a login or a request (`dataSource`
+ * calls it for every one, since thu-learn-lib logs in again by itself).
+ */
+export const noteSession = (sessionToken: string) => {
+  if (getAuth().sessionToken !== sessionToken) {
+    useAuthStore.setState({ sessionToken });
+  }
+};
 
 /**
  * Notes a failed request (`dataSource` calls it for every one). thu-learn-lib

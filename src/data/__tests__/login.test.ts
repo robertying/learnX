@@ -74,6 +74,7 @@ describe('login', () => {
       errorDetail: null,
       failure: null,
       reloginRequested: false,
+      sessionToken: '',
     });
   });
 

@@ -11,6 +11,9 @@ jest.mock('data/source', () => ({
   dataSource: { getCSRFToken: () => 'token' },
 }));
 jest.mock('data/serverActions', () => ({ openNotice: jest.fn() }));
+jest.mock('helpers/webViewCookies', () => ({
+  syncWebViewCookies: jest.fn(async () => ''),
+}));
 jest.mock('components/AutoHeightWebView', () => {
   const { Text } = require('react-native');
   return ({ source }: { source: { html: string } }) => (
