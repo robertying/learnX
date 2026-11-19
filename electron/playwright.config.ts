@@ -16,11 +16,14 @@ export default defineConfig({
   // traces of what failed, which a cancelled job never uploads.
   globalTimeout: process.env.CI ? 15 * 60_000 : undefined,
   expect: { timeout: 15_000 },
-  // On CI, one app per core: every test has its own data folder and ports,
+  // One app per core on CI, and per two cores (at most six) locally, leaving
+  // room for what else runs: every test has its own data folder and ports,
   // and tests are spread one by one rather than by file, so the long files
-  // (updates, errors) don't end up on one worker. Locally one app at a time,
-  // so the windows don't pile up on the desktop you're using.
-  workers: process.env.CI ? availableParallelism() : 1,
+  // (updates, errors) don't end up on one worker. The windows never come to
+  // the front (electron/AGENTS.md), so they don't get in your way.
+  workers: process.env.CI
+    ? availableParallelism()
+    : Math.min(6, Math.max(1, Math.floor(availableParallelism() / 2))),
   fullyParallel: true,
   // One retry on CI, for a trace of the failure; a test that passes only on
   // its retry still fails the run, so flakes don't pass as green.

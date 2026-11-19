@@ -30,6 +30,7 @@ const failures: [MockFailure, string][] = [
   ['offline', 'Fail: Offline'],
   ['serverError', 'Fail: Server Error'],
   ['timeout', 'Fail: Time Out After 20 s'],
+  ['quickTimeout', 'Fail: Time Out After 4 s, Retry Sooner'],
 ];
 
 const MockNetwork: React.FC = () => {

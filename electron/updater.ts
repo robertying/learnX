@@ -19,6 +19,12 @@ import type { AppUpdater, UpdateInfo } from 'electron-updater';
 
 /** The first check, after the window has had time to load. */
 export const FIRST_CHECK_DELAY = 10 * 1000;
+/**
+ * A dev run's first check on a local test server (`LEARNX_UPDATE_URL`): the
+ * E2E tests wait for it, and the page asks for an update that came before it
+ * listened (`updates:pending`).
+ */
+export const TEST_FIRST_CHECK_DELAY = 1000;
 /** Later checks, while the app keeps running (in the tray). */
 export const CHECK_INTERVAL = 4 * 60 * 60 * 1000;
 /** Another check after one failed: offline, or the mirror mid-copy. */
@@ -98,6 +104,7 @@ export const createUpdater = ({
   feed,
   onReady,
   log = () => {},
+  firstCheckDelay = FIRST_CHECK_DELAY,
   timers = { setTimeout, setInterval },
 }: {
   autoUpdater: AutoUpdater;
@@ -107,6 +114,7 @@ export const createUpdater = ({
   feed: { url: string; provider: new (...args: any[]) => any };
   onReady: (update: ReadyUpdate) => void;
   log?: (message: string) => void;
+  firstCheckDelay?: number;
   timers?: {
     setTimeout: (callback: () => void, ms: number) => unknown;
     setInterval: (callback: () => void, ms: number) => unknown;
@@ -184,7 +192,7 @@ export const createUpdater = ({
       started = true;
       timers.setTimeout(() => {
         void check();
-      }, FIRST_CHECK_DELAY);
+      }, firstCheckDelay);
       timers.setInterval(() => {
         void check();
       }, CHECK_INTERVAL);

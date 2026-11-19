@@ -93,23 +93,23 @@ name: Show no results and failures
     env:
       NAME: server-error
 
-# A server that doesn't answer: the login times out after 20 s (the mock
-# server's timeout) and counts as offline, then tries again on its own after
-# 30 s (helpers/loginRetry), reconnecting meanwhile.
+# A server that doesn't answer: the login times out (the mock server's 20 s
+# timeout) and counts as offline, then tries again on its own (30 s,
+# helpers/loginRetry), reconnecting meanwhile. Both waits are scaled down to a
+# fifth (quickTimeout): 4 s, then 6 s.
 - launchApp:
     stopApp: true
     arguments:
       mockLatency: none
-      mockFailure: timeout
+      mockFailure: quickTimeout
 - extendedWaitUntil:
     visible: '.*(${T_syncStatusOffline}).*'
-    timeout: 40000
+    timeout: 20000
 # Maestro counts this timeout from the last interaction (the launch above),
-# not from the wait before it (adjustedToLatestInteraction in Orchestra.kt):
-# the app retries 30 s after going offline (20 s timeout), about 50 s in.
+# not from the wait before it (adjustedToLatestInteraction in Orchestra.kt).
 - extendedWaitUntil:
     visible: '.*(${T_syncStatusReconnecting}).*'
-    timeout: 75000
+    timeout: 30000
 
 # A password changed on the website while the app is open: the session runs
 # out after the launch login (mockSessionExpiry), and the login the next
