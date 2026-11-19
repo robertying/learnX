@@ -78,10 +78,10 @@ it('has a 512 README logo, as lossless WebP with a color profile', () => {
   expect(chunks).toEqual(expect.arrayContaining(['ICCP', 'VP8L']));
   // VP8L: a signature byte, then 14-bit width and height, each minus 1.
   const bits = lossless!.readUInt32LE(1);
-  expect([(bits & 0x3fff) + 1, ((bits >> 14) & 0x3fff) + 1]).toEqual([
-    LOGO_SIZE,
-    LOGO_SIZE,
-  ]);
+  const field = 2 ** 14;
+  const width = (bits % field) + 1;
+  const height = (Math.floor(bits / field) % field) + 1;
+  expect([width, height]).toEqual([LOGO_SIZE, LOGO_SIZE]);
 });
 
 it('centers the shape at its share of the canvas, on whole pixels', () => {
