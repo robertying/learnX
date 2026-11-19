@@ -30,9 +30,9 @@ type Props = NativeStackScreenProps<RootStackParams, 'Setup'>;
  * reminders and grades, all on here to start with, and syncing the timetable
  * and assignments to the calendar and, on Apple platforms, assignments to
  * Reminders, off unless an earlier version synced them.
- * (Settings has them all off until chosen.) Done saves the choices and asks
- * for the permissions they need; notifications chosen stay on if that's
- * denied, and start working once they're allowed. Opened by `useLaunchSheet`,
+ * (Settings has them all off until chosen.) Done saves the choices, closes,
+ * and then asks for the permissions they need; notifications chosen stay on
+ * if that's denied, and start working once they're allowed. Opened by `useLaunchSheet`,
  * once, also on an update for a user who never saw it.
  */
 const Setup: React.FC<Props> = ({ navigation, route }) => {
@@ -60,7 +60,7 @@ const Setup: React.FC<Props> = ({ navigation, route }) => {
     calendar: calendarSynced,
     reminders: remindersSynced,
   });
-  const [saving, setSaving] = useState(false);
+  const [closing, setClosing] = useState(false);
 
   // Seen once shown, however it's closed, and a new user's What's New is
   // this version's. After an update, What's New still shows next launch.
@@ -90,10 +90,17 @@ const Setup: React.FC<Props> = ({ navigation, route }) => {
 
   const close = () => navigation.goBack();
 
-  const handleDone = async () => {
-    setSaving(true);
+  /**
+   * Saves the choices and closes at once, then asks for what they need in
+   * the background: an answer can come late or never. On a Mac the
+   * notification request is a banner that can be ignored, and nothing ever
+   * answers it.
+   */
+  const handleDone = () => {
+    setClosing(true);
     const { schedule, calendar, reminders, ...chosen } = choices;
-    if (Object.values(chosen).some(Boolean)) {
+    const notify = Object.values(chosen).some(Boolean);
+    if (notify) {
       // Kept even if the permission is denied, so they start working once
       // notifications are allowed in the system settings.
       setSetting('notifications', {
@@ -104,21 +111,39 @@ const Setup: React.FC<Props> = ({ navigation, route }) => {
         deadlineChanges: chosen.assignments,
         groupSubmissions: chosen.assignments,
       });
-      if (!(await request())) {
-        toast(t('notificationPermissionDenied'), 'error');
-      }
     }
-    if (schedule && !scheduleSynced) {
+    close();
+    void allow({
+      notify,
+      schedule: schedule && !scheduleSynced,
+      calendar: calendar && !calendarSynced,
+      reminders: reminders && !remindersSynced,
+    });
+  };
+
+  /**
+   * One request at a time, since Android turns down a second while one is
+   * showing, with the notification permission last, so an unanswered banner
+   * holds nothing back.
+   */
+  const allow = async (chosen: {
+    notify: boolean;
+    schedule: boolean;
+    calendar: boolean;
+    reminders: boolean;
+  }) => {
+    if (chosen.schedule) {
       await setScheduleSyncEnabled(true);
     }
-    if (calendar && !calendarSynced) {
+    if (chosen.calendar) {
       await setSyncEnabled('calendar', true);
     }
-    if (reminders && !remindersSynced) {
+    if (chosen.reminders) {
       await setSyncEnabled('reminder', true);
     }
-    setSaving(false);
-    close();
+    if (chosen.notify && !(await request())) {
+      toast(t('notificationPermissionDenied'), 'error');
+    }
   };
 
   return (
@@ -180,7 +205,7 @@ const Setup: React.FC<Props> = ({ navigation, route }) => {
         action={{
           label: t('done'),
           testID: 'setup-done',
-          disabled: saving,
+          disabled: closing,
           onPress: handleDone,
         }}
         secondaryAction={{
