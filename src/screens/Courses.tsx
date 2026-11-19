@@ -2,7 +2,7 @@ import CourseCard from 'components/CourseCard';
 import FilterList from 'components/FilterList';
 import SafeArea from 'components/SafeArea';
 import { useAssignments, useNotices, useFiles } from 'data/content';
-import { useCourses } from 'data/queries';
+import { useCourses, useFirstLoad } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
 import { useCurrentSemester, useUserData } from 'data/userData';
 import { Course } from 'data/types/state';
@@ -52,6 +52,7 @@ const Courses: React.FC<Props> = ({ navigation }) => {
   const hidden = coursesWithCounts.filter(i => hiddenIds.includes(i.id));
 
   const loggedIn = useLoggedIn();
+  const loading = useFirstLoad({ isPending, isFetching: fetching });
   const handleRefresh = () =>
     loggedIn && currentSemesterId ? refetch() : undefined;
 
@@ -76,7 +77,7 @@ const Courses: React.FC<Props> = ({ navigation }) => {
         navigation={navigation}
         onItemPress={handlePush}
         refreshing={pullToRefresh.refreshing}
-        loading={isPending && fetching}
+        loading={loading}
         onRefresh={pullToRefresh.onRefresh}
         updatedAt={dataUpdatedAt}
       />

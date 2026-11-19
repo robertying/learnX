@@ -31,16 +31,19 @@ import { waitAtMost } from 'helpers/waitAtMost';
  * nobody known, it is dropped first, so a new account never starts with the
  * previous one's courses, lists or timetable. With `startOver`, it's dropped
  * either way and the user data starts from it (the mock account typed on the
- * login screen starts from its sample data). Resolves once the old data is
- * gone, reminders and files included.
+ * login screen starts from its sample data). The stores, the server cache
+ * and the files go at once. What the system shows for the old data (widgets,
+ * Spotlight, reminders) is cleared in the surfaces' own queue, ahead of
+ * anything shown for this account, so the login doesn't wait for it: the
+ * system can take minutes to answer, as Spotlight does after a restart.
  */
-async function claimData(
+function claimData(
   previousOwner: string | null,
   username: string,
   startOver?: UserData,
 ) {
   if (startOver || previousOwner !== username) {
-    await clearAccountData(startOver);
+    void clearAccountData(startOver);
   }
   setDataOwner(username);
 }
@@ -117,12 +120,13 @@ export async function login({
     );
 
     if (given) {
-      // A failed write keeps the login for this session only.
-      await saveCredentials(given).catch(() => undefined);
+      // Saved for this session at once; the keychain write isn't waited for,
+      // and a failed one keeps the login for this session only.
+      void saveCredentials(given).catch(() => undefined);
     }
     const account = username ?? getCredentials()?.username;
     if (account) {
-      await claimData(
+      claimData(
         previousOwner,
         account,
         username && isMockUser(username) ? mockUserData() : undefined,

@@ -12,6 +12,7 @@ import { getUserData, resetUserData, setArchived } from 'data/userData';
 // The fixture helpers/env is mocked with (jest/setup.ts), typed as strings.
 import env from 'test-utils/mocks/env';
 import { MOCK_FINGER_PRINT } from 'helpers/mock';
+import { clearSurfaces } from 'services/surfaces';
 import {
   clearSessionCookies,
   dataSource,
@@ -181,6 +182,16 @@ describe('login', () => {
     jest
       .spyOn(SecureStore, 'setItemAsync')
       .mockRejectedValueOnce(new Error('keychain'));
+    await login(sso);
+    expect(getAuth().loggedIn).toBe(true);
+    expect(getCredentials()).toEqual(sso);
+  });
+
+  it('does not wait for the keychain to save the login', async () => {
+    const SecureStore = require('expo-secure-store');
+    jest
+      .spyOn(SecureStore, 'setItemAsync')
+      .mockReturnValueOnce(new Promise(() => {}));
     await login(sso);
     expect(getAuth().loggedIn).toBe(true);
     expect(getCredentials()).toEqual(sso);
@@ -424,6 +435,19 @@ describe('a login that replaces data', () => {
 
     expect(seen[0]).toEqual([env.DUMMY_USERNAME, undefined]);
     expect(getAuth().reloginRequested).toBe(false);
+  });
+
+  it('does not wait for the system to clear the old data', async () => {
+    // Spotlight can take minutes to answer, e.g. after a restart.
+    jest.mocked(clearSurfaces).mockReturnValueOnce(new Promise(() => {}));
+    await login({
+      username: env.DUMMY_USERNAME,
+      password: env.DUMMY_PASSWORD,
+      fingerPrint: MOCK_FINGER_PRINT,
+    });
+    expect(clearSurfaces).toHaveBeenCalled();
+    expect(getAuth().loggedIn).toBe(true);
+    expect(getDataOwner()).toBe(env.DUMMY_USERNAME);
   });
 
   it('keeps the data when the mock login fails', async () => {
