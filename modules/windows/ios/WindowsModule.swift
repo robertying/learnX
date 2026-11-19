@@ -13,6 +13,12 @@ public final class WindowsModule: Module {
       WindowTracker.setLink(link, for: windowId)
     }
 
+    AsyncFunction("setWindowTitle") { (windowId: String, title: String) in
+      MainActor.assumeIsolated {
+        WindowTracker.setTitle(title, for: windowId)
+      }
+    }.runOnQueue(.main)
+
     AsyncFunction("openWindow") { (link: String) in
       guard let url = URL(string: link) else {
         return
