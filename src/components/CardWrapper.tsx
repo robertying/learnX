@@ -257,8 +257,8 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
 
   const {
     snapRef,
-    close,
     onArmedChange,
+    onActionPress,
     onStartDrag,
     onWillOpen,
     onOpen,
@@ -292,10 +292,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
           translation={translation}
           rowWidth={rowWidth}
           onArmedChange={armed => onArmedChange(side, armed)}
-          onPress={() => {
-            runAction(action);
-            close();
-          }}
+          onPress={() => onActionPress(side)}
         />
       ) : null;
     };
