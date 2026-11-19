@@ -11,14 +11,12 @@
 // startup code, which no test runs.
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
-import { coverageTable } from './coverage-table.mjs';
+import { checkMinimum, coverageTable, minArg } from './coverage-table.mjs';
 
-const args = process.argv.slice(2);
-const minArg = args.find(arg => arg.startsWith('--min='));
-const min = minArg ? Number(minArg.slice('--min='.length)) : 0;
+const { min, rest: reports } = minArg(process.argv.slice(2));
 
 const files = [];
-for (const arg of args.filter(a => a !== minArg)) {
+for (const arg of reports) {
   const [path, only] = arg.split('#');
   const xml = readFileSync(path, 'utf8');
   for (const pkg of xml.matchAll(
@@ -50,13 +48,4 @@ const untested = execFileSync(
   .filter(path => path && !files.some(file => path.endsWith(`/${file.path}`)));
 
 console.log(coverageTable(files, untested).join('\n'));
-
-const covered = files.reduce((sum, file) => sum + file.covered, 0);
-const executable = files.reduce((sum, file) => sum + file.executable, 0);
-const percent = executable ? (100 * covered) / executable : 100;
-if (percent < min) {
-  console.error(
-    `Line coverage ${percent.toFixed(1)}% is below the minimum, ${min}%.`,
-  );
-  process.exitCode = 1;
-}
+checkMinimum(files, min);

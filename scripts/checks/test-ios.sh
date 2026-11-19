@@ -26,7 +26,11 @@ derived="${DERIVED_DATA:-$HOME/Library/Developer/Xcode/DerivedData/learnX-tests}
 results="$derived/results"
 
 schemes=("$@")
+# The line coverage a run of every scheme must reach (below); keep it just
+# under the current total, and raise it as coverage grows.
+min=0
 if [ ${#schemes[@]} -eq 0 ]; then
+  min=86
   for podspec in modules/*/ios/*.podspec; do
     if [ -d "$(dirname "$podspec")/Tests" ]; then
       schemes+=("$(basename "$podspec" .podspec)-Unit-Tests")
@@ -58,10 +62,10 @@ for scheme in "${schemes[@]}"; do
 done
 
 # Coverage of the app's and the modules' own Swift (not their tests, not pods),
-# each file from the run that covers it best.
+# each file from the run that covers it best, failing below `min`.
 for result in "$results"/*.xcresult; do
   xcrun xccov view --report --json "$result" 2>/dev/null || true
-done | node scripts/checks/native-coverage.mjs "$PWD"
+done | node scripts/checks/native-coverage.mjs --min="$min" "$PWD" || failed+=(coverage)
 
 if [ ${#failed[@]} -gt 0 ]; then
   echo "Failed: ${failed[*]}" >&2

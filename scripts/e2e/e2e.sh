@@ -22,13 +22,12 @@
 # --live logs in with the real test account from .env (LIVE_USERNAME /
 # LIVE_PASSWORD / LIVE_FINGERPRINT) instead, and runs only the flows tagged
 # `live`. Local only: it refuses to run in CI. The build from
-# scripts/e2e/e2e-build.sh holds no live value: the flow passes the fingerprint as a
-# launch argument,
-# and the app signs the account in with it instead of opening the SSO page,
-# which would add a device each run. Maestro's output, which has the password
-# and fingerprint in it, goes to a temporary folder that is deleted afterwards,
-# and the app's data is cleared at the end so the real login isn't left on the
-# device.
+# scripts/e2e/e2e-build.sh holds no live value: the flow passes the fingerprint
+# as a launch argument, and the app signs the account in with it instead of
+# opening the SSO page, which would add a device each run. Maestro's output,
+# which has the password and fingerprint in it, goes to a temporary folder that
+# is deleted afterwards, and the app's data is cleared at the end so the real
+# login isn't left on the device.
 #
 # Boot one simulator/emulator first (or pass --device <id> via MAESTRO_DEVICE).
 # E2E_ORIENTATION (PORTRAIT, LANDSCAPE_LEFT, ...) sets the orientation each
@@ -66,7 +65,7 @@ case "$platform" in
 ios) app_id="io.robertying.learnX" ;;
 android) app_id="io.robertying.learnx" ;;
 *)
-  echo "usage: $0 ios|android [--live] [maestro test args...]" >&2
+  echo "usage: $0 ios|android [--live] [maestro test args...] | ios --ui [xcodebuild test args...]" >&2
   exit 1
   ;;
 esac

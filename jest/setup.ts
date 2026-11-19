@@ -1,52 +1,17 @@
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-import 'dayjs/locale/zh-cn';
-import { mockClock, mockLocale } from './locale';
-
-// Code that reads process.platform (the Electron app's main process) runs as
-// on CI's Linux runners on every machine, as process.env.TZ in jest.config.js
-// does for time zones: a test that needs another platform sets it itself.
-Object.defineProperty(process, 'platform', { value: 'linux' });
-
-// As helpers/i18n does when it loads
-dayjs.extend(relativeTime);
+import './common';
 
 // Modules every test gets a stand-in for: native modules, ESM-only packages
-// and native views. Each stand-in is in jest/mocks/ and says what it does.
+// and native views. Each stand-in is in jest/mocks/ and says what it does;
+// jest/common.ts has the ones the Electron app's tests share.
 
-// helpers/env inlines the repo's .env at build time (babel/inline-env.js); tests
-// use fixed fixture values instead. Mocked by path so it covers every import
-// specifier module-resolver produces ('helpers/env', './env', '../helpers/env').
-jest.mock('../src/helpers/env', () => require('./mocks/env'));
-
-jest.mock('expo-localization', () => ({
-  getCalendars: () => [{ uses24hourClock: mockClock.uses24hourClock }],
-  getLocales: () => [
-    {
-      languageTag: mockLocale.current,
-      languageCode: mockLocale.current.split('-')[0],
-      isRTL: false,
-    },
-  ],
-}));
-
-jest.mock('@react-native-async-storage/async-storage', () =>
-  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
-);
 jest.mock(
   'react-native-safe-area-context',
   () => require('react-native-safe-area-context/jest/mock').default,
 );
 
 // Native modules
-jest.mock('expo-application', () => ({
-  nativeBuildVersion: '1',
-  applicationId: 'io.robertying.learnx',
-}));
 jest.mock('expo-calendar', () => require('./mocks/expoCalendar'));
-jest.mock('expo-device', () => require('./mocks/device'));
 jest.mock('expo-file-system', () => require('./mocks/fileSystem'));
-jest.mock('expo-haptics', () => require('./mocks/haptics'));
 jest.mock('expo-notifications', () => require('./mocks/notifications'));
 jest.mock('expo-secure-store', () => require('./mocks/secureStore'));
 jest.mock('expo-sqlite/kv-store', () => require('./mocks/sqliteKvStore'));

@@ -64,3 +64,31 @@ describe('flow references', () => {
     },
   );
 });
+
+// The patched Maestro (scripts/e2e/maestro): build.sh applies the patches in
+// the order it lists them, and README.md says what each one is for. A patch
+// added to the folder but not to the list would never be applied.
+describe('patched Maestro', () => {
+  const patchDir = join(__dirname, '../e2e/maestro');
+  const patches = readdirSync(patchDir)
+    .filter(name => name.endsWith('.patch'))
+    .sort();
+  const applied = [
+    ...read(join(patchDir, 'build.sh')).matchAll(
+      /"\$here\/(maestro-[\w-]+\.patch)"/g,
+    ),
+  ].map(match => match[1]);
+  const readme = read(join(patchDir, 'README.md'));
+
+  it('has patches', () => {
+    expect(patches.length).toBeGreaterThan(0);
+  });
+
+  it('applies each patch once in build.sh', () => {
+    expect([...applied].sort()).toEqual(patches);
+  });
+
+  it.each(patches)('describes %s in README.md', name => {
+    expect(readme).toContain(`\`${name}\``);
+  });
+});

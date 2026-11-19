@@ -5,8 +5,9 @@
 // - `T_<key>`: the translation `<key>` in English and Chinese, as a regex
 //   alternation (`T_search` = `Search|搜索`), with the English also in
 //   sentence case where Android and the Electron app write it so
-//   (`T_logout` = `Log out|Log Out|退出登录`). Only keys the flows (and the
-//   Electron app's Playwright tests, electron/e2e) use are printed.
+//   (`T_logout` = `Log out|Log Out|退出登录`). Only keys the flows, the
+//   Electron app's Playwright tests (electron/e2e) and the Mac app's UI tests
+//   (ios/learnXUITests/Mac) use are printed.
 // - `MOCK_*`: mock items (`data/mock.ts`, `data/mockEnglish.ts`) the flows
 //   open, as an alternation of their English and Chinese texts. A flow matches
 //   one inside a card's label as `'.*(${MOCK_NOTICE}).*'`.
