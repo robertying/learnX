@@ -17,8 +17,8 @@ import type { DeadlineWidgetProps } from 'widgets/props';
  * app formatted, and it leaves out the deadlines that have passed by the time
  * it's drawn (it's redrawn every half hour, see res/xml/deadlines_info.xml).
  * It lists as many as fit the widget's height and counts the rest in the
- * header, spreading the rows over the height when some are left out, as the
- * iOS layout (widgets/Deadlines) does.
+ * header, as the iOS layout (widgets/Deadlines) does, with the rows from the
+ * top.
  *
  * The build embeds this layout with `initialProps` (see
  * android/app/src/main/expo-widgets-layout-registry.config.json), so a widget
@@ -124,7 +124,6 @@ function DeadlinesWidget(
             </Row>
           </Column>
         )),
-        more > 0,
         spacing,
       )}
     </Column>

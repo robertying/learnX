@@ -24,8 +24,8 @@ import type { UpNextWidgetProps } from 'widgets/props';
  * res/xml/up_next_info.xml) and whenever the app sends new props. Below the
  * featured class it lists as many of the later ones as fit the widget's
  * height, laid out as the iOS layout (widgets/UpNext) lays them out: a row
- * each with the time at the end, under their own label in a tall widget, and
- * spread over the height when some are left out. The build embeds it with `initialProps` (see
+ * each with the time at the end, under their own label in a tall widget,
+ * from the top. The build embeds it with `initialProps` (see
  * expo-widgets-layout-registry.config.json) so a widget added before the app
  * has run asks to open it. Tapping it opens Today, and a class its course.
  */
@@ -174,7 +174,6 @@ function UpNextWidget(
             </Text>
           </Row>
         )),
-        following.length < classes.length - 1,
         spacing,
         first,
       )}

@@ -107,27 +107,16 @@ export function widgetKit() {
     ),
     /**
      * Rows under a widget's header (or a label), `first` dp below it and
-     * `spacing` dp apart. When rows are left out (`cut`), the space the next
-     * row didn't fit in goes between the rows, as the iOS layouts spread them
-     * (`fitted` in widgets/kit), so the first stays right under its header
-     * and the last ends at the bottom; when all are shown, they keep to the
-     * top. One Column holds them, each with its gaps in a Column of its own,
-     * since Glance draws only the first 10 children of a container.
+     * `spacing` dp apart, from the top: what doesn't fill the height stays
+     * empty at the bottom. One Column holds them, each with its gap in a
+     * Column of its own, since Glance draws only the first 10 children of a
+     * container.
      */
-    rows: (
-      rows: ReactElement[],
-      cut: boolean,
-      spacing: number,
-      first: number = spacing,
-    ) =>
+    rows: (rows: ReactElement[], spacing: number, first: number = spacing) =>
       rows.length > 0 ? (
-        <Column modifiers={[fillMaxWidth(), ...(cut ? [fill] : [])]}>
+        <Column modifiers={[fillMaxWidth()]}>
           {rows.map((row, i) => (
-            <Column
-              key={row.key}
-              modifiers={[fillMaxWidth(), ...(cut && i > 0 ? [fill] : [])]}
-            >
-              {cut && i > 0 ? <Spacer modifiers={[fill]} /> : null}
+            <Column key={row.key} modifiers={[fillMaxWidth()]}>
               <Spacer modifiers={[height(i === 0 ? first : spacing)]} />
               {row}
             </Column>
