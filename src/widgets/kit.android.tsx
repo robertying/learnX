@@ -1,8 +1,12 @@
+import { Column, Row, Spacer, Text } from '@expo/ui/jetpack-compose';
 import {
   background,
   cornerRadius,
   fillMaxSize,
+  fillMaxWidth,
+  height,
   paddingAll,
+  weight,
 } from '@expo/ui/jetpack-compose/modifiers';
 import type { WidgetEnvironment } from 'expo-widgets';
 import type { ReactElement } from 'react';
@@ -61,10 +65,64 @@ export function widgetKit() {
           orange: '#9A4605',
         };
 
+  /**
+   * Takes the space its siblings leave in a Row (width) or Column (height),
+   * as Glance's `defaultWeight()` (our expo-widgets patch).
+   */
+  const fill = weight(1);
+
   return {
     padding,
     colors,
     openUrl,
+    fill,
+    /**
+     * A section's name, such as the widget's title, in the brand color, with
+     * `trailing` (the count of deadlines left out) at the end of the line.
+     */
+    label: (
+      environment: AndroidWidgetEnvironment,
+      text: string,
+      trailing?: string,
+    ) => (
+      <Row modifiers={[fillMaxWidth()]}>
+        <Text
+          color={colors(environment).accent}
+          style={{ fontSize: 13, fontWeight: 'bold' }}
+          maxLines={1}
+          modifiers={[fill]}
+        >
+          {text}
+        </Text>
+        {trailing ? (
+          <Text
+            color={colors(environment).caption}
+            style={{ fontSize: 12 }}
+            maxLines={1}
+          >
+            {trailing}
+          </Text>
+        ) : null}
+      </Row>
+    ),
+    /**
+     * Rows under a widget's header (or a label), `first` dp below it and
+     * `spacing` dp apart, from the top: what doesn't fill the height stays
+     * empty at the bottom. One Column holds them, each with its gap in a
+     * Column of its own, since Glance draws only the first 10 children of a
+     * container.
+     */
+    rows: (rows: ReactElement[], spacing: number, first: number = spacing) =>
+      rows.length > 0 ? (
+        <Column modifiers={[fillMaxWidth()]}>
+          {rows.map((row, i) => (
+            <Column key={row.key} modifiers={[fillMaxWidth()]}>
+              <Spacer modifiers={[height(i === 0 ? first : spacing)]} />
+              {row}
+            </Column>
+          ))}
+        </Column>
+      ) : null,
     /**
      * What TalkBack reads for a row, as one sentence without the dots
      * (handled by our patch too).
@@ -100,8 +158,9 @@ export function widgetKit() {
       size * (environment.fontScale ?? 1) * 1.34,
     /**
      * How many rows of `rowHeight` dp fit in the widget's height after `used`
-     * dp (the padding included): at least one and at most `max`. Without a
-     * height, `max`.
+     * dp (the padding included): at least one and at most `max`, and never
+     * more than the 10 children Glance draws in a container (see `rows`).
+     * Without a height, `max`.
      */
     rowsThatFit: (
       environment: AndroidWidgetEnvironment,
@@ -112,9 +171,10 @@ export function widgetKit() {
       environment.height
         ? Math.min(
             max,
+            10,
             Math.max(1, Math.floor((environment.height - used) / rowHeight)),
           )
-        : max,
+        : Math.min(max, 10),
   };
 }
 
