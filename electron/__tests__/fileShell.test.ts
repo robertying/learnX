@@ -92,24 +92,24 @@ describe('a file that would run a program', () => {
   };
   const win = { id: 1 } as never;
 
-  it('opens only once the user says so, Cancel first', async () => {
+  it('opens only once the user says so, Cancel focused', async () => {
     const fileShell = shellFor();
     const { file, uri } = download('作业说明.pdf.BAT');
     shell.openPath.mockResolvedValue('');
-    dialog.showMessageBox.mockResolvedValueOnce({ response: 0 });
+    dialog.showMessageBox.mockResolvedValueOnce({ response: 1 });
     await expect(fileShell.open(win, uri, labels)).resolves.toBe('');
     expect(shell.openPath).not.toHaveBeenCalled();
     expect(dialog.showMessageBox).toHaveBeenCalledWith(win, {
       type: 'warning',
       message: '要打开“作业说明.pdf.BAT”吗？',
       detail: labels.detail,
-      buttons: ['取消', '打开'],
-      defaultId: 0,
-      cancelId: 0,
+      buttons: ['打开', '取消'],
+      defaultId: 1,
+      cancelId: 1,
       noLink: true,
     });
 
-    dialog.showMessageBox.mockResolvedValueOnce({ response: 1 });
+    dialog.showMessageBox.mockResolvedValueOnce({ response: 0 });
     await expect(fileShell.open(win, uri, labels)).resolves.toBe('');
     expect(shell.openPath).toHaveBeenCalledWith(file);
   });
@@ -119,7 +119,7 @@ describe('a file that would run a program', () => {
     async name => {
       const fileShell = shellFor();
       const { uri } = download(name);
-      dialog.showMessageBox.mockResolvedValueOnce({ response: 0 });
+      dialog.showMessageBox.mockResolvedValueOnce({ response: 1 });
       await fileShell.open(win, uri, labels);
       expect(dialog.showMessageBox).toHaveBeenCalledTimes(1);
       expect(shell.openPath).not.toHaveBeenCalled();
@@ -129,13 +129,13 @@ describe('a file that would run a program', () => {
   it('asks in English when the page sends no labels', async () => {
     const fileShell = shellFor();
     const { uri } = download('setup.exe');
-    dialog.showMessageBox.mockResolvedValueOnce({ response: 0 });
+    dialog.showMessageBox.mockResolvedValueOnce({ response: 1 });
     await fileShell.open(null, uri, { message: 3, open: '' });
     expect(dialog.showMessageBox).toHaveBeenCalledWith(
       expect.objectContaining({
         message: 'Open “setup.exe”?',
         detail: DEFAULT_RUN_LABELS.detail,
-        buttons: ['Cancel', 'Open'],
+        buttons: ['Open', 'Cancel'],
       }),
     );
     expect(shell.openPath).not.toHaveBeenCalled();

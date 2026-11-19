@@ -157,7 +157,8 @@ export const createFileShell = ({
     /**
      * Opens a download in the system's default app for its type. One that
      * would run as a program opens only once the user says so in a dialog of
-     * the system's (Cancel first), which the page can't answer for them;
+     * the system's (Open, then Cancel, as Windows orders them, with Cancel
+     * focused), which the page can't answer for them;
      * Windows also knows it came from the internet (`markDownloaded`).
      * Resolves to an error message, or '' when it opened or was cancelled.
      * @param labels the dialog's text, `{name}` the file's
@@ -174,15 +175,15 @@ export const createFileShell = ({
           type: 'warning',
           message: text.message.replace('{name}', path.basename(file)),
           detail: text.detail,
-          buttons: [text.cancel, text.open],
-          defaultId: 0,
-          cancelId: 0,
+          buttons: [text.open, text.cancel],
+          defaultId: 1,
+          cancelId: 1,
           noLink: true,
         };
         const { response } = win
           ? await dialog.showMessageBox(win, options)
           : await dialog.showMessageBox(options);
-        if (response !== 1) {
+        if (response !== 0) {
           return '';
         }
       }
