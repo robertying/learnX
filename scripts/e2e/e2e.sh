@@ -125,11 +125,9 @@ fi
 # paged tab bar subflows/tab.yaml handles; other devices skip that check.
 # IOS_MAJOR is that simulator's iOS major version (0 on Android): before iOS 26
 # the flows go back with the back button instead of a swipe (subflows/back.yaml).
-# DUO_POSTURE is E2E_DUO_POSTURE (halfFold or flat), which
-# scripts/e2e/e2e-devices.sh sets while the iPhone Duo is open and the app is
-# on its inner display; empty otherwise. SPLIT=true where the app has the
-# split layout, with a detail column beside the list: on an iPad and on the
-# open Duo.
+# SPLIT=true where the app has the split layout, with a detail column beside
+# the list: on an iPad, and on the open iPhone Duo, which
+# scripts/e2e/e2e-devices.sh says with E2E_DUO_POSTURE (halfFold or flat).
 ipad=false
 ios_major=0
 duo_posture=
@@ -265,7 +263,6 @@ test_args=(
   -e STATE_CLEARED="${E2E_STATE_CLEARED:-}"
   -e APP_CLOCK="${E2E_CLOCK:-}"
   -e IPAD="$ipad"
-  -e DUO_POSTURE="$duo_posture"
   -e SPLIT="$split"
   -e IOS_MAJOR="$ios_major"
   -e CALENDAR_URL="$calendar_url"

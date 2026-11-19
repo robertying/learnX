@@ -1,0 +1,195 @@
+From b597afc031307e9086dc80643f7805e942e2f9c7 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 18 Nov 2026 16:34:14 -0800
+Subject: [PATCH] fix(ios): place and answer a SpringBoard alert on another
+ display
+
+On the open iPhone Duo, SpringBoard reports an alert over the app in the
+inner display's unrotated portrait points while the app is in landscape,
+and the events the runner synthesizes land on the main display, so the
+alert sat in the wrong place and a notifications request was tapped
+beside its button. Turn the alert's frames a quarter turn into the app's
+landscape points, and have the runner leave the tap answering a
+permission request to the driver, which sends it through the touch
+helper (MAESTRO_IOS_SIM_TOUCH) and reads the screen again.
+---
+ .../main/java/maestro/drivers/IOSDriver.kt    | 10 ++-
+ .../src/main/kotlin/hierarchy/AXElement.kt    |  5 +-
+ .../Handlers/ViewHierarchyHandler.swift       | 69 +++++++++++++++++--
+ .../Helpers/SystemPermissionHelper.swift      | 15 ++++
+ .../Routes/Models/AXElement.swift             |  3 +
+ 5 files changed, 93 insertions(+), 9 deletions(-)
+
+diff --git a/maestro-client/src/main/java/maestro/drivers/IOSDriver.kt b/maestro-client/src/main/java/maestro/drivers/IOSDriver.kt
+index ab304b71..649357b1 100644
+--- a/maestro-client/src/main/java/maestro/drivers/IOSDriver.kt
++++ b/maestro-client/src/main/java/maestro/drivers/IOSDriver.kt
+@@ -205,7 +205,15 @@ class IOSDriver(
+     }
+ 
+     private fun viewHierarchy(excludeKeyboardElements: Boolean): TreeNode {
+-        val hierarchyResult = iosDevice.viewHierarchy(excludeKeyboardElements)
++        var hierarchyResult = iosDevice.viewHierarchy(excludeKeyboardElements)
++        // The runner leaves a permission request on another display for us to answer
++        // (simTouch); read the screen again once the alert has gone.
++        repeat(2) {
++            val tap = hierarchyResult.pendingTap ?: return@repeat
++            if (simTouch?.send("tap ${tap.x + tap.width / 2} ${tap.y + tap.height / 2}") != true) return@repeat
++            Thread.sleep(500)
++            hierarchyResult = iosDevice.viewHierarchy(excludeKeyboardElements)
++        }
+         if (hierarchyResult.depth > WARNING_MAX_DEPTH) {
+             val message = "The view hierarchy has been calculated. The current depth of the hierarchy " +
+                     "is ${hierarchyResult.depth}. This might affect the execution time of your test. " +
+diff --git a/maestro-ios-driver/src/main/kotlin/hierarchy/AXElement.kt b/maestro-ios-driver/src/main/kotlin/hierarchy/AXElement.kt
+index 84170b9d..97be87cb 100644
+--- a/maestro-ios-driver/src/main/kotlin/hierarchy/AXElement.kt
++++ b/maestro-ios-driver/src/main/kotlin/hierarchy/AXElement.kt
+@@ -17,7 +17,10 @@ data class AXFrame(
+ 
+ data class ViewHierarchy(
+     val axElement: AXElement,
+-    val depth: Int
++    val depth: Int,
++    /** A point to tap that the runner's events can't reach, such as a permission request's
++     * button on a display other than the main one. */
++    val pendingTap: AXFrame? = null,
+ )
+ 
+ data class AXElement(
+diff --git a/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/ViewHierarchyHandler.swift b/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/ViewHierarchyHandler.swift
+index 66dc0f88..dd40bc76 100644
+--- a/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/ViewHierarchyHandler.swift
++++ b/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/ViewHierarchyHandler.swift
+@@ -29,8 +29,8 @@ struct ViewHierarchyHandler: HTTPHandler {
+                 return HTTPResponse(statusCode: .ok, body: body)
+             }
+             NSLog("[Start] View hierarchy snapshot for \(foregroundApp)")
+-            let appViewHierarchy = try await getAppViewHierarchy(foregroundApp: foregroundApp, excludeKeyboardElements: requestBody.excludeKeyboardElements)
+-            let viewHierarchy = ViewHierarchy.init(axElement: appViewHierarchy, depth: appViewHierarchy.depth())
++            let (appViewHierarchy, pendingTap) = try await getAppViewHierarchy(foregroundApp: foregroundApp, excludeKeyboardElements: requestBody.excludeKeyboardElements)
++            let viewHierarchy = ViewHierarchy.init(axElement: appViewHierarchy, depth: appViewHierarchy.depth(), pendingTap: pendingTap)
+             
+             NSLog("[Done] View hierarchy snapshot for \(foregroundApp) ")
+             let body = try JSONEncoder().encode(viewHierarchy)
+@@ -44,17 +44,72 @@ struct ViewHierarchyHandler: HTTPHandler {
+         }
+     }
+ 
+-    func getAppViewHierarchy(foregroundApp: XCUIApplication, excludeKeyboardElements: Bool) async throws -> AXElement {
++    /// The app's hierarchy, and a point for the caller to tap that the runner can't: the button
++    /// answering a permission request on a display other than the main one.
++    func getAppViewHierarchy(foregroundApp: XCUIApplication, excludeKeyboardElements: Bool) async throws -> (AXElement, AXFrame?) {
+         let hierarchy = try await getAppAndBarsHierarchy(foregroundApp: foregroundApp, excludeKeyboardElements: excludeKeyboardElements)
+-        guard let alert = springboardAlert(over: foregroundApp) else {
+-            return hierarchy
++        guard var alert = springboardAlert(over: foregroundApp) else {
++            return (hierarchy, nil)
+         }
+         // An alert SpringBoard shows over the app (an app asking to send notifications, Save
+         // Password) isn't in the app's tree, and the app stays the foreground app meanwhile. Add
+         // it last, on top, as it is on screen, and answer a permission request as the flow set.
+         NSLog("Adding the SpringBoard alert over \(foregroundApp.bundleID)")
+-        await SystemPermissionHelper.handleSystemPermissionAlertIfNeeded(appHierarchy: alert, foregroundApp: springboardApplication)
+-        return AXElement(children: [hierarchy, alert])
++        guard ScreenSizeHelper.foregroundAppOtherDisplayID() != nil else {
++            await SystemPermissionHelper.handleSystemPermissionAlertIfNeeded(appHierarchy: alert, foregroundApp: springboardApplication)
++            return (AXElement(children: [hierarchy, alert]), nil)
++        }
++        // On another display (the open iPhone Duo's inner one), SpringBoard reports the alert in
++        // that display's unrotated, portrait points while the app is in landscape, and events the
++        // runner synthesizes land on the main display. Put the alert where the app's frames are,
++        // and leave the tap answering it to the caller.
++        if let width = landscapeWidth(of: hierarchy) {
++            alert = rotatedQuarterTurn(alert, width: width)
++        }
++        let tap = SystemPermissionHelper.permissionButtonFrame(in: alert)
++        return (AXElement(children: [hierarchy, alert]), tap)
++    }
++
++    /// The width of the app's widest window when that window is in landscape, else nil.
++    private func landscapeWidth(of hierarchy: AXElement) -> Double? {
++        func windows(_ element: AXElement) -> [AXFrame] {
++            element.elementType == Int(XCUIElement.ElementType.window.rawValue)
++                ? [element.frame] : (element.children ?? []).flatMap(windows)
++        }
++        guard let window = windows(hierarchy).max(by: { ($0["Width"] ?? 0) < ($1["Width"] ?? 0) }),
++              let width = window["Width"], let height = window["Height"], width > height else {
++            return nil
++        }
++        return width
++    }
++
++    /// Frames in a display's unrotated points, turned a quarter turn as the open iPhone Duo's
++    /// inner display shows them: a point (x, y) is at (width - y, x) in landscape.
++    private func rotatedQuarterTurn(_ element: AXElement, width: Double) -> AXElement {
++        let x = element.frame["X"] ?? 0, y = element.frame["Y"] ?? 0
++        let w = element.frame["Width"] ?? 0, h = element.frame["Height"] ?? 0
++        return copy(element, frame: ["X": width - y - h, "Y": x, "Width": h, "Height": w],
++                    children: element.children?.map { rotatedQuarterTurn($0, width: width) } ?? [])
++    }
++
++    private func copy(_ element: AXElement, frame: AXFrame, children: [AXElement]) -> AXElement {
++        AXElement(
++            identifier: element.identifier,
++            frame: frame,
++            value: element.value,
++            title: element.title,
++            label: element.label,
++            elementType: element.elementType,
++            enabled: element.enabled,
++            horizontalSizeClass: element.horizontalSizeClass,
++            verticalSizeClass: element.verticalSizeClass,
++            placeholderValue: element.placeholderValue,
++            selected: element.selected,
++            hasFocus: element.hasFocus,
++            displayID: element.displayID,
++            windowContextID: element.windowContextID,
++            children: children
++        )
+     }
+ 
+     private func springboardAlert(over app: XCUIApplication) -> AXElement? {
+diff --git a/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Helpers/SystemPermissionHelper.swift b/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Helpers/SystemPermissionHelper.swift
+index 69cf5811..be59ccdb 100644
+--- a/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Helpers/SystemPermissionHelper.swift
++++ b/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Helpers/SystemPermissionHelper.swift
+@@ -37,6 +37,21 @@ final class SystemPermissionHelper {
+         NSLog("[Done] Foreground app is springboard attempting to tap on permissions dialog")
+     }
+ 
++    /// The frame of the button answering a notifications request in `alert` as the flow's
++    /// permissions say, for a caller that taps it itself; nil when there is nothing to tap.
++    static func permissionButtonFrame(in alert: AXElement) -> AXFrame? {
++        guard let data = UserDefaults.standard.object(forKey: "permissions") as? Data,
++              let permissions = try? JSONDecoder().decode([String : PermissionValue].self, from: data),
++              let notificationsPermission = permissions.first(where: { $0.key == "notifications" }) else {
++            return nil
++        }
++        if case .found(let frame) = buttonFinder.findButtonToTap(for: notificationsPermission.value, in: alert) {
++            NSLog("Leaving the tap on the permission button at \(frame) to the caller")
++            return frame
++        }
++        return nil
++    }
++
+     /// Tap at the center of an element's frame
+     private static func tapAtCenter(of frame: AXFrame, in app: XCUIApplication) async {
+         let x = frame.centerX
+diff --git a/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Models/AXElement.swift b/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Models/AXElement.swift
+index 54b7879b..2f219f92 100644
+--- a/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Models/AXElement.swift
++++ b/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Models/AXElement.swift
+@@ -6,6 +6,9 @@ import MaestroDriverLib
+ struct ViewHierarchy : Codable {
+     let axElement: AXElement
+     let depth: Int
++    /// A point the caller should tap, since the runner's events can't reach it: a permission
++    /// request's button on a display other than the main one.
++    var pendingTap: AXFrame? = nil
+ }
+ 
+ struct WindowOffset: Codable {
+-- 
+2.56.1
+
