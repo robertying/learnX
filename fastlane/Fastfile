@@ -805,7 +805,8 @@ end
 
 desc "Set the app version everywhere and bump the build number."
 desc "A new version moves the build number to the next multiple of 10; the same version adds 1 (a rebuild)."
-desc "Usage: bundle exec fastlane bump version:18.1.0   (no version: rebuild of the current one)"
+desc "build: sets the build number itself, which must be above the current one."
+desc "Usage: bundle exec fastlane bump version:18.1.0 build:<number>   (no version: rebuild of the current one; no build: the rule above)"
 lane :bump do |options|
   current = app_version
   build = build_number
@@ -814,6 +815,11 @@ lane :bump do |options|
   verify_versions!
 
   new_build = version == current ? build + 1 : (build / 10 + 1) * 10
+  if options[:build]
+    UI.user_error!("Invalid build '#{options[:build]}': expected a whole number") unless options[:build].to_s.match?(/\A\d+\z/)
+    new_build = options[:build].to_i
+    UI.user_error!("Build #{new_build} must be above the current build #{build}") unless new_build > build
+  end
   new_code = ANDROID_VERSION_CODE_BASE + new_build
 
   replace_in_file!(PACKAGE_JSON, %("version": "#{current}"), %("version": "#{version}"), count: 1)
