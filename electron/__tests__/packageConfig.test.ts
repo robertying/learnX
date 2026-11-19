@@ -42,6 +42,15 @@ it('names every file it uploads without spaces', () => {
   }
 });
 
+// The packaged E2E tests launch the app with --inspect (Playwright).
+it('turns off the fuses the app has no use for, and keeps --inspect', () => {
+  expect(packageConfig().electronFuses).toEqual({
+    runAsNode: false,
+    enableNodeOptionsEnvironmentVariable: false,
+    grantFileProtocolExtraPrivileges: false,
+  });
+});
+
 it('writes the update files under their default names', () => {
   // A channel or detectUpdateChannel would rename latest*.yml.
   const config = packageConfig();
