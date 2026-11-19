@@ -121,18 +121,37 @@ class PdfViewTest {
     assertEquals("java.io.IOException", view.failure)
   }
 
-  /** Leaving File detail while the document still opens: it never shows. */
+  /** Leaving File detail while the document still opens: it never shows, and is closed once it has opened. */
   @Test
-  fun stopsOpeningWhenDestroyed() {
+  fun closesADocumentThatOpensAfterDestroy() {
     val pending = CompletableDeferred<PdfDocument>()
     coEvery { loader.openDocument(file, null) } coAnswers { pending.await() }
     val view = view()
     view.setUri(file.toString())
     view.destroy()
-    pending.complete(document())
+    val late = document()
+    pending.complete(late)
+    verify { late.close() }
     assertNull(view.document)
     assertNull(view.viewer)
     assertNull(view.failure)
+  }
+
+  /** Another file chosen while the first still opens: the first is closed once it has opened, and never shows. */
+  @Test
+  fun closesADocumentThatOpensAfterAnotherIsChosen() {
+    val pending = CompletableDeferred<PdfDocument>()
+    val other = Uri.parse("file:///data/b.pdf")
+    val shown = document()
+    coEvery { loader.openDocument(file, null) } coAnswers { pending.await() }
+    coEvery { loader.openDocument(other, null) } returns shown
+    val view = view()
+    view.setUri(file.toString())
+    view.setUri(other.toString())
+    val late = document()
+    pending.complete(late)
+    verify { late.close() }
+    assertSame(shown, view.document)
   }
 
   @Test
