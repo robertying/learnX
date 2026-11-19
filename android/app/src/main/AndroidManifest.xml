@@ -11,10 +11,10 @@
     <uses-permission
         android:name="com.google.android.gms.permission.AD_ID"
         tools:node="remove" />
-    <!-- Added by libraries for features learnX doesn't use: react-native-blob-util (storage on every
-         Android version, downloads without a notification, Wi-Fi state) and expo-image-picker (the
-         camera; learnX only opens the system photo picker). learnX writes only to its own folders,
-         and files go in and out through the system pickers. -->
+    <!-- Added by libraries for features learnX doesn't use: expo-file-system and expo-image-picker
+         (storage up to Android 12, and the camera; learnX only opens the system photo picker).
+         learnX writes only to its own folders, and files go in and out through the system
+         pickers. -->
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         tools:node="remove" />
@@ -23,12 +23,6 @@
         tools:node="remove" />
     <uses-permission
         android:name="android.permission.CAMERA"
-        tools:node="remove" />
-    <uses-permission
-        android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION"
-        tools:node="remove" />
-    <uses-permission
-        android:name="android.permission.ACCESS_WIFI_STATE"
         tools:node="remove" />
 
     <application
