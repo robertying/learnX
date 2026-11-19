@@ -139,13 +139,15 @@ jobs:
           name: electron-web
           path: build/electron/web
 
-      # Weston's ~90 packages come from main's cache, since Ubuntu's mirror
-      # can take over 15 minutes to serve them. The key follows the runner
-      # image, whose installed packages decide which ones Weston needs.
+      # Weston's packages come from main's cache, since Ubuntu's mirror can
+      # take over 15 minutes to serve them. Runners mix image versions, so
+      # the newest cache for the OS is restored, and used if it holds exactly
+      # the packages this image lacks (install-weston.sh); otherwise they're
+      # downloaded, and main saves them as the newest.
       - name: Weston cache key
         id: weston-key
         if: env.CHANGED == 'true' && matrix.run == 'Linux'
-        run: echo "key=weston-debs-$ImageOS-$(echo "$ImageVersion" | sha256sum | cut -c1-40)" >> "$GITHUB_OUTPUT"
+        run: echo "prefix=weston-debs-$ImageOS-" >> "$GITHUB_OUTPUT"
 
       - name: Restore Weston packages
         id: weston-cache
@@ -153,31 +155,20 @@ jobs:
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ runner.temp }}/weston-debs
-          key: ${{ steps.weston-key.outputs.key }}
+          key: ${{ steps.weston-key.outputs.prefix }}${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: ${{ steps.weston-key.outputs.prefix }}
 
       - name: Install Weston
+        id: weston
         if: env.CHANGED == 'true' && matrix.run == 'Linux'
-        env:
-          DEBS: ${{ runner.temp }}/weston-debs
-          CACHED: ${{ steps.weston-cache.outputs.cache-hit }}
-        run: |
-          if [ "$CACHED" != 'true' ]; then
-            mkdir -p "$DEBS/partial"
-            sudo apt-get update
-            sudo apt-get install -y --no-install-recommends --download-only \
-              -o Dir::Cache::archives="$DEBS" weston
-            sudo chmod -R a+r "$DEBS"
-          fi
-          # Exactly the packages this image lacks, so dpkg installs them
-          # with no network and no package lists.
-          sudo dpkg -i "$DEBS"/*.deb
+        run: scripts/ci/install-weston.sh "$RUNNER_TEMP/weston-debs"
 
       - name: Save Weston packages
-        if: env.SAVE_CACHE == 'true' && matrix.run == 'Linux' && steps.weston-cache.outcome == 'success' && steps.weston-cache.outputs.cache-hit != 'true'
+        if: env.SAVE_CACHE == 'true' && steps.weston.outputs.downloaded == 'true'
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ runner.temp }}/weston-debs
-          key: ${{ steps.weston-key.outputs.key }}
+          key: ${{ steps.weston-key.outputs.prefix }}${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Restore Electron download cache
         id: electron-cache
