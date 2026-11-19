@@ -1,8 +1,12 @@
+import { Row, Spacer, Text } from '@expo/ui/jetpack-compose';
 import {
   background,
   cornerRadius,
   fillMaxSize,
+  fillMaxWidth,
+  height,
   paddingAll,
+  weight,
 } from '@expo/ui/jetpack-compose/modifiers';
 import type { WidgetEnvironment } from 'expo-widgets';
 import type { ReactElement } from 'react';
@@ -61,10 +65,61 @@ export function widgetKit() {
           orange: '#9A4605',
         };
 
+  /**
+   * Takes the space its siblings leave in a Row (width) or Column (height),
+   * as Glance's `defaultWeight()` (our expo-widgets patch).
+   */
+  const fill = weight(1);
+
   return {
     padding,
     colors,
     openUrl,
+    fill,
+    /**
+     * A section's name, such as the widget's title, in the brand color, with
+     * `trailing` (the count of deadlines left out) at the end of the line.
+     */
+    label: (
+      environment: AndroidWidgetEnvironment,
+      text: string,
+      trailing?: string,
+    ) => (
+      <Row modifiers={[fillMaxWidth()]}>
+        <Text
+          color={colors(environment).accent}
+          style={{ fontSize: 13, fontWeight: 'bold' }}
+          maxLines={1}
+          modifiers={[fill]}
+        >
+          {text}
+        </Text>
+        {trailing ? (
+          <Text
+            color={colors(environment).caption}
+            style={{ fontSize: 12 }}
+            maxLines={1}
+          >
+            {trailing}
+          </Text>
+        ) : null}
+      </Row>
+    ),
+    /**
+     * Rows under a widget's header, `spacing` dp apart, as the iOS layouts
+     * place them (`fitted` in widgets/kit): when rows are left out (`cut`),
+     * the ones shown spread over the height, so the space the next row didn't
+     * fit in doesn't all end up at the bottom; when all are shown, they keep
+     * to the top.
+     */
+    rows: (rows: ReactElement[], cut: boolean, spacing: number) =>
+      rows.flatMap(row => [
+        <Spacer key={`gap-${String(row.key)}`} modifiers={[height(spacing)]} />,
+        ...(cut
+          ? [<Spacer key={`fill-${String(row.key)}`} modifiers={[fill]} />]
+          : []),
+        row,
+      ]),
     /**
      * What TalkBack reads for a row, as one sentence without the dots
      * (handled by our patch too).

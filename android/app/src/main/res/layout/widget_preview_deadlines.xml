@@ -12,7 +12,6 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="6dp"
         android:maxLines="1"
         android:text="@string/deadlines_display_name"
         android:textColor="@color/md_theme_primary"
@@ -22,19 +21,16 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="2dp"
-        android:layout_marginTop="2dp"
+        android:layout_marginTop="4dp"
         android:maxLines="1"
         android:text="@string/widget_preview_assignment"
         android:textColor="@color/md_theme_onSurface"
-        android:textSize="14sp"
-        android:textStyle="bold" />
+        android:fontFamily="sans-serif-medium"
+        android:textSize="14sp" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="2dp"
-        android:layout_marginBottom="2dp"
         android:maxLines="1"
         android:text="@string/widget_preview_assignment_due"
         android:textColor="@color/md_theme_onSurfaceVariant"
@@ -43,18 +39,16 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="2dp"
-        android:layout_marginTop="2dp"
+        android:layout_marginTop="4dp"
         android:maxLines="1"
         android:text="@string/widget_preview_assignment_2"
         android:textColor="@color/md_theme_onSurface"
-        android:textSize="14sp"
-        android:textStyle="bold" />
+        android:fontFamily="sans-serif-medium"
+        android:textSize="14sp" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="2dp"
         android:maxLines="1"
         android:text="@string/widget_preview_assignment_2_due"
         android:textColor="@color/md_theme_onSurfaceVariant"

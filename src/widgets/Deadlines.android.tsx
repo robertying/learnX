@@ -1,9 +1,7 @@
-import { Box, Column, Row, Spacer, Text } from '@expo/ui/jetpack-compose';
+import { Box, Column, Row, Text } from '@expo/ui/jetpack-compose';
 import {
   fillMaxSize,
   fillMaxWidth,
-  height,
-  paddingAll,
 } from '@expo/ui/jetpack-compose/modifiers';
 import { createWidget } from 'expo-widgets';
 import {
@@ -21,7 +19,9 @@ import type { DeadlineWidgetProps } from 'widgets/props';
  * Android widgets have no self-updating dates, so it shows the due time the
  * app formatted, and it leaves out the deadlines that have passed by the time
  * it's drawn (it's redrawn every half hour, see res/xml/deadlines_info.xml).
- * It lists as many as fit the widget's height and counts the rest.
+ * It lists as many as fit the widget's height and counts the rest in the
+ * header, spreading the rows over the height when some are left out, as the
+ * iOS layout (widgets/Deadlines) does.
  *
  * The build embeds this layout with `initialProps` (see
  * android/app/src/main/expo-widgets-layout-registry.config.json), so a widget
@@ -63,12 +63,13 @@ function DeadlinesWidget(
         : undefined;
   const all = props.deadlines ?? [];
   const ahead = all.filter(d => d.deadline > now);
-  // The title and the space below it, then rows of a title and a due line
-  // with 2 dp of padding around them.
+  // 4 dp between rows, as on iOS. The header comes first, then rows of a
+  // title and a due line, each with the gap above it.
+  const spacing = 4;
   const fit = kit.rowsThatFit(
     environment,
-    2 * kit.padding + kit.line(environment, 13) + 6,
-    4 + kit.line(environment, 14) + kit.line(environment, 12),
+    2 * kit.padding + kit.line(environment, 13),
+    spacing + kit.line(environment, 14) + kit.line(environment, 12),
     environment.height ? ahead.length : 4,
   );
   const deadlines = ahead.slice(0, fit);
@@ -77,21 +78,7 @@ function DeadlinesWidget(
 
   return (
     <Column modifiers={kit.root(environment, props.url)}>
-      <Row modifiers={[fillMaxWidth()]}>
-        <Text
-          color={colors.accent}
-          style={{ fontSize: 13, fontWeight: 'bold' }}
-          maxLines={1}
-        >
-          {title}
-        </Text>
-        {more > 0 ? (
-          <Text color={colors.caption} style={{ fontSize: 13 }} maxLines={1}>
-            {`  +${more}`}
-          </Text>
-        ) : null}
-      </Row>
-      <Spacer modifiers={[height(6)]} />
+      {kit.label(environment, title, more > 0 ? `+${more}` : undefined)}
       {deadlines.length === 0 ? (
         // Centered in the space below the title.
         <Box modifiers={[fillMaxSize()]} contentAlignment="center">
@@ -103,37 +90,46 @@ function DeadlinesWidget(
           </Text>
         </Box>
       ) : null}
-      {deadlines.map(item => (
-        <Column
-          key={item.id}
-          modifiers={[
-            fillMaxWidth(),
-            paddingAll(2),
-            ...kit.openUrl(item.url),
-            ...kit.spoken(item.title, item.due, item.courseName),
-          ]}
-        >
-          <Text
-            color={colors.title}
-            style={{ fontSize: 14, fontWeight: 'bold' }}
-            maxLines={1}
+      {kit.rows(
+        deadlines.map(item => (
+          <Column
+            key={item.id}
+            modifiers={[
+              fillMaxWidth(),
+              ...kit.openUrl(item.url),
+              ...kit.spoken(item.title, item.due, item.courseName),
+            ]}
           >
-            {item.title}
-          </Text>
-          <Row>
             <Text
-              color={dueColor(item) ?? colors.caption}
-              style={{ fontSize: 12 }}
+              color={colors.title}
+              style={{ fontSize: 14, fontWeight: '500' }}
               maxLines={1}
             >
-              {item.due}
+              {item.title}
             </Text>
-            <Text color={colors.caption} style={{ fontSize: 12 }} maxLines={1}>
-              {` · ${item.courseName}`}
-            </Text>
-          </Row>
-        </Column>
-      ))}
+            {/* The due time first, in its color, so the course is what's
+                cut: Android has no live countdown to show beside it. */}
+            <Row>
+              <Text
+                color={dueColor(item) ?? colors.caption}
+                style={{ fontSize: 12 }}
+                maxLines={1}
+              >
+                {item.due}
+              </Text>
+              <Text
+                color={colors.caption}
+                style={{ fontSize: 12 }}
+                maxLines={1}
+              >
+                {` · ${item.courseName}`}
+              </Text>
+            </Row>
+          </Column>
+        )),
+        more > 0,
+        spacing,
+      )}
     </Column>
   );
 }

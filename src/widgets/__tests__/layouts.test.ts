@@ -812,7 +812,7 @@ describe('Deadlines on Android', () => {
     const widget = layout(props, { colorScheme: 'dark' });
     expect(texts(widget)).toEqual([
       'Deadlines',
-      '  +5',
+      '+5',
       ...[1, 2, 3, 4].flatMap(i => [
         `Assignment d${i}`,
         `d${i}-due`,
@@ -847,7 +847,7 @@ describe('Deadlines on Android', () => {
       (texts(layout(deadlineProps, environment)).length - 2) / 3;
     // 2 × 2 cells: two rows, and the rest counted.
     const short = layout(deadlineProps, { height: 140 });
-    expect(texts(short).slice(0, 2)).toEqual(['Deadlines', '  +7']);
+    expect(texts(short).slice(0, 2)).toEqual(['Deadlines', '+7']);
     expect(openUrls(short)).toEqual([
       'learnx://assignment',
       'learnx://assignment/d1',
@@ -860,6 +860,30 @@ describe('Deadlines on Android', () => {
     expect(rows({ height: 300, fontScale: 1.5 })).toBe(4);
     // Always at least one.
     expect(rows({ height: 60 })).toBe(1);
+  });
+
+  it('spreads the rows over its height when some are left out, as on iOS', () => {
+    // A Spacer taking the space left (the `weight` modifier) before each row.
+    const fills = (props: DeadlineWidgetProps) =>
+      all(layout(props, { height: 400 })).filter(
+        n => n.type === 'Spacer' && modifier(n, 'weight') !== undefined,
+      ).length;
+    // Seven of nine.
+    expect(fills(deadlineProps)).toBe(7);
+    // All shown: they keep to the top.
+    expect(fills({ ...deadlineProps, total: 7 })).toBe(0);
+  });
+
+  it('puts the count of the rest at the end of the header', () => {
+    const widget = layout(deadlineProps, { height: 140 });
+    const header = childrenOf(widget)[0];
+    expect(header.type).toBe('Row');
+    expect(childrenOf(header).map(n => n.props.children)).toEqual([
+      'Deadlines',
+      '+7',
+    ]);
+    // The title takes the space left, so the count is at the end.
+    expect(modifier(childrenOf(header)[0], 'weight')).toBe(1);
   });
 
   it("is the launcher's widget background", () => {
@@ -919,8 +943,10 @@ describe('Up Next on Android', () => {
       'Now',
       'Course now',
       'now-time · 六教6A414',
-      'Later: Course later · Tomorrow later-time',
-      'Course c3 · c3-weekday c3-time',
+      'Course later',
+      'Tomorrow later-time',
+      'Course c3',
+      'c3-weekday c3-time',
     ]);
     expect(openUrls(widget)).toEqual([
       'learnx://today',
@@ -930,23 +956,48 @@ describe('Up Next on Android', () => {
     ]);
     expect(descriptions(widget)).toEqual([
       'Course now, now-time, 六教6A414',
-      'Later, Course later, Tomorrow later-time',
+      'Course later, Tomorrow later-time',
       'Course c3, c3-weekday c3-time',
     ]);
   });
 
   it('lists as many later classes as fit its height', () => {
-    // The label and the featured class, then one text a class.
+    // The widget's and the featured class's links, then one a class.
     const later = (environment: object) =>
-      texts(layout(upNextProps, environment)).length - 3;
+      openUrls(layout(upNextProps, environment)).length - 2;
     // 2 × 2 cells
     expect(later({ height: 130 })).toBe(2);
     expect(later({ height: 160 })).toBe(3);
     // All five after the featured one.
     expect(later({ height: 400 })).toBe(5);
     // Larger text: fewer.
-    expect(later({ height: 200, fontScale: 1.3 })).toBe(4);
+    expect(later({ height: 200, fontScale: 1.3 })).toBe(3);
     expect(later({ height: 160, fontScale: 1.3 })).toBe(2);
+  });
+
+  it('lays the later classes out as the iOS layout does', () => {
+    // A row each: the course, taking the space left, then when.
+    const medium = layout(upNextProps, { height: 160 });
+    const rows = all(medium).filter(
+      n => n.type === 'Row' && openUrls(n).length === 1,
+    );
+    expect(rows.map(texts)).toEqual([
+      ['Course later', 'Tomorrow later-time'],
+      ['Course c3', 'c3-weekday c3-time'],
+      ['Course c4', 'c4-weekday c4-time'],
+    ]);
+    expect(modifier(childrenOf(rows[0])[0], 'weight')).toBe(1);
+    // No label in a medium one; spread out, as two are left out.
+    expect(texts(medium)).not.toContain('Later');
+    const fills = (node: Node) =>
+      all(node).filter(
+        n => n.type === 'Spacer' && modifier(n, 'weight') !== undefined,
+      ).length;
+    expect(fills(medium)).toBe(3);
+    // A tall one names them on a line of their own, and shows all at the top.
+    const large = layout(upNextProps, { height: 400 });
+    expect(texts(large).slice(3, 5)).toEqual(['Later', 'Course later']);
+    expect(fills(large)).toBe(0);
   });
 
   it("dates a class after tomorrow, and leaves out what's missing", () => {

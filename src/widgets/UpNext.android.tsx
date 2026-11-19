@@ -1,8 +1,9 @@
-import { Box, Column, Spacer, Text } from '@expo/ui/jetpack-compose';
+import { Box, Column, Row, Spacer, Text } from '@expo/ui/jetpack-compose';
 import {
   fillMaxSize,
   fillMaxWidth,
   height,
+  padding,
 } from '@expo/ui/jetpack-compose/modifiers';
 import { createWidget } from 'expo-widgets';
 import {
@@ -22,7 +23,9 @@ import type { UpNextWidgetProps } from 'widgets/props';
  * one by the time it's drawn at; the widget is redrawn every half hour (see
  * res/xml/up_next_info.xml) and whenever the app sends new props. Below the
  * featured class it lists as many of the later ones as fit the widget's
- * height. The build embeds it with `initialProps` (see
+ * height, laid out as the iOS layout (widgets/UpNext) lays them out: a row
+ * each with the time at the end, under their own label in a tall widget, and
+ * spread over the height when some are left out. The build embeds it with `initialProps` (see
  * expo-widgets-layout-registry.config.json) so a widget added before the app
  * has run asks to open it. Tapping it opens Today, and a class its course.
  */
@@ -52,25 +55,26 @@ function UpNextWidget(
   const classes = (props.classes ?? []).filter(c => c.end > now);
   const featured = classes[0];
   const current = !!featured && featured.start <= now;
-  // The ones after it that fit below: the label and the featured class come
-  // first, then rows of one line with 2 dp between them (6 above the first,
-  // counted as part of the space above).
-  const line = kit.line(environment, 12) + 2;
-  const following = classes.slice(
-    1,
-    1 +
-      kit.rowsThatFit(
-        environment,
-        2 * kit.padding +
-          kit.line(environment, 13) +
-          4 +
-          kit.line(environment, 16) +
-          kit.line(environment, 13) +
-          4,
-        line,
-        environment.height ? classes.length - 1 : 2,
-      ),
+  // A tall widget names the classes after the featured one above them and
+  // spaces them out more, as a large iOS widget does (widgets/UpNext).
+  const large = (environment.height ?? 0) >= 250;
+  const spacing = large ? 8 : 4;
+  const row = kit.line(environment, 13);
+  // The label and the featured class come first, in a large widget also the
+  // later classes' label and the gap above it, then rows of one line, each
+  // with the gap above it.
+  const fit = kit.rowsThatFit(
+    environment,
+    2 * kit.padding +
+      kit.line(environment, 13) +
+      4 +
+      kit.line(environment, 16) +
+      kit.line(environment, 13) +
+      (large ? spacing + kit.line(environment, 13) : 0),
+    spacing + row,
+    environment.height ? classes.length - 1 : 2,
   );
+  const following = classes.slice(1, 1 + fit);
 
   // Days counted in Beijing (UTC+8), as the app's timetable counts them.
   const beijingDay = (ms: number) =>
@@ -88,13 +92,10 @@ function UpNextWidget(
 
   return (
     <Column modifiers={kit.root(environment, props.url)}>
-      <Text
-        color={colors.accent}
-        style={{ fontSize: 13, fontWeight: 'bold' }}
-        maxLines={1}
-      >
-        {featured ? (current ? props.now : props.next) : title}
-      </Text>
+      {kit.label(
+        environment,
+        featured ? (current ? props.now : props.next) : title,
+      )}
       <Spacer modifiers={[height(4)]} />
       {featured ? (
         <Column
@@ -132,23 +133,45 @@ function UpNextWidget(
           </Text>
         </Box>
       )}
-      {following.map((c, i) => (
-        <Column
-          key={c.key}
-          modifiers={[
-            fillMaxWidth(),
-            ...kit.openUrl(c.url),
-            ...kit.spoken(i === 0 ? props.later : '', c.courseName, when(c)),
-          ]}
-        >
-          <Spacer modifiers={[height(i === 0 ? 6 : 2)]} />
-          <Text color={colors.caption} style={{ fontSize: 12 }} maxLines={1}>
-            {i === 0
-              ? `${props.later}: ${c.courseName} · ${when(c)}`
-              : `${c.courseName} · ${when(c)}`}
-          </Text>
-        </Column>
-      ))}
+      {large && following.length > 0 ? (
+        <Spacer modifiers={[height(spacing)]} />
+      ) : null}
+      {large && following.length > 0
+        ? kit.label(environment, props.later)
+        : null}
+      {/* A class after it: its course, shortened first, and when, lined up
+          at the end. */}
+      {kit.rows(
+        following.map(c => (
+          <Row
+            key={c.key}
+            modifiers={[
+              fillMaxWidth(),
+              ...kit.openUrl(c.url),
+              ...kit.spoken(c.courseName, when(c)),
+            ]}
+          >
+            <Text
+              color={colors.title}
+              style={{ fontSize: 13 }}
+              maxLines={1}
+              modifiers={[kit.fill]}
+            >
+              {c.courseName}
+            </Text>
+            <Text
+              color={colors.caption}
+              style={{ fontSize: 13 }}
+              maxLines={1}
+              modifiers={[padding(8, 0, 0, 0)]}
+            >
+              {when(c)}
+            </Text>
+          </Row>
+        )),
+        following.length < classes.length - 1,
+        spacing,
+      )}
     </Column>
   );
 }

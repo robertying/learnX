@@ -36,12 +36,29 @@
         android:textColor="@color/md_theme_onSurfaceVariant"
         android:textSize="13sp" />
 
-    <TextView
+    <!-- A later class: the course, taking the width left, and when, at the end. -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:maxLines="1"
-        android:text="@string/widget_preview_later_class"
-        android:textColor="@color/md_theme_onSurfaceVariant"
-        android:textSize="12sp" />
+        android:layout_marginTop="4dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:maxLines="1"
+            android:text="@string/widget_preview_later_course"
+            android:textColor="@color/md_theme_onSurface"
+            android:textSize="13sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:maxLines="1"
+            android:text="@string/widget_preview_later_time"
+            android:textColor="@color/md_theme_onSurfaceVariant"
+            android:textSize="13sp" />
+    </LinearLayout>
 </LinearLayout>

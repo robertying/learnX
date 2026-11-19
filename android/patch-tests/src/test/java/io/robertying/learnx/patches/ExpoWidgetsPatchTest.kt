@@ -12,11 +12,22 @@ import androidx.glance.GlanceModifier
 import androidx.glance.action.ActionModifier
 import androidx.glance.appwidget.AppWidgetId
 import androidx.glance.appwidget.action.StartActivityIntentAction
+import androidx.glance.layout.Dimension
 import androidx.glance.layout.EmittableBox
+import androidx.glance.layout.EmittableColumn
+import androidx.glance.layout.EmittableRow
+import androidx.glance.layout.HeightModifier
+import androidx.glance.layout.WidthModifier
+import androidx.glance.text.EmittableText
+import androidx.glance.text.FontWeight
 import androidx.glance.semantics.SemanticsModifier
 import androidx.glance.semantics.SemanticsProperties
 import com.facebook.react.bridge.DynamicFromObject
+import com.facebook.react.bridge.JavaOnlyArray
+import com.facebook.react.bridge.JavaOnlyMap
+import com.facebook.react.bridge.ReadableMap
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -27,9 +38,10 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
 /**
- * What patches/expo-widgets@58.0.28.patch changes on Android: tapping a widget opens the app, an `openUrl` modifier
+ * What patches/expo-widgets@58.0.29.patch changes on Android: tapping a widget opens the app, an `openUrl` modifier
  * opens a link in the app, an `appWidgetBackground` modifier marks the background, a `contentDescription` modifier
- * sets what TalkBack reads, and layouts get the locale, the text size setting, the launcher's widget corner radius
+ * sets what TalkBack reads, Expo UI's `weight` modifier makes a Row's or Column's child take the space left, a 500 or
+ * 600 font weight draws medium, and layouts get the locale, the text size setting, the launcher's widget corner radius
  * and their size. The library keeps these internal, so they're reached by reflection. (The size is passed only with a
  * layout, which needs the widgets' JS runtime.)
  */
@@ -138,5 +150,89 @@ class ExpoWidgetsPatchTest {
       listOf("Assignment, 3 PM, Course"),
       semantics.configuration.getOrNull(SemanticsProperties.ContentDescription),
     )
+  }
+
+  /** A view as a layout's element tree has it: its type and props, with its children among them. */
+  private fun node(type: String, vararg props: Pair<String, Any>, children: List<ReadableMap> = emptyList()) =
+    JavaOnlyMap.of(
+      "type", type,
+      "props", JavaOnlyMap().apply {
+        props.forEach { (key, value) -> putDynamic(key, value) }
+        if (children.isNotEmpty()) {
+          putArray("children", JavaOnlyArray.from(children))
+        }
+      },
+    )
+
+  private fun JavaOnlyMap.putDynamic(key: String, value: Any) = when (value) {
+    is String -> putString(key, value)
+    is ReadableMap -> putMap(key, value)
+    is List<*> -> putArray(key, JavaOnlyArray.from(value))
+    else -> error("Unexpected $value")
+  }
+
+  private val weight = listOf(JavaOnlyMap.of("\$type", "weight", "weight", 1.0))
+
+  /** Converts a layout's element tree as a widget does, and returns what it wraps. */
+  private fun peekRoot(node: ReadableMap): Emittable {
+    val tree = Class.forName("expo.modules.widgets.ExpoWidgetEmittableTreeKt")
+    val source = Class.forName("expo.modules.widgets.InteractionSource\$Widget")
+      .getDeclaredConstructor(String::class.java).apply { isAccessible = true }
+      .newInstance("Test")
+    // DpSize is an inline class, so the method's name is mangled and the size is a Long.
+    val toPeekRoot = tree.declaredMethods.single { it.name.startsWith("toPeekRoot") }
+      .apply { isAccessible = true }
+    val root = toPeekRoot.invoke(null, node, context, source, 0L) as EmittableBox
+    return root.children.single()
+  }
+
+  private fun expandsWidth(modifier: GlanceModifier) =
+    modifier.any { it is WidthModifier && it.width == Dimension.Expand }
+
+  private fun expandsHeight(modifier: GlanceModifier) =
+    modifier.any { it is HeightModifier && it.height == Dimension.Expand }
+
+  @Test
+  fun weightModifierTakesTheSpaceLeftInARow() {
+    val row = peekRoot(
+      node(
+        "RowView",
+        children = listOf(
+          node("TextView", "text" to "Course", "modifiers" to weight),
+          node("TextView", "text" to "08:00"),
+        ),
+      ),
+    ) as EmittableRow
+    val (course, time) = row.children
+    assertTrue(expandsWidth(course.modifier))
+    assertFalse(expandsHeight(course.modifier))
+    assertFalse(expandsWidth(time.modifier))
+  }
+
+  @Test
+  fun weightModifierTakesTheSpaceLeftInAColumn() {
+    val column = peekRoot(
+      node(
+        "ColumnView",
+        children = listOf(
+          node("SpacerView", "modifiers" to weight),
+          node("TextView", "text" to "Course"),
+        ),
+      ),
+    ) as EmittableColumn
+    val (spacer, text) = column.children
+    assertTrue(expandsHeight(spacer.modifier))
+    assertFalse(expandsWidth(spacer.modifier))
+    assertFalse(expandsHeight(text.modifier))
+  }
+
+  @Test
+  fun mediumFontWeightsDrawMedium() {
+    fun weightOf(value: String) = (peekRoot(node("TextView", "text" to "A", "fontWeight" to value)) as EmittableText)
+      .style?.fontWeight
+    assertEquals(FontWeight.Medium, weightOf("500"))
+    assertEquals(FontWeight.Medium, weightOf("600"))
+    assertEquals(FontWeight.Normal, weightOf("400"))
+    assertEquals(FontWeight.Bold, weightOf("bold"))
   }
 }

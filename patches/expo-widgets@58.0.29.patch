@@ -1,5 +1,5 @@
 diff --git a/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt b/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt
-index 3df9e4a4d92155a00d3f5652d17d20be10bef1c1..2b6062d2c7d6fe2039684ba231365b4ab6283611 100644
+index 3df9e4a4d92155a00d3f5652d17d20be10bef1c1..b927222cf4bfa8136a96dd88a3a301608fd9980d 100644
 --- a/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt
 +++ b/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt
 @@ -4,6 +4,8 @@ package expo.modules.widgets
@@ -20,7 +20,61 @@ index 3df9e4a4d92155a00d3f5652d17d20be10bef1c1..2b6062d2c7d6fe2039684ba231365b4a
  import androidx.glance.appwidget.CheckboxDefaults
  import androidx.glance.appwidget.cornerRadius
  import androidx.glance.appwidget.EmittableCheckBox
-@@ -419,6 +423,20 @@ private fun ModifierType.toPeekModifier(converterContext: ConverterContext): Gla
+@@ -78,6 +82,9 @@ import androidx.glance.appwidget.RadioButtonDefaults
+ import androidx.glance.appwidget.SwitchDefaults
+ import androidx.glance.background
+ import androidx.glance.layout.Alignment
++import androidx.glance.layout.Dimension
++import androidx.glance.layout.HeightModifier
++import androidx.glance.layout.WidthModifier
+ import androidx.glance.layout.ContentScale
+ import androidx.glance.layout.EmittableBox
+ import androidx.glance.layout.EmittableColumn
+@@ -175,7 +182,9 @@ private fun ReadableMap.toPeekRow(converterContext: WidgetConverterContext, sour
+     it.modifier = props.modifiers.toPeekModifier(converterContext)
+     it.horizontalAlignment = props.toPeekHorizontalAlignment()
+     it.verticalAlignment = props.toPeekVerticalAlignment()
+-    it.children += children().flatMap { child -> child.toPeekNodes(converterContext, source) }
++    it.children += children().flatMap { child ->
++      child.toPeekNodes(converterContext, source).withWeight(child, WidthModifier(Dimension.Expand))
++    }
+   }
+ }
+ 
+@@ -185,10 +194,31 @@ private fun ReadableMap.toPeekColumn(converterContext: WidgetConverterContext, s
+     it.modifier = props.modifiers.toPeekModifier(converterContext)
+     it.verticalAlignment = props.toPeekVerticalAlignment()
+     it.horizontalAlignment = props.toPeekHorizontalAlignment()
+-    it.children += children().flatMap { child -> child.toPeekNodes(converterContext, source) }
++    it.children += children().flatMap { child ->
++      child.toPeekNodes(converterContext, source).withWeight(child, HeightModifier(Dimension.Expand))
++    }
+   }
+ }
+ 
++// learnX: a Row's or Column's child with Expo UI's `weight` modifier takes the space its siblings leave, as Glance's
++// `defaultWeight()` does (a Row's in width, a Column's in height). Glance has no weight values: weighted siblings
++// share the space equally.
++private fun List<Emittable>.withWeight(child: ReadableMap, expand: GlanceModifier.Element): List<Emittable> {
++  val props = child.propsMap() ?: return this
++  if (!props.hasKey("modifiers") || props.getType("modifiers") != ReadableType.Array) {
++    return this
++  }
++  val modifiers = props.getArray("modifiers") ?: return this
++  val weighted = (0 until modifiers.size()).any { index ->
++    modifiers.getType(index) == ReadableType.Map &&
++      modifiers.getMap(index)?.let { it.hasKey("\$type") && it.getString("\$type") == "weight" } == true
++  }
++  if (weighted) {
++    forEach { it.modifier = it.modifier.then(expand) }
++  }
++  return this
++}
++
+ private fun ReadableMap.toPeekLazyColumn(converterContext: WidgetConverterContext, source: InteractionSource): EmittableLazyColumn {
+   val props = props<LayoutProps>(converterContext)
+   val alignment = props.toPeekHorizontalAlignment()
+@@ -419,6 +449,20 @@ private fun ModifierType.toPeekModifier(converterContext: ConverterContext): Gla
      "background" -> asRecord<BackgroundParams>(converterContext)?.color?.toGlanceColorProvider()
        ?.let { GlanceModifier.background(it) }
      "cornerRadius" -> asRecord<CornerRadiusParams>(converterContext)?.let { GlanceModifier.cornerRadius(it.radius.dp) }
@@ -41,6 +95,17 @@ index 3df9e4a4d92155a00d3f5652d17d20be10bef1c1..2b6062d2c7d6fe2039684ba231365b4a
      // Unsupported Expo UI modifiers are ignored until they have exact Glance semantics.
      else -> null
    } ?: GlanceModifier
+@@ -543,7 +587,9 @@ private fun VerticalAlignment.toGlanceVerticalAlignment(): Alignment.Vertical {
+ private fun TextFontWeight.toGlanceFontWeight(): FontWeight {
+   return when (this) {
+     TextFontWeight.BOLD, TextFontWeight.W700, TextFontWeight.W800, TextFontWeight.W900 -> FontWeight.Bold
+-    TextFontWeight.NORMAL, TextFontWeight.W100, TextFontWeight.W200, TextFontWeight.W300, TextFontWeight.W400, TextFontWeight.W500, TextFontWeight.W600 -> FontWeight.Normal
++    // learnX: 500 and 600 draw medium (Glance's only weight between normal and bold), as list titles do in the app.
++    TextFontWeight.W500, TextFontWeight.W600 -> FontWeight.Medium
++    TextFontWeight.NORMAL, TextFontWeight.W100, TextFontWeight.W200, TextFontWeight.W300, TextFontWeight.W400 -> FontWeight.Normal
+   }
+ }
+ 
 diff --git a/android/src/main/java/expo/modules/widgets/ExpoWidgetsPeekWidget.kt b/android/src/main/java/expo/modules/widgets/ExpoWidgetsPeekWidget.kt
 index edabde8f51b3bd9162b634e46f2f09686c3a3b8a..7c426253f6ac20734f31818fec8cc1bfa5ca3252 100644
 --- a/android/src/main/java/expo/modules/widgets/ExpoWidgetsPeekWidget.kt
