@@ -1,14 +1,10 @@
 // Flows that open mock items by their learnx:// links: 11-links.yaml (and the
-// Mac app's LinksUITests), and the iPhone Duo posture flows (.maestro/postures), since Maestro can't see the
-// open Duo's tab bar; and 12-notification-actions.yaml, whose launches post
-// notifications about mock items by id. Keep them pointing at items the mock
-// account has.
+// Mac app's LinksUITests), and 12-notification-actions.yaml, whose launches
+// post notifications about mock items by id. Keep them pointing at items the
+// mock account has.
 import { mockAssignments, mockFiles, mockNotices } from 'data/mock';
 import { getUrlTarget } from 'helpers/openTarget';
-import { readdirSync, readFileSync } from 'node:fs';
-
-const dir = '.maestro/postures';
-const postures = readdirSync(dir).filter(name => name.endsWith('.yaml'));
+import { readFileSync } from 'node:fs';
 
 const items = {
   notice: mockNotices,
@@ -30,18 +26,6 @@ const expectMockItem = (link: string) => {
       : (items[type as keyof typeof items] ?? []).map(item => item.id);
   expect(known).toContain(id);
 };
-
-describe('posture flows', () => {
-  it('exist', () => {
-    expect(postures.length).toBeGreaterThan(0);
-  });
-
-  it.each(postures)('%s opens a learnx:// link to a mock item', name => {
-    const found = links(`${dir}/${name}`);
-    expect(found).toHaveLength(1);
-    expectMockItem(found[0]);
-  });
-});
 
 it('11-links.yaml opens each kind of item and Today', () => {
   const found = links('.maestro/11-links.yaml');

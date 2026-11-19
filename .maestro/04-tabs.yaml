@@ -59,11 +59,12 @@ tags:
           file: subflows/back.yaml
           env:
             LIST: '${T_filter}'
-      # iPad and unfolded Android show course details beside the list.
+      # The split layout (SPLIT: iPad, the open iPhone Duo) and unfolded
+      # Android show course details beside the list.
       - runFlow:
           when:
             platform: iOS
-            true: ${IPAD != 'true'}
+            true: ${SPLIT != 'true'}
           commands:
             - assertNotVisible:
                 id: course-detail

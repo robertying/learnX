@@ -33,10 +33,14 @@ tags:
       true: ${ACCOUNT == 'mock'}
     commands:
       # Below the description, past the bottom of a short screen (the closed
-      # iPhone Duo).
-      - scrollUntilVisible:
-          element: '.*(${MOCK_ASSIGNMENT_ATTACHMENT}).*'
-          direction: DOWN
+      # iPhone Duo). The detail itself is swiped: the middle of the screen
+      # can be the list in the split layout.
+      - runFlow:
+          file: subflows/scroll-list.yaml
+          env:
+            LIST: assignment-detail
+            TARGET: '.*(${MOCK_ASSIGNMENT_ATTACHMENT}).*'
+            DIRECTION: UP
 - runFlow:
     file: subflows/back.yaml
     env:

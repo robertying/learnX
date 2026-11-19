@@ -1,6 +1,6 @@
 # Leave a pushed detail screen. Skipped while LIST (a label on the list
 # screen) is still visible, i.e. when the detail opened beside the list in a
-# split view (iPad) instead of being pushed over it.
+# split view (iPad, the open iPhone Duo) instead of being pushed over it.
 appId: ${APP_ID}
 ---
 - runFlow:

@@ -67,7 +67,8 @@ name: Open every other screen
     visible:
       id: courseXReload
     timeout: 10000
-# It's about the open course: beside the course on iPad, a sheet elsewhere.
+# It's about the open course: beside the course in the split layout, a sheet
+# elsewhere.
 - runFlow: subflows/close-item-page.yaml
 - extendedWaitUntil:
     notVisible:
@@ -80,7 +81,7 @@ name: Open every other screen
 
 # Every course's courseX, from the Courses list's More (…) menu. It's about
 # the whole app, not the open course, so it opens over the whole window even
-# beside a detail pane (iPad, unfolded Android): Close (the system back on
+# beside a detail pane (the split layout, unfolded Android): Close (the system back on
 # Android) shuts it.
 - runFlow:
     when:
