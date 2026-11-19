@@ -2,7 +2,9 @@
 // Makes the Electron app's icons from the app's Icon Composer source
 // (ios/learnX/AppIcon.icon): icon.ico for Windows and icon.png (512) for
 // Linux, from which electron-builder makes the hicolor sizes; the window and
-// the tray use them too (main.ts, system.ts). The outputs are committed:
+// the tray use them too (main.ts, system.ts). It also makes the README's logo
+// (docs/assets/logo.png), edge to edge at 4x its 128 display size and
+// lossless, so it stays sharp on every screen. The outputs are committed:
 // only a Mac with Xcode can make them.
 //
 //   node electron/icons/generate.ts
@@ -32,6 +34,8 @@ import zlib from 'node:zlib';
 export const ICO_SIZES = [16, 20, 24, 32, 40, 48, 64, 96, 128, 256];
 /** Linux's: electron-builder scales it down for the hicolor theme. */
 export const PNG_SIZE = 512;
+/** The README logo's: 4x the 128 points it's shown at. */
+export const LOGO_SIZE = 512;
 /** How much of the canvas the shape takes in the .ico: all of it. */
 export const ICO_SHAPE_FRACTION = 1;
 /** And in the Linux PNG: between GNOME's squares (104) and circles (112). */
@@ -415,7 +419,9 @@ const main = () => {
       path.join(out, 'icon.png'),
       encodePng(render(PNG_SIZE, PNG_SHAPE_FRACTION)),
     );
-    console.log(`Wrote ${path.join(out, 'icon.ico')} and icon.png`);
+    const logo = path.join(root, 'docs', 'assets', 'logo.png');
+    fs.writeFileSync(logo, encodePng(render(LOGO_SIZE, ICO_SHAPE_FRACTION)));
+    console.log(`Wrote ${path.join(out, 'icon.ico')}, icon.png and ${logo}`);
   } finally {
     fs.rmSync(work, { recursive: true, force: true });
   }

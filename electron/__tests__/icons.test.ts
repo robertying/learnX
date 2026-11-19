@@ -4,6 +4,7 @@ import path from 'node:path';
 import {
   ICO_SHAPE_FRACTION,
   ICO_SIZES,
+  LOGO_SIZE,
   PNG_SHAPE_FRACTION,
   PNG_SIZE,
   decodePng,
@@ -56,6 +57,16 @@ it('has a 512 icon.png for Linux, with transparent corners', () => {
   const png = decodePng(fs.readFileSync(path.join(icons, 'icon.png')));
   expect([png.width, png.height]).toEqual([PNG_SIZE, PNG_SIZE]);
   expectShapeOnClear(png);
+});
+
+it('has a 512 README logo, edge to edge with transparent corners', () => {
+  const file = path.join(__dirname, '..', '..', 'docs', 'assets', 'logo.png');
+  const logo = decodePng(fs.readFileSync(file));
+  expect([logo.width, logo.height]).toEqual([LOGO_SIZE, LOGO_SIZE]);
+  expectShapeOnClear(logo);
+  // Edge to edge: the shape's sides touch the canvas's.
+  const middle = Math.floor(LOGO_SIZE / 2);
+  expect(alphaAt(logo, 0, middle)).toBeGreaterThan(0);
 });
 
 it('centers the shape at its share of the canvas, on whole pixels', () => {
