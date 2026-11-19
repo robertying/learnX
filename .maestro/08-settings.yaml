@@ -83,7 +83,9 @@ name: Change every setting
 
 # Notifications: each on, then each off. The first one asks for the
 # permission, which launchApp allows: on iOS the patched Maestro answers the
-# system's alert (scripts/e2e/maestro/maestro-springboard-alerts.patch).
+# system's alert (scripts/e2e/maestro/maestro-springboard-alerts.patch). On
+# the open iPhone Duo its tap misses (the alert's frame there isn't turned
+# with the inner display), so the Duo is closed while the alert shows.
 - runFlow:
     commands:
       - tapOn:
@@ -93,11 +95,29 @@ name: Change every setting
             id: notification-settings
           timeout: 10000
       - runFlow:
+          when:
+            true: ${!!DUO_POSTURE}
+          file: subflows/fold.yaml
+          env:
+            POSTURE: closed
+      - runFlow:
           file: subflows/toggle.yaml
           env:
             LIST: notification-settings
             ID: notifications-notices
             ON: 'true'
+      - runFlow:
+          when:
+            true: ${!!DUO_POSTURE}
+          commands:
+            - runFlow:
+                file: subflows/fold.yaml
+                env:
+                  POSTURE: ${DUO_POSTURE}
+            - extendedWaitUntil:
+                visible:
+                  id: notification-settings
+                timeout: 10000
       - runFlow:
           file: subflows/toggle.yaml
           env:
@@ -342,8 +362,7 @@ name: Change every setting
             MATCH: '.*(${MOCK_ASSIGNMENT}).*'
             FOUND: 'true'
       # Back to learnX as it was
-      - launchApp:
-          stopApp: false
+      - runFlow: subflows/back-to-app.yaml
       - extendedWaitUntil:
           visible:
             id: calendar-settings
@@ -427,8 +446,7 @@ name: Change every setting
           env:
             MATCH: '.*(${MOCK_ASSIGNMENT}).*'
             FOUND: 'false'
-      - launchApp:
-          stopApp: false
+      - runFlow: subflows/back-to-app.yaml
       - extendedWaitUntil:
           visible:
             id: calendar-settings

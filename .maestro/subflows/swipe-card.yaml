@@ -4,7 +4,8 @@
 # swipes to 10% from the screen's edge: from the card's middle that's short of
 # it to the left, but to the right it's past it where the list ends before the
 # screen does (the closed iPhone Duo, with its bars at the right), so a right
-# swipe starts further along the card. On iPad the list is a column on the
+# swipe starts further along the card. In the split layout (SPLIT from
+# scripts/e2e/e2e.sh: iPad, the open iPhone Duo) the list is a column on the
 # left, so a right swipe crosses the whole card whatever its start: that's the
 # full swipe, which runs the action by itself, with no button left to tap.
 appId: ${APP_ID}
@@ -30,7 +31,7 @@ appId: ${APP_ID}
           duration: 300
 - runFlow:
     when:
-      true: ${DIRECTION == 'LEFT' || IPAD != 'true'}
+      true: ${DIRECTION == 'LEFT' || SPLIT != 'true'}
     commands:
       - tapOn:
           id: ${ACTION}

@@ -1,0 +1,40 @@
+# Swipe the list with id LIST once, UP (to what's further down) or DOWN
+# (DIRECTION). In the split layout (SPLIT from scripts/e2e/e2e.sh) a page
+# beside Settings' list (settings-list), such as a Settings page or an item's
+# detail, is laid out under the list column from iOS 26, so its element spans
+# the window and its middle can be on the list column (the half-open iPhone
+# Duo): those are swiped in the right half of the window instead.
+appId: ${APP_ID}
+---
+- evalScript: ${output.swipeDetail = SPLIT == 'true' && LIST != 'settings-list'}
+# A swipe's direction can't come from a variable.
+- runFlow:
+    when:
+      true: ${!output.swipeDetail && DIRECTION == 'UP'}
+    commands:
+      - swipe:
+          from:
+            id: ${LIST}
+          direction: UP
+- runFlow:
+    when:
+      true: ${!output.swipeDetail && DIRECTION == 'DOWN'}
+    commands:
+      - swipe:
+          from:
+            id: ${LIST}
+          direction: DOWN
+- runFlow:
+    when:
+      true: ${output.swipeDetail && DIRECTION == 'UP'}
+    commands:
+      - swipe:
+          start: 75%, 70%
+          end: 75%, 30%
+- runFlow:
+    when:
+      true: ${output.swipeDetail && DIRECTION == 'DOWN'}
+    commands:
+      - swipe:
+          start: 75%, 30%
+          end: 75%, 70%

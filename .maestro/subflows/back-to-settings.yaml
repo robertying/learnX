@@ -1,5 +1,5 @@
 # Back from a Settings page to Settings, unless the page opened beside it
-# (iPad, unfolded Android).
+# (the split layout, unfolded Android).
 appId: ${APP_ID}
 ---
 - runFlow:

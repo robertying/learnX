@@ -1,7 +1,8 @@
 # Open the list card matching CARD (e.g. '.*(${MOCK_NOTICE}).*') and wait for
-# its detail screen, whose testID is DETAIL. On iPad and unfolded Android it
-# opens beside the list. Live runs (scripts/e2e/e2e.sh --live) open the first card
-# whose testID is CARD_ID instead, when the flow passes one.
+# its detail screen, whose testID is DETAIL. In the split layout and on
+# unfolded Android it opens beside the list. Live runs (scripts/e2e/e2e.sh
+# --live) open the first card whose testID is CARD_ID instead, when the flow
+# passes one.
 appId: ${APP_ID}
 ---
 - runFlow:

@@ -1,13 +1,14 @@
 # Swipe the list with id LIST up until the element with id ID shows. Form rows
-# below the fold aren't in the hierarchy until then. On iPhone the tab bar
-# lies over the list's end, where a tap would land on a tab even when the row's
-# top shows above it (iOS 17), so the row is scrolled up to the upper part of
-# the screen (Maestro's centerElement: its middle in the top 70%).
+# below the fold aren't in the hierarchy until then. In an iPhone's layout
+# (not SPLIT, scripts/e2e/e2e.sh) the tab bar lies over the list's end, where
+# a tap would land on a tab even when the row's top shows above it (iOS 17),
+# so the row is scrolled up to the upper part of the screen (Maestro's
+# centerElement: its middle in the top 70%).
 appId: ${APP_ID}
 ---
 - runFlow:
     when:
-      true: ${maestro.platform == 'ios' && IPAD != 'true'}
+      true: ${maestro.platform == 'ios' && SPLIT != 'true'}
     commands:
       - scrollUntilVisible:
           element:
@@ -16,7 +17,7 @@ appId: ${APP_ID}
           centerElement: true
 - runFlow:
     when:
-      true: ${maestro.platform != 'ios' || IPAD == 'true'}
+      true: ${maestro.platform != 'ios' || SPLIT == 'true'}
     commands:
       - repeat:
           times: 8
@@ -24,7 +25,8 @@ appId: ${APP_ID}
             notVisible:
               id: ${ID}
           commands:
-            - swipe:
-                from:
-                  id: ${LIST}
-                direction: UP
+            - runFlow:
+                file: swipe-list.yaml
+                env:
+                  LIST: ${LIST}
+                  DIRECTION: UP
