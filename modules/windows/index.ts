@@ -1,7 +1,16 @@
 import { Platform } from 'react-native';
 import { requireOptionalNativeModule } from 'expo';
+import type { NativeModule } from 'expo';
 
-declare class WindowsModule {
+type WindowsEvents = {
+  /**
+   * The Mac app came to the front (`active`) or another app did. Never sent
+   * on iPhone or iPad.
+   */
+  onActiveChange: (event: { active: boolean }) => void;
+};
+
+declare class WindowsModule extends NativeModule<WindowsEvents> {
   /** iPad and Mac; not iPhone. */
   supportsMultipleWindows(): boolean;
   /**

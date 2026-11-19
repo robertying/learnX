@@ -3,6 +3,7 @@ import { act, renderHook } from '@testing-library/react-native';
 import {
   canScheduleExactAlarms,
   getNotificationPermission,
+  onPermissionAnswered,
   requestExactAlarms,
   requestNotificationPermission,
 } from 'services/notifications';
@@ -13,6 +14,7 @@ jest.mock('services/notifications', () => ({
   canScheduleExactAlarms: jest.fn(async () => false),
   requestNotificationPermission: jest.fn(async () => 'granted'),
   requestExactAlarms: jest.fn(async () => true),
+  onPermissionAnswered: jest.fn(() => () => {}),
 }));
 
 const addListener = jest.spyOn(AppState, 'addEventListener');
@@ -43,6 +45,18 @@ it('checks again when the app comes back from the system settings', async () => 
   expect(result.current.exactAlarms).toBe(true);
   jest.mocked(getNotificationPermission).mockResolvedValue('undetermined');
   jest.mocked(canScheduleExactAlarms).mockResolvedValue(false);
+});
+
+it('checks again after the permission is asked for elsewhere, until unmounted', async () => {
+  const stop = jest.fn();
+  jest.mocked(onPermissionAnswered).mockReturnValueOnce(stop);
+  const { result, unmount } = await render();
+  jest.mocked(getNotificationPermission).mockResolvedValueOnce('granted');
+  const answered = jest.mocked(onPermissionAnswered).mock.calls[0][0];
+  await act(async () => answered());
+  expect(result.current.permission).toBe('granted');
+  await unmount();
+  expect(stop).toHaveBeenCalled();
 });
 
 it('asks only when not granted yet', async () => {

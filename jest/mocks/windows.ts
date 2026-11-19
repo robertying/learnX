@@ -6,4 +6,5 @@ export const Windows = {
   setWindowLink: jest.fn(),
   setWindowTitle: jest.fn(() => Promise.resolve()),
   openWindow: jest.fn(() => Promise.resolve()),
+  addListener: jest.fn(() => ({ remove: jest.fn() })),
 };
