@@ -8,8 +8,8 @@
 //   node scripts/release/sign-electron-update.mjs <dir> [--key <private key PEM>] [--version <x.y.z>]
 //
 // The private key is never in the repo: --key, or the file
-// LEARNX_UPDATE_SIGNING_KEY names (Rui keeps it in 1Password; a process
-// substitution such as `--key <(op read …)` keeps it off the disk). Every
+// LEARNX_UPDATE_SIGNING_KEY names (a process substitution that reads it from
+// a password manager, such as `--key <(op read …)`, keeps it off the disk). Every
 // update file must name package.json's version, or `--version`'s for a test
 // build made with another (`pnpm electron:package --version`). Each
 // signature is checked against the committed public key, so a wrong key

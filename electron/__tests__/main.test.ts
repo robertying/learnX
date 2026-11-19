@@ -508,8 +508,20 @@ describe('the window', () => {
     expect(fake.electron.shell.openExternal).toHaveBeenCalledWith(
       'https://x.test/',
     );
+    // Mail links too, which React Native Web's Linking opens as a window.
+    webContents.windowOpenHandler!({ url: 'mailto:a@b.test' });
+    expect(fake.electron.shell.openExternal).toHaveBeenLastCalledWith(
+      'mailto:a@b.test',
+    );
     webContents.windowOpenHandler!({ url: 'file:///etc/hosts' });
-    expect(fake.electron.shell.openExternal).toHaveBeenCalledTimes(1);
+    webContents.windowOpenHandler!({ url: 'ms-settings:privacy' });
+    expect(fake.electron.shell.openExternal).toHaveBeenCalledTimes(2);
+    // One the system can't open is no error in the main process.
+    fake.electron.shell.openExternal.mockRejectedValueOnce(
+      new Error('No application'),
+    );
+    webContents.windowOpenHandler!({ url: 'mailto:a@b.test' });
+    await new Promise(resolve => setImmediate(resolve));
 
     const navigate = (url: string) => {
       const event = { preventDefault: jest.fn() };
@@ -532,15 +544,23 @@ describe('the window', () => {
     ).toBe(false);
   });
 
-  it('loads a crashed page again, a few times at most', async () => {
+  it('loads a crashed page again, a few times in a row at most', async () => {
+    let now = 1_000_000;
+    jest.spyOn(Date, 'now').mockImplementation(() => now);
     await loadMain();
     const { webContents } = fake.windows[0];
     webContents.loadURL.mockClear();
     webContents.emit('render-process-gone', {}, { reason: 'clean-exit' });
     for (let crash = 0; crash < 5; crash += 1) {
+      now += 1000;
       webContents.emit('render-process-gone', {}, { reason: 'crashed' });
     }
     expect(webContents.loadURL).toHaveBeenCalledTimes(3);
+
+    // A page that then ran a while gets its reloads again.
+    now += 10 * 60 * 1000;
+    webContents.emit('render-process-gone', {}, { reason: 'crashed' });
+    expect(webContents.loadURL).toHaveBeenCalledTimes(4);
   });
 
   it('comes back where it was', async () => {

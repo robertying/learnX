@@ -74,6 +74,20 @@ const PICKED_TYPES: Record<string, string> = {
 
 const extensionOf = (name: string) => path.extname(name).slice(1).toLowerCase();
 
+/**
+ * Whether opening a file would run a program, by its extension as written
+ * or as Windows reads it: Windows ignores dots and spaces at the end of a
+ * name (`setup.exe.` is setup.exe), and `name:stream` names one of a file's
+ * streams (`setup.exe::$DATA` is setup.exe's contents).
+ */
+export const runsAsProgram = (file: string): boolean => {
+  const name = path.basename(file);
+  const asWindowsReads = name.replace(/:.*$/, '').replace(/[. ]+$/, '');
+  return [name, asWindowsReads].some(form =>
+    RUNNABLE_TYPES.has(extensionOf(form)),
+  );
+};
+
 /** A name for a file the user saves: no folders, nothing the system forbids. */
 export const safeName = (name: unknown): string => {
   const base = path
@@ -154,7 +168,7 @@ export const createFileShell = ({
       labels?: unknown,
     ): Promise<string> => {
       const file = ownFile(uri);
-      if (RUNNABLE_TYPES.has(extensionOf(file))) {
+      if (runsAsProgram(file)) {
         const text = runLabelsOf(labels);
         const options: Electron.MessageBoxOptions = {
           type: 'warning',

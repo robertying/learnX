@@ -5,8 +5,9 @@
 // maintainer's Mac, with learnX's own Ed25519 update key, into a detached
 // `<file>.sig` next to it (scripts/release/sign-electron-update.mjs); the app carries
 // the public half (certs/electron-public-key.pem). It reads an update file only
-// through `signedProvider`, which refuses one without a valid signature: no
-// update is offered, and the reason is logged.
+// through `signedProvider`, which refuses one without a valid signature, or
+// one for another platform or CPU: no update is offered, and the reason is
+// logged.
 import { createPublicKey, sign, verify } from 'node:crypto';
 
 /** The signature's file name next to an update file's. */
@@ -57,9 +58,69 @@ export const signatureProblem = (
 };
 
 /**
+ * Whether an installer, by its file name, is for this computer, as
+ * packageConfig.ts names them: Windows' one installer for both CPUs, or
+ * Linux's AppImage or .deb for this CPU (`x86_64` or `amd64` for x64).
+ * macOS has no release, only dev runs on a test server, so anything goes.
+ * @param arch Node's (`process.arch`)
+ */
+export const installerForThisComputer = (
+  name: string,
+  platform: string,
+  arch: string,
+): boolean => {
+  if (platform === 'win32') {
+    return /^learnX-windows-v[^/\\]+\.exe$/.test(name);
+  }
+  if (platform === 'linux') {
+    const cpus = arch === 'x64' ? ['x86_64', 'amd64'] : [arch];
+    return cpus.some(cpu =>
+      new RegExp(`^learnX-linux-${cpu}-v[^/\\\\]+\\.(AppImage|deb)$`).test(
+        name,
+      ),
+    );
+  }
+  return true;
+};
+
+/**
+ * Why an update file names installers for another computer, or null: every
+ * platform's update file is signed with the same key, so a mirror could serve
+ * another one's (Windows', or the other CPU's) under this one's name, and an
+ * AppImage would be replaced by an installer that can't run here.
+ */
+const installerProblem = (
+  info: unknown,
+  channelUrl: URL,
+  platform: string,
+  arch: string,
+): string | null => {
+  const { files = [], path: legacyPath } = (info ?? {}) as {
+    files?: { url?: unknown }[];
+    path?: unknown;
+  };
+  const names = [...files.map(file => file.url), legacyPath]
+    .filter((url): url is string => typeof url === 'string')
+    .map(url =>
+      decodeURIComponent(
+        new URL(url, channelUrl).pathname.split('/').pop() ?? '',
+      ),
+    );
+  const other = names.find(
+    name => !installerForThisComputer(name, platform, arch),
+  );
+  return names.length === 0
+    ? 'no installer'
+    : other
+      ? `${other} is for another computer`
+      : null;
+};
+
+/**
  * electron-updater's generic provider, reading the update file only with a
- * valid signature: an error otherwise, which the updater logs (updater.ts).
- * Takes electron-updater's pieces as arguments, so tests can give stand-ins.
+ * valid signature, and only if it names installers for this computer: an
+ * error otherwise, which the updater logs (updater.ts). Takes
+ * electron-updater's pieces as arguments, so tests can give stand-ins.
  */
 export const signedProvider = ({
   GenericProvider,
@@ -67,6 +128,8 @@ export const signedProvider = ({
   getChannelFilename,
   newUrlFromBase,
   publicKey,
+  platform = process.platform,
+  arch = process.arch,
 }: {
   // The provider's fields it reads (`channel`, `updater`, `baseUrl`,
   // `httpRequest`) are private in electron-updater's types.
@@ -83,6 +146,8 @@ export const signedProvider = ({
     addRandomQueryToAvoidCaching?: boolean,
   ) => URL;
   publicKey: string | Buffer;
+  platform?: string;
+  arch?: string;
 }) =>
   class SignedProvider extends GenericProvider {
     async getLatestVersion() {
@@ -110,6 +175,13 @@ export const signedProvider = ({
           code: 'ERR_UPDATE_SIGNATURE',
         });
       }
-      return parseUpdateInfo(data, channelFile, channelUrl);
+      const info = parseUpdateInfo(data, channelFile, channelUrl);
+      const installer = installerProblem(info, channelUrl, platform, arch);
+      if (installer) {
+        throw Object.assign(new Error(`${channelFile} refused: ${installer}`), {
+          code: 'ERR_UPDATE_PLATFORM',
+        });
+      }
+      return info;
     }
   };

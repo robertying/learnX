@@ -56,6 +56,7 @@ import { signedProvider } from './updateSignature.ts';
 import {
   PARTITION,
   createWebviews,
+  externalUrl,
   hardenWebview,
   webviewPermission,
 } from './webviews.ts';
@@ -208,11 +209,18 @@ protocol.registerSchemesAsPrivileged([
   },
 ]);
 
-const webviews = createWebviews({
-  openExternal: url => {
+/**
+ * Opens a web page in the system's browser, or a mailto: link in its mail
+ * app; anything else stays shut. One the system can't open (no mail app set
+ * up) does nothing, as a link in the system's own apps does.
+ */
+const openExternal = (url: string) => {
+  if (externalUrl(url)) {
     shell.openExternal(url).catch(() => {});
-  },
-});
+  }
+};
+
+const webviews = createWebviews({ openExternal });
 
 const handleIpc = (ses: Electron.Session) => {
   const logStorage = (message: string) => console.error(`[storage] ${message}`);
@@ -423,8 +431,17 @@ const iconFile = path.join(
   process.platform === 'win32' ? 'icon.ico' : 'icon.png',
 );
 
-/** How many times a crashed page is loaded again before it's left. */
+/**
+ * How many times in a row a crashed page is loaded again before it's left,
+ * so one that crashes as it loads isn't reloaded for ever.
+ */
 const MAX_PAGE_RELOADS = 3;
+/**
+ * How long a page reloaded after a crash has to run for its next crash to
+ * start a new count: learnX stays in the tray for weeks, and a crash now and
+ * then shouldn't use up its reloads for good.
+ */
+const PAGE_RELOAD_RESET_MS = 10 * 60 * 1000;
 
 /**
  * The window, on the app's own session (`ses`, which serves app://), where it
@@ -491,12 +508,17 @@ const createWindow = (ses: Electron.Session) => {
   // The window is learnX, whichever screen the app names in the page title.
   win.on('page-title-updated', event => event.preventDefault());
   // A crashed page (out of memory, a GPU fault) is loaded again rather than
-  // left blank in the tray, a few times at most.
+  // left blank in the tray, a few times in a row at most.
   let reloads = 0;
+  let reloadedAt = 0;
   win.webContents.on('render-process-gone', (_event, details) => {
     console.error(`[window] page gone: ${details.reason}`);
+    if (Date.now() - reloadedAt > PAGE_RELOAD_RESET_MS) {
+      reloads = 0;
+    }
     if (details.reason !== 'clean-exit' && reloads < MAX_PAGE_RELOADS) {
       reloads += 1;
+      reloadedAt = Date.now();
       void win.loadURL(`${ORIGIN}/`);
     }
   });
@@ -522,11 +544,10 @@ const createWindow = (ses: Electron.Session) => {
     win.once('ready-to-show', reveal);
   }
 
-  // Links open in the browser; the window itself never leaves the app.
+  // Links open in the browser or the mail app (React Native Web's Linking
+  // opens both as a new window); the window itself never leaves the app.
   win.webContents.setWindowOpenHandler(({ url }) => {
-    if (/^https?:\/\//.test(url)) {
-      void shell.openExternal(url);
-    }
+    openExternal(url);
     return { action: 'deny' };
   });
   win.webContents.on('will-navigate', (event, url) => {
