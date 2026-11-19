@@ -123,8 +123,8 @@ struct Display {
   let panel: CGSize
   /// The interface's rotation on the panel: rot0, rot90, rot180 or rot270.
   let rotation: String
-  /// The touchscreen of this display, as dtuhidd numbers it.
-  let target: UInt64
+  /// The display's id, which names its touchscreen; older runtimes (iOS 17) leave it out.
+  let id: String?
 
   /// The display's size in points as the interface shows it.
   var size: CGSize {
@@ -143,8 +143,8 @@ struct Display {
   }
 }
 
-/// The display that is lit, from CoreDevice's displayinfo feature (`info`), with its touchscreen.
-func litDisplay(_ info: xpc_connection_t, udid: String, target: (String) throws -> UInt64) throws -> Display {
+/// The display that is lit, from CoreDevice's displayinfo feature (`info`).
+func litDisplay(_ info: xpc_connection_t, udid: String) throws -> Display {
   guard
     let version = Bundle(url: URL(fileURLWithPath: "/Library/Developer/PrivateFrameworks/CoreDevice.framework"))?
       .object(forInfoDictionaryKey: "CFBundleVersion") as? String
@@ -168,11 +168,16 @@ func litDisplay(_ info: xpc_connection_t, udid: String, target: (String) throws 
   guard let output = xpc_dictionary_get_dictionary(reply, "CoreDevice.output") else {
     throw Failure("The simulator didn't report its displays: \(reply)")
   }
-  let lit = array(xpc_dictionary_get_value(output, "displays")).filter {
+  let integrated = array(xpc_dictionary_get_value(output, "displays")).filter {
     xpc_dictionary_get_dictionary($0, "type").map { xpc_dictionary_get_value($0, "integrated") != nil } ?? false
-      && (xpc_dictionary_get_bool($0, "active") || string($0, "backlightState") == "activeOn")
   }
-  guard lit.count == 1, let record = lit.first, let id = string(record, "uniqueId") else {
+  // A simulator with one screen has it lit, and older runtimes (iOS 17) report neither `active`
+  // nor a backlight state ("unknown") for it.
+  let lit =
+    integrated.count == 1
+    ? integrated
+    : integrated.filter { xpc_dictionary_get_bool($0, "active") || string($0, "backlightState") == "activeOn" }
+  guard lit.count == 1, let record = lit.first else {
     throw Failure("Not exactly one display is lit (\(lit.count)); is the hinge still moving?")
   }
   let bounds = array(xpc_dictionary_get_value(record, "bounds"))
@@ -185,7 +190,7 @@ func litDisplay(_ info: xpc_connection_t, udid: String, target: (String) throws 
     primary: xpc_dictionary_get_bool(record, "primary"),
     panel: panel,
     rotation: string(record, "currentOrientation") ?? "rot0",
-    target: try target(id))
+    id: string(record, "uniqueId"))
 }
 
 /// The touchscreen of display `displayID`, from the universal HID service, which names each
@@ -232,7 +237,7 @@ struct Digitizer {
   }
 
   /// One finger on `display`: phase 0 puts it down, 1 moves it, 2 lifts it.
-  func touch(_ display: Display, _ x: Double, _ y: Double, phase: UInt64) {
+  func touch(_ display: Display, target: UInt64, _ x: Double, _ y: Double, phase: UInt64) {
     let (u, v) = display.normalized(x, y)
     xpc_connection_send_message(
       connection,
@@ -240,7 +245,7 @@ struct Digitizer {
         "pointOne": dictionary(["x": xpc_double_create(u), "y": xpc_double_create(v)]),
         "eventType": xpc_uint64_create(phase),
         "edge": xpc_uint64_create(0),
-        "target": xpc_uint64_create(display.target),
+        "target": xpc_uint64_create(target),
       ]))
   }
 
@@ -261,15 +266,18 @@ struct Digitizer {
 }
 
 /// A finger moved from one point to another, at 60 samples a second.
-func drag(_ digitizer: Digitizer, _ display: Display, from start: (Double, Double), to end: (Double, Double), seconds: Double) {
-  digitizer.touch(display, start.0, start.1, phase: 0)
+func drag(
+  _ digitizer: Digitizer, _ display: Display, target: UInt64, from start: (Double, Double), to end: (Double, Double),
+  seconds: Double
+) {
+  digitizer.touch(display, target: target, start.0, start.1, phase: 0)
   let steps = max(Int(seconds * 60), 1)
   for step in 1...steps {
     Thread.sleep(forTimeInterval: seconds / Double(steps))
     let t = Double(step) / Double(steps)
-    digitizer.touch(display, start.0 + (end.0 - start.0) * t, start.1 + (end.1 - start.1) * t, phase: 1)
+    digitizer.touch(display, target: target, start.0 + (end.0 - start.0) * t, start.1 + (end.1 - start.1) * t, phase: 1)
   }
-  digitizer.touch(display, end.0, end.1, phase: 2)
+  digitizer.touch(display, target: target, end.0, end.1, phase: 2)
 }
 
 /// The HID keyboard usage of an ASCII character on a US keyboard, and whether it needs Shift.
@@ -315,25 +323,20 @@ final class Session {
     guard let command = words.first else { throw Failure("No command") }
     let values = Array(words.dropFirst())
     let numbers = values.compactMap(Double.init)
-    let display = try litDisplay(info, udid: udid) { id in
-      if let target = targets[id] { return target }
-      let target = try touchscreenTarget(device, displayID: id)
-      targets[id] = target
-      return target
-    }
+    let display = try litDisplay(info, udid: udid)
     if secondaryOnly && display.primary { return nil }
     switch command {
     case "display":
       return "\(display.name) \(Int(display.size.width))x\(Int(display.size.height)) \(display.rotation)\(display.primary ? " primary" : "")"
     case "tap" where numbers.count == values.count && (2...3).contains(numbers.count):
-      let digitizer = try connectedDigitizer()
-      digitizer.touch(display, numbers[0], numbers[1], phase: 0)
+      let (digitizer, target) = try (connectedDigitizer(), touchscreen(display))
+      digitizer.touch(display, target: target, numbers[0], numbers[1], phase: 0)
       Thread.sleep(forTimeInterval: numbers.count == 3 ? numbers[2] : 0.05)
-      digitizer.touch(display, numbers[0], numbers[1], phase: 2)
+      digitizer.touch(display, target: target, numbers[0], numbers[1], phase: 2)
       digitizer.flush()
     case "swipe" where numbers.count == values.count && (4...5).contains(numbers.count):
-      let digitizer = try connectedDigitizer()
-      drag(digitizer, display, from: (numbers[0], numbers[1]), to: (numbers[2], numbers[3]), seconds: numbers.count == 5 ? numbers[4] : 0.3)
+      let (digitizer, target) = try (connectedDigitizer(), touchscreen(display))
+      drag(digitizer, display, target: target, from: (numbers[0], numbers[1]), to: (numbers[2], numbers[3]), seconds: numbers.count == 5 ? numbers[4] : 0.3)
       digitizer.flush()
     case "erase" where numbers.count == 1 && values.count == 1:
       let digitizer = try connectedDigitizer()
@@ -362,6 +365,15 @@ final class Session {
       throw Failure("Unknown command or arguments: \(words.joined(separator: " "))")
     }
     return "ok"
+  }
+
+  /// The touchscreen of `display`, as dtuhidd numbers it.
+  private func touchscreen(_ display: Display) throws -> UInt64 {
+    guard let id = display.id else { throw Failure("The simulator doesn't name its display's touchscreen") }
+    if let target = targets[id] { return target }
+    let target = try touchscreenTarget(device, displayID: id)
+    targets[id] = target
+    return target
   }
 
   private func connectedDigitizer() throws -> Digitizer {
