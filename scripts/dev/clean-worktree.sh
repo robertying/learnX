@@ -97,8 +97,9 @@ command -v lsof >/dev/null ||
   refuse "lsof isn't installed, so it can't tell whether anything still uses $wt"
 # Processes with a file, folder or executable in the worktree. A shell or a
 # Claude session sitting in it is the one cleaning up; anything else (Metro,
-# Gradle, Xcode, an app built there) is still using it.
-holders="$(lsof -nP -Fpcn 2>/dev/null | awk -v wt="$wt" '
+# Gradle, Xcode, an app built there) is still using it. The pipeline runs from
+# / so its own commands don't count when this runs from inside the worktree.
+holders="$(cd / && lsof -nP -Fpcn 2>/dev/null | awk -v wt="$wt" '
   /^p/ { pid = substr($0, 2) }
   /^c/ { cmd = substr($0, 2) }
   /^n\// {
