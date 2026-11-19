@@ -23,8 +23,10 @@ final class DetailsUITests: LearnXUITestCase {
   func testOpensACardFromTheKeyboard() throws {
     try open(tab: "tab-notices")
     try waitFor(card: "notice-card", "MOCK_NOTICE")
-    let focusedCard = element(
-      NSPredicate(format: "identifier == %@ AND hasKeyboardFocus == true", "notice-card"))
+    // The focus is on the row's `ContextMenuView`, which holds the card.
+    let focusedCard = app.descendants(matching: .any)
+      .matching(NSPredicate(format: "hasKeyboardFocus == true"))
+      .containing(.button, identifier: "notice-card").firstMatch
     for _ in 0..<4 where !focusedCard.exists {
       app.typeKey(.tab, modifierFlags: [])
     }
