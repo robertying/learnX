@@ -230,6 +230,32 @@ index b81f0e2f91e3638a3d2a40f4a05a853a1580e093..917593c6eea621ec84fcc06f170da6ad
          modifiers,
          ...modifiers ? createViewModifierEventListener(modifiers) : undefined,
          onButtonPress: onPress
+diff --git a/build/swift-ui/Text/index.d.ts b/build/swift-ui/Text/index.d.ts
+index 2a5e57bc85660a666fc95f42b5a284ba16ebaf53..91b94ed76c30980c4d0e50eaaad0ba7e5843d33c 100644
+--- a/build/swift-ui/Text/index.d.ts
++++ b/build/swift-ui/Text/index.d.ts
+@@ -3,7 +3,7 @@ import { type ClosedRangeDate, type CommonViewModifierProps } from '../types';
+ /**
+  * The style used to format a date in a SwiftUI `Text` view.
+  */
+-export type TextDateStyle = 'timer' | 'relative' | 'offset' | 'date' | 'time';
++export type TextDateStyle = 'timer' | 'relative' | 'offset' | 'date' | 'time' | 'countdown';
+ export interface TextProps extends CommonViewModifierProps {
+     /**
+      * Text content or nested Text components.
+@@ -22,6 +22,12 @@ export interface TextProps extends CommonViewModifierProps {
+      * @default 'date'
+      */
+     dateStyle?: TextDateStyle;
++    /**
++     * With `dateStyle: 'countdown'` (learnX), the most units it shows: days, hours
++     * and minutes, never seconds.
++     * @default 2
++     */
++    maxFieldCount?: number;
+     /**
+      * A time interval to display as a live-updating timer.
+      * @platform ios 16.0+
 diff --git a/build/swift-ui/modifiers/index.d.ts b/build/swift-ui/modifiers/index.d.ts
 index 186073ea4722b5e58046bba393a905eeeff5a89c..d3e2de19f58e846135a6c0ad647afae1eaaeeaa6 100644
 --- a/build/swift-ui/modifiers/index.d.ts
@@ -394,7 +420,7 @@ index a9e0dac9d371043fa9a99c1b7b6b9a0916dfbd50..f5a6eb13894f151bb700b25187f411dc
 +  }
  }
 diff --git a/ios/Modifiers/ViewModifierRegistry.swift b/ios/Modifiers/ViewModifierRegistry.swift
-index 07a856574df36a69b802bd483caf4e33ae05a976..13140f1f7571c618ffaf1b99116acb2fe2863481 100644
+index 07a856574df36a69b802bd483caf4e33ae05a976..2275f0ca8c07c3e311864fc1a05e4483c8e5119f 100644
 --- a/ios/Modifiers/ViewModifierRegistry.swift
 +++ b/ios/Modifiers/ViewModifierRegistry.swift
 @@ -1098,10 +1098,15 @@ internal enum AlignmentGuideOptions: String, Enumerable {
@@ -414,6 +440,149 @@ index 07a856574df36a69b802bd483caf4e33ae05a976..13140f1f7571c618ffaf1b99116acb2f
      } else {
        content
      }
+@@ -1653,6 +1658,10 @@ public class ViewModifierRegistry {
+     case "strikethrough":
+       guard let modifier = try? TextStrikeThrough(from: params, appContext: appContext) else { return text }
+       return text.strikethrough(modifier.isActive, pattern: modifier.pattern.toSwiftUI(), color: modifier.color)
++    // learnX: what VoiceOver reads for this part of a joined text.
++    case "accessibilityLabel":
++      guard let label = params["label"] as? String else { return text }
++      return text.accessibilityLabel(Text(label))
+     default:
+       #if DEBUG
+       return Text(" ['\(type)' not supported for nested Text]").foregroundColor(.red)
+diff --git a/ios/TextView.swift b/ios/TextView.swift
+index 7dfe0a9dc9fafb625067dbb29f80d82f767d63e1..84b42ca789b63f06850e58faa66f50664bb16ab2 100644
+--- a/ios/TextView.swift
++++ b/ios/TextView.swift
+@@ -4,12 +4,13 @@ import SwiftUI
+ import ExpoModulesCore
+ 
+ public enum TextDateStyle: String, Enumerable {
+-  case timer, relative, offset, date, time
++  // learnX: countdown (Text.countdown)
++  case timer, relative, offset, date, time, countdown
+ 
+   func toSwiftUI() -> SwiftUI.Text.DateStyle {
+     switch self {
+     case .timer: return .timer
+-    case .relative: return .relative
++    case .relative, .countdown: return .relative
+     case .offset: return .offset
+     case .date: return .date
+     case .time: return .time
+@@ -25,6 +26,8 @@ public final class TextViewProps: UIBaseViewProps {
+   @Field public var timerInterval: ClosedRangeDate?
+   @Field public var countsDown: Bool?
+   @Field public var pauseTime: Date?
++  // learnX: the most units a countdown shows (2 by default).
++  @Field public var maxFieldCount: Int?
+ 
+   // Override default frame alignment for text views
+   override var defaultFrameAlignment: Alignment { .leading }
+@@ -32,17 +35,41 @@ public final class TextViewProps: UIBaseViewProps {
+ 
+ public struct TextView: ExpoSwiftUI.View {
+   @ObservedObject public var props: TextViewProps
++  @Environment(\.locale) private var locale
+ 
+   public init(props: TextViewProps) {
+     self.props = props
+   }
+ 
+   public var body: some View {
+-    buildText(applyModifiers: false)
++    content
+       .applyModifiers(props.modifiers, appContext: props.appContext, globalEventDispatcher: props.globalEventDispatcher)
+   }
+ 
+-  internal func buildText(applyModifiers: Bool = true) -> Text {
++  // learnX: a live date takes all the width it's offered, and a widget lays
++  // it out once, when it renders, not as it changes. So a countdown on its
++  // own takes the width of the widest value it will show from now on, drawn
++  // over that in the same font (the text before it in a row shortens to fit
++  // it). In a Text, it's part of that text.
++  @ViewBuilder
++  private var content: some View {
++    if props.dateStyle == .countdown, let date = props.date, props.children == nil {
++      ZStack(alignment: .leading) {
++        ForEach(Text.countdownWidths(to: date), id: \.self) { offset in
++          Text.countdown(to: date, maxFieldCount: props.maxFieldCount, locale: locale, at: date.addingTimeInterval(-offset))
++            .hidden()
++        }
++      }
++      .overlay(alignment: .leading) {
++        buildText(applyModifiers: false)
++      }
++    } else {
++      buildText(applyModifiers: false)
++    }
++  }
++
++  internal func buildText(applyModifiers: Bool = true, locale: Locale? = nil) -> Text {
++    let locale = locale ?? self.locale
+     let text: Text
+ 
+     if #available(iOS 16.0, tvOS 16.0, *),
+@@ -55,6 +82,8 @@ public struct TextView: ExpoSwiftUI.View {
+         pauseTime: props.pauseTime,
+         countsDown: props.countsDown ?? true
+       )
++    } else if let date = props.date, props.dateStyle == .countdown {
++      text = Text.countdown(to: date, maxFieldCount: props.maxFieldCount, locale: locale)
+     } else if let date = props.date {
+       text = Text(date, style: props.dateStyle?.toSwiftUI() ?? .date)
+     } else {
+@@ -67,9 +96,48 @@ public struct TextView: ExpoSwiftUI.View {
+ 
+     if let children = props.children {
+       result = children
+-        .compactMap { ($0.childView as? TextView)?.buildText(applyModifiers: true) }
++        .compactMap { ($0.childView as? TextView)?.buildText(applyModifiers: true, locale: locale) }
+         .reduce(result, +)
+     }
+     return result
+   }
+ }
++
++// learnX: the time left until (or since) a date, kept live by the system like
++// Text(date, style: .relative), but in days, hours and minutes, at most two of
++// them ("42 minutes", "2 days, 20 hours") or `maxFieldCount`, without the
++// seconds the relative style counts under an hour; before iOS 18, the relative
++// style. Equal-width digits, so a value is never wider than one with as many
++// digits.
++extension Text {
++  /// The countdown, or its value at `now` as plain text.
++  static func countdown(to date: Date, maxFieldCount: Int?, locale: Locale, at now: Date? = nil) -> Text {
++    guard #available(iOS 18.0, tvOS 18.0, *) else {
++      return Text(date, style: .relative).monospacedDigit()
++    }
++    let format = SystemFormatStyle.DateOffset.offset(
++      to: date,
++      allowedFields: [.day, .hour, .minute],
++      maxFieldCount: maxFieldCount ?? 2,
++      sign: .never
++    ).locale(locale)
++    return (now.map { Text(format.format($0)) } ?? Text(.currentDate, format: format)).monospacedDigit()
++  }
++
++  /// The times left (in seconds) at which a countdown to `date` shows its
++  /// widest values from now on: now, and a minute before each whole day and
++  /// hour where a unit drops off or a field comes back ("1 hour", then
++  /// "59 minutes"; "3 hours", then "2 hours, 59 minutes").
++  static func countdownWidths(to date: Date) -> [TimeInterval] {
++    let left = date.timeIntervalSinceNow
++    let day: TimeInterval = 24 * 60 * 60
++    let hour: TimeInterval = 60 * 60
++    let marks = [
++      (left / day).rounded(.down) * day,
++      day,
++      (min(left, day) / hour).rounded(.down) * hour,
++      hour,
++    ]
++    return Array(Set([left] + marks.filter { $0 > 60 && $0 <= left }.map { $0 - 60 }))
++  }
++}
 diff --git a/src/jetpack-compose/modifiers/index.ts b/src/jetpack-compose/modifiers/index.ts
 index 91a0e72da596dd78b8301a11a94bd38f0d8beff1..e14554027afed3cc80484e56b7bd98a66f1c0ebd 100644
 --- a/src/jetpack-compose/modifiers/index.ts
@@ -459,6 +628,32 @@ index 41df9325424c31c0c0eb728796bd835c4db2ba09..ad3c3db83913e39bc1d4ef75107005b1
      modifiers,
      ...(modifiers ? createViewModifierEventListener(modifiers) : undefined),
      onButtonPress: onPress,
+diff --git a/src/swift-ui/Text/index.tsx b/src/swift-ui/Text/index.tsx
+index 788da8626d019e9b861bc712e0c8d8db968a98ae..de7acbeadf55e9f3a74053d0c752104fd3efbefc 100644
+--- a/src/swift-ui/Text/index.tsx
++++ b/src/swift-ui/Text/index.tsx
+@@ -8,7 +8,7 @@ import { type ClosedRangeDate, type CommonViewModifierProps } from '../types';
+ /**
+  * The style used to format a date in a SwiftUI `Text` view.
+  */
+-export type TextDateStyle = 'timer' | 'relative' | 'offset' | 'date' | 'time';
++export type TextDateStyle = 'timer' | 'relative' | 'offset' | 'date' | 'time' | 'countdown';
+ 
+ export interface TextProps extends CommonViewModifierProps {
+   /**
+@@ -31,6 +31,12 @@ export interface TextProps extends CommonViewModifierProps {
+    * @default 'date'
+    */
+   dateStyle?: TextDateStyle;
++  /**
++   * With `dateStyle: 'countdown'` (learnX), the most units it shows: days, hours
++   * and minutes, never seconds.
++   * @default 2
++   */
++  maxFieldCount?: number;
+ 
+   /**
+    * A time interval to display as a live-updating timer.
 diff --git a/src/swift-ui/modifiers/index.ts b/src/swift-ui/modifiers/index.ts
 index 6e4bc76a1cb91cf589d0faf97afa178a267e0198..c0c246cf2a8a46149b646a63a8fca01c522360e0 100644
 --- a/src/swift-ui/modifiers/index.ts
