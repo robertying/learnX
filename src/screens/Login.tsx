@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { type ComponentRef, useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Keyboard,
@@ -29,6 +29,7 @@ import { isMockUser, MOCK_FINGER_PRINT } from 'helpers/mock';
 import { t } from 'helpers/i18n';
 import { mockNetworkTitle } from 'navigation/options';
 import { noteLoginShown } from 'hooks/useLaunchSheet';
+import useKeepAboveKeyboard from 'hooks/useKeepAboveKeyboard';
 import { LoginStackParams } from 'navigation/types';
 import { Caption, Text } from 'components/Text';
 import { isAndroid, isApple } from 'helpers/platform';
@@ -47,6 +48,11 @@ const Login: React.FC<Props> = ({ navigation }) => {
   const [password, setPassword] = useState(savedPassword ?? '');
 
   const hasCredential = savedUsername && savedPassword && savedFingerPrint;
+
+  // The whole field group, not just the focused field, clears the keyboard.
+  const scrollView = useRef<ComponentRef<typeof ScrollView>>(null);
+  const fields = useRef<ComponentRef<typeof View>>(null);
+  const handleScroll = useKeepAboveKeyboard(scrollView, fields);
 
   useEffect(() => {
     noteLoginShown();
@@ -142,9 +148,12 @@ const Login: React.FC<Props> = ({ navigation }) => {
   return (
     <SafeArea>
       <ScrollView
+        ref={scrollView}
         style={Styles.flex1}
         contentContainerStyle={styles.root}
         automaticallyAdjustKeyboardInsets
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
       >
         <KeyboardAvoidingView
           style={styles.inputs}
@@ -162,16 +171,17 @@ const Login: React.FC<Props> = ({ navigation }) => {
             />
             <Text>{t('graduate')}</Text>
           </View>
-          <LoginFields
-            style={styles.textInput}
-            username={username}
-            password={password}
-            onUsernameChange={setUsername}
-            onPasswordChange={setPassword}
-            onSubmit={handleLogin}
-            usernameLabel={t('usernameOrId')}
-            passwordLabel={t('password')}
-          />
+          <View ref={fields} style={styles.textInput} collapsable={false}>
+            <LoginFields
+              username={username}
+              password={password}
+              onUsernameChange={setUsername}
+              onPasswordChange={setPassword}
+              onSubmit={handleLogin}
+              usernameLabel={t('usernameOrId')}
+              passwordLabel={t('password')}
+            />
+          </View>
           <View style={styles.noteContainer}>
             <Caption style={styles.note}>{t('securityNote')}</Caption>
           </View>
