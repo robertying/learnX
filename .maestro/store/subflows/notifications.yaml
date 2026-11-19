@@ -19,7 +19,7 @@ appId: ${APP_ID}
 # The permission given at launch (start.yaml) doesn't always hold: then the
 # first switch asks. On iPad a tap on the alert's button by its text misses
 # (it lands where the button would be on a phone), so tap where the button
-# shows in landscape.
+# shows in landscape, between where the Chinese and the taller English alert have it.
 - waitForAnimationToEnd
 - runFlow:
     when:
@@ -30,7 +30,7 @@ appId: ${APP_ID}
             true: ${IPAD == 'true'}
           commands:
             - tapOn:
-                point: 55%,53%
+                point: 55%,55%
       - runFlow:
           when:
             true: ${IPAD != 'true'}
