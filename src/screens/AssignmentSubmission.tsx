@@ -1,4 +1,5 @@
 import { useLayoutEffect, useState } from 'react';
+import { usePreventRemove } from '@react-navigation/native';
 import useHeaderButtons from 'hooks/useHeaderButtons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Alert, Keyboard } from 'react-native';
@@ -41,7 +42,7 @@ import {
 } from 'hooks/useAssignmentSubmission';
 import useSaveSubmissionDraft from 'hooks/useSaveSubmissionDraft';
 import { AssignmentSubmissionParamList } from 'navigation/types';
-import { isAndroid, isApple, isElectron } from 'helpers/platform';
+import { isAndroid, isElectron } from 'helpers/platform';
 
 type Props = NativeStackScreenProps<
   AssignmentSubmissionParamList,
@@ -154,18 +155,14 @@ const AssignmentSubmissionContent: React.FC<{
     uploading ? t('uploadingSubmission') : assignment.courseName,
   );
 
-  // Not swiped away while uploading: back beside a list, or the sheet down.
+  // Not left while uploading, whichever way: the back or close button, the
+  // sheet swiped down (its route is held too), Android's Back or the Electron
+  // app's back keys.
+  usePreventRemove(uploading, () => {});
+  // A swipe back is turned off rather than undone: UIKit would take the page
+  // away before React Navigation put it back.
   useLayoutEffect(() => {
     navigation.setOptions({ gestureEnabled: !uploading });
-    const parent = navigation.getParent();
-    const parentState = parent?.getState();
-    if (
-      isApple() &&
-      parentState?.routes[parentState.index]?.name ===
-        'AssignmentSubmissionStack'
-    ) {
-      parent?.setOptions({ gestureEnabled: !uploading });
-    }
   }, [navigation, uploading]);
 
   const handleDraftDiscard = () => {

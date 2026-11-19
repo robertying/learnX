@@ -190,3 +190,29 @@ it('takes the hidden list out of the keyboard and screen readers in full screen'
   await act(async () => fireEvent.click(screen.getByText('show')));
   expect(inert()).toBe(false);
 });
+
+it("takes the other tabs' detail panes out of the keyboard and screen readers", async () => {
+  const Tabs = () => {
+    const { tabs } = useContext(SplitViewContext);
+    return <Text onPress={() => tabs?.select('B')}>select B</Text>;
+  };
+  render(
+    <SplitViewProvider
+      showDetail
+      initialTab="A"
+      renderDetail={() => <Text>detail</Text>}
+    >
+      <Tabs />
+    </SplitViewProvider>,
+  );
+  // Each tab's pane, in the order the tabs were first selected
+  const inert = () =>
+    screen
+      .getAllByText('detail')
+      .map(
+        text => (text.parentElement as HTMLElement & { inert: boolean }).inert,
+      );
+  expect(inert()).toEqual([false]);
+  await act(async () => fireEvent.click(screen.getByText('select B')));
+  expect(inert()).toEqual([true, false]);
+});

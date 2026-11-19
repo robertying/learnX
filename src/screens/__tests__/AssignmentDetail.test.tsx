@@ -111,14 +111,19 @@ it('submits from the header while open, in a sheet without a detail pane', async
 });
 
 it('disables submitting once closed, and offers none for paper submissions', async () => {
-  await renderScreen(
-    find(
-      a =>
-        a.submissionType !== HomeworkSubmissionType.OFFLINE &&
-        dayjs(a.deadline).isBefore(dayjs()),
-    ),
-  );
+  const pastDue = (a: Assignment) =>
+    a.submissionType !== HomeworkSubmissionType.OFFLINE &&
+    dayjs(a.deadline).isBefore(dayjs());
+  const lateOpen = (a: Assignment) =>
+    !!a.lateSubmissionDeadline &&
+    dayjs(a.lateSubmissionDeadline).isAfter(dayjs());
+  await renderScreen(find(a => pastDue(a) && !lateOpen(a)));
   expect(submitButton()?.disabled).toBe(true);
+
+  // Past the deadline, but late submissions are still taken.
+  navigation.setOptions.mockClear();
+  await renderScreen(find(a => pastDue(a) && lateOpen(a)));
+  expect(submitButton()?.disabled).toBe(false);
 
   navigation.setOptions.mockClear();
   await renderScreen(

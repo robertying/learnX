@@ -32,7 +32,8 @@ import { DOCUMENT_TITLE } from 'hooks/useWindow';
 const RootNavigator = createNativeStackNavigator<RootStackParams>();
 
 // A page sheet on iOS, iPadOS and Mac, which a swipe down closes, as the
-// system's own apps present search and web pages. Android covers the window.
+// system's own apps present search and web pages. Android and the Electron app
+// cover the window.
 const sheetOptions: NativeStackNavigationOptions = isApple()
   ? { presentation: 'pageSheet' }
   : { gestureEnabled: false };

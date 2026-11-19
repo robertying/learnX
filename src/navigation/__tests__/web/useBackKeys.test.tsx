@@ -1,5 +1,11 @@
-import { renderHook } from '@testing-library/react';
-import type { NavigationState } from '@react-navigation/native';
+import { act, render, renderHook } from '@testing-library/react';
+import {
+  createNavigationContainerRef,
+  NavigationContainer,
+  usePreventRemove,
+  type NavigationState,
+} from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import useBackKeys from 'navigation/useBackKeys';
 
 type Route = { key: string; name: string; state?: State };
@@ -15,14 +21,15 @@ const route = (name: string, state?: State): Route => ({
   state,
 });
 
-const container = (state: State, options: object = {}) => ({
+const container = (state: State) => ({
   current: {
     isReady: () => true,
     getRootState: () => state as NavigationState,
-    getCurrentOptions: () => options,
     dispatch: jest.fn(),
   },
 });
+
+const Empty = () => null;
 
 const press = (init: KeyboardEventInit) =>
   window.dispatchEvent(new KeyboardEvent('keydown', init));
@@ -107,21 +114,26 @@ it('closes a sheet with Esc from any of its pages', () => {
   unmount();
 });
 
-it("leaves a page a swipe couldn't, as a submission while it uploads", () => {
-  const window = container(
-    main(
-      [route('Courses')],
-      route(
-        'AssignmentSubmissionStack',
-        stack('submission', [route('AssignmentSubmission')]),
-      ),
-    ),
-    { gestureEnabled: false },
+it('keeps a page that holds itself, as a submission while it uploads', () => {
+  const Stack = createNativeStackNavigator();
+  const Uploading = () => {
+    usePreventRemove(true, () => {});
+    return null;
+  };
+  const window = createNavigationContainerRef();
+  render(
+    <NavigationContainer ref={window}>
+      <Stack.Navigator>
+        <Stack.Screen name="AssignmentDetail" component={Empty} />
+        <Stack.Screen name="AssignmentSubmission" component={Uploading} />
+      </Stack.Navigator>
+    </NavigationContainer>,
   );
+  act(() => window.navigate('AssignmentSubmission' as never));
   const { unmount } = renderHook(() => useBackKeys(window, null));
   back();
   close();
-  expect(window.current.dispatch).not.toHaveBeenCalled();
+  expect(window.getCurrentRoute()?.name).toBe('AssignmentSubmission');
   unmount();
 });
 
