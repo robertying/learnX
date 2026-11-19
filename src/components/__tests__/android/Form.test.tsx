@@ -6,7 +6,6 @@ import {
   userEvent,
 } from '@testing-library/react-native';
 import { useState } from 'react';
-import type * as ReactNative from 'react-native';
 import { Appearance, Keyboard, StyleSheet, Text, View } from 'react-native';
 import { NavigationContext } from '@react-navigation/native';
 import { showChoices } from 'components/choiceSheet';
@@ -27,6 +26,7 @@ import {
   FormTitle,
   FormToggle,
 } from 'components/Form';
+import { setFontScale } from 'test-utils/fontScale';
 
 jest.mock('components/choiceSheet', () => ({ showChoices: jest.fn() }));
 jest.mock('services/haptics', () => ({ playHaptic: jest.fn() }));
@@ -444,17 +444,8 @@ describe('Form (Android)', () => {
   const style = (text: string) =>
     StyleSheet.flatten(screen.getByText(text).props.style);
 
-  /** Jest's React Native reports a font scale of 2. */
-  const atFontScale = (fontScale: number) =>
-    jest
-      .spyOn(
-        require('react-native') as typeof ReactNative,
-        'useWindowDimensions',
-      )
-      .mockReturnValue({ width: 400, height: 800, scale: 2, fontScale });
-
   it('tints a detail by its kind, and grays out a row that is over', async () => {
-    atFontScale(1);
+    setFontScale(1);
     await render(
       <FormSection>
         <FormText title="Grade" detail="A" detailTint="accent" />
@@ -497,7 +488,7 @@ describe('Form (Android)', () => {
   });
 
   it('puts the detail under the subtitle at large font sizes', async () => {
-    atFontScale(1.5);
+    setFontScale(1.5);
     await render(
       <FormSection>
         <FormText title="Deadline" subtitle="Problem set" detail="Friday" />

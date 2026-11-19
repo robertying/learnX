@@ -3,8 +3,6 @@ import {
   cloneElement,
   Fragment,
   isValidElement,
-  useContext,
-  useEffect,
   useRef,
   useState,
   type ReactNode,
@@ -18,7 +16,6 @@ import {
   type PressableStateCallbackType,
   type ViewProps,
 } from 'react-native';
-import { NavigationContext } from '@react-navigation/native';
 import {
   Button,
   Input,
@@ -37,7 +34,6 @@ import SystemIcon from 'components/SystemIcon';
 import { Caption, Headline, Text, Title } from 'components/Text';
 import Spacing from 'constants/Spacing';
 import { t } from 'helpers/i18n';
-import useAppCommand from 'hooks/useAppCommand';
 import { useTheme } from 'theme';
 import {
   parseNumberInput,
@@ -68,38 +64,11 @@ export * from './Form.shared';
 /** React Native Web's pressable state, which also knows the pointer. */
 type PressState = PressableStateCallbackType & { hovered?: boolean };
 
-/** The window's refresh command (F5) refreshes the form on screen. */
-const useRefreshCommand = (onRefresh?: () => Promise<void>) => {
-  const navigation = useContext(NavigationContext);
-  const [focused, setFocused] = useState(() => navigation?.isFocused() ?? true);
-  useEffect(() => {
-    if (!navigation) {
-      return;
-    }
-    const subscriptions = [
-      navigation.addListener('focus', () => setFocused(true)),
-      navigation.addListener('blur', () => setFocused(false)),
-    ];
-    return () => subscriptions.forEach(remove => remove());
-  }, [navigation]);
-  const refreshing = useRef(false);
-  useAppCommand(
-    'refresh',
-    () => {
-      if (onRefresh && !refreshing.current) {
-        refreshing.current = true;
-        void onRefresh().finally(() => {
-          refreshing.current = false;
-        });
-      }
-    },
-    !!onRefresh && focused,
-  );
-};
-
-export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
+// `onRefresh` is pull to refresh elsewhere. The window's refresh command
+// (F5, Ctrl+R) and the header's Refresh button belong to the screen
+// (`hooks/useRefreshCommand`), which every Form screen with `onRefresh` uses.
+export const Form: React.FC<FormProps> = ({ children, testID }) => {
   const theme = useTheme();
-  useRefreshCommand(onRefresh);
   return (
     <ScrollView
       testID={testID}

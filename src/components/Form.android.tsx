@@ -1,6 +1,6 @@
 import { Fragment, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { StyleSheet, useWindowDimensions, type ViewProps } from 'react-native';
+import { StyleSheet, type ViewProps } from 'react-native';
 import {
   Badge,
   CircularProgressIndicator,
@@ -71,7 +71,7 @@ import {
 import { showChoices } from './choiceSheet';
 import ThemedHost from 'components/ThemedHost';
 import SystemIcon from 'components/SystemIcon';
-import { textStyles } from 'components/Text';
+import { textStyles, useFontScale } from 'components/Text';
 import { playHaptic } from 'services/haptics';
 
 export * from './Form.shared';
@@ -305,7 +305,7 @@ const FormRow: React.FC<
   const theme = useMaterialTheme();
   const { subtitle: supporting, detail: endDetail } = stackedDetail(
     { subtitle, detail },
-    useWindowDimensions().fontScale,
+    useFontScale(),
   );
   // Over: the text in the secondary color, read out as over.
   const contentColor = done ? colors.outline : titleColor;

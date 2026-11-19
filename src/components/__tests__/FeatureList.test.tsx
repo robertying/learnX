@@ -7,6 +7,7 @@ import {
 } from '@testing-library/react-native';
 import FeatureList from 'components/FeatureList';
 import { openLink } from 'helpers/openLink';
+import { setFontScale } from 'test-utils/fontScale';
 
 jest.mock('helpers/openLink', () => ({ openLink: jest.fn() }));
 
@@ -68,12 +69,8 @@ describe('FeatureList', () => {
 });
 
 it('grows the symbols with the text size, up to a limit', async () => {
-  const dimensions = jest.requireActual('react-native').Dimensions;
-  const get = dimensions.get;
   const symbolSizes = async (fontScale: number) => {
-    jest
-      .spyOn(dimensions, 'get')
-      .mockImplementation(dim => ({ ...get(dim), fontScale }));
+    setFontScale(fontScale);
     await render(
       <FeatureList
         title="Welcome"

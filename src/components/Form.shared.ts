@@ -3,20 +3,27 @@ import type { ReactElement, ReactNode } from 'react';
 import type { SystemIconName } from 'helpers/systemIcons';
 import type { ChoiceSheet } from './choiceSheet';
 
-// Props and helpers shared by Form.tsx (SwiftUI) and Form.android.tsx (Compose).
+// Props and helpers shared by Form.tsx (SwiftUI), Form.android.tsx (Compose)
+// and Form.web.tsx (the Electron app).
 
 /**
  * A settings screen drawn by the system: a SwiftUI `Form` (inset grouped
- * sections, as in the Settings app) on iOS, iPadOS and Mac, and the Material
- * 3 grouped list on Android (`Form.android.tsx`). It fills its parent and
- * scrolls by itself.
+ * sections, as in the Settings app) on iOS, iPadOS and Mac, the Material 3
+ * grouped list on Android (`Form.android.tsx`), and Windows 11 Settings' cards
+ * in the Electron app (`Form.web.tsx`). It fills its parent and scrolls by
+ * itself.
  *
- * Children are `FormSection`s, and a section's children are the rows below. Rows have to be direct children of their section
- * (fragments and `false` are fine), since the section lays them out.
+ * Children are `FormSection`s, and a section's children are the rows below.
+ * Rows have to be direct children of their section (fragments and `false`
+ * are fine), since the section lays them out.
  */
 export interface FormProps {
   children?: ReactNode;
-  /** Pull to refresh; the indicator shows until the promise settles. */
+  /**
+   * Pull to refresh; the indicator shows until the promise settles. The
+   * Electron app has none: there the screen's refresh command
+   * (`hooks/useRefreshCommand`) refreshes.
+   */
   onRefresh?: () => Promise<void>;
   testID?: string;
 }

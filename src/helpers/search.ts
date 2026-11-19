@@ -249,22 +249,43 @@ export const searchItems = <T extends object>(
 ): T[] => searchHits(items, query, spec, now).map(({ item }) => item);
 
 /**
+ * `text` in the forms `normalize` matches (NFKC, lowercase), with where each
+ * of its code units came from in `text`: a character and the marks after it
+ * fold together, and may fold to more or fewer code units than they had.
+ */
+const fold = (text: string) => {
+  let folded = '';
+  const starts: number[] = [];
+  const ends: number[] = [];
+  for (const match of text.matchAll(/\P{M}\p{M}*|\p{M}+/gu)) {
+    const part = match[0].normalize('NFKC').toLowerCase();
+    for (let i = 0; i < part.length; i++) {
+      starts.push(match.index);
+      ends.push(match.index + match[0].length);
+    }
+    folded += part;
+  }
+  return { folded, starts, ends };
+};
+
+/**
  * Where `words` (from `queryWords`) appear in `text`, as sorted, merged
- * `[start, end)` ranges. A Han word that the text doesn't hold whole is
- * looked for in pieces of two or more characters, longest first, as
- * `searchItems` matches it.
+ * `[start, end)` ranges of `text`. Words match as `searchItems` matches them:
+ * in the text's usual forms (full-width letters and digits as ASCII), and a
+ * Han word that the text doesn't hold whole in pieces of two or more
+ * characters, longest first.
  */
 export const matchRanges = (text: string, words: readonly string[]) => {
-  const lower = text.toLowerCase();
+  const { folded, starts, ends } = fold(text);
   const ranges: [number, number][] = [];
   const addAll = (part: string) => {
     let found = false;
     for (
-      let at = lower.indexOf(part);
+      let at = folded.indexOf(part);
       at >= 0;
-      at = lower.indexOf(part, at + 1)
+      at = folded.indexOf(part, at + 1)
     ) {
-      ranges.push([at, at + part.length]);
+      ranges.push([starts[at], ends[at + part.length - 1]]);
       found = true;
     }
     return found;

@@ -86,10 +86,13 @@ describe('on iOS and Mac', () => {
   });
 
   it('gives web content CSS colors: WebKit text and the brand links', () => {
-    expect(theme.webContentColors(true)).toEqual({
+    expect(theme.webContentColors(theme.BrandDarkTheme)).toEqual({
       textColor: 'CanvasText',
       linkColor: theme.brandColors.dark,
     });
+    expect(theme.webContentColors(theme.BrandLightTheme).linkColor).toBe(
+      theme.brandColors.light,
+    );
   });
 
   describe('status text', () => {

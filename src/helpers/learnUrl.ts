@@ -5,11 +5,6 @@ import Urls from 'constants/Urls';
 // URLs get the login cookies and the CSRF token.
 const csrfLinks: {
   isLearnUrl: (url: string, base?: string) => boolean;
-  addCSRFTokenToUrl: (
-    url: string,
-    token: string,
-    base?: string,
-  ) => string | null;
 } = require('./preval/csrfLinks.js');
 
 /**
@@ -31,10 +26,3 @@ export const loadsFromWebLearning = (html: string) =>
   Array.from(html.matchAll(SOURCE_ATTRIBUTE)).some(match =>
     isLearnUrl(match[1] ?? match[2] ?? match[3], `${Urls.learn}/`),
   );
-
-/**
- * The URL with the CSRF token added, as https, when it points to Web
- * Learning; any other URL comes back unchanged.
- */
-export const addCSRFTokenToLearnUrl = (url: string, token: string) =>
-  csrfLinks.addCSRFTokenToUrl(url, token) ?? url;
