@@ -5,7 +5,9 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
+  type ComponentRef,
 } from 'react';
 import { StyleSheet, View } from 'react-native';
 import {
@@ -14,6 +16,7 @@ import {
 } from '@react-navigation/native';
 import type { DetailNavigationContainerRef, DetailStackParams } from './types';
 import SplitSizes from 'constants/SplitSizes';
+import { isElectron } from 'helpers/platform';
 import { saveMasterWidth, savedMasterWidth } from './paneLayout';
 import SplitDivider from './SplitDivider';
 
@@ -31,8 +34,9 @@ const SplitViewContext = createContext<{
   /** Width of the master pane beside the detail one. */
   masterWidth: number;
   /**
-   * Android's split, which holds all the tabs: each tab's detail container,
-   * and showing it as the tab is selected (`SplitTab`).
+   * The JS split of Android and the Electron app, which holds all the tabs:
+   * each tab's detail container, and showing it as the tab is selected
+   * (`SplitTab`).
    */
   tabs?: {
     detailRef: (tab: string) => DetailNavigationContainerRef;
@@ -91,7 +95,7 @@ export const TabLayer: React.FC<
 );
 
 /**
- * A tab inside Android's split (`SplitViewProvider`): its lists open items in
+ * A tab inside the JS split (`SplitViewProvider`): its lists open items in
  * the tab's own detail stack, which the detail pane shows while the tab is
  * selected. Elsewhere it renders its children as they are.
  */
@@ -156,9 +160,10 @@ export interface SplitViewProps {
 }
 
 /**
- * Android's split view, drawn in JS: the list beside the detail pane once the
- * window is wide enough (`showDetail`), the list alone otherwise. iOS, iPadOS
- * and Mac lay out theirs natively (`NativeSplitView`). It holds the whole
+ * The split view of Android and the Electron app, drawn in JS: the list
+ * beside the detail pane once the window is wide enough (`showDetail`), the
+ * list alone otherwise. iOS, iPadOS and Mac lay out theirs natively
+ * (`NativeSplitView`). It holds the whole
  * main UI, tab bar and sheets included, and the pane shows the detail stack
  * of the selected tab (`SplitTab`); screens outside the tabs use that one.
  */
@@ -196,6 +201,16 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
   );
   const showMaster = !fullScreenTabs.has(selectedTab);
   const masterHidden = showDetail && !showMaster;
+  // The hidden list is only moved off the window's edge, and React Native
+  // Web hides it from screen readers but not from the keyboard: Tab would
+  // still go through its buttons and cards, unseen. `inert` takes it out of
+  // both, as the native split does.
+  const master = useRef<ComponentRef<typeof View>>(null);
+  useEffect(() => {
+    if (isElectron()) {
+      (master.current as unknown as HTMLElement).inert = masterHidden;
+    }
+  }, [masterHidden]);
   const toggleTabMaster = useCallback(
     (tab: string, show: boolean) =>
       setFullScreenTabs(tabs => {
@@ -262,6 +277,7 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
         onLayout={event => setRootWidth(event.nativeEvent.layout.width)}
       >
         <View
+          ref={master}
           testID="split-master"
           style={[
             styles.master,

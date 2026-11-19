@@ -38,13 +38,21 @@ export const copyDroppedFile = async (file: globalThis.File) => {
   dir.create({ intermediates: true, idempotent: true });
   const name = sanitizeFileName(file.name);
   const target = new File(dir, name);
-  target.writeSync(new Uint8Array());
-  for (let start = 0; start < file.size; start += DROP_CHUNK_BYTES) {
-    const piece = file.slice(start, start + DROP_CHUNK_BYTES);
-    await bridge().files.append(
-      target.uri,
-      new Uint8Array(await piece.arrayBuffer()),
-    );
+  try {
+    target.writeSync(new Uint8Array());
+    for (let start = 0; start < file.size; start += DROP_CHUNK_BYTES) {
+      const piece = file.slice(start, start + DROP_CHUNK_BYTES);
+      await bridge().files.append(
+        target.uri,
+        new Uint8Array(await piece.arrayBuffer()),
+      );
+    }
+  } catch (error) {
+    // A copy cut short (a full disk, a folder dropped) leaves nothing behind.
+    try {
+      dir.delete();
+    } catch {}
+    throw error;
   }
   return {
     uri: target.uri,
