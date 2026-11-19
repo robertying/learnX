@@ -82,6 +82,16 @@ name: App Store screenshots on the iPhone Duo
           file: ../subflows/filter.yaml
           env:
             LABEL: '(${T_all})(, .*)?'
+      # The half-open display is short: scroll the list column (the left
+      # half) to the assignment.
+      - repeat:
+          times: 6
+          while:
+            notVisible: '.*(${MOCK_STORE_ASSIGNMENT}).*'
+          commands:
+            - swipe:
+                start: 25%,75%
+                end: 25%,45%
       - runFlow:
           file: ../subflows/open.yaml
           env:
@@ -113,8 +123,8 @@ name: App Store screenshots on the iPhone Duo
       # position: a short drag to the right shows Hide, a longer one runs it.
       - assertVisible: '.*(${MOCK_COURSE}).*'
       - swipe:
-          start: 15%,22%
-          end: 25%,22%
+          start: 15%,28%
+          end: 25%,28%
           duration: 800
       - waitForAnimationToEnd
       - assertVisible:
