@@ -145,13 +145,13 @@ describe('platforms', () => {
       'whatsNew19SpotlightTitle',
       'whatsNew19ElectronTitle',
     ]);
-    // The Mac has no widgets, and a design row of its own.
+    // The Mac has no widgets, a design row of its own, and as a desktop app
+    // already, no pointer to the other desktop apps.
     expect(titles('mac')).toEqual([
       'whatsNew19TodayTitle',
       'whatsNew19NotificationsTitle',
       'whatsNew19SpotlightTitle',
       'whatsNew19DesignTitle',
-      'whatsNew19ElectronTitle',
     ]);
     // Android has no Spotlight or Siri.
     expect(titles('android')).toEqual([
