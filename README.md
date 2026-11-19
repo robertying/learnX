@@ -20,7 +20,7 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 
 <div align="center">
     <img src="./docs/screenshots/iphone.webp?v=3" alt="iphone screenshot" height="350" width="161" />
-    <img src="./docs/screenshots/mac.webp?v=3" alt="mac screenshot" height="350" width="460" />
+    <img src="./docs/screenshots/mac.webp?v=4" alt="mac screenshot" height="350" width="452" />
 </div>
 
 </div>
