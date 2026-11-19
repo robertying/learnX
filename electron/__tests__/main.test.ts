@@ -99,7 +99,6 @@ const fakeElectron = (dataDir: string, { packaged = false } = {}) => {
       get: jest.fn(async () => [{ name: 'JSESSIONID', value: 'x' }]),
       set: jest.fn(async () => {}),
       remove: jest.fn(async () => {}),
-      flushStore: jest.fn(async () => {}),
     },
     clearStorageData: jest.fn(async () => {}),
   });
@@ -376,11 +375,9 @@ describe('the page’s other calls', () => {
     ).resolves.toEqual([{ name: 'JSESSIONID', value: 'x' }]);
     await call('cookies:set', { url: 'https://x', name: 'a' });
     await call('cookies:remove', 'https://x', 'a');
-    await call('cookies:flush');
     await call('cookies:clearAll');
     expect(cookies.set).toHaveBeenCalledWith({ url: 'https://x', name: 'a' });
     expect(cookies.remove).toHaveBeenCalledWith('https://x', 'a');
-    expect(cookies.flushStore).toHaveBeenCalled();
     expect(clearStorageData).toHaveBeenCalledWith({ storages: ['cookies'] });
   });
 

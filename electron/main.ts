@@ -295,10 +295,6 @@ const handleIpc = (ses: Electron.Session) => {
     fromApp(event);
     return ses.cookies.remove(url, name);
   });
-  ipcMain.handle('cookies:flush', event => {
-    fromApp(event);
-    return ses.cookies.flushStore();
-  });
   ipcMain.handle('cookies:clearAll', event => {
     fromApp(event);
     return ses.clearStorageData({ storages: ['cookies'] });
