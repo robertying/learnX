@@ -17,15 +17,5 @@ final class LinksUITests: LearnXUITestCase {
       try waitFor(id: id)
     }
   }
-
-  /// Opens `url` as a click on a link elsewhere does, through AppKit's NSWorkspace (which a Mac Catalyst test can
-  /// only reach at run time). Launch Services gives it to the learnX the tests just built. Neither
-  /// XCUIApplication.open(_:) nor UIApplication.open(_:) delivers it on Mac Catalyst.
-  private func openInWorkspace(_ url: URL) throws {
-    let workspace = try XCTUnwrap(NSClassFromString("NSWorkspace") as? NSObject.Type)
-      .perform(NSSelectorFromString("sharedWorkspace")).takeUnretainedValue()
-    // Returns a BOOL, not an object: leave it unread.
-    _ = workspace.perform(NSSelectorFromString("openURL:"), with: url)
-  }
 }
 #endif
