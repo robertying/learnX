@@ -45,7 +45,7 @@ export default {
   loginFailedBadCredential:
     "Couldn't log in. The username or password is incorrect.",
   loginFailedUntrustedDevice:
-    "Couldn't log in because this device is no longer a trusted browser. Log in again and complete two-factor authentication.",
+    "Couldn't log in because this device is no longer a trusted browser. Log in again.",
   versionInformation: 'Version',
   sourceCode: 'Source Code',
   website: 'Website',
@@ -334,7 +334,7 @@ export default {
   syncStatusLoginFailed: "Couldn't log in",
   syncStatusServerError: 'Server error',
   syncStatusBadCredential: 'Incorrect password',
-  syncStatusUntrustedDevice: 'Two-factor authentication needed',
+  syncStatusUntrustedDevice: 'Trusted browser expired',
   syncStatusReconnecting: 'Reconnecting…',
   syncStatusUpdated: 'Updated {time}',
   syncStatusLogIn: 'Log In',
