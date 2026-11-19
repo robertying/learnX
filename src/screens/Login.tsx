@@ -137,9 +137,13 @@ const Login: React.FC<Props> = ({ navigation }) => {
         {
           text: t('continue'),
           onPress: async () => {
+            // Until the SSO page closes (screens/SSO), so a login the app
+            // starts by itself doesn't clear the cookies under it.
             setSSOInProgress(true);
 
-            await clearLoginCookies();
+            // Best effort: the SSO page also opens without cookies, and
+            // thu-learn-lib clears them again before its own login.
+            await clearLoginCookies().catch(() => {});
             navigation.navigate('SSO', {
               username,
               password,

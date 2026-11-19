@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Alert, Linking } from 'react-native';
 import type { WebViewMessageEvent } from 'react-native-webview';
 import type { OnShouldStartLoadWithRequest } from 'react-native-webview/lib/WebViewTypes';
@@ -55,6 +55,10 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
     fingerGenPrint: string;
     fingerGenPrint3: string;
   } | null>(null);
+
+  // However the page is left (handed over to Web Learning, back, or closed
+  // during the second factor), the app may log in by itself again.
+  useEffect(() => () => setSSOInProgress(false), []);
 
   const injectedJs = fillSSOScript(ssoCustomScript, {
     username,
