@@ -4,5 +4,7 @@ export const Windows = {
   supportsMultipleWindows: jest.fn(() => false),
   targetWindowId: jest.fn((): string | null => null),
   setWindowLink: jest.fn(),
+  setWindowTitle: jest.fn(() => Promise.resolve()),
   openWindow: jest.fn(() => Promise.resolve()),
+  addListener: jest.fn(() => ({ remove: jest.fn() })),
 };

@@ -1,6 +1,6 @@
 // Updates (updater.ts) against updateServer.ts, the local stand-in for the
 // TUNA mirror's LatestRelease/ folder: a dev run with LEARNX_UPDATE_URL
-// checks 10 seconds after launch, downloads the installer named in
+// checks a second after launch, downloads the installer named in
 // latest*.yml and checks its SHA-512; Settings then offers it, and Restart
 // quits into the installer (recorded instead, mainProcess.ts). The installer
 // here is made-up bytes: what's tested is learnX's side, not the installer.
@@ -181,7 +181,7 @@ test('downloads an update and restarts into it', async ({
   await main.stubInstall();
   await openSettings(window);
 
-  // The first check comes 10 seconds after launch.
+  // The first check comes a second after launch.
   const row = byId(window, 'settings-update');
   await expect(row).toBeVisible({ timeout: 60_000 });
   await expect(row).toContainText(text('T_foundNewVersion'));

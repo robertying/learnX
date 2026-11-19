@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
-import { queryOptions, useQuery } from '@tanstack/react-query';
+import { queryOptions, useIsFetching, useQuery } from '@tanstack/react-query';
 import { Language } from '@robertying/thu-learn-lib';
 import { queryClient } from 'data/queryClient';
 import { dataSource } from 'data/source';
-import { useLoggedIn } from 'data/auth';
+import { useLoggedIn, useLoggingIn } from 'data/auth';
 import { Course, User } from 'data/types/state';
 import { useCurrentSemester } from 'data/userData';
 import { isLocaleChinese } from 'helpers/i18n';
@@ -85,6 +85,27 @@ export const coursesQuery = (semesterId: string) =>
         .sort((a, b) => a.id.localeCompare(b.id));
     },
   });
+
+/**
+ * Whether a list with nothing to show yet is on its way: it's being fetched,
+ * or it will be once the login under way is done or the semester being shown
+ * is known. Lists show a spinner meanwhile, not their empty state.
+ */
+export const useFirstLoad = ({
+  isPending,
+  isFetching,
+}: {
+  isPending: boolean;
+  isFetching: boolean;
+}) => {
+  const loggingIn = useLoggingIn();
+  const semesterId = useCurrentSemester();
+  const semesterFetching =
+    useIsFetching({ queryKey: queryKeys.schoolSemester }, queryClient) > 0;
+  return (
+    isPending && (isFetching || loggingIn || (!semesterId && semesterFetching))
+  );
+};
 
 const noCourses: Course[] = [];
 

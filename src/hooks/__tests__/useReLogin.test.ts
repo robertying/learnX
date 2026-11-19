@@ -5,8 +5,13 @@ import { initialAuth, useAuthStore } from 'data/auth';
 import { saveCredentials, clearCredentials } from 'data/credentials';
 import { login } from 'data/login';
 import { queryClient } from 'data/queryClient';
+import {
+  defaultMockNetworkConfig,
+  setMockNetworkConfig,
+} from 'data/mockSource';
 import { flushServerActionsWithin } from 'data/serverActions';
 import useReLogin, { resetReLogin } from 'hooks/useReLogin';
+import env from 'test-utils/mocks/env';
 
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
 jest.mock('data/login', () => ({ login: jest.fn(async () => {}) }));
@@ -33,6 +38,7 @@ beforeEach(async () => {
 
 afterEach(async () => {
   await clearCredentials();
+  setMockNetworkConfig(defaultMockNetworkConfig);
 });
 
 /** Renders the hook and lets its launch login through. */
@@ -88,6 +94,18 @@ describe('useReLogin', () => {
     expect(login).toHaveBeenCalledTimes(1);
     await act(() => jest.advanceTimersByTime(1000));
     expect(login).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries the mock account five times sooner with quickTimeout', async () => {
+    await saveCredentials({ ...credentials, username: env.DUMMY_USERNAME! });
+    setMockNetworkConfig({ failure: 'quickTimeout' });
+    await launch();
+    await fail('offline');
+
+    await act(() => jest.advanceTimersByTime(5999));
+    expect(login).not.toHaveBeenCalled();
+    await act(() => jest.advanceTimersByTime(1));
+    expect(login).toHaveBeenCalledTimes(1);
   });
 
   it('does not retry a login the server turned down', async () => {

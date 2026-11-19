@@ -43,6 +43,14 @@ for patch in patches/*.patch; do
     echo "error: $patch changes Android code that $package ships prebuilt. Add $project to expo.autolinking.android.buildFromSource in package.json." >&2
     missing=1
   fi
+  # React Native's native code ships prebuilt too: iOS links React.xcframework
+  # (React-Core-prebuilt; RCT_USE_PREBUILT_RNCORE defaults to 1) and Android
+  # its Maven artifacts. A patch to that code changes node_modules and nothing
+  # the app runs (an RCTAppState.mm patch never reached a build).
+  if [ "$package" = react-native ] && grep -Eq '^diff --git a/.*\.(c|cpp|h|hpp|m|mm|swift|java|kt) ' "$patch"; then
+    echo "error: $patch changes React Native's native code, which the app links prebuilt, so the change never builds. Make it in learnX's own native code instead." >&2
+    missing=1
+  fi
 done
 
 exit $missing

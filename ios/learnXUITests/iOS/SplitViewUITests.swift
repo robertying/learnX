@@ -10,19 +10,22 @@ import XCTest
 final class SplitViewUITests: SimulatorUITestCase {
   private let listTabs = ["tab-notices", "tab-assignments", "tab-files", "tab-courses"]
 
+  override var onlyOn: (idiom: UIUserInterfaceIdiom, reason: String)? {
+    (.pad, "the tab bar and the sidebar are an iPad's")
+  }
+
   override func setUp() async throws {
     try await super.setUp()
-    guard UIDevice.current.userInterfaceIdiom == .pad else {
-      throw XCTSkip("the tab bar and the sidebar are an iPad's")
-    }
     XCUIDevice.shared.orientation = .portrait
     try showTabBar()
   }
 
   override func tearDown() async throws {
-    // The next test, and the next run, start in portrait with the tab bar.
-    XCUIDevice.shared.orientation = .portrait
-    try? showTabBar()
+    // The next test, and the next run, start in portrait with the tab bar (unless it was skipped before launching).
+    if app != nil {
+      XCUIDevice.shared.orientation = .portrait
+      try? showTabBar()
+    }
     try await super.tearDown()
   }
 

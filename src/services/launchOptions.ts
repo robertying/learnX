@@ -22,7 +22,8 @@ export interface LaunchOptions {
   mockLatency?: unknown;
   /**
    * How the emulated server fails for a mock account (`offline`,
-   * `serverError`, `timeout`), so flows can reach the error states.
+   * `serverError`, `timeout`, `quickTimeout`), so flows can reach the error
+   * states.
    */
   mockFailure?: unknown;
   /**
@@ -98,6 +99,7 @@ const failures = new Set<unknown>([
   'offline',
   'serverError',
   'timeout',
+  'quickTimeout',
 ]);
 
 const isFailure = (value: unknown): value is MockFailure => failures.has(value);

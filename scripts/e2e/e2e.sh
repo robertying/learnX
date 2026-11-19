@@ -11,10 +11,13 @@
 # The UI tests run after the flows when every flow ran (no flow passed, no
 # --live); --ui runs only them, E2E_UI_TESTS=0 skips them. Each is for a kind
 # of device (an iPhone, an iPad, an iPad mini) and skips itself on others.
-# xcodebuild builds the Release app with them: DerivedData goes to
-# $DERIVED_DATA (default ~/Library/Developer/Xcode/DerivedData/learnX-e2e-ui),
-# the result bundle to $E2E_UI_RESULT (default build/e2e/ios-ui.xcresult). A
-# test that runs over 3 minutes is stopped and fails.
+# xcodebuild builds the Release app with them, in scripts/e2e/e2e-build.sh's
+# DerivedData ($DERIVED_DATA, default
+# ~/Library/Developer/Xcode/DerivedData/learnX-e2e) and with its build
+# settings, so it reuses the app that script built instead of building it
+# again. The result bundle goes to $E2E_UI_RESULT (default
+# build/e2e/ios-ui.xcresult). A test that runs over 3 minutes is stopped and
+# fails.
 #
 # --live logs in with the real test account from .env (LIVE_USERNAME /
 # LIVE_PASSWORD / LIVE_FINGERPRINT) instead, and runs only the flows tagged
@@ -288,7 +291,7 @@ run_ui_tests() {
   local device result derived status
   device="$(ui_device)" || return 1
   result="${E2E_UI_RESULT:-build/e2e/ios-ui.xcresult}"
-  derived="${DERIVED_DATA:-$HOME/Library/Developer/Xcode/DerivedData/learnX-e2e-ui}"
+  derived="${DERIVED_DATA:-$HOME/Library/Developer/Xcode/DerivedData/learnX-e2e}"
   rm -rf "$result"
   mkdir -p "$(dirname "$result")"
   # TEST_LOGIN=1 as in scripts/e2e/e2e-build.sh: the app xcodebuild installs
@@ -304,6 +307,8 @@ run_ui_tests() {
     -resultBundlePath "$result" \
     -test-timeouts-enabled YES \
     -default-test-execution-time-allowance 180 \
+    DEBUG_INFORMATION_FORMAT=dwarf \
+    COMPILER_INDEX_STORE_ENABLE=NO \
     "$@" || status=$?
   export_ui_shots "$result"
   return "${status:-0}"

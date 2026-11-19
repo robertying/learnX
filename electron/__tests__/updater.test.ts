@@ -132,6 +132,20 @@ it('checks after launch and every few hours', async () => {
   expect(CHECK_INTERVAL).toBe(4 * 60 * 60 * 1000);
 });
 
+it('checks first after the delay it is given', async () => {
+  const autoUpdater = fakeAutoUpdater();
+  createUpdater({
+    autoUpdater,
+    feed,
+    onReady: jest.fn(),
+    firstCheckDelay: 1000,
+  }).start();
+  await jest.advanceTimersByTimeAsync(999);
+  expect(autoUpdater.checkForUpdates).not.toHaveBeenCalled();
+  await jest.advanceTimersByTimeAsync(1);
+  expect(autoUpdater.checkForUpdates).toHaveBeenCalledTimes(1);
+});
+
 it('tells the page once an update has downloaded, and stops checking', async () => {
   const autoUpdater = fakeAutoUpdater();
   const onReady = jest.fn();

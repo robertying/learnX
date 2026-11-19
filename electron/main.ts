@@ -44,7 +44,12 @@ import { PRELOADS_DIR, stripPreloads } from './preloads.ts';
 import { createSecrets } from './secrets.ts';
 import { claimSingleInstance, setUpSystem } from './system.ts';
 import type { System } from './system.ts';
-import { createUpdater, debFileName, updateMode } from './updater.ts';
+import {
+  createUpdater,
+  debFileName,
+  TEST_FIRST_CHECK_DELAY,
+  updateMode,
+} from './updater.ts';
 import type { UpdateMode } from './updater.ts';
 import { signedProvider } from './updateSignature.ts';
 import {
@@ -687,6 +692,7 @@ const loadUpdater = async (updaterMode: UpdateMode) => {
       console.log(`[updater] ${message}`);
       devUpdaterLog?.push(message);
     },
+    ...(devUpdateUrl ? { firstCheckDelay: TEST_FIRST_CHECK_DELAY } : {}),
   });
 };
 /** The updater, once it's loaded; null in a run without updates. */

@@ -152,6 +152,48 @@ it("doesn't ask with every notification off, and turns timetable, calendar and R
   expect(setSyncEnabled).toHaveBeenCalledWith('reminder', true);
 });
 
+it('closes before the notification permission is answered, which may never happen', async () => {
+  // A Mac asks with a banner that can be ignored.
+  request.mockReturnValueOnce(new Promise(() => {}));
+  await renderScreen();
+  await userEvent.press(screen.getByTestId('setup-done'));
+  expect(request).toHaveBeenCalled();
+  expect(navigation.goBack).toHaveBeenCalledTimes(1);
+  expect(getSettings().notifications.notices).toBe(true);
+});
+
+it('asks for calendar and Reminders access before notifications, one at a time', async () => {
+  const order: string[] = [];
+  const answer = (name: string) => async () => {
+    order.push(`ask ${name}`);
+    await Promise.resolve();
+    order.push(`answered ${name}`);
+  };
+  setScheduleSyncEnabled.mockImplementationOnce(answer('timetable'));
+  setSyncEnabled
+    .mockImplementationOnce(answer('calendar'))
+    .mockImplementationOnce(answer('reminders'));
+  request.mockImplementationOnce(async () => {
+    order.push('ask notifications');
+    return true;
+  });
+  await renderScreen();
+  await toggle(t('setupCourseCalendar'), true);
+  await toggle(t('setupCalendar'), true);
+  await toggle(t('setupReminders'), true);
+  await userEvent.press(screen.getByTestId('setup-done'));
+  expect(order).toEqual([
+    'ask timetable',
+    'answered timetable',
+    'ask calendar',
+    'answered calendar',
+    'ask reminders',
+    'answered reminders',
+    'ask notifications',
+  ]);
+  expect(navigation.goBack).toHaveBeenCalledTimes(1);
+});
+
 it('keeps sync an earlier version turned on, without syncing again', async () => {
   setSetting('assignmentCalendarSync', true);
   setSetting('assignmentReminderSync', true);

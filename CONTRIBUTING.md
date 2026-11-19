@@ -108,6 +108,8 @@ pnpm ios --simulator "<name>"   # pick a simulator by name (xcrun simctl list de
 
 You can also open `ios/learnX.xcworkspace` in Xcode, pick the `learnX` scheme and a simulator, and press Run. For the Mac app, pick "My Mac (Mac Catalyst)" as the destination. To run on your own iPhone, plug it in, turn on Developer Mode, and pick it as the destination.
 
+macOS registers every copy of the app it sees, so after builds in several folders the share sheet can offer learnX once per copy. `scripts/dev/unregister-apps.sh` lists the copies it would unregister, keeping `/Applications/learnX.app`; run it with `--apply` to unregister them, and see its header for the options (another bundle ID or apps to keep).
+
 Debug builds load JavaScript from Metro, so JS changes show up on reload. Rebuild only after native changes (Swift, Objective-C, `ios/Podfile`, a native package or a patch).
 
 ## 4. Android

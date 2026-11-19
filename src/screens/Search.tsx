@@ -44,11 +44,13 @@ import { useTheme } from 'theme';
 import { isAndroid, isApple, isElectron } from 'helpers/platform';
 import HeaderSearch from 'components/HeaderSearch';
 import KeyboardInsetView from 'components/KeyboardInsetView';
+import { useWindowTitle } from 'hooks/useWindow';
 
 type Props = NativeStackScreenProps<SearchStackParams, 'Search'>;
 
 const Search: React.FC<Props> = ({ navigation, route }) => {
   const theme = useTheme();
+  useWindowTitle(t('search'));
 
   const safeAreaInsets = useSafeAreaInsets();
 

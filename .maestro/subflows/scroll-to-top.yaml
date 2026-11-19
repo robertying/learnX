@@ -3,17 +3,13 @@
 # snapshot, where a tap lands on the bar.
 appId: ${APP_ID}
 ---
-- repeat:
-    times: 8
-    while:
-      notVisible:
-        id: ${ID}
-    commands:
-      - runFlow:
-          file: swipe-list.yaml
-          env:
-            LIST: ${LIST}
-            DIRECTION: DOWN
+- runFlow:
+    file: swipe-until-shown.yaml
+    env:
+      LIST: ${LIST}
+      ID: ${ID}
+      TEXT: ''
+      DIRECTION: DOWN
 - runFlow:
     file: swipe-list.yaml
     env:

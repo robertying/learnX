@@ -8,6 +8,7 @@ import {
   getNotificationTarget,
   postNotification,
   requestExactAlarms,
+  onPermissionAnswered,
   requestNotificationPermission,
 } from 'services/notifications';
 import { getTargetUrl, getUrlTarget } from 'helpers/openTarget';
@@ -85,6 +86,16 @@ describe('permission', () => {
       ios: { status: Notifications.IosAuthorizationStatus.PROVISIONAL },
     } as never);
     expect(await getNotificationPermission()).toBe('granted');
+  });
+
+  it('tells listeners once a request is answered', async () => {
+    const listener = jest.fn();
+    const stop = onPermissionAnswered(listener);
+    await requestNotificationPermission();
+    expect(listener).toHaveBeenCalledTimes(1);
+    stop();
+    await requestNotificationPermission();
+    expect(listener).toHaveBeenCalledTimes(1);
   });
 
   it('creates the Android channels before asking', async () => {

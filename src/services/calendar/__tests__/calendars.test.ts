@@ -10,7 +10,9 @@ import {
   assignmentEntriesMissing,
   exportSyncedCalendarsToICS,
   getAssignmentCalendar,
+  getAndRequestPermission,
   getCourseCalendar,
+  onAccessAnswered,
   removeCalendars,
   saveAssignmentsToReminderOrCalendar,
 } from 'services/calendar/calendars';
@@ -61,6 +63,26 @@ beforeEach(() => {
   grant();
   mocked.getCalendars.mockResolvedValue([]);
   mocked.createCalendar.mockResolvedValue({ id: 'created' });
+});
+
+describe('getAndRequestPermission', () => {
+  it('tells listeners once a request is answered, and not when access was already granted', async () => {
+    const listener = jest.fn();
+    const stop = onAccessAnswered(listener);
+    expect(await getAndRequestPermission('calendar')).toBe(true);
+    expect(listener).not.toHaveBeenCalled();
+
+    mocked.getRemindersPermissions.mockResolvedValue({
+      status: 'undetermined',
+    });
+    expect(await getAndRequestPermission('reminder')).toBe(true);
+    expect(listener).toHaveBeenCalledTimes(1);
+
+    stop();
+    mocked.requestRemindersPermissions.mockResolvedValue({ status: 'denied' });
+    expect(await getAndRequestPermission('reminder')).toBe(false);
+    expect(listener).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('synced calendars', () => {

@@ -7,10 +7,9 @@ import {
   WebViewSource,
   WebViewSourceHtml,
 } from 'react-native-webview/lib/WebViewTypes';
-import CookieManager from '@preeternal/react-native-cookie-manager';
-import { recordError } from 'services/crashReporting';
 import Urls from 'constants/Urls';
 import { getTappedLink } from 'helpers/webContent';
+import { syncWebViewCookies } from 'helpers/webViewCookies';
 import { isAndroid, isApple } from 'helpers/platform';
 
 /** Whether a load is the web view's own page: HTML at Web Learning's root. */
@@ -96,7 +95,8 @@ const AutoHeightWebView: React.FC<AutoHeightWebViewProps> = ({
   ...props
 }) => {
   const [height, setHeight] = useState(0);
-  // Loading waits for the session cookies, so the page loads once with them.
+  // Loading waits for the session cookies, so the page loads once with them
+  // (`FormWebView` also waits for a login under way, see `useWebSession`).
   const [cookieString, setCookieString] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
 
@@ -141,32 +141,7 @@ const AutoHeightWebView: React.FC<AutoHeightWebViewProps> = ({
   };
 
   useEffect(() => {
-    void (async () => {
-      let cookies: Awaited<ReturnType<typeof CookieManager.get>>;
-      try {
-        cookies = await CookieManager.get(Urls.learn);
-      } catch (error) {
-        recordError(error);
-        setCookieString('');
-        return;
-      }
-      // The page still loads with the Cookie header below if these fail.
-      await Promise.all(
-        Object.values(cookies).map(value =>
-          CookieManager.set(
-            Urls.learn,
-            value.sameSite === 'none' ? { ...value, secure: true } : value,
-            true,
-          ),
-        ),
-      ).catch(recordError);
-
-      setCookieString(
-        Object.entries(cookies)
-          .map(([key, value]) => `${key}=${value.value}`)
-          .join('; '),
-      );
-    })();
+    void syncWebViewCookies().then(setCookieString);
   }, []);
 
   if (cookieString === null) {

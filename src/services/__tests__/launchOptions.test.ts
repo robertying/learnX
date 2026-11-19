@@ -58,6 +58,8 @@ it('reads how the emulated server fails', () => {
   jest.replaceProperty(Platform, 'OS', 'android');
   applyLaunchOptions({ mockFailure: 'offline' });
   expect(getMockNetworkConfig().failure).toBe('offline');
+  applyLaunchOptions({ mockFailure: 'quickTimeout' });
+  expect(getMockNetworkConfig().failure).toBe('quickTimeout');
 
   jest.replaceProperty(Platform, 'OS', 'ios');
   mockSettingsGet.mockImplementation(key =>

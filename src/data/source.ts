@@ -1,9 +1,9 @@
 import { Learn2018Helper, type Credential } from '@robertying/thu-learn-lib';
 import mime from 'mime';
 import CookieManager from '@preeternal/react-native-cookie-manager';
-import { noteRequestError } from 'data/auth';
+import { noteRequestError, noteSession } from 'data/auth';
 import { getCredentials, loadCredentials } from 'data/credentials';
-import { mockSource } from 'data/mockSource';
+import { mockSource, mockTimeScale } from 'data/mockSource';
 import Urls from 'constants/Urls';
 import { isLearnUrl } from 'helpers/learnUrl';
 import { isMockUser } from 'helpers/mock';
@@ -81,6 +81,12 @@ const isMockSession = () =>
     ? sessionServer === 'mock'
     : isMockUser(getCredentials()?.username);
 
+/**
+ * What the app's quiet login retries are scaled by: the mock server's
+ * `mockTimeScale` in a mock session, else 1.
+ */
+export const retryDelayScale = () => (isMockSession() ? mockTimeScale() : 1);
+
 /** Forgets which server the session used, e.g. on logout. */
 export const endSession = () => {
   sessionServer = null;
@@ -156,7 +162,9 @@ const realSource = new Proxy({} as AppSource, {
  * mock account to pick a server. Every failed call is noted (`noteRequestError`
  * in `data/auth`), so a wrong password found by thu-learn-lib's own re-login
  * ends the session wherever the request came from: a list, a server action, a
- * download or a submission.
+ * download or a submission. After every call, the session's token is noted
+ * too (`noteSession`), so a login thu-learn-lib ran by itself reloads the web
+ * content that needs the session.
  */
 export const dataSource = new Proxy({} as AppSource, {
   get: (_, key: keyof AppSource) => {
@@ -171,10 +179,17 @@ export const dataSource = new Proxy({} as AppSource, {
         args,
       );
       return result instanceof Promise
-        ? result.catch((error: unknown) => {
-            noteRequestError(error);
-            throw error;
-          })
+        ? result.then(
+            (resolved: unknown) => {
+              noteSession(source.getCSRFToken());
+              return resolved;
+            },
+            (error: unknown) => {
+              noteSession(source.getCSRFToken());
+              noteRequestError(error);
+              throw error;
+            },
+          )
         : result;
     };
   },
@@ -245,8 +260,13 @@ export const loginWithFingerPrint = async (credential?: Credential) => {
   // A new login names its account; it may differ from the stored one.
   const isMock = isMockUser(credential?.username ?? getCredentials()?.username);
   sessionServer = isMock ? 'mock' : 'real';
-  // thu-learn-lib clears the SSO cookies first (clearLoginCookies).
-  await (isMock ? mockSource : helper).login(credential);
+  const source = isMock ? mockSource : helper;
+  try {
+    // thu-learn-lib clears the SSO cookies first (clearLoginCookies).
+    await source.login(credential);
+  } finally {
+    noteSession(source.getCSRFToken());
+  }
 };
 
 /**

@@ -1,3 +1,4 @@
+import { DeviceEventEmitter } from 'react-native';
 import { create } from 'zustand';
 import { Windows } from 'modules/windows';
 
@@ -57,4 +58,27 @@ export const openWindow = (link: string) => {
 /** What the window `id` shows, to reopen after a relaunch. */
 export const setWindowLink = (id: string, link: string) => {
   Windows?.setWindowLink(id, link);
+};
+
+/** Names the window `id` after what it shows. */
+export const setWindowTitle = (id: string, title: string) => {
+  void Windows?.setWindowTitle(id, title).catch(() => {});
+};
+
+/**
+ * Makes React Native's `AppState` turn inactive when another app comes to the
+ * front of the Mac, and active when learnX is back, as it does on iPhone and
+ * iPad. UIKit keeps a Mac app active either way, so what's checked again on
+ * return (a permission changed in System Settings, a login gone stale) never
+ * was. Sent as React Native's own app state event, which the native module
+ * also sends; it skips a state it already reported. Returns the call that
+ * stops it.
+ */
+export const followMacActivation = () => {
+  const subscription = Windows?.addListener('onActiveChange', ({ active }) =>
+    DeviceEventEmitter.emit('appStateDidChange', {
+      app_state: active ? 'active' : 'inactive',
+    }),
+  );
+  return () => subscription?.remove();
 };

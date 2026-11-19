@@ -6,11 +6,12 @@ import {
   useMemo,
   type PropsWithChildren,
 } from 'react';
-import { useIsFocused } from '@react-navigation/native';
+import { NavigationContext, useIsFocused } from '@react-navigation/native';
 import { getTargetUrl, type OpenTarget } from 'helpers/openTarget';
 import {
   registerWindow,
   setWindowLink,
+  setWindowTitle,
   usePrimaryWindow,
 } from 'services/windows';
 
@@ -23,6 +24,17 @@ export interface WindowProps {
 }
 
 const WindowContext = createContext<WindowProps>({});
+
+// A split view's detail pane has a navigation container of its own, whose
+// screen stays focused while another tab is selected.
+const DetailPaneContext = createContext(false);
+
+/** Wraps a split view's detail pane (`useWindowTitle`). */
+export const DetailPane: React.FC<PropsWithChildren> = ({ children }) => (
+  <DetailPaneContext.Provider value={true}>
+    {children}
+  </DetailPaneContext.Provider>
+);
 
 /** Gives the app inside it its window (`services/windows`). */
 export const WindowProvider: React.FC<PropsWithChildren<WindowProps>> = ({
@@ -69,4 +81,31 @@ export const useWindowRestoration = (target: OpenTarget) => {
       setWindowLink(windowId, link);
     }
   }, [windowId, focused, link]);
+};
+
+/**
+ * Names this window after what it shows while the calling screen is focused
+ * (iPad and Mac): the Mac's Dock and Window menus and iPadOS's App Exposé
+ * list windows by this name. In a detail pane it does nothing: the list
+ * beside the pane names the window after the item it opened, since only the
+ * list knows whether its tab is the one selected.
+ */
+export const useWindowTitle = (title: string | undefined) => {
+  const { windowId } = useWindow();
+  const inDetailPane = useContext(DetailPaneContext);
+  // Optional, unlike `useIsFocused`, for screens rendered outside a
+  // navigator (as in tests).
+  const navigation = useContext(NavigationContext);
+  useEffect(() => {
+    if (!windowId || !navigation || !title || inDetailPane) {
+      return;
+    }
+    const name = () => {
+      if (navigation.isFocused()) {
+        setWindowTitle(windowId, title);
+      }
+    };
+    name();
+    return navigation.addListener('focus', name);
+  }, [windowId, navigation, title, inDetailPane]);
 };

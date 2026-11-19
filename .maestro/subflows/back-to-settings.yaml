@@ -1,5 +1,6 @@
 # Back from a Settings page to Settings, unless the page opened beside it
-# (the split layout, unfolded Android).
+# (the split layout, unfolded Android): on iOS by SPLIT, on Android while
+# Settings' list is still visible, as in back.yaml.
 appId: ${APP_ID}
 ---
 - runFlow:
@@ -12,9 +13,7 @@ appId: ${APP_ID}
 - runFlow:
     when:
       platform: iOS
-      true: ${IOS_MAJOR >= 26}
-      notVisible:
-        id: settings-list
+      true: ${IOS_MAJOR >= 26 && SPLIT != 'true'}
     commands:
       - swipe:
           start: 1%, 50%
@@ -27,9 +26,7 @@ appId: ${APP_ID}
 - runFlow:
     when:
       platform: iOS
-      true: ${IOS_MAJOR < 26}
-      notVisible:
-        id: settings-list
+      true: ${IOS_MAJOR < 26 && SPLIT != 'true'}
     commands:
       - tapOn:
           point: 5%, 8%

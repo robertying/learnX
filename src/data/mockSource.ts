@@ -36,7 +36,13 @@ export type MockFailure =
   /** The server answers with an unexpected status. */
   | 'serverError'
   /** Requests hang, then fail like a timed-out fetch. */
-  | 'timeout';
+  | 'timeout'
+  /**
+   * As `timeout`, with that wait and the app's quiet login retries while
+   * offline cut to a fifth (`mockTimeScale`), so a test reaches offline and
+   * reconnecting in seconds rather than a minute.
+   */
+  | 'quickTimeout';
 
 export interface MockNetworkConfig {
   latency: MockLatency;
@@ -77,6 +83,13 @@ const latencyRanges: Record<MockLatency, [number, number]> = {
 };
 
 export const MOCK_TIMEOUT_MS = 20 * 1000;
+
+/**
+ * What the emulated server's timeout and, in a mock session, the app's quiet
+ * login retries (`retryDelayScale` in data/source) are scaled by.
+ */
+export const mockTimeScale = () =>
+  config.failure === 'quickTimeout' ? 0.2 : 1;
 
 let config = defaultMockNetworkConfig;
 const listeners = new Set<() => void>();
@@ -124,7 +137,8 @@ const roundTrip = async ({ isLogin = false } = {}) => {
         new TypeError('Network request failed'),
       );
     case 'timeout':
-      await wait(MOCK_TIMEOUT_MS);
+    case 'quickTimeout':
+      await wait(MOCK_TIMEOUT_MS * mockTimeScale());
       throw apiError(FailReason.REQUEST_TIMEOUT);
     case 'serverError':
       await wait(randomLatency());

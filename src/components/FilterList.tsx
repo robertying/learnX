@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react';
-import { RefreshControl, View } from 'react-native';
+import { View } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase, useIsFocused } from '@react-navigation/native';
 import { scheduleOnRN } from 'react-native-worklets';
@@ -36,10 +36,11 @@ import FilterListRow, {
   ItemComponentProps,
 } from './FilterListRow';
 import FlatList from './FlatList';
+import RefreshControl from './RefreshControl';
 import ListBackground from './ListBackground';
 import { playHaptic } from 'services/haptics';
-import { useTheme } from 'theme';
-import { useWindowRestoration } from 'hooks/useWindow';
+import { useWindowRestoration, useWindowTitle } from 'hooks/useWindow';
+import { t } from 'helpers/i18n';
 
 export type { ItemComponentProps };
 
@@ -53,6 +54,14 @@ const detailScreens: Record<
   file: 'FileDetail',
   course: 'CourseDetail',
 };
+
+// What a window showing the list without an item open is called.
+const listTitles = {
+  notice: 'notices',
+  assignment: 'assignments',
+  file: 'files',
+  course: 'courses',
+} as const satisfies Record<FilterListProps<unknown>['type'], string>;
 
 export interface FilterListProps<T> {
   type: 'notice' | 'assignment' | 'file' | 'course';
@@ -100,7 +109,6 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   onRefresh,
   updatedAt,
 }: FilterListProps<T>) => {
-  const theme = useTheme();
   const detailNavigator = useDetailNavigator();
   // The item open beside the list, which its row shows as selected.
   const detailRoot = useDetailRoot();
@@ -108,6 +116,13 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     detailRoot?.name === detailScreens[type] ? detailRoot.id : undefined;
   // A window on iPad or Mac comes back to this list and item after a relaunch.
   useWindowRestoration({ type, id: openedId });
+  const opened = openedId
+    ? [all, hidden, archived ?? []].flat().find(item => item.id === openedId)
+    : undefined;
+  useWindowTitle(
+    (opened && ('title' in opened ? opened.title : opened.name)) ||
+      t(listTitles[type]),
+  );
 
   // Only this tab's selection, so changing another tab's filter does not
   // re-render this list
@@ -310,14 +325,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     // drag in reorder mode), nor on the Mac, which has no pull.
     refreshControl:
       selectionMode || reorderMode || DeviceInfo.isMac() ? undefined : (
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          // Android: Material 3's colors, as Compose's pull to refresh
-          // (Today) draws them; iOS keeps the system spinner.
-          colors={[theme.colors.primary]}
-          progressBackgroundColor={theme.colors.surfaceContainer}
-        />
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       ),
   };
 

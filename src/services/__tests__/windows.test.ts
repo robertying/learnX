@@ -1,10 +1,13 @@
+import { DeviceEventEmitter } from 'react-native';
 import { Windows } from 'modules/windows';
 import {
   canOpenWindows,
+  followMacActivation,
   isTargetWindow,
   openWindow,
   registerWindow,
   setWindowLink,
+  setWindowTitle,
   targetWindow,
 } from 'services/windows';
 
@@ -56,6 +59,8 @@ describe('windows', () => {
     expect(Windows!.openWindow).toHaveBeenCalledWith('learnx://notice/n1');
     setWindowLink('a', 'learnx://today');
     expect(Windows!.setWindowLink).toHaveBeenCalledWith('a', 'learnx://today');
+    setWindowTitle('a', 'Today');
+    expect(Windows!.setWindowTitle).toHaveBeenCalledWith('a', 'Today');
   });
 
   it("keeps a window's place when its root registers again", () => {
@@ -65,10 +70,39 @@ describe('windows', () => {
     expect(targetWindow()).toBe('a');
   });
 
+  it('ignores a window that fails to be named', async () => {
+    jest.mocked(Windows!.setWindowTitle).mockRejectedValueOnce(new Error('no'));
+    setWindowTitle('a', 'Today');
+    await Promise.resolve();
+    expect(Windows!.setWindowTitle).toHaveBeenCalledTimes(1);
+  });
+
   it('ignores a window that fails to open', async () => {
     jest.mocked(Windows!.openWindow).mockRejectedValueOnce(new Error('no'));
     openWindow('learnx://notice/n1');
     await Promise.resolve();
     expect(Windows!.openWindow).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('followMacActivation', () => {
+  it("sends the Mac app leaving the front and coming back as React Native's app state event", () => {
+    // AppState listens for it on the device event emitter.
+    const emit = jest.spyOn(DeviceEventEmitter, 'emit');
+    const remove = jest.fn();
+    jest.mocked(Windows!.addListener).mockReturnValueOnce({ remove } as never);
+    const stop = followMacActivation();
+    const changed = jest.mocked(Windows!.addListener).mock
+      .calls[0][1] as (event: { active: boolean }) => void;
+
+    changed({ active: false });
+    changed({ active: true });
+    expect(emit.mock.calls).toEqual([
+      ['appStateDidChange', { app_state: 'inactive' }],
+      ['appStateDidChange', { app_state: 'active' }],
+    ]);
+
+    stop();
+    expect(remove).toHaveBeenCalled();
   });
 });

@@ -19,14 +19,22 @@ import {
   toggleFavorite,
 } from 'services/listActions';
 import useDetailNavigator, { useDetailRoot } from 'hooks/useDetailNavigator';
+import { useWindowTitle } from 'hooks/useWindow';
 import useFilterListHeader, {
   type FilterListHeaderOptions,
 } from 'hooks/useFilterListHeader';
 import type { AppCommand } from 'modules/menus';
 import { playHaptic } from 'services/haptics';
 
-jest.mock('@react-navigation/native', () => ({ useIsFocused: () => true }));
+jest.mock('@react-navigation/native', () => ({
+  ...jest.requireActual('@react-navigation/native'),
+  useIsFocused: () => true,
+}));
 jest.mock('hooks/useFilterListHeader', () => jest.fn());
+jest.mock('hooks/useWindow', () => ({
+  ...jest.requireActual('hooks/useWindow'),
+  useWindowTitle: jest.fn(),
+}));
 jest.mock('services/haptics', () => ({ playHaptic: jest.fn() }));
 jest.mock('hooks/useDetailNavigator', () => ({
   __esModule: true,
@@ -371,6 +379,20 @@ it('marks the item open in the detail pane, by the page its list opens', async (
     />,
   );
   expect(screen.queryByText(/opened/)).toBeNull();
+});
+
+it('names the window after the item open beside it, else the list', async () => {
+  await renderList();
+  expect(useWindowTitle).toHaveBeenLastCalledWith('Notices');
+
+  jest.mocked(useDetailRoot).mockReturnValue({ name: 'NoticeDetail', id: 'b' });
+  await renderList();
+  expect(useWindowTitle).toHaveBeenLastCalledWith('Item b');
+
+  // Archived, so not in the list shown.
+  jest.mocked(useDetailRoot).mockReturnValue({ name: 'NoticeDetail', id: 'z' });
+  await renderList();
+  expect(useWindowTitle).toHaveBeenLastCalledWith('Item z');
 });
 
 describe('pull to refresh', () => {

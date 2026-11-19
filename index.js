@@ -20,6 +20,7 @@ import { watchAssignmentChanges } from './src/services/background';
 import { watchSurfaces } from './src/services/surfaces';
 import { watchUpdates } from './src/services/updateNotifications';
 import { withLaunchOptions } from './src/services/launchOptions';
+import { followMacActivation } from './src/services/windows';
 
 // Keep LogBox off: its "Open debugger to view warnings" toast covers the tab
 // bar and opens a React Native DevTools window when tapped. Read warnings in
@@ -34,6 +35,9 @@ setUpNotificationActions();
 // Keeps the widgets, reminders, Spotlight and App Intents in step with the
 // data, in this runtime whether or not the app renders.
 watchSurfaces();
+// So what's checked when the app comes back (a permission changed in System
+// Settings) is on the Mac too.
+followMacActivation();
 // Notifies about grades and moved deadlines the app itself fetches while open.
 watchAssignmentChanges();
 // Checks for a new version where learnX updates itself, and says when one is

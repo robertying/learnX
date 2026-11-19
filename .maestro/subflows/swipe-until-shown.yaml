@@ -1,0 +1,41 @@
+# Swipe the list LIST (its testID; swipe-list.yaml) in DIRECTION until the
+# element with id ID shows, or with text TEXT (a regex) when ID is empty: the
+# scroll subflows' shared loop. An element already on screen, the usual case,
+# is found first (shown.yaml) at no cost; otherwise the loop runs while it's
+# absent, which only waits out Maestro's lookup timeout once, as it shows.
+appId: ${APP_ID}
+---
+- runFlow:
+    file: shown.yaml
+    env:
+      ID: ${ID}
+      TEXT: ${TEXT}
+- runFlow:
+    when:
+      true: ${!output.shown && !!ID}
+    commands:
+      - repeat:
+          times: 8
+          while:
+            notVisible:
+              id: ${ID}
+          commands:
+            - runFlow:
+                file: swipe-list.yaml
+                env:
+                  LIST: ${LIST}
+                  DIRECTION: ${DIRECTION}
+- runFlow:
+    when:
+      true: ${!output.shown && !ID}
+    commands:
+      - repeat:
+          times: 8
+          while:
+            notVisible: ${TEXT}
+          commands:
+            - runFlow:
+                file: swipe-list.yaml
+                env:
+                  LIST: ${LIST}
+                  DIRECTION: ${DIRECTION}

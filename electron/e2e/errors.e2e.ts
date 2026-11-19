@@ -45,18 +45,21 @@ test('goes offline after a timeout, then reconnects', async ({
   login,
   relaunch,
 }) => {
-  // The mock server answers after 20 s, and the quiet retry comes 30 s later.
-  test.setTimeout(180_000);
+  // The mock server times out after 20 s and the quiet retry comes 30 s
+  // later, both scaled down to a fifth (quickTimeout).
   await login();
   const { window } = await relaunch({
-    launchOptions: { mockLatency: 'none', mockFailure: 'timeout' },
+    launchOptions: {
+      mockLatency: 'none',
+      mockFailure: 'quickTimeout',
+    },
   });
   await expect(
     shown(window.getByText(text('T_syncStatusOffline'))),
-  ).toBeVisible({ timeout: 40_000 });
+  ).toBeVisible({ timeout: 15_000 });
   await expect(
     shown(window.getByText(text('T_syncStatusReconnecting'))),
-  ).toBeVisible({ timeout: 75_000 });
+  ).toBeVisible({ timeout: 15_000 });
 });
 
 test('offers to log in again after the password changed', async ({

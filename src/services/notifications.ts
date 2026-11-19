@@ -138,14 +138,28 @@ export const configureNotifications = async () => {
 export const getNotificationPermission = async () =>
   toPermission(await Notifications.getPermissionsAsync());
 
+const permissionListeners = new Set<() => void>();
+
+/**
+ * Calls `listener` after each answer to a request for the permission,
+ * wherever in the app it was asked, so what shows the permission doesn't wait
+ * for the app to come back to the front. Returns a function that stops it.
+ */
+export const onPermissionAnswered = (listener: () => void) => {
+  permissionListeners.add(listener);
+  return () => {
+    permissionListeners.delete(listener);
+  };
+};
+
 /** Asks for the permission if the system still lets the app ask. */
 export const requestNotificationPermission = async () => {
   await setUpChannels();
-  return toPermission(
-    await Notifications.requestPermissionsAsync({
-      ios: { allowAlert: true, allowSound: true, allowBadge: false },
-    }),
-  );
+  const response = await Notifications.requestPermissionsAsync({
+    ios: { allowAlert: true, allowSound: true, allowBadge: false },
+  });
+  permissionListeners.forEach(listener => listener());
+  return toPermission(response);
 };
 
 /**

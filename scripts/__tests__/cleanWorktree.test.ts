@@ -42,9 +42,9 @@ const addWorktree = (name: string) => {
   return { wt, dd };
 };
 
-const clean = (...args: string[]) =>
+const cleanFrom = (cwd: string, ...args: string[]) =>
   spawnSync('bash', [script, ...args], {
-    cwd: root,
+    cwd,
     env: {
       ...process.env,
       DERIVED_DATA_ROOT: derivedData,
@@ -52,6 +52,7 @@ const clean = (...args: string[]) =>
     },
     encoding: 'utf8',
   });
+const clean = (...args: string[]) => cleanFrom(root, ...args);
 
 const branches = () =>
   execFileSync('git', ['branch', '--format=%(refname:short)'], {
@@ -111,6 +112,17 @@ test('--apply removes only that worktree, its DerivedData and its pushed branch'
   expect(existsSync(other.dd)).toBe(true);
   expect(existsSync(join(derivedData, 'ModuleCache.noindex'))).toBe(true);
   expect(existsSync(main)).toBe(true);
+});
+
+test('runs from inside the worktree it removes', () => {
+  const { wt } = addWorktree('done');
+  git(wt, 'push', '-q', 'origin', 'done');
+
+  const result = cleanFrom(wt, '--apply', wt);
+
+  expect(result.stderr).toBe('');
+  expect(result.status).toBe(0);
+  expect(existsSync(wt)).toBe(false);
 });
 
 test('removes a branch with no commits of its own', () => {

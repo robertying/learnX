@@ -46,12 +46,16 @@ appId: ${APP_ID}
     visible:
       id: 'welcome-continue|login-username|tab-notices'
     timeout: 60000
-# Logged in already: an absent element costs Maestro's optional lookup (up to
-# 7 s from the launch), still far less than a login.
+# Logged in already, as every flow but the first finds the app: look for the
+# tabs rather than the login pages (shown.yaml).
+- runFlow:
+    file: shown.yaml
+    env:
+      ID: tab-notices
+      TEXT: ''
 - runFlow:
     when:
-      visible:
-        id: 'welcome-continue|login-username'
+      true: ${!output.shown}
     file: login-form.yaml
 # The app opens on Today; the flows start from the notices.
 - runFlow:
