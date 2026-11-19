@@ -179,63 +179,6 @@ index 29e4f1566d188665e301d32bc1ad85640f83e68c..fdbffad2a76c7c578edabdfb7f2b573f
    }
  }
 +#endif
-diff --git a/ios/Widgets/CountdownView.swift b/ios/Widgets/CountdownView.swift
-new file mode 100644
-index 0000000000000000000000000000000000000000..2ecc571ae4cfebe3c426a2e7b585514b912ba37d
---- /dev/null
-+++ b/ios/Widgets/CountdownView.swift
-@@ -0,0 +1,51 @@
-+import SwiftUI
-+import ExpoModulesCore
-+import ExpoUI
-+
-+// learnX: the time left until (or since) a date, kept live by the system
-+// like Text(date, style: .relative), but in days, hours and minutes, at most
-+// two of them ("42 minutes", "2 days, 20 hours") or as many as
-+// `maxFieldCount`, without the seconds the relative style counts under an
-+// hour. A layout makes the node itself:
-+// { type: 'CountdownView', props: { date, maxFieldCount, modifiers } }.
-+final class CountdownViewProps: UIBaseViewProps {
-+  @Field var date: Date?
-+  @Field var maxFieldCount: Int?
-+}
-+
-+struct CountdownView: ExpoSwiftUI.View {
-+  @ObservedObject var props: CountdownViewProps
-+  @Environment(\.locale) private var locale
-+
-+  init(props: CountdownViewProps) {
-+    self.props = props
-+  }
-+
-+  var body: some View {
-+    if let date = props.date {
-+      if #available(iOS 18.0, *) {
-+        let format = SystemFormatStyle.DateOffset.offset(
-+          to: date,
-+          allowedFields: [.day, .hour, .minute],
-+          maxFieldCount: props.maxFieldCount ?? 2,
-+          sign: .never
-+        ).locale(locale)
-+        // A live Text takes all the width it's offered, and fixedSize blanks
-+        // the widget, so it takes the width of its value at render time and
-+        // the rest of its row (a course name) gives way to it. Both draw
-+        // equal-width digits, so the live value fills the width it was given
-+        // (proportional digits left a gap after a narrow "1").
-+        Text(format.format(Date()))
-+          .monospacedDigit()
-+          .hidden()
-+          .overlay(alignment: .leading) {
-+            Text(.currentDate, format: format)
-+              .monospacedDigit()
-+              .minimumScaleFactor(0.8)
-+          }
-+      } else {
-+        Text(date, style: .relative)
-+      }
-+    }
-+  }
-+}
 diff --git a/ios/Widgets/LiveActivityBanner.swift b/ios/Widgets/LiveActivityBanner.swift
 index 3e6ff0b55c0b6d57ddeb1ba6605536adae2ca62d..0ac8618fa3c6959af86526cd17cc77f23f01a7f8 100644
 --- a/ios/Widgets/LiveActivityBanner.swift
@@ -286,17 +229,15 @@ index 76b2199c2d3f879463fed5d2bd49038b0428a2e7..d3130e19431e0c524e59c3f12ae1f41f
  }
 +#endif
 diff --git a/ios/Widgets/ViewRenderer.swift b/ios/Widgets/ViewRenderer.swift
-index 68e376fdd5a4a1b088f6e2e28b0babb285feec12..77a092d35795db5172db75ef67acc6707ce52bf8 100644
+index 68e376fdd5a4a1b088f6e2e28b0babb285feec12..a98f9038916da4012ac36edf06e4dfada5f1ef7b 100644
 --- a/ios/Widgets/ViewRenderer.swift
 +++ b/ios/Widgets/ViewRenderer.swift
-@@ -81,6 +81,10 @@ struct WidgetsViewRenderer {
+@@ -81,6 +81,8 @@ struct WidgetsViewRenderer {
        return renderWithModifiers(FragmentView.self, FragmentProps.self, updateProps: updateChildren)
      case "LinkView":
        return renderWithModifiers(LinkView.self, LinkViewProps.self, updateProps: updateChildren)
 +    case "ViewThatFitsView":
 +      return renderWithModifiers(ViewThatFitsView.self, ViewThatFitsViewProps.self, updateProps: updateChildren)
-+    case "CountdownView":
-+      return renderWithModifiers(CountdownView.self, CountdownViewProps.self)
  #if DEBUG
      case "RedBoxView":
        return renderWithModifiers(RedBoxView.self, RedBoxViewProps.self) { redBoxProps in

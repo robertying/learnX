@@ -71,13 +71,20 @@ const childrenOf = (node: Node): Node[] =>
 
 const all = (node: Node): Node[] => [node, ...childrenOf(node).flatMap(all)];
 
+/** A Text with words of its own, not one made of other Texts. */
+const isText = (node: Node) =>
+  node.type === 'Text' &&
+  !childrenOf(node).some(child => child.type === 'Text');
+
+const isCountdown = (node: Node) => node.props.dateStyle === 'countdown';
+
 /**
- * Each Text's words, a countdown (our patch's CountdownView) or relative date
- * as `in <ISO time>`.
+ * Each Text's words, a countdown (our @expo/ui patch) or relative date as
+ * `in <ISO time>`.
  */
 const texts = (node: Node) =>
   all(node)
-    .filter(n => n.type === 'Text' || n.type === 'CountdownView')
+    .filter(isText)
     .map(n =>
       n.props.date
         ? `in ${(n.props.date as Date).toISOString()}`
@@ -99,11 +106,7 @@ const spoken = (node: Node) =>
     .filter(n => modifier(n, 'accessibilityElement') === 'combine')
     .map(n =>
       all(n)
-        .filter(
-          t =>
-            (t.type === 'Text' || t.type === 'CountdownView') &&
-            !modifier(t, 'accessibilityHidden'),
-        )
+        .filter(t => isText(t) && !modifier(t, 'accessibilityHidden'))
         .map(
           t =>
             (modifier(t, 'accessibilityLabel') as string | undefined) ??
@@ -208,7 +211,7 @@ const coloredDeadlines = [
 const dueText = (node: Node, ms: number, due: string) =>
   all(node).find(
     n =>
-      (n.type === 'Text' || n.type === 'CountdownView') &&
+      isText(n) &&
       ((n.props.date as Date | undefined)?.getTime() === ms ||
         n.props.children === due),
   )!;
@@ -295,7 +298,7 @@ describe('Up Next on iOS', () => {
     ]);
     expect(
       all(oneLater)
-        .filter(n => n.type === 'CountdownView')
+        .filter(isCountdown)
         .map(n => modifier(n, 'font')),
     ).toEqual([{ textStyle: 'footnote' }]);
     // VoiceOver reads each class as one element, without the dot.
@@ -439,10 +442,7 @@ describe('Up Next on iOS', () => {
     // One tap target: Today.
     expect(modifier(widget, 'widgetURL')).toBe('learnx://today');
     // Its largest unit only, to fit the width.
-    expect(
-      all(withCountdown).find(n => n.type === 'CountdownView')!.props
-        .maxFieldCount,
-    ).toBe(1);
+    expect(all(withCountdown).find(isCountdown)!.props.maxFieldCount).toBe(1);
     expect(links(widget)).toEqual([]);
   });
 
@@ -497,8 +497,8 @@ describe('Up Next on iOS', () => {
       ),
     ).toBe('learnx://today');
     expect(
-      all(render('accessoryRectangular')).find(n => n.type === 'CountdownView')!
-        .props.maxFieldCount,
+      all(render('accessoryRectangular')).find(isCountdown)!.props
+        .maxFieldCount,
     ).toBe(1);
     // Without a place, the countdown alone; not today, the place alone.
     const unplaced = layout(
@@ -688,7 +688,7 @@ describe('Deadlines on iOS', () => {
     // The time left in its largest unit, to leave the course room.
     expect(
       all(version(widget, 3))
-        .filter(n => n.type === 'CountdownView')
+        .filter(isCountdown)
         .map(n => n.props.maxFieldCount),
     ).toEqual([1, 1, 1]);
     expect(texts(version(widget, 1)).slice(0, 2)).toEqual(['Deadlines', '+8']);

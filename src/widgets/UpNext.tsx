@@ -107,15 +107,15 @@ function UpNextWidget(
         >
           {`${current ? props.endsIn : props.startsIn} `}
         </Text>
-        <kit.Countdown
-          date={new Date(current ? featured.end : featured.start)}
-          maxFieldCount={small ? 1 : undefined}
-          modifiers={[
+        {kit.countdown({
+          date: current ? featured.end : featured.start,
+          maxFieldCount: small ? 1 : undefined,
+          modifiers: [
             font({ textStyle }),
             foregroundStyle(accent),
             lineLimit(1),
-          ]}
-        />
+          ],
+        })}
       </HStack>
     ) : null;
 
@@ -147,13 +147,13 @@ function UpNextWidget(
             >
               {today ? `${when(featured, true)} · ` : when(featured, true)}
             </Text>
-            {today ? (
-              <kit.Countdown
-                date={new Date(current ? featured.end : featured.start)}
-                maxFieldCount={1}
-                modifiers={[lineLimit(1)]}
-              />
-            ) : null}
+            {today
+              ? kit.countdown({
+                  date: current ? featured.end : featured.start,
+                  maxFieldCount: 1,
+                  modifiers: [lineLimit(1)],
+                })
+              : null}
           </HStack>
         ) : null}
         {featured?.location ? (
