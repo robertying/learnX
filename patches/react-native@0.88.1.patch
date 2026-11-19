@@ -44,3 +44,36 @@ index 3e7b02e669dcd3ad5241022d385db7121e2b0fb6..dd8e9c69e412ecbc91f78442106aedd9
          }
          if (typeof value.type === 'string') {
            headers['content-type'] = value.type;
+diff --git a/React/CoreModules/RCTAppState.mm b/React/CoreModules/RCTAppState.mm
+index 7ca35bfefefddea86f67ebc8b324550414118340..ff4f54cdb3dd01a2e73cf207cd40ca0e8094425d 100644
+--- a/React/CoreModules/RCTAppState.mm
++++ b/React/CoreModules/RCTAppState.mm
+@@ -94,6 +94,15 @@ RCT_EXPORT_MODULE()
+                                                object:nil];
+   }
+ 
++  // A Mac Catalyst app stays active in UIKit when another app comes to the
++  // front, so AppKit's notifications say when it's left and back. (Never
++  // posted on iOS.)
++  for (NSString *name in @[ @"NSApplicationDidBecomeActiveNotification", @"NSApplicationDidResignActiveNotification" ]) {
++    [[NSNotificationCenter defaultCenter] addObserver:self
++                                             selector:@selector(handleAppStateDidChange:)
++                                                 name:name
++                                               object:nil];
++  }
+   [[NSNotificationCenter defaultCenter] addObserver:self
+                                            selector:@selector(handleMemoryWarning)
+                                                name:UIApplicationDidReceiveMemoryWarningNotification
+@@ -116,8 +125,11 @@ RCT_EXPORT_MODULE()
+ {
+   NSString *newState;
+ 
+-  if ([notification.name isEqualToString:UIApplicationWillResignActiveNotification]) {
++  if ([notification.name isEqualToString:UIApplicationWillResignActiveNotification] ||
++      [notification.name isEqualToString:@"NSApplicationDidResignActiveNotification"]) {
+     newState = @"inactive";
++  } else if ([notification.name isEqualToString:@"NSApplicationDidBecomeActiveNotification"]) {
++    newState = @"active";
+   } else if ([notification.name isEqualToString:UIApplicationWillEnterForegroundNotification]) {
+     newState = @"background";
+   } else {
