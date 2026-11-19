@@ -10,7 +10,7 @@ beforeEach(() => {
 const showKeyboard = (screenY: number) =>
   (
     addListener.mock.calls.findLast(
-      ([name]) => name === 'keyboardDidShow',
+      ([name]) => name === 'keyboardWillShow',
     )![1] as (event: object) => void
   )({ endCoordinates: { screenY } });
 
@@ -49,6 +49,6 @@ it('does nothing on Android, where the page avoids the keyboard itself', async (
   jest.replaceProperty(Platform, 'OS', 'android');
   await setUp(500);
   expect(
-    addListener.mock.calls.some(([name]) => name === 'keyboardDidShow'),
+    addListener.mock.calls.some(([name]) => name === 'keyboardWillShow'),
   ).toBe(false);
 });

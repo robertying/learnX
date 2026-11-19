@@ -14,7 +14,8 @@ import { isApple } from 'helpers/platform';
  * its fields has focus. A scroll view with `automaticallyAdjustKeyboardInsets`
  * only scrolls the focused text field into view, so the rest of a group, such
  * as its padding and the next field, stays under the keyboard. Once the
- * keyboard is up, this scrolls on until the view and a margin clear it.
+ * keyboard starts to show, this scrolls, alongside it, until the view and a
+ * margin clear where it will end.
  *
  * Pass the returned `onScroll` (with `scrollEventThrottle`) to the scroll view.
  * Android pages avoid the keyboard with `KeyboardAvoidingView`, so this does
@@ -31,7 +32,7 @@ const useKeepAboveKeyboard = (
     if (!isApple()) {
       return;
     }
-    const subscription = Keyboard.addListener('keyboardDidShow', event => {
+    const subscription = Keyboard.addListener('keyboardWillShow', event => {
       // The keyboard's top is in screen coordinates and the view's in the
       // window's. In an iPad window that doesn't start at the screen's top,
       // the view seems higher than it is and this scrolls less, never too far.
