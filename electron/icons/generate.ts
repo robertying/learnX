@@ -2,8 +2,11 @@
 // Makes the Electron app's icons from the app's Icon Composer source
 // (ios/learnX/AppIcon.icon): icon.ico for Windows and icon.png (512) for
 // Linux, from which electron-builder makes the hicolor sizes; the window and
-// the tray use them too (main.ts, system.ts). The outputs are committed:
-// only a Mac with Xcode can make them.
+// the tray use them too (main.ts, system.ts). It also makes the README's logo
+// (docs/assets/logo.webp): ictool's export as it is, at 4x its 128 display
+// size, stored as lossless WebP (`cwebp`, Homebrew's webp) with its color
+// profile, so it stays sharp on every screen at a sixth of the PNG's size.
+// The outputs are committed: only a Mac with Xcode can make them.
 //
 //   node electron/icons/generate.ts
 //
@@ -32,6 +35,8 @@ import zlib from 'node:zlib';
 export const ICO_SIZES = [16, 20, 24, 32, 40, 48, 64, 96, 128, 256];
 /** Linux's: electron-builder scales it down for the hicolor theme. */
 export const PNG_SIZE = 512;
+/** The README logo's: 4x the 128 points it's shown at. */
+export const LOGO_SIZE = 512;
 /** How much of the canvas the shape takes in the .ico: all of it. */
 export const ICO_SHAPE_FRACTION = 1;
 /** And in the Linux PNG: between GNOME's squares (104) and circles (112). */
@@ -340,6 +345,28 @@ export const icoImages = (ico: Buffer): Image[] =>
     return { width, height, pixels };
   });
 
+/** `png` as lossless WebP at `webp`, its color profile kept. */
+const losslessWebp = (png: string, webp: string) => {
+  try {
+    execFileSync('cwebp', [
+      '-lossless',
+      '-z',
+      '9',
+      '-metadata',
+      'icc',
+      '-quiet',
+      png,
+      '-o',
+      webp,
+    ]);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      throw new Error('No cwebp: brew install webp');
+    }
+    throw error;
+  }
+};
+
 /** macOS's sRGB profile, which `sips --matchTo` converts to. */
 const SRGB_PROFILE = '/System/Library/ColorSync/Profiles/sRGB Profile.icc';
 
@@ -379,11 +406,8 @@ const main = () => {
     throw new Error('Making the icons needs a Mac (sips and its sRGB profile)');
   }
   const work = fs.mkdtempSync(path.join(os.tmpdir(), 'learnx-icons-'));
-  /** The icon at `size`, its shape exported at `fraction` and centered. */
-  const render = (size: number, fraction: number) => {
-    const shape = shapeSize(size, fraction);
-    const file = path.join(work, `${shape}.png`);
-    const srgb = path.join(work, `${shape}-srgb.png`);
+  /** ictool's own export of the shape at `size`, to `file`. */
+  const exportShape = (size: number, file: string) => {
     execFileSync(tool, [
       source,
       '--export-image',
@@ -394,12 +418,19 @@ const main = () => {
       '--rendition',
       'Default',
       '--width',
-      String(shape),
+      String(size),
       '--height',
-      String(shape),
+      String(size),
       '--scale',
       '1',
     ]);
+  };
+  /** The icon at `size`, its shape exported at `fraction` and centered. */
+  const render = (size: number, fraction: number) => {
+    const shape = shapeSize(size, fraction);
+    const file = path.join(work, `${shape}.png`);
+    const srgb = path.join(work, `${shape}-srgb.png`);
+    exportShape(shape, file);
     execFileSync('sips', ['--matchTo', SRGB_PROFILE, file, '--out', srgb], {
       stdio: 'ignore',
     });
@@ -415,7 +446,11 @@ const main = () => {
       path.join(out, 'icon.png'),
       encodePng(render(PNG_SIZE, PNG_SHAPE_FRACTION)),
     );
-    console.log(`Wrote ${path.join(out, 'icon.ico')} and icon.png`);
+    const logo = path.join(root, 'docs', 'assets', 'logo.webp');
+    const logoPng = path.join(work, 'logo.png');
+    exportShape(LOGO_SIZE, logoPng);
+    losslessWebp(logoPng, logo);
+    console.log(`Wrote ${path.join(out, 'icon.ico')}, icon.png and ${logo}`);
   } finally {
     fs.rmSync(work, { recursive: true, force: true });
   }

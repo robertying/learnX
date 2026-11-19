@@ -1,8 +1,28 @@
 # Save the screen, once it has settled (scroll bars faded, transitions done),
-# as $STORE_OUT/$NAME$STORE_SUFFIX.png. Only the store flows (.maestro/store/)
-# use it; scripts/e2e/store-screenshots.sh passes STORE_OUT and STORE_SUFFIX.
+# as $STORE_OUT/$NAME.png. Only the store flows (.maestro/store/)
+# use it; scripts/e2e/store-screenshots.sh passes STORE_OUT.
 appId: ${APP_ID}
 ---
 - waitForAnimationToEnd:
     timeout: 5000
-- takeScreenshot: ${STORE_OUT}/${NAME}${STORE_SUFFIX}
+# Scroll bars stay a while after a list scrolls or loads, longer than an
+# animation lasts: wait 3 s for them to fade, for something that never shows.
+- extendedWaitUntil:
+    visible:
+      id: never-shown
+    timeout: 3000
+    optional: true
+- runFlow:
+    when:
+      true: ${!DUO_POSTURE}
+    commands:
+      - takeScreenshot: ${STORE_OUT}/${NAME}
+# On the open iPhone Duo (DUO_POSTURE) takeScreenshot sees only the outer
+# display, black while open: scripts/e2e/store-screenshots.sh saves the inner
+# one when asked at STORE_SHOT_URL.
+- runFlow:
+    when:
+      true: ${!!DUO_POSTURE}
+    commands:
+      - evalScript: ${output.shot = http.get(STORE_SHOT_URL + '?name=' + NAME).body}
+      - assertTrue: ${output.shot == 'ok'}

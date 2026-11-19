@@ -11,6 +11,10 @@ const tests = JSON.parse(readFileSync(join(dir, 'manifest.json'), 'utf8'));
 for (const test of tests) {
   for (const attachment of test.attachments) {
     const name = attachment.suggestedHumanReadableName.split('_')[0];
+    // Only the shots: a failure also attaches snapshots and a recording.
+    if (!/^\d\d-[\w-]+$/.test(name)) {
+      continue;
+    }
     copyFileSync(
       join(dir, attachment.exportedFileName),
       join(out, `${name}.png`),

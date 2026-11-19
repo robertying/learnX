@@ -635,7 +635,7 @@ export const mockAssignments: Assignment[] = [
     submitted: false,
     graded: false,
     description:
-      '<p>教材习题 4.3、4.7、5.2。</p><p>提示：泊松过程满足 $$P\\{N(t)=k\\}=\\frac{(\\lambda t)^k}{k!}e^{-\\lambda t}.$$</p>',
+      '<p>教材习题 4.3、4.7、5.2，提交电子版。</p><p>提示：第 2 题先由独立增量性质写出泊松过程的分布律，再求条件概率。</p>',
   }),
   assignment(3, quantum, {
     title: '第4讲课后习题（纸质）',

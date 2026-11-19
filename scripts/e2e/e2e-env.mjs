@@ -86,12 +86,13 @@ const searchAssignment = zhMock.assignmentId(13);
 
 // The store screenshots (.maestro/store/): notice 3 and assignment 7 (both
 // "Project 1", with an attachment and a future deadline), file 2 (a PDF) and
-// notice 3's course, which split views open while notice 1's course shows
-// its swipe actions.
+// notice 3's course, which split views open while notice 5 and notice 1's
+// course show their swipe actions.
 const storeNotice = item(zhMock.mockNotices, zhMock.noticeId(3));
 const storeCourse = item(zhMock.mockCourses, storeNotice.courseId);
 const storeAssignment = zhMock.assignmentId(7);
 const storeFile = zhMock.fileId(2);
+const storeSwipeNotice = zhMock.noticeId(5);
 const courseName = c =>
   either(c.englishName || c.name, c.chineseName || c.name);
 
@@ -122,6 +123,7 @@ const mock = {
   MOCK_STORE_COURSE: courseName(storeCourse),
   MOCK_STORE_ASSIGNMENT: both('mockAssignments', storeAssignment),
   MOCK_STORE_FILE: both('mockFiles', storeFile),
+  MOCK_STORE_SWIPE_NOTICE: both('mockNotices', storeSwipeNotice),
 };
 for (const [listName, id] of [
   ['mockNotices', searchNotice],
@@ -134,14 +136,17 @@ for (const [listName, id] of [
   }
 }
 
-// The store screenshots are in Chinese and search for 作业 ("Assignments");
-// the results include assignment 7.
-const storeSearchTerm = zh.assignments;
+// The store screenshots search for the start of a course's name, 量子 or, in
+// English (STORE_SEARCH_TERM, from scripts/e2e/store-screenshots.sh),
+// Quantum; the results include notice 1, of that course.
+const storeSearchTerm = process.env.STORE_SEARCH_TERM || '量子';
 if (
-  !item(zhMock.mockAssignments, storeAssignment).title.includes(storeSearchTerm)
+  !courseName(item(zhMock.mockCourses, notice.courseId)).includes(
+    storeSearchTerm,
+  )
 ) {
   throw new Error(
-    `Mock item ${storeAssignment} doesn't contain "${storeSearchTerm}"`,
+    `Mock item ${notice.id} isn't from a course with "${storeSearchTerm}"`,
   );
 }
 

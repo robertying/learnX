@@ -196,6 +196,57 @@ describe('postNotification', () => {
   });
 });
 
+describe('mockClock', () => {
+  const dev = __DEV__;
+  const RealDate = Date;
+  const moment = '2026-11-18T09:41:00+08:00';
+
+  beforeEach(() => {
+    jest.replaceProperty(Platform, 'OS', 'android');
+  });
+
+  afterEach(() => {
+    globalThis.Date = RealDate;
+    (globalThis as unknown as { __DEV__: boolean }).__DEV__ = dev;
+    delete (env as { TEST_LOGIN?: boolean }).TEST_LOGIN;
+  });
+
+  it('starts the clock from the moment and keeps it running', () => {
+    applyLaunchOptions({ mockClock: moment });
+
+    const start = RealDate.parse(moment);
+    expect(Date.now() - start).toBeGreaterThanOrEqual(0);
+    expect(Date.now() - start).toBeLessThan(1000);
+    expect(new Date().getTime() - start).toBeLessThan(1000);
+    expect(new Date()).toBeInstanceOf(RealDate);
+  });
+
+  it('leaves dates made from a value alone', () => {
+    applyLaunchOptions({ mockClock: moment });
+
+    expect(new Date(0).getTime()).toBe(0);
+    expect(new Date(2026, 0, 2).getDate()).toBe(2);
+    expect(Date.parse('1970-01-01T00:00:00Z')).toBe(0);
+    expect(Date.UTC(1970, 0, 1)).toBe(0);
+  });
+
+  it('ignores a value that is not a moment', () => {
+    applyLaunchOptions({ mockClock: 'soon' });
+    applyLaunchOptions({ mockClock: 1 });
+    expect(Date).toBe(RealDate);
+  });
+
+  it('is ignored by release builds other than E2E builds', () => {
+    (globalThis as unknown as { __DEV__: boolean }).__DEV__ = false;
+    applyLaunchOptions({ mockClock: moment });
+    expect(Date).toBe(RealDate);
+
+    (env as { TEST_LOGIN?: boolean }).TEST_LOGIN = true;
+    applyLaunchOptions({ mockClock: moment });
+    expect(Date).not.toBe(RealDate);
+  });
+});
+
 describe('mock network link', () => {
   const dev = __DEV__;
 
