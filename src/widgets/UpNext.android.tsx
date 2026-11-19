@@ -59,10 +59,13 @@ function UpNextWidget(
   // spaces them out more, as a large iOS widget does (widgets/UpNext).
   const large = (environment.height ?? 0) >= 250;
   const spacing = large ? 8 : 4;
+  // The later classes' label belongs to them: twice the gap above it, and
+  // only a small one between it and the first class.
+  const first = large ? 4 : spacing;
   const row = kit.line(environment, 13);
   // The label and the featured class come first, in a large widget also the
   // later classes' label and the gap above it, then rows of one line, each
-  // with the gap above it.
+  // with the gap above it (the first one's `first`).
   const fit = kit.rowsThatFit(
     environment,
     2 * kit.padding +
@@ -70,7 +73,9 @@ function UpNextWidget(
       4 +
       kit.line(environment, 16) +
       kit.line(environment, 13) +
-      (large ? spacing + kit.line(environment, 13) : 0),
+      (large ? 2 * spacing + kit.line(environment, 13) : 0) +
+      first -
+      spacing,
     spacing + row,
     environment.height ? classes.length - 1 : 2,
   );
@@ -134,7 +139,7 @@ function UpNextWidget(
         </Box>
       )}
       {large && following.length > 0 ? (
-        <Spacer modifiers={[height(spacing)]} />
+        <Spacer modifiers={[height(2 * spacing)]} />
       ) : null}
       {large && following.length > 0
         ? kit.label(environment, props.later)
@@ -171,6 +176,7 @@ function UpNextWidget(
         )),
         following.length < classes.length - 1,
         spacing,
+        first,
       )}
     </Column>
   );

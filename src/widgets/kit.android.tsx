@@ -106,23 +106,29 @@ export function widgetKit() {
       </Row>
     ),
     /**
-     * Rows under a widget's header, `spacing` dp apart, as the iOS layouts
-     * place them (`fitted` in widgets/kit): when rows are left out (`cut`),
-     * the ones shown spread over the height, so the space the next row didn't
-     * fit in doesn't all end up at the bottom; when all are shown, they keep
-     * to the top. One Column holds them, each with its gaps in a Column of its
-     * own, since Glance draws only the first 10 children of a container.
+     * Rows under a widget's header (or a label), `first` dp below it and
+     * `spacing` dp apart. When rows are left out (`cut`), the space the next
+     * row didn't fit in goes between the rows, as the iOS layouts spread them
+     * (`fitted` in widgets/kit), so the first stays right under its header
+     * and the last ends at the bottom; when all are shown, they keep to the
+     * top. One Column holds them, each with its gaps in a Column of its own,
+     * since Glance draws only the first 10 children of a container.
      */
-    rows: (rows: ReactElement[], cut: boolean, spacing: number) =>
+    rows: (
+      rows: ReactElement[],
+      cut: boolean,
+      spacing: number,
+      first: number = spacing,
+    ) =>
       rows.length > 0 ? (
         <Column modifiers={[fillMaxWidth(), ...(cut ? [fill] : [])]}>
-          {rows.map(row => (
+          {rows.map((row, i) => (
             <Column
               key={row.key}
-              modifiers={[fillMaxWidth(), ...(cut ? [fill] : [])]}
+              modifiers={[fillMaxWidth(), ...(cut && i > 0 ? [fill] : [])]}
             >
-              {cut ? <Spacer modifiers={[fill]} /> : null}
-              <Spacer modifiers={[height(spacing)]} />
+              {cut && i > 0 ? <Spacer modifiers={[fill]} /> : null}
+              <Spacer modifiers={[height(i === 0 ? first : spacing)]} />
               {row}
             </Column>
           ))}

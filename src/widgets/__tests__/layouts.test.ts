@@ -867,13 +867,14 @@ describe('Deadlines on Android', () => {
   });
 
   it('spreads the rows over its height when some are left out, as on iOS', () => {
-    // A Spacer taking the space left (the `weight` modifier) before each row.
+    // A Spacer taking the space left (the `weight` modifier) before each row
+    // but the first, which stays under the header.
     const fills = (props: DeadlineWidgetProps) =>
       all(layout(props, { height: 400 })).filter(
         n => n.type === 'Spacer' && modifier(n, 'weight') !== undefined,
       ).length;
     // Seven of nine.
-    expect(fills(deadlineProps)).toBe(7);
+    expect(fills(deadlineProps)).toBe(6);
     // All shown: they keep to the top.
     expect(fills({ ...deadlineProps, total: 7 })).toBe(0);
   });
@@ -1028,7 +1029,10 @@ describe('Up Next on Android', () => {
       all(node).filter(
         n => n.type === 'Spacer' && modifier(n, 'weight') !== undefined,
       ).length;
-    expect(fills(medium)).toBe(3);
+    expect(fills(medium)).toBe(2);
+    // One shown of five: right under what's above it, not spread.
+    expect(openUrls(layout(upNextProps, { height: 110 })).length).toBe(3);
+    expect(fills(layout(upNextProps, { height: 110 }))).toBe(0);
     // A tall one names them on a line of their own, and shows all at the top.
     const large = layout(upNextProps, { height: 400 });
     expect(texts(large).slice(3, 5)).toEqual(['Later', 'Course later']);
