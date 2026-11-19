@@ -2,6 +2,7 @@ require "digest"
 require "dotenv"
 require "fileutils"
 require "json"
+require "open3"
 require "shellwords"
 require "tmpdir"
 
@@ -14,6 +15,10 @@ GRADLE = File.join(ROOT, "android/app/build.gradle")
 ANDROID_APP = File.join(ROOT, "android/app")
 
 GITHUB_REPO = "robertying/learnX"
+APP_IDENTIFIER = "io.robertying.learnX"
+# The Appfile sets this only for `android` lanes; the top-level `release` and
+# `bump` lanes need it too.
+ANDROID_PACKAGE = "io.robertying.learnx"
 # The Android versionCode is this plus the iOS build number (18.0.3: 4530 -> 9204530).
 ANDROID_VERSION_CODE_BASE = 9_200_000
 APK_ABIS = %w[x86_64 arm64-v8a armeabi-v7a universal].freeze
@@ -78,6 +83,103 @@ def sourcemap_path(platform)
   File.join(out_dir, "sourcemaps", "learnX-#{platform}-v#{app_version}-#{build}.map")
 end
 
+# Removes the platform's maps from earlier builds of this version, so the
+# GitHub release's zip has only the maps of the binaries it ships.
+def clear_sourcemaps(platform)
+  Dir[File.join(out_dir, "sourcemaps", "learnX-#{platform}-v#{app_version}-*.map")].each { |map| FileUtils.rm_f(map) }
+end
+
+# ---------------------------------------------------------------------------
+# Build records
+#
+# Each build lane writes build.json next to its output: the commit, version
+# and build number it built, and the SHA-256 of each file it made. The upload
+# lanes take only a build of this commit, with this version and build number,
+# from a clean tree, whose files haven't changed since; the release lanes
+# build only when there's no such build (or with rebuild:true).
+
+def head_commit
+  Dir.chdir(ROOT) { `git rev-parse HEAD`.strip }
+end
+
+def tree_dirty?
+  Dir.chdir(ROOT) { !`git status --porcelain`.strip.empty? }
+end
+
+def build_record_path(platform)
+  File.join(out_dir, platform, "build.json")
+end
+
+def start_build_record(platform)
+  FileUtils.rm_f(build_record_path(platform))
+  { commit: head_commit, dirty: tree_dirty? }
+end
+
+def write_build_record(platform, started, files, extra = {})
+  record = {
+    platform: platform,
+    version: app_version,
+    build: build_number,
+    commit: started[:commit],
+    dirty: started[:dirty],
+    files: files.sort.to_h { |file| [file.delete_prefix("#{out_dir}/"), Digest::SHA256.file(file).hexdigest] },
+  }.merge(extra)
+  FileUtils.mkdir_p(File.dirname(build_record_path(platform)))
+  File.write(build_record_path(platform), "#{JSON.pretty_generate(record)}\n")
+end
+
+# Why the platform's build can't be uploaded from this checkout, or nil.
+def build_record_problem(platform)
+  path = build_record_path(platform)
+  return "no #{platform} build of v#{app_version} yet" unless File.exist?(path)
+
+  record = JSON.parse(File.read(path))
+  return "the #{platform} build is v#{record['version']} (#{record['build']}), not v#{app_version} (#{build_number})" unless record["version"] == app_version && record["build"] == build_number
+  return "the #{platform} build is of #{record['commit'][0, 8]}, not HEAD #{head_commit[0, 8]}" unless record["commit"] == head_commit
+  return "the #{platform} build was made from uncommitted changes" if record["dirty"]
+
+  changed = record["files"].reject do |file, sha|
+    full = File.join(out_dir, file)
+    File.exist?(full) && Digest::SHA256.file(full).hexdigest == sha
+  end
+  return "#{changed.keys.join(', ')} changed or went missing since the #{platform} build" unless changed.empty?
+
+  nil
+end
+
+def build_record(platform)
+  JSON.parse(File.read(build_record_path(platform)))
+end
+
+def verify_built!(platform)
+  problem = build_record_problem(platform)
+  UI.user_error!("Can't upload: #{problem}. Run `bundle exec fastlane #{platform == 'macos' ? 'mac' : platform} build` on a clean tree at this commit.") if problem
+end
+
+# Builds unless this commit's build is already there (rebuild:true always
+# builds), so a release after `fastlane build` uploads what was built.
+def built_or_build(platform, options)
+  problem = rebuild?(options) ? "rebuild:true" : build_record_problem(platform)
+  if problem.nil?
+    UI.success("Using the #{platform} build from #{build_record_path(platform)}")
+    return
+  end
+  UI.message("Building #{platform}: #{problem}")
+  case platform
+  when "ios", "macos" then build_apple(platform)
+  when "android" then build_android
+  when "electron" then build_electron(options)
+  end
+end
+
+def rebuild?(options)
+  %w[true yes 1].include?(options[:rebuild].to_s.downcase)
+end
+
+def apple_package_path(platform)
+  File.join(out_dir, platform, platform == "macos" ? "learnX.pkg" : "learnX.ipa")
+end
+
 # ---------------------------------------------------------------------------
 # Release notes (written by the release-notes skill)
 #
@@ -91,6 +193,7 @@ end
 
 # notes:<file> if given, else what `fastlane notes` wrote for this version.
 def notes_path(options)
+  return nil if no_notes?(options)
   return options[:notes] unless options[:notes].to_s.empty?
   return nil unless File.exist?(default_notes_path)
 
@@ -98,12 +201,32 @@ def notes_path(options)
   default_notes_path
 end
 
+# notes:none uploads no text anywhere (a rebuild between releases).
+def no_notes?(options)
+  options[:notes].to_s == "none"
+end
+
+# store_notes:false keeps the stores' text as it is (set by hand in App Store
+# Connect or Play Console) and still gives the GitHub release its notes.
+def store_notes?(options)
+  !%w[false no 0].include?(options[:store_notes].to_s.downcase)
+end
+
+# A store's part of the notes, or nil when that store keeps its own text.
+def store_text(notes, key, options)
+  notes && store_notes?(options) ? notes[key] : nil
+end
+
 # What the release lanes upload. With no notes file yet, an interactive run
-# writes one (as `fastlane notes` does) and waits until it's reviewed. A
-# non-interactive run, or a rebuild of a tagged version, uploads without notes.
+# writes one (as `fastlane notes` does) and waits until it's reviewed, and a
+# non-interactive run stops: notes:none uploads none. A rebuild of a tagged
+# version uploads without notes.
 def notes_for_release(options)
   path = notes_path(options)
-  if path.nil? && UI.interactive? && !tagged?(app_version)
+  if path.nil? && !no_notes?(options) && !tagged?(app_version)
+    unless UI.interactive?
+      UI.user_error!("No release notes for v#{app_version} at #{default_notes_path}: run `bundle exec fastlane notes` and review them, or pass notes:none to upload no text (store_notes:false keeps the stores' text but fills the GitHub release).")
+    end
     UI.important("No release notes for v#{app_version} yet, so writing them first.")
     path = write_notes(use_claude: use_claude?(options))
     print_notes(path)
@@ -385,9 +508,10 @@ def build_apple(platform)
   verify_versions!
   verify_release_env!
   verify_ota_config!
+  started = start_build_record(platform)
+  clear_sourcemaps(platform)
   map = sourcemap_path(platform)
   FileUtils.mkdir_p(File.dirname(map))
-  FileUtils.rm_f(map)
 
   # react-native-xcode.sh writes the composed Hermes source map to SOURCEMAP_FILE.
   # gym passes xcargs to the export too, so the auth args must not also go in export_xcargs.
@@ -411,6 +535,7 @@ def build_apple(platform)
 
   UI.user_error!("The build wrote no source map to #{map}") unless File.exist?(map)
   UI.success("Source map: #{map}")
+  write_build_record(platform, started, [path, map])
   path
 end
 
@@ -514,6 +639,7 @@ def build_android
   verify_versions!
   verify_release_env!
   verify_ota_config!
+  started = start_build_record("android")
   # The release config reads LEARNX_RELEASE_* from android/local.properties and
   # signs with android/app/release.keystore. Two flavors (android/app/build.gradle):
   # googlePlay makes the AAB, github the APKs that update themselves in the app.
@@ -546,9 +672,11 @@ def build_android
     File.join(ANDROID_APP, "build/generated/sourcemaps/react/#{variant}/index.android.bundle.map")
   end
   UI.user_error!("The googlePlay and github JS bundles differ; keep both source maps.") unless FileUtils.compare_file(*maps)
+  clear_sourcemaps("android")
   map = sourcemap_path("android")
   FileUtils.mkdir_p(File.dirname(map))
   FileUtils.cp(maps.first, map)
+  write_build_record("android", started, [aab_path, *apk_paths, latest_json_path, map])
 
   UI.success("Android release files: #{android_out_dir}")
   UI.success("Source map: #{map}")
@@ -599,6 +727,7 @@ def upload_android(notes, track)
     mapping = File.join(ANDROID_APP, "build/outputs/mapping/release/mapping.txt")
     options = {
       aab: aab_path,
+      package_name: ANDROID_PACKAGE,
       track: track,
       # A draft release: review and roll it out in Play Console.
       release_status: "draft",
@@ -610,9 +739,7 @@ def upload_android(notes, track)
       skip_upload_changelogs: notes.nil?,
     }
     options[:mapping] = mapping if File.exist?(mapping)
-    # supply reads SUPPLY_JSON_KEY itself; also take the name used in fastlane/.env.
-    json_key = ENV["GOOGLE_PLAY_CONSOLE_JSON_KEY"].to_s
-    options[:json_key] = File.expand_path(json_key) unless json_key.empty?
+    options[:json_key] = play_json_key if play_json_key
     upload_to_play_store(options)
   end
 end
@@ -699,6 +826,7 @@ end
 def build_electron(options)
   verify_versions!
   platforms = electron_platforms(options)
+  started = start_build_record("electron")
   FileUtils.rm_rf(electron_out_dir)
   FileUtils.mkdir_p(electron_out_dir)
 
@@ -720,8 +848,23 @@ def build_electron(options)
   end
 
   verify_electron_files!(platforms)
+  write_build_record("electron", started, electron_release_files(electron_out_dir), platforms: platforms)
   UI.success("Electron release files for #{platforms.join(', ')} in #{electron_out_dir}")
   platforms
+end
+
+# The platforms of this commit's Electron build, which must be the ones asked
+# for (all of them unless platforms: says otherwise).
+def built_electron_platforms(options)
+  verify_built!("electron")
+  built = build_record("electron")["platforms"]
+  wanted = electron_platforms(options)
+  UI.user_error!("The Electron build has #{built.join(', ')}, not #{wanted.join(', ')}: run `bundle exec fastlane electron build platforms:#{wanted.join(',')}`") unless built.sort == wanted.sort
+  built
+end
+
+def electron_signed?(platforms)
+  electron_update_file_paths(platforms).all? { |yml| File.exist?("#{yml}.sig") }
 end
 
 # Signs the update files (scripts/release/sign-electron-update.mjs, which refuses one
@@ -738,6 +881,7 @@ def sign_electron(options)
   end
   ref = ENV["LEARNX_UPDATE_SIGNING_KEY_REF"].to_s
   UI.user_error!("No update signing key: pass key:, or set LEARNX_UPDATE_SIGNING_KEY (a file) or LEARNX_UPDATE_SIGNING_KEY_REF (the key's op:// reference) in fastlane/.env") if ref.empty?
+  UI.important("1Password asks to approve reading the update signing key now; the prompt gives up after about a minute.")
   sh("bash", "-c", 'node "$0" "$1" --key <(op read "$2")', script, electron_out_dir, ref)
 end
 
@@ -773,12 +917,12 @@ end
 
 def publish_github(notes, electron_platforms: nil)
   version = app_version
-  missing = [*apk_paths, latest_json_path].reject { |f| File.exist?(f) }
-  UI.user_error!("Missing #{missing.map { |f| File.basename(f) }.join(', ')} in #{android_out_dir}. Run `bundle exec fastlane android build` first.") unless missing.empty?
+  verify_built!("android")
 
   assets = [latest_json_path, *apk_paths]
   assets += electron_assets(electron_platforms) if electron_platforms
-  maps = Dir[File.join(out_dir, "sourcemaps", "*.map")].sort
+  # This build's maps only, whatever else an earlier build left there.
+  maps = %w[ios macos android].map { |platform| sourcemap_path(platform) }.select { |map| File.exist?(map) }
   unless maps.empty?
     zip = File.join(out_dir, "learnX-sourcemaps-v#{version}.zip")
     FileUtils.rm_f(zip)
@@ -801,12 +945,231 @@ def publish_github(notes, electron_platforms: nil)
 end
 
 # ---------------------------------------------------------------------------
+# Uploaded builds
+
+PLAY_TRACKS = %w[production beta alpha internal].freeze
+
+# supply reads SUPPLY_JSON_KEY itself; fastlane/.env may use this name instead.
+def play_json_key
+  key = ENV["GOOGLE_PLAY_CONSOLE_JSON_KEY"].to_s
+  key = ENV["SUPPLY_JSON_KEY"].to_s if key.empty?
+  key.empty? ? nil : File.expand_path(key)
+end
+
+# The highest build number each store has (App Store Connect's iOS and Mac
+# builds, Play's version codes on any track, drafts included), and what
+# couldn't be checked. Builds uploaded between releases take numbers too, so
+# the next build has to be above all of them.
+def uploaded_builds
+  builds = {}
+  errors = []
+  if asc_api_key?
+    app_store_connect_api_key
+    { "ios" => "App Store Connect (iOS)", "osx" => "App Store Connect (Mac)" }.each do |platform, name|
+      builds[name] = latest_testflight_build_number(app_identifier: APP_IDENTIFIER, platform: platform, initial_build_number: 0).to_i
+    rescue StandardError => e
+      errors << "#{name}: #{e.message}"
+    end
+  else
+    errors << "App Store Connect: no APP_STORE_CONNECT_API_KEY_* in fastlane/.env"
+  end
+  if play_json_key
+    codes = PLAY_TRACKS.flat_map do |track|
+      google_play_track_version_codes(package_name: ANDROID_PACKAGE, track: track, json_key: play_json_key)
+    rescue StandardError => e
+      errors << "Google Play (#{track}): #{e.message}"
+      []
+    end
+    builds["Google Play"] = codes.map(&:to_i).max - ANDROID_VERSION_CODE_BASE unless codes.empty?
+  else
+    errors << "Google Play: no GOOGLE_PLAY_CONSOLE_JSON_KEY or SUPPLY_JSON_KEY in fastlane/.env"
+  end
+  [builds, errors]
+end
+
+# ---------------------------------------------------------------------------
+# GitHub checks
+
+# `gh api` takes the repository in its path, every other command --repo.
+def gh_json(*args)
+  repo = args.first == "api" ? [] : ["--repo", GITHUB_REPO]
+  out, err, status = Open3.capture3("gh", *args, *repo)
+  raise "gh #{args.first(2).join(' ')} failed: #{err.strip}" unless status.success?
+
+  JSON.parse(out)
+end
+
+def origin_main
+  Dir.chdir(ROOT) do
+    system("git", "fetch", "-q", "origin", "main")
+    `git rev-parse origin/main`.strip
+  end
+end
+
+# Why the release commit's CI isn't green, or nil.
+def ci_problem(sha)
+  runs = gh_json("api", "repos/#{GITHUB_REPO}/commits/#{sha}/check-runs?per_page=100").fetch("check_runs")
+  return "no CI runs on #{sha[0, 8]}" if runs.empty?
+
+  running = runs.reject { |run| run["status"] == "completed" }.map { |run| run["name"] }
+  failed = runs.select { |run| %w[failure cancelled timed_out action_required].include?(run["conclusion"]) }.map { |run| run["name"] }
+  return "failed on #{sha[0, 8]}: #{failed.uniq.join(', ')}" unless failed.empty?
+  return "still running on #{sha[0, 8]}: #{running.uniq.join(', ')}" unless running.empty?
+
+  nil
+end
+
+ELECTRON_WORKFLOW = "electron.yml"
+
+def electron_update_runs(sha)
+  gh_json("run", "list", "--workflow", ELECTRON_WORKFLOW, "--event", "workflow_dispatch", "--commit", sha, "--json", "databaseId,status,conclusion", "--limit", "20")
+end
+
+# Why there's no passing real update (the Electron workflow's Update E2E
+# jobs, which only a manual run has) on this commit, or nil.
+def electron_update_e2e_problem(sha)
+  runs = electron_update_runs(sha)
+  return "never run on #{sha[0, 8]}" if runs.empty?
+
+  runs.each do |run|
+    jobs = gh_json("run", "view", run["databaseId"].to_s, "--json", "jobs").fetch("jobs").select { |job| job["name"].start_with?("Update E2E") }
+    return nil if jobs.size >= 2 && jobs.all? { |job| job["conclusion"] == "success" }
+  end
+  return "still running on #{sha[0, 8]}" if runs.any? { |run| run["status"] != "completed" }
+
+  "failed on #{sha[0, 8]}"
+end
+
+# Starts the Electron workflow by hand on main, which must be this commit,
+# and waits for it unless wait:false.
+def run_electron_update_e2e(options)
+  sha = head_commit
+  UI.user_error!("The workflow runs on main's latest commit (#{origin_main[0, 8]}), not HEAD #{sha[0, 8]}: push the release commit first") unless sha == origin_main
+  before = electron_update_runs(sha).map { |run| run["databaseId"] }
+  sh("gh", "workflow", "run", ELECTRON_WORKFLOW, "--repo", GITHUB_REPO, "--ref", "main")
+  run = nil
+  30.times do
+    sleep(5)
+    run = electron_update_runs(sha).find { |r| !before.include?(r["databaseId"]) }
+    break if run
+  end
+  UI.user_error!("Started the workflow but found no run for #{sha[0, 8]}; check https://github.com/#{GITHUB_REPO}/actions/workflows/#{ELECTRON_WORKFLOW}") unless run
+  id = run["databaseId"].to_s
+  UI.success("Electron update E2E: https://github.com/#{GITHUB_REPO}/actions/runs/#{id}")
+  return if %w[false no 0].include?(options[:wait].to_s.downcase)
+
+  sh("gh", "run", "watch", id, "--repo", GITHUB_REPO, "--exit-status", "--interval", "60")
+end
+
+# ---------------------------------------------------------------------------
+# Preflight
+#
+# Everything a release needs that isn't the build itself, checked in a minute
+# so a missing key or a red check stops the release before an hour of
+# building, not after it.
+
+# A rough guess for four clean release builds and their DerivedData.
+MIN_FREE_GB = 30
+
+def preflight(options)
+  results = []
+  check = lambda do |name, warn: false, &block|
+    problem = begin
+      block.call
+    rescue StandardError => e
+      e.message
+    end
+    results << [name, problem, warn]
+  end
+  sha = head_commit
+  electron = !%w[false no 0].include?(options[:electron].to_s.downcase)
+
+  check.call("Clean tree at a commit on origin/main") do
+    next "uncommitted changes (git status)" if tree_dirty?
+
+    Dir.chdir(ROOT) { system("git", "merge-base", "--is-ancestor", sha, origin_main) } ? nil : "HEAD #{sha[0, 8]} isn't on origin/main: push it, since the GitHub release points at it"
+  end
+  check.call("Versions in sync") { verify_versions! && nil }
+  check.call("v#{app_version} not released yet") { tagged?(app_version) ? "v#{app_version} is tagged: run `pnpm bump`" : nil }
+  check.call("Build #{build_number} above every uploaded build") do
+    uploaded, errors = uploaded_builds
+    taken = uploaded.select { |_, build| build >= build_number }
+    next "#{taken.map { |name, build| "#{name} has #{build}" }.join(', ')}: run `pnpm bump`, which starts above them" unless taken.empty?
+    next "couldn't check #{errors.join('; ')}" unless errors.empty?
+
+    nil
+  end
+  check.call("CI green on HEAD") { ci_problem(sha) }
+  check.call("Repo-root .env with the mock login") { verify_release_env! && nil }
+  check.call("Over-the-air update URL in app.json") { verify_ota_config! && nil }
+  check.call("Android signing") do
+    signing = android_signing
+    missing = %w[LEARNX_RELEASE_STORE_PASSWORD LEARNX_RELEASE_KEY_ALIAS LEARNX_RELEASE_KEY_PASSWORD].select { |key| signing[key].to_s.empty? }
+    next "android/local.properties has no #{missing.join(', ')}" unless missing.empty?
+
+    File.exist?(File.join(ANDROID_APP, "release.keystore")) ? nil : "no android/app/release.keystore"
+  end
+  unless no_notes?(options)
+    check.call("Release notes") do
+      path = notes_path(options)
+      next "none for v#{app_version}: run `bundle exec fastlane notes` and review them (or pass notes:none)" unless path
+
+      release_notes(path) && nil
+    end
+  end
+  if app_version.end_with?(".0")
+    check.call("What's New entry for v#{app_version}", warn: true) do
+      File.read(File.join(ROOT, "src/helpers/whatsNew.ts")).include?("version: '#{app_version}'") ? nil : "src/helpers/whatsNew.ts has none (a feature release gets one; a bug-fix release doesn't)"
+    end
+  end
+  check.call("Free disk space", warn: true) do
+    free = `df -Pk #{ROOT.shellescape}`.lines.last.split[3].to_i / 1024 / 1024
+    free < MIN_FREE_GB ? "#{free} GB free; the four clean builds need about #{MIN_FREE_GB} GB" : nil
+  end
+  if electron
+    check.call("Electron update signing key") do
+      key = options[:key] || ENV["LEARNX_UPDATE_SIGNING_KEY"]
+      next(File.exist?(File.expand_path(key.to_s)) ? nil : "no key file at #{key}") unless key.to_s.empty?
+
+      ref = ENV["LEARNX_UPDATE_SIGNING_KEY_REF"].to_s
+      next "no LEARNX_UPDATE_SIGNING_KEY_REF (or LEARNX_UPDATE_SIGNING_KEY) in fastlane/.env" if ref.empty?
+      next "the 1Password CLI (op) isn't installed" unless system("command -v op > /dev/null")
+
+      UI.important("1Password asks to approve reading the update signing key; approve it within a minute.")
+      out, err, status = Open3.capture3("op", "read", ref)
+      next "op read failed: #{err.strip} (turn on the 1Password app's CLI integration and approve the prompt)" unless status.success?
+
+      out.include?("PRIVATE KEY") ? nil : "#{ref} isn't a PEM private key"
+    end
+    check.call("Electron update E2E passed on HEAD") do
+      problem = electron_update_e2e_problem(sha)
+      problem && "#{problem}: run `bundle exec fastlane electron update_e2e`"
+    end
+  end
+
+  UI.header("Preflight v#{app_version} (#{build_number}) at #{sha[0, 8]}")
+  results.each do |name, problem, warn|
+    if problem.nil?
+      UI.success("✓ #{name}")
+    elsif warn
+      UI.important("! #{name}: #{problem}")
+    else
+      UI.error("✗ #{name}: #{problem}")
+    end
+  end
+  failed = results.count { |_, problem, warn| problem && !warn }
+  UI.user_error!("Preflight: #{failed} check#{failed == 1 ? '' : 's'} failed") if failed.positive?
+  UI.success("Ready to release v#{app_version} (#{build_number})")
+end
+
+# ---------------------------------------------------------------------------
 # Lanes
 
 desc "Set the app version everywhere and bump the build number."
 desc "A new version moves the build number to the next multiple of 10; the same version adds 1 (a rebuild)."
+desc "Either way it starts above the highest build App Store Connect and Google Play already have (uploads between releases take numbers too); remote:false skips that check."
 desc "build: sets the build number itself, which must be above the current one."
-desc "Usage: bundle exec fastlane bump version:18.1.0 build:<number>   (no version: rebuild of the current one; no build: the rule above)"
+desc "Usage: bundle exec fastlane bump version:18.1.0 build:<number> [remote:false]   (no version: rebuild of the current one; no build: the rule above)"
 lane :bump do |options|
   current = app_version
   build = build_number
@@ -814,11 +1177,20 @@ lane :bump do |options|
   UI.user_error!("Invalid version '#{version}': expected x.y.z") unless version.match?(/\A\d+\.\d+\.\d+\z/)
   verify_versions!
 
-  new_build = version == current ? build + 1 : (build / 10 + 1) * 10
+  next_build = ->(base) { version == current ? base + 1 : (base / 10 + 1) * 10 }
+  new_build = next_build.call(build)
   if options[:build]
     UI.user_error!("Invalid build '#{options[:build]}': expected a whole number") unless options[:build].to_s.match?(/\A\d+\z/)
     new_build = options[:build].to_i
     UI.user_error!("Build #{new_build} must be above the current build #{build}") unless new_build > build
+  elsif !%w[false no 0].include?(options[:remote].to_s.downcase)
+    uploaded, errors = uploaded_builds
+    errors.each { |error| UI.important("Couldn't check the uploaded builds of #{error}") }
+    highest = uploaded.values.max
+    if highest && highest >= new_build
+      new_build = next_build.call(highest)
+      UI.important("Uploaded builds go up to #{highest} (#{uploaded.map { |name, b| "#{name} #{b}" }.join(', ')}), so the next is #{new_build}")
+    end
   end
   new_code = ANDROID_VERSION_CODE_BASE + new_build
 
@@ -841,23 +1213,39 @@ lane :notes do |options|
   UI.important("Review and edit #{path}, then run a release lane; it picks the file up without notes:.")
 end
 
-desc "Build and upload everything: iOS, Mac, Android (Play draft) and a draft GitHub release."
-desc "Builds all platforms before uploading anything. Nothing is submitted for review or rolled out."
-desc "electron:true also builds and signs the Windows and Linux app (see `electron build`; from:, platforms: and key: as there) and puts it on the GitHub release. Untested."
-desc "Usage: bundle exec fastlane release [notes:/path/to/notes.md] [track:production] [electron:true [from:<dirs>]]"
+desc "Check everything a release needs before building: a clean, pushed commit with green CI, versions, a build number above every upload,"
+desc "the App Store Connect and Play keys, Android signing, .env, the notes, and for Windows and Linux the signing key (1Password asks to approve) and the update E2E run."
+desc "Usage: bundle exec fastlane preflight [notes:<file>|none] [electron:false]"
+lane :preflight do |options|
+  preflight(options)
+end
+
+desc "Build iOS, Mac, Android and (unless electron:false) Windows and Linux, uploading nothing. A failed Windows or Linux build doesn't undo the others."
+desc "Usage: bundle exec fastlane build [electron:false] [platforms:win,linux]"
+lane :build do |options|
+  build_apple("ios")
+  build_apple("macos")
+  build_android
+  build_electron(options) unless %w[false no 0].include?(options[:electron].to_s.downcase)
+end
+
+desc "Upload everything to App Store Connect (not submitted for review), Google Play (a draft on track:) and a draft GitHub release."
+desc "Uses this commit's builds from `build`, building only what's missing or stale (rebuild:true builds everything). Builds everything before uploading anything."
+desc "store_notes:false keeps the stores' text and still puts the notes on the GitHub release; notes:none uploads no text."
+desc "electron:true also builds (if needed) and signs the Windows and Linux app (from:, platforms: and key: as in `electron build`) and puts it on the GitHub release."
+desc "Usage: bundle exec fastlane release [notes:<file>|none] [store_notes:false] [track:production] [rebuild:true] [electron:true [from:<dirs>]]"
 lane :release do |options|
   ensure_git_status_clean
   notes = notes_for_release(options)
-  ipa = build_apple("ios")
-  pkg = build_apple("macos")
-  build_android
+  %w[ios macos android].each { |platform| built_or_build(platform, options) }
   if options[:electron]
-    platforms = build_electron(options)
-    sign_electron(options)
+    built_or_build("electron", options)
+    platforms = built_electron_platforms(options)
+    sign_electron(options) unless electron_signed?(platforms)
   end
-  upload_apple("ios", ipa, notes && notes[:ios])
-  upload_apple("macos", pkg, notes && notes[:mac])
-  upload_android(notes && notes[:play], options[:track] || "production")
+  upload_apple("ios", apple_package_path("ios"), store_text(notes, :ios, options))
+  upload_apple("macos", apple_package_path("macos"), store_text(notes, :mac, options))
+  upload_android(store_text(notes, :play, options), options[:track] || "production")
   publish_github(notes, electron_platforms: platforms)
 end
 
@@ -875,9 +1263,10 @@ lane :symbolicate do |options|
   UI.user_error!("Symbolicating failed") unless ok
 end
 
-desc "Create a draft GitHub release with the APKs, latest.json and source maps from `android build`."
-desc "Usage: bundle exec fastlane github_release [notes:/path/to/notes.md]"
+desc "Create a draft GitHub release with this commit's APKs, latest.json and source maps from `android build` (no rebuild)."
+desc "Usage: bundle exec fastlane github_release [notes:<file>|none]"
 lane :github_release do |options|
+  ensure_git_status_clean
   publish_github(notes_for_release(options))
 end
 
@@ -887,12 +1276,22 @@ platform :ios do
     build_apple("ios")
   end
 
-  desc "Build and upload to App Store Connect (not submitted for review)."
-  desc "Usage: bundle exec fastlane ios release [notes:/path/to/notes.md]"
+  desc "Upload this commit's `ios build` to App Store Connect (not submitted for review), without rebuilding."
+  desc "Usage: bundle exec fastlane ios upload [notes:<file>|none] [store_notes:false]"
+  lane :upload do |options|
+    ensure_git_status_clean
+    notes = notes_for_release(options)
+    verify_built!("ios")
+    upload_apple("ios", apple_package_path("ios"), store_text(notes, :ios, options))
+  end
+
+  desc "Build (unless this commit's build is there; rebuild:true always) and upload to App Store Connect (not submitted for review)."
+  desc "Usage: bundle exec fastlane ios release [notes:<file>|none] [store_notes:false] [rebuild:true]"
   lane :release do |options|
     ensure_git_status_clean
     notes = notes_for_release(options)
-    upload_apple("ios", build_apple("ios"), notes && notes[:ios])
+    built_or_build("ios", options)
+    upload_apple("ios", apple_package_path("ios"), store_text(notes, :ios, options))
   end
 
   desc "Set a processed build's TestFlight What to Test to the App Store notes (no upload, nothing sent to testers)."
@@ -915,12 +1314,22 @@ platform :mac do
     build_apple("macos")
   end
 
-  desc "Build and upload the Mac Catalyst app to App Store Connect (not submitted for review)."
-  desc "Usage: bundle exec fastlane mac release [notes:/path/to/notes.md]"
+  desc "Upload this commit's `mac build` to App Store Connect (not submitted for review), without rebuilding."
+  desc "Usage: bundle exec fastlane mac upload [notes:<file>|none] [store_notes:false]"
+  lane :upload do |options|
+    ensure_git_status_clean
+    notes = notes_for_release(options)
+    verify_built!("macos")
+    upload_apple("macos", apple_package_path("macos"), store_text(notes, :mac, options))
+  end
+
+  desc "Build (unless this commit's build is there; rebuild:true always) and upload the Mac Catalyst app to App Store Connect (not submitted for review)."
+  desc "Usage: bundle exec fastlane mac release [notes:<file>|none] [store_notes:false] [rebuild:true]"
   lane :release do |options|
     ensure_git_status_clean
     notes = notes_for_release(options)
-    upload_apple("macos", build_apple("macos"), notes && notes[:mac])
+    built_or_build("macos", options)
+    upload_apple("macos", apple_package_path("macos"), store_text(notes, :mac, options))
   end
 
   desc "Set a processed build's TestFlight What to Test to the Mac App Store notes (no upload, nothing sent to testers)."
@@ -948,17 +1357,25 @@ platform :android do
     install_android_bundle
   end
 
-  desc "Build and upload the AAB to Google Play as a draft release."
-  desc "Usage: bundle exec fastlane android release [notes:/path/to/notes.md] [track:production]"
+  desc "Upload this commit's `android build` AAB to Google Play as a draft release, without rebuilding."
+  desc "Usage: bundle exec fastlane android upload [notes:<file>|none] [store_notes:false] [track:production]"
+  lane :upload do |options|
+    ensure_git_status_clean
+    notes = notes_for_release(options)
+    verify_built!("android")
+    upload_android(store_text(notes, :play, options), options[:track] || "production")
+  end
+
+  desc "Build (unless this commit's build is there; rebuild:true always) and upload the AAB to Google Play as a draft release."
+  desc "Usage: bundle exec fastlane android release [notes:<file>|none] [store_notes:false] [track:production] [rebuild:true]"
   lane :release do |options|
     ensure_git_status_clean
     notes = notes_for_release(options)
-    build_android
-    upload_android(notes && notes[:play], options[:track] || "production")
+    built_or_build("android", options)
+    upload_android(store_text(notes, :play, options), options[:track] || "production")
   end
 end
 
-# Untested: written to the release skill's procedure, not yet run.
 platform :electron do
   desc "Put the Windows and Linux installers, latest*.yml and blockmaps into build/release/v<version>/electron/, checked for this version."
   desc "Packages them here, or copies them from folders built on a Windows PC or Linux."
@@ -973,12 +1390,26 @@ platform :electron do
     sign_electron(options)
   end
 
-  desc "Build, sign and add the files to the draft v<version> GitHub release (made by `release` or `github_release`)."
-  desc "Usage: bundle exec fastlane electron release [from:<dirs>] [platforms:win,linux] [key:/path/to/key.pem]"
+  desc "Run a real update (the Electron workflow's Update E2E jobs, Windows and Linux) on main, which must be this commit, and wait for it (wait:false doesn't)."
+  desc "Usage: bundle exec fastlane electron update_e2e [wait:false]"
+  lane :update_e2e do |options|
+    run_electron_update_e2e(options)
+  end
+
+  desc "Add this commit's signed Windows and Linux files to the draft v<version> GitHub release (made by `release` or `github_release`), without rebuilding."
+  desc "Usage: bundle exec fastlane electron upload [platforms:win,linux]"
+  lane :upload do |options|
+    ensure_git_status_clean
+    upload_electron(built_electron_platforms(options))
+  end
+
+  desc "Build (unless this commit's build is there; rebuild:true always), sign if unsigned, and add the files to the draft v<version> GitHub release."
+  desc "Usage: bundle exec fastlane electron release [from:<dirs>] [platforms:win,linux] [key:/path/to/key.pem] [rebuild:true]"
   lane :release do |options|
     ensure_git_status_clean
-    platforms = build_electron(options)
-    sign_electron(options)
+    built_or_build("electron", options)
+    platforms = built_electron_platforms(options)
+    sign_electron(options) unless electron_signed?(platforms)
     upload_electron(platforms)
   end
 end
