@@ -250,7 +250,7 @@ export default {
     'learnX will restart to install the update. Otherwise, it installs the next time you quit learnX.',
   restart: 'Restart',
   updateDebMessage:
-    'Download the new .deb and open it to install, or install it with sudo apt install in a terminal.',
+    "The new version has downloaded. Open its .deb to install it. You'll be asked for your password.",
   updateInstalling: 'Installing',
   updateFailed: "Couldn't Update learnX",
   updateDownloadFailed:
@@ -456,6 +456,7 @@ export default {
   updateNotificationBody: 'Download and install it in Settings.',
   updateNotificationReadyBody:
     "It's downloaded and installs when you quit learnX.",
+  updateNotificationDebBody: "It's downloaded. Open it in Settings to install.",
   notifyClassReminders: 'Class Reminders',
   classReminderOffset: 'Remind Before (Minutes)',
   classStartsAt: 'Starts at {time}',

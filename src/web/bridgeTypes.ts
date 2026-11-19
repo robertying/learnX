@@ -94,10 +94,11 @@ export interface WebviewLoadRequest {
 export interface BridgeUpdate {
   version: string;
   /**
-   * Where to download it, for a build that doesn't install updates itself
-   * (a .deb): Settings links to it instead of restarting.
+   * For a build that doesn't install updates itself (a .deb): Settings opens
+   * the download in the system's installer (`install`) instead of
+   * restarting.
    */
-  download?: string;
+  opensInstaller?: true;
 }
 
 /** A notification for the main process to show (electron/notifications.ts). */
@@ -246,7 +247,10 @@ export interface Bridge {
     pending: () => BridgeUpdate | null;
     /** Called when an update has downloaded. */
     onReady: (listener: (update: BridgeUpdate) => void) => void;
-    /** Quits, installs the waiting update and opens the app again. */
+    /**
+     * Quits, installs the waiting update and opens the app again; for a
+     * .deb, opens it in the system's installer.
+     */
     install: () => void;
   };
   /** Files outside the app's folders, through dialogs and the system. */

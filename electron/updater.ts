@@ -1,7 +1,7 @@
 // Keeps the packaged app up to date with electron-updater: checks shortly
 // after launch and every few hours, downloads in the background, and installs
 // when the app quits, or at once when the user restarts from Settings
-// (`learnx.updates.install`). Updates come from the TUNA mirror's copy of the
+// (`learnx.updates.install`); a .deb's the user installs from Settings. Updates come from the TUNA mirror's copy of the
 // latest GitHub release (`v<version>`, the mobile apps' too), through
 // electron-updater's generic provider as app-update.yml names it
 // (packageConfig.ts). Builds are unsigned, so Windows checks no publisher
@@ -9,13 +9,13 @@
 // the release's update file (latest.yml, latest-linux.yml), which it reads
 // only with a valid signature by learnX's update key (updateSignature.ts).
 // So nothing the mirror alone changes is downloaded, let alone installed on
-// quit.
+// quit or handed to the system's installer.
 //
 // The mirror copies a release's files on a schedule, so a check can find the
 // new latest.yml before its installer: the download then fails, which is
 // only logged (no error reaches the page), and a check half an hour later
 // tries again.
-import type { AppUpdater, UpdateInfo } from 'electron-updater';
+import type { AppUpdater, UpdateDownloadedEvent } from 'electron-updater';
 
 /** The first check, after the window has had time to load. */
 export const FIRST_CHECK_DELAY = 10 * 1000;
@@ -36,11 +36,12 @@ export type UpdateMode = 'install' | 'notify';
  * How this run takes updates, if it does, from the app-update.yml its
  * target wrote (an unpacked `--dir` build has none): `install`, downloading
  * and installing them itself (NSIS on Windows; an AppImage on Linux, where
- * `APPIMAGE` is its path), or `notify`, only saying one is out with a link to
- * it (a .deb, which electron-builder marks in `package-type`: installing one
- * needs an administrator's password, as Android's APKs need the user's
- * consent). Never a dev run, and never on macOS, which has the Mac Catalyst
- * app.
+ * `APPIMAGE` is its path), or `notify`, downloading and checking them the
+ * same way but leaving the install to the user, whom Settings hands the
+ * download in the system's installer (a .deb, which electron-builder marks
+ * in `package-type`: installing one needs an administrator's password, as
+ * Android's APKs need the user's consent). Never a dev run, and never on
+ * macOS, which has the Mac Catalyst app.
  *
  * A .deb is told apart first: an AppImage's runtime sets `APPIMAGE` for
  * everything it starts, so a .deb opened from a terminal or launcher that
@@ -71,18 +72,13 @@ export const updateMode = ({
     : null;
 };
 
-/**
- * The .deb of `version` for this CPU, as packageConfig.ts names it
- * (electron-builder calls x64 amd64 for Debian).
- * @param arch Node's (`process.arch`)
- */
-export const debFileName = (version: string, arch: string): string =>
-  `learnX-linux-${arch === 'x64' ? 'amd64' : arch}-v${version}.deb`;
-
 export type ReadyUpdate = {
   version: string;
-  /** In `notify` mode, the installer to download. */
-  download?: string;
+  /**
+   * In `notify` mode: Settings opens the downloaded installer in the
+   * system's (`install`) instead of restarting.
+   */
+  opensInstaller?: true;
 };
 
 /** What the updater uses of electron-updater's `autoUpdater`. */
@@ -98,8 +94,10 @@ export type AutoUpdater = Pick<
   | 'quitAndInstall'
 > & {
   on(
-    event: 'update-downloaded' | 'update-available',
-    listener: (info: Pick<UpdateInfo, 'version'>) => void,
+    event: 'update-downloaded',
+    listener: (
+      info: Pick<UpdateDownloadedEvent, 'version' | 'downloadedFile'>,
+    ) => void,
   ): unknown;
   on(event: 'error', listener: (error: Error) => void): unknown;
 };
@@ -107,7 +105,7 @@ export type AutoUpdater = Pick<
 export const createUpdater = ({
   autoUpdater,
   mode = 'install',
-  downloadUrl = () => '',
+  openInstaller = () => {},
   feed,
   onReady,
   log = () => {},
@@ -116,7 +114,8 @@ export const createUpdater = ({
 }: {
   autoUpdater: AutoUpdater;
   mode?: UpdateMode;
-  downloadUrl?: (version: string) => string;
+  /** In `notify` mode, opens a downloaded installer in the system's. */
+  openInstaller?: (file: string) => void;
   // electron-updater's Provider, which a custom feed takes as a class.
   feed: { url: string; provider: new (...args: any[]) => any };
   onReady: (update: ReadyUpdate) => void;
@@ -128,6 +127,8 @@ export const createUpdater = ({
   };
 }) => {
   let ready: ReadyUpdate | null = null;
+  /** The downloaded installer, in `notify` mode. */
+  let installer = '';
   let checking = false;
   let started = false;
   let retryScheduled = false;
@@ -140,8 +141,9 @@ export const createUpdater = ({
     url: feed.url,
   });
   // Only a verified update file is ever read (the provider), so only a
-  // verified update downloads and installs on quit.
-  autoUpdater.autoDownload = mode === 'install';
+  // verified update downloads, and installs on quit or opens in the
+  // system's installer.
+  autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = mode === 'install';
   autoUpdater.allowPrerelease = false;
   autoUpdater.allowDowngrade = false;
@@ -151,19 +153,15 @@ export const createUpdater = ({
     warn: (message: unknown) => log(`warn: ${String(message)}`),
     error: (message: unknown) => log(`error: ${String(message)}`),
   };
-  if (mode === 'install') {
-    autoUpdater.on('update-downloaded', info => {
-      ready = { version: info.version };
-      log(`downloaded ${info.version}`);
-      onReady(ready);
-    });
-  } else {
-    autoUpdater.on('update-available', info => {
-      ready = { version: info.version, download: downloadUrl(info.version) };
-      log(`available ${info.version}`);
-      onReady(ready);
-    });
-  }
+  autoUpdater.on('update-downloaded', info => {
+    ready =
+      mode === 'install'
+        ? { version: info.version }
+        : { version: info.version, opensInstaller: true };
+    installer = info.downloadedFile;
+    log(`downloaded ${info.version}`);
+    onReady(ready);
+  });
   // Offline, the mirror out of reach, or a release's files only partly
   // copied there (a 404, a signature not there yet, or a checksum that
   // doesn't match yet): tried again half an hour later, once.
@@ -205,18 +203,21 @@ export const createUpdater = ({
       }, CHECK_INTERVAL);
     },
     check,
-    /**
-     * The update downloaded and waiting to be installed, or in `notify`
-     * mode the one out, if any.
-     */
+    /** The update downloaded and waiting to be installed, if any. */
     ready: (): ReadyUpdate | null => ready,
     /**
      * Quits and installs the waiting update, then opens the app again (the
-     * installer runs silently, as on quit). Nothing in `notify` mode.
+     * installer runs silently, as on quit); in `notify` mode, opens it in
+     * the system's installer, which asks for the password.
      */
     install: () => {
-      if (ready && mode === 'install') {
+      if (!ready) {
+        return;
+      }
+      if (mode === 'install') {
         autoUpdater.quitAndInstall(true, true);
+      } else {
+        openInstaller(installer);
       }
     },
   };

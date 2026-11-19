@@ -13,7 +13,7 @@ let watching = false;
 
 /**
  * Says when the main process has a new version ready (`notifyUpdate`):
- * downloaded and installing on quit, or for a .deb, out to download. The
+ * downloaded and installing on quit, or for a .deb, to open from Settings. The
  * main process checks every few hours (electron/updater.ts), also while the
  * window is closed to the tray, where this page keeps running. Runs from
  * `index.js`; safe to call more than once.
@@ -28,8 +28,8 @@ export const watchUpdates = () => {
     if (update) {
       void notifyUpdate({
         version: update.version,
-        body: update.download
-          ? t('updateNotificationBody')
+        body: update.opensInstaller
+          ? t('updateNotificationDebBody')
           : t('updateNotificationReadyBody'),
       });
     }

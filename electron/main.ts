@@ -47,7 +47,6 @@ import { claimSingleInstance, setUpSystem } from './system.ts';
 import type { System } from './system.ts';
 import {
   createUpdater,
-  debFileName,
   TEST_FIRST_CHECK_DELAY,
   updateMode,
 } from './updater.ts';
@@ -641,7 +640,7 @@ const mode: UpdateMode | null = devUpdateUrl
  */
 const loadUpdater = async (updaterMode: UpdateMode) => {
   const [
-    { autoUpdater },
+    { autoUpdater: platformUpdater, DebUpdater },
     { GenericProvider },
     { parseUpdateInfo },
     { getChannelFilename, newUrlFromBase },
@@ -653,6 +652,10 @@ const loadUpdater = async (updaterMode: UpdateMode) => {
     import('electron-updater/out/providers/Provider.js'),
     import('electron-updater/out/util.js'),
   ]);
+  // A .deb's (`notify`), as electron-updater picks by `package-type`; also a
+  // dev run's in that mode, which has no `package-type`.
+  const autoUpdater =
+    updaterMode === 'notify' ? new DebUpdater() : platformUpdater;
   if (devUpdateUrl && devDataDir) {
     // What electron-builder writes into a packaged build's app-update.yml:
     // where updates come from, here the test server, and the cache folder's
@@ -697,8 +700,17 @@ const loadUpdater = async (updaterMode: UpdateMode) => {
   return createUpdater({
     autoUpdater,
     mode: updaterMode,
-    downloadUrl: version =>
-      new URL(debFileName(version, process.arch), feedUrl).href,
+    // The verified .deb, in the system's installer (GNOME Software, App
+    // Center), which asks for the password; shown in its folder where none
+    // opens .debs, to install with apt.
+    openInstaller: file => {
+      void shell.openPath(file).then(error => {
+        if (error) {
+          console.error(`[updater] couldn't open the installer: ${error}`);
+          shell.showItemInFolder(file);
+        }
+      });
+    },
     feed: {
       url: feedUrl,
       provider: signedProvider({
