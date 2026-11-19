@@ -82,6 +82,9 @@ it('shows the progress while loading, without reloading or opening meanwhile', a
 it('keeps the page clear of the floating toolbar', async () => {
   await renderScreen();
   expect(mockProps.contentInset).toEqual({ bottom: 0 });
+  // Only the system's adjustment adds the safe area, so it isn't added twice.
+  expect(mockProps.contentInsetAdjustmentBehavior).toBe('automatic');
+  expect(mockProps.automaticallyAdjustContentInsets).toBe(false);
 });
 
 it("opens the course's page in the browser before the page says where it is", async () => {
