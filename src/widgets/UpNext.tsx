@@ -92,31 +92,20 @@ function UpNextWidget(
       content
     );
 
-  // The countdown after its label. A small widget has room for its largest
-  // unit only ("Starts in 2 hours").
+  // The countdown after its label, in one Text. A small widget has room for
+  // its largest unit only ("Starts in 2 hours"). No space typed in Chinese:
+  // iOS draws the gap before the digits itself (src/assets/translations).
   const countdown = (textStyle: 'caption' | 'footnote') =>
     featured && today ? (
-      <HStack spacing={0}>
-        <Text
-          modifiers={[
-            font({ textStyle }),
-            foregroundStyle(accent),
-            lineLimit(1),
-            layoutPriority(1),
-          ]}
-        >
-          {`${current ? props.endsIn : props.startsIn} `}
-        </Text>
+      <Text
+        modifiers={[font({ textStyle }), foregroundStyle(accent), lineLimit(1)]}
+      >
+        {`${current ? props.endsIn : props.startsIn}${props.locale?.startsWith('zh') ? '' : ' '}`}
         {kit.countdown({
           date: current ? featured.end : featured.start,
           maxFieldCount: small ? 1 : undefined,
-          modifiers: [
-            font({ textStyle }),
-            foregroundStyle(accent),
-            lineLimit(1),
-          ],
         })}
-      </HStack>
+      </Text>
     ) : null;
 
   if (family === 'accessoryRectangular') {

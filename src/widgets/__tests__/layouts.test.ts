@@ -78,23 +78,44 @@ const isText = (node: Node) =>
 
 const isCountdown = (node: Node) => node.props.dateStyle === 'countdown';
 
-/**
- * Each Text's words, a countdown (our @expo/ui patch) or relative date as
- * `in <ISO time>`.
- */
-const texts = (node: Node) =>
-  all(node)
-    .filter(isText)
-    .map(n =>
-      n.props.date
-        ? `in ${(n.props.date as Date).toISOString()}`
-        : [n.props.children].flat().join(''),
-    );
-
 const modifier = (node: Node, name: string) =>
   (node.props.modifiers as Record<string, unknown>[] | undefined)
     ?.filter(Boolean)
     .find(m => name in m)?.[name];
+
+/**
+ * Each Text's words, a countdown (our @expo/ui patch) or relative date as
+ * `in <ISO time>`. A Text made of parts gives its words and its Texts in order.
+ * `spoken`: what VoiceOver reads instead, a label or nothing for a hidden one.
+ */
+const texts = (node: Node, spoken = false): string[] => {
+  if (spoken && modifier(node, 'accessibilityHidden')) {
+    return [];
+  }
+  const label = spoken
+    ? (modifier(node, 'accessibilityLabel') as string | undefined)
+    : undefined;
+  if (label !== undefined) {
+    return [label];
+  }
+  if (node.props.date) {
+    return [`in ${(node.props.date as Date).toISOString()}`];
+  }
+  if (isText(node)) {
+    return [[node.props.children].flat().join('')];
+  }
+  return node.type === 'Text'
+    ? [node.props.children]
+        .flat(Infinity)
+        .flatMap(child =>
+          typeof child === 'string'
+            ? [child]
+            : child && typeof child === 'object'
+              ? texts(child as Node, spoken)
+              : [],
+        )
+    : childrenOf(node).flatMap(child => texts(child, spoken));
+};
 
 /**
  * What VoiceOver reads for each element a layout combines
@@ -104,17 +125,7 @@ const modifier = (node: Node, name: string) =>
 const spoken = (node: Node) =>
   all(node)
     .filter(n => modifier(n, 'accessibilityElement') === 'combine')
-    .map(n =>
-      all(n)
-        .filter(t => isText(t) && !modifier(t, 'accessibilityHidden'))
-        .map(
-          t =>
-            (modifier(t, 'accessibilityLabel') as string | undefined) ??
-            (t.props.date
-              ? `in ${(t.props.date as Date).toISOString()}`
-              : [t.props.children].flat().join('')),
-        ),
-    );
+    .map(n => texts(n, true));
 
 /**
  * The version of a deadline list with this many rows: the layout offers one
@@ -296,11 +307,17 @@ describe('Up Next on iOS', () => {
       'Course later',
       'Tomorrow later-time',
     ]);
+    // The label and the countdown are one Text.
+    const label = all(oneLater).filter(
+      n => n.type === 'Text' && childrenOf(n).some(isCountdown),
+    );
+    expect(label.map(n => modifier(n, 'font'))).toEqual([
+      { textStyle: 'footnote' },
+    ]);
+    // In Chinese, no space typed before the countdown: iOS draws the gap.
     expect(
-      all(oneLater)
-        .filter(isCountdown)
-        .map(n => modifier(n, 'font')),
-    ).toEqual([{ textStyle: 'footnote' }]);
+      texts(render('systemMedium', { ...upNextProps, locale: 'zh_Hans' })),
+    ).toContain('Ends in');
     // VoiceOver reads each class as one element, without the dot.
     expect(spoken(oneLater)).toEqual([
       [
