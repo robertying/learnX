@@ -3,9 +3,10 @@
 // (ios/learnX/AppIcon.icon): icon.ico for Windows and icon.png (512) for
 // Linux, from which electron-builder makes the hicolor sizes; the window and
 // the tray use them too (main.ts, system.ts). It also makes the README's logo
-// (docs/assets/logo.png): ictool's export as it is, at 4x its 128 display
-// size and lossless, so it stays sharp on every screen. The outputs are
-// committed: only a Mac with Xcode can make them.
+// (docs/assets/logo.webp): ictool's export as it is, at 4x its 128 display
+// size, stored as lossless WebP (`cwebp`, Homebrew's webp) with its color
+// profile, so it stays sharp on every screen at a sixth of the PNG's size.
+// The outputs are committed: only a Mac with Xcode can make them.
 //
 //   node electron/icons/generate.ts
 //
@@ -344,6 +345,28 @@ export const icoImages = (ico: Buffer): Image[] =>
     return { width, height, pixels };
   });
 
+/** `png` as lossless WebP at `webp`, its color profile kept. */
+const losslessWebp = (png: string, webp: string) => {
+  try {
+    execFileSync('cwebp', [
+      '-lossless',
+      '-z',
+      '9',
+      '-metadata',
+      'icc',
+      '-quiet',
+      png,
+      '-o',
+      webp,
+    ]);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      throw new Error('No cwebp: brew install webp');
+    }
+    throw error;
+  }
+};
+
 /** macOS's sRGB profile, which `sips --matchTo` converts to. */
 const SRGB_PROFILE = '/System/Library/ColorSync/Profiles/sRGB Profile.icc';
 
@@ -423,8 +446,10 @@ const main = () => {
       path.join(out, 'icon.png'),
       encodePng(render(PNG_SIZE, PNG_SHAPE_FRACTION)),
     );
-    const logo = path.join(root, 'docs', 'assets', 'logo.png');
-    exportShape(LOGO_SIZE, logo);
+    const logo = path.join(root, 'docs', 'assets', 'logo.webp');
+    const logoPng = path.join(work, 'logo.png');
+    exportShape(LOGO_SIZE, logoPng);
+    losslessWebp(logoPng, logo);
     console.log(`Wrote ${path.join(out, 'icon.ico')}, icon.png and ${logo}`);
   } finally {
     fs.rmSync(work, { recursive: true, force: true });

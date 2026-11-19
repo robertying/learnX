@@ -63,11 +63,13 @@ case " $* " in
 *) set -- -skip-testing:learnXUITests/StoreScreenshots "$@" ;;
 esac
 
-# E2E_CLOCK: the moment the store screenshots' app clock starts from, and
-# E2E_LANGUAGE their language (scripts/e2e/store-screenshots.sh).
+# E2E_CLOCK: the moment the store screenshots' app clock starts from,
+# E2E_LANGUAGE their language and E2E_APPEARANCE their light or dark mode
+# (scripts/e2e/store-screenshots.sh).
 TEST_RUNNER_E2E_USERNAME="$username" TEST_RUNNER_E2E_PASSWORD="$password" \
   TEST_RUNNER_E2E_CLOCK="${E2E_CLOCK:-}" \
   TEST_RUNNER_E2E_LANGUAGE="${E2E_LANGUAGE:-}" \
+  TEST_RUNNER_E2E_APPEARANCE="${E2E_APPEARANCE:-}" \
   xcodebuild test \
   -workspace ios/learnX.xcworkspace \
   -scheme learnXUITests \

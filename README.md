@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./docs/assets/logo.png" alt="logo" width="128" height="128" />
+<img src="./docs/assets/logo.webp?v=3" alt="logo" width="128" height="128" />
 
 <h1>learnX</h1>
 
@@ -19,8 +19,8 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 <a href="https://github.com/robertying/learnX/releases" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/platform-linux-orange" alt="Platform Linux" height="20" width="auto"></a>
 
 <div align="center">
-    <img src="./docs/screenshots/iphone.webp?v=2" alt="iphone screenshot" height="350" width="161" />
-    <img src="./docs/screenshots/mac.webp?v=2" alt="mac screenshot" height="350" width="467" />
+    <img src="./docs/screenshots/iphone.webp?v=3" alt="iphone screenshot" height="350" width="161" />
+    <img src="./docs/screenshots/mac.webp?v=3" alt="mac screenshot" height="350" width="467" />
 </div>
 
 </div>

@@ -59,10 +59,26 @@ it('has a 512 icon.png for Linux, with transparent corners', () => {
   expectShapeOnClear(png);
 });
 
-it("has a 512 README logo, ictool's PNG as it exports it", () => {
-  const file = path.join(__dirname, '..', '..', 'docs', 'assets', 'logo.png');
-  const header = fs.readFileSync(file).subarray(16, 24);
-  expect([header.readUInt32BE(0), header.readUInt32BE(4)]).toEqual([
+it('has a 512 README logo, as lossless WebP with a color profile', () => {
+  const file = path.join(__dirname, '..', '..', 'docs', 'assets', 'logo.webp');
+  const webp = fs.readFileSync(file);
+  expect([webp.toString('ascii', 0, 4), webp.toString('ascii', 8, 12)]).toEqual(
+    ['RIFF', 'WEBP'],
+  );
+  // The extended format's chunks: the profile, then the lossless image.
+  const chunks: string[] = [];
+  let lossless: Buffer | undefined;
+  for (let offset = 12; offset < webp.length;) {
+    const type = webp.toString('ascii', offset, offset + 4);
+    const size = webp.readUInt32LE(offset + 4);
+    chunks.push(type);
+    if (type === 'VP8L') lossless = webp.subarray(offset + 8);
+    offset += 8 + size + (size % 2);
+  }
+  expect(chunks).toEqual(expect.arrayContaining(['ICCP', 'VP8L']));
+  // VP8L: a signature byte, then 14-bit width and height, each minus 1.
+  const bits = lossless!.readUInt32LE(1);
+  expect([(bits & 0x3fff) + 1, ((bits >> 14) & 0x3fff) + 1]).toEqual([
     LOGO_SIZE,
     LOGO_SIZE,
   ]);
