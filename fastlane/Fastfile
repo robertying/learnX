@@ -417,7 +417,9 @@ def build_apple(platform)
   # the .ipa / .pkg. Not gym's learnX.app.dSYM.zip: gym writes none for a
   # Mac Catalyst export.
   archived = Dir[File.join(archive.to_s, "dSYMs/*.dSYM")]
-  UI.user_error!("The archive #{archive} has no dSYMs") if archived.empty?
+  # Without the app's own dSYM, Crashlytics can't symbolicate the app's frames
+  # (19.0.0's Mac archive had only the extensions' and frameworks' dSYMs).
+  UI.user_error!("The archive #{archive} has no learnX.app.dSYM") unless archived.any? { |dsym| File.basename(dsym) == "learnX.app.dSYM" }
   dsyms = dsym_zip_path(platform)
   FileUtils.rm_f(dsyms)
   sh("ditto", "-c", "-k", File.join(archive.to_s, "dSYMs"), dsyms)
