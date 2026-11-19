@@ -2,6 +2,7 @@ require "digest"
 require "dotenv"
 require "fileutils"
 require "json"
+require "open3"
 require "shellwords"
 require "tmpdir"
 
@@ -411,7 +412,64 @@ def build_apple(platform)
 
   UI.user_error!("The build wrote no source map to #{map}") unless File.exist?(map)
   UI.success("Source map: #{map}")
+
+  # Every dSYM in the archive (the app's and its extensions'), zipped next to
+  # the .ipa / .pkg. Not gym's learnX.app.dSYM.zip: gym writes none for a
+  # Mac Catalyst export.
+  archived = Dir[File.join(archive.to_s, "dSYMs/*.dSYM")]
+  # Without the app's own dSYM, Crashlytics can't symbolicate the app's frames
+  # (19.0.0's Mac archive had only the extensions' and frameworks' dSYMs).
+  UI.user_error!("The archive #{archive} has no learnX.app.dSYM") unless archived.any? { |dsym| File.basename(dsym) == "learnX.app.dSYM" }
+  dsyms = dsym_zip_path(platform)
+  FileUtils.rm_f(dsyms)
+  sh("ditto", "-c", "-k", File.join(archive.to_s, "dSYMs"), dsyms)
+  upload_dsyms(platform, dsyms)
   path
+end
+
+def dsym_zip_path(platform)
+  File.join(out_dir, platform, "learnX-dSYMs.zip")
+end
+
+# Firebase's upload-symbols, from the firebase-ios-sdk Swift package that the
+# build checked out next to its build folder (as the "Upload dSYM files" build
+# phase finds Crashlytics/run).
+def crashlytics_upload_symbols
+  @crashlytics_upload_symbols ||= begin
+    # stdout only: xcodebuild warns on stderr.
+    out, status = Open3.capture2(
+      "xcodebuild", "-showBuildSettings", "-json",
+      "-workspace", File.join(ROOT, "ios/learnX.xcworkspace"), "-scheme", "learnX", "-configuration", "Release",
+    )
+    UI.user_error!("xcodebuild -showBuildSettings failed") unless status.success?
+    settings = JSON.parse(out)
+    build_dir = settings.map { |target| target.dig("buildSettings", "BUILD_DIR") }.compact.first.to_s
+    path = File.join(build_dir.sub(%r{\A(.*)/Build/.*\z}, "\\1"), "SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/upload-symbols")
+    UI.user_error!("Found no Crashlytics upload-symbols at #{path}: build the app first, so Xcode checks out the Firebase package") unless File.executable?(path)
+    path
+  end
+end
+
+# Uploads the build's dSYMs to Crashlytics, so it symbolicates native frames.
+# The "Upload dSYM files" build phase uploads them too, but in the background,
+# where a failed upload goes unnoticed (18.0.3's Mac dSYMs never arrived); this
+# one fails the lane, as the Android build does.
+# platform: "ios" or "macos" (Mac Catalyst, which Crashlytics calls mac).
+def upload_dsyms(platform, dsyms)
+  sh(
+    crashlytics_upload_symbols,
+    "-gsp", File.join(ROOT, "ios/GoogleService-Info.plist"),
+    "-p", platform == "macos" ? "mac" : "ios",
+    dsyms,
+  )
+  UI.success("Uploaded the dSYMs to Crashlytics: #{dsyms}")
+end
+
+# Uploads the dSYMs of this version's build again, from build/release.
+def upload_built_dsyms(platform)
+  dsyms = dsym_zip_path(platform)
+  UI.user_error!("No dSYMs at #{dsyms}: run `bundle exec fastlane #{platform == 'macos' ? 'mac' : 'ios'} build` first") unless File.exist?(dsyms)
+  upload_dsyms(platform, dsyms)
 end
 
 def upload_apple(platform, path, notes)
@@ -882,9 +940,14 @@ lane :github_release do |options|
 end
 
 platform :ios do
-  desc "Archive and export the App Store build and its source map to build/release/<version>/."
+  desc "Archive and export the App Store build, its dSYMs and source map to build/release/<version>/, and upload the dSYMs to Crashlytics."
   lane :build do
     build_apple("ios")
+  end
+
+  desc "Upload the dSYMs of this version's iOS build (build/release/<version>/ios/) to Crashlytics again, e.g. after a failed upload."
+  lane :symbols do
+    upload_built_dsyms("ios")
   end
 
   desc "Build and upload to App Store Connect (not submitted for review)."
@@ -910,9 +973,14 @@ platform :ios do
 end
 
 platform :mac do
-  desc "Archive and export the Mac Catalyst build and its source map to build/release/<version>/."
+  desc "Archive and export the Mac Catalyst build, its dSYMs and source map to build/release/<version>/, and upload the dSYMs to Crashlytics."
   lane :build do
     build_apple("macos")
+  end
+
+  desc "Upload the dSYMs of this version's Mac build (build/release/<version>/macos/) to Crashlytics again, e.g. after a failed upload."
+  lane :symbols do
+    upload_built_dsyms("macos")
   end
 
   desc "Build and upload the Mac Catalyst app to App Store Connect (not submitted for review)."
