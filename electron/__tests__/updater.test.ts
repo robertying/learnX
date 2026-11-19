@@ -5,10 +5,8 @@ import {
   FIRST_CHECK_DELAY,
   RETRY_DELAY,
   createUpdater,
-  debFileName,
   updateMode,
 } from '../updater.ts';
-import { packageConfig } from '../packageConfig.ts';
 
 /** electron-updater's autoUpdater, as far as updater.ts uses it. */
 const fakeAutoUpdater = () =>
@@ -63,49 +61,47 @@ describe('updateMode', () => {
   });
 });
 
-it('names the .deb as the build does', () => {
-  expect(debFileName('19.1.0', 'x64')).toBe('learnX-linux-amd64-v19.1.0.deb');
-  expect(debFileName('19.1.0', 'arm64')).toBe('learnX-linux-arm64-v19.1.0.deb');
-  expect(packageConfig().deb?.artifactName).toBe(
-    'learnX-linux-${arch}-v${version}.${ext}',
-  );
-});
-
 describe('in notify mode (a .deb)', () => {
   const setUp = () => {
     const autoUpdater = fakeAutoUpdater();
     const onReady = jest.fn();
+    const openInstaller = jest.fn();
     const updater = createUpdater({
       autoUpdater,
       feed,
       mode: 'notify',
-      downloadUrl: version =>
-        `https://mirror.test/learnX-linux-amd64-v${version}.deb`,
+      openInstaller,
       onReady,
     });
-    return { autoUpdater, onReady, updater };
+    return { autoUpdater, onReady, openInstaller, updater };
   };
 
-  it('downloads and installs nothing', () => {
+  it('downloads, but never installs on quit', () => {
     const { autoUpdater } = setUp();
     expect(autoUpdater).toMatchObject({
-      autoDownload: false,
+      autoDownload: true,
       autoInstallOnAppQuit: false,
     });
   });
 
-  it('says when a verified update is out, with its download', async () => {
-    const { autoUpdater, onReady, updater } = setUp();
-    autoUpdater.emit('update-available', { version: '19.1.0' });
-    const ready = {
+  it('opens a verified download in the system’s installer', async () => {
+    const { autoUpdater, onReady, openInstaller, updater } = setUp();
+    updater.install();
+    expect(openInstaller).not.toHaveBeenCalled();
+    autoUpdater.emit('update-downloaded', {
       version: '19.1.0',
-      download: 'https://mirror.test/learnX-linux-amd64-v19.1.0.deb',
-    };
+      downloadedFile: '/cache/pending/learnX-linux-amd64-v19.1.0.deb',
+    });
+    // The page learns only that it opens the installer, not where it is.
+    const ready = { version: '19.1.0', opensInstaller: true };
     expect(onReady).toHaveBeenCalledWith(ready);
     expect(updater.ready()).toEqual(ready);
-    // Nothing to install, nor to check again for.
     updater.install();
+    expect(openInstaller).toHaveBeenCalledWith(
+      '/cache/pending/learnX-linux-amd64-v19.1.0.deb',
+    );
     expect(autoUpdater.quitAndInstall).not.toHaveBeenCalled();
+    // Nothing to check again for.
     await updater.check();
     expect(autoUpdater.checkForUpdates).not.toHaveBeenCalled();
   });

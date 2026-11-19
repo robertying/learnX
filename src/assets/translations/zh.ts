@@ -231,7 +231,7 @@ const zh: typeof en = {
     'learnX将重新启动以安装更新。如果不重新启动，更新将在下次退出learnX时安装。',
   restart: '重新启动',
   updateDebMessage:
-    '请下载新的deb安装包（.deb）并打开安装，也可以在终端中用sudo apt install安装。',
+    '新版本已下载。打开安装包（.deb）即可安装，系统会要求输入密码。',
   updateInstalling: '正在安装',
   updateFailed: '更新失败',
   updateDownloadFailed: '更新下载失败，请检查网络连接后重试。',
@@ -430,6 +430,7 @@ const zh: typeof en = {
   notifyAppUpdatesCaption: 'learnX有新版本时通知你。',
   updateNotificationBody: '前往设置下载并安装。',
   updateNotificationReadyBody: '更新已下载，将在退出learnX时安装。',
+  updateNotificationDebBody: '更新已下载，前往设置打开安装。',
   notifyClassReminders: '上课提醒',
   classReminderOffset: '提前提醒（分钟）',
   classStartsAt: '{time}上课',

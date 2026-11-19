@@ -8,7 +8,9 @@
 // trusts (LEARNX_UPDATE_PUBLIC_KEY), as a release's are with the update key
 // (updateSignature.ts); without a valid signature nothing is downloaded.
 // A downloaded update is also said in a notification (a dev run records
-// it, system.ts), held back until someone has logged in.
+// it, system.ts), held back until someone has logged in. A .deb
+// (LEARNX_UPDATE_MODE=notify) downloads and is checked the same way, and
+// opens in the system's installer from Settings instead of restarting.
 import { type ChildProcess, spawn } from 'node:child_process';
 import { createHash, generateKeyPairSync, randomBytes } from 'node:crypto';
 import fs from 'node:fs';
@@ -21,8 +23,17 @@ import { byId, openSettings, openTab, shown } from './steps.ts';
 
 const VERSION = '99.0.0';
 
-/** The update file and installer this platform's electron-updater reads. */
-const release = () => {
+/**
+ * The update file and installer this platform's electron-updater reads, or
+ * on Linux with `deb`, a .deb's.
+ */
+const release = ({ deb = false } = {}) => {
+  if (deb) {
+    return {
+      yml: release().yml,
+      installer: `learnX-linux-${process.arch === 'x64' ? 'amd64' : process.arch}-v${VERSION}.deb`,
+    };
+  }
   switch (process.platform) {
     case 'win32':
       return { yml: 'latest.yml', installer: `learnX-windows-v${VERSION}.exe` };
@@ -55,10 +66,11 @@ const writeRelease = (
   {
     badChecksum = false,
     signature = 'good',
-  }: { badChecksum?: boolean; signature?: Signature } = {},
+    deb = false,
+  }: { badChecksum?: boolean; signature?: Signature; deb?: boolean } = {},
 ) => {
   fs.mkdirSync(dir, { recursive: true });
-  const { yml, installer } = release();
+  const { yml, installer } = release({ deb });
   const bytes = randomBytes(64 * 1024);
   fs.writeFileSync(path.join(dir, installer), bytes);
   const sha512 = createHash('sha512')
@@ -256,14 +268,16 @@ test('holds the notification until someone logs in', async ({
     .toBe(1);
 });
 
-test('tells a .deb install of an update, with its download', async ({
+test('opens a .deb’s verified download in the system’s installer', async ({
   login,
   relaunch,
   dataDir,
 }) => {
+  test.skip(process.platform !== 'linux', 'a .deb is for Linux');
   const log: string[] = [];
-  const installer = writeRelease(path.join(dataDir, 'release'));
-  const served = await serve(path.join(dataDir, 'release'), log);
+  const releaseDir = path.join(dataDir, 'release');
+  const installer = writeRelease(releaseDir, { deb: true });
+  const served = await serve(releaseDir, log);
   server = served.server;
   await login();
   const { window, main } = await relaunch({
@@ -275,11 +289,11 @@ test('tells a .deb install of an update, with its download', async ({
   const row = byId(window, 'settings-update');
   await expect(row).toBeVisible({ timeout: 60_000 });
   await expect(row).toContainText(VERSION);
-  // Checked against its signature, and nothing downloaded.
+  // Checked against its signature, and downloaded.
   expect(log.some(line => line.startsWith(`GET /${release().yml}.sig`))).toBe(
     true,
   );
-  expect(log.some(line => line.startsWith(`GET /${installer}`))).toBe(false);
+  expect(log.some(line => line.startsWith(`GET /${installer}`))).toBe(true);
 
   await row.click();
   const dialog = window.getByRole('dialog');
@@ -287,40 +301,51 @@ test('tells a .deb install of an update, with its download', async ({
   await expect(
     dialog.getByRole('button', { name: exact('T_restart') }),
   ).toHaveCount(0);
-  await dialog.getByRole('button', { name: exact('T_download') }).click();
-  const deb = `learnX-linux-${process.arch === 'x64' ? 'amd64' : process.arch}-v${VERSION}.deb`;
+  await dialog.getByRole('button', { name: exact('T_open') }).click();
   await expect
-    .poll(async () => (await main.record()).openedUrls)
-    .toEqual([`${served.url}${deb}`]);
+    .poll(async () => (await main.record()).openedPaths)
+    .toHaveLength(1);
+  const [opened] = (await main.record()).openedPaths;
+  expect(path.basename(opened)).toBe(installer);
+  expect(fs.readFileSync(opened)).toEqual(
+    fs.readFileSync(path.join(releaseDir, installer)),
+  );
   expect((await main.record()).installs).toBe(0);
 });
 
-test('offers nothing when the download doesn’t match its checksum', async ({
-  login,
-  relaunch,
-  dataDir,
-}) => {
-  const log: string[] = [];
-  const installer = writeRelease(path.join(dataDir, 'release'), {
-    badChecksum: true,
+for (const deb of [false, true]) {
+  test(`offers no ${deb ? '.deb' : 'update'} that doesn’t match its checksum`, async ({
+    login,
+    relaunch,
+    dataDir,
+  }) => {
+    test.skip(deb && process.platform !== 'linux', 'a .deb is for Linux');
+    const log: string[] = [];
+    const installer = writeRelease(path.join(dataDir, 'release'), {
+      badChecksum: true,
+      deb,
+    });
+    const served = await serve(path.join(dataDir, 'release'), log);
+    server = served.server;
+    await login();
+    const { window, main } = await relaunch({
+      env: {
+        ...updateEnv(served.url, dataDir),
+        ...(deb ? { LEARNX_UPDATE_MODE: 'notify' } : {}),
+      },
+    });
+    await main.stubInstall();
+    await openSettings(window);
+    // The download went through, and was refused.
+    await expect
+      .poll(() => log.some(line => line.startsWith(`GET /${installer}`)), {
+        timeout: 60_000,
+      })
+      .toBe(true);
+    await expect(shown(window.getByTestId('settings-list'))).toBeVisible();
+    await expect(window.getByTestId('settings-update')).toHaveCount(0);
   });
-  const served = await serve(path.join(dataDir, 'release'), log);
-  server = served.server;
-  await login();
-  const { window, main } = await relaunch({
-    env: updateEnv(served.url, dataDir),
-  });
-  await main.stubInstall();
-  await openSettings(window);
-  // The download went through, and was refused.
-  await expect
-    .poll(() => log.some(line => line.startsWith(`GET /${installer}`)), {
-      timeout: 60_000,
-    })
-    .toBe(true);
-  await expect(shown(window.getByTestId('settings-list'))).toBeVisible();
-  await expect(window.getByTestId('settings-update')).toHaveCount(0);
-});
+}
 
 for (const signature of ['missing', 'bad', 'wrong key'] as const) {
   test(`downloads nothing when the update file’s signature is ${signature}`, async ({

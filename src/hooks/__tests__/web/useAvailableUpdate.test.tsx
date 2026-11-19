@@ -5,7 +5,6 @@ import {
   renderHook,
   screen,
 } from '@testing-library/react';
-import { Linking } from 'react-native';
 import type { Bridge, BridgeUpdate } from 'web/bridge';
 import { t } from 'helpers/i18n';
 import useAvailableUpdate from 'hooks/useAvailableUpdate';
@@ -88,21 +87,15 @@ describe('useUpdateInstaller', () => {
     expect(bridge.updates.install).not.toHaveBeenCalled();
   });
 
-  it('offers a .deb’s download instead of a restart', () => {
-    const deb =
-      'https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/learnX-linux-amd64-v19.1.0.deb';
-    load({ version: '19.1.0', download: deb });
-    const openURL = jest
-      .spyOn(Linking, 'openURL')
-      .mockResolvedValue(undefined as never);
+  it('opens a .deb in the system’s installer instead of restarting', () => {
+    load({ version: '19.1.0', opensInstaller: true });
     render(<FluentRoot />);
     const { result } = renderHook(() => useUpdateInstaller(release));
     act(() => result.current.update());
     expect(screen.getByText(t('updateDebMessage'))).toBeTruthy();
     expect(screen.queryByRole('button', { name: t('restart') })).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: t('download') }));
-    expect(openURL).toHaveBeenCalledWith(deb);
-    expect(bridge.updates.install).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: t('open') }));
+    expect(bridge.updates.install).toHaveBeenCalledTimes(1);
   });
 
   it('does nothing without an update', () => {

@@ -73,10 +73,10 @@ it('says when an update has downloaded', async () => {
   ]);
 });
 
-it('says when a .deb is out', async () => {
-  await ready({ version: '19.2.0', download: 'https://mirror/app.deb' });
+it('says when a .deb has downloaded, to open from Settings', async () => {
+  await ready({ version: '19.2.0', opensInstaller: true });
   expect(posted()).toEqual([
-    expect.objectContaining({ body: t('updateNotificationBody') }),
+    expect.objectContaining({ body: t('updateNotificationDebBody') }),
   ]);
 });
 

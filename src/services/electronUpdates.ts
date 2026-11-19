@@ -33,7 +33,10 @@ export const subscribeToUpdates = (listener: () => void) => {
   };
 };
 
-/** Quits, installs the waiting update and opens learnX again. */
+/**
+ * Quits, installs the waiting update and opens learnX again; a .deb's opens
+ * in the system's installer.
+ */
 export const installUpdate = () => bridge().updates.install();
 
 /** The GitHub release of an Electron app version (its tag's page). */
