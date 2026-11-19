@@ -1,7 +1,7 @@
 import { useEffect, useEffectEvent } from 'react';
 import type { NavigationProp, ParamListBase } from '@react-navigation/native';
 import { useLoggedIn } from 'data/auth';
-import { useCourseIds } from 'data/queries';
+import { useCourseIds, useFirstLoad } from 'data/queries';
 import { useUserData } from 'data/userData';
 import type { Assignment, File, Notice } from 'data/types/state';
 import { useShowDetail } from 'hooks/useDetailNavigator';
@@ -39,6 +39,7 @@ const useContentList = <
   lists?: ExtraLists<T, K>,
 ) => {
   const loggedIn = useLoggedIn();
+  const loading = useFirstLoad(query);
   const courseIds = useCourseIds();
   const hiddenCourseIds = useUserData(data => data.hiddenCourses);
   const archivedIds = useUserData(data => data.archived[type]);
@@ -72,7 +73,7 @@ const useContentList = <
       type,
       onItemPress: (item: Pick<T, 'id'>) => show(screen, { id: item.id }),
       refreshing: pullToRefresh.refreshing,
-      loading: query.isPending && query.isFetching,
+      loading,
       onRefresh: pullToRefresh.onRefresh,
       updatedAt: query.dataUpdatedAt,
     },

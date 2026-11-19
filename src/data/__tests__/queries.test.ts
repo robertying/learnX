@@ -2,7 +2,7 @@ import { createElement, type ReactNode } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Language } from '@robertying/thu-learn-lib';
 import { act, renderHook, waitFor } from '@testing-library/react-native';
-import { useAuthStore } from 'data/auth';
+import { initialAuth, useAuthStore } from 'data/auth';
 import { mockCourses, mockCurrentSemester, mockSemesters } from 'data/mock';
 import {
   defaultMockNetworkConfig,
@@ -17,6 +17,7 @@ import {
   semestersQuery,
   useCourseIds,
   useCourses,
+  useFirstLoad,
   userQuery,
 } from 'data/queries';
 import { dataSource } from 'data/source';
@@ -185,5 +186,70 @@ describe('course hooks', () => {
       .getQueryCache()
       .build(queryClient, { queryKey: coursesQuery('2020-2021-1').queryKey });
     expect(getCachedCourses()).toEqual([]);
+  });
+});
+
+describe('useFirstLoad', () => {
+  const wrapper = ({ children }: { children: ReactNode }) =>
+    createElement(QueryClientProvider, { client: queryClient }, children);
+  const empty = { isPending: true, isFetching: false };
+  afterEach(async () => {
+    await act(() => {
+      useAuthStore.setState(initialAuth);
+      resetUserData();
+    });
+  });
+
+  it('is loading while a list with nothing yet is fetched', async () => {
+    const { result } = await renderHook(
+      () => useFirstLoad({ isPending: true, isFetching: true }),
+      { wrapper },
+    );
+    expect(result.current).toBe(true);
+  });
+
+  it('is loading while the login a list waits for is under way', async () => {
+    useAuthStore.setState({ loggingIn: true });
+    const { result } = await renderHook(() => useFirstLoad(empty), {
+      wrapper,
+    });
+    expect(result.current).toBe(true);
+
+    // A login that failed leaves the list empty, as it is offline.
+    await act(() => useAuthStore.setState({ loggingIn: false }));
+    expect(result.current).toBe(false);
+  });
+
+  it('is loading while the semester a list waits for is fetched', async () => {
+    let answer: (semester: unknown) => void = () => {};
+    void queryClient.fetchQuery({
+      queryKey: schoolSemesterQuery.queryKey,
+      queryFn: () => new Promise(resolve => (answer = resolve)),
+    });
+    const { result } = await renderHook(() => useFirstLoad(empty), {
+      wrapper,
+    });
+    expect(result.current).toBe(true);
+
+    // A semester already shown doesn't wait for the school's.
+    await act(() =>
+      useUserDataStore.setState({ currentSemester: mockCurrentSemester }),
+    );
+    expect(result.current).toBe(false);
+    await act(async () => answer({ id: mockCurrentSemester }));
+  });
+
+  it('is not loading for a list with data, or one nothing will fetch', async () => {
+    useAuthStore.setState({ loggingIn: true });
+    const { result, rerender } = await renderHook(
+      (props: { isPending: boolean; isFetching: boolean }) =>
+        useFirstLoad(props),
+      { wrapper, initialProps: { isPending: false, isFetching: true } },
+    );
+    expect(result.current).toBe(false);
+
+    await act(() => useAuthStore.setState({ loggingIn: false }));
+    await rerender(empty);
+    expect(result.current).toBe(false);
   });
 });
