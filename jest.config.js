@@ -17,6 +17,10 @@ process.env.TZ = 'Asia/Shanghai';
 /** @type {import('jest').Config} */
 const base = {
   preset: '@react-native/jest-preset',
+  // In the checkout rather than the shared temporary folder, so the cache
+  // goes away with the checkout (scripts/dev/clean-worktree.sh) instead of
+  // piling up for every worktree that ever ran the tests.
+  cacheDirectory: '<rootDir>/node_modules/.cache/jest',
   // patches/__tests__ test what the patches in patches/ change.
   roots: ['<rootDir>/src', '<rootDir>/patches'],
   // Loads Reanimated's and Worklets' web builds instead of the native ones
@@ -129,6 +133,7 @@ module.exports = {
     },
     {
       displayName: 'web',
+      cacheDirectory: base.cacheDirectory,
       roots: ['<rootDir>/src', '<rootDir>/modules'],
       testEnvironment: 'jsdom',
       haste: { defaultPlatform: 'web', platforms: ['web'] },
