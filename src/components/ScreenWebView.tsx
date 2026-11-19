@@ -31,9 +31,10 @@ const ScreenWebView: React.FC<
         style={[styles.webView, style]}
         decelerationRate={isApple() ? 'normal' : undefined}
         contentInsetAdjustmentBehavior={scrollInsetBehavior}
-        // React Native's own inset from the safe area, which is the same
-        // toolbar on Mac (`scrollInsetBehavior`)
-        automaticallyAdjustContentInsets={scrollInsetBehavior === 'automatic'}
+        // React Native's own inset adds the screen's safe area to
+        // `contentInset`, on top of the system's adjustment above, which
+        // would count the header and the home indicator twice.
+        automaticallyAdjustContentInsets={false}
         onLoadProgress={event => {
           progress.onLoadProgress(event);
           onLoadProgress?.(event);
