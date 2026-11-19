@@ -121,7 +121,9 @@ const fakeElectron = (dataDir: string, { packaged = false } = {}) => {
         popup: ({ callback }: { callback: () => void }) => callback(),
       }),
     },
-    nativeTheme: { shouldUseDarkColors: false },
+    nativeTheme: Object.assign(new EventEmitter(), {
+      shouldUseDarkColors: false,
+    }),
     net: { fetch: jest.fn(), request: jest.fn() },
     protocol: { registerSchemesAsPrivileged: jest.fn() },
     safeStorage: {
