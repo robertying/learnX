@@ -27,6 +27,7 @@
 #   STORE_OUT_DIR          where the shots go (default build/store-screenshots)
 #   STORE_LANGUAGE         iOS app and system language, Mac app language
 #                          (default zh-Hans)
+#   STORE_APPEARANCE       light or dark mode (default light)
 #   STORE_LOCALE           iOS system region (default zh_CN)
 #   STORE_ANDROID_LOCALE   Android app locale (default zh-CN)
 #   STORE_ANDROID_SIZE     Android screen size while shooting (default
@@ -37,9 +38,10 @@
 #                          Today shows a class coming up and a busy day)
 #
 # The script sets the device up for the shots and puts it back on exit: the
-# iOS status bar (9:41, full battery and signal) and light mode, or the
-# Android screen size, density, app locale and status bar (9:41; the other
-# icons are painted over with the bar's color after the run). The device's
+# iOS status bar (9:41, full battery and signal) and light or dark mode, or
+# the Android screen size, density, light or dark mode, app locale and status
+# bar (9:41; the other icons are painted over with the bar's color after the
+# run). The Mac app takes the mode on its own, not the Mac. The device's
 # time zone is Beijing's for the run, so Today shows class times without a
 # Beijing time note, and the app's clock reads STORE_CLOCK, so its times match
 # the status bar's 9:41. Which simulator
@@ -74,6 +76,15 @@ android-tablet)
 *) usage ;;
 esac
 
+appearance="${STORE_APPEARANCE:-light}"
+case "$appearance" in
+light | dark) ;;
+*)
+  echo "STORE_APPEARANCE is light or dark, not $appearance" >&2
+  exit 1
+  ;;
+esac
+
 cd "$(dirname "$0")/../.."
 
 # Wednesday of this week (Monday first) in Beijing, at 9:41 there.
@@ -100,6 +111,8 @@ out="$(cd "$out_root/$folder" && pwd)"
 if [ "$platform" = mac ]; then
   status=0
   export E2E_LANGUAGE="${STORE_LANGUAGE:-zh-Hans}"
+  # The app's own appearance (StoreScreenshots.swift), not the Mac's.
+  export E2E_APPEARANCE="$appearance"
   scripts/e2e/e2e-mac.sh -only-testing:learnXUITests/StoreScreenshots || status=$?
   # The shots are the test's attachments; name each file after its
   # attachment ("01-notices_0_<uuid>.png" -> 01-notices.png).
@@ -131,6 +144,7 @@ restore_locales=""
 restore_time_zone=""
 restore_auto_time_zone=""
 restore_appearance=""
+restore_night=""
 restore_languages=()
 restore_locale=""
 
@@ -159,6 +173,9 @@ cleanup() {
       adb -s "$device" shell settings put global auto_time_zone "$restore_auto_time_zone" || true
     fi
     adb -s "$device" shell settings put global sysui_demo_allowed 0 || true
+    if [ -n "$restore_night" ]; then
+      adb -s "$device" shell cmd uimode night "$restore_night" || true
+    fi
   fi
 }
 
@@ -192,9 +209,8 @@ if [ "$platform" = ios ]; then
     xcrun simctl boot "$device"
     xcrun simctl bootstatus "$device" >/dev/null
   fi
-  # The shots are in light mode.
   restore_appearance="$(xcrun simctl ui "$device" appearance)"
-  xcrun simctl ui "$device" appearance light
+  xcrun simctl ui "$device" appearance "$appearance"
   # Apps launched from now on take Beijing's time zone.
   xcrun simctl spawn "$device" launchctl setenv TZ Asia/Shanghai
   xcrun simctl status_bar "$device" override --time 9:41 \
@@ -210,6 +226,13 @@ else
   export E2E_STATE_CLEARED=1
   adb -s "$device" shell cmd locale set-app-locales "$android_app_id" \
     --locales "${STORE_ANDROID_LOCALE:-zh-CN}"
+  # "Night mode: no": keep the last word.
+  restore_night="$(adb -s "$device" shell cmd uimode night | tr -d '\r' | awk '{ print $NF }')"
+  if [ "$appearance" = dark ]; then
+    adb -s "$device" shell cmd uimode night yes
+  else
+    adb -s "$device" shell cmd uimode night no
+  fi
   # Beijing's time zone, with automatic time zone off so it stays.
   restore_time_zone="$(adb -s "$device" shell getprop persist.sys.timezone | tr -d '\r')"
   restore_auto_time_zone="$(adb -s "$device" shell settings get global auto_time_zone | tr -d '\r')"

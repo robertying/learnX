@@ -8,12 +8,20 @@ import XCTest
 /// as its context menu.
 @MainActor
 final class StoreScreenshots: LearnXUITestCase {
-  /// The clock scripts/e2e/store-screenshots.sh pins, so Today shows the same classes every time, and the window's
-  /// size for the store shots, in place of the one the app saved (`WindowFrameAutosave`).
+  /// The clock scripts/e2e/store-screenshots.sh pins, so Today shows the same classes every time, the window's size
+  /// for the store shots, in place of the one the app saved (`WindowFrameAutosave`), and dark mode when the script
+  /// asks for it: the app's own `AppleInterfaceStyle`, so the Mac's appearance stays as it is.
   override var launchOptions: [String: String] {
-    let clock = ProcessInfo.processInfo.environment["E2E_CLOCK"] ?? ""
-    return ["Window Frame Main": "{{120, 120}, {1096, 741}}"].merging(
-      clock.isEmpty ? [:] : ["mockClock": clock], uniquingKeysWith: { $1 })
+    let environment = ProcessInfo.processInfo.environment
+    let clock = environment["E2E_CLOCK"] ?? ""
+    var options = ["Window Frame Main": "{{120, 120}, {1096, 741}}"]
+    if !clock.isEmpty {
+      options["mockClock"] = clock
+    }
+    if environment["E2E_APPEARANCE"] == "dark" {
+      options["AppleInterfaceStyle"] = "Dark"
+    }
+    return options
   }
 
   /// Beijing's time zone, so Today shows class times without a Beijing time note.
