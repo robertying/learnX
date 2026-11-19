@@ -40,6 +40,7 @@ import {
 } from './language.ts';
 import { popupMenu } from './menus.ts';
 import { mainFetch } from './net.ts';
+import { themePdfViewers } from './pdfViewer.ts';
 import { PRELOADS_DIR, stripPreloads } from './preloads.ts';
 import { createSecrets } from './secrets.ts';
 import { claimSingleInstance, setUpSystem } from './system.ts';
@@ -545,9 +546,11 @@ const createWindow = (ses: Electron.Session) => {
       event.preventDefault();
     }
   });
+  themePdfViewers(win.webContents, nativeTheme);
   win.webContents.on('did-attach-webview', (_event, guest) => {
     webviews.guard(guest);
     zoomOnKeys(guest);
+    themePdfViewers(guest, nativeTheme);
   });
   if (dev) {
     win.webContents.on('console-message', ({ level, message }) => {
