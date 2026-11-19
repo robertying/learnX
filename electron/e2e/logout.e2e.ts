@@ -8,6 +8,7 @@ import { exact } from './maestroEnv.ts';
 import { backToSettings, byId, openSettings, shown } from './steps.ts';
 
 test('opens settings pages and logs out', async ({
+  app,
   window,
   dataDir,
   login,
@@ -24,10 +25,16 @@ test('opens settings pages and logs out', async ({
   await byId(window, 'settings-about').click();
   await expect(shown(window.getByText(/© \d+ Rui Ying/))).toBeVisible();
   await backToSettings(window);
+  // The window is named after Settings until logging out.
+  const windowTitle = () =>
+    app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].title);
+  await expect.poll(windowTitle).toMatch(/. - learnX$/);
 
   await byId(window, 'settings-logout').click();
   await window.getByRole('button', { name: exact('T_logout') }).click();
   await expect(byId(window, 'login-username')).toBeVisible();
+  // Named learnX again, not after Settings.
+  await expect.poll(windowTitle).toBe('learnX');
 
   // The saved login is gone: the next launch asks again.
   await expect
