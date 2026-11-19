@@ -1,40 +1,6 @@
 #!/bin/bash
-# Build Maestro from source with the patches in this folder:
-#   maestro-display.patch       element positions, taps and screenshots when
-#                               the app is on another display (iPhone Duo
-#                               open) or in a window (iPadOS windowed apps)
-#   maestro-fold-posture.patch  the setFoldPosture command (closed, halfFold,
-#                               flat) for foldable simulators, from upstream
-#                               PR mobile-dev-inc/Maestro#3621
-#   maestro-hierarchy-fallback.patch
-#                               the hierarchy of an app whose accessibility
-#                               tree is too deep for one snapshot (only the
-#                               status bar came back)
-#   maestro-tiny-elements.patch  no taps on an element under 8 points
-#                               across or high, such as the copies of a
-#                               sheet's bar buttons UIKit leaves outside it
-#   maestro-springboard-alerts.patch
-#                               SpringBoard's alerts over an app (a
-#                               notifications request, Save Password) in its
-#                               hierarchy, so flows see and answer them
-#   maestro-instrumentation-shell.patch
-#                               the Android driver's instrumentation in the
-#                               foreground of its adb shell, which otherwise
-#                               stays a zombie until llkd kills adbd (API 29)
-#   maestro-sim-touch.patch     touches and typing through scripts/e2e/
-#                               sim-touch.swift (MAESTRO_IOS_SIM_TOUCH) when a
-#                               display other than the main one is lit, which
-#                               XCUITest's events don't reach (iPhone Duo open)
-#   maestro-inner-display-tree.patch
-#                               the open iPhone Duo's right side in the app's
-#                               hierarchy: loads scripts/e2e/sim-ax-frame.m into
-#                               the app (MAESTRO_IOS_INSERT_LIBRARIES) and starts
-#                               a new runner after setFoldPosture
-#   maestro-inner-display-alerts.patch
-#                               a SpringBoard alert on the open iPhone Duo where
-#                               it shows, and its permission tap through
-#                               scripts/e2e/sim-touch.swift
-#   maestro-pinch.patch         the pinch command (two fingers) on Android
+# Build Maestro from source with the patches in this folder, applied in the
+# order below (README.md says what each one changes and why).
 #
 #   scripts/e2e/maestro/build.sh <install folder>
 #

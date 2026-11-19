@@ -57,12 +57,6 @@ const webAliases = Object.fromEntries(
   ]),
 );
 
-/**
- * One project per platform, each resolving that platform's files (iOS is
- * Jest's default platform here; Android's and the Electron app's tests live in
- * `__tests__/android` and `__tests__/web`), and `tooling` for the repo's own
- * scripts and the Electron main process, typed with Node.
- */
 // Node's own localStorage (on by default since Node 25) warns in every worker
 // whose environment reads the globals (Jest copies them), and the tests use
 // jsdom's or none: the workers start without it.
@@ -101,14 +95,18 @@ module.exports = {
     '!electron/{dev,clean,package,macDevApp,devTraces,webExport,electronApp,updateE2E}.ts',
     '!electron/playwright.config.ts',
   ],
+  // The totals in the log, and a browsable report in coverage/index.html
+  coverageReporters: ['text-summary', 'html'],
   // CI runs `pnpm test --coverage` and fails below these, so coverage can't
   // slip unnoticed. Keep them just under the current numbers; raise them as
   // coverage grows.
-  // The totals in the log, and a browsable report in coverage/index.html
-  coverageReporters: ['text-summary', 'html'],
   coverageThreshold: {
     global: { statements: 99, branches: 95.8, functions: 97, lines: 99.2 },
   },
+  // One project per platform, each resolving that platform's files (iOS is
+  // Jest's default platform here; Android's and the Electron app's tests live
+  // in `__tests__/android` and `__tests__/web`), and `tooling` for the repo's
+  // own scripts and the Electron main process, typed with Node.
   projects: [
     {
       ...base,

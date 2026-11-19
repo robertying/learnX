@@ -48,7 +48,8 @@ name: Show no results and failures
     file: subflows/shot.yaml
     env:
       NAME: offline
-# A file that isn't on the device can't download (08 deleted file 1's).
+# A file that isn't on the device can't download (09-downloads deleted
+# this one).
 - runFlow:
     file: subflows/tab.yaml
     env:

@@ -54,6 +54,16 @@ describe('native-coverage.mjs', () => {
     expect(table.join('\n')).not.toMatch(/Tests|Pods|ExpoWidgetsTarget/);
   });
 
+  it('fails below the minimum it is given', () => {
+    const input = report(file('ios/learnX/AppDelegate.swift', 8));
+    expect(
+      run('native-coverage.mjs', ['--min=80', root], input).at(-1),
+    ).toMatch(/total/);
+    expect(() => run('native-coverage.mjs', ['--min=90', root], input)).toThrow(
+      /Line coverage 80\.0% is below the minimum, 90%\./,
+    );
+  });
+
   it('names the own sources no report has, outside the total', () => {
     expect(table).toContain(
       '          untested  ios/learnX/SceneDelegate.swift',

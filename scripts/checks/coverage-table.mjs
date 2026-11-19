@@ -29,3 +29,37 @@ export const coverageTable = (files, untested = []) => {
     : 'total';
   return [...lines, ...missing, row(covered, executable, total)];
 };
+
+/**
+ * The `--min=<percent>` among a script's arguments (0 without one), and the
+ * other arguments.
+ *
+ * @param {string[]} args
+ * @returns {{ min: number, rest: string[] }}
+ */
+export const minArg = args => {
+  const arg = args.find(a => a.startsWith('--min='));
+  return {
+    min: arg ? Number(arg.slice('--min='.length)) : 0,
+    rest: args.filter(a => a !== arg),
+  };
+};
+
+/**
+ * Fails the process (exit code 1, after the table) when the files' total line
+ * coverage is below `min` percent.
+ *
+ * @param {{ covered: number, executable: number }[]} files
+ * @param {number} min
+ */
+export const checkMinimum = (files, min) => {
+  const covered = files.reduce((sum, file) => sum + file.covered, 0);
+  const executable = files.reduce((sum, file) => sum + file.executable, 0);
+  const total = executable ? (100 * covered) / executable : 100;
+  if (total < min) {
+    console.error(
+      `Line coverage ${total.toFixed(1)}% is below the minimum, ${min}%.`,
+    );
+    process.exitCode = 1;
+  }
+};

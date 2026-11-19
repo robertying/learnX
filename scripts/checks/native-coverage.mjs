@@ -2,12 +2,17 @@
 // `xcrun xccov view --report --json` reports on stdin (one or more, back to
 // back), keeping each file's best run, and names the own sources that no
 // report has (no test target builds them). Used by scripts/checks/test-ios.sh.
+//
+//   node scripts/checks/native-coverage.mjs [--min=<percent>] [<repo root>] < reports
+//
+// With --min, it fails when the total line coverage is below that percent.
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { relative } from 'node:path';
-import { coverageTable } from './coverage-table.mjs';
+import { checkMinimum, coverageTable, minArg } from './coverage-table.mjs';
 
-const root = process.argv[2] ?? process.cwd();
+const { min, rest } = minArg(process.argv.slice(2));
+const root = rest[0] ?? process.cwd();
 const input = readFileSync(0, 'utf8');
 
 // The reports are concatenated JSON objects; split them at the top level.
@@ -65,3 +70,4 @@ const rows = [...files.entries()]
     executable: file.executableLines,
   }));
 console.log(coverageTable(rows, untested).join('\n'));
+checkMinimum(rows, min);

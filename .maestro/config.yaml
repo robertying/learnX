@@ -4,8 +4,7 @@ flows:
   - '*'
 # The flows share one login (subflows/login.yaml): start from a fresh install
 # and log out last. Flows not listed, or left out of a tagged run's prefix of
-# this list, run after these. A failed flow doesn't
-# stop the rest.
+# this list, run after these. A failed flow doesn't stop the rest.
 executionOrder:
   continueOnFailure: true
   flowsOrder:
@@ -23,7 +22,7 @@ executionOrder:
     - Search and open a result
     - Open every other screen
     - Change every setting
-    # Deletes the file 02 downloaded, which the next one needs gone.
+    # Deletes the file 03-details downloaded, which the next one needs gone.
     - Download a file, then delete it
     - Show no results and failures
     - Open items from links
