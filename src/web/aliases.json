@@ -13,7 +13,6 @@
   "expo-secure-store": "packages/secureStore.ts",
   "expo-sqlite/kv-store": "packages/kvStore.ts",
   "expo-task-manager": "packages/taskManager.ts",
-  "react-native-pdf": "packages/Pdf.tsx",
   "react-native-share": "packages/share.ts",
   "react-native-webview": "packages/WebView.tsx"
 }
