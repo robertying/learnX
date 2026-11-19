@@ -32,12 +32,48 @@ final class ContextMenuView: ExpoView, UIContextMenuInteractionDelegate {
     key == .keyboardReturnOrEnter || key == .keypadEnter || key == .keyboardSpacebar
   }
 
+  /// The presses that opened the row, which the view keeps from the views after it through to their end, as UIKit
+  /// asks of a view that takes a press's start.
+  private var openingPresses = Set<UIPress>()
+
   override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
-    guard isFocused, presses.contains(where: { $0.key.map { Self.opens($0.keyCode) } ?? false }) else {
-      super.pressesBegan(presses, with: event)
-      return
+    let opening = isFocused ? presses.filter { $0.key.map { Self.opens($0.keyCode) } ?? false } : []
+    if !opening.isEmpty {
+      openingPresses.formUnion(opening)
+      onPrimaryAction()
     }
-    onPrimaryAction()
+    let rest = presses.subtracting(opening)
+    if !rest.isEmpty {
+      super.pressesBegan(rest, with: event)
+    }
+  }
+
+  override func pressesChanged(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+    let rest = presses.subtracting(openingPresses)
+    if !rest.isEmpty {
+      super.pressesChanged(rest, with: event)
+    }
+  }
+
+  override func pressesEnded(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+    let rest = finish(presses)
+    if !rest.isEmpty {
+      super.pressesEnded(rest, with: event)
+    }
+  }
+
+  override func pressesCancelled(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+    let rest = finish(presses)
+    if !rest.isEmpty {
+      super.pressesCancelled(rest, with: event)
+    }
+  }
+
+  /// Forgets the opening presses among `presses`, which have ended, and returns the others.
+  private func finish(_ presses: Set<UIPress>) -> Set<UIPress> {
+    let opening = presses.intersection(openingPresses)
+    openingPresses.subtract(opening)
+    return presses.subtracting(opening)
   }
 
   private var actions: [ContextMenuAction] = []

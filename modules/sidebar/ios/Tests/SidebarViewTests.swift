@@ -121,8 +121,17 @@ extension SidebarView {
 
     view.setSelectedKey("notices")
     #expect(view.selectedRows == [1])
-    // The badge turns white over the selection.
+    // Over the selection, the badge takes the row's text color.
     let notices = try #require(view.cell(1))
+    var state = notices.configurationState
+    state.isSelected = false
+    #expect(SidebarView.badgeColor(notices, state) == .systemRed)
+    state.isSelected = true
+    let content = try #require(notices.contentConfiguration as? UIListContentConfiguration)
+    let textColor = content.updated(for: state).textProperties.resolvedColor()
+    #expect(SidebarView.badgeColor(notices, state) == textColor)
+    #expect(textColor != .systemRed)
+    // The cell recolors it as its state changes.
     notices.isSelected = true
     notices.updateConfiguration(using: notices.configurationState)
 
