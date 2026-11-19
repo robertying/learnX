@@ -169,11 +169,22 @@ it('submits only once there is something to send', async () => {
 });
 
 it('stops saving the draft and goes back once submitted', async () => {
+  jest.mocked(useSubmitAssignment).mockReturnValue({
+    ...submit,
+    uploading: true,
+  } as never);
   await renderScreen();
-  const onDone = jest.mocked(useSubmitAssignment).mock.calls[0][2];
-  onDone();
+  const onDone = jest.mocked(useSubmitAssignment).mock.lastCall![2];
+  // Gone back only once the upload no longer holds the page.
+  let heldOnGoBack: boolean | undefined;
+  navigation.goBack.mockImplementationOnce(() => {
+    heldOnGoBack = jest.mocked(usePreventRemove).mock.lastCall![0];
+  });
+  jest.mocked(useSubmitAssignment).mockReturnValue({ ...submit } as never);
+  await act(() => onDone());
   expect(stop).toHaveBeenCalled();
-  expect(navigation.goBack).toHaveBeenCalled();
+  expect(navigation.goBack).toHaveBeenCalledTimes(1);
+  expect(heldOnGoBack).toBe(false);
 });
 
 it('picks from documents or photos, with the keyboard down', async () => {

@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { usePreventRemove } from '@react-navigation/native';
 import useHeaderButtons from 'hooks/useHeaderButtons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -112,6 +112,7 @@ const AssignmentSubmissionContent: React.FC<{
   const [removeAttachment, setRemoveAttachment] = useState(
     draft?.removeAttachment ?? false,
   );
+  const [submitted, setSubmitted] = useState(false);
 
   const {
     picked: attachmentResult,
@@ -143,7 +144,7 @@ const AssignmentSubmissionContent: React.FC<{
     },
     () => {
       stopSavingDraft();
-      navigation.goBack();
+      setSubmitted(true);
     },
   );
 
@@ -159,6 +160,13 @@ const AssignmentSubmissionContent: React.FC<{
   // sheet swiped down (its route is held too), Android's Back or the Electron
   // app's back keys.
   usePreventRemove(uploading, () => {});
+  // Left once submitted, a render later: the upload's hold is still on when
+  // it reports back.
+  useEffect(() => {
+    if (submitted) {
+      navigation.goBack();
+    }
+  }, [navigation, submitted]);
   // A swipe back is turned off rather than undone: UIKit would take the page
   // away before React Navigation put it back.
   useLayoutEffect(() => {
