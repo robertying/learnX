@@ -187,6 +187,11 @@ name: Show no results and failures
     timeout: 10000
 # Continue Offline goes back to the saved data, still offering to log in.
 - tapOn: '${T_offlineMode}'
+# Leaving the login page after a typed password, some iOS devices ask to save
+# it (the system's own labels), which hides the app until dismissed.
+- tapOn:
+    text: 'Not Now|现在不|以后'
+    optional: true
 - extendedWaitUntil:
     visible:
       id: sync-status-relogin
