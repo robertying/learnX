@@ -158,6 +158,8 @@ class UpdaterModule : Module() {
       }
     }
 
+    // Called from the install's thread, the main thread (the installer's status) and a newer install's thread.
+    @Synchronized
     fun finish(error: CodedException?) {
       if (done) {
         return

@@ -4,6 +4,7 @@ import { latestReleaseQuery } from 'data/latestRelease';
 import { queryClient } from 'data/queryClient';
 import { t } from 'helpers/i18n';
 import { isNewerRelease, type Release } from 'helpers/update';
+import { clearDownloadedUpdate } from 'services/update';
 import { notifyOnLogin, notifyUpdate } from 'services/updateNotice';
 
 /**
@@ -27,13 +28,16 @@ let watching = false;
  * the app once the last check is a few hours old (`latestReleaseQuery`), and
  * says when one finds a new version (`notifyUpdate`). The open app checks
  * every few hours too (`hooks/useAvailableUpdate`), and the background task
- * with `checkForUpdate`. Runs from `index.js`; safe to call more than once.
+ * with `checkForUpdate`. Also deletes the APK of an update that installed:
+ * installing it ended the app before it could. Runs from `index.js`; safe to
+ * call more than once.
  */
 export const watchUpdates = () => {
   if (watching || !checksForUpdates()) {
     return;
   }
   watching = true;
+  clearDownloadedUpdate();
   queryClient.getQueryCache().subscribe(event => {
     if (
       event.type === 'updated' &&

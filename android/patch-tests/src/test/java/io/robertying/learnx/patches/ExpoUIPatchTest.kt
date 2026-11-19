@@ -55,7 +55,7 @@ import org.robolectric.RuntimeEnvironment
 import org.robolectric.Shadows.shadowOf
 
 /**
- * What patches/@expo__ui@58.0.28.patch changes in modifiers on Android: the `semantics` modifier takes `heading`, which marks the
+ * What patches/@expo__ui@58.0.29.patch changes in modifiers on Android: the `semantics` modifier takes `heading`, which marks the
  * element as a heading for TalkBack.
  */
 @RunWith(RobolectricTestRunner::class)
@@ -96,7 +96,7 @@ class ExpoUIPatchTest {
 }
 
 /**
- * What patches/@expo__ui@58.0.28.patch changes in a `Host` with `matchContents` on Android: when the size it sends
+ * What patches/@expo__ui@58.0.29.patch changes in a `Host` with `matchContents` on Android: when the size it sends
  * to the layout is dropped and its frame stays 0, it sends the size again.
  *
  * The frame is what Fabric lays the view out at from Yoga; here the parent never lays the host out, and a test calls
@@ -189,7 +189,7 @@ class ExpoUIHostSizePatchTest {
 }
 
 /**
- * What patches/@expo__ui@58.0.28.patch changes in `Text` on Android: without a typography it takes the style its
+ * What patches/@expo__ui@58.0.29.patch changes in `Text` on Android: without a typography it takes the style its
  * container provides (a list item's headline, a button's label), as Material 3's `Text` does, instead of a bare one.
  */
 @RunWith(RobolectricTestRunner::class)
