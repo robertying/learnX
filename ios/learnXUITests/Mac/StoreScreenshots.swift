@@ -8,21 +8,36 @@ import XCTest
 /// as its context menu.
 @MainActor
 final class StoreScreenshots: LearnXUITestCase {
+  /// The clock scripts/e2e/store-screenshots.sh pins, so Today shows the same classes every time, and the window's
+  /// size for the store shots, in place of the one the app saved (`WindowFrameAutosave`).
+  override var launchOptions: [String: String] {
+    let clock = ProcessInfo.processInfo.environment["E2E_CLOCK"] ?? ""
+    return ["Window Frame Main": "{{120, 120}, {1096, 741}}"].merging(
+      clock.isEmpty ? [:] : ["mockClock": clock], uniquingKeysWith: { $1 })
+  }
+
+  /// Beijing's time zone, so Today shows class times without a Beijing time note.
+  override var launchEnvironment: [String: String] { ["TZ": "Asia/Shanghai"] }
+
   func testTakesStoreScreenshots() throws {
     // Every shot in one test: more than the 3 minutes scripts/e2e/e2e-mac.sh allows each test.
     executionTimeAllowance = 600
     try clearSettingsBadge()
 
-    // 1 Notices with a notice open
+    // 1 Today with the schedule open beside it
+    try open(tab: "tab-today")
+    try waitFor(text: "MOCK_ASSIGNMENT", timeout: 15)
+    try waitFor(id: "today-schedule").click()
+    try waitFor(id: "schedule")
+    try shot("01-today")
+
+    // 2 Notices with a notice open and another notice's actions
     try open(tab: "tab-notices")
     try open(card: "notice-card", "MOCK_STORE_NOTICE", detail: "notice-detail")
     try waitFor(text: "MOCK_STORE_NOTICE_BODY", timeout: 15)
-    try shot("01-notices")
-
-    // 2 Another notice's actions
-    try waitFor(card: "notice-card", "MOCK_NOTICE").rightClick()
+    try waitFor(card: "notice-card", "MOCK_STORE_SWIPE_NOTICE").rightClick()
     XCTAssertTrue(app.menuItems.firstMatch.waitForExistence(timeout: 5), "no card actions")
-    try shot("02-notices-actions")
+    try shot("02-notices")
     app.typeKey(.escape, modifierFlags: [])
 
     // 3 All assignments with one open
@@ -62,13 +77,23 @@ final class StoreScreenshots: LearnXUITestCase {
     UIPasteboard.general.string = value("STORE_SEARCH_TERM")
     field.typeKey("v", modifierFlags: .command)
     UIPasteboard.general.string = ""
-    try waitFor(card: "assignment-card", "MOCK_STORE_ASSIGNMENT")
+    try waitFor(card: "notice-card", "MOCK_NOTICE")
     try shot("07-search")
-    app.typeKey(.escape, modifierFlags: [])
+    // Escape only leaves the field; the sheet closes with its button.
+    try waitFor(label: "T_close").click()
+    waitForAbsence(field, "the search sheet", timeout: 5)
 
-    // 8 Settings with the calendar page open
+    // 8 Settings with the notifications page open
+    try openSetting("settings-notifications", page: "notification-settings")
+    for row in ["notifications-notices", "notifications-assignments", "notifications-files"] {
+      try toggle(row, on: true)
+    }
+    try shot("08-notifications")
+
+    // 9 Settings with the calendar page open. Its syncs stay off: on the Mac they'd write into the user's own
+    // calendars.
     try openSetting("settings-calendar", page: "calendar-settings")
-    try shot("08-calendar")
+    try shot("09-calendar")
   }
 
   /// Opening Course Information Sharing once marks it seen, which hides the Settings badge.

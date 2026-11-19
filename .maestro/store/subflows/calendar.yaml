@@ -1,4 +1,5 @@
-# Open Settings › Calendars and Reminders (iOS) or Calendar (Android).
+# Open Settings › Calendars and Reminders (iOS) or Calendar (Android), with
+# its first two syncs on.
 appId: ${APP_ID}
 ---
 - runFlow: ../../subflows/settings.yaml
@@ -12,4 +13,23 @@ appId: ${APP_ID}
       platform: Android
     commands:
       - tapOn: '.*(${T_setupCalendarSection}).*'
+- waitForAnimationToEnd
+# With the class schedule and the assignments synced to the calendar.
+- runFlow:
+    file: ../../subflows/toggle.yaml
+    env:
+      LIST: calendar-settings
+      ID: calendar-course-sync
+      ON: 'true'
+- runFlow:
+    file: ../../subflows/toggle.yaml
+    env:
+      LIST: calendar-settings
+      ID: calendar-assignment-sync
+      ON: 'true'
+- runFlow:
+    file: ../../subflows/scroll-to-top.yaml
+    env:
+      LIST: calendar-settings
+      ID: calendar-course-sync
 - waitForAnimationToEnd

@@ -1,0 +1,181 @@
+appId: ${APP_ID}
+name: App Store screenshots on the iPhone Duo
+---
+# Run by scripts/e2e/store-screenshots.sh (duo): the iPhone Duo shots of the
+# store listing, as STORE_OUT/NN-<slug>-<posture>.png. One listing takes up to
+# 10 shots for both displays, so the shots are grouped by posture: closed
+# (outer display), half open, then fully open (inner display, in the split
+# layout as on iPad). The hinge moves with subflows/fold.yaml, so it needs the
+# patched Maestro (scripts/e2e/maestro) first on PATH. Each group sets
+# DUO_POSTURE and SPLIT for its subflows, which scripts/e2e/e2e.sh sets for a
+# whole run.
+- runFlow:
+    file: ../subflows/fold.yaml
+    env:
+      POSTURE: closed
+- runFlow: subflows/start.yaml
+
+# Closed
+- runFlow:
+    env:
+      DUO_POSTURE: ''
+      SPLIT: 'false'
+    commands:
+      # 1 Today
+      - runFlow: subflows/today.yaml
+      - runFlow:
+          file: ../subflows/screenshot.yaml
+          env:
+            NAME: 01-today-folded
+
+      # 2 Notices with a row's swipe actions and the filter menu open
+      - runFlow:
+          file: ../subflows/tab.yaml
+          env:
+            TAB: 'tab-notices'
+      - runFlow:
+          file: subflows/swipe-actions.yaml
+          env:
+            CARD: '.*(${MOCK_STORE_SWIPE_NOTICE}).*'
+            DIRECTION: LEFT
+      - tapOn: '${T_filter}'
+      - runFlow:
+          file: ../subflows/screenshot.yaml
+          env:
+            NAME: 02-notices-folded
+      - tapOn: '(${T_all})(, .*)?'
+      - waitForAnimationToEnd
+
+      # 3 Search
+      - runFlow:
+          file: ../subflows/search.yaml
+          env:
+            TERM: ${STORE_SEARCH_TERM}
+            RESULT: '.*(${MOCK_NOTICE}).*'
+      # The search key hides the keyboard.
+      - pressKey: Enter
+      - runFlow:
+          file: ../subflows/screenshot.yaml
+          env:
+            NAME: 03-search-folded
+      - tapOn: '${T_close}'
+      - waitForAnimationToEnd
+
+# Half open
+- runFlow:
+    file: ../subflows/fold.yaml
+    env:
+      POSTURE: halfFold
+- waitForAnimationToEnd:
+    timeout: 5000
+- runFlow:
+    env:
+      DUO_POSTURE: halfFold
+      SPLIT: 'true'
+    commands:
+      # 4 All assignments with one open
+      - runFlow:
+          file: ../subflows/tab.yaml
+          env:
+            TAB: 'tab-assignments'
+      - runFlow:
+          file: ../subflows/filter.yaml
+          env:
+            LABEL: '(${T_all})(, .*)?'
+      # The half-open display is short: scroll the list column (the left
+      # half) to the assignment.
+      - repeat:
+          times: 6
+          while:
+            notVisible: '.*(${MOCK_STORE_ASSIGNMENT}).*'
+          commands:
+            - swipe:
+                start: 25%,75%
+                end: 25%,45%
+      - runFlow:
+          file: ../subflows/open.yaml
+          env:
+            CARD: '.*(${MOCK_STORE_ASSIGNMENT}).*'
+            DETAIL: assignment-detail
+      - runFlow:
+          file: ../subflows/screenshot.yaml
+          env:
+            NAME: 04-assignments-half-open
+
+      # 5 Submitting it
+      - runFlow: subflows/submission.yaml
+      - runFlow:
+          file: ../subflows/screenshot.yaml
+          env:
+            NAME: 05-submission-half-open
+
+      # 6 Courses with one open and another's swipe actions
+      - runFlow:
+          file: ../subflows/tab.yaml
+          env:
+            TAB: 'tab-courses'
+      - runFlow:
+          file: ../subflows/open.yaml
+          env:
+            CARD: '.*(${MOCK_STORE_COURSE}).*'
+            DETAIL: course-detail
+      # As on iPad (ipad.yaml), the first row (MOCK_COURSE) is swiped by its
+      # position: a short drag to the right shows Hide, a longer one runs it.
+      - assertVisible: '.*(${MOCK_COURSE}).*'
+      - swipe:
+          start: 15%,28%
+          end: 25%,28%
+          duration: 800
+      - waitForAnimationToEnd
+      - assertVisible:
+          id: card-hide
+      - runFlow:
+          file: ../subflows/screenshot.yaml
+          env:
+            NAME: 06-courses-half-open
+
+# Fully open
+- runFlow:
+    file: ../subflows/fold.yaml
+    env:
+      POSTURE: flat
+- waitForAnimationToEnd:
+    timeout: 5000
+- runFlow:
+    env:
+      DUO_POSTURE: flat
+      SPLIT: 'true'
+    commands:
+      # 7 Files with a PDF open
+      - runFlow:
+          file: ../subflows/tab.yaml
+          env:
+            TAB: 'tab-files'
+      - runFlow: subflows/file.yaml
+      - runFlow:
+          file: ../subflows/screenshot.yaml
+          env:
+            NAME: 07-files-open
+
+      # 8 Settings with the notifications page open
+      - runFlow: subflows/notifications.yaml
+      - runFlow:
+          file: ../subflows/screenshot.yaml
+          env:
+            NAME: 08-notifications-open
+      # Back to Today, where the calendar page's Settings opens from.
+      - runFlow:
+          file: ../subflows/back.yaml
+          env:
+            LIST: '.*(${T_logout}).*'
+      - runFlow:
+          file: ../subflows/back.yaml
+          env:
+            LIST: '.*(${T_todayDueSoon}).*'
+
+      # 9 Settings with the calendar page open
+      - runFlow: subflows/calendar.yaml
+      - runFlow:
+          file: ../subflows/screenshot.yaml
+          env:
+            NAME: 09-calendar-open

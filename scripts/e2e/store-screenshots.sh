@@ -7,37 +7,42 @@
 #
 # Targets (each runs one flow; the folder is under STORE_OUT_DIR):
 #   iphone          .maestro/store/iphone.yaml       ios/iphone/
-#   duo-folded      .maestro/store/iphone.yaml       ios/iphone-duo/ (-folded)
-#   duo-half-open   .maestro/store/iphone.yaml       ios/iphone-duo/ (-half-open)
-#   duo-open        .maestro/store/iphone.yaml       ios/iphone-duo/ (-open)
-#
-# duo-half-open and duo-open set each screen up on the closed Duo (nothing
-# can tap on its inner display yet) and open the hinge for each shot, so they
-# need the patched Maestro (scripts/e2e/maestro/build.sh) first on PATH.
+#   duo             .maestro/store/duo.yaml          ios/iphone-duo/
+#                   (closed, half open and fully open; needs the patched
+#                   Maestro, scripts/e2e/maestro/build.sh, first on PATH)
 #   ipad            .maestro/store/ipad.yaml         ios/ipad/ (landscape)
 #   android-phone   .maestro/store/android-phone.yaml   android/phone/
 #   android-tablet  .maestro/store/android-tablet.yaml  android/tablet/
-#   mac             ios/learnXUITests/Mac/StoreScreenshots.swift  macos/windows/
+#   mac             ios/learnXUITests/Mac/StoreScreenshots.swift  macos/raw/
 #
 # mac runs the Mac app's XCUITest (scripts/e2e/e2e-mac.sh: it takes over the
 # pointer and keyboard, so start it by hand and leave the Mac alone) and saves
-# the window shots, to be composed onto the store background.
+# the window shots, raw until composed onto the store background
+# (macos/NN-<slug>.png).
 #
 # device: the simulator UDID or emulator serial. Defaults to MAESTRO_DEVICE,
 # else the one booted simulator (iOS) or connected emulator (Android).
 #
 # Settings, all optional:
 #   STORE_OUT_DIR          where the shots go (default build/store-screenshots)
-#   STORE_LANGUAGE         iOS app language (default zh-Hans)
+#   STORE_LANGUAGE         iOS app and system language, Mac app language
+#                          (default zh-Hans)
+#   STORE_LOCALE           iOS system region (default zh_CN)
 #   STORE_ANDROID_LOCALE   Android app locale (default zh-CN)
 #   STORE_ANDROID_SIZE     Android screen size while shooting (default
 #                          1080x1920 for phone, 2560x1440 for tablet)
 #   STORE_ANDROID_DENSITY  Android density (default 420 phone, 280 tablet)
+#   STORE_CLOCK            the moment the app's clock starts from (default
+#                          9:41 Beijing time on this week's Wednesday, when
+#                          Today shows a class coming up and a busy day)
 #
 # The script sets the device up for the shots and puts it back on exit: the
 # iOS status bar (9:41, full battery and signal) and light mode, or the
 # Android screen size, density, app locale and status bar (9:41; the other
-# icons are painted over with the bar's color after the run). Which simulator
+# icons are painted over with the bar's color after the run). The device's
+# time zone is Beijing's for the run, so Today shows class times without a
+# Beijing time note, and the app's clock reads STORE_CLOCK, so its times match
+# the status bar's 9:41. Which simulator
 # or emulator model to use depends on the store's size rules: an iPhone of
 # 1206x2622 pixels, a 13-inch iPad, the iPhone Duo, and any Android foldable
 # or tablet emulator.
@@ -47,22 +52,15 @@ target="${1:-}"
 device="${2:-${MAESTRO_DEVICE:-}}"
 
 usage() {
-  echo "usage: $0 mac|iphone|duo-folded|duo-half-open|duo-open|ipad|android-phone|android-tablet [device]" >&2
+  echo "usage: $0 mac|iphone|duo|ipad|android-phone|android-tablet [device]" >&2
   exit 1
 }
 
-suffix=""
-posture=""
 case "$target" in
 iphone) platform=ios flow=iphone folder=ios/iphone ;;
-duo-folded) platform=ios flow=iphone folder=ios/iphone-duo suffix=-folded ;;
-duo-half-open)
-  platform=ios flow=iphone folder=ios/iphone-duo suffix=-half-open
-  posture=halfFold
-  ;;
-duo-open) platform=ios flow=iphone folder=ios/iphone-duo suffix=-open posture=flat ;;
+duo) platform=ios flow=duo folder=ios/iphone-duo ;;
 ipad) platform=ios flow=ipad folder=ios/ipad ;;
-mac) platform=mac folder=macos/windows ;;
+mac) platform=mac folder=macos/raw ;;
 android-phone)
   platform=android flow=android-phone folder=android/phone
   size="${STORE_ANDROID_SIZE:-1080x1920}" density="${STORE_ANDROID_DENSITY:-420}"
@@ -78,12 +76,30 @@ esac
 
 cd "$(dirname "$0")/../.."
 
+# Wednesday of this week (Monday first) in Beijing, at 9:41 there.
+export E2E_CLOCK="${STORE_CLOCK:-$(node -e '
+const beijing = new Date(Date.now() + 8 * 3600e3);
+const wednesday = new Date(beijing - ((beijing.getUTCDay() + 6) % 7 - 2) * 864e5);
+console.log(wednesday.toISOString().slice(0, 10) + "T09:41:00+08:00");
+')}"
+
+# What the Search shot looks for, in the shots' language (scripts/e2e/e2e-env.mjs).
+if [ "$platform" = android ]; then
+  shot_language="${STORE_ANDROID_LOCALE:-zh-CN}"
+else
+  shot_language="${STORE_LANGUAGE:-zh-Hans}"
+fi
+if [[ "$shot_language" == en* ]]; then
+  export STORE_SEARCH_TERM=Quantum
+fi
+
 out_root="${STORE_OUT_DIR:-build/store-screenshots}"
 mkdir -p "$out_root/$folder"
 out="$(cd "$out_root/$folder" && pwd)"
 
 if [ "$platform" = mac ]; then
   status=0
+  export E2E_LANGUAGE="${STORE_LANGUAGE:-zh-Hans}"
   scripts/e2e/e2e-mac.sh -only-testing:learnXUITests/StoreScreenshots || status=$?
   # The shots are the test's attachments; name each file after its
   # attachment ("01-notices_0_<uuid>.png" -> 01-notices.png).
@@ -112,12 +128,23 @@ fi
 
 android_app_id="io.robertying.learnx"
 restore_locales=""
+restore_time_zone=""
+restore_auto_time_zone=""
 restore_appearance=""
+restore_languages=()
+restore_locale=""
 
 # shellcheck disable=SC2329 # run by the EXIT trap
 cleanup() {
   if [ "$platform" = ios ]; then
     xcrun simctl status_bar "$device" clear || true
+    xcrun simctl spawn "$device" launchctl unsetenv TZ || true
+    # Back to the system language it had, from its next boot.
+    if [ -n "$restore_locale" ]; then
+      xcrun simctl spawn "$device" defaults write -g AppleLanguages \
+        -array ${restore_languages[@]+"${restore_languages[@]}"} || true
+      xcrun simctl spawn "$device" defaults write -g AppleLocale "$restore_locale" || true
+    fi
     if [ -n "$restore_appearance" ]; then
       xcrun simctl ui "$device" appearance "$restore_appearance" || true
     fi
@@ -127,6 +154,10 @@ cleanup() {
     adb -s "$device" shell cmd locale set-app-locales "$android_app_id" \
       --locales "$restore_locales" || true
     demo exit || true
+    if [ -n "$restore_time_zone" ]; then
+      adb -s "$device" shell cmd alarm set-timezone "$restore_time_zone" || true
+      adb -s "$device" shell settings put global auto_time_zone "$restore_auto_time_zone" || true
+    fi
     adb -s "$device" shell settings put global sysui_demo_allowed 0 || true
   fi
 }
@@ -142,9 +173,30 @@ trap cleanup EXIT
 
 if [ "$platform" = ios ]; then
   export E2E_LANGUAGE="${STORE_LANGUAGE:-zh-Hans}"
+  # The system in the same language, for the status bar's date (iPad) and
+  # system alerts. It takes a restart.
+  locale="${STORE_LOCALE:-zh_CN}"
+  current_locale="$(xcrun simctl spawn "$device" defaults read -g AppleLocale 2>/dev/null || true)"
+  # The languages, one per line, from the plist array defaults prints.
+  current_languages="$(xcrun simctl spawn "$device" defaults read -g AppleLanguages 2>/dev/null |
+    sed -n 's/^ *"\{0,1\}\([^",()]*\)"\{0,1\},\{0,1\}$/\1/p')"
+  if [ "$current_locale" != "$locale" ] ||
+    [ "$(printf '%s\n' "$current_languages" | head -n 1)" != "$E2E_LANGUAGE" ]; then
+    while IFS= read -r language; do
+      [ -n "$language" ] && restore_languages+=("$language")
+    done <<<"$current_languages"
+    restore_locale="${current_locale:-en_US}"
+    xcrun simctl spawn "$device" defaults write -g AppleLanguages -array "$E2E_LANGUAGE"
+    xcrun simctl spawn "$device" defaults write -g AppleLocale "$locale"
+    xcrun simctl shutdown "$device"
+    xcrun simctl boot "$device"
+    xcrun simctl bootstatus "$device" >/dev/null
+  fi
   # The shots are in light mode.
   restore_appearance="$(xcrun simctl ui "$device" appearance)"
   xcrun simctl ui "$device" appearance light
+  # Apps launched from now on take Beijing's time zone.
+  xcrun simctl spawn "$device" launchctl setenv TZ Asia/Shanghai
   xcrun simctl status_bar "$device" override --time 9:41 \
     --batteryState discharging --batteryLevel 100 \
     --wifiBars 3 --cellularMode active --cellularBars 4
@@ -158,6 +210,11 @@ else
   export E2E_STATE_CLEARED=1
   adb -s "$device" shell cmd locale set-app-locales "$android_app_id" \
     --locales "${STORE_ANDROID_LOCALE:-zh-CN}"
+  # Beijing's time zone, with automatic time zone off so it stays.
+  restore_time_zone="$(adb -s "$device" shell getprop persist.sys.timezone | tr -d '\r')"
+  restore_auto_time_zone="$(adb -s "$device" shell settings get global auto_time_zone | tr -d '\r')"
+  adb -s "$device" shell settings put global auto_time_zone 0
+  adb -s "$device" shell cmd alarm set-timezone Asia/Shanghai
   # From the default size: straight from another override (the previous
   # target), SystemUI can leave the clock out of demo mode.
   adb -s "$device" shell wm size reset
@@ -184,15 +241,10 @@ run_dir="$(mktemp -d "${TMPDIR:-/tmp}/learnx-store.XXXXXX")"
 copy_shots() {
   find "$run_dir" -path '*takeScreenshot*' -name '*.png' -exec cp {} "$out"/ \;
 }
-flows=.maestro
-if [ -n "$posture" ]; then
-  # A copy of the flows whose shots open the hinge (see
-  # .maestro/store/subflows/screenshot-posture.yaml).
-  flows="$run_dir/flows"
-  cp -R .maestro "$flows"
-  cp .maestro/store/subflows/screenshot-posture.yaml "$flows/subflows/screenshot.yaml"
+if [ "$flow" = duo ]; then
   # Maestro's takeScreenshot of the inner display is black, so the flow asks
-  # this server for each shot, which saves the inner display (3) with simctl.
+  # this server for each shot there, which saves the inner display (3) with
+  # simctl (.maestro/subflows/screenshot.yaml).
   shot_port_file="$run_dir/shot-port"
   node scripts/e2e/lib/inner-display-shots.mjs "$device" "$out" "$shot_port_file" &
   shot_server=$!
@@ -204,11 +256,9 @@ status=0
 MAESTRO_DEVICE="$device" scripts/e2e/e2e.sh "$platform" \
   --test-output-dir "$run_dir" \
   -e STORE_OUT=store \
-  -e STORE_SUFFIX="$suffix" \
-  -e STORE_POSTURE="$posture" \
   -e STORE_SHOT_URL="${shot_url:-}" \
-  "$flows/store/$flow.yaml" || status=$?
-if [ -n "$posture" ]; then
+  ".maestro/store/$flow.yaml" || status=$?
+if [ "$flow" = duo ]; then
   # Leave the Duo closed, as the next run expects.
   MAESTRO_DEVICE="$device" scripts/e2e/e2e.sh ios -e POSTURE=closed \
     --test-output-dir "$run_dir/close" .maestro/subflows/fold.yaml || true

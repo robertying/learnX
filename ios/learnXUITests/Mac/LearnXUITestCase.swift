@@ -20,6 +20,9 @@ class LearnXUITestCase: XCTestCase {
   /// Launch arguments of a test login or a failure to emulate (`services/launchOptions.ts`), as `-name value`.
   var launchOptions: [String: String] { [:] }
 
+  /// Environment variables the app launches with, such as `TZ`.
+  var launchEnvironment: [String: String] { [:] }
+
   override func setUp() async throws {
     continueAfterFailure = false
     try launch(launchOptions)
@@ -36,10 +39,15 @@ class LearnXUITestCase: XCTestCase {
   func launch(_ options: [String: String] = [:]) throws {
     app?.terminate()
     app = XCUIApplication()
-    app.launchArguments += ["-AppleLanguages", "(zh-Hans)", "-AppleLocale", "zh_CN"]
+    // Chinese unless E2E_LANGUAGE (scripts/e2e/e2e-mac.sh) asks for English.
+    let english = ProcessInfo.processInfo.environment["E2E_LANGUAGE"]?.hasPrefix("en") == true
+    app.launchArguments += english
+      ? ["-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
+      : ["-AppleLanguages", "(zh-Hans)", "-AppleLocale", "zh_CN"]
     for (name, value) in ["mockLatency": "none"].merging(options, uniquingKeysWith: { $1 }) {
       app.launchArguments += ["-\(name)", value]
     }
+    app.launchEnvironment.merge(launchEnvironment, uniquingKeysWith: { $1 })
     app.launch()
   }
 

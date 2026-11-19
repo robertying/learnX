@@ -59,6 +59,12 @@ export interface LaunchOptions {
    * reminder (Remind Later and Archive). Only debug and E2E builds take it.
    */
   postNotification?: unknown;
+  /**
+   * A moment (ISO 8601) the app's clock starts from, for the store
+   * screenshots, so Today shows the same classes whenever they're taken. The
+   * clock keeps running from there. Only debug and E2E builds take it.
+   */
+  mockClock?: unknown;
 }
 
 export interface LiveLogin {
@@ -125,6 +131,29 @@ const read = (key: keyof LaunchOptions, initialProps?: LaunchOptions) =>
   isApple() ? (Settings.get(key) as unknown) : initialProps?.[key];
 
 /**
+ * Moves the JS clock (`Date.now()` and `new Date()`) so it reads `moment` now
+ * and runs on from there. Native code keeps the real clock.
+ */
+export const pinClock = (moment: number) => {
+  const RealDate = Date;
+  const offset = moment - RealDate.now();
+  const now = () => RealDate.now() + offset;
+  function PinnedDate(this: unknown, ...args: unknown[]) {
+    if (!new.target) {
+      return new RealDate(now()).toString();
+    }
+    return args.length === 0
+      ? new RealDate(now())
+      : new (RealDate as unknown as new (...a: unknown[]) => Date)(...args);
+  }
+  PinnedDate.prototype = RealDate.prototype;
+  PinnedDate.now = now;
+  PinnedDate.parse = RealDate.parse;
+  PinnedDate.UTC = RealDate.UTC;
+  globalThis.Date = PinnedDate as unknown as DateConstructor;
+};
+
+/**
  * Applies the launch arguments; unknown values are ignored. Returns whether
  * the store report replaces the app.
  */
@@ -161,6 +190,11 @@ export const applyLaunchOptions = (initialProps?: LaunchOptions) => {
       typeof notification === 'string' && notification
         ? notification
         : undefined;
+    const clock = read('mockClock', initialProps);
+    const moment = typeof clock === 'string' ? Date.parse(clock) : NaN;
+    if (!Number.isNaN(moment)) {
+      pinClock(moment);
+    }
   }
 
   // NSUserDefaults reads `-storeReport true` as the string.

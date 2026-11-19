@@ -5,13 +5,34 @@ name: Google Play screenshots on an Android phone
 # the Play listing, as STORE_OUT/NN-<slug>.png.
 - runFlow: subflows/start.yaml
 
-# 1 Notices
+# 1 Today
+- runFlow: subflows/today.yaml
 - runFlow:
     file: ../subflows/screenshot.yaml
     env:
-      NAME: 01-notices
+      NAME: 01-today
 
-# 2 A notice with an attachment
+# 2 Notices with the filter menu open
+- runFlow:
+    file: ../subflows/tab.yaml
+    env:
+      TAB: 'tab-notices'
+# Plain, for the Play feature graphic
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 02-notices-plain
+# The filter menu open. Android's swipe actions run on release and leave
+# nothing showing, so no card shows its actions.
+- tapOn: '${T_filter}'
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 02-notices
+- tapOn: '(${T_all})(, .*)?'
+- waitForAnimationToEnd
+
+# 3 A notice with an attachment
 - runFlow:
     file: ../subflows/open.yaml
     env:
@@ -24,11 +45,11 @@ name: Google Play screenshots on an Android phone
 - runFlow:
     file: ../subflows/screenshot.yaml
     env:
-      NAME: 02-notice-detail
+      NAME: 03-notice-detail
 - back
 - waitForAnimationToEnd
 
-# 3 Assignments, all of them
+# 4 Assignments, all of them
 - runFlow:
     file: ../subflows/tab.yaml
     env:
@@ -40,42 +61,28 @@ name: Google Play screenshots on an Android phone
 - runFlow:
     file: ../subflows/screenshot.yaml
     env:
-      NAME: 03-assignments
+      NAME: 04-assignments
 
-# 4 Submitting an assignment
-# It can be below the screen's end on a short phone.
-- scrollUntilVisible:
-    element: '.*(${MOCK_STORE_ASSIGNMENT}).*'
-    direction: DOWN
-- runFlow:
-    file: ../subflows/open.yaml
-    env:
-      CARD: '.*(${MOCK_STORE_ASSIGNMENT}).*'
-      DETAIL: assignment-detail
-- runFlow: subflows/submission.yaml
-- runFlow:
-    file: ../subflows/screenshot.yaml
-    env:
-      NAME: 04-submission
-- back
-- waitForAnimationToEnd
-- back
-- waitForAnimationToEnd
-
-# 5 A PDF
+# 5 Files
 - runFlow:
     file: ../subflows/tab.yaml
     env:
       TAB: 'tab-files'
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 05-files
+
+# 6 A PDF
 - runFlow: subflows/file.yaml
 - runFlow:
     file: ../subflows/screenshot.yaml
     env:
-      NAME: 05-file
+      NAME: 06-file
 - back
 - waitForAnimationToEnd
 
-# 6 Courses
+# 7 Courses
 - runFlow:
     file: ../subflows/tab.yaml
     env:
@@ -83,9 +90,9 @@ name: Google Play screenshots on an Android phone
 - runFlow:
     file: ../subflows/screenshot.yaml
     env:
-      NAME: 06-courses
+      NAME: 07-courses
 
-# 7 Search
+# 8 Search
 - runFlow:
     file: ../subflows/tab.yaml
     env:
@@ -94,31 +101,12 @@ name: Google Play screenshots on an Android phone
     file: ../subflows/search.yaml
     env:
       TERM: ${STORE_SEARCH_TERM}
-      RESULT: '.*(${MOCK_STORE_ASSIGNMENT}).*'
-- hideKeyboard
-- runFlow:
-    file: ../subflows/screenshot.yaml
-    env:
-      NAME: 07-search
-# The first back clears the query and brings the keyboard back: go back
-# until search is closed, or Settings below would match Gboard's gear.
-- back
+      RESULT: '.*(${MOCK_NOTICE}).*'
+# Hides the keyboard; Maestro's hideKeyboard is the back key, which clears
+# the query.
+- pressKey: Escape
 - waitForAnimationToEnd
-- repeat:
-    times: 3
-    while:
-      visible: '${T_searchPrompt}'
-    commands:
-      - back
-      - waitForAnimationToEnd
-- extendedWaitUntil:
-    visible:
-      id: tab-notices
-    timeout: 10000
-
-# 8 Calendar settings
-- runFlow: subflows/calendar.yaml
 - runFlow:
     file: ../subflows/screenshot.yaml
     env:
-      NAME: 08-calendar
+      NAME: 08-search

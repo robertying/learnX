@@ -1,0 +1,12 @@
+# Today, once its assignments have loaded. The store run pins the app's clock
+# (STORE_CLOCK in scripts/e2e/store-screenshots.sh), so it shows the same
+# classes every time.
+appId: ${APP_ID}
+---
+- runFlow:
+    file: ../../subflows/tab.yaml
+    env:
+      TAB: 'tab-today'
+- extendedWaitUntil:
+    visible: '.*(${MOCK_ASSIGNMENT}).*'
+    timeout: 15000

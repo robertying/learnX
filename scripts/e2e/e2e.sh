@@ -34,6 +34,8 @@
 # E2E_ORIENTATION (PORTRAIT, LANDSCAPE_LEFT, ...) sets the orientation each
 # flow starts in. scripts/e2e/e2e-devices.sh runs the flows on every device setup.
 # E2E_LANGUAGE (e.g. zh-Hans) launches the iOS app in that language.
+# E2E_CLOCK (an ISO 8601 moment) starts the app's clock there
+# (services/launchOptions.ts), for the store screenshots.
 # E2E_SCREENSHOTS=1 saves a screenshot of each tab, detail and settings page
 # the flows reach, and of search results and failures (.maestro/subflows/
 # shot.yaml), numbered in order, to build/e2e/screenshots/<run start time>/;
@@ -262,6 +264,7 @@ test_args=(
   -e ORIENTATION="${E2E_ORIENTATION:-PORTRAIT}"
   -e APP_LANGUAGE="${E2E_LANGUAGE:-}"
   -e STATE_CLEARED="${E2E_STATE_CLEARED:-}"
+  -e APP_CLOCK="${E2E_CLOCK:-}"
   -e IPAD="$ipad"
   -e SPLIT="$split"
   -e IOS_MAJOR="$ios_major"

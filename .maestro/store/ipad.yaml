@@ -9,7 +9,25 @@ name: App Store screenshots on the iPad
 - setOrientation: LANDSCAPE_LEFT
 - waitForAnimationToEnd
 
-# 1 Notices with a notice open
+# 1 Today with the schedule open beside it
+- runFlow: subflows/today.yaml
+- tapOn:
+    id: today-schedule
+- extendedWaitUntil:
+    visible:
+      id: schedule
+    timeout: 10000
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 01-today
+
+# 2 Notices with a notice open, another row's swipe actions and the filter
+# menu open
+- runFlow:
+    file: ../subflows/tab.yaml
+    env:
+      TAB: 'tab-notices'
 - runFlow:
     file: ../subflows/open.yaml
     env:
@@ -19,21 +37,15 @@ name: App Store screenshots on the iPad
 - extendedWaitUntil:
     visible: '.*(${MOCK_STORE_NOTICE_BODY}).*'
     timeout: 15000
-- runFlow:
-    file: ../subflows/screenshot.yaml
-    env:
-      NAME: 01-notices
-
-# 2 Another row's swipe actions with the filter menu open
 # On iPad a long press opens a context menu, which hides the filter button,
-# and Maestro's element swipe is too short: swipe the first row (MOCK_NOTICE)
-# by its position in the list pane.
-- assertVisible: '.*(${MOCK_NOTICE}).*'
+# and Maestro's element swipe is too short: swipe MOCK_STORE_SWIPE_NOTICE, the
+# fifth row, by its position in the list pane.
+- assertVisible: '.*(${MOCK_STORE_SWIPE_NOTICE}).*'
 # Landscape has three columns; the list runs from about 20% to 43% of the
 # width. Drag about a fifth of the row: farther runs the first action.
 - swipe:
-    start: 41%,19%
-    end: 36%,19%
+    start: 41%,64%
+    end: 36%,64%
     duration: 800
 - waitForAnimationToEnd
 # Fail here, not in the shot, if the actions didn't open.
@@ -43,7 +55,7 @@ name: App Store screenshots on the iPad
 - runFlow:
     file: ../subflows/screenshot.yaml
     env:
-      NAME: 02-notices-actions
+      NAME: 02-notices
 - tapOn: '(${T_all})(, .*)?'
 - waitForAnimationToEnd
 
@@ -120,7 +132,7 @@ name: App Store screenshots on the iPad
     file: ../subflows/search.yaml
     env:
       TERM: ${STORE_SEARCH_TERM}
-      RESULT: '.*(${MOCK_STORE_ASSIGNMENT}).*'
+      RESULT: '.*(${MOCK_NOTICE}).*'
 - pressKey: Enter
 - runFlow:
     file: ../subflows/screenshot.yaml
@@ -129,9 +141,25 @@ name: App Store screenshots on the iPad
 - tapOn: '${T_close}'
 - waitForAnimationToEnd
 
-# 8 Settings with the calendar page open
+# 8 Settings with the notifications page open
+- runFlow: subflows/notifications.yaml
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 08-notifications
+# Back to Today, where the calendar page's Settings opens from.
+- runFlow:
+    file: ../subflows/back.yaml
+    env:
+      LIST: '.*(${T_logout}).*'
+- runFlow:
+    file: ../subflows/back.yaml
+    env:
+      LIST: '.*(${T_todayDueSoon}).*'
+
+# 9 Settings with the calendar page open
 - runFlow: subflows/calendar.yaml
 - runFlow:
     file: ../subflows/screenshot.yaml
     env:
-      NAME: 08-calendar
+      NAME: 09-calendar
