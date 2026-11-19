@@ -212,7 +212,7 @@ set_hinge() {
 # Every flow, on simulator $1 in orientation $2, then the UI tests
 # (ios/learnXUITests/iOS) when $4 is 1: on the iPhone and the iPad, the
 # devices they're for (they set the orientation themselves). E2E_DUO_POSTURE
-# tells the flows the iPhone Duo is open, and how far (scripts/e2e/e2e.sh).
+# tells the flows the iPhone Duo is open (scripts/e2e/e2e.sh).
 run_ios_suite() {
   local udid="$1" orientation="$2" out="$3" ui="${4:-0}"
   MAESTRO_DEVICE="$udid" E2E_ORIENTATION="$orientation" E2E_UI_TESTS="$ui" \

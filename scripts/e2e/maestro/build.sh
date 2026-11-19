@@ -30,48 +30,75 @@
 #                               hierarchy: loads scripts/e2e/sim-ax-frame.m into
 #                               the app (MAESTRO_IOS_INSERT_LIBRARIES) and starts
 #                               a new runner after setFoldPosture
+#   maestro-inner-display-alerts.patch
+#                               a SpringBoard alert on the open iPhone Duo where
+#                               it shows, and its permission tap through
+#                               scripts/e2e/sim-touch.swift
 #
-#   scripts/e2e/maestro/build.sh <maestro checkout>
+#   scripts/e2e/maestro/build.sh <install folder>
 #
-# The checkout is the argument, or MAESTRO_DIR when there is none; one of them
-# is required. It is cloned there if it doesn't exist, and its folder must be
-# named Maestro (the driver's build script insists on it).
+# Clones Maestro's base commit (no history) into a temporary folder, applies
+# the patches, builds it, puts the installed tool in <install folder> (replacing
+# an earlier one there) and deletes the clone, so only what running needs is
+# kept. Prints the folder to put first on PATH:
+#   PATH="$(scripts/e2e/maestro/build.sh <install folder> | tail -n 1):$PATH" scripts/e2e/e2e.sh ios
 #
-# Needs Xcode and JDK 17. Resets the checkout to the patched commits unless
-# MAESTRO_KEEP=1. Prints the folder to put first on PATH:
-#   PATH="$(scripts/e2e/maestro/build.sh <checkout> | tail -n 1):$PATH" scripts/e2e/e2e.sh ios
+# MAESTRO_SOURCE=<checkout> builds that checkout as it is instead, and keeps
+# it, after cloning the base and applying the patches there if it doesn't
+# exist: for changing the patches or moving them to a new Maestro release. Its
+# folder must be named Maestro (the driver's build script insists on it).
+#
+# Needs Xcode and JDK 17.
 set -euo pipefail
 
 here="$(cd "$(dirname "$0")" && pwd)"
-dir="${1:-${MAESTRO_DIR:-}}"
-if [ -z "$dir" ]; then
-  echo "Usage: scripts/e2e/maestro/build.sh <maestro checkout> (or set MAESTRO_DIR)" >&2
+install="${1:-}"
+if [ -z "$install" ]; then
+  echo "Usage: scripts/e2e/maestro/build.sh <install folder>" >&2
   exit 2
 fi
-if [ "$(basename "$dir")" != Maestro ]; then
-  echo "The checkout's folder must be named Maestro: $dir" >&2
+install="$(cd "$(dirname "$install")" && pwd)/$(basename "$install")"
+# Only an earlier install, or a Maestro checkout an older build.sh built in, is
+# replaced.
+if [ -e "$install" ] && [ ! -x "$install/bin/maestro" ] && [ ! -d "$install/maestro-cli" ]; then
+  echo "$install isn't an earlier Maestro install; choose another folder" >&2
   exit 2
 fi
-# The upstream commit the patch was written against.
-base="${MAESTRO_BASE:-aaa248d}"
+# The upstream commit the patches were written against.
+base="${MAESTRO_BASE:-aaa248d7fd4ca4924444dc027af9c7a62a9be348}"
 
-if [ ! -d "$dir/.git" ]; then
-  git clone https://github.com/mobile-dev-inc/Maestro.git "$dir" >&2
-fi
-cd "$dir"
-# MAESTRO_KEEP=1 builds the checkout as it is (for trying driver changes).
-if [ "${MAESTRO_KEEP:-}" != 1 ]; then
-  git fetch origin main >&2
-  git checkout -q -B learnx-patched "$base" >&2
-  git -c commit.gpgsign=false am -q "$here/maestro-display.patch" \
+# A checkout of the base with the patches applied, in folder $1.
+patched_checkout() {
+  git init -q "$1"
+  git -C "$1" fetch -q --depth 1 https://github.com/mobile-dev-inc/Maestro.git "$base"
+  git -C "$1" checkout -q -B learnx-patched FETCH_HEAD
+  git -C "$1" -c commit.gpgsign=false am -q "$here/maestro-display.patch" \
     "$here/maestro-fold-posture.patch" \
     "$here/maestro-hierarchy-fallback.patch" \
     "$here/maestro-tiny-elements.patch" \
     "$here/maestro-springboard-alerts.patch" \
     "$here/maestro-instrumentation-shell.patch" \
     "$here/maestro-sim-touch.patch" \
-    "$here/maestro-inner-display-tree.patch" >&2
+    "$here/maestro-inner-display-tree.patch" \
+    "$here/maestro-inner-display-alerts.patch"
+}
+
+if [ -n "${MAESTRO_SOURCE:-}" ]; then
+  dir="$MAESTRO_SOURCE"
+  if [ "$(basename "$dir")" != Maestro ]; then
+    echo "MAESTRO_SOURCE's folder must be named Maestro: $dir" >&2
+    exit 2
+  fi
+  if [ ! -d "$dir" ]; then
+    patched_checkout "$dir" >&2
+  fi
+else
+  tmp="$(mktemp -d -t maestro-build)"
+  trap 'rm -rf "$tmp"' EXIT
+  dir="$tmp/Maestro"
+  patched_checkout "$dir" >&2
 fi
+cd "$dir"
 
 if [ -z "${JAVA_HOME:-}" ] && [ -x /usr/libexec/java_home ]; then
   JAVA_HOME="$(/usr/libexec/java_home -v 17)"
@@ -91,7 +118,7 @@ fi
 # --no-daemon: a one-off build with its own Gradle version, whose daemon (and
 # the Kotlin daemon it starts) would otherwise sit idle for hours.
 xcconfig="$(mktemp -t maestro-driver).xcconfig"
-trap 'rm -f "$xcconfig"' EXIT
+trap 'rm -f "$xcconfig"; [ -z "${tmp:-}" ] || rm -rf "$tmp"' EXIT
 echo "IPHONEOS_DEPLOYMENT_TARGET = 15.0" > "$xcconfig"
 XCODE_XCCONFIG_FILE="$xcconfig" ARCHS=arm64 \
   ./gradlew --no-daemon :maestro-ios-driver:buildIosDriver --rerun :maestro-cli:installDist >&2
@@ -103,4 +130,9 @@ if [ ! -s "$driver/maestro-driver-iosUITests-Runner.zip" ]; then
   exit 1
 fi
 
-echo "$dir/maestro-cli/build/install/maestro/bin"
+# Swap the install in only once it is complete.
+rm -rf "$install.new"
+cp -R maestro-cli/build/install/maestro "$install.new"
+rm -rf "$install"
+mv "$install.new" "$install"
+echo "$install/bin"
