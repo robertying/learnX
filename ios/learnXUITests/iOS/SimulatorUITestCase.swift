@@ -11,8 +11,15 @@ class SimulatorUITestCase: XCTestCase {
   /// The emulated server's delay (`services/launchOptions.ts`): none, normal or slow.
   var mockLatency: String { "none" }
 
+  /// The kind of device the class's tests are for, and why: on another they're skipped before the app launches,
+  /// which would take seconds for nothing.
+  var onlyOn: (idiom: UIUserInterfaceIdiom, reason: String)? { nil }
+
   override func setUp() async throws {
     continueAfterFailure = false
+    if let onlyOn, UIDevice.current.userInterfaceIdiom != onlyOn.idiom {
+      throw XCTSkip(onlyOn.reason)
+    }
     app = XCUIApplication()
     app.launchArguments += ["-AppleLanguages", "(zh-Hans)", "-AppleLocale", "zh_CN", "-mockLatency", mockLatency]
     app.launch()
@@ -20,7 +27,7 @@ class SimulatorUITestCase: XCTestCase {
   }
 
   override func tearDown() async throws {
-    app.terminate()
+    app?.terminate()
   }
 
   // MARK: - Steps

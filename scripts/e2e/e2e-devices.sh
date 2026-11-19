@@ -50,6 +50,12 @@
 # E2E_SCREENSHOTS=1 saves each profile's screenshots (scripts/e2e/e2e.sh) to
 # its results' screenshots/ folder.
 #
+# E2E_PARALLEL=1 runs the Android profiles beside the iOS ones, one emulator
+# and one simulator at a time, each line of output starting with its side
+# ([ios], [android]). Maestro runs on both at once fine, unlike on two
+# simulators. Not with E2E_BUILD=1: an emulator can stop answering while
+# Xcode or Gradle builds beside it, so install the builds first.
+#
 # Results, with Maestro's output and a JUnit report:
 # build/e2e/devices/<run start time>/<profile>/. A run keeps the earlier ones'
 # results (failure screenshots included); only the latest $E2E_KEEP_RUNS
@@ -69,6 +75,7 @@ avd="${E2E_AVD:-}"
 iphone_min="${E2E_IPHONE_MIN:-}"
 avd_min="${E2E_AVD_MIN:-}"
 build="${E2E_BUILD:-0}"
+parallel="${E2E_PARALLEL:-0}"
 max_booted="${E2E_MAX_BOOTED:-3}"
 ios_app_id="io.robertying.learnX"
 android_app_id="io.robertying.learnx"
@@ -357,14 +364,64 @@ find "$runs_root" -mindepth 1 -maxdepth 1 -type d | sort |
   awk -v keep="$keep_runs" '{ runs[NR] = $0 } END { for (i = 1; i <= NR - keep; i++) print runs[i] }' |
   while IFS= read -r old; do rm -rf "$old"; done
 
-for profile in $profiles; do
-  log "Profile: $profile"
-  if run_profile "$profile"; then
-    passed="$passed $profile"
-  else
-    failed="$failed $profile"
+# Run profiles $@ one after another, adding each to passed or failed.
+run_profiles() {
+  local profile
+  for profile in "$@"; do
+    log "Profile: $profile"
+    if run_profile "$profile"; then
+      passed="$passed $profile"
+    else
+      failed="$failed $profile"
+    fi
+  done
+}
+
+if [ "$parallel" = 1 ]; then
+  if [ "$build" = 1 ]; then
+    echo "E2E_PARALLEL=1 doesn't build: install the builds with scripts/e2e/e2e-build.sh first" >&2
+    exit 2
   fi
-done
+  ios_profiles=""
+  android_profiles=""
+  for profile in $profiles; do
+    case "$profile" in
+    fold-* | android-*) android_profiles="$android_profiles $profile" ;;
+    *) ios_profiles="$ios_profiles $profile" ;;
+    esac
+  done
+  # Each side in a subshell of its own, with its own booted device to shut
+  # down, writing what passed and failed for the summary below.
+  for side in ios android; do
+    side_profiles="${side}_profiles"
+    [ -n "${!side_profiles}" ] || continue
+    (
+      trap cleanup EXIT
+      # Word splitting makes the list arguments.
+      # shellcheck disable=SC2086
+      run_profiles ${!side_profiles}
+      printf '%s\n' "$passed" >"$out_root/.passed-$side"
+      printf '%s\n' "$failed" >"$out_root/.failed-$side"
+    ) > >(sed -u "s/^/[$side] /") 2>&1 &
+  done
+  wait
+  for side in ios android; do
+    side_profiles="${side}_profiles"
+    [ -n "${!side_profiles}" ] || continue
+    if [ -f "$out_root/.failed-$side" ]; then
+      passed="$passed$(cat "$out_root/.passed-$side")"
+      failed="$failed$(cat "$out_root/.failed-$side")"
+    else
+      # The side stopped before its summary: count all of it as failed.
+      failed="$failed${!side_profiles}"
+    fi
+    rm -f "$out_root/.passed-$side" "$out_root/.failed-$side"
+  done
+else
+  # Word splitting makes the list arguments.
+  # shellcheck disable=SC2086
+  run_profiles $profiles
+fi
 
 log "Passed:${passed:- none}"
 if [ -n "$failed" ]; then
