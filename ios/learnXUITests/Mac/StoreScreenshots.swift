@@ -8,10 +8,12 @@ import XCTest
 /// as its context menu.
 @MainActor
 final class StoreScreenshots: LearnXUITestCase {
-  /// The clock scripts/e2e/store-screenshots.sh pins, so Today shows the same classes every time.
+  /// The clock scripts/e2e/store-screenshots.sh pins, so Today shows the same classes every time, and the window's
+  /// size for the store shots, in place of the one the app saved (`WindowFrameAutosave`).
   override var launchOptions: [String: String] {
     let clock = ProcessInfo.processInfo.environment["E2E_CLOCK"] ?? ""
-    return clock.isEmpty ? [:] : ["mockClock": clock]
+    return ["Window Frame Main": "{{120, 120}, {1096, 741}}"].merging(
+      clock.isEmpty ? [:] : ["mockClock": clock], uniquingKeysWith: { $1 })
   }
 
   /// Beijing's time zone, so Today shows class times without a Beijing time note.
@@ -77,7 +79,9 @@ final class StoreScreenshots: LearnXUITestCase {
     UIPasteboard.general.string = ""
     try waitFor(card: "notice-card", "MOCK_NOTICE")
     try shot("07-search")
-    app.typeKey(.escape, modifierFlags: [])
+    // Escape only leaves the field; the sheet closes with its button.
+    try waitFor(label: "T_close").click()
+    waitForAbsence(field, "the search sheet", timeout: 5)
 
     // 8 Settings with the notifications page open
     try openSetting("settings-notifications", page: "notification-settings")

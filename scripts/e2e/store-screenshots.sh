@@ -13,18 +13,20 @@
 #   ipad            .maestro/store/ipad.yaml         ios/ipad/ (landscape)
 #   android-phone   .maestro/store/android-phone.yaml   android/phone/
 #   android-tablet  .maestro/store/android-tablet.yaml  android/tablet/
-#   mac             ios/learnXUITests/Mac/StoreScreenshots.swift  macos/windows/
+#   mac             ios/learnXUITests/Mac/StoreScreenshots.swift  macos/raw/
 #
 # mac runs the Mac app's XCUITest (scripts/e2e/e2e-mac.sh: it takes over the
 # pointer and keyboard, so start it by hand and leave the Mac alone) and saves
-# the window shots, to be composed onto the store background.
+# the window shots, raw until composed onto the store background
+# (macos/NN-<slug>.png).
 #
 # device: the simulator UDID or emulator serial. Defaults to MAESTRO_DEVICE,
 # else the one booted simulator (iOS) or connected emulator (Android).
 #
 # Settings, all optional:
 #   STORE_OUT_DIR          where the shots go (default build/store-screenshots)
-#   STORE_LANGUAGE         iOS app and system language (default zh-Hans)
+#   STORE_LANGUAGE         iOS app and system language, Mac app language
+#                          (default zh-Hans)
 #   STORE_LOCALE           iOS system region (default zh_CN)
 #   STORE_ANDROID_LOCALE   Android app locale (default zh-CN)
 #   STORE_ANDROID_SIZE     Android screen size while shooting (default
@@ -58,7 +60,7 @@ case "$target" in
 iphone) platform=ios flow=iphone folder=ios/iphone ;;
 duo) platform=ios flow=duo folder=ios/iphone-duo ;;
 ipad) platform=ios flow=ipad folder=ios/ipad ;;
-mac) platform=mac folder=macos/windows ;;
+mac) platform=mac folder=macos/raw ;;
 android-phone)
   platform=android flow=android-phone folder=android/phone
   size="${STORE_ANDROID_SIZE:-1080x1920}" density="${STORE_ANDROID_DENSITY:-420}"
@@ -97,6 +99,7 @@ out="$(cd "$out_root/$folder" && pwd)"
 
 if [ "$platform" = mac ]; then
   status=0
+  export E2E_LANGUAGE="${STORE_LANGUAGE:-zh-Hans}"
   scripts/e2e/e2e-mac.sh -only-testing:learnXUITests/StoreScreenshots || status=$?
   # The shots are the test's attachments; name each file after its
   # attachment ("01-notices_0_<uuid>.png" -> 01-notices.png).

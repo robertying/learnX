@@ -39,7 +39,11 @@ class LearnXUITestCase: XCTestCase {
   func launch(_ options: [String: String] = [:]) throws {
     app?.terminate()
     app = XCUIApplication()
-    app.launchArguments += ["-AppleLanguages", "(zh-Hans)", "-AppleLocale", "zh_CN"]
+    // Chinese unless E2E_LANGUAGE (scripts/e2e/e2e-mac.sh) asks for English.
+    let english = ProcessInfo.processInfo.environment["E2E_LANGUAGE"]?.hasPrefix("en") == true
+    app.launchArguments += english
+      ? ["-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
+      : ["-AppleLanguages", "(zh-Hans)", "-AppleLocale", "zh_CN"]
     for (name, value) in ["mockLatency": "none"].merging(options, uniquingKeysWith: { $1 }) {
       app.launchArguments += ["-\(name)", value]
     }
