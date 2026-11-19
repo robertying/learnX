@@ -14,7 +14,8 @@
 #   temporary files Xcode keeps for them;
 # - its local branch, when a remote branch has the branch's last commit.
 # Apps built there are unregistered from Launch Services first, so the share
-# sheet and learnx:// links don't keep pointing at a deleted copy.
+# sheet and learnx:// links don't keep pointing at a deleted copy
+# (unregister-apps.sh unregisters every stray copy, wherever it was built).
 #
 # It takes exactly one worktree and never looks for others to clean: whether
 # another worktree is still someone's work is not something a script can
