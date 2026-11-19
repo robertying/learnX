@@ -89,6 +89,16 @@ export const packageConfig = (options: PackageOptions = {}): Configuration => {
       output: options.output ?? '../build/electron/dist',
       buildResources: 'icons',
     },
+    // Fuses flipped in the packaged Electron binary: it never runs as plain
+    // Node (`ELECTRON_RUN_AS_NODE`), takes no code from `NODE_OPTIONS`, and
+    // gives `file://` pages no extra privileges, since the app serves itself
+    // from `app://` (appOrigin.ts). `--inspect` stays: the packaged E2E
+    // tests launch through it (Playwright's `electron.launch`).
+    electronFuses: {
+      runAsNode: false,
+      enableNodeOptionsEnvironmentVariable: false,
+      grantFileProtocolExtraPrivileges: false,
+    },
     // Electron's downloads for each platform, kept with the dev runner's.
     electronDownload: {
       cache: path.join(electronDir, '..', 'build', 'electron', 'cache'),
