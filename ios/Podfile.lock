@@ -196,6 +196,10 @@ PODS:
   - LearnXMenus/Tests (1.0.0):
     - ExpoModulesCore
     - ExpoUI
+  - LearnXPdf (1.0.0):
+    - ExpoModulesCore
+  - LearnXPdf/Tests (1.0.0):
+    - ExpoModulesCore
   - LearnXQuickLook (1.0.0):
     - ExpoModulesCore
   - LearnXQuickLook/Tests (1.0.0):
@@ -1556,29 +1560,6 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - react-native-blob-util (1.1.1):
-    - hermes-engine
-    - RCTRequired
-    - RCTTypeSafety
-    - React-bridging
-    - React-Core
-    - React-Core-prebuilt
-    - React-cxxstableapi
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-ImageManager
-    - React-jsi
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-renderercss
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/core
-    - ReactNativeDependencies
-    - Yoga
   - react-native-bottom-tabs (1.5.0):
     - hermes-engine
     - RCTRequired
@@ -1651,29 +1632,6 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - SwiftUIIntrospect (~> 1.0)
-    - Yoga
-  - react-native-pdf (7.0.5):
-    - hermes-engine
-    - RCTRequired
-    - RCTTypeSafety
-    - React-bridging
-    - React-Core
-    - React-Core-prebuilt
-    - React-cxxstableapi
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-ImageManager
-    - React-jsi
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-renderercss
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/core
-    - ReactNativeDependencies
     - Yoga
   - react-native-safe-area-context (5.11.1):
     - hermes-engine
@@ -2516,6 +2474,8 @@ DEPENDENCIES:
   - LearnXCrashlytics/Tests (from `../modules/crashlytics/ios`)
   - LearnXMenus (from `../modules/menus/ios`)
   - LearnXMenus/Tests (from `../modules/menus/ios`)
+  - LearnXPdf (from `../modules/pdf/ios`)
+  - LearnXPdf/Tests (from `../modules/pdf/ios`)
   - LearnXQuickLook (from `../modules/quicklook/ios`)
   - LearnXQuickLook/Tests (from `../modules/quicklook/ios`)
   - LearnXShare (from `../modules/share/ios`)
@@ -2569,10 +2529,8 @@ DEPENDENCIES:
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
   - React-mutationobservernativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/mutationobserver`)
-  - react-native-blob-util (from `../node_modules/react-native-blob-util`)
   - react-native-bottom-tabs (from `../node_modules/react-native-bottom-tabs`)
   - react-native-pager-view (from `../node_modules/react-native-pager-view`)
-  - react-native-pdf (from `../node_modules/react-native-pdf`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
@@ -2717,6 +2675,8 @@ EXTERNAL SOURCES:
     :path: "../modules/crashlytics/ios"
   LearnXMenus:
     :path: "../modules/menus/ios"
+  LearnXPdf:
+    :path: "../modules/pdf/ios"
   LearnXQuickLook:
     :path: "../modules/quicklook/ios"
   LearnXShare:
@@ -2809,14 +2769,10 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
   React-mutationobservernativemodule:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/mutationobserver"
-  react-native-blob-util:
-    :path: "../node_modules/react-native-blob-util"
   react-native-bottom-tabs:
     :path: "../node_modules/react-native-bottom-tabs"
   react-native-pager-view:
     :path: "../node_modules/react-native-pager-view"
-  react-native-pdf:
-    :path: "../node_modules/react-native-pdf"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-webview:
@@ -2960,6 +2916,7 @@ SPEC CHECKSUMS:
   hermes-engine: 79484fc4e58f328d01b9339ef899ca633d3702ee
   LearnXCrashlytics: f54c9b50163ce8255ee9148b00819a6203273c3e
   LearnXMenus: 2dcfdffd7d21297d1235b14669f1256ec039f030
+  LearnXPdf: 56c8308a1a67a23f6def9c35f208a0a3f16b52d1
   LearnXQuickLook: 5a07c6af2e517166ac3e4a896533d7f0e308abfb
   LearnXShare: 593f47ced0cdb48861422731919d6f541c5e8085
   LearnXShortcuts: f7d94d3eab97e8ecb2feaaf05c27ca59f6ef6cd9
@@ -3007,10 +2964,8 @@ SPEC CHECKSUMS:
   React-Mapbuffer: 8a30d6d1aa30274771dc5d22f6778fa7689d98b8
   React-microtasksnativemodule: c5df4b7fe2553c25d419b99c586179ab77594b5b
   React-mutationobservernativemodule: b85faf3c54644c0ef2c758cd8c4e6ce16fb1f8ae
-  react-native-blob-util: c14f542c2965a8d33a8feac2bed2d29e11be4971
   react-native-bottom-tabs: 9a566c85396bd965466ab5f5470ba3f6dccb32c4
   react-native-pager-view: faf53d79edd117d1638167d5188f17faa2f2fd8c
-  react-native-pdf: 6b234f68a08fe3256c3bd1b61262943537766173
   react-native-safe-area-context: f54c903d3a8c8ddd602e85d4e5bcfe9944de85bc
   react-native-webview: 0350e63d9eff606d9923619409987b6cd1ac58f5
   React-NativeModulesApple: 8cfb2f308f48c48068c96b932e7f0e4297c23342

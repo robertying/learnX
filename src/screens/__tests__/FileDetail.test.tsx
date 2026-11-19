@@ -60,12 +60,11 @@ jest.mock('react-native-webview', () => {
     ),
   };
 });
-jest.mock('react-native-pdf', () => {
+jest.mock('modules/pdf', () => {
   const { View } = require('react-native');
   return {
-    __esModule: true,
-    default: (props: { onError?: (error: Error) => void }) => (
-      <View testID="pdf" {...{ onError: props.onError }} />
+    PdfView: (props: { uri: string; onError?: () => void }) => (
+      <View testID="pdf" {...{ uri: props.uri, onError: props.onError }} />
     ),
   };
 });
@@ -113,7 +112,7 @@ it('shows progress while downloading, then the PDF, marking it seen', async () =
 
   downloaded({ path: 'file:///a.pdf' });
   await renderScreen({ id: pdf.id });
-  expect(screen.getByTestId('pdf')).toBeTruthy();
+  expect(screen.getByTestId('pdf').props.uri).toBe('file:///a.pdf');
   expect(markFileSeen).toHaveBeenCalledWith(pdf.id);
   // White pages stay clear of the header and tab bar, whose text follows the
   // app's dark mode
@@ -130,7 +129,9 @@ it("offers to download again when the PDF can't be read", async () => {
   downloaded({ path: 'file:///a.pdf' });
   await renderScreen({ id: pdf.id });
   await act(async () => {
-    screen.getByTestId('pdf').props.onError(new Error('Load pdf failed'));
+    screen
+      .getByTestId('pdf')
+      .props.onError({ nativeEvent: { message: 'The PDF needs a password.' } });
   });
   expect(screen.queryByTestId('pdf')).toBeNull();
   expect(screen.getByText(t('previewFailedTitle'))).toBeTruthy();

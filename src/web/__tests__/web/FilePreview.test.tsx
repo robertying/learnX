@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import FilePreview, { previewUrlOf } from 'web/FilePreview';
-import Pdf from 'web/packages/Pdf';
+import { PdfView } from 'modules/pdf';
 import WebView from 'web/packages/WebView';
 import {
   installBridge,
@@ -56,8 +56,8 @@ it('shows a PDF in Chromium’s viewer and a picture fitted', () => {
   expect(container.querySelector('iframe,img')).toBeNull();
 });
 
-it('stands in for react-native-pdf and for a web view of a file', () => {
-  const pdf = render(<Pdf source={{ uri: download }} />);
+it('shows a PDF and a web view of a file', () => {
+  const pdf = render(<PdfView uri={download} />);
   expect(pdf.getByTestId('pdf-preview')).toBeTruthy();
   expect(pdf.container.querySelector('iframe')).toBeTruthy();
 

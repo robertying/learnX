@@ -44,6 +44,11 @@ A module may have an `index.web.ts(x)` for the Electron app beside its `index.ts
 - Quick Look draws Office documents only while the app is active: a preview opened while another app is in front stays blank until learnX comes to the front. Inside the preview, the layout is Quick Look's own.
 - The floating panel (⌘Y, as Space opens it in Finder) works for any downloaded file. Its controller joins the key window's responder chain, where the panel looks for it.
 
+## PDFs
+
+- File detail shows a PDF in `modules/pdf`: PDFKit on iOS and the Mac, which fits the pages to the width, keeps the zoom when the view resizes and opens below a translucent header. The Electron app uses Chromium's viewer.
+- On Android, Jetpack's `PdfView` (androidx.pdf) draws the document in an isolated process, so a crash in the renderer can't take the app down; `MainApplication` skips React Native's setup there. Where Jetpack would fall back to the old platform renderer (before Android 15, without the S extension 13 module update), which lays out landscape pages at the wrong size, AndroidPdfViewer on Pdfium draws it instead (`PdfBackend`). `PdfiumView` works around what that library gets wrong: it closes the document on the renderer thread after any render, turns drawing on, and loads again after a resize, which it doesn't refit.
+
 ## Sharing files to learnX
 
 - iOS and Mac: the share extension copies the first shared file into the app group, records it in the group's user defaults and opens `learnx://`; `modules/share` hands it to JS once. Plain text isn't taken.
