@@ -1,0 +1,594 @@
+From 95c8e74374e6081900fa0599f1803d70c2407b7d Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 19 Nov 2026 05:32:24 -0800
+Subject: [PATCH] feat(android): add a pinch command
+
+Adds `pinch: {scale, point, duration}`: two fingers move apart (scale
+above 1, zooming in) or together around a point, "50%,50%" by default,
+or pixels as "x,y". The scale defaults to 2 and the duration to 500 ms.
+
+`adb shell input` and `sendevent` (without root) send one finger only,
+so the Android driver's instrumentation moves the two pointers with
+UiAutomator's performTwoPointerGesture, through a new `pinch` rpc. The
+fingers end at most 40% of the screen's shorter side apart, less near a
+side edge, so they land around the point (inside a split view's pane),
+and stay at least a tenth of that apart whatever the scale. Other
+drivers fail with an unsupported-command error.
+---
+ .../mobile/maestro/MaestroDriverService.kt    |  29 ++++
+ .../src/main/java/maestro/Driver.kt           |   7 +
+ .../src/main/java/maestro/Maestro.kt          |  24 +++
+ .../src/main/java/maestro/PinchSpans.kt       |  20 +++
+ .../java/maestro/drivers/AndroidDriver.kt     |  16 ++
+ .../src/test/java/maestro/PinchSpansTest.kt   |  42 ++++++
+ .../main/java/maestro/orchestra/Commands.kt   |  18 +++
+ .../java/maestro/orchestra/MaestroCommand.kt  |   3 +
+ .../main/java/maestro/orchestra/Orchestra.kt  |  23 +++
+ .../orchestra/yaml/YamlFluentCommand.kt       |  22 +++
+ .../java/maestro/orchestra/yaml/YamlPinch.kt  |  13 ++
+ .../MaestroCommandSerializationTest.kt        |  29 ++++
+ .../error.txt                                 |   2 +-
+ .../src/main/proto/maestro_android.proto      |  13 ++
+ .../kotlin/maestro/test/drivers/FakeDriver.kt |  13 ++
+ .../kotlin/maestro/test/IntegrationTest.kt    |  23 +++
+ .../src/test/resources/161_pinch.yaml         |  11 ++
+ 17 files changed, 307 insertions(+), 1 deletion(-)
+ create mode 100644 maestro-client/src/main/java/maestro/PinchSpans.kt
+ create mode 100644 maestro-client/src/test/java/maestro/PinchSpansTest.kt
+ create mode 100644 maestro-orchestra/src/main/java/maestro/orchestra/yaml/YamlPinch.kt
+ create mode 100644 maestro-test/src/test/resources/161_pinch.yaml
+
+diff --git a/maestro-android/src/androidTest/java/dev/mobile/maestro/MaestroDriverService.kt b/maestro-android/src/androidTest/java/dev/mobile/maestro/MaestroDriverService.kt
+index 9e75fec..51f129a 100644
+--- a/maestro-android/src/androidTest/java/dev/mobile/maestro/MaestroDriverService.kt
++++ b/maestro-android/src/androidTest/java/dev/mobile/maestro/MaestroDriverService.kt
+@@ -41,6 +41,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
+ import androidx.test.platform.app.InstrumentationRegistry
+ import androidx.test.uiautomator.Configurator
+ import androidx.test.uiautomator.UiDevice
++import androidx.test.uiautomator.UiObject
++import androidx.test.uiautomator.UiSelector
+ import androidx.test.uiautomator.UiDeviceExt.clickExt
+ import com.google.android.gms.location.LocationServices
+ import dev.mobile.maestro.location.FusedLocationProvider
+@@ -50,6 +52,7 @@ import dev.mobile.maestro.location.PlayServices
+ import dev.mobile.maestro.screenshot.ScreenshotException
+ import dev.mobile.maestro.screenshot.ScreenshotService
+ import io.grpc.Metadata
++import android.graphics.Point
+ import io.grpc.Status
+ import io.grpc.StatusRuntimeException
+ import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder
+@@ -63,6 +66,7 @@ import maestro_android.emptyResponse
+ import maestro_android.eraseAllTextResponse
+ import maestro_android.inputTextResponse
+ import maestro_android.launchAppResponse
++import maestro_android.pinchResponse
+ import maestro_android.screenshotResponse
+ import maestro_android.setLocationResponse
+ import maestro_android.tapResponse
+@@ -267,6 +271,31 @@ class Service(
+         }
+     }
+ 
++    override fun pinch(
++        request: MaestroAndroid.PinchRequest,
++        responseObserver: StreamObserver<MaestroAndroid.PinchResponse>
++    ) {
++        try {
++            val y = request.centerY
++            val startHalf = request.startSpan / 2
++            val endHalf = request.endSpan / 2
++            // UiAutomator moves the pointers one step every 5 ms.
++            val steps = maxOf(1, request.durationMs / 5)
++            UiObject(UiSelector()).performTwoPointerGesture(
++                Point(request.centerX - startHalf, y),
++                Point(request.centerX + startHalf, y),
++                Point(request.centerX - endHalf, y),
++                Point(request.centerX + endHalf, y),
++                steps,
++            )
++
++            responseObserver.onNext(pinchResponse {})
++            responseObserver.onCompleted()
++        } catch (t: Throwable) {
++            responseObserver.onError(t.internalError())
++        }
++    }
++
+     override fun addMedia(responseObserver: StreamObserver<MaestroAndroid.AddMediaResponse>): StreamObserver<MaestroAndroid.AddMediaRequest> {
+         return object : StreamObserver<MaestroAndroid.AddMediaRequest> {
+ 
+diff --git a/maestro-client/src/main/java/maestro/Driver.kt b/maestro-client/src/main/java/maestro/Driver.kt
+index 0b4f128..7b35f2e 100644
+--- a/maestro-client/src/main/java/maestro/Driver.kt
++++ b/maestro-client/src/main/java/maestro/Driver.kt
+@@ -121,6 +121,13 @@ interface Driver {
+     fun setFoldPosture(posture: FoldPosture): Unit =
+         throw MaestroException.InvalidCommand("setFoldPosture is only supported on foldable iOS simulators")
+ 
++    /**
++     * Pinches with two fingers around [center], from fingers [startSpan] apart to [endSpan] apart, in the device's
++     * pixels: zooming in when they move apart.
++     */
++    fun pinch(center: Point, startSpan: Int, endSpan: Int, durationMs: Long): Unit =
++        throw MaestroException.InvalidCommand("pinch is only supported on Android")
++
+     fun setAndroidChromeDevToolsEnabled(enabled: Boolean) = Unit
+ 
+     fun queryOnDeviceElements(query: OnDeviceElementQuery): List<TreeNode> {
+diff --git a/maestro-client/src/main/java/maestro/Maestro.kt b/maestro-client/src/main/java/maestro/Maestro.kt
+index aba775f..7b57911 100644
+--- a/maestro-client/src/main/java/maestro/Maestro.kt
++++ b/maestro-client/src/main/java/maestro/Maestro.kt
+@@ -794,6 +794,30 @@ class Maestro(
+         waitForAppToSettle()
+     }
+ 
++    /**
++     * Pinches around the point [percentX], [percentY] of the screen, so that what is under the fingers scales by
++     * [scale]: above 1 zooms in, below 1 zooms out.
++     */
++    suspend fun pinch(percentX: Int, percentY: Int, scale: Double, durationMs: Long) {
++        val deviceInfo = runInterruptible(Dispatchers.IO) { driver.deviceInfo() }
++        val center = Point(deviceInfo.widthGrid * percentX / 100, deviceInfo.heightGrid * percentY / 100)
++        pinch(center, scale, durationMs, deviceInfo)
++    }
++
++    suspend fun pinch(center: Point, scale: Double, durationMs: Long) {
++        val deviceInfo = runInterruptible(Dispatchers.IO) { driver.deviceInfo() }
++        pinch(center, scale, durationMs, deviceInfo)
++    }
++
++    private suspend fun pinch(center: Point, scale: Double, durationMs: Long, deviceInfo: DeviceInfo) {
++        val (startSpan, endSpan) = pinchSpans(center, deviceInfo.widthGrid, deviceInfo.heightGrid, scale)
++        LOGGER.info("Pinching at $center from $startSpan to $endSpan over ${durationMs}ms")
++
++        runInterruptible(Dispatchers.IO) { driver.pinch(center, startSpan, endSpan, durationMs) }
++
++        waitForAppToSettle()
++    }
++
+     suspend fun setAndroidChromeDevToolsEnabled(enabled: Boolean) = runInterruptible(Dispatchers.IO) {
+         driver.setAndroidChromeDevToolsEnabled(enabled)
+     }
+diff --git a/maestro-client/src/main/java/maestro/PinchSpans.kt b/maestro-client/src/main/java/maestro/PinchSpans.kt
+new file mode 100644
+index 0000000..2fd70e9
+--- /dev/null
++++ b/maestro-client/src/main/java/maestro/PinchSpans.kt
+@@ -0,0 +1,20 @@
++package maestro
++
++import kotlin.math.roundToInt
++
++/**
++ * How far apart two fingers, side by side, start and end a pinch around [center] that scales what is under them by
++ * [scale], on a screen [width] by [height] pixels. The wider span is 40% of the shorter side, and less near a side
++ * edge, so that both fingers land around [center] (in a split view, inside its pane). The narrower one is at least a
++ * tenth of the wider, so a scale beyond 10 (or under 1/10) pinches only that far.
++ */
++fun pinchSpans(center: Point, width: Int, height: Int, scale: Double): Pair<Int, Int> {
++    require(scale > 0) { "A pinch's scale must be above 0: $scale" }
++    val wide = minOf(minOf(width, height) * 0.4, minOf(center.x, width - center.x) * 2 * 0.9)
++    val narrow = maxOf(wide / 10, wide / maxOf(scale, 1 / scale))
++    return if (scale >= 1) {
++        narrow.roundToInt() to wide.roundToInt()
++    } else {
++        wide.roundToInt() to narrow.roundToInt()
++    }
++}
+diff --git a/maestro-client/src/main/java/maestro/drivers/AndroidDriver.kt b/maestro-client/src/main/java/maestro/drivers/AndroidDriver.kt
+index 2f98656..1d5d468 100644
+--- a/maestro-client/src/main/java/maestro/drivers/AndroidDriver.kt
++++ b/maestro-client/src/main/java/maestro/drivers/AndroidDriver.kt
+@@ -282,6 +282,22 @@ class AndroidDriver(
+         }
+     }
+ 
++    override fun pinch(center: Point, startSpan: Int, endSpan: Int, durationMs: Long) {
++        metrics.measured("operation", mapOf("command" to "pinch")) {
++            connection.execute("pinch") {
++                it.pinch(
++                    pinchRequest {
++                        centerX = center.x
++                        centerY = center.y
++                        this.startSpan = startSpan
++                        this.endSpan = endSpan
++                        this.durationMs = durationMs.toInt()
++                    }
++                )
++            }.orThrow()
++        }
++    }
++
+     override fun longPress(point: Point) {
+         metrics.measured("operation", mapOf("command" to "longPress")) {
+             shell("input swipe ${point.x} ${point.y} ${point.x} ${point.y} 3000")
+diff --git a/maestro-client/src/test/java/maestro/PinchSpansTest.kt b/maestro-client/src/test/java/maestro/PinchSpansTest.kt
+new file mode 100644
+index 0000000..db7637e
+--- /dev/null
++++ b/maestro-client/src/test/java/maestro/PinchSpansTest.kt
+@@ -0,0 +1,42 @@
++package maestro
++
++import com.google.common.truth.Truth.assertThat
++import org.junit.jupiter.api.Test
++import org.junit.jupiter.api.assertThrows
++
++class PinchSpansTest {
++
++    private val center = Point(500, 1000)
++
++    @Test
++    fun `zooming in spreads the fingers to 40 percent of the shorter side`() {
++        assertThat(pinchSpans(center, width = 1000, height = 2000, scale = 2.0)).isEqualTo(200 to 400)
++    }
++
++    @Test
++    fun `zooming out brings them together from there`() {
++        assertThat(pinchSpans(center, width = 1000, height = 2000, scale = 0.25)).isEqualTo(400 to 100)
++    }
++
++    @Test
++    fun `fingers stay at least a tenth of the wider span apart`() {
++        assertThat(pinchSpans(center, width = 1000, height = 2000, scale = 20.0)).isEqualTo(40 to 400)
++        assertThat(pinchSpans(center, width = 1000, height = 2000, scale = 0.01)).isEqualTo(400 to 40)
++    }
++
++    @Test
++    fun `fingers stay around a point near a side edge`() {
++        assertThat(pinchSpans(Point(100, 1000), width = 1000, height = 2000, scale = 2.0)).isEqualTo(90 to 180)
++        assertThat(pinchSpans(Point(950, 1000), width = 1000, height = 2000, scale = 2.0)).isEqualTo(45 to 90)
++    }
++
++    @Test
++    fun `a scale of 1 doesn't move them`() {
++        assertThat(pinchSpans(center, width = 1000, height = 2000, scale = 1.0)).isEqualTo(400 to 400)
++    }
++
++    @Test
++    fun `a scale must be above 0`() {
++        assertThrows<IllegalArgumentException> { pinchSpans(center, width = 1000, height = 2000, scale = 0.0) }
++    }
++}
+diff --git a/maestro-orchestra-models/src/main/java/maestro/orchestra/Commands.kt b/maestro-orchestra-models/src/main/java/maestro/orchestra/Commands.kt
+index 492f17d..ed23a80 100644
+--- a/maestro-orchestra-models/src/main/java/maestro/orchestra/Commands.kt
++++ b/maestro-orchestra-models/src/main/java/maestro/orchestra/Commands.kt
+@@ -1301,6 +1301,24 @@ data class SetFoldPostureCommand(
+     }
+ }
+ 
++data class PinchCommand(
++    val scale: Double,
++    val point: String? = null,
++    val duration: Long? = null,
++    override val label: String? = null,
++    override val optional: Boolean = false,
++) : Command {
++    override val originalDescription: String
++        get() = "Pinch to ${scale}x" + (point?.let { " at $it" } ?: "")
++
++    override fun evaluateScripts(jsEngine: JsEngine): PinchCommand {
++        return copy(
++            point = point?.evaluateScripts(jsEngine),
++            label = label?.evaluateScripts(jsEngine),
++        )
++    }
++}
++
+ internal fun tapOnDescription(isLongPress: Boolean?, repeat: TapRepeat?): String {
+     return if (isLongPress == true) "Long press"
+     else if (repeat != null) {
+diff --git a/maestro-orchestra-models/src/main/java/maestro/orchestra/MaestroCommand.kt b/maestro-orchestra-models/src/main/java/maestro/orchestra/MaestroCommand.kt
+index 10e8df6..b3e410a 100644
+--- a/maestro-orchestra-models/src/main/java/maestro/orchestra/MaestroCommand.kt
++++ b/maestro-orchestra-models/src/main/java/maestro/orchestra/MaestroCommand.kt
+@@ -78,6 +78,7 @@ data class MaestroCommand(
+     val assertDarkModeCommand: AssertDarkModeCommand? = null,
+     val assertLightModeCommand: AssertLightModeCommand? = null,
+     val setFoldPostureCommand: SetFoldPostureCommand? = null,
++    val pinchCommand: PinchCommand? = null,
+     val retryCommand: RetryCommand? = null,
+     // @JsonIgnore: serializing would duplicate the full origin YAML on every command in the DB.
+     @JsonIgnore val sourceInfo: SourceInfo? = null,
+@@ -133,6 +134,7 @@ data class MaestroCommand(
+         assertDarkModeCommand = command as? AssertDarkModeCommand,
+         assertLightModeCommand = command as? AssertLightModeCommand,
+         setFoldPostureCommand = command as? SetFoldPostureCommand,
++        pinchCommand = command as? PinchCommand,
+         retryCommand = command as? RetryCommand
+     )
+ 
+@@ -186,6 +188,7 @@ data class MaestroCommand(
+         assertDarkModeCommand != null -> assertDarkModeCommand
+         assertLightModeCommand != null -> assertLightModeCommand
+         setFoldPostureCommand != null -> setFoldPostureCommand
++        pinchCommand != null -> pinchCommand
+         retryCommand != null -> retryCommand
+         else -> null
+     }
+diff --git a/maestro-orchestra/src/main/java/maestro/orchestra/Orchestra.kt b/maestro-orchestra/src/main/java/maestro/orchestra/Orchestra.kt
+index 46e12b7..277a700 100644
+--- a/maestro-orchestra/src/main/java/maestro/orchestra/Orchestra.kt
++++ b/maestro-orchestra/src/main/java/maestro/orchestra/Orchestra.kt
+@@ -494,6 +494,7 @@ class Orchestra(
+                 maestro.setFoldPosture(command.posture)
+                 true
+             }
++            is PinchCommand -> pinchCommand(command)
+             is RetryCommand -> retryCommand(command, config)
+             else -> true
+         }.also { mutating ->
+@@ -1446,6 +1447,27 @@ class Orchestra(
+         return true
+     }
+ 
++    private suspend fun pinchCommand(command: PinchCommand): Boolean {
++        val point = command.point ?: "50%,50%"
++        val duration = command.duration ?: DEFAULT_PINCH_DURATION_MS
++
++        if (point.contains("%")) {
++            val (percentX, percentY) = NumericFields.parsePoint(point)
++            if (percentX !in 0..100 || percentY !in 0..100) {
++                throw MaestroException.InvalidCommand("Invalid point: $point")
++            }
++            maestro.pinch(percentX, percentY, command.scale, duration)
++        } else {
++            val (x, y) = NumericFields.parsePoint(point)
++            if (x < 0 || y < 0) {
++                throw MaestroException.InvalidCommand("Invalid point: $point. Coordinates must not be negative.")
++            }
++            maestro.pinch(Point(x, y), command.scale, duration)
++        }
++
++        return true
++    }
++
+     private suspend fun tapOnPointV2Command(
+         command: TapOnPointV2Command,
+     ): Boolean {
+@@ -1909,6 +1931,7 @@ class Orchestra(
+ 
+         private const val MAX_ERASE_CHARACTERS = 50
+         private const val MAX_RETRIES_ALLOWED = 3
++        private const val DEFAULT_PINCH_DURATION_MS = 500L
+         private val logger = LoggerFactory.getLogger(Orchestra::class.java)
+     }
+ 
+diff --git a/maestro-orchestra/src/main/java/maestro/orchestra/yaml/YamlFluentCommand.kt b/maestro-orchestra/src/main/java/maestro/orchestra/yaml/YamlFluentCommand.kt
+index 7512681..96905b3 100644
+--- a/maestro-orchestra/src/main/java/maestro/orchestra/yaml/YamlFluentCommand.kt
++++ b/maestro-orchestra/src/main/java/maestro/orchestra/yaml/YamlFluentCommand.kt
+@@ -63,6 +63,7 @@ import maestro.orchestra.ScrollUntilVisibleCommand
+ import maestro.orchestra.SetAirplaneModeCommand
+ import maestro.orchestra.SetDarkModeCommand
+ import maestro.orchestra.SetFoldPostureCommand
++import maestro.orchestra.PinchCommand
+ import maestro.orchestra.SetLocationCommand
+ import maestro.orchestra.SetOrientationCommand
+ import maestro.orchestra.SetPermissionsCommand
+@@ -153,6 +154,7 @@ data class YamlFluentCommand(
+     val assertDarkMode: YamlAssertDarkMode? = null,
+     val assertLightMode: YamlAssertLightMode? = null,
+     val setFoldPosture: YamlSetFoldPosture? = null,
++    val pinch: YamlPinch? = null,
+     val retry: YamlRetryCommand? = null,
+     @JsonIgnore val _sourceInfo: SourceInfo,
+ ) {
+@@ -548,6 +550,26 @@ data class YamlFluentCommand(
+                 )
+             )
+ 
++            pinch != null -> {
++                if (pinch.scale <= 0) {
++                    throw SyntaxError("A pinch's scale must be above 0: ${pinch.scale}")
++                }
++                if (pinch.duration != null && pinch.duration <= 0) {
++                    throw SyntaxError("A pinch's duration must be above 0: ${pinch.duration}")
++                }
++                listOf(
++                    MaestroCommand(
++                        PinchCommand(
++                            scale = pinch.scale,
++                            point = pinch.point,
++                            duration = pinch.duration,
++                            label = pinch.label,
++                            optional = pinch.optional,
++                        )
++                    )
++                )
++            }
++
+             else -> throw SyntaxError("Invalid command: No mapping provided for $this")
+         }
+     }
+diff --git a/maestro-orchestra/src/main/java/maestro/orchestra/yaml/YamlPinch.kt b/maestro-orchestra/src/main/java/maestro/orchestra/yaml/YamlPinch.kt
+new file mode 100644
+index 0000000..b866394
+--- /dev/null
++++ b/maestro-orchestra/src/main/java/maestro/orchestra/yaml/YamlPinch.kt
+@@ -0,0 +1,13 @@
++package maestro.orchestra.yaml
++
++/**
++ * `pinch: {scale, point, duration}`: two fingers pinch around [point] ("50%,50%" by default, or pixels as "x,y") over
++ * [duration] milliseconds, so that what is under them scales by [scale]: 2, zooming in, by default.
++ */
++data class YamlPinch(
++    val scale: Double = 2.0,
++    val point: String? = null,
++    val duration: Long? = null,
++    val label: String? = null,
++    val optional: Boolean = false,
++)
+diff --git a/maestro-orchestra/src/test/java/maestro/orchestra/MaestroCommandSerializationTest.kt b/maestro-orchestra/src/test/java/maestro/orchestra/MaestroCommandSerializationTest.kt
+index b67b779..0f408a8 100644
+--- a/maestro-orchestra/src/test/java/maestro/orchestra/MaestroCommandSerializationTest.kt
++++ b/maestro-orchestra/src/test/java/maestro/orchestra/MaestroCommandSerializationTest.kt
+@@ -760,6 +760,35 @@ internal class MaestroCommandSerializationTest {
+             .isEqualTo(command)
+     }
+ 
++    @Test
++    fun `serialize PinchCommand`() {
++        // given
++        val command = MaestroCommand(
++            PinchCommand(scale = 2.0, point = "50%,40%", duration = 300)
++        )
++
++        // when
++        val serializedCommandJson = command.toJson()
++        val deserializedCommand = objectMapper.readValue(serializedCommandJson, MaestroCommand::class.java)
++
++        // then
++        @Language("json")
++        val expectedJson = """
++            {
++              "pinchCommand" : {
++                "scale" : 2.0,
++                "point" : "50%,40%",
++                "duration" : 300,
++                "optional" : false
++              }
++            }
++          """.trimIndent()
++        assertThat(serializedCommandJson)
++            .isEqualTo(expectedJson)
++        assertThat(deserializedCommand)
++            .isEqualTo(command)
++    }
++
+     private fun MaestroCommand.toJson(): String =
+         objectMapper
+             .writerWithDefaultPrettyPrinter()
+diff --git a/maestro-orchestra/src/test/resources/workspaces/e016_config_invalid_command_in_onFlowStart/error.txt b/maestro-orchestra/src/test/resources/workspaces/e016_config_invalid_command_in_onFlowStart/error.txt
+index b723d4d..6e8b62e 100644
+--- a/maestro-orchestra/src/test/resources/workspaces/e016_config_invalid_command_in_onFlowStart/error.txt
++++ b/maestro-orchestra/src/test/resources/workspaces/e016_config_invalid_command_in_onFlowStart/error.txt
+@@ -8,5 +8,5 @@ Invalid Command: inp at /tmp/WorkspaceExecutionPlannerErrorsTest_workspace/works
+ 
+   `inp` is not a valid command.
+   
+-  Did you mean one of: inputRandomText, inputRandomNumber, inputRandomEmail, inputRandomPersonName, inputRandomCityName, inputRandomCountryName, inputRandomColorName, inputText
++  Did you mean one of: inputRandomText, inputRandomNumber, inputRandomEmail, inputRandomPersonName, inputRandomCityName, inputRandomCountryName, inputRandomColorName, inputText, pinch
+   See: https://docs.maestro.dev/api-reference/commands
+\ No newline at end of file
+diff --git a/maestro-proto/src/main/proto/maestro_android.proto b/maestro-proto/src/main/proto/maestro_android.proto
+index 51a65d5..2bff63b 100644
+--- a/maestro-proto/src/main/proto/maestro_android.proto
++++ b/maestro-proto/src/main/proto/maestro_android.proto
+@@ -12,6 +12,8 @@ service MaestroDriver {
+ 
+   rpc tap(TapRequest) returns (TapResponse) {}
+ 
++  rpc pinch(PinchRequest) returns (PinchResponse) {}
++
+   rpc inputText(InputTextRequest) returns (InputTextResponse) {}
+ 
+   rpc eraseAllText(EraseAllTextRequest) returns (EraseAllTextResponse) {}
+@@ -76,6 +78,17 @@ message TapRequest {
+ 
+ message TapResponse {}
+ 
++// Two fingers moving apart (startSpan < endSpan, zoom in) or together across centerX, centerY.
++message PinchRequest {
++  uint32 centerX = 1;
++  uint32 centerY = 2;
++  uint32 startSpan = 3;
++  uint32 endSpan = 4;
++  uint32 durationMs = 5;
++}
++
++message PinchResponse {}
++
+ message InputTextRequest {
+   string text = 1;
+ }
+diff --git a/maestro-test/src/main/kotlin/maestro/test/drivers/FakeDriver.kt b/maestro-test/src/main/kotlin/maestro/test/drivers/FakeDriver.kt
+index 60f5efd..080c670 100644
+--- a/maestro-test/src/main/kotlin/maestro/test/drivers/FakeDriver.kt
++++ b/maestro-test/src/main/kotlin/maestro/test/drivers/FakeDriver.kt
+@@ -110,6 +110,12 @@ open class FakeDriver : Driver {
+         events += Event.SetOrientation(orientation)
+     }
+ 
++    override fun pinch(center: Point, startSpan: Int, endSpan: Int, durationMs: Long) {
++        ensureOpen()
++
++        events += Event.Pinch(center, startSpan, endSpan, durationMs)
++    }
++
+     override fun setFoldPosture(posture: FoldPosture) {
+         ensureOpen()
+ 
+@@ -533,6 +539,13 @@ open class FakeDriver : Driver {
+             val orientation: DeviceOrientation,
+         ) : Event()
+ 
++        data class Pinch(
++            val center: Point,
++            val startSpan: Int,
++            val endSpan: Int,
++            val durationMs: Long,
++        ) : Event()
++
+         data class SetFoldPosture(
+             val posture: FoldPosture,
+         ) : Event()
+diff --git a/maestro-test/src/test/kotlin/maestro/test/IntegrationTest.kt b/maestro-test/src/test/kotlin/maestro/test/IntegrationTest.kt
+index 0c38a9b..e7ca1b4 100644
+--- a/maestro-test/src/test/kotlin/maestro/test/IntegrationTest.kt
++++ b/maestro-test/src/test/kotlin/maestro/test/IntegrationTest.kt
+@@ -5563,6 +5563,29 @@ class IntegrationTest {
+         )
+     }
+ 
++    @Test
++    fun `Case 161 - Pinch`() {
++        // Given
++        val commands = readCommands("161_pinch")
++        val driver = driver { }
++
++        // When
++        Maestro(driver).use {
++            runBlocking {
++                orchestra(it).runFlow(commands)
++            }
++        }
++
++        // Then: the fake screen is 540 by 960, so the fingers end at most 216 apart, less near a side edge.
++        driver.assertEvents(
++            listOf(
++                Event.Pinch(Point(270, 480), startSpan = 108, endSpan = 216, durationMs = 500),
++                Event.Pinch(Point(100, 200), startSpan = 180, endSpan = 90, durationMs = 300),
++                Event.Pinch(Point(54, 864), startSpan = 10, endSpan = 97, durationMs = 500),
++            )
++        )
++    }
++
+     @Test
+     fun `optional assertDarkMode is warned, not failed`() {
+         val driver = driver { } // darkMode defaults to false
+diff --git a/maestro-test/src/test/resources/161_pinch.yaml b/maestro-test/src/test/resources/161_pinch.yaml
+new file mode 100644
+index 0000000..0aebd60
+--- /dev/null
++++ b/maestro-test/src/test/resources/161_pinch.yaml
+@@ -0,0 +1,11 @@
++appId: com.example.app
++---
++- pinch: {}
++- pinch:
++    scale: 0.5
++    point: 100,200
++    duration: 300
++- pinch:
++    scale: 20
++    point: 10%,90%
++    label: Zoom in as far as it goes
+-- 
+2.56.1
+

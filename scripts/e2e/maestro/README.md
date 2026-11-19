@@ -71,6 +71,20 @@ kept its stream open, and on API 29 emulators Android's llkd kills adbd once
 a child has been a zombie for 10 minutes: every session longer than that lost
 the device (the `android-min` profile, from `08-settings` on).
 
+`maestro-pinch.patch` adds a `pinch` command, two fingers moving apart or together, on Android:
+
+```yaml
+- pinch:
+    scale: 2 # what is under the fingers doubles; 0.5 halves it
+    point: 50%,50% # the default; or pixels, as x,y
+    duration: 500 # milliseconds, the default
+```
+
+The driver's instrumentation moves the two pointers with UiAutomator, since `adb shell input` and
+`sendevent` (without root) send only one finger. The fingers sit side by side, at most 40% of the
+screen's shorter side apart and less near a side edge, so a pinch in a split view's pane stays in
+it. On iOS it fails as an unsupported command.
+
 Until a Maestro release includes all of them, build
 it from source and put it first on `PATH`:
 
@@ -79,7 +93,7 @@ bin="$(scripts/e2e/maestro/build.sh <install folder> | tail -n 1)"
 PATH="$bin:$PATH" scripts/e2e/e2e.sh ios
 ```
 
-`build.sh` needs Xcode and JDK 17. It builds in a temporary clone of
+`build.sh` needs Xcode, JDK 17 and the Android SDK. It builds in a temporary clone of
 Maestro's base commit, without history, and keeps only the installed tool in
 the folder it's given (about 370 MB; the clone and its build outputs take
 some 2 GB). To change the patches, give it a checkout to build in with

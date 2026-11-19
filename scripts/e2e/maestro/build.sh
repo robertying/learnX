@@ -34,6 +34,7 @@
 #                               a SpringBoard alert on the open iPhone Duo where
 #                               it shows, and its permission tap through
 #                               scripts/e2e/sim-touch.swift
+#   maestro-pinch.patch         the pinch command (two fingers) on Android
 #
 #   scripts/e2e/maestro/build.sh <install folder>
 #
@@ -48,7 +49,7 @@
 # exist: for changing the patches or moving them to a new Maestro release. Its
 # folder must be named Maestro (the driver's build script insists on it).
 #
-# Needs Xcode and JDK 17.
+# Needs Xcode, JDK 17 and the Android SDK (platform 37).
 set -euo pipefail
 
 here="$(cd "$(dirname "$0")" && pwd)"
@@ -80,7 +81,8 @@ patched_checkout() {
     "$here/maestro-instrumentation-shell.patch" \
     "$here/maestro-sim-touch.patch" \
     "$here/maestro-inner-display-tree.patch" \
-    "$here/maestro-inner-display-alerts.patch"
+    "$here/maestro-inner-display-alerts.patch" \
+    "$here/maestro-pinch.patch"
 }
 
 if [ -n "${MAESTRO_SOURCE:-}" ]; then
@@ -110,6 +112,17 @@ fi
 if [ "$(uname -m)" = arm64 ]; then
   sed -i '' 's/^grpc = ".*"/grpc = "1.76.0"/' gradle/libs.versions.toml
 fi
+
+# Maestro ships its Android driver as prebuilt APKs, which maestro-pinch.patch
+# changes, so they're built here and copied into the CLI's resources: the app by
+# assemble, the instrumentation (the driver itself) by copyMaestroServer.
+# Maestro's Android Gradle plugin finds SDK platforms by their old names
+# (android-37), which newer SDKs install as android-37.0.
+sdk="${ANDROID_HOME:-$HOME/Library/Android/sdk}"
+if [ ! -d "$sdk/platforms/android-37" ] && [ -d "$sdk/platforms/android-37.0" ]; then
+  sed -i '' 's/^    compileSdk = 37$/    compileSdkVersion("android-37.0")/' maestro-android/build.gradle.kts
+fi
+ANDROID_HOME="$sdk" ./gradlew --no-daemon :maestro-android:assemble :maestro-android:copyMaestroServer >&2
 
 # installDist bundles the iOS driver, which buildIosDriver builds (always, since
 # Gradle can take a failed earlier build for up to date) with these settings:
