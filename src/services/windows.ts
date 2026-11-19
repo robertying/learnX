@@ -1,6 +1,7 @@
 import { DeviceEventEmitter } from 'react-native';
 import { create } from 'zustand';
 import { Windows } from 'modules/windows';
+import { isElectron } from 'helpers/platform';
 
 /**
  * The app's windows on iPad and Mac. Each is its own React root on the one
@@ -60,9 +61,17 @@ export const setWindowLink = (id: string, link: string) => {
   Windows?.setWindowLink(id, link);
 };
 
-/** Names the window `id` after what it shows. */
-export const setWindowTitle = (id: string, title: string) => {
-  void Windows?.setWindowTitle(id, title).catch(() => {});
+/**
+ * Names a window after what it shows: the window `id` on iPad and Mac, or
+ * the Electron app's one window through the page's title, which its main
+ * process shows as "<title> - learnX" (electron/main.ts).
+ */
+export const setWindowTitle = (id: string | undefined, title: string) => {
+  if (isElectron()) {
+    document.title = title;
+  } else if (id) {
+    void Windows?.setWindowTitle(id, title).catch(() => {});
+  }
 };
 
 /**

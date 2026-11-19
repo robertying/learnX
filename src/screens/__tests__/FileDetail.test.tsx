@@ -131,7 +131,7 @@ it("offers to download again when the PDF can't be read", async () => {
   await act(async () => {
     screen
       .getByTestId('pdf')
-      .props.onError({ nativeEvent: { message: 'The PDF needs a password.' } });
+      .props.onError({ nativeEvent: { reason: 'unreadable' } });
   });
   expect(screen.queryByTestId('pdf')).toBeNull();
   expect(screen.getByText(t('previewFailedTitle'))).toBeTruthy();
@@ -140,6 +140,47 @@ it("offers to download again when the PDF can't be read", async () => {
   await user.press(screen.getByText(t('downloadAgain')));
   expect(download.redownload).toHaveBeenCalledTimes(1);
   expect(screen.getByTestId('pdf')).toBeTruthy();
+});
+
+const lockedPdf = async () => {
+  downloaded({ path: 'file:///a.pdf' });
+  await renderScreen({ id: pdf.id });
+  await act(async () => {
+    screen
+      .getByTestId('pdf')
+      .props.onError({ nativeEvent: { reason: 'password' } });
+  });
+  expect(screen.queryByTestId('pdf')).toBeNull();
+  expect(screen.getByText(t('pdfPasswordTitle'))).toBeTruthy();
+  expect(screen.getByText(t('pdfPasswordDescription'))).toBeTruthy();
+  expect(screen.queryByText(t('downloadAgain'))).toBeNull();
+};
+
+describe('a PDF that needs a password', () => {
+  it('offers the share sheet on iOS, to open it in another app', async () => {
+    await lockedPdf();
+    await userEvent.press(screen.getByText(t('share')));
+    expect(download.share).toHaveBeenCalled();
+  });
+
+  it('opens it in Quick Look on the Mac', async () => {
+    jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+    jest.replaceProperty(
+      jest.requireMock<typeof quickLook>('modules/quicklook'),
+      'isQuickLookAvailable',
+      true,
+    );
+    await lockedPdf();
+    await userEvent.press(screen.getByText(t('quickLook')));
+    expect(quickLook.showQuickLookPanel).toHaveBeenCalledWith('file:///a.pdf');
+  });
+
+  it('opens it in another app on Android', async () => {
+    jest.replaceProperty(Platform, 'OS', 'android');
+    await lockedPdf();
+    await userEvent.press(screen.getByText(t('open')));
+    expect(download.open).toHaveBeenCalled();
+  });
 });
 
 it('says when the download failed, with a button to try again', async () => {

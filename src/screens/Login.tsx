@@ -37,6 +37,7 @@ import { loginFailedMessage } from 'helpers/loginFailureText';
 import { mockNetworkTitle } from 'navigation/options';
 import { noteLoginShown } from 'hooks/useLaunchSheet';
 import useKeepAboveKeyboard from 'hooks/useKeepAboveKeyboard';
+import { useWindowTitle } from 'hooks/useWindow';
 import { LoginStackParams } from 'navigation/types';
 import { Caption, Text } from 'components/Text';
 import { isAndroid, isApple } from 'helpers/platform';
@@ -73,6 +74,8 @@ const Login: React.FC<Props> = ({ navigation }) => {
   useEffect(() => {
     noteLoginShown();
   }, []);
+  // Logged out, the window is learnX again, not the last item it showed.
+  useWindowTitle('learnX');
 
   // Says when a login started here (after SSO, the mock or live test login, or
   // Retry Login) didn't go through. The saved login, if any, is kept, so this

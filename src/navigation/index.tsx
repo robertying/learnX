@@ -27,6 +27,7 @@ import {
   WhatsNewStack,
 } from './stacks';
 import { isAndroid, isApple } from 'helpers/platform';
+import { DOCUMENT_TITLE } from 'hooks/useWindow';
 
 const RootNavigator = createNativeStackNavigator<RootStackParams>();
 
@@ -157,6 +158,7 @@ const Navigation: React.FC<{ showMain: boolean }> = ({ showMain }) => {
       <NavigationContainer
         ref={rootNavigation}
         theme={theme}
+        documentTitle={DOCUMENT_TITLE}
         onStateChange={trackScreen}
       >
         {nativeSplit ? (

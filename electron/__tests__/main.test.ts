@@ -77,6 +77,7 @@ const fakeElectron = (dataDir: string, { packaged = false } = {}) => {
     hide = jest.fn();
     isVisible = () => this.show.mock.calls.length > 0;
     focus = jest.fn();
+    setTitle = jest.fn();
     isDestroyed = () => false;
     isMinimized = () => false;
     isMaximized = () => false;
@@ -606,6 +607,21 @@ describe('the window', () => {
     win.emit('ready-to-show');
     expect(win.maximize).toHaveBeenCalled();
     expect(win.show).not.toHaveBeenCalled();
+  });
+
+  it('names the window after what the page shows', async () => {
+    await loadMain();
+    const [win] = fake.windows;
+    expect(win.options.title).toBe('learnX');
+    const title = (pageTitle: string) => {
+      const event = { preventDefault: jest.fn() };
+      win.emit('page-title-updated', event, pageTitle);
+      expect(event.preventDefault).toHaveBeenCalled();
+      return win.setTitle.mock.lastCall?.[0];
+    };
+    expect(title('Homework 1')).toBe('Homework 1 - learnX');
+    expect(title('learnX')).toBe('learnX');
+    expect(title(' ')).toBe('learnX');
   });
 
   it('shows the window at once on Linux, where Wayland draws no hidden window', async () => {

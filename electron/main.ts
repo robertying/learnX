@@ -501,8 +501,14 @@ const createWindow = (ses: Electron.Session) => {
   win.webContents.on('did-finish-load', () => {
     win.webContents.setZoomLevel(zoom);
   });
-  // The window is learnX, whichever screen the app names in the page title.
-  win.on('page-title-updated', event => event.preventDefault());
+  // The window is named after what the page shows, as Windows names a
+  // document's window ("<title> - learnX"), or learnX
+  // (services/windows.ts): Alt+Tab, the taskbar and screen readers say it.
+  win.on('page-title-updated', (event, title) => {
+    event.preventDefault();
+    const name = title.trim();
+    win.setTitle(name && name !== 'learnX' ? `${name} - learnX` : 'learnX');
+  });
   // A crashed page (out of memory, a GPU fault) is loaded again rather than
   // left blank in the tray, a few times in a row at most.
   let reloads = 0;

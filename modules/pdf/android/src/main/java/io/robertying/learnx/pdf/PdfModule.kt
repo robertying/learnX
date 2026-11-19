@@ -45,14 +45,22 @@ class PdfModule : Module() {
   }
 }
 
-internal const val PASSWORD_MESSAGE = "The PDF needs a password."
+/** Why a PDF didn't open, as `onError`'s `reason` says it. */
+internal enum class PdfFailure(val reason: String) {
+  /** It is encrypted with a password. */
+  PASSWORD("password"),
 
-/** What `onError` says about [error]. */
-internal fun errorMessage(error: Throwable): String =
-  when (error) {
-    is PdfPasswordException, is PdfiumPasswordException -> PASSWORD_MESSAGE
-    else -> error.message ?: error.toString()
+  /** It is damaged or isn't a PDF. */
+  UNREADABLE("unreadable");
+
+  companion object {
+    fun of(error: Throwable): PdfFailure =
+      when (error) {
+        is PdfPasswordException, is PdfiumPasswordException -> PASSWORD
+        else -> UNREADABLE
+      }
   }
+}
 
 /**
  * One local PDF, its pages one under another and fitted to the view's width, with the viewer's own scrolling and
@@ -93,7 +101,7 @@ class PdfView @JvmOverloads constructor(
     private set
 
   /** Why the document didn't open, as sent to `onError`. */
-  internal var failure: String? = null
+  internal var failure: PdfFailure? = null
     private set
 
   // The viewers lay out and draw their pages themselves, outside React Native's layout.
@@ -138,7 +146,7 @@ class PdfView @JvmOverloads constructor(
         show(JetpackPdfView(context).apply { pdfDocument = opened })
       } catch (e: Exception) {
         // Only for the file still wanted.
-        if (isActive) fail(errorMessage(e))
+        if (isActive) fail(PdfFailure.of(e))
       }
     }
   }
@@ -185,7 +193,7 @@ class PdfView @JvmOverloads constructor(
   internal fun pdfiumFailed(view: PdfiumView, error: Throwable) {
     // A view that left the window while it loads still finishes loading, and fails for want of its renderer.
     if (viewer === view && !view.hasLeftWindow) {
-      fail(errorMessage(error))
+      fail(PdfFailure.of(error))
     }
   }
 
@@ -197,9 +205,9 @@ class PdfView @JvmOverloads constructor(
     }
   }
 
-  private fun fail(message: String) {
-    failure = message
-    onError(mapOf("message" to message))
+  private fun fail(failure: PdfFailure) {
+    this.failure = failure
+    onError(mapOf("reason" to failure.reason))
   }
 
   private fun close() {
