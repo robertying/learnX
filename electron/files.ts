@@ -16,10 +16,20 @@ const MOCK_FILES =
 
 /**
  * Whether a download may come from `url`: Tsinghua's sites and courseX, as
- * every request, or the mock account's files.
+ * every request, or the mock account's files. The path is read as the
+ * request will send it, so `mock-files/../..` can't leave the folder.
  */
-export const downloadAllowedUrl = (url: string): boolean =>
-  allowedUrl(url) || url.startsWith(MOCK_FILES);
+export const downloadAllowedUrl = (url: string): boolean => {
+  if (allowedUrl(url)) {
+    return true;
+  }
+  try {
+    const { origin, pathname } = new URL(url);
+    return `${origin}${pathname}`.startsWith(MOCK_FILES);
+  } catch {
+    return false;
+  }
+};
 
 type EntryInfo = {
   exists: boolean;
@@ -84,8 +94,9 @@ export const createFiles = (
   /**
    * Folders the user picked in a folder dialog for an export, with when each
    * was last used. The page may only look in them, make folders and copy
-   * its own files in (`exporting`): never read, change or delete what's
-   * there, and only for a while.
+   * its own files in (`exporting`), replacing a file of the same name, as
+   * exporting again does: never read, move or delete what's there, and only
+   * for a while.
    */
   const granted = new Map<string, number>();
 

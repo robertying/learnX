@@ -32,6 +32,7 @@ import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { createUpdateServer } from './updateServer.ts';
 import { SIGNATURE_SUFFIX, signUpdateFile } from './updateSignature.ts';
+import electronPackage from './package.json' with { type: 'json' };
 
 const electronDir = import.meta.dirname;
 const root = path.join(electronDir, '..');
@@ -199,7 +200,9 @@ try {
     for (let i = 0; i < 60 && fs.existsSync(installed); i++) {
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
-    fs.rmSync(path.join(localAppData, 'learnX-updater'), {
+    // electron-updater's downloads, named after the package as
+    // electron-builder names them (and installer.nsh removes them).
+    fs.rmSync(path.join(localAppData, `${electronPackage.name}-updater`), {
       recursive: true,
       force: true,
     });

@@ -18,7 +18,6 @@ const learnx: Bridge = {
     get: url => ipcRenderer.invoke('cookies:get', url),
     set: details => ipcRenderer.invoke('cookies:set', details),
     remove: (url, name) => ipcRenderer.invoke('cookies:remove', url, name),
-    flush: () => ipcRenderer.invoke('cookies:flush'),
     clearAll: () => ipcRenderer.invoke('cookies:clearAll'),
   },
   storage: {

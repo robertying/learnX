@@ -74,6 +74,20 @@ const PICKED_TYPES: Record<string, string> = {
 
 const extensionOf = (name: string) => path.extname(name).slice(1).toLowerCase();
 
+/**
+ * Whether opening a file would run a program, by its extension as written
+ * or as Windows reads it: Windows ignores dots and spaces at the end of a
+ * name (`setup.exe.` is setup.exe), and `name:stream` names one of a file's
+ * streams (`setup.exe::$DATA` is setup.exe's contents).
+ */
+export const runsAsProgram = (file: string): boolean => {
+  const name = path.basename(file);
+  const asWindowsReads = name.replace(/:.*$/, '').replace(/[. ]+$/, '');
+  return [name, asWindowsReads].some(form =>
+    RUNNABLE_TYPES.has(extensionOf(form)),
+  );
+};
+
 /** A name for a file the user saves: no folders, nothing the system forbids. */
 export const safeName = (name: unknown): string => {
   const base = path
@@ -143,7 +157,8 @@ export const createFileShell = ({
     /**
      * Opens a download in the system's default app for its type. One that
      * would run as a program opens only once the user says so in a dialog of
-     * the system's (Cancel first), which the page can't answer for them;
+     * the system's (Open, then Cancel, as Windows orders them, with Cancel
+     * focused), which the page can't answer for them;
      * Windows also knows it came from the internet (`markDownloaded`).
      * Resolves to an error message, or '' when it opened or was cancelled.
      * @param labels the dialog's text, `{name}` the file's
@@ -154,21 +169,21 @@ export const createFileShell = ({
       labels?: unknown,
     ): Promise<string> => {
       const file = ownFile(uri);
-      if (RUNNABLE_TYPES.has(extensionOf(file))) {
+      if (runsAsProgram(file)) {
         const text = runLabelsOf(labels);
         const options: Electron.MessageBoxOptions = {
           type: 'warning',
           message: text.message.replace('{name}', path.basename(file)),
           detail: text.detail,
-          buttons: [text.cancel, text.open],
-          defaultId: 0,
-          cancelId: 0,
+          buttons: [text.open, text.cancel],
+          defaultId: 1,
+          cancelId: 1,
           noLink: true,
         };
         const { response } = win
           ? await dialog.showMessageBox(win, options)
           : await dialog.showMessageBox(options);
-        if (response !== 1) {
+        if (response !== 0) {
           return '';
         }
       }
