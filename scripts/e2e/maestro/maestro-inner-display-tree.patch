@@ -1,4 +1,4 @@
-From 5c7a54e2c104101a11978ad058ef2c48ab5b996b Mon Sep 17 00:00:00 2001
+From e28f58ed41c78f38fdd7823b4c449310ba09d469 Mon Sep 17 00:00:00 2001
 From: Claude <noreply@anthropic.com>
 Date: Wed, 18 Nov 2026 11:02:56 -0800
 Subject: [PATCH] fix(ios): keep the whole app in the hierarchy on the open
@@ -15,10 +15,14 @@ elements right of a width: learnX's tab column at the right edge.
 - The tree keeps the bounds the app had when the runner first read it, so
   an app that started closed lost the right side once opened.
   setFoldPosture now starts a new runner after moving the hinge.
+- An app already running without the libraries, such as Calendar, which
+  the system keeps running in the background for its widgets, was only
+  brought to the front by simctl. launchApp now starts such a process
+  again; one that has them keeps its state.
 ---
- maestro-client/src/main/java/maestro/drivers/IOSDriver.kt     | 4 ++++
- .../src/main/kotlin/util/LocalSimulatorUtils.kt               | 4 ++++
- 2 files changed, 8 insertions(+)
+ .../main/java/maestro/drivers/IOSDriver.kt    |  4 ++++
+ .../main/kotlin/util/LocalSimulatorUtils.kt   | 22 +++++++++++++++++++
+ 2 files changed, 26 insertions(+)
 
 diff --git a/maestro-client/src/main/java/maestro/drivers/IOSDriver.kt b/maestro-client/src/main/java/maestro/drivers/IOSDriver.kt
 index 9fdaf576..ab304b71 100644
@@ -36,20 +40,46 @@ index 9fdaf576..ab304b71 100644
                      throw deviceError
                  } catch (e: Throwable) {
 diff --git a/maestro-ios-driver/src/main/kotlin/util/LocalSimulatorUtils.kt b/maestro-ios-driver/src/main/kotlin/util/LocalSimulatorUtils.kt
-index a7555c7c..b7e2edd6 100644
+index a7555c7c..8bbca0c0 100644
 --- a/maestro-ios-driver/src/main/kotlin/util/LocalSimulatorUtils.kt
 +++ b/maestro-ios-driver/src/main/kotlin/util/LocalSimulatorUtils.kt
-@@ -362,6 +362,9 @@ class LocalSimulatorUtils(private val tempFileHandler: TempFileHandler) {
+@@ -230,6 +230,19 @@ class LocalSimulatorUtils(private val tempFileHandler: TempFileHandler) {
+         logger.info("[Done] Terminating app $bundleId")
+     }
+ 
++    /** True when the app is running and its process wasn't started with `libraries` inserted. */
++    private fun runsWithoutLibraries(deviceId: String, bundleId: String, libraries: String): Boolean {
++        val list = ProcessBuilder(listOf("xcrun", "simctl", "spawn", deviceId, "launchctl", "list")).start()
++        // A line is "<pid>\t<status>\tUIKitApplication:<bundle id>[…]".
++        val pid = String(list.inputStream.readBytes()).lineSequence()
++            .map { it.split("\t") }
++            .firstOrNull { it.size == 3 && it[2].startsWith("UIKitApplication:$bundleId[") }
++            ?.get(0)?.toIntOrNull() ?: return false
++        // Simulator apps are processes on the Mac, so ps shows their environment.
++        val ps = ProcessBuilder(listOf("ps", "eww", "-o", "command=", "-p", pid.toString())).start()
++        return !String(ps.inputStream.readBytes()).contains("DYLD_INSERT_LIBRARIES=$libraries")
++    }
++
+     private fun isAppRunning(deviceId: String, bundleId: String): Boolean {
+         val process = ProcessBuilder(
+             listOf(
+@@ -362,14 +375,23 @@ class LocalSimulatorUtils(private val tempFileHandler: TempFileHandler) {
          bundleId: String,
          launchArguments: List<String> = emptyList(),
      ) {
 +        // MAESTRO_IOS_INSERT_LIBRARIES names libraries to load into the app, such as a fix for
 +        // what its accessibility tree reports on a particular simulator.
 +        val libraries = System.getenv("MAESTRO_IOS_INSERT_LIBRARIES")?.takeIf { it.isNotBlank() }
++        // simctl only brings an app that is already running to the front, without the libraries:
++        // an app the system keeps running in the background (Calendar, for its widgets) or one a
++        // flow left running. Start such a process again; one that has them keeps its state.
++        val restart = libraries != null && runsWithoutLibraries(deviceId, bundleId, libraries)
          runCommand(
              listOf(
                  "xcrun",
-@@ -370,6 +373,7 @@ class LocalSimulatorUtils(private val tempFileHandler: TempFileHandler) {
+                 "simctl",
+                 "launch",
++            ) + (if (restart) listOf("--terminate-running-process") else emptyList()) + listOf(
                  deviceId,
                  bundleId,
              ) + launchArguments,

@@ -23,7 +23,16 @@ gives the app's accessibility element the inner display's portrait size while th
 landscape: `launchApp` loads the libraries `MAESTRO_IOS_INSERT_LIBRARIES` names into the app on
 a simulator, and `scripts/e2e/e2e.sh` names `scripts/e2e/sim-ax-frame.m`, which gives the app
 element the size of the screen it is on. The tree also keeps the bounds the app had when the
-runner first read it, so `setFoldPosture` starts a new runner after moving the hinge.
+runner first read it, so `setFoldPosture` starts a new runner after moving the hinge. An app
+already running without the libraries, such as Calendar, which the system keeps running in the
+background for its widgets, is started again so it gets them; `simctl launch` would only bring
+it to the front.
+
+`maestro-inner-display-alerts.patch` places and answers a SpringBoard alert on the open iPhone
+Duo. SpringBoard reports it in the inner display's unrotated portrait points while the app is in
+landscape, so its frames are turned a quarter turn to where it shows. The runner's own tap
+answering a notifications request would land on the main display, so it hands the tap to the
+driver, which sends it through `scripts/e2e/sim-touch.swift`.
 
 `maestro-fold-posture.patch` adds the
 `setFoldPosture` command from upstream PR mobile-dev-inc/Maestro#3621, so a
@@ -66,10 +75,12 @@ Until a Maestro release includes all of them, build
 it from source and put it first on `PATH`:
 
 ```sh
-bin="$(scripts/e2e/maestro/build.sh <folder>/Maestro | tail -n 1)"
+bin="$(scripts/e2e/maestro/build.sh <install folder> | tail -n 1)"
 PATH="$bin:$PATH" scripts/e2e/e2e.sh ios
 ```
 
-`build.sh` needs Xcode and JDK 17. It takes the Maestro checkout as its
-argument (or `MAESTRO_DIR`), a folder named `Maestro`, and clones Maestro
-there if it doesn't exist.
+`build.sh` needs Xcode and JDK 17. It builds in a temporary clone of
+Maestro's base commit, without history, and keeps only the installed tool in
+the folder it's given (about 370 MB; the clone and its build outputs take
+some 2 GB). To change the patches, give it a checkout to build in with
+`MAESTRO_SOURCE` (its header says how).

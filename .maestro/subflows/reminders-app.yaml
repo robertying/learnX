@@ -3,16 +3,6 @@
 # to the lists, where Reminders opens next time, and leaves it in front.
 appId: com.apple.reminders
 ---
-# On the open iPhone Duo the system app's tree lacks its right side (the
-# inner-display fix, scripts/e2e/sim-ax-frame.m, doesn't take in the system apps),
-# where its buttons are, so the Duo is closed first; back-to-app.yaml opens
-# it again.
-- runFlow:
-    when:
-      true: ${!!DUO_POSTURE}
-    file: fold.yaml
-    env:
-      POSTURE: closed
 - launchApp:
     stopApp: true
 - runFlow:
@@ -33,16 +23,16 @@ appId: com.apple.reminders
     commands:
       - assertNotVisible: ${MATCH}
 # The back button has an id from iOS 26 on (IOS_MAJOR, scripts/e2e/e2e.sh); before,
-# only its label. On iPad the lists stay in the sidebar beside the open list,
-# with no back button.
+# only its label. In the split layout (iPad, the open iPhone Duo) the lists stay
+# in the sidebar beside the open list, with no back button.
 - runFlow:
     when:
-      true: ${IOS_MAJOR >= 26 && IPAD != 'true'}
+      true: ${IOS_MAJOR >= 26 && SPLIT != 'true'}
     commands:
       - tapOn:
           id: BackButton
 - runFlow:
     when:
-      true: ${IOS_MAJOR < 26 && IPAD != 'true'}
+      true: ${IOS_MAJOR < 26 && SPLIT != 'true'}
     commands:
       - tapOn: 'Lists|列表'
