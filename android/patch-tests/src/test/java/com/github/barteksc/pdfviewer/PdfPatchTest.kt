@@ -1,22 +1,27 @@
 // In the viewer's package, like RecycleSafeRendering, to reach PDFView's package-private state.
 package com.github.barteksc.pdfviewer
 
+import android.graphics.RectF
 import android.os.Looper
 import android.os.Message
+import io.legere.pdfiumandroid.PdfiumCore
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 
 /**
  * What patches/react-native-pdf@7.0.5.patch changes on Android: recycling the view (e.g. leaving the screen while
  * pages render) disposes the document only after the render running on the renderer thread, and tasks that come in
- * once it's recycled are dropped. Closing the document under a render crashed in Pdfium.
+ * once it's recycled are dropped. Closing the document under a render crashed in Pdfium. A render task also holds
+ * pdfiumandroid's lock from the page's open to its close, so no other thread's Pdfium call lands in between.
  */
 @RunWith(RobolectricTestRunner::class)
 class PdfPatchTest {
@@ -67,5 +72,27 @@ class PdfPatchTest {
     guarded.stop()
     // A task the recycled view would render: with no document, rendering it would throw.
     guarded.handleMessage(Message.obtain(guarded, RenderingHandler.MSG_RENDER_TASK, null))
+  }
+
+  @Test
+  fun rendersWhileHoldingPdfiumsLock() {
+    val view = mockk<PDFView>(relaxed = true)
+    val pdfFile = mockk<PdfFile>(relaxed = true)
+    val heldLock = mutableListOf<Boolean>()
+    every { pdfFile.openPage(any()) } answers {
+      heldLock += Thread.holdsLock(PdfiumCore.lock)
+      true
+    }
+    every { pdfFile.renderPageBitmap(any(), any(), any(), any()) } answers {
+      heldLock += Thread.holdsLock(PdfiumCore.lock)
+    }
+    view.pdfFile = pdfFile
+    view.renderingHandler = RenderingHandler(Looper.getMainLooper(), view)
+    RecycleSafeRendering.install(view)
+
+    view.renderingHandler.addRenderingTask(0, 10f, 10f, RectF(0f, 0f, 1f, 1f), false, 0, false, false)
+    shadowOf(Looper.getMainLooper()).idle()
+
+    assertEquals(listOf(true, true), heldLock)
   }
 }

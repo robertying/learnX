@@ -13,13 +13,15 @@ index 34da3248a540ad228acc7c4efdf294bf2f3b79e4..c71240157665954cdced448a99991ee3
  }
 diff --git a/android/src/main/java/com/github/barteksc/pdfviewer/RecycleSafeRendering.java b/android/src/main/java/com/github/barteksc/pdfviewer/RecycleSafeRendering.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..9baf55a7fcd7d3f53bd912f02ea600beaf07d759
+index 0000000000000000000000000000000000000000..8d870fd1ab3a0b64ccaf827905f794fc80d74043
 --- /dev/null
 +++ b/android/src/main/java/com/github/barteksc/pdfviewer/RecycleSafeRendering.java
-@@ -0,0 +1,92 @@
+@@ -0,0 +1,101 @@
 +package com.github.barteksc.pdfviewer;
 +
 +import android.os.Message;
++
++import io.legere.pdfiumandroid.PdfiumCore;
 +
 +/**
 + * Keeps PDFView.recycle() from closing the document under an in-flight render.
@@ -99,7 +101,14 @@ index 0000000000000000000000000000000000000000..9baf55a7fcd7d3f53bd912f02ea600be
 +                return;
 +            }
 +            try {
-+                super.handleMessage(message);
++                // pdfiumandroid 1.0.x locks each Pdfium call on its own, so between the open, render
++                // and close of a page another thread can close it or the document, and Pdfium aborts
++                // mid-render (SIGTRAP in FPDF_RenderPageBitmap). Holding the library's lock for the
++                // whole task makes them one step; the lock is a reentrant monitor, so its own calls
++                // still take it. pdfiumandroid 2.x does this itself.
++                synchronized (PdfiumCore.Companion.getLock()) {
++                    super.handleMessage(message);
++                }
 +            } catch (NullPointerException | IllegalStateException e) {
 +                // A task picked up just as the view was recycled finds the document gone.
 +                if (running) {
