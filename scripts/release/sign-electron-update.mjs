@@ -81,7 +81,7 @@ export const signUpdateFiles = (dir, privateKey, publicKey, version) => {
 };
 
 const main = () => {
-  const root = path.join(import.meta.dirname, '..');
+  const root = path.join(import.meta.dirname, '../..');
   const { values, positionals } = parseArgs({
     allowPositionals: true,
     options: { key: { type: 'string' }, version: { type: 'string' } },

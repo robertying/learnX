@@ -1,3 +1,4 @@
+import { spawnSync } from 'node:child_process';
 import { generateKeyPairSync } from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -108,5 +109,26 @@ it('refuses an update file for another version, writing nothing', () => {
   ).toThrow(
     "latest-linux.yml is for version 18.9.0, not package.json's 19.0.0",
   );
+  expect(signatures()).toEqual([]);
+});
+
+it('finds the committed public key when run as a script', () => {
+  const keyFile = path.join(dir, 'key.pem');
+  fs.writeFileSync(keyFile, keys.privateKey);
+  const { status, stderr } = spawnSync(
+    'node',
+    [
+      path.join(__dirname, '../release/sign-electron-update.mjs'),
+      dir,
+      '--key',
+      keyFile,
+    ],
+    { encoding: 'utf8' },
+  );
+  // A throwaway key isn't the committed key's pair: reaching that check means
+  // certs/electron-public-key.pem and package.json were found from the repo root.
+  expect(status).toBe(1);
+  expect(stderr).not.toContain('ENOENT');
+  expect(stderr).toMatch(/signature doesn’t match|is a placeholder/);
   expect(signatures()).toEqual([]);
 });
