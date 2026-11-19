@@ -16,10 +16,21 @@ describe('commands', () => {
     [{ key: ',', metaKey: true }, 'settings'],
     [{ key: 'ArrowUp', altKey: true }, 'previousItem'],
     [{ key: 'ArrowDown', altKey: true }, 'nextItem'],
+    [{ key: 'ArrowLeft', altKey: true }, 'back'],
+    [{ key: 'ArrowLeft', altKey: true, shiftKey: true }, null],
+    [{ key: 'ArrowLeft' }, null],
+    [{ key: 'Escape' }, 'close'],
+    [{ key: 'Escape', shiftKey: true }, null],
     [{ key: 'ArrowDown' }, null],
   ])('maps %j to %s', (key, command) => {
     expect(
-      commandForKey({ ctrlKey: false, metaKey: false, altKey: false, ...key }),
+      commandForKey({
+        ctrlKey: false,
+        metaKey: false,
+        altKey: false,
+        shiftKey: false,
+        ...key,
+      }),
     ).toBe(command);
   });
 
@@ -32,6 +43,37 @@ describe('commands', () => {
     expect(event.defaultPrevented).toBe(true);
     subscription.remove();
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'F5' }));
+    expect(listener).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves a key something on the page took, as a menu takes Esc', () => {
+    const listener = jest.fn();
+    const subscription = Menus.addListener('onCommand', listener);
+    document.body.addEventListener('keydown', event => event.preventDefault(), {
+      once: true,
+    });
+    document.body.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: 'Escape',
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+    expect(listener).not.toHaveBeenCalled();
+    subscription.remove();
+  });
+
+  it("goes back with the mouse's back button", () => {
+    const listener = jest.fn();
+    const subscription = Menus.addListener('onCommand', listener);
+    window.dispatchEvent(new MouseEvent('mouseup', { button: 0 }));
+    expect(listener).not.toHaveBeenCalled();
+    const event = new MouseEvent('mouseup', { button: 3, cancelable: true });
+    window.dispatchEvent(event);
+    expect(listener).toHaveBeenCalledWith({ command: 'back' });
+    expect(event.defaultPrevented).toBe(true);
+    subscription.remove();
+    window.dispatchEvent(new MouseEvent('mouseup', { button: 3 }));
     expect(listener).toHaveBeenCalledTimes(1);
   });
 });

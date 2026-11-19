@@ -16,6 +16,7 @@ import MainTab from './MainTab';
 import WindowFrame from './WindowFrame';
 import { initialTab, nativeSplit } from './layout';
 import { createRootNavigation, RootNavigationContext } from './rootNavigation';
+import useBackKeys from './useBackKeys';
 import Setup from 'screens/Setup';
 import {
   AssignmentSubmissionStack,
@@ -148,6 +149,8 @@ const AndroidMain = () => {
 const Navigation: React.FC<{ showMain: boolean }> = ({ showMain }) => {
   const theme = useNavigationTheme();
   const [rootNavigation] = useState(createRootNavigation);
+  // The Electron app's back keys at login; the split view has the main UI's.
+  useBackKeys(rootNavigation, null, !showMain);
 
   return (
     <RootNavigationContext.Provider value={rootNavigation}>
