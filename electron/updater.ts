@@ -41,6 +41,11 @@ export type UpdateMode = 'install' | 'notify';
  * needs an administrator's password, as Android's APKs need the user's
  * consent). Never a dev run, and never on macOS, which has the Mac Catalyst
  * app.
+ *
+ * A .deb is told apart first: an AppImage's runtime sets `APPIMAGE` for
+ * everything it starts, so a .deb opened from a terminal or launcher that
+ * runs as an AppImage has one too, and would otherwise install updates on
+ * quit, asking for an administrator's password as it closes.
  */
 export const updateMode = ({
   dev,
@@ -58,10 +63,12 @@ export const updateMode = ({
   if (dev || !hasUpdateConfig) {
     return null;
   }
-  if (platform === 'win32' || (platform === 'linux' && env.APPIMAGE)) {
-    return 'install';
+  if (platform === 'linux' && packageType === 'deb') {
+    return 'notify';
   }
-  return platform === 'linux' && packageType === 'deb' ? 'notify' : null;
+  return platform === 'win32' || (platform === 'linux' && env.APPIMAGE)
+    ? 'install'
+    : null;
 };
 
 /**

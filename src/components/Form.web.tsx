@@ -322,6 +322,7 @@ const RowContent: React.FC<
       <RowDetail detail={detail} tint={done ? undefined : detailTint} />
       {badge ? (
         <View
+          role="img"
           style={[styles.badge, { backgroundColor: BADGE_COLOR }]}
           aria-label={t('a11yNewBadge')}
         />
@@ -356,7 +357,8 @@ export const FormText: React.FC<FormTextProps> = ({
         ) : undefined
       }
     />
-    {done ? <View aria-label={t('a11yDone')} /> : null}
+    {/* A label on a plain view isn't read: Chromium drops it. */}
+    {done ? <View role="img" aria-label={t('a11yDone')} /> : null}
   </Card>
 );
 

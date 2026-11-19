@@ -86,12 +86,14 @@ const PaneItem = ({
 }: PaneItemProps) => {
   const theme = useTheme();
   const title = options.title ?? route.name;
+  const badge = options.tabBarBadge !== undefined;
   const icon = tabIcon(options.tabBarIcon?.({ focused: selected }));
   const item = (
     <Pressable
       role="tab"
       aria-selected={selected}
-      aria-label={title}
+      // The badge's dot is said with the title, as the Mac sidebar says it.
+      aria-label={badge ? `${title}, ${t('a11yNewBadge')}` : title}
       testID={options.tabBarButtonTestID}
       onPress={onPress}
       style={({
@@ -122,9 +124,7 @@ const PaneItem = ({
             color={selected ? theme.colors.primary : theme.colors.onSurface}
           />
         ) : null}
-        {options.tabBarBadge !== undefined ? (
-          <BadgeDot style={styles.badge} />
-        ) : null}
+        {badge ? <BadgeDot style={styles.badge} /> : null}
       </View>
       {expanded ? (
         <Text numberOfLines={1} style={selected && styles.selectedTitle}>
@@ -136,7 +136,8 @@ const PaneItem = ({
   return expanded ? (
     item
   ) : (
-    <Tooltip content={title} relationship="label" positioning="after">
+    // The item has its own label: the tooltip only shows the title.
+    <Tooltip content={title} relationship="inaccessible" positioning="after">
       {item}
     </Tooltip>
   );
@@ -249,10 +250,11 @@ function TabNavigator({
           />
         </Tooltip>
       </View>
+      {/* One list of tabs, Settings at its foot included. */}
       <View role="tablist" style={styles.items}>
         {state.routes.filter(r => r.name !== 'SettingStack').map(renderItem)}
+        <View style={styles.footer}>{settings.map(renderItem)}</View>
       </View>
-      <View style={styles.footer}>{settings.map(renderItem)}</View>
     </View>
   );
 
@@ -320,6 +322,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   items: {
+    flex: 1,
     gap: 2,
   },
   footer: {

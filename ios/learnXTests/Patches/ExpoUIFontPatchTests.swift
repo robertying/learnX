@@ -3,7 +3,7 @@ internal import ExpoModulesCore
 import SwiftUI
 import Testing
 
-/// What patches/@expo__ui@58.0.28.patch changes in the `font` modifier: on Mac the system font (a text style or a size)
+/// What patches/@expo__ui@58.0.29.patch changes in the `font` modifier: on Mac the system font (a text style or a size)
 /// is made from UIKit's, which draws its weights as React Native's text does (SwiftUI's own medium looks like UIKit's
 /// semibold there). iPhone and iPad keep SwiftUI's system font, and other designs stay SwiftUI's everywhere.
 @MainActor

@@ -7,6 +7,7 @@ import { resetNotified } from 'data/notified';
 import { clearQueryCache, queryClient } from 'data/queryClient';
 import { getLatestRelease } from 'helpers/update';
 import Updater from 'modules/updater';
+import { clearDownloadedUpdate } from 'services/update';
 import { checkForUpdate, watchUpdates } from 'services/updateNotifications';
 
 // Loads expo-updates and the Crashlytics module, neither of which Jest can.
@@ -21,6 +22,7 @@ jest.mock('modules/updater', () => ({
   __esModule: true,
   default: { isSupported: true },
 }));
+jest.mock('services/update', () => ({ clearDownloadedUpdate: jest.fn() }));
 jest.mock('expo-application', () => ({
   nativeApplicationVersion: '19.0.0',
   nativeBuildVersion: '1',
@@ -90,6 +92,8 @@ describe('watchUpdates', () => {
     watchUpdates();
     watchUpdates();
     expect(addListener).toHaveBeenCalledTimes(1);
+    // Installing an update ends the app before it deletes the APK.
+    expect(clearDownloadedUpdate).toHaveBeenCalledTimes(1);
 
     latest('19.1.0');
     await queryClient.fetchQuery(latestReleaseQuery);

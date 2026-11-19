@@ -2,7 +2,12 @@ import { AppState } from 'react-native';
 import { act, renderHook } from '@testing-library/react-native';
 import * as Updates from 'expo-updates';
 import { initialAuth, useAuthStore, type LoginFailure } from 'data/auth';
-import { saveCredentials, clearCredentials } from 'data/credentials';
+import {
+  REFUSED_LOGIN_RETRY_MS,
+  clearCredentials,
+  noteSavedLoginRefused,
+  saveCredentials,
+} from 'data/credentials';
 import { login } from 'data/login';
 import { queryClient } from 'data/queryClient';
 import {
@@ -148,6 +153,16 @@ describe('useReLogin', () => {
       expect(login).not.toHaveBeenCalled();
     },
   );
+
+  it('tries a refused login once more on coming back a day after it was refused', async () => {
+    await launch();
+    await fail('badCredential');
+    await noteSavedLoginRefused('badCredential');
+    await leaveAndComeBack(11);
+    expect(login).not.toHaveBeenCalled();
+    await leaveAndComeBack(REFUSED_LOGIN_RETRY_MS / 60_000);
+    expect(login).toHaveBeenCalledWith({});
+  });
 
   it('does not retry a failed login on a timer', async () => {
     await launch();

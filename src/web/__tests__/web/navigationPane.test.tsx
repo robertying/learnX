@@ -3,6 +3,7 @@ import { Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import Storage from 'expo-sqlite/kv-store';
 import WindowFrame from 'navigation/WindowFrame';
+import { t } from 'helpers/i18n';
 import FluentRoot from 'web/FluentRoot';
 import {
   createNativeBottomTabNavigator,
@@ -146,6 +147,17 @@ it('keeps the pane expanded in a narrower window once the user expanded it', asy
 
   renderPane();
   expect(screen.getByText('First')).toBeTruthy();
+});
+
+it('lists every tab, Settings too, and says its badge', () => {
+  setWidth(1200);
+  renderPane();
+  const tabs = screen.getByRole('tablist');
+  expect(
+    Array.from(tabs.querySelectorAll('[role="tab"]')).map(tab =>
+      tab.getAttribute('aria-label'),
+    ),
+  ).toEqual(['First', 'Two', `Settings, ${t('a11yNewBadge')}`]);
 });
 
 it("finds a tab's icon from its Android drawable name", () => {

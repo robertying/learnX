@@ -1,8 +1,13 @@
-import { Platform } from 'react-native';
+import { AppState, Platform } from 'react-native';
 import CookieManager from '@preeternal/react-native-cookie-manager';
 import { FailReason } from '@robertying/thu-learn-lib';
 import { getAuth, initialAuth, useAuthStore } from 'data/auth';
-import { useCredentialsStore } from 'data/credentials';
+import {
+  REFUSED_LOGIN_RETRY_MS,
+  noteSavedLoginRefused,
+  savedLoginRefusal,
+  useCredentialsStore,
+} from 'data/credentials';
 import { mockSource } from 'data/mockSource';
 import {
   clearSessionCookies,
@@ -22,6 +27,8 @@ jest.mock('@preeternal/react-native-cookie-manager', () => ({
   clearAllStores: jest.fn(() => Promise.resolve(true)),
 }));
 const mockEnsureSession = jest.fn(() => Promise.resolve());
+// The helper's session token, which a login changes.
+const mockToken = { current: 'token' };
 const mockLogin = jest.fn<Promise<void>, [credential?: unknown]>(() =>
   Promise.resolve(),
 );
@@ -46,7 +53,7 @@ jest.mock('@robertying/thu-learn-lib', () => ({
     constructor(config: HelperConfig) {
       Helper.config = config;
     }
-    getCSRFToken = () => 'token';
+    getCSRFToken = () => mockToken.current;
     login = (credential?: unknown) => mockLogin(credential);
     ensureSession = () => mockEnsureSession();
     // These call this file's consts only once a test runs.
@@ -424,6 +431,125 @@ describe('the session token', () => {
       dataSource.markNoticeRead('https://learn.tsinghua.edu.cn/n'),
     ).rejects.toThrow('offline');
     expect(getAuth().sessionToken).toBe('token');
+  });
+});
+
+describe('a refused saved login', () => {
+  const saved = {
+    username: '2020000000',
+    password: 'p',
+    fingerPrint: 'fp',
+    fingerGenPrint: '',
+    fingerGenPrint3: '',
+  };
+  const badCredential = { reason: FailReason.BAD_CREDENTIAL };
+  const provider = () => helperConfig().provider();
+  const settle = () => new Promise<void>(resolve => setImmediate(resolve));
+  /** What the provider throws, if anything. */
+  const thrownBy = (run: () => unknown) => {
+    try {
+      run();
+    } catch (e) {
+      return e;
+    }
+    return undefined;
+  };
+
+  beforeEach(() => {
+    jest.useFakeTimers({ now: 1_000, doNotFake: ['setImmediate'] });
+    (AppState as { currentState: string }).currentState = 'active';
+    useCredentialsStore.setState({ credentials: saved });
+  });
+  afterEach(() => {
+    mockToken.current = 'token';
+    useCredentialsStore.setState({ credentials: null });
+    useAuthStore.setState(initialAuth);
+    endSession();
+  });
+
+  it('is remembered when the server turns it down, from a login or any call', async () => {
+    mockLogin.mockRejectedValueOnce(badCredential);
+    await expect(loginWithFingerPrint()).rejects.toBe(badCredential);
+    await settle();
+    expect(savedLoginRefusal()).toEqual({
+      failure: 'badCredential',
+      at: 1_000,
+    });
+
+    useCredentialsStore.setState({ credentials: saved });
+    mockEnsureSession.mockRejectedValueOnce({
+      reason: FailReason.DEVICE_NOT_TRUSTED,
+    });
+    await expect(dataSource.ensureSession()).rejects.toBeDefined();
+    await settle();
+    expect(savedLoginRefusal()?.failure).toBe('untrustedDevice');
+  });
+
+  it("isn't remembered for a typed login, another error or a mock session", async () => {
+    mockLogin.mockRejectedValueOnce(badCredential);
+    await expect(loginWithFingerPrint(saved)).rejects.toBe(badCredential);
+    mockEnsureSession.mockRejectedValueOnce({
+      reason: FailReason.NETWORK_ERROR,
+    });
+    await expect(dataSource.ensureSession()).rejects.toBeDefined();
+
+    endSession();
+    useCredentialsStore.setState({
+      credentials: { ...saved, username: 'mock-user' },
+    });
+    jest
+      .spyOn(mockSource, 'ensureSession')
+      .mockRejectedValueOnce(badCredential);
+    await expect(dataSource.ensureSession()).rejects.toBe(badCredential);
+    await settle();
+    expect(savedLoginRefusal()).toBeUndefined();
+  });
+
+  it('is what every login with it rejects with, without asking the server', async () => {
+    await noteSavedLoginRefused('untrustedDevice');
+    const error = thrownBy(provider);
+    expect(error).toMatchObject({ reason: FailReason.DEVICE_NOT_TRUSTED });
+
+    // Rejecting with it doesn't start its wait over.
+    jest.setSystemTime(5_000);
+    mockEnsureSession.mockRejectedValueOnce(error as never);
+    await expect(dataSource.ensureSession()).rejects.toBe(error);
+    await settle();
+    expect(savedLoginRefusal()?.at).toBe(1_000);
+  });
+
+  it('is tried once more a day later, in the foreground only', async () => {
+    await noteSavedLoginRefused('badCredential');
+    jest.setSystemTime(1_000 + REFUSED_LOGIN_RETRY_MS);
+    (AppState as { currentState: string }).currentState = 'background';
+    expect(thrownBy(provider)).toMatchObject({
+      reason: FailReason.BAD_CREDENTIAL,
+    });
+    (AppState as { currentState: string }).currentState = 'active';
+    expect(provider()).toMatchObject({ username: saved.username });
+  });
+
+  it('is forgotten once a login goes through', async () => {
+    await noteSavedLoginRefused('badCredential');
+    mockLogin.mockImplementationOnce(async () => {
+      mockToken.current = 'new token';
+    });
+    await loginWithFingerPrint();
+    await settle();
+    expect(savedLoginRefusal()).toBeUndefined();
+
+    // A call whose session was still good says nothing about the password.
+    await noteSavedLoginRefused('badCredential');
+    await dataSource.ensureSession();
+    await settle();
+    expect(savedLoginRefusal()).toBeDefined();
+
+    mockEnsureSession.mockImplementationOnce(async () => {
+      mockToken.current = 'newer token';
+    });
+    await dataSource.ensureSession();
+    await settle();
+    expect(savedLoginRefusal()).toBeUndefined();
   });
 });
 

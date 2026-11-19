@@ -4,7 +4,7 @@ import UIKit
 
 @testable internal import ExpoWidgets
 
-/// What patches/@expo__ui@58.0.28.patch adds to `Text` for widget layouts on iOS: `dateStyle: 'countdown'`, the time
+/// What patches/@expo__ui@58.0.29.patch adds to `Text` for widget layouts on iOS: `dateStyle: 'countdown'`, the time
 /// left in days, hours and minutes without seconds, in equal-width digits. Inside a Text it's part of that text; on its
 /// own it takes the width of the widest value it will show, as a widget lays it out only when it renders. Also, a part
 /// of a joined Text takes an `accessibilityLabel`. Nodes are rendered as a widget's layout is and compared as images

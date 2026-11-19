@@ -23,7 +23,11 @@ export type AppCommand =
   /** Help menu, no shortcut */
   | 'website'
   /** Help menu, no shortcut */
-  | 'privacyPolicy';
+  | 'privacyPolicy'
+  /** The Electron app's, as Windows apps': Alt+← and the mouse's back button */
+  | 'back'
+  /** The Electron app's: Esc, which closes a sheet */
+  | 'close';
 
 type MenusEvents = {
   onCommand: (event: { command: AppCommand }) => void;

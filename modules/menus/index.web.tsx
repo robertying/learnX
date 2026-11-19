@@ -60,9 +60,15 @@ type CommandListener = (event: { command: AppCommand }) => void;
 
 const listeners = new Set<CommandListener>();
 
-/** The shortcut's command: F5 or Ctrl+R, Ctrl+F, Ctrl+, and Alt+↑/↓. */
+/**
+ * The shortcut's command: F5 or Ctrl+R, Ctrl+F, Ctrl+, Alt+↑/↓, Alt+← (back)
+ * and Esc (close).
+ */
 export const commandForKey = (
-  event: Pick<KeyboardEvent, 'key' | 'ctrlKey' | 'metaKey' | 'altKey'>,
+  event: Pick<
+    KeyboardEvent,
+    'key' | 'ctrlKey' | 'metaKey' | 'altKey' | 'shiftKey'
+  >,
 ): AppCommand | null => {
   const control = event.ctrlKey || event.metaKey;
   if (event.key === 'F5' || (control && event.key.toLowerCase() === 'r')) {
@@ -80,15 +86,40 @@ export const commandForKey = (
   if (event.altKey && event.key === 'ArrowDown') {
     return 'nextItem';
   }
+  if (
+    event.altKey &&
+    !control &&
+    !event.shiftKey &&
+    event.key === 'ArrowLeft'
+  ) {
+    return 'back';
+  }
+  if (event.key === 'Escape' && !event.altKey && !control && !event.shiftKey) {
+    return 'close';
+  }
   return null;
+};
+
+const send = (command: AppCommand, event: Event) => {
+  // Not the page's own reload (Ctrl+R, F5) or find.
+  event.preventDefault();
+  listeners.forEach(listener => listener({ command }));
 };
 
 const handleKeyDown = (event: KeyboardEvent) => {
   const command = commandForKey(event);
-  if (command && listeners.size) {
-    // Not the page's own reload (Ctrl+R, F5) or find.
-    event.preventDefault();
-    listeners.forEach(listener => listener({ command }));
+  // Not a key something on the page took already, as a menu takes Esc.
+  if (command && listeners.size && !event.defaultPrevented) {
+    send(command, event);
+  }
+};
+
+/** The mouse's back button (the fourth), as it goes back in Windows apps. */
+const MOUSE_BACK = 3;
+
+const handleMouseUp = (event: MouseEvent) => {
+  if (event.button === MOUSE_BACK && listeners.size) {
+    send('back', event);
   }
 };
 
@@ -97,6 +128,7 @@ export const Menus = {
   addListener: (_event: 'onCommand', listener: CommandListener) => {
     if (!listeners.size) {
       globalThis.addEventListener?.('keydown', handleKeyDown);
+      globalThis.addEventListener?.('mouseup', handleMouseUp);
     }
     listeners.add(listener);
     return {
@@ -104,6 +136,7 @@ export const Menus = {
         listeners.delete(listener);
         if (!listeners.size) {
           globalThis.removeEventListener?.('keydown', handleKeyDown);
+          globalThis.removeEventListener?.('mouseup', handleMouseUp);
         }
       },
     };

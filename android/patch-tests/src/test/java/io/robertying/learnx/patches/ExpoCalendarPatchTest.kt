@@ -18,7 +18,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 
 /**
- * What patches/expo-calendar@58.0.7.patch changes on Android: calendars are found on a provider that doesn't know
+ * What patches/expo-calendar@58.0.8.patch changes on Android: calendars are found on a provider that doesn't know
  * IS_PRIMARY, as on HarmonyOS, where asking for it made the query throw.
  */
 @RunWith(RobolectricTestRunner::class)

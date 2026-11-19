@@ -5,7 +5,13 @@
 // in the browser.
 import { expect, test } from './fixtures.ts';
 import { exact } from './maestroEnv.ts';
-import { byId, openSettings, openTab, shown } from './steps.ts';
+import {
+  byId,
+  openSettings,
+  openSettingsPage,
+  openTab,
+  shown,
+} from './steps.ts';
 
 test('opens the Schedule and Today from the Jump List', async ({
   login,
@@ -44,4 +50,14 @@ test('opens links in the browser', async ({ window, main, login }) => {
         /^https:\/\/github\.com\/robertying\/learnX\/blob\/main\/docs\/PRIVACY_POLICY_(CN|EN)\.md$/,
       ),
     ]);
+});
+
+test('opens email links in the mail app', async ({ window, main, login }) => {
+  await login();
+  await openSettings(window);
+  await openSettingsPage(window, 'settings-help', 'help');
+  await shown(window.getByText('learnX@ruiying.io', { exact: true })).click();
+  await expect
+    .poll(async () => (await main.record()).openedUrls)
+    .toEqual(['mailto:learnX@ruiying.io']);
 });
