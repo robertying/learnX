@@ -6,7 +6,7 @@ import { t } from 'helpers/i18n';
 import { isRefusal } from 'helpers/errors';
 import { loginRetryDelay, retriesOnTimer } from 'helpers/loginRetry';
 import { toast } from 'components/Toast';
-import { hasSavedLogin } from 'data/credentials';
+import { hasSavedLogin, refusedLoginRetryDue } from 'data/credentials';
 import { getAuth, useAuthStore } from 'data/auth';
 import { login } from 'data/login';
 import { queryClient } from 'data/queryClient';
@@ -45,10 +45,12 @@ export const resetReLogin = () => {
 };
 
 /**
- * Whether a login may start on its own now. Never after the saved login was
+ * Whether a login may start on its own now. Not after the saved login was
  * refused (a wrong password, a device no longer trusted): it would only be
  * refused again, and more wrong passwords may lock the account. The user logs
- * in again from the lists' status row instead.
+ * in again from the lists' status row instead. A day later it's tried once
+ * more, at launch or on return, in case the refusal was a passing answer
+ * (`data/credentials`).
  */
 const canLogIn = () => {
   const auth = getAuth();
@@ -56,7 +58,7 @@ const canLogIn = () => {
     !auth.ssoInProgress &&
     !auth.loggingIn &&
     !auth.reloginRequested &&
-    !isRefusal(auth.failure) &&
+    (!isRefusal(auth.failure) || refusedLoginRetryDue()) &&
     hasSavedLogin()
   );
 };
