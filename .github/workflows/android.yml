@@ -90,9 +90,40 @@ jobs:
           key: android
           save: ${{ env.SAVE_CACHE }}
 
+      # Robolectric downloads an Android jar for each SDK the tests run on
+      # from Maven Central into ~/.m2, outside the Gradle home setup-gradle
+      # caches, so every run fetched them again, and Maven Central has
+      # answered with HTTP 429. The key is Robolectric's version and the SDKs
+      # the tests ask for (robolectric.properties and @Config), so it changes
+      # only when the set of jars does.
+      - name: Robolectric cache key
+        id: robolectric-key
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          version=$(sed -n 's/.*robolectricVersion = "\(.*\)".*/\1/p' android/build.gradle)
+          sdks=$(grep -rhoE '^sdk=[0-9]+|@Config\(sdk = \[[0-9, ]+\]' --include=robolectric.properties --include='*.kt' modules/*/android/src/test android/app/src/test android/patch-tests/src/test |
+            grep -oE '[0-9]+' | sort -un | paste -sd- -)
+          echo "key=robolectric-$version-sdk-$sdks" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Robolectric jars
+        id: robolectric-cache
+        if: steps.changes.outputs.changed == 'true'
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.m2/repository/org/robolectric
+          key: ${{ steps.robolectric-key.outputs.key }}
+
       - name: Unit tests
+        id: unit-tests
         if: steps.changes.outputs.changed == 'true'
         run: scripts/checks/test-android.sh --build-cache
+
+      - name: Save Robolectric jars
+        if: env.SAVE_CACHE == 'true' && steps.unit-tests.outcome == 'success' && steps.robolectric-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.m2/repository/org/robolectric
+          key: ${{ steps.robolectric-key.outputs.key }}
 
       # The release bundle inlines .env; the mock login is what E2E logs in
       # with. Any non-empty values work, as they only switch to mock data.
