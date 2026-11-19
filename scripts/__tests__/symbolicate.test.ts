@@ -52,6 +52,16 @@ it("uses the store build's map for the built-in bundle", () => {
   });
 });
 
+it("takes the AAB's map for a per-ABI APK's version code", () => {
+  // arm64-v8a (digit 3) of build 4560
+  expect(
+    mapPath({ platform: 'android', version: '19.0.0', build: '1000045603' }),
+  ).toEqual({
+    value:
+      '/repo/build/release/v19.0.0/sourcemaps/learnX-android-v19.0.0-9204560.map',
+  });
+});
+
 it("uses an update's map, the iOS one on the Mac", () => {
   expect(mapPath({ platform: 'macos', bundle: 'abc-123' })).toEqual({
     value: '/repo/build/ota/updates/abc-123/ios.map',

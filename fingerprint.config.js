@@ -7,13 +7,16 @@
 
 const { execFileSync } = require('child_process');
 
-// The build number changes with every `pnpm bump` and doesn't make a build's
-// native code any different to the JS it runs, so these lines of the files
-// that hold it don't count (the version does: it's the runtime version).
-const buildNumbers = {
+// The version and build number change with every `pnpm bump` and don't make
+// a build's native code any different to the JS it runs, so these lines of
+// the files that hold them don't count: a release that changes only JS keeps
+// the runtime version, which is set in app.json, not taken from the app's
+// version.
+const versionLines = {
   'ios/learnX.xcodeproj/project.pbxproj':
-    /^\s*CURRENT_PROJECT_VERSION = \d+;\n/gm,
-  'android/app/build.gradle': /^\s*versionCode = \d+\n/gm,
+    /^\s*(?:CURRENT_PROJECT_VERSION = \d+|MARKETING_VERSION = [\d.]+);\n/gm,
+  'android/app/build.gradle':
+    /^\s*(?:versionCode = \d+|versionName = "[\d.]+")\n/gm,
 };
 
 // Files come in chunks, so the files above are held until their end.
@@ -21,7 +24,7 @@ const held = new Map();
 
 /** @type {import('@expo/fingerprint').FileHookTransformFunction} */
 const fileHookTransform = (source, chunk, isEndOfFile, encoding) => {
-  const pattern = source.type === 'file' && buildNumbers[source.filePath];
+  const pattern = source.type === 'file' && versionLines[source.filePath];
   if (!pattern) {
     return chunk;
   }

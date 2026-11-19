@@ -16,9 +16,10 @@ case "${1:-}" in
 android)
   # Android sources and what they build from: native code, patches, the JS
   # dependencies, app config and the Node version; the scripts and workflow
-  # that build and test them, and the shared JS setup. Changed when any file
+  # that build and test them (the build's preBuild runs check-patches.sh),
+  # and the shared JS setup. Changed when any file
   # matches.
-  pattern='^(android/|modules/([^/]+/(android/|expo-module\.config\.json$)|unit-tests\.gradle$)|patches/|package\.json$|pnpm-(lock|workspace)\.yaml$|app\.json$|\.node-version$|scripts/(ci/changed-files\.sh|checks/(test-android\.sh|android-coverage\.mjs|coverage-table\.mjs)|e2e/ota-e2e-cert\.sh)$|\.github/(workflows/android\.yml|actions/setup-js/))'
+  pattern='^(android/|modules/([^/]+/(android/|expo-module\.config\.json$)|unit-tests\.gradle$)|patches/|package\.json$|pnpm-(lock|workspace)\.yaml$|app\.json$|\.node-version$|scripts/(ci/(changed-files|write-e2e-env)\.sh|checks/(test-android\.sh|check-patches\.sh|android-coverage\.mjs|coverage-table\.mjs)|e2e/ota-e2e-cert\.sh)$|\.github/(workflows/android\.yml|actions/setup-js/))'
   match=any
   ;;
 electron)

@@ -15,7 +15,7 @@
 // - The built-in bundle uses the map the release build kept,
 //   build/release/v<version>/sourcemaps/learnX-<platform>-v<version>-<build>.map
 //   (fastlane/Fastfile), for the report's version and build (Android's build is
-//   its version code). Without it, the maps zip is taken from that version's
+//   its version code, a per-ABI APK's too). Without it, the maps zip is taken from that version's
 //   GitHub release (`gh`).
 // - `--map` names the map directly.
 import { execFileSync } from 'node:child_process';
@@ -26,6 +26,20 @@ import { parseArgs } from 'node:util';
 
 const root = join(import.meta.dirname, '../..');
 const PLATFORMS = ['ios', 'macos', 'android'];
+
+/**
+ * The version code the Android map is named by. A per-ABI APK (the github
+ * flavor) reports its own code, 1,000,000,000 + build number * 10 + the ABI's
+ * digit (android/app/build.gradle), but bundles the same JS as the AAB, whose
+ * code is 9,200,000 + build number.
+ * @param {string} build
+ */
+const androidMapBuild = build => {
+  const code = Number(build);
+  return code >= 1_000_000_000
+    ? String(9_200_000 + Math.floor((code - 1_000_000_000) / 10))
+    : build;
+};
 
 /**
  * Where the map of a report's bundle is kept, relative to `base`.
@@ -46,9 +60,10 @@ export const mapPath = ({ platform, bundle, version, build }, base = root) => {
     );
   }
   const v = version.replace(/^v/, '');
+  const mapBuild = platform === 'android' ? androidMapBuild(build) : build;
   return join(
     base,
-    `build/release/v${v}/sourcemaps/learnX-${platform}-v${v}-${build}.map`,
+    `build/release/v${v}/sourcemaps/learnX-${platform}-v${v}-${mapBuild}.map`,
   );
 };
 

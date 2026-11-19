@@ -5,7 +5,7 @@ description: Write learnX release notes since the last tag, as separate texts fo
 
 # Release notes for learnX
 
-1. Find the last tag (`git tag --sort=-creatordate | head`) and read `git log <tag>..HEAD`. Read the previous releases (`gh release list`, `gh release view <tag> --json body -q .body`) to match their style.
+1. Fetch tags first (`git fetch --tags origin`; publishing a GitHub release makes its tag on GitHub only), then find the last tag (`git tag --sort=-creatordate | head`) and read `git log <tag>..HEAD`. Read the previous releases (`gh release list`, `gh release view <tag> --json body -q .body`) to match their style.
 2. Compare against the last tag's code, not the commit titles: a feature that already existed is "Improve" (改进), and a bug that only existed between the tag and HEAD isn't a fix to list. Skip changes users can't see: mock login/data, skills and scripts, release tooling (fastlane), version bumps, dependency updates.
 3. For each user-visible commit, check `git show --stat` to decide which platforms it affects. Patches in `patches/` can be platform-specific (look at the files they touch, e.g. `android/` vs `ios/`). Shared-code changes need a look at the code: `isApple()` / `isAndroid()` / `isElectron()` branches, `.android.tsx` / `.web.tsx` files, iOS-version gates, iPad/Mac-only features. `electron/` is the Windows and Linux app only.
 4. Save to the path you were given (`bundle exec fastlane notes` asks for `build/release/v<version>/release-notes.md`), else the scratchpad (never a tracked file in the repo), as one markdown file in the shape below. `bundle exec fastlane release notes:<file>` reads it by its labels (see the release skill). Don't publish or upload anything unless asked.
