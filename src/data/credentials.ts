@@ -1,6 +1,16 @@
 import * as SecureStore from 'expo-secure-store';
 import { create } from 'zustand';
 
+/**
+ * The SSO server turned the saved login down: a wrong password (as after a
+ * change on the website) or a device fingerprint it no longer trusts.
+ */
+export interface LoginRefusal {
+  failure: 'badCredential' | 'untrustedDevice';
+  /** When, in ms since the epoch. */
+  at: number;
+}
+
 /** What a login needs to sign in again without the user. */
 export interface Credentials {
   username: string;
@@ -8,6 +18,12 @@ export interface Credentials {
   fingerPrint: string;
   fingerGenPrint: string;
   fingerGenPrint3: string;
+  /**
+   * Kept with the login, so no JS runtime (a background sync, the next
+   * launch) tries it again by itself; gone once a login goes through or a new
+   * one is saved.
+   */
+  refused?: LoginRefusal;
 }
 
 export const CREDENTIALS_KEY = 'credentials';
@@ -172,4 +188,44 @@ export const clearCredentials = async () => {
     // this one; it must not bring the old login back after logging out.
     SecureStore.deleteItemAsync(LEGACY_AUTH_KEY),
   ]);
+};
+
+/**
+ * How long after a refusal the saved login may be tried once more by itself
+ * (in the foreground only, `data/source`): what was taken for a refusal may
+ * have been a passing answer, such as a page shown during maintenance, and
+ * one try a day can't lock the account.
+ */
+export const REFUSED_LOGIN_RETRY_MS = 24 * 60 * 60 * 1000;
+
+/** Why the server turned the saved login down, if it did. */
+export const savedLoginRefusal = () => getCredentials()?.refused;
+
+/** Whether a refused saved login may be tried again by itself now. */
+export const refusedLoginRetryDue = (now = Date.now()) => {
+  const refused = savedLoginRefusal();
+  return !!refused && now - refused.at >= REFUSED_LOGIN_RETRY_MS;
+};
+
+/** Remembers that the server turned the saved login down, from now. */
+export const noteSavedLoginRefused = async (
+  failure: LoginRefusal['failure'],
+) => {
+  const credentials = getCredentials();
+  if (credentials) {
+    await saveCredentials({
+      ...credentials,
+      refused: { failure, at: Date.now() },
+    });
+  }
+};
+
+/** Forgets a refusal of the saved login, once a login went through. */
+export const clearSavedLoginRefusal = async () => {
+  const credentials = getCredentials();
+  if (credentials?.refused) {
+    const rest = { ...credentials };
+    delete rest.refused;
+    await saveCredentials(rest);
+  }
 };

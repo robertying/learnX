@@ -18,7 +18,9 @@ import type { DetailNavigationContainerRef, DetailStackParams } from './types';
 import SplitSizes from 'constants/SplitSizes';
 import { isElectron } from 'helpers/platform';
 import { saveMasterWidth, savedMasterWidth } from './paneLayout';
+import { useRootNavigation } from './rootNavigation';
 import SplitDivider from './SplitDivider';
+import useBackKeys from './useBackKeys';
 
 const SplitViewContext = createContext<{
   detailNavigationContainerRef: DetailNavigationContainerRef | null;
@@ -256,6 +258,12 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
       },
     }),
     [detailRefs],
+  );
+
+  // The Electron app's back keys: the sheets, then this pane, then the list.
+  useBackKeys(
+    useRootNavigation(),
+    showDetail ? tabs.detailRef(selectedTab) : null,
   );
 
   return (
