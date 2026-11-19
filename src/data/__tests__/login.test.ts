@@ -88,7 +88,7 @@ describe('login', () => {
       loggingIn: false,
       loggedIn: false,
       error: FailReason.NO_CREDENTIAL,
-      failure: 'rejected',
+      failure: 'failed',
     });
     expect(getCredentials()?.username).toBe('saved');
   });
@@ -109,7 +109,7 @@ describe('login', () => {
     expect(queryClient.prefetchQuery).toHaveBeenCalledWith(userQuery);
   });
 
-  it('records a failed login the server answered as rejected', async () => {
+  it('records a login the server failed with an error as a server error', async () => {
     jest
       .mocked(loginWithFingerPrint)
       .mockRejectedValueOnce({ reason: FailReason.ERROR_FETCH_FROM_ID });
@@ -118,11 +118,11 @@ describe('login', () => {
       loggingIn: false,
       loggedIn: false,
       error: FailReason.ERROR_FETCH_FROM_ID,
-      failure: 'rejected',
+      failure: 'serverError',
     });
   });
 
-  it('records a wrong password as rejected at once, without retrying', async () => {
+  it('records a wrong password at once, without retrying', async () => {
     jest
       .mocked(loginWithFingerPrint)
       .mockRejectedValueOnce({ reason: FailReason.BAD_CREDENTIAL });
@@ -131,8 +131,28 @@ describe('login', () => {
     expect(getAuth()).toMatchObject({
       loggedIn: false,
       error: FailReason.BAD_CREDENTIAL,
-      failure: 'rejected',
+      failure: 'badCredential',
     });
+  });
+
+  it('records a device the SSO server no longer trusts at once, without retrying', async () => {
+    jest
+      .mocked(loginWithFingerPrint)
+      .mockRejectedValueOnce({ reason: FailReason.DEVICE_NOT_TRUSTED });
+    await login({});
+    expect(loginWithFingerPrint).toHaveBeenCalledTimes(1);
+    expect(getAuth()).toMatchObject({
+      error: FailReason.DEVICE_NOT_TRUSTED,
+      failure: 'untrustedDevice',
+    });
+  });
+
+  it('records a login failing outside the server as failed', async () => {
+    jest
+      .mocked(loginWithFingerPrint)
+      .mockRejectedValueOnce({ reason: FailReason.ERROR_SETTING_COOKIES });
+    await login({});
+    expect(getAuth()).toMatchObject({ failure: 'failed' });
   });
 
   it('keeps what the server answered to a turned-down login, until the next try', async () => {
@@ -164,7 +184,10 @@ describe('login', () => {
       .mocked(loginWithFingerPrint)
       .mockRejectedValueOnce({ reason: FailReason.ERROR_FETCH_FROM_ID, extra });
     await login(sso);
-    expect(getAuth()).toMatchObject({ failure: 'rejected', errorDetail: null });
+    expect(getAuth()).toMatchObject({
+      failure: 'serverError',
+      errorDetail: null,
+    });
   });
 
   it('retries only a failure that may pass', async () => {
@@ -176,6 +199,10 @@ describe('login', () => {
     expect(mockShouldRetry?.({ reason: FailReason.BAD_CREDENTIAL })).toBe(
       false,
     );
+    expect(mockShouldRetry?.({ reason: FailReason.DEVICE_NOT_TRUSTED })).toBe(
+      false,
+    );
+    expect(mockShouldRetry?.(new Error('bug'))).toBe(false);
   });
 
   it('stays logged in for the session when the login cannot be saved', async () => {
@@ -221,8 +248,8 @@ describe('login', () => {
 
   it('clears the failure and the login screen once a login works', async () => {
     useAuthStore.setState({
-      failure: 'rejected',
-      error: FailReason.ERROR_FETCH_FROM_ID,
+      failure: 'badCredential',
+      error: FailReason.BAD_CREDENTIAL,
       reloginRequested: true,
     });
     await login(sso);
@@ -247,7 +274,10 @@ describe('login', () => {
       .spyOn(dataSource, 'ensureSession')
       .mockRejectedValueOnce({ reason: FailReason.BAD_CREDENTIAL });
     await login({ resume: true });
-    expect(getAuth()).toMatchObject({ loggedIn: false, failure: 'rejected' });
+    expect(getAuth()).toMatchObject({
+      loggedIn: false,
+      failure: 'badCredential',
+    });
   });
 
   it('does not start a second login with the saved one', async () => {
@@ -257,7 +287,7 @@ describe('login', () => {
   });
 
   it('goes back from the login screen to the cached data', () => {
-    useAuthStore.setState({ reloginRequested: true, failure: 'rejected' });
+    useAuthStore.setState({ reloginRequested: true, failure: 'badCredential' });
     loginWithOfflineMode();
     expect(getAuth()).toMatchObject({
       reloginRequested: false,
@@ -332,7 +362,7 @@ describe('switching accounts', () => {
   it('drops the data when "Log in again" signs in as someone else', async () => {
     await login(sso);
     leaveData();
-    useAuthStore.setState({ loggedIn: false, failure: 'rejected' });
+    useAuthStore.setState({ loggedIn: false, failure: 'badCredential' });
     requestRelogin();
 
     await login({ ...sso, username: 'someone-else' });
@@ -345,7 +375,7 @@ describe('switching accounts', () => {
   it('keeps the data when the same user logs in again', async () => {
     await login(sso);
     leaveData();
-    useAuthStore.setState({ loggedIn: false, failure: 'rejected' });
+    useAuthStore.setState({ loggedIn: false, failure: 'badCredential' });
     requestRelogin();
 
     await login(sso);

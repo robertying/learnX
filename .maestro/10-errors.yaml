@@ -76,22 +76,37 @@ name: Show no results and failures
     env:
       LIST: '${T_filter}'
 
-# A server that answers with errors: the login fails after its retries, and
-# the lists say so and offer to log in again.
+# A server that answers with errors: the login fails after its quick retries,
+# and the lists say so. It tries again by itself later (helpers/loginRetry),
+# so there's no Log In button.
 - launchApp:
     stopApp: true
     arguments:
       mockLatency: none
       mockFailure: serverError
 - extendedWaitUntil:
-    visible: '.*(${T_syncStatusLoginFailed}).*'
+    visible: '.*(${T_syncStatusServerError}).*'
     timeout: 30000
-- assertVisible:
+- assertNotVisible:
     id: sync-status-relogin
 - runFlow:
     file: subflows/shot.yaml
     env:
       NAME: server-error
+
+# A device the SSO server no longer trusts (its fingerprint expired): the
+# lists say so and offer to log in again, which goes through SSO's second
+# factor.
+- launchApp:
+    stopApp: true
+    arguments:
+      mockLatency: none
+      mockFailure: untrustedDevice
+- extendedWaitUntil:
+    visible: '.*(${T_syncStatusUntrustedDevice}).*'
+    timeout: 30000
+- assertVisible:
+    id: sync-status-relogin
 
 # A server that doesn't answer: the login times out (the mock server's 20 s
 # timeout) and counts as offline, then tries again on its own (30 s,
@@ -125,7 +140,7 @@ name: Show no results and failures
     visible:
       id: sync-status-relogin
     timeout: 30000
-- assertVisible: '.*(${T_syncStatusLoginFailed}).*'
+- assertVisible: '.*(${T_syncStatusBadCredential}).*'
 
 # A saved login the server turns down, as after a password change: the
 # launch login and the next one are rejected (mockLoginFails), the third
@@ -140,21 +155,26 @@ name: Show no results and failures
     visible:
       id: sync-status-relogin
     timeout: 30000
-- assertVisible: '.*(${T_syncStatusLoginFailed}).*'
+- assertVisible: '.*(${T_syncStatusBadCredential}).*'
 - runFlow:
     file: subflows/shot.yaml
     env:
       NAME: login-rejected
-# Log In opens the login page with the saved account filled in.
+# Log In opens the login page with the saved account, but not its turned-down
+# password, and without logging in with the saved account again, which would
+# only be turned down too.
 - tapOn:
     id: sync-status-relogin
 - extendedWaitUntil:
     visible:
       id: login-username
     timeout: 10000
-- assertVisible: '${T_retryLogin}'
-# Its second login is rejected too: the page stays, saying why.
-- tapOn: '${T_retryLogin}'
+- assertNotVisible: '${T_retryLogin}'
+# A password typed here that's turned down too: the page stays, saying why.
+- tapOn:
+    id: login-password
+- inputText: ${PASSWORD}
+- pressKey: Enter
 - extendedWaitUntil:
     visible: 'bad credential(.|\n)*'
     timeout: 30000
@@ -167,17 +187,41 @@ name: Show no results and failures
     timeout: 10000
 # Continue Offline goes back to the saved data, still offering to log in.
 - tapOn: '${T_offlineMode}'
+# Leaving the login page after a typed password, some iOS devices ask to save
+# it (the system's own labels), which hides the app until dismissed.
+- tapOn:
+    text: 'Not Now|现在不|以后'
+    optional: true
 - extendedWaitUntil:
     visible:
       id: sync-status-relogin
     timeout: 10000
-# The third login goes through: the login page and the status go away.
+# The third login goes through: the login page and the status go away. The
+# page starts without the turned-down password again, so it's typed again.
 - tapOn:
     id: sync-status-relogin
 - extendedWaitUntil:
-    visible: '${T_retryLogin}'
+    visible:
+      id: login-password
     timeout: 10000
-- tapOn: '${T_retryLogin}'
+- tapOn:
+    id: login-password
+- inputText: ${PASSWORD}
+- pressKey: Enter
+# Some iOS devices ask to save the password first (the system's own labels).
+- tapOn:
+    text: 'Not Now|现在不|以后'
+    optional: true
+# A typed mock login starts over from the mock data, so the set-up page shows
+# again, as after the first login (subflows/login-form.yaml).
+- extendedWaitUntil:
+    visible:
+      id: setup-not-now
+    timeout: 15000
+    optional: true
+- tapOn:
+    id: setup-not-now
+    optional: true
 - extendedWaitUntil:
     visible:
       id: 'tab-notices'

@@ -1,7 +1,7 @@
 // .maestro/10-errors.yaml: failures, each after a mock login and a relaunch
 // with the failure's launch option (services/launchOptions.ts), as the flow's
 // `launchApp` does. No results is in search.e2e.ts.
-import { expect, packagedApp, test } from './fixtures.ts';
+import { expect, mockLogin, packagedApp, test } from './fixtures.ts';
 import { exact, text } from './maestroEnv.ts';
 import { byId, openCard, openTab, shown } from './steps.ts';
 
@@ -27,7 +27,7 @@ test('shows the offline status and a file that can’t download', async ({
   await expect(byId(window, 'file-error')).toBeVisible({ timeout: 30_000 });
 });
 
-test('offers to log in again after a server error', async ({
+test('says a server error and retries by itself, without a button', async ({
   login,
   relaunch,
 }) => {
@@ -36,7 +36,21 @@ test('offers to log in again after a server error', async ({
     launchOptions: { mockLatency: 'none', mockFailure: 'serverError' },
   });
   await expect(
-    shown(window.getByText(text('T_syncStatusLoginFailed'))),
+    shown(window.getByText(text('T_syncStatusServerError'))),
+  ).toBeVisible({ timeout: 30_000 });
+  await expect(byId(window, 'sync-status-relogin')).toBeHidden();
+});
+
+test('offers to log in again when the trusted browser expired', async ({
+  login,
+  relaunch,
+}) => {
+  await login();
+  const { window } = await relaunch({
+    launchOptions: { mockLatency: 'none', mockFailure: 'untrustedDevice' },
+  });
+  await expect(
+    shown(window.getByText(text('T_syncStatusUntrustedDevice'))),
   ).toBeVisible({ timeout: 30_000 });
   await expect(byId(window, 'sync-status-relogin')).toBeVisible();
 });
@@ -78,7 +92,7 @@ test('offers to log in again after the password changed', async ({
     timeout: 30_000,
   });
   await expect(
-    shown(window.getByText(text('T_syncStatusLoginFailed'))),
+    shown(window.getByText(text('T_syncStatusBadCredential'))),
   ).toBeVisible();
 });
 
@@ -92,21 +106,27 @@ test('logs in again after rejected logins', async ({ login, relaunch }) => {
     },
   });
   const relogin = byId(window, 'sync-status-relogin');
-  const retry = shown(
-    window.getByRole('button', { name: exact('T_retryLogin') }),
-  );
+  const password = byId(window, 'login-password');
   await expect(relogin).toBeVisible({ timeout: 30_000 });
   await expect(
-    shown(window.getByText(text('T_syncStatusLoginFailed'))),
+    shown(window.getByText(text('T_syncStatusBadCredential'))),
   ).toBeVisible();
 
-  // The second login is rejected too. The web build isn't an E2E build
-  // (TEST_LOGIN), so its toast leaves out the reason the flow matches.
+  // The login page leaves out the turned-down password and doesn't offer the
+  // saved login again. A typed password is turned down too. The web build
+  // isn't an E2E build (TEST_LOGIN), so its toast leaves out the reason.
   await relogin.click();
   await expect(byId(window, 'login-username')).toBeVisible();
-  await retry.click();
+  await expect(password).toHaveValue('');
   await expect(
-    shown(window.getByTestId('toast').getByText(text('T_loginFailed'))),
+    window.getByRole('button', { name: exact('T_retryLogin') }),
+  ).toBeHidden();
+  await password.fill(mockLogin().password);
+  await password.press('Enter');
+  await expect(
+    shown(
+      window.getByTestId('toast').getByText(text('T_loginFailedBadCredential')),
+    ),
   ).toBeVisible({ timeout: 30_000 });
   await expect(byId(window, 'login-username')).toBeVisible();
 
@@ -116,7 +136,8 @@ test('logs in again after rejected logins', async ({ login, relaunch }) => {
   ).click();
   await expect(relogin).toBeVisible();
   await relogin.click();
-  await retry.click();
+  await password.fill(mockLogin().password);
+  await password.press('Enter');
   await expect(window.getByTestId('tab-notices')).toBeVisible({
     timeout: 30_000,
   });

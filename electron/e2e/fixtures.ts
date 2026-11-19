@@ -32,7 +32,7 @@ const root = path.join(electronDir, '..');
 export const packagedApp = process.env.LEARNX_E2E_APP;
 
 /** The mock login, from .env as the web build inlined it. */
-const mockLogin = () => {
+export const mockLogin = () => {
   const env = parse(fs.readFileSync(path.join(root, '.env'), 'utf8'));
   if (!env.DUMMY_USERNAME || !env.DUMMY_PASSWORD) {
     throw new Error('.env has no mock login (DUMMY_USERNAME, DUMMY_PASSWORD)');

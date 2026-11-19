@@ -368,7 +368,10 @@ describe('failed requests', () => {
     await expect(
       dataSource.addToFavorites('notification' as never, 'n1'),
     ).rejects.toBe(error);
-    expect(getAuth()).toMatchObject({ loggedIn: false, failure: 'rejected' });
+    expect(getAuth()).toMatchObject({
+      loggedIn: false,
+      failure: 'badCredential',
+    });
   });
 
   it('leave the session alone for other errors and pass results through', async () => {

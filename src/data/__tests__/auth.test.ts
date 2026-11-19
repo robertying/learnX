@@ -17,7 +17,16 @@ describe('noteRequestError', () => {
     expect(getAuth()).toMatchObject({
       loggedIn: false,
       error: FailReason.BAD_CREDENTIAL,
-      failure: 'rejected',
+      failure: 'badCredential',
+    });
+  });
+
+  it('ends the session when the SSO server no longer trusts the device', () => {
+    noteRequestError({ reason: FailReason.DEVICE_NOT_TRUSTED });
+    expect(getAuth()).toMatchObject({
+      loggedIn: false,
+      error: FailReason.DEVICE_NOT_TRUSTED,
+      failure: 'untrustedDevice',
     });
   });
 

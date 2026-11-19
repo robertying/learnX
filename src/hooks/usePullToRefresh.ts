@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { getAuth, useLoggedIn, useLoggingIn } from 'data/auth';
+import { isRefusal } from 'helpers/errors';
+import { loginFailedMessage } from 'helpers/loginFailureText';
 import { login } from 'data/login';
 import { toast } from 'components/Toast';
 import { t } from 'helpers/i18n';
@@ -11,7 +13,9 @@ type RefreshResult = { isError: boolean } | void;
  * Pull to refresh for a list: refetches while logged in, and says so when
  * that fails. With no session (offline, or a failed login) it logs in again
  * with the saved login instead; the lists refetch on their own once it
- * succeeds, and the status line above them reports a failure.
+ * succeeds, and the status line above them reports a failure. A saved login
+ * the server refused isn't tried again: the toast says why, and the status
+ * line offers to log in.
  *
  * `refreshing` is true only for a refresh the user started, until it ends.
  * Fetches the app starts itself (at launch, on returning to the app, when
@@ -45,6 +49,8 @@ const usePullToRefresh = (
           }
         })
         .finally(() => setRefreshing(false));
+    } else if (isRefusal(getAuth().failure)) {
+      toast(loginFailedMessage(getAuth().failure), 'error');
     } else if (!getAuth().loggingIn) {
       setPulled(true);
       void login({});
