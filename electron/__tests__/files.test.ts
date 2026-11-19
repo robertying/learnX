@@ -423,6 +423,19 @@ describe('download in the main process', () => {
     await expect(done).resolves.toEqual({ status: 200 });
   });
 
+  it.each([
+    'https://raw.githubusercontent.com/robertying/learnX/main/mock-files/../../../other/repo/main/a.exe',
+    'https://raw.githubusercontent.com/robertying/learnX/main/mock-files/%2e%2e/%2e%2e/x',
+    'https://raw.githubusercontent.com/robertying/learnX/main/mock-files-other/a.pdf',
+    'http://raw.githubusercontent.com/robertying/learnX/main/mock-files/a.pdf',
+  ])('refuses %s, outside the mock files', async url => {
+    const { net, requests } = fakeNet();
+    await expect(
+      files.download(net, session, { url, uri: target }),
+    ).rejects.toThrow('Not an allowed URL');
+    expect(requests).toHaveLength(0);
+  });
+
   it('fails on a status other than 2xx, leaving no file', async () => {
     const { net, requests } = fakeNet();
     const done = files.download(net, session, {

@@ -42,6 +42,17 @@ describe('updateMode', () => {
     ],
     // A .deb: its updates need an administrator, so it only says.
     [{ ...packaged, platform: 'linux', packageType: 'deb' }, 'notify'],
+    // Started from something that runs as an AppImage, which passes on its
+    // APPIMAGE: still a .deb.
+    [
+      {
+        ...packaged,
+        platform: 'linux',
+        packageType: 'deb',
+        env: { APPIMAGE: '/a/Terminal.AppImage' },
+      },
+      'notify',
+    ],
     [{ ...packaged, platform: 'linux' }, null],
     [{ ...packaged, platform: 'darwin' }, null],
     [{ ...packaged, dev: true, platform: 'win32' }, null],

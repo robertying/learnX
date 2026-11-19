@@ -168,7 +168,6 @@ export interface Bridge {
     get: (url: string) => Promise<BridgeCookie[]>;
     set: (details: BridgeCookieDetails) => Promise<void>;
     remove: (url: string, name: string) => Promise<void>;
-    flush: () => Promise<void>;
     clearAll: () => Promise<void>;
   };
   storage: {

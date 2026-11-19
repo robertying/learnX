@@ -103,12 +103,22 @@ export const createSecrets = (
     ]).finally(() => clearTimeout(timer));
   };
 
-  const save = async (key: string, value: string) =>
-    store.setItem(
-      DB,
-      key,
-      (await encryption.encrypt(value)).toString('base64'),
-    );
+  /**
+   * How many times each key has been set or removed, so a save that
+   * finishes encrypting after a later set or remove (logging out right after
+   * logging in) writes nothing.
+   */
+  const changes = new Map<string, number>();
+  const changed = (key: string) =>
+    changes.set(key, (changes.get(key) ?? 0) + 1);
+
+  /** @param at the key's change count when `value` was current */
+  const save = async (key: string, value: string, at = changes.get(key)) => {
+    const encrypted = await encryption.encrypt(value);
+    if (changes.get(key) === at) {
+      store.setItem(DB, key, encrypted.toString('base64'));
+    }
+  };
 
   /**
    * Values waiting for the key store to open, by key: read back from here
@@ -128,6 +138,7 @@ export const createSecrets = (
       if (waiting !== undefined) {
         return waiting;
       }
+      const at = changes.get(key);
       const saved = store.getItem(DB, key);
       if (saved == null) {
         return null;
@@ -140,7 +151,7 @@ export const createSecrets = (
           Buffer.from(saved, 'base64'),
         );
         if (shouldReEncrypt) {
-          await save(key, result).catch(() => {});
+          await save(key, result, at).catch(() => {});
         }
         return result;
       } catch {
@@ -156,6 +167,7 @@ export const createSecrets = (
      * saves the value once it opens; until then it's only in memory.
      */
     set: async (key: string, value: string): Promise<void> => {
+      changed(key);
       unsaved.set(key, value);
       const saving = (async () => {
         const open = await keyStore();
@@ -180,6 +192,7 @@ export const createSecrets = (
       }
     },
     remove: async (key: string): Promise<void> => {
+      changed(key);
       unsaved.delete(key);
       store.removeItem(DB, key);
     },

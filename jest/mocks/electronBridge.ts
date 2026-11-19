@@ -14,7 +14,6 @@ export const installBridge = (overrides: Partial<Bridge> = {}): Bridge => {
       get: jest.fn(async () => []),
       set: jest.fn(async () => {}),
       remove: jest.fn(async () => {}),
-      flush: jest.fn(async () => {}),
       clearAll: jest.fn(async () => {}),
     },
     storage: {

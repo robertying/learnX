@@ -89,6 +89,59 @@ it('saves a value again when its key has been rotated', async () => {
   expect(safeStorage.encryptStringAsync).toHaveBeenCalledWith('x');
 });
 
+describe('a set or remove while a value is still being encrypted', () => {
+  /**
+   * safeStorage whose encryptions finish only when `finish` is called, the
+   * latest first.
+   */
+  const slow = (options?: Parameters<typeof fakeSafeStorage>[0]) => {
+    const safeStorage = fakeSafeStorage(options);
+    const encrypt = safeStorage.encryptStringAsync.getMockImplementation()!;
+    const waiting: (() => void)[] = [];
+    safeStorage.encryptStringAsync.mockImplementation(
+      (text: string) =>
+        new Promise(resolve => waiting.push(() => resolve(encrypt(text)))),
+    );
+    const finish = async () => {
+      for (const resolve of waiting.splice(0).reverse()) {
+        resolve();
+      }
+      await new Promise(resolve => setTimeout(resolve, 0));
+    };
+    return { safeStorage, finish };
+  };
+
+  it('keeps a value removed meanwhile removed', async () => {
+    const store = createFileStore(root);
+    const { safeStorage, finish } = slow();
+    const secrets = createSecrets(store, safeStorage, {
+      platform: 'win32',
+      saveWaitMs: 10,
+    });
+    await secrets.set('credentials', 'x');
+    await secrets.remove('credentials');
+    await finish();
+    expect(store.getItem('secrets', 'credentials')).toBeNull();
+    await expect(secrets.get('credentials')).resolves.toBeNull();
+  });
+
+  it('keeps the newer value over a rotated key’s old one', async () => {
+    const store = createFileStore(root);
+    store.setItem('secrets', 'credentials', saved('old'));
+    const { safeStorage, finish } = slow({ rotated: true });
+    const secrets = createSecrets(store, safeStorage, {
+      platform: 'win32',
+      saveWaitMs: 10,
+    });
+    const reading = secrets.get('credentials');
+    await new Promise(resolve => setTimeout(resolve, 0));
+    await secrets.set('credentials', 'new');
+    await finish();
+    await expect(reading).resolves.toBe('old');
+    expect(store.getItem('secrets', 'credentials')).toBe(saved('new'));
+  });
+});
+
 it.each([
   ['without encryption', { available: false }, 'win32'],
   ['without encryption on Linux', { available: false }, 'linux'],
