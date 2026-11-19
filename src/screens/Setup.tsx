@@ -6,6 +6,7 @@ import { Form, FormScreen, FormSection, FormToggle } from 'components/Form';
 import { Title } from 'components/Text';
 import { toast } from 'components/Toast';
 import DeviceInfo from 'constants/DeviceInfo';
+import PageColumn from 'constants/PageColumn';
 import { setSetupSeen, setWhatsNewSeen } from 'data/appState';
 import { setSetting, useSettings } from 'data/settings';
 import { calendarSettingsTitle } from 'helpers/calendar/details';
@@ -221,7 +222,7 @@ const Setup: React.FC<Props> = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   title: {
     textAlign: isAndroid() ? 'auto' : 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: PageColumn.margin,
     paddingTop: 34,
     paddingBottom: 10,
   },

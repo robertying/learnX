@@ -3,6 +3,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ContainedButton from 'components/ContainedButton';
 import Divider from 'components/Divider';
 import TextButton from 'components/TextButton';
+import PageColumn from 'constants/PageColumn';
 import { isApple } from 'helpers/platform';
 
 export interface BarAction {
@@ -101,9 +102,9 @@ const styles = StyleSheet.create({
   },
   bar: {
     width: '100%',
-    maxWidth: 520,
+    maxWidth: PageColumn.maxWidth,
     alignSelf: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: PageColumn.margin,
     paddingTop: 12,
   },
   appleBar: {
