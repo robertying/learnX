@@ -81,6 +81,16 @@ const wednesday = new Date(beijing - ((beijing.getUTCDay() + 6) % 7 - 2) * 864e5
 console.log(wednesday.toISOString().slice(0, 10) + "T09:41:00+08:00");
 ')}"
 
+# What the Search shot looks for, in the shots' language (scripts/e2e/e2e-env.mjs).
+if [ "$platform" = android ]; then
+  shot_language="${STORE_ANDROID_LOCALE:-zh-CN}"
+else
+  shot_language="${STORE_LANGUAGE:-zh-Hans}"
+fi
+if [[ "$shot_language" == en* ]]; then
+  export STORE_SEARCH_TERM=Quantum
+fi
+
 out_root="${STORE_OUT_DIR:-build/store-screenshots}"
 mkdir -p "$out_root/$folder"
 out="$(cd "$out_root/$folder" && pwd)"

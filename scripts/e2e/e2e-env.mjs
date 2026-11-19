@@ -136,10 +136,15 @@ for (const [listName, id] of [
   }
 }
 
-// The store screenshots are in Chinese and search for 量子 ("quantum"), the
-// start of a course's name; the results include notice 1, of that course.
-const storeSearchTerm = '量子';
-if (!notice.courseName.includes(storeSearchTerm)) {
+// The store screenshots search for the start of a course's name, 量子 or, in
+// English (STORE_SEARCH_TERM, from scripts/e2e/store-screenshots.sh),
+// Quantum; the results include notice 1, of that course.
+const storeSearchTerm = process.env.STORE_SEARCH_TERM || '量子';
+if (
+  !courseName(item(zhMock.mockCourses, notice.courseId)).includes(
+    storeSearchTerm,
+  )
+) {
   throw new Error(
     `Mock item ${notice.id} isn't from a course with "${storeSearchTerm}"`,
   );
