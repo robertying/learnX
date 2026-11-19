@@ -1,4 +1,4 @@
-import { Keyboard, Platform } from 'react-native';
+import { Dimensions, Keyboard, Platform } from 'react-native';
 import { act, renderHook } from '@testing-library/react-native';
 import useKeepAboveKeyboard from 'hooks/useKeepAboveKeyboard';
 
@@ -7,12 +7,16 @@ beforeEach(() => {
   addListener = jest.spyOn(Keyboard, 'addListener');
 });
 
-const showKeyboard = (screenY: number) =>
+// A docked keyboard ends at the screen's bottom; `height` can stop it short.
+const showKeyboard = (
+  screenY: number,
+  height = Dimensions.get('screen').height - screenY,
+) =>
   (
     addListener.mock.calls.findLast(
       ([name]) => name === 'keyboardWillShow',
     )![1] as (event: object) => void
-  )({ endCoordinates: { screenY } });
+  )({ endCoordinates: { screenY, height } });
 
 // A view 100 high at `y` in the window, in a scroll view scrolled to 50.
 const setUp = async (y: number) => {
@@ -37,6 +41,12 @@ it('scrolls on until the whole view and a margin clear the keyboard', async () =
   // The view ends at 600, the margin at 616: 16 under the keyboard at 600.
   await act(() => showKeyboard(600));
   expect(scrollTo).toHaveBeenCalledWith({ y: 66, animated: true });
+});
+
+it('skips a keyboard frame that stops short of the screen bottom, as one does mid-rotation', async () => {
+  const scrollTo = await setUp(500);
+  await act(() => showKeyboard(340, 100));
+  expect(scrollTo).not.toHaveBeenCalled();
 });
 
 it('leaves a view that already clears the keyboard', async () => {

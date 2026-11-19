@@ -1,5 +1,6 @@
 import { type ComponentRef, useEffect, useRef, type RefObject } from 'react';
 import {
+  Dimensions,
   Keyboard,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
@@ -37,6 +38,19 @@ const useKeepAboveKeyboard = (
       // window's. In an iPad window that doesn't start at the screen's top,
       // the view seems higher than it is and this scrolls less, never too far.
       const keyboardTop = event.endCoordinates.screenY;
+      // Only a docked keyboard, which ends at the screen's bottom. While the
+      // device rotates, iOS also reports a passing frame that stops short of
+      // it, and scrolling for that one overshoots (as would scrolling for a
+      // floating keyboard, which covers no fixed part of the page).
+      if (
+        Math.abs(
+          keyboardTop +
+            event.endCoordinates.height -
+            Dimensions.get('screen').height,
+        ) > 1
+      ) {
+        return;
+      }
       view.current?.measureInWindow((_x, y, _width, height) => {
         const overlap = y + height + margin - keyboardTop;
         if (overlap > 0) {
