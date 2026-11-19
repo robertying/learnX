@@ -48,6 +48,7 @@ import { SafeAreaView } from 'react-native-screens/experimental';
 import { hasGlassHeader } from 'navigation/options';
 import { isApple } from 'helpers/platform';
 import { scrollInsetBehavior } from 'constants/scrollInsetBehavior';
+import { useWindowTitle } from 'hooks/useWindow';
 
 type NavigationProp = MainStackNavigationProp<
   CourseDetailParamList,
@@ -150,6 +151,7 @@ const CourseDetail: React.FC<Props> = ({ navigation, route }) => {
   const course = useCourse(route.params.id);
 
   useHeaderTitle(navigation, course?.name, course?.teacherName);
+  useWindowTitle(course?.name);
 
   if (!course) {
     return <NotFound />;

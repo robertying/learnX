@@ -39,6 +39,7 @@ import {
   FormText,
 } from 'components/Form';
 import { isAndroid, isApple, isElectron } from 'helpers/platform';
+import { useWindowTitle } from 'hooks/useWindow';
 
 type Props = NativeStackScreenProps<FileDetailParamList, 'FileDetail'>;
 
@@ -48,6 +49,7 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
   const file = 'attachment' in params ? params.attachment : storeFile;
 
   useHeaderTitle(navigation, file?.title, file?.courseName);
+  useWindowTitle(file?.title);
 
   if (!file) {
     return <NotFound />;

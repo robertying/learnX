@@ -6,6 +6,7 @@ import type { Assignment } from 'data/types/state';
 import type { ClassSession } from 'helpers/schedule';
 import DeviceInfo from 'constants/DeviceInfo';
 import useDetailNavigator, { useDetailRoot } from 'hooks/useDetailNavigator';
+import { useWindowTitle } from 'hooks/useWindow';
 import type { AppCommand } from 'modules/menus';
 import { getTitleOptions } from 'navigation/options';
 import Today from 'screens/Today';
@@ -19,6 +20,10 @@ jest.mock('@react-navigation/native', () => ({
 }));
 
 jest.mock('hooks/useAvailableUpdate', () => () => null);
+jest.mock('hooks/useWindow', () => ({
+  ...jest.requireActual('hooks/useWindow'),
+  useWindowTitle: jest.fn(),
+}));
 jest.mock('hooks/useDetailNavigator', () => ({
   ...jest.requireActual('hooks/useDetailNavigator'),
   __esModule: true,
@@ -71,6 +76,11 @@ jest.mock('data/content', () => ({
   useNotices: () => query({ notices: mockNotices }),
   useFiles: () => query({ files: mockFiles }),
 }));
+const mockCourses: { id: string; name: string }[] = [];
+jest.mock('data/queries', () => ({
+  ...jest.requireActual('data/queries'),
+  useCourse: (id: string) => mockCourses.find(course => course.id === id),
+}));
 jest.mock('navigation/options', () => ({
   ...jest.requireActual('navigation/options'),
   getTitleOptions: jest.fn(() => ({})),
@@ -109,6 +119,7 @@ beforeEach(() => {
   mockListeners.clear();
   mockSessions.length = 0;
   mockAssignments.length = 0;
+  mockCourses.length = 0;
   for (const key of Object.keys(mockSchedule)) {
     delete mockSchedule[key];
   }
@@ -409,4 +420,27 @@ it('opens search from the header', async () => {
     .find((item: { identifier: string }) => item.identifier === 'search');
   search.onPress();
   expect(navigation.navigate).toHaveBeenCalledWith('SearchStack');
+});
+
+it('names the window after what is open beside Today, else Today', async () => {
+  await setup();
+  expect(useWindowTitle).toHaveBeenLastCalledWith('Today');
+
+  mockAssignments.push({ id: 'h1', courseId: 'a', title: 'Homework 1' });
+  jest
+    .mocked(useDetailRoot)
+    .mockReturnValue({ name: 'AssignmentDetail', id: 'h1' });
+  await setup();
+  expect(useWindowTitle).toHaveBeenLastCalledWith('Homework 1');
+
+  mockCourses.push({ id: 'c1', name: 'Calculus' });
+  jest
+    .mocked(useDetailRoot)
+    .mockReturnValue({ name: 'CourseDetail', id: 'c1' });
+  await setup();
+  expect(useWindowTitle).toHaveBeenLastCalledWith('Calculus');
+
+  jest.mocked(useDetailRoot).mockReturnValue({ name: 'Schedule' });
+  await setup();
+  expect(useWindowTitle).toHaveBeenLastCalledWith('Schedule');
 });

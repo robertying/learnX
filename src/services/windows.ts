@@ -58,3 +58,8 @@ export const openWindow = (link: string) => {
 export const setWindowLink = (id: string, link: string) => {
   Windows?.setWindowLink(id, link);
 };
+
+/** Names the window `id` after what it shows. */
+export const setWindowTitle = (id: string, title: string) => {
+  void Windows?.setWindowTitle(id, title).catch(() => {});
+};

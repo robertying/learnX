@@ -39,7 +39,8 @@ import FlatList from './FlatList';
 import ListBackground from './ListBackground';
 import { playHaptic } from 'services/haptics';
 import { useTheme } from 'theme';
-import { useWindowRestoration } from 'hooks/useWindow';
+import { useWindowRestoration, useWindowTitle } from 'hooks/useWindow';
+import { t } from 'helpers/i18n';
 
 export type { ItemComponentProps };
 
@@ -53,6 +54,14 @@ const detailScreens: Record<
   file: 'FileDetail',
   course: 'CourseDetail',
 };
+
+// What a window showing the list without an item open is called.
+const listTitles = {
+  notice: 'notices',
+  assignment: 'assignments',
+  file: 'files',
+  course: 'courses',
+} as const satisfies Record<FilterListProps<unknown>['type'], string>;
 
 export interface FilterListProps<T> {
   type: 'notice' | 'assignment' | 'file' | 'course';
@@ -108,6 +117,13 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     detailRoot?.name === detailScreens[type] ? detailRoot.id : undefined;
   // A window on iPad or Mac comes back to this list and item after a relaunch.
   useWindowRestoration({ type, id: openedId });
+  const opened = openedId
+    ? [all, hidden, archived ?? []].flat().find(item => item.id === openedId)
+    : undefined;
+  useWindowTitle(
+    (opened && ('title' in opened ? opened.title : opened.name)) ||
+      t(listTitles[type]),
+  );
 
   // Only this tab's selection, so changing another tab's filter does not
   // re-render this list

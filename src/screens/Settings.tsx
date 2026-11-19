@@ -35,6 +35,7 @@ import {
   SettingDetailParams,
   SettingsStackParams,
 } from 'navigation/types';
+import { useWindowTitle } from 'hooks/useWindow';
 
 type Props = MainStackScreenProps<SettingsStackParams, 'Settings'>;
 
@@ -55,6 +56,7 @@ const latestWhatsNew = () => {
 
 const Settings: React.FC<Props> = ({ navigation }) => {
   const show = useShowDetail(navigation);
+  useWindowTitle(t('settings'));
   // A row opens its page beside Settings where there's a detail pane, and
   // shows as selected while it's open there.
   const detailRoot = useDetailRoot();

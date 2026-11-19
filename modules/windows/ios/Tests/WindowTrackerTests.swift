@@ -50,6 +50,16 @@ import UIKit
     #expect(WindowTracker.targetWindowId == "window-b")
   }
 
+  @MainActor @Test func namesTheWindowWithTheId() throws {
+    let scene = try #require(UIApplication.shared.connectedScenes.first)
+    let title = scene.title
+    defer { scene.title = title }
+    WindowTracker.setTitle("Homework 1", for: scene.session.persistentIdentifier)
+    #expect(scene.title == "Homework 1")
+    WindowTracker.setTitle("Notices", for: "another-window")
+    #expect(scene.title == "Homework 1")
+  }
+
   @MainActor @Test func targetsTheWindowThatBecomesKey() throws {
     let scene = try #require(UIApplication.shared.connectedScenes.first as? UIWindowScene)
     WindowTracker.setTarget("another-window")

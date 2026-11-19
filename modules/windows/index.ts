@@ -15,6 +15,11 @@ declare class WindowsModule {
    * window comes back after a relaunch.
    */
   setWindowLink(windowId: string, link: string | null): void;
+  /**
+   * Names a window after what it shows, in the Mac's Dock and Window menus
+   * and in App Exposé on iPad.
+   */
+  setWindowTitle(windowId: string, title: string): Promise<void>;
   /** Opens a new window on a learnx:// link. */
   openWindow(link: string): Promise<void>;
 }

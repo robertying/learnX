@@ -5,6 +5,7 @@ import {
   openWindow,
   registerWindow,
   setWindowLink,
+  setWindowTitle,
   targetWindow,
 } from 'services/windows';
 
@@ -56,6 +57,8 @@ describe('windows', () => {
     expect(Windows!.openWindow).toHaveBeenCalledWith('learnx://notice/n1');
     setWindowLink('a', 'learnx://today');
     expect(Windows!.setWindowLink).toHaveBeenCalledWith('a', 'learnx://today');
+    setWindowTitle('a', 'Today');
+    expect(Windows!.setWindowTitle).toHaveBeenCalledWith('a', 'Today');
   });
 
   it("keeps a window's place when its root registers again", () => {
@@ -63,6 +66,13 @@ describe('windows', () => {
     open('b');
     open('a');
     expect(targetWindow()).toBe('a');
+  });
+
+  it('ignores a window that fails to be named', async () => {
+    jest.mocked(Windows!.setWindowTitle).mockRejectedValueOnce(new Error('no'));
+    setWindowTitle('a', 'Today');
+    await Promise.resolve();
+    expect(Windows!.setWindowTitle).toHaveBeenCalledTimes(1);
   });
 
   it('ignores a window that fails to open', async () => {

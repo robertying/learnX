@@ -20,6 +20,7 @@ import {
   FormParagraph,
   FormTitle,
 } from 'components/Form';
+import { useWindowTitle } from 'hooks/useWindow';
 
 type Props = NativeStackScreenProps<NoticeDetailParamList, 'NoticeDetail'>;
 
@@ -27,6 +28,7 @@ const NoticeDetail: React.FC<Props> = ({ route, navigation }) => {
   const notice = useNotice(route.params.id);
 
   useHeaderTitle(navigation, notice?.courseName, notice?.courseTeacherName);
+  useWindowTitle(notice?.title);
 
   if (!notice) {
     return <NotFound />;
