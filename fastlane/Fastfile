@@ -266,7 +266,7 @@ def write_fallback_notes(path)
 
       # 功能
 
-      - #{NOTES_TODO}：只写这个平台的改动，没有就在 # 修复 下写“修复若干小问题。”
+      - #{NOTES_TODO}：只写这个平台的改动，没有就在 # 修复 下写"修复若干小问题。"
 
       # 修复
 
