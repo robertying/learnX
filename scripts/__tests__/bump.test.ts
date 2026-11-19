@@ -74,6 +74,11 @@ it.each([
     ['--build', '4560', 'minor'],
     'exec fastlane bump version:18.5.0 build:4560',
   ],
+  [['--offline'], 'exec fastlane bump remote:false'],
+  [
+    ['patch', '--offline', '--build', '4560'],
+    'exec fastlane bump version:18.4.3 build:4560 remote:false',
+  ],
 ])('passes the build number of %j to the lane', (args, expected) => {
   expect(bump(...args)).toBe(expected);
 });
