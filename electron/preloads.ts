@@ -39,9 +39,21 @@ export const stripTypes = (source: string): string => {
   }
 };
 
+/** A file's text, or undefined when there's none to read. */
+const readIfThere = (file: string): string | undefined => {
+  try {
+    return fs.readFileSync(file, 'utf8');
+  } catch {
+    return undefined;
+  }
+};
+
 /**
  * Writes the preloads into `outDir`, each through a temporary file renamed
- * over it, so E2E workers launching at once never read a partial one.
+ * over it, so E2E workers launching at once never read a partial one. A
+ * preload already as stripped is left alone: on Windows a rename over a file
+ * another running app has open fails (EPERM), so with the E2E run's setup
+ * having stripped them once (e2e/setup.ts), its apps never replace one.
  */
 export const stripPreloads = (outDir: string = PRELOADS_DIR): void => {
   fs.mkdirSync(outDir, { recursive: true });
@@ -50,6 +62,9 @@ export const stripPreloads = (outDir: string = PRELOADS_DIR): void => {
       fs.readFileSync(path.join(import.meta.dirname, source), 'utf8'),
     );
     const file = path.join(outDir, output);
+    if (readIfThere(file) === code) {
+      continue;
+    }
     const temp = `${file}.${process.pid}.tmp`;
     fs.writeFileSync(temp, code);
     fs.renameSync(temp, file);
