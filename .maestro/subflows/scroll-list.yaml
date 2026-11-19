@@ -2,17 +2,13 @@
 # itself (LIST, its testID; swipe-list.yaml): DIRECTION UP shows what's
 # further down, DOWN goes back up. Not scrollUntilVisible: it swipes the
 # middle of the screen, which is the detail pane in a split view (iPad, the
-# open iPhone Duo, the unfolded foldable). Ends once TARGET is found, which
-# costs Maestro's lookup timeout once.
+# open iPhone Duo, the unfolded foldable).
 appId: ${APP_ID}
 ---
-- repeat:
-    times: 8
-    while:
-      notVisible: ${TARGET}
-    commands:
-      - runFlow:
-          file: swipe-list.yaml
-          env:
-            LIST: ${LIST}
-            DIRECTION: ${DIRECTION}
+- runFlow:
+    file: swipe-until-shown.yaml
+    env:
+      LIST: ${LIST}
+      ID: ''
+      TEXT: ${TARGET}
+      DIRECTION: ${DIRECTION}

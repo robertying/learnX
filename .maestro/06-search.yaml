@@ -84,9 +84,13 @@ name: Search and open a result
 - tapOn: '.*(${MOCK_SEARCH_NOTICE}).*'
 - waitForAnimationToEnd
 - runFlow:
+    file: subflows/shown.yaml
+    env:
+      ID: notice-detail
+      TEXT: ''
+- runFlow:
     when:
-      notVisible:
-        id: notice-detail
+      true: ${!output.shown}
     commands:
       - tapOn: '.*(${MOCK_SEARCH_NOTICE}).*'
 - extendedWaitUntil:

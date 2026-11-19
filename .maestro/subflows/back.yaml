@@ -1,6 +1,9 @@
-# Leave a pushed detail screen. Skipped while LIST (a label on the list
-# screen) is still visible, i.e. when the detail opened beside the list in a
-# split view (iPad, the open iPhone Duo) instead of being pushed over it.
+# Leave a pushed detail screen. Skipped when the detail opened beside the list
+# instead of being pushed over it: on iOS in the split layout (SPLIT from
+# scripts/e2e/e2e.sh: iPad, the open iPhone Duo), on Android while LIST (a
+# label on the list screen) is still visible (the unfolded foldable). SPLIT
+# rather than LIST on iOS: a notVisible check on a label that is there waits
+# out Maestro's lookup timeout (7 s) each time.
 appId: ${APP_ID}
 ---
 - runFlow:
@@ -12,8 +15,7 @@ appId: ${APP_ID}
 - runFlow:
     when:
       platform: iOS
-      true: ${IOS_MAJOR >= 26}
-      notVisible: ${LIST}
+      true: ${IOS_MAJOR >= 26 && SPLIT != 'true'}
     commands:
       # Interactive pop from the left edge; there's no system back on iOS.
       - swipe:
@@ -27,8 +29,7 @@ appId: ${APP_ID}
 - runFlow:
     when:
       platform: iOS
-      true: ${IOS_MAJOR < 26}
-      notVisible: ${LIST}
+      true: ${IOS_MAJOR < 26 && SPLIT != 'true'}
     commands:
       - tapOn:
           point: 5%, 8%

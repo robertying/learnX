@@ -1,0 +1,27 @@
+# Set output.shown to whether the element with id ID, or with text TEXT (a
+# regex) when ID is empty, is on screen. Branch on it rather than on
+# `notVisible`, which waits out Maestro's lookup timeout (7 s) whenever the
+# element is there: this waits only when it's absent, so look for what is
+# usually there (a retry's goal, a row already on screen).
+appId: ${APP_ID}
+---
+- evalScript: ${output.shown = false}
+- runFlow:
+    when:
+      true: ${!!ID}
+    commands:
+      - runFlow:
+          when:
+            visible:
+              id: ${ID}
+          commands:
+            - evalScript: ${output.shown = true}
+- runFlow:
+    when:
+      true: ${!ID}
+    commands:
+      - runFlow:
+          when:
+            visible: ${TEXT}
+          commands:
+            - evalScript: ${output.shown = true}
