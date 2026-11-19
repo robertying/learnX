@@ -91,8 +91,11 @@ test('opens, saves and shows a file in its folder', async ({
   const saved = path.join(dataDir, 'Saved.pdf');
   await main.stub({ save: saved });
   await header('T_saveAs').click();
-  await expect.poll(() => fs.existsSync(saved)).toBe(true);
-  expect(fs.statSync(saved).size).toBe(fs.statSync(opened).size);
+  // Once the app says so: the copy shows in the folder before it's written.
+  await expect(
+    shown(window.getByTestId('toast').getByText(text('T_saveFileSucceeded'))),
+  ).toBeVisible();
+  expect(fs.readFileSync(saved).equals(fs.readFileSync(opened))).toBe(true);
   const save = (await main.record()).dialogs.find(d => d.type === 'save');
   expect(save?.options).toMatchObject({
     defaultPath: expect.stringMatching(/\.pdf$/),
