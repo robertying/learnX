@@ -146,6 +146,58 @@ describe('saveCredentials', () => {
   });
 });
 
+describe('a refused saved login', () => {
+  it('is kept with the login, in the keychain, until a login goes through', async () => {
+    jest.useFakeTimers({ now: 1_000 });
+    await m.saveCredentials(credentials);
+    await m.clearSavedLoginRefusal();
+    expect(m.savedLoginRefusal()).toBeUndefined();
+
+    await m.noteSavedLoginRefused('untrustedDevice');
+    const refused = { failure: 'untrustedDevice', at: 1_000 };
+    expect(m.savedLoginRefusal()).toEqual(refused);
+    expect(JSON.parse(keychain.get(m.CREDENTIALS_KEY)!)).toEqual({
+      ...credentials,
+      refused,
+    });
+
+    await m.clearSavedLoginRefusal();
+    expect(m.getCredentials()).toEqual(credentials);
+    expect(JSON.parse(keychain.get(m.CREDENTIALS_KEY)!)).toEqual(credentials);
+  });
+
+  it('may be tried again by itself a day after it was refused', async () => {
+    jest.useFakeTimers({ now: 1_000 });
+    await m.saveCredentials(credentials);
+    expect(m.refusedLoginRetryDue()).toBe(false);
+    await m.noteSavedLoginRefused('badCredential');
+    expect(m.refusedLoginRetryDue()).toBe(false);
+    jest.setSystemTime(1_000 + m.REFUSED_LOGIN_RETRY_MS - 1);
+    expect(m.refusedLoginRetryDue()).toBe(false);
+    jest.setSystemTime(1_000 + m.REFUSED_LOGIN_RETRY_MS);
+    expect(m.refusedLoginRetryDue()).toBe(true);
+  });
+
+  it('is gone with a new login saved, and needs a saved login', async () => {
+    await m.noteSavedLoginRefused('badCredential');
+    expect(m.getCredentials()).toBeNull();
+    await m.saveCredentials(credentials);
+    await m.noteSavedLoginRefused('badCredential');
+    await m.saveCredentials({ ...credentials, password: 'new' });
+    expect(m.savedLoginRefusal()).toBeUndefined();
+  });
+
+  it('is read back from the keychain', async () => {
+    const refused = { failure: 'badCredential', at: 5 };
+    keychain.set(
+      m.CREDENTIALS_KEY,
+      JSON.stringify({ ...credentials, refused }),
+    );
+    await m.loadCredentials();
+    expect(m.savedLoginRefusal()).toEqual(refused);
+  });
+});
+
 describe('clearCredentials', () => {
   it('removes the new and the legacy key', async () => {
     await m.saveCredentials(credentials);

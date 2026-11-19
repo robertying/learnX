@@ -1,10 +1,26 @@
-import { Learn2018Helper, type Credential } from '@robertying/thu-learn-lib';
+import {
+  ApiError,
+  FailReason,
+  isRefusedLogin,
+  Learn2018Helper,
+  type Credential,
+} from '@robertying/thu-learn-lib';
+import { AppState } from 'react-native';
 import mime from 'mime';
 import CookieManager from '@preeternal/react-native-cookie-manager';
 import { noteRequestError, noteSession } from 'data/auth';
-import { getCredentials, loadCredentials } from 'data/credentials';
+import {
+  clearSavedLoginRefusal,
+  getCredentials,
+  loadCredentials,
+  type LoginRefusal,
+  noteSavedLoginRefused,
+  refusedLoginRetryDue,
+  savedLoginRefusal,
+} from 'data/credentials';
 import { mockSource, mockTimeScale } from 'data/mockSource';
 import Urls from 'constants/Urls';
+import { loginFailureOf } from 'helpers/errors';
 import { isLearnUrl } from 'helpers/learnUrl';
 import { isMockUser } from 'helpers/mock';
 import {
@@ -144,6 +160,52 @@ const realRequests: Omit<AppSource, keyof DataSource> = {
   },
 };
 
+/** What a remembered refusal rejects with, so it isn't noted as a new one. */
+const REMEMBERED = 'remembered refusal';
+
+const refusalReasons: Record<LoginRefusal['failure'], FailReason> = {
+  badCredential: FailReason.BAD_CREDENTIAL,
+  untrustedDevice: FailReason.DEVICE_NOT_TRUSTED,
+};
+
+/**
+ * The saved login's refusal, which every login with it rejects with instead
+ * of asking the server again: a wrong password tried again by itself may lock
+ * the account, and an untrusted device stays untrusted. A day later, the app
+ * in the foreground may try it once more, in case the refusal was a passing
+ * answer; never a background task.
+ */
+const rememberedRefusal = (): ApiError | undefined => {
+  const refused = savedLoginRefusal();
+  if (
+    !refused ||
+    (AppState.currentState === 'active' && refusedLoginRetryDue())
+  ) {
+    return undefined;
+  }
+  return { reason: refusalReasons[refused.failure], extra: REMEMBERED };
+};
+
+/**
+ * After a call that may have logged in with the saved login on the real
+ * server: forgets its refusal when a login went through (the session's token
+ * changed), or remembers one the server just gave. Mock sessions emulate
+ * failures per launch, so they remember nothing.
+ */
+const noteSavedLogin = (tokenBefore: string, error?: unknown) => {
+  const token = helper.getCSRFToken();
+  if (token && token !== tokenBefore) {
+    void clearSavedLoginRefusal().catch(() => {});
+  } else if (
+    isRefusedLogin(error) &&
+    (error as ApiError).extra !== REMEMBERED
+  ) {
+    void noteSavedLoginRefused(
+      loginFailureOf(error) as LoginRefusal['failure'],
+    ).catch(() => {});
+  }
+};
+
 /** learn.tsinghua.edu.cn, through thu-learn-lib and the requests above. */
 const realSource = new Proxy({} as AppSource, {
   get: (_, key: keyof AppSource) => {
@@ -173,7 +235,9 @@ export const dataSource = new Proxy({} as AppSource, {
     if (typeof value !== 'function') {
       return value;
     }
+    const real = source === realSource;
     return (...args: unknown[]) => {
+      const tokenBefore = source.getCSRFToken();
       const result: unknown = (value as (...a: unknown[]) => unknown).apply(
         source,
         args,
@@ -182,10 +246,16 @@ export const dataSource = new Proxy({} as AppSource, {
         ? result.then(
             (resolved: unknown) => {
               noteSession(source.getCSRFToken());
+              if (real) {
+                noteSavedLogin(tokenBefore);
+              }
               return resolved;
             },
             (error: unknown) => {
               noteSession(source.getCSRFToken());
+              if (real) {
+                noteSavedLogin(tokenBefore, error);
+              }
               noteRequestError(error);
               throw error;
             },
@@ -261,11 +331,21 @@ export const loginWithFingerPrint = async (credential?: Credential) => {
   const isMock = isMockUser(credential?.username ?? getCredentials()?.username);
   sessionServer = isMock ? 'mock' : 'real';
   const source = isMock ? mockSource : helper;
+  const tokenBefore = source.getCSRFToken();
   try {
     // thu-learn-lib clears the SSO cookies first (clearLoginCookies).
     await source.login(credential);
+  } catch (error) {
+    // Only the saved login's refusal is remembered, not a typed one's.
+    if (!isMock && !credential) {
+      noteSavedLogin(tokenBefore, error);
+    }
+    throw error;
   } finally {
     noteSession(source.getCSRFToken());
+  }
+  if (!isMock) {
+    noteSavedLogin(tokenBefore);
   }
 };
 
@@ -297,6 +377,10 @@ const helper = new Learn2018Helper({
   // Web Learning cookies in a header; iOS sends them from the shared store.
   cookieHeader: () => (isAndroid() ? learnCookieHeader() : undefined),
   provider: () => {
+    const refusal = rememberedRefusal();
+    if (refusal) {
+      throw refusal;
+    }
     const credentials = getCredentials();
     return {
       username: credentials?.username || undefined,
