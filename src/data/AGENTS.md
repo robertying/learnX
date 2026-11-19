@@ -25,7 +25,7 @@
 
 - Favorites are the website's (我的收藏); archives and hidden courses stay on the device, as the website has nothing like them.
 - Everything that changes the account goes through one queue of server actions (`data/serverActions`). An action is shown right away, saved (one per item: the last wins) and sent when it can be; waiting actions, and ones the server took after a fetch started, are laid over every response, so a refresh never undoes them. A network error keeps the action; repeated HTTP errors drop it. Debug builds keep favorite changes queued until "Allow Server Writes" is on. To add a kind, add it to `ServerAction` and `actionChange` and give it a handler.
-- Marking a notice read loads its page. An expired session answers with the login page and status 200, so the handler checks for it and logs in again rather than counting it as done.
+- Marking a notice read loads its page. An expired session answers with the login page and status 200, which thu-learn-lib takes as expired: it logs in again and loads the page once more, so the action isn't counted as done on the login page.
 
 ## Timetable
 

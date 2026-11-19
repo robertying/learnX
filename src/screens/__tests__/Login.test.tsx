@@ -148,6 +148,23 @@ describe('Login', () => {
     });
   });
 
+  it('opens the SSO page even when the cookies could not be cleared', async () => {
+    const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    jest.mocked(clearLoginCookies).mockRejectedValueOnce(new Error('store'));
+    const { navigation } = await setup();
+    await fill('student', 'secret');
+    await pressLogin();
+
+    const buttons = alert.mock.calls[0][2] as AlertButton[];
+    await act(async () => {
+      await buttons[1].onPress!();
+    });
+    expect(navigation.navigate).toHaveBeenCalledWith('SSO', {
+      username: 'student',
+      password: 'secret',
+    });
+  });
+
   it('logs the mock account in through the emulated server', async () => {
     const alert = jest.spyOn(Alert, 'alert');
     await setup();

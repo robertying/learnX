@@ -1,7 +1,8 @@
 // What the Electron app does with a downloaded file instead of sharing it:
-// opening it in its default app, showing it in the file manager, saving a
-// copy where the user picks, and copying its link. The main process asks
-// the system (electron/fileShell.ts); only called in the Electron app.
+// opening it in its default app, showing it in the file manager and saving a
+// copy where the user picks. It also saves an export's text where the user
+// picks. The main process asks the system (electron/fileShell.ts); only
+// called in the Electron app.
 import { DownloadableFile } from 'data/types/state';
 import { fileNameOf, sanitizeFileName } from 'helpers/filename';
 import { t } from 'helpers/i18n';

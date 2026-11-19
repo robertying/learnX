@@ -119,10 +119,12 @@ test("keeps Full Screen to the file's own tab", async ({ window, login }) => {
   const header = (name: string) =>
     shown(window.getByRole('button', { name: exact(name) }));
 
-  // The list moves off the window's edge.
+  // The list moves off the window's edge, and out of the keyboard's reach.
   const list = card(window, 'MOCK_OTHER_FILE');
+  const master = window.getByTestId('split-master');
   await header('T_fullscreen').click();
   await expect(list).not.toBeInViewport();
+  await expect(master).toHaveJSProperty('inert', true);
   await expect(header('T_exitFullscreen')).toBeVisible();
 
   // Another tab still shows its list, to pick something from.
@@ -134,6 +136,7 @@ test("keeps Full Screen to the file's own tab", async ({ window, login }) => {
   await expect(list).not.toBeInViewport();
   await header('T_exitFullscreen').click();
   await expect(list).toBeInViewport();
+  await expect(master).toHaveJSProperty('inert', false);
 });
 
 test('brings the list back when going back from a full screen file', async ({
