@@ -8,6 +8,7 @@ const all: Haptic[] = [
   'error',
   'threshold',
   'thresholdRelease',
+  'swipeActionPress',
   'longPress',
   'dragStart',
   'dragTick',
@@ -35,7 +36,7 @@ describe('playHaptic', () => {
   it('plays UIKit feedback on iOS, and nothing for switches', () => {
     expect(played(all)).toEqual({
       notification: [['success'], ['warning'], ['error']],
-      impact: [['medium'], ['light'], ['medium'], ['medium']],
+      impact: [['medium'], ['light'], ['medium'], ['medium'], ['medium']],
       selection: 1,
       android: [],
     });
@@ -53,6 +54,7 @@ describe('playHaptic', () => {
         ['reject'],
         ['segment-tick'],
         ['segment-tick'],
+        ['segment-tick'],
         ['long-press'],
         ['drag-start'],
         ['segment-frequent-tick'],
@@ -68,6 +70,7 @@ describe('playHaptic', () => {
       ['confirm'],
       ['reject'],
       ['reject'],
+      ['clock-tick'],
       ['clock-tick'],
       ['clock-tick'],
       ['long-press'],

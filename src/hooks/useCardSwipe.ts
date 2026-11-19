@@ -20,8 +20,9 @@ const sideOf = (direction: SwipeDirection): SwipeSide =>
  * swipe and closes the actions on a later tap. `onSwipe` runs a side's action
  * when a swipe commits to it: on iOS when let go past the full-swipe point
  * (short of it the card rests open on the button), on Android whenever the
- * card slides all the way open. The actions close when selection or reorder
- * mode turns on.
+ * card slides all the way open. `onActionPress` runs a side's action from the
+ * button the swipe revealed, with the same haptic a full swipe plays. The
+ * actions close when selection or reorder mode turns on.
  */
 const useCardSwipe = ({
   selectionMode,
@@ -73,6 +74,12 @@ const useCardSwipe = ({
     } else if (wasArmed) {
       playHaptic('thresholdRelease');
     }
+  };
+
+  /** The button the swipe revealed was tapped (iOS; Android has none) */
+  const onActionPress = (side: SwipeSide) => {
+    playHaptic('swipeActionPress');
+    commit(side);
   };
 
   const onWillOpen = (direction: SwipeDirection) => {
@@ -127,6 +134,7 @@ const useCardSwipe = ({
     snapRef,
     close,
     onArmedChange,
+    onActionPress,
     onStartDrag: closeOthers,
     onWillOpen,
     onOpen,

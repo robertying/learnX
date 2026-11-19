@@ -1,0 +1,27 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'io.robertying.learnx'
+version = '1.0.0'
+
+android {
+  namespace = "io.robertying.learnx.pdf"
+}
+
+dependencies {
+  implementation 'androidx.pdf:pdf-viewer:1.0.0-beta01'
+  // Opens documents in an isolated process, so a crash in the PDF renderer doesn't take the app with it.
+  implementation 'androidx.pdf:pdf-document-service:1.0.0-beta01'
+  // Where Jetpack's viewer would use the old platform renderer (PdfBackend).
+  implementation 'dev.zwander:pdfviewer:5.0.0'
+  // 2.0.3 changed a constructor that pdfviewer 5.0.0, built against 2.0.0, calls.
+  implementation 'io.legere:pdfiumandroid:2.0.2'
+  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2'
+  testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2'
+  // The view's events go out through React's context.
+  testImplementation 'com.facebook.react:react-android'
+}
+
+apply from: "../../unit-tests.gradle"

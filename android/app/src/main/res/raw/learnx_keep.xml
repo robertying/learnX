@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Resources the release build's resource shrinker must keep because only
+     JS names them: the tab bar icons (src/navigation/MainTab.tsx), which
+     react-native-bottom-tabs looks up by name. Not keep.xml: React Native's
+     bundle task writes one for the JS image assets, which would replace it. -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:keep="@drawable/tab_*" />

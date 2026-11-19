@@ -115,6 +115,17 @@ describe('useCardSwipe', () => {
       expect(onSwipe).toHaveBeenCalledTimes(1);
     });
 
+    it("runs a tapped button's action with a full swipe's tap, and closes", async () => {
+      const { result, methods, onSwipe } = await setup();
+      result.current.onWillOpen(left);
+      result.current.onActionPress('trailing');
+      expect(onSwipe).toHaveBeenCalledWith('trailing');
+      expect(methods.close).toHaveBeenCalledTimes(1);
+      expect((Haptics.impactAsync as jest.Mock).mock.calls).toEqual([
+        [Haptics.ImpactFeedbackStyle.Medium],
+      ]);
+    });
+
     it('runs nothing once the swipe comes back short, or for the other side', async () => {
       const { result, onSwipe } = await setup();
       result.current.onArmedChange('trailing', true);

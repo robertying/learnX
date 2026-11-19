@@ -25,7 +25,8 @@ name: Download a file, then delete it
       LIST: '${T_filter}'
 
 # Settings › Downloads lists its course; Export asks where (cancelled here),
-# and Delete removes the course's files.
+# and Delete removes the course's files. Other courses' downloads (another
+# flow's, without 02-reset in between) stay, so the steps name this course.
 - runFlow: subflows/settings.yaml
 - runFlow:
     file: subflows/scroll-to-id.yaml
@@ -36,7 +37,7 @@ name: Download a file, then delete it
     id: settings-downloads
 - extendedWaitUntil:
     visible:
-      id: 'downloads-course-.*'
+      id: 'downloads-course-${MOCK_FILE_COURSE_ID}'
     timeout: 10000
 - tapOn:
     id: downloads-export
@@ -76,12 +77,12 @@ name: Download a file, then delete it
           times: 5
           while:
             notVisible:
-              id: 'downloads-course-.*'
+              id: 'downloads-course-${MOCK_FILE_COURSE_ID}'
           commands:
             - back
 - waitForAnimationToEnd
 - tapOn:
-    id: 'downloads-course-.*'
+    id: 'downloads-course-${MOCK_FILE_COURSE_ID}'
 - tapOn: '${T_deleteEllipsis}'
 # The alert's button, right of its Cancel: on iOS 17 the trash icons behind
 # the alert read Delete too.
@@ -90,6 +91,6 @@ name: Download a file, then delete it
     rightOf: '${T_cancel}'
 - extendedWaitUntil:
     notVisible:
-      id: 'downloads-course-.*'
+      id: 'downloads-course-${MOCK_FILE_COURSE_ID}'
     timeout: 10000
 - runFlow: subflows/back-to-settings.yaml

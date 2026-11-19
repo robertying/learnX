@@ -94,7 +94,12 @@ test.describe('chosen in Settings', () => {
       electronApp.getPath('userData'),
     );
     const closed = app.waitForEvent('close');
-    await window.getByRole('button', { name: exact('T_restartNow') }).click();
+    await window
+      .getByRole('button', { name: exact('T_restartNow') })
+      .click()
+      .catch(() => {
+        // The app can quit before the click returns.
+      });
     // learnX quits and asks to be started again (the stand-in notes it).
     await closed;
     expect(fs.existsSync(path.join(userData, 'e2e-relaunched'))).toBe(true);

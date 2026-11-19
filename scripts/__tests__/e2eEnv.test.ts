@@ -52,10 +52,14 @@ const used = new Set([
 ]);
 
 /**
- * Values the same in both languages: the search term, and a file of the
- * course taught in English, whose title isn't translated.
+ * Values the same in both languages: the search term, a file of the course
+ * taught in English, whose title isn't translated, and an id.
  */
-const sameInBoth = new Set(['MOCK_SEARCH_TERM', 'MOCK_OTHER_FILE']);
+const sameInBoth = new Set([
+  'MOCK_SEARCH_TERM',
+  'MOCK_OTHER_FILE',
+  'MOCK_FILE_COURSE_ID',
+]);
 
 const env = new Map(
   execFileSync(

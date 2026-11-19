@@ -4,7 +4,6 @@ import { Linking, StyleSheet, View, ViewProps } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useIsFocused } from '@react-navigation/native';
 import WebView from 'react-native-webview';
-import Pdf from 'react-native-pdf';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
 import {
@@ -17,6 +16,7 @@ import {
   QuickLookView,
   showQuickLookPanel,
 } from 'modules/quicklook';
+import { PdfView } from 'modules/pdf';
 import { formatDate, t } from 'helpers/i18n';
 import { displayFileSize } from 'helpers/filename';
 import Spinner from 'components/Spinner';
@@ -172,10 +172,9 @@ const FileDetailContent: React.FC<{
         />
       ) : !showInfo && canRender ? (
         kind === 'pdf' ? (
-          <Pdf
+          <PdfView
             style={Styles.flex1}
-            source={{ uri: path }}
-            fitPolicy={0}
+            uri={path}
             onError={handlePreviewError}
           />
         ) : kind === 'quickLook' ? (

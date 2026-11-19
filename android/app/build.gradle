@@ -105,7 +105,11 @@ android {
     splits {
         abi {
             reset()
-            enable = true
+            // Off when building an AAB: Google Play splits it by ABI itself, and
+            // AGP can't shrink resources for a bundle while ABI splits are on
+            // (https://issuetracker.google.com/402800800). Gradle can't enable
+            // splits per variant, so build bundles and APKs in separate runs.
+            enable = !gradle.startParameter.taskNames.any { it ==~ /(.*:)?bundle[A-Z].*/ }
             universalApk = true
             // Follows reactNativeArchitectures, so CI can build a single ABI
             include(*project.property("reactNativeArchitectures").split(","))
@@ -155,6 +159,9 @@ android {
             // any app could start learnX with them.
             buildConfigField "boolean", "TAKES_LAUNCH_OPTIONS", ciRelease ? "true" : "false"
             minifyEnabled = true
+            // Drops resources nothing references once R8 has removed unused code
+            // (AGP 9.3+ shrinks code and resources together).
+            shrinkResources = true
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             firebaseCrashlytics {
                 mappingFileUploadEnabled = !ciRelease

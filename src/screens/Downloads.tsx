@@ -23,13 +23,25 @@ import {
 } from 'components/Form';
 import { setSetting, useSettings } from 'data/settings';
 import { SettingsStackParams } from 'navigation/types';
-import { isAndroid } from 'helpers/platform';
+import DeviceInfo from 'constants/DeviceInfo';
+import { isAndroid, isElectron } from 'helpers/platform';
 import { recordError } from 'services/crashReporting';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'Downloads'>;
 
 const fileCount = (count: number) =>
   tCount('downloadsOneFile', 'downloadsFileCount', count);
+
+/**
+ * How to reach a course's Export and Delete: its row brings up a menu, tapped
+ * on iOS and Android, clicked on the Mac and in the Electron app.
+ */
+const caption = () =>
+  isElectron()
+    ? t('downloadsCaptionElectron')
+    : DeviceInfo.isMac()
+      ? t('downloadsCaptionMac')
+      : t('downloadsCaption');
 
 const summary = ({ count, size }: { count: number; size: number }) =>
   `${fileCount(count)} · ${formatFileSize(size)}`;
@@ -128,7 +140,7 @@ const Downloads: React.FC<Props> = () => {
             />
           </FormSection>
         )}
-        <FormSection footer={t('downloadsCaption')}>
+        <FormSection footer={caption()}>
           <FormText
             icon="storage"
             title={t('downloadsTotal')}
