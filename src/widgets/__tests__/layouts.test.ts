@@ -794,6 +794,10 @@ describe('Deadlines on iOS', () => {
   });
 });
 
+/** The most children any container in the tree has: Glance draws only 10. */
+const mostChildren = (node: Node) =>
+  Math.max(...all(node).map(n => childrenOf(n).length));
+
 describe('Deadlines on Android', () => {
   const layout = layoutOf<DeadlineWidgetProps>(() =>
     require('widgets/Deadlines.android'),
@@ -872,6 +876,20 @@ describe('Deadlines on Android', () => {
     expect(fills(deadlineProps)).toBe(7);
     // All shown: they keep to the top.
     expect(fills({ ...deadlineProps, total: 7 })).toBe(0);
+  });
+
+  it('keeps to the 10 children a Glance container draws', () => {
+    const props = {
+      ...deadlineProps,
+      deadlines: Array.from({ length: 20 }, (_, i) =>
+        deadline(`m${i}`, at('23:59') + (i + 1) * DAY),
+      ),
+      total: 20,
+    };
+    const widget = layout(props, { height: 2000 });
+    expect(mostChildren(widget)).toBeLessThanOrEqual(10);
+    // The widget's link, then ten rows.
+    expect(openUrls(widget)).toHaveLength(11);
   });
 
   it('puts the count of the rest at the end of the header', () => {
@@ -975,13 +993,30 @@ describe('Up Next on Android', () => {
     expect(later({ height: 160, fontScale: 1.3 })).toBe(2);
   });
 
+  it('keeps to the 10 children a Glance container draws', () => {
+    const props = {
+      ...upNextProps,
+      classes: Array.from({ length: 20 }, (_, i) =>
+        klass(
+          `m${i}`,
+          at('08:00') + (i + 1) * DAY,
+          at('09:35') + (i + 1) * DAY,
+        ),
+      ),
+    };
+    const widget = layout(props, { height: 2000 });
+    expect(mostChildren(widget)).toBeLessThanOrEqual(10);
+    // The widget's and the featured class's links, then ten later ones.
+    expect(openUrls(widget)).toHaveLength(12);
+  });
+
   it('lays the later classes out as the iOS layout does', () => {
     // A row each: the course, taking the space left, then when.
     const medium = layout(upNextProps, { height: 160 });
     const rows = all(medium).filter(
       n => n.type === 'Row' && openUrls(n).length === 1,
     );
-    expect(rows.map(texts)).toEqual([
+    expect(rows.map(n => texts(n))).toEqual([
       ['Course later', 'Tomorrow later-time'],
       ['Course c3', 'c3-weekday c3-time'],
       ['Course c4', 'c4-weekday c4-time'],

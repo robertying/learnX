@@ -24,7 +24,7 @@ index 3df9e4a4d92155a00d3f5652d17d20be10bef1c1..b927222cf4bfa8136a96dd88a3a30160
  import androidx.glance.appwidget.SwitchDefaults
  import androidx.glance.background
  import androidx.glance.layout.Alignment
-+import androidx.glance.layout.Dimension
++import androidx.glance.unit.Dimension
 +import androidx.glance.layout.HeightModifier
 +import androidx.glance.layout.WidthModifier
  import androidx.glance.layout.ContentScale

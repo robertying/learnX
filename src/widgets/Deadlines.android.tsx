@@ -1,8 +1,5 @@
 import { Box, Column, Row, Text } from '@expo/ui/jetpack-compose';
-import {
-  fillMaxSize,
-  fillMaxWidth,
-} from '@expo/ui/jetpack-compose/modifiers';
+import { fillMaxSize, fillMaxWidth } from '@expo/ui/jetpack-compose/modifiers';
 import { createWidget } from 'expo-widgets';
 import {
   withWidgetKit,

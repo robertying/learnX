@@ -12,7 +12,6 @@ import androidx.glance.GlanceModifier
 import androidx.glance.action.ActionModifier
 import androidx.glance.appwidget.AppWidgetId
 import androidx.glance.appwidget.action.StartActivityIntentAction
-import androidx.glance.layout.Dimension
 import androidx.glance.layout.EmittableBox
 import androidx.glance.layout.EmittableColumn
 import androidx.glance.layout.EmittableRow
@@ -22,6 +21,7 @@ import androidx.glance.text.EmittableText
 import androidx.glance.text.FontWeight
 import androidx.glance.semantics.SemanticsModifier
 import androidx.glance.semantics.SemanticsProperties
+import androidx.glance.unit.Dimension
 import com.facebook.react.bridge.DynamicFromObject
 import com.facebook.react.bridge.JavaOnlyArray
 import com.facebook.react.bridge.JavaOnlyMap
@@ -182,7 +182,7 @@ class ExpoWidgetsPatchTest {
     // DpSize is an inline class, so the method's name is mangled and the size is a Long.
     val toPeekRoot = tree.declaredMethods.single { it.name.startsWith("toPeekRoot") }
       .apply { isAccessible = true }
-    val root = toPeekRoot.invoke(null, node, context, source, 0L) as EmittableBox
+    val root = toPeekRoot.invoke(null, node, context, source, 0L) as EmittableColumn
     return root.children.single()
   }
 

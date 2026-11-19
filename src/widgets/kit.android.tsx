@@ -1,4 +1,4 @@
-import { Row, Spacer, Text } from '@expo/ui/jetpack-compose';
+import { Column, Row, Spacer, Text } from '@expo/ui/jetpack-compose';
 import {
   background,
   cornerRadius,
@@ -110,16 +110,24 @@ export function widgetKit() {
      * place them (`fitted` in widgets/kit): when rows are left out (`cut`),
      * the ones shown spread over the height, so the space the next row didn't
      * fit in doesn't all end up at the bottom; when all are shown, they keep
-     * to the top.
+     * to the top. One Column holds them, each with its gaps in a Column of its
+     * own, since Glance draws only the first 10 children of a container.
      */
     rows: (rows: ReactElement[], cut: boolean, spacing: number) =>
-      rows.flatMap(row => [
-        <Spacer key={`gap-${String(row.key)}`} modifiers={[height(spacing)]} />,
-        ...(cut
-          ? [<Spacer key={`fill-${String(row.key)}`} modifiers={[fill]} />]
-          : []),
-        row,
-      ]),
+      rows.length > 0 ? (
+        <Column modifiers={[fillMaxWidth(), ...(cut ? [fill] : [])]}>
+          {rows.map(row => (
+            <Column
+              key={row.key}
+              modifiers={[fillMaxWidth(), ...(cut ? [fill] : [])]}
+            >
+              {cut ? <Spacer modifiers={[fill]} /> : null}
+              <Spacer modifiers={[height(spacing)]} />
+              {row}
+            </Column>
+          ))}
+        </Column>
+      ) : null,
     /**
      * What TalkBack reads for a row, as one sentence without the dots
      * (handled by our patch too).
@@ -155,8 +163,9 @@ export function widgetKit() {
       size * (environment.fontScale ?? 1) * 1.34,
     /**
      * How many rows of `rowHeight` dp fit in the widget's height after `used`
-     * dp (the padding included): at least one and at most `max`. Without a
-     * height, `max`.
+     * dp (the padding included): at least one and at most `max`, and never
+     * more than the 10 children Glance draws in a container (see `rows`).
+     * Without a height, `max`.
      */
     rowsThatFit: (
       environment: AndroidWidgetEnvironment,
@@ -167,9 +176,10 @@ export function widgetKit() {
       environment.height
         ? Math.min(
             max,
+            10,
             Math.max(1, Math.floor((environment.height - used) / rowHeight)),
           )
-        : max,
+        : Math.min(max, 10),
   };
 }
 

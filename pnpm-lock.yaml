@@ -177,7 +177,7 @@ patchedDependencies:
   expo-background-task@58.0.13: 31d2b86985f5833a56adedeb62d7b017f82c426b349d711eba78adea300cf707
   expo-calendar@58.0.8: b62bb1b60978bf8ee6206c2c71abca18695e2d9c92263ff773ad1ae732c2f298
   expo-document-picker@58.0.5: f6b22f329e4dd4b82362600de611418bab926a130f3793ec089256a637d47146
-  expo-widgets@58.0.29: 141a9be1b67a3e08830f660a941441ad3d9234b35933e49c0ac281c3616ac878
+  expo-widgets@58.0.29: 5d020502f125241a766b36f3f6a80e4c68a5671c2075c3107366a7e8bc50bd0f
   react-native-bottom-tabs@1.5.0: e6ddcc67bd16745a13fbb0a0aa3a5ce47507fc4ce6b057297803d7cc1a3ac214
   react-native-pager-view@10.0.3: da0b1a8d1b06c1378b4cf4e23824ad81c87ac25f20a67aae0e125a474c952179
   react-native-pdf@7.0.5: 5fdb347578d0837ed5387677fe9c4a7798e5ffede4868a1ddfe7bbfd410ede6b
@@ -352,7 +352,7 @@ importers:
         version: 58.0.22(expo@58.0.26)(react-native@0.88.1(patch_hash=a8480dc6b7373bf0846bc66d4e1aa838d0ce866e515d3fa38f8381fdb4c163ea)(@babel/core@7.29.13(supports-color@8.1.1))(@react-native-community/cli@21.0.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1)(supports-color@8.1.1)
       expo-widgets:
         specifier: 58.0.29
-        version: 58.0.29(patch_hash=141a9be1b67a3e08830f660a941441ad3d9234b35933e49c0ac281c3616ac878)(0a18b5aaccf6a723e2dd80a2396236f2)
+        version: 58.0.29(patch_hash=5d020502f125241a766b36f3f6a80e4c68a5671c2075c3107366a7e8bc50bd0f)(0a18b5aaccf6a723e2dd80a2396236f2)
       fuse.js:
         specifier: 7.5.0
         version: 7.5.0
@@ -10603,7 +10603,7 @@ snapshots:
     optionalDependencies:
       '@babel/runtime': 7.29.13
       expo: 58.0.26(d25d2a56a2e288d007d18d4ba69a6c4d)
-      expo-widgets: 58.0.29(patch_hash=141a9be1b67a3e08830f660a941441ad3d9234b35933e49c0ac281c3616ac878)(0a18b5aaccf6a723e2dd80a2396236f2)
+      expo-widgets: 58.0.29(patch_hash=5d020502f125241a766b36f3f6a80e4c68a5671c2075c3107366a7e8bc50bd0f)(0a18b5aaccf6a723e2dd80a2396236f2)
     transitivePeerDependencies:
       - '@babel/core'
       - supports-color
@@ -11543,7 +11543,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  expo-widgets@58.0.29(patch_hash=141a9be1b67a3e08830f660a941441ad3d9234b35933e49c0ac281c3616ac878)(0a18b5aaccf6a723e2dd80a2396236f2):
+  expo-widgets@58.0.29(patch_hash=5d020502f125241a766b36f3f6a80e4c68a5671c2075c3107366a7e8bc50bd0f)(0a18b5aaccf6a723e2dd80a2396236f2):
     dependencies:
       '@expo/plist': 0.10.2
       '@expo/ui': 58.0.29(patch_hash=10943ac7548cd7ee1b860a7c927ca1d158b0fe9247aa1c9da19f62f68088c3c7)(0a18b5aaccf6a723e2dd80a2396236f2)
