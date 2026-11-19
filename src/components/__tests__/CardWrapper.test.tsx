@@ -316,15 +316,19 @@ describe('swipe actions', () => {
     expect(swipeKeys('left')).toEqual([]);
   });
 
-  it('runs the pressed action and closes the swipe', async () => {
+  it('runs the pressed action with the tap a full swipe plays, and closes the swipe', async () => {
     const onToggleFav = jest.fn();
     const onToggleArchived = jest.fn();
     await render(card({ onToggleFav, onToggleArchived, fav: true }));
     await user.press(swipeAction('card-fav'));
     expect(onToggleFav).toHaveBeenCalled();
     expect(mockSwipeableMethods.close).toHaveBeenCalled();
+    expect(Haptics.impactAsync).toHaveBeenLastCalledWith(
+      Haptics.ImpactFeedbackStyle.Medium,
+    );
     await user.press(swipeAction('card-archive'));
     expect(onToggleArchived).toHaveBeenCalled();
+    expect(Haptics.impactAsync).toHaveBeenCalledTimes(2);
   });
 
   it('rests open on the button when let go short of a full swipe', async () => {

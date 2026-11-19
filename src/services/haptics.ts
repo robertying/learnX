@@ -20,6 +20,11 @@ export type Haptic =
   | 'threshold'
   /** A swipe went back under that point. */
   | 'thresholdRelease'
+  /**
+   * A swipe action ran from the button the swipe revealed: the same tap a
+   * full swipe plays, so both ways of running it feel alike.
+   */
+  | 'swipeActionPress'
   /** A long press opened something (Android's card menu). */
   | 'longPress'
   /** A row lifted to be dragged. */
@@ -42,6 +47,7 @@ const ios: Record<Haptic, (() => Promise<void>) | null> = {
   error: () => Haptics.notificationAsync(NotificationFeedbackType.Error),
   threshold: () => Haptics.impactAsync(ImpactFeedbackStyle.Medium),
   thresholdRelease: () => Haptics.impactAsync(ImpactFeedbackStyle.Light),
+  swipeActionPress: () => Haptics.impactAsync(ImpactFeedbackStyle.Medium),
   longPress: () => Haptics.impactAsync(ImpactFeedbackStyle.Medium),
   dragStart: () => Haptics.impactAsync(ImpactFeedbackStyle.Medium),
   dragTick: () => Haptics.selectionAsync(),
@@ -65,6 +71,10 @@ const android: Record<Haptic, [api: number, Haptics.AndroidHaptics][]> = {
     [0, A.Clock_Tick],
   ],
   thresholdRelease: [
+    [34, A.Segment_Tick],
+    [0, A.Clock_Tick],
+  ],
+  swipeActionPress: [
     [34, A.Segment_Tick],
     [0, A.Clock_Tick],
   ],

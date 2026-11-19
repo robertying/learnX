@@ -521,7 +521,11 @@ export default {
   downloads: 'Downloads',
   downloadsTotal: 'All Downloads',
   downloadsCaption:
-    'Files downloaded in learnX, by course. Open a course to export or delete its files.',
+    'Files downloaded in learnX, by course. Tap a course to export or delete its files.',
+  downloadsCaptionMac:
+    'Files downloaded in learnX, by course. Click a course to export or delete its files.',
+  downloadsCaptionElectron:
+    'Files downloaded in learnX, by course. Click a course to export or delete its files.',
   downloadsExport: 'Export All Downloads',
   downloadsExportCaption:
     'Copies the files to a “learnX” folder in a place you choose, sorted by semester and course. Exporting again updates that folder.',

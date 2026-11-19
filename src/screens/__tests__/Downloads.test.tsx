@@ -7,6 +7,7 @@ import {
   userEvent,
   within,
 } from '@testing-library/react-native';
+import DeviceInfo from 'constants/DeviceInfo';
 import { getSettings, resetSettings } from 'data/settings';
 import {
   listDownloads,
@@ -71,6 +72,25 @@ it('sums the downloads and lists each course with its count and size', async () 
   expect(
     screen.getByText(`${t('downloadsFileCount', { count: 3 })} · 2.0 KB`),
   ).toBeTruthy();
+});
+
+describe("the hint at how to reach a course's actions", () => {
+  it('says to tap a course on iOS and Android', async () => {
+    await renderScreen();
+    expect(screen.getByText(t('downloadsCaption'))).toBeTruthy();
+  });
+
+  it('says to click one on the Mac', async () => {
+    jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+    await renderScreen();
+    expect(screen.getByText(t('downloadsCaptionMac'))).toBeTruthy();
+  });
+
+  it('says to click one on Windows and Linux', async () => {
+    jest.replaceProperty(Platform, 'OS', 'web');
+    await renderScreen();
+    expect(screen.getByText(t('downloadsCaptionElectron'))).toBeTruthy();
+  });
 });
 
 it('shows only the total without downloads', async () => {

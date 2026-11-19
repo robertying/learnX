@@ -496,7 +496,11 @@ const zh: typeof en = {
   downloads: '已下载文件',
   downloadsTotal: '全部已下载文件',
   downloadsCaption:
-    '在learnX中下载的文件，按课程分类。打开课程可导出或删除其中的文件。',
+    '在learnX中下载的文件，按课程分类。点按课程可导出或删除其中的文件。',
+  downloadsCaptionMac:
+    '在learnX中下载的文件，按课程分类。点按课程可导出或删除其中的文件。',
+  downloadsCaptionElectron:
+    '在learnX中下载的文件，按课程分类。点击课程可导出或删除其中的文件。',
   downloadsExport: '导出全部已下载文件',
   downloadsExportCaption:
     '将文件复制到你选择的位置下的“learnX”文件夹，按学期和课程分类。再次导出会更新该文件夹。',
