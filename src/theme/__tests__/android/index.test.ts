@@ -7,6 +7,7 @@ import {
   MaterialColors,
   StatusTone,
   useComposeColorOverrides,
+  webContentColors,
 } from 'theme';
 
 // Android: Material 3 roles and custom colors, all plain `rgb(…)` strings.
@@ -53,6 +54,13 @@ describe.each([
 
   it('has the brand color as primary', () => {
     expect(colors.primary).toBe(toRgb(brand));
+  });
+
+  it('gives course content the text and brand colors', () => {
+    expect(webContentColors(theme)).toEqual({
+      textColor: colors.onSurface,
+      linkColor: toRgb(brand),
+    });
   });
 
   it("is the native theme's palette (colors.xml)", () => {

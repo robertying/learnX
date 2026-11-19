@@ -35,7 +35,7 @@ const FormWebView: React.FC<{
                   dark: theme.dark,
                   // The form row's own color shows through.
                   backgroundColor: 'transparent',
-                  ...webContentColors(theme.dark),
+                  ...webContentColors(theme),
                 },
                 csrfToken,
               ),

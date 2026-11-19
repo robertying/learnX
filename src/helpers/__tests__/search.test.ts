@@ -221,6 +221,18 @@ describe('matchRanges', () => {
     ]);
     expect(matchRanges('没有', ['数据'])).toEqual([]);
   });
+
+  it('finds words in full-width forms and composed letters, in the text', () => {
+    // The query 1 ppt, normalized, against the text as the course site
+    // wrote it.
+    expect(matchRanges('第１次作业 ＰＰＴ', ['1', 'ppt'])).toEqual([
+      [1, 2],
+      [6, 9],
+    ]);
+    // é written as e and a combining accent is one character to match.
+    expect(matchRanges('Cafe\u0301 menu', ['café'])).toEqual([[0, 5]]);
+    expect(matchRanges('Cafe\u0301 menu', ['menu'])).toEqual([[6, 10]]);
+  });
 });
 
 describe('snippet', () => {
@@ -228,6 +240,12 @@ describe('snippet', () => {
 
   it('starts a little before a match the preview would cut off', () => {
     expect(snippet(text, ['三教'])).toBe('…很长的开头期中考试在三教');
+  });
+
+  it('starts before a match written in full-width letters', () => {
+    expect(snippet(`${'很长的开头'.repeat(10)}ＰＰＴ`, ['ppt'])).toBe(
+      '…很长的开头很长的开头ＰＰＴ',
+    );
   });
 
   it('keeps text whose first match is near its start, or that has none', () => {

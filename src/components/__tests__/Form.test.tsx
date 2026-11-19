@@ -27,7 +27,6 @@ import {
   sectionRows,
 } from 'components/Form';
 import { accessibilityValue } from '@expo/ui/swift-ui/modifiers';
-import type * as ReactNative from 'react-native';
 import { NavigationContext } from '@react-navigation/native';
 import {
   accessibilityElement,
@@ -41,6 +40,7 @@ import {
 } from '@expo/ui/swift-ui/modifiers';
 import { FormProfile } from 'components/Form';
 import DeviceInfo from 'constants/DeviceInfo';
+import { setFontScale } from 'test-utils/fontScale';
 import { BrandLightTheme } from 'theme';
 
 describe('Form', () => {
@@ -529,8 +529,6 @@ describe('form helpers', () => {
 });
 
 describe('Form (iOS details)', () => {
-  const RN: typeof ReactNative = require('react-native');
-
   it('continues the grouped background into the header, and gives it back', async () => {
     const navigation = { setOptions: jest.fn() };
     await render(
@@ -605,9 +603,7 @@ describe('Form (iOS details)', () => {
       expect(screen.getByText(title).props.modifiers[0]).toEqual(medium);
     }
     // At the default text size, with each detail at the row's end
-    jest
-      .spyOn(RN, 'useWindowDimensions')
-      .mockReturnValue({ width: 400, height: 800, scale: 2, fontScale: 1 });
+    setFontScale(1);
     await render(
       <FormSection>
         <FormText title="Schedule" detail="4 classes" />
@@ -657,9 +653,7 @@ describe('Form (iOS details)', () => {
 
   it('sets a grade large and bold, and a deadline semibold in its text shade', async () => {
     // At Jest's font scale of 2 the detail would go under the title instead.
-    jest
-      .spyOn(RN, 'useWindowDimensions')
-      .mockReturnValue({ width: 400, height: 800, scale: 2, fontScale: 1 });
+    setFontScale(1);
     await render(
       <FormSection>
         <FormText title="Grade" detail="A" detailTint="accent" />

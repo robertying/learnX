@@ -371,17 +371,13 @@ export const BrandDarkNavigationTheme = {
 /**
  * Text and link colors for course-site HTML in a web view, which takes CSS
  * strings: WebKit's own text color on iOS and Mac (the label color), the
- * Material role on Android, and the brand color for links.
+ * theme's text color elsewhere (Material's on Android, Fluent's in the
+ * Electron app), and the theme's brand color for links. Those roles are plain
+ * strings on every platform: the brand color is a hex value on Apple's too.
  */
-export const webContentColors = (dark: boolean) => ({
-  textColor: isApple()
-    ? 'CanvasText'
-    : (dark ? materialDark : materialLight).onSurface,
-  linkColor: dark
-    ? isApple()
-      ? brandColors.dark
-      : brandColors.materialDark
-    : brandColors.light,
+export const webContentColors = ({ colors }: Theme) => ({
+  textColor: isApple() ? 'CanvasText' : (colors.onSurface as string),
+  linkColor: colors.primary as string,
 });
 
 /**

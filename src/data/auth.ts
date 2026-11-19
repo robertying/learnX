@@ -1,11 +1,6 @@
-import { FailReason } from '@robertying/thu-learn-lib';
+import { FailReason, isRefusedLogin } from '@robertying/thu-learn-lib';
 import { create } from 'zustand';
-import {
-  apiReason,
-  isRefusedLogin,
-  loginFailureOf,
-  type LoginFailure,
-} from 'helpers/errors';
+import { apiReason, loginFailureOf, type LoginFailure } from 'helpers/errors';
 
 /**
  * Why the saved login didn't go through (`helpers/errors`). The app keeps

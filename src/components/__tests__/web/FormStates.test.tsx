@@ -1,7 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import { NavigationContext } from '@react-navigation/native';
 import {
-  Form,
   FormButton,
   FormChoiceButton,
   FormLink,
@@ -17,7 +15,7 @@ import { t } from 'helpers/i18n';
 import FluentRoot from 'web/FluentRoot';
 
 // The Form's other states: rows without their optional parts, the pointer
-// over a row, and the refresh shortcut following the screen's focus.
+// over a row.
 
 const renderForm = (children: React.ReactNode) =>
   render(<FluentRoot>{children}</FluentRoot>);
@@ -84,32 +82,4 @@ it('colors a destructive choice red, and takes a number typed as text', async ()
   const input = screen.getByRole('spinbutton', { name: 'Days' });
   fireEvent.keyDown(input, { key: 'ArrowUp' });
   expect(onValueChange).toHaveBeenCalledWith(4);
-});
-
-it('refreshes only while its screen is focused', async () => {
-  const onRefresh = jest.fn(async () => {});
-  // The screen's navigation, as far as the Form listens to it
-  const listeners: Record<string, () => void> = {};
-  const navigation = {
-    isFocused: () => true,
-    addListener: (event: string, listener: () => void) => {
-      listeners[event] = listener;
-      return () => delete listeners[event];
-    },
-  };
-  const { unmount } = renderForm(
-    <NavigationContext value={navigation as never}>
-      <Form onRefresh={onRefresh} />
-    </NavigationContext>,
-  );
-  fireEvent.keyDown(window, { key: 'F5' });
-  expect(onRefresh).toHaveBeenCalledTimes(1);
-  await act(async () => listeners.blur());
-  fireEvent.keyDown(window, { key: 'F5' });
-  expect(onRefresh).toHaveBeenCalledTimes(1);
-  await act(async () => listeners.focus());
-  fireEvent.keyDown(window, { key: 'F5' });
-  expect(onRefresh).toHaveBeenCalledTimes(2);
-  unmount();
-  expect(listeners).toEqual({});
 });

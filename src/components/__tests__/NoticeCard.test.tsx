@@ -1,12 +1,10 @@
 import { act, render, screen } from '@testing-library/react-native';
-import type * as ReactNative from 'react-native';
 import { StyleSheet } from 'react-native';
 import dayjs from 'dayjs';
 import { NOW, notice } from 'test-utils/fixtures/cards';
+import { setFontScale } from 'test-utils/fontScale';
 import NoticeCard from 'components/NoticeCard';
 import type { Notice } from 'data/types/state';
-
-const RN: typeof ReactNative = require('react-native');
 
 beforeEach(() => {
   jest.useFakeTimers({ now: NOW });
@@ -27,25 +25,13 @@ describe('NoticeCard', () => {
   });
 
   it('wraps the title only at accessibility text sizes', async () => {
-    const dimensions = jest.spyOn(RN, 'useWindowDimensions');
-    dimensions.mockReturnValue({
-      width: 400,
-      height: 800,
-      scale: 2,
-      fontScale: 1,
-    });
+    setFontScale(1);
     const view = await render(<NoticeCard data={notice()} />);
     expect(screen.getByText('Midterm room change').props.numberOfLines).toBe(1);
     await view.unmount();
-    dimensions.mockReturnValue({
-      width: 400,
-      height: 800,
-      scale: 2,
-      fontScale: 2,
-    });
+    setFontScale(2);
     await render(<NoticeCard data={notice()} />);
     expect(screen.getByText('Midterm room change').props.numberOfLines).toBe(3);
-    dimensions.mockRestore();
   });
 
   it('shows the course, title, plain-text content and weekday', async () => {

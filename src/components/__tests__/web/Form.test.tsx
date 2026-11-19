@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import {
   Form,
@@ -17,8 +18,13 @@ import {
   FormView,
 } from 'components/Form';
 import { t } from 'helpers/i18n';
-import { Menus } from 'modules/menus';
+import useRefreshCommand from 'hooks/useRefreshCommand';
 import FluentRoot from 'web/FluentRoot';
+
+jest.mock('@react-navigation/native', () => ({
+  ...jest.requireActual('@react-navigation/native'),
+  useIsFocused: () => true,
+}));
 
 const renderForm = (children: React.ReactNode) =>
   render(<FluentRoot>{children}</FluentRoot>);
@@ -259,17 +265,34 @@ it('shows paragraphs, titles, views and the profile', () => {
   }
 });
 
-it('refreshes on the refresh shortcut, once at a time', async () => {
+it('refreshes a Form screen once per refresh shortcut: the screen has the command', async () => {
   let finish = () => {};
   const onRefresh = jest.fn(
     () => new Promise<void>(resolve => (finish = resolve)),
   );
-  renderForm(<Form onRefresh={onRefresh} />);
-  fireEvent.keyDown(window, { key: 'F5' });
-  fireEvent.keyDown(window, { key: 'F5' });
+  // As Today, Schedule and Semesters: pull to refresh on the Form, the
+  // window's command from the screen.
+  const Screen = () => {
+    const [refreshing, setRefreshing] = useState(false);
+    const refresh = async () => {
+      setRefreshing(true);
+      await onRefresh();
+      setRefreshing(false);
+    };
+    useRefreshCommand({ refreshing, onRefresh: refresh });
+    return <Form onRefresh={refresh} />;
+  };
+  renderForm(<Screen />);
+  await act(async () => {
+    fireEvent.keyDown(window, { key: 'F5' });
+  });
+  await act(async () => {
+    fireEvent.keyDown(window, { key: 'F5' });
+  });
   expect(onRefresh).toHaveBeenCalledTimes(1);
   await act(async () => finish());
-  fireEvent.keyDown(window, { key: 'r', ctrlKey: true });
+  await act(async () => {
+    fireEvent.keyDown(window, { key: 'r', ctrlKey: true });
+  });
   expect(onRefresh).toHaveBeenCalledTimes(2);
-  expect(Menus).toBeDefined();
 });

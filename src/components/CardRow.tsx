@@ -1,10 +1,5 @@
 import { ReactNode } from 'react';
-import {
-  StyleSheet,
-  Text as NativeText,
-  View,
-  useWindowDimensions,
-} from 'react-native';
+import { StyleSheet, Text as NativeText, View } from 'react-native';
 import SystemIcon from 'components/SystemIcon';
 import {
   Caption,
@@ -13,6 +8,7 @@ import {
   Text,
   TextVariant,
   textStyles,
+  useFontScale,
   useTextIconSize,
 } from 'components/Text';
 import { t } from 'helpers/i18n';
@@ -27,7 +23,7 @@ const android = isAndroid();
  * Titles get one line, as in Mail, except at accessibility text sizes, where
  * one line holds only a few characters.
  */
-const useTitleLines = () => (useWindowDimensions().fontScale >= 1.5 ? 3 : 1);
+const useTitleLines = () => (useFontScale() >= 1.5 ? 3 : 1);
 // Mail's first line is Subheadline; a Material three-line item's overline is
 // small (bodySmall).
 const metaVariant: TextVariant = android ? 'footnote' : 'subheadline';

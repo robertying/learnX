@@ -11,7 +11,6 @@ import {
   Keyboard,
   PlatformColor,
   StyleSheet,
-  useWindowDimensions,
   View,
   type ViewProps,
 } from 'react-native';
@@ -102,7 +101,7 @@ import {
   type FormViewProps,
 } from './Form.shared';
 import ThemedHost from 'components/ThemedHost';
-import { textStyles } from 'components/Text';
+import { textStyles, useFontScale } from 'components/Text';
 import { rowHighlight } from 'components/Touchable';
 
 export * from './Form.shared';
@@ -458,7 +457,7 @@ const rowEnd = DeviceInfo.isMac()
 
 /** The row's subtitle and detail for the text size (`stackedDetail`). */
 const useStackedDetail = (subtitle?: string, detail?: string) =>
-  stackedDetail({ subtitle, detail }, useWindowDimensions().fontScale);
+  stackedDetail({ subtitle, detail }, useFontScale());
 
 const RowDetail: React.FC<{
   detail?: string;
@@ -759,11 +758,10 @@ export const FormFile: React.FC<FormFileProps> = ({
   </Button>
 );
 
-// Starts a few lines tall, as a box to write in, and grows with the text.
-// Mac rows are tight, so the box gets the room above and below its text
-// that the row's side inset gives it.
-// Six lines to start with, then the field grows with its text and the Form
-// scrolls, rather than the field scrolling inside the Form.
+// Six lines tall to start with, as a box to write in, then the field grows
+// with its text and the Form scrolls, rather than the field scrolling inside
+// the Form. Mac rows are tight, so the box gets the room above and below its
+// text that the row's side inset gives it.
 const multilineModifiers = [lineLimit({ min: 6, max: 10000 })];
 const macMultilineModifiers = [...multilineModifiers, padding({ vertical: 6 })];
 const plainTextModifiers = [

@@ -18,9 +18,10 @@ export interface CourseTarget {
 export type ListTarget = ItemTarget | CourseTarget;
 
 /**
- * What a learnx:// link opens: an item, a course or a list, or Today; from
- * the Electron app's Jump List, the week's Schedule; and from a new version's
- * notification, Settings, where its row is on top.
+ * What the app opens on a tap from outside it: an item, a course or a list,
+ * or Today, each also a learnx:// link (`getTargetUrl`, `getUrlTarget`); the
+ * week's Schedule, from the Electron app's Jump List; and Settings, where its
+ * row is on top, from a new version's notification. Those two have no link.
  */
 export type OpenTarget =
   | ListTarget

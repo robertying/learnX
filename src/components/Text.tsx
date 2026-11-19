@@ -183,10 +183,10 @@ const getFontScale = () => Dimensions.get('window').fontScale;
 
 /**
  * The text size setting (Dynamic Type on iOS, the font scale on Android),
- * without the window's size, so text doesn't re-render whenever a window
- * (iPad, Mac, a foldable) is resized.
+ * without the window's size, so text and what's laid out by it don't
+ * re-render whenever a window (iPad, Mac, a foldable) is resized.
  */
-const useFontScale = () =>
+export const useFontScale = () =>
   useSyncExternalStore(subscribeToDimensions, getFontScale);
 
 /**

@@ -1,7 +1,8 @@
-import { Platform, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import SystemIcon from 'components/SystemIcon';
 import { Text, textStyles } from 'components/Text';
 import TextButton from 'components/TextButton';
+import { isAndroid } from 'helpers/platform';
 import type { SystemIconName } from 'helpers/systemIcons';
 import { useTheme } from 'theme';
 
@@ -34,10 +35,9 @@ export interface StatusViewProps {
  */
 // The large dimmed icon: 56 pt beside iOS's text and Material's, and as
 // much smaller on the Mac as its large title (26 pt for 34) is.
-const iconSize = Platform.select({
-  android: 56,
-  default: Math.round(((textStyles.largeTitle.fontSize ?? 34) * 56) / 34),
-});
+const iconSize = isAndroid()
+  ? 56
+  : Math.round(((textStyles.largeTitle.fontSize ?? 34) * 56) / 34);
 
 const StatusView: React.FC<StatusViewProps> = ({
   icon,

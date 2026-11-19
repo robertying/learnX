@@ -1,16 +1,17 @@
 import { useRef, useState } from 'react';
-import {
-  ScrollView,
-  StyleSheet,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ActionBar, { BarAction } from 'components/ActionBar';
 import Divider from 'components/Divider';
 import Logo from 'components/Logo';
 import SystemIcon from 'components/SystemIcon';
-import { Caption, Headline, textStyles, Title } from 'components/Text';
+import {
+  Caption,
+  Headline,
+  textStyles,
+  Title,
+  useFontScale,
+} from 'components/Text';
 import { openLink } from 'helpers/openLink';
 import type { SystemIconName } from 'helpers/systemIcons';
 import { useTheme } from 'theme';
@@ -75,7 +76,7 @@ const FeatureList: React.FC<FeatureListProps> = ({
   };
   // Symbols grow with the text (Dynamic Type, Android font scale), up to
   // about the size of the title's line.
-  const { fontScale } = useWindowDimensions();
+  const fontScale = useFontScale();
   const iconScale = Math.min(Math.max(fontScale, 1), 1.6);
   const circle = 40 * iconScale;
   // Android: the circle's middle on the middle of the title's first line.

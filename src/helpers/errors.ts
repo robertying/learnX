@@ -2,7 +2,6 @@ import {
   ApiError,
   FailReason,
   isConnectionError,
-  isRefusedLogin,
 } from '@robertying/thu-learn-lib';
 
 /** An ApiError's reason, or undefined for any other error. */
@@ -38,7 +37,7 @@ export const isNetworkError = (err: unknown): boolean =>
  * - `failed`: anything else, such as a login SSO didn't capture.
  *
  * Only `offline` and `serverError` can go through by trying the same login
- * again; the refused ones (`isRefusedLogin`) can't, and more wrong passwords
+ * again; the refused ones (thu-learn-lib's `isRefusedLogin`) can't, and more wrong passwords
  * may lock the account.
  */
 export type LoginFailure =
@@ -76,8 +75,6 @@ export const loginFailureOf = (err: unknown): LoginFailure => {
  */
 export const isRefusal = (failure: LoginFailure | null | undefined) =>
   failure === 'badCredential' || failure === 'untrustedDevice';
-
-export { isRefusedLogin };
 
 /**
  * Whether the server answered and turned the request down (an unexpected
