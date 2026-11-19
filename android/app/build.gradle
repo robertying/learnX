@@ -155,6 +155,9 @@ android {
             // any app could start learnX with them.
             buildConfigField "boolean", "TAKES_LAUNCH_OPTIONS", ciRelease ? "true" : "false"
             minifyEnabled = true
+            // Drops resources nothing references once R8 has removed unused code
+            // (AGP 9.3+ shrinks code and resources together).
+            shrinkResources = true
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             firebaseCrashlytics {
                 mappingFileUploadEnabled = !ciRelease
