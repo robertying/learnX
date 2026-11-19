@@ -78,9 +78,15 @@ const createContent = <T extends { id: string; courseId: string }>({
   /**
    * Fetches a course's items. `cached` holds what the list has for the course
    * (possibly nothing), to skip the per-item requests for items that didn't
-   * change and fill those items in from it.
+   * change and fill those items in from it. With `refresh`, every item gets
+   * its per-item requests; `cached` still fills in what a failed side request
+   * left out.
    */
-  fetchCourse: (courseId: string, cached: T[]) => Promise<object[]>;
+  fetchCourse: (
+    courseId: string,
+    cached: T[],
+    options: { refresh: boolean },
+  ) => Promise<object[]>;
   sort: (items: T[]) => T[];
   /** Lower lists get their courses fetched first when several refresh. */
   priority: number;
@@ -131,14 +137,17 @@ const createContent = <T extends { id: string; courseId: string }>({
         });
   };
 
+  /** What the semester list has cached for a course. */
+  const cachedOf = (semesterId: string, courseId: string) =>
+    (
+      queryClient.getQueryData<T[]>(queryKeys.content(name, semesterId)) ?? []
+    ).filter(item => item.courseId === courseId);
+
   /** Fetches a course's items, reusing what the semester list has cached. */
   const fetchCourse = (semesterId: string, courseId: string) =>
-    fetchFromServer(
-      courseId,
-      (
-        queryClient.getQueryData<T[]>(queryKeys.content(name, semesterId)) ?? []
-      ).filter(item => item.courseId === courseId),
-    );
+    fetchFromServer(courseId, cachedOf(semesterId, courseId), {
+      refresh: false,
+    });
 
   /**
    * Fetches these courses' items through the limiter shared by every list,
@@ -240,12 +249,18 @@ const createContent = <T extends { id: string; courseId: string }>({
   /**
    * Replaces one course's items in the semester list and saves it. Every item
    * gets its per-item requests again, as the user asked for it (or it follows
-   * a submission), so details changed in place show up too.
+   * a submission), so details changed in place show up too. What a side
+   * request that failed leaves out (the excellent homework) stays as cached.
    */
   const refreshCourse = async (semesterId: string, courseId: string) => {
     const startedAt = Date.now();
     const items = withOverrides(
-      tag(courseId, await fetchFromServer(courseId, [])),
+      tag(
+        courseId,
+        await fetchFromServer(courseId, cachedOf(semesterId, courseId), {
+          refresh: true,
+        }),
+      ),
       startedAt,
     );
     refreshedAt.set(`${semesterId}/${courseId}`, startedAt);
@@ -378,11 +393,16 @@ const createContent = <T extends { id: string; courseId: string }>({
  * it takes a request per notice, so only new or changed notices get it; the
  * others keep the one cached.
  */
-const fetchNotices = async (courseId: string, cached: Notice[]) => {
+const fetchNotices = async (
+  courseId: string,
+  cached: Notice[],
+  { refresh }: { refresh: boolean },
+) => {
   const known = new Map(cached.map(notice => [notice.id, notice]));
   const isUnchanged = (notice: CourseNotificationBase) => {
     const old = known.get(notice.id);
     return (
+      !refresh &&
       !!old &&
       sameServerTime(old.publishTime, notice.publishTime) &&
       old.attachment?.name === notice.attachmentName
@@ -450,11 +470,16 @@ const detailFields = [
   'gradeAttachment',
 ] as const satisfies readonly (keyof Assignment & keyof HomeworkDetail)[];
 
-const fetchAssignments = async (courseId: string, cached: Assignment[]) => {
+const fetchAssignments = async (
+  courseId: string,
+  cached: Assignment[],
+  { refresh }: { refresh: boolean },
+) => {
   const known = new Map(cached.map(assignment => [assignment.id, assignment]));
   const isUnchanged = (homework: HomeworkBase) => {
     const old = known.get(homework.id);
     return (
+      !refresh &&
       !!old &&
       listFields.every(field =>
         (assignmentTimes as readonly string[]).includes(field)

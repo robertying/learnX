@@ -69,6 +69,14 @@ const followLatestSemester = async (shownSemester: string) => {
 export const SYNC_BUDGET_MS = 20_000;
 
 /**
+ * How long the sync waits for the widgets, reminders and Spotlight to follow
+ * what it saved (`refreshSurfaces`). The system can take minutes to answer,
+ * as Spotlight does after a restart; what isn't done by then carries on while
+ * the app runs, or at the next refresh.
+ */
+const SURFACES_WAIT_MS = 5_000;
+
+/**
  * The least time left for a timetable week to be asked for; the registrar
  * answers in about a second, and a week cut short is only asked again next
  * run.
@@ -159,12 +167,19 @@ export const syncContent = async ({
     return record({ status: 'skipped' });
   }
 
-  try {
-    // Keeps the session if it's still good (the app may be running) and logs
-    // in only when it has expired, rather than a full SSO login every run.
-    await ensureSession();
-  } catch {
-    return record({ status: 'skipped' });
+  // Keeps the session if it's still good (the app may be running) and logs
+  // in only when it has expired, rather than a full SSO login every run. A
+  // login is a few requests, each allowed a minute, so it counts against the
+  // budget like the fetches.
+  const session = await waitAtMost(
+    ensureSession().then(
+      () => 'open' as const,
+      () => 'failed' as const,
+    ),
+    deadline - Date.now(),
+  );
+  if (session !== 'open') {
+    return record({ status: 'skipped' }, session ? {} : { timedOut: true });
   }
 
   // Favorites and notices read while offline (or from a notification) go up
@@ -173,7 +188,11 @@ export const syncContent = async ({
     requireLogin: false,
   });
 
-  const semesterId = await followLatestSemester(shownSemester);
+  const semesterId =
+    (await waitAtMost(
+      followLatestSemester(shownSemester),
+      deadline - Date.now(),
+    )) ?? shownSemester;
   // Nothing is shown or notified for hidden courses, so they aren't fetched.
   const hidden = new Set(getUserData().hiddenCourses);
   const courseIds = (
@@ -234,7 +253,7 @@ export const syncContent = async ({
   await refreshTimetable(deadline);
   // The lists saved above update the widgets, reminders and Spotlight
   // (services/surfaces); wait for that before the system ends the task.
-  await refreshSurfaces();
+  await waitAtMost(refreshSurfaces(), SURFACES_WAIT_MS);
   return record(
     { status: 'synced', diff: diffContent(before, after) },
     details,
