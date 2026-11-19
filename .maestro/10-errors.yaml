@@ -212,6 +212,16 @@ name: Show no results and failures
 - tapOn:
     text: 'Not Now|现在不|以后'
     optional: true
+# A typed mock login starts over from the mock data, so the set-up page shows
+# again, as after the first login (subflows/login-form.yaml).
+- extendedWaitUntil:
+    visible:
+      id: setup-not-now
+    timeout: 15000
+    optional: true
+- tapOn:
+    id: setup-not-now
+    optional: true
 - extendedWaitUntil:
     visible:
       id: 'tab-notices'
