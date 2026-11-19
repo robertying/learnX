@@ -45,9 +45,8 @@ final class SidebarView: ExpoView, UICollectionViewDelegate {
       if item.badge {
         let (accessory, dot) = Self.badge()
         cell.accessories = [accessory]
-        // Red, except over the selection, where it takes the color of the selected text.
-        cell.configurationUpdateHandler = { _, state in
-          dot.backgroundColor = state.isSelected ? .white : .systemRed
+        cell.configurationUpdateHandler = { cell, state in
+          dot.backgroundColor = Self.badgeColor(cell, state)
         }
       } else {
         cell.accessories = []
@@ -113,5 +112,14 @@ final class SidebarView: ExpoView, UICollectionViewDelegate {
     var configuration = UICellAccessory.CustomViewConfiguration(customView: dot, placement: .trailing())
     configuration.maintainsFixedSize = true
     return (.customView(configuration: configuration), dot)
+  }
+
+  /// Red, except over the selection, where it takes the color of the row's text: white on the accent color, but the
+  /// label color on the gray selection of a window that isn't key, where white would vanish.
+  static func badgeColor(_ cell: UICollectionViewCell, _ state: UICellConfigurationState) -> UIColor {
+    guard state.isSelected, let content = cell.contentConfiguration as? UIListContentConfiguration else {
+      return .systemRed
+    }
+    return content.updated(for: state).textProperties.resolvedColor()
   }
 }

@@ -120,10 +120,11 @@ final class WindowsUITests: LearnXUITestCase {
     sidebar.click()
   }
 
-  /// File › New Window: UIKit's own item for an app with several windows.
+  /// File › New Window: UIKit's own item for an app with several windows, in the language the app runs in.
   private func openNewWindow() throws {
     try wait(app.menuBars.menuBarItems["com.apple.menu.file"], "the File menu", 5).click()
-    try wait(app.menuItems["新建窗口"], "New Window", 5).click()
+    let newWindow = app.menuItems.matching(NSPredicate(format: "title IN %@", ["New Window", "新建窗口"])).firstMatch
+    try wait(newWindow, "New Window", 5).click()
   }
 
   private func waitFor(selected id: String, in parent: XCUIElement) throws {

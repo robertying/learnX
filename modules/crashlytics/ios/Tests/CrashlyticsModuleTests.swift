@@ -92,6 +92,8 @@ func frame(_ symbol: String, _ file: String, _ line: Int, _ column: Int) -> JSSt
 
   @Test func reportsNothingWithoutAReporter() {
     let module = CrashlyticsModule(appContext: AppContext())
+    #expect(module.reporter == nil)
+    // Nothing to send it to, and no crash.
     module.addLog("Launched")
   }
 }

@@ -18,6 +18,23 @@ final class DetailsUITests: LearnXUITestCase {
     try open(card: "file-card", "MOCK_FILE", detail: "file-detail")
   }
 
+  /// As in Mail, Tab moves into the list and Return opens the row that has the focus (`ContextMenuView` in
+  /// `modules/menus`).
+  func testOpensACardFromTheKeyboard() throws {
+    try open(tab: "tab-notices")
+    try waitFor(card: "notice-card", "MOCK_NOTICE")
+    // The focus is on the row's `ContextMenuView`, which holds the card.
+    let focusedCard = app.descendants(matching: .any)
+      .matching(NSPredicate(format: "hasKeyboardFocus == true"))
+      .containing(.button, identifier: "notice-card").firstMatch
+    for _ in 0..<4 where !focusedCard.exists {
+      app.typeKey(.tab, modifierFlags: [])
+    }
+    XCTAssertTrue(focusedCard.waitForExistence(timeout: 2), "Tab didn't move into the list\n\(app.debugDescription)")
+    app.typeKey(.return, modifierFlags: [])
+    try waitFor(id: "notice-detail")
+  }
+
   /// A PowerPoint file, which the Mac's web view can't show, previews through Quick Look (`modules/quicklook`).
   func testPreviewsAnOfficeFileWithQuickLook() throws {
     try open(tab: "tab-files")

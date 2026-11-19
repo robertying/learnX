@@ -798,7 +798,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Debug builds make no dSYM to upload.\nif [ \"${DEBUG_INFORMATION_FORMAT}\" != \"dwarf-with-dsym\" ]; then\n  exit 0\nfi\n# Firebase is a Swift package, checked out next to the build folder.\n\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
+			shellScript = "# Only archives (the release lanes), not the Release builds that E2E and UI tests\n# run, and not Debug builds, which make no dSYM.\nif [ \"${ACTION}\" != \"install\" ] || [ \"${DEBUG_INFORMATION_FORMAT}\" != \"dwarf-with-dsym\" ]; then\n  exit 0\nfi\n# Firebase is a Swift package, checked out next to the build folder.\n\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
 		};
 		E0034376B1851C8CB53E8191 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
