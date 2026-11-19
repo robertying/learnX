@@ -7,13 +7,9 @@
 #
 # Targets (each runs one flow; the folder is under STORE_OUT_DIR):
 #   iphone          .maestro/store/iphone.yaml       ios/iphone/
-#   duo-folded      .maestro/store/iphone.yaml       ios/iphone-duo/ (-folded)
-#   duo-half-open   .maestro/store/iphone.yaml       ios/iphone-duo/ (-half-open)
-#   duo-open        .maestro/store/iphone.yaml       ios/iphone-duo/ (-open)
-#
-# duo-half-open and duo-open set each screen up on the closed Duo (nothing
-# can tap on its inner display yet) and open the hinge for each shot, so they
-# need the patched Maestro (scripts/e2e/maestro/build.sh) first on PATH.
+#   duo             .maestro/store/duo.yaml          ios/iphone-duo/
+#                   (closed, half open and fully open; needs the patched
+#                   Maestro, scripts/e2e/maestro/build.sh, first on PATH)
 #   ipad            .maestro/store/ipad.yaml         ios/ipad/ (landscape)
 #   android-phone   .maestro/store/android-phone.yaml   android/phone/
 #   android-tablet  .maestro/store/android-tablet.yaml  android/tablet/
@@ -54,20 +50,13 @@ target="${1:-}"
 device="${2:-${MAESTRO_DEVICE:-}}"
 
 usage() {
-  echo "usage: $0 mac|iphone|duo-folded|duo-half-open|duo-open|ipad|android-phone|android-tablet [device]" >&2
+  echo "usage: $0 mac|iphone|duo|ipad|android-phone|android-tablet [device]" >&2
   exit 1
 }
 
-suffix=""
-posture=""
 case "$target" in
 iphone) platform=ios flow=iphone folder=ios/iphone ;;
-duo-folded) platform=ios flow=iphone folder=ios/iphone-duo suffix=-folded ;;
-duo-half-open)
-  platform=ios flow=iphone folder=ios/iphone-duo suffix=-half-open
-  posture=halfFold
-  ;;
-duo-open) platform=ios flow=iphone folder=ios/iphone-duo suffix=-open posture=flat ;;
+duo) platform=ios flow=duo folder=ios/iphone-duo ;;
 ipad) platform=ios flow=ipad folder=ios/ipad ;;
 mac) platform=mac folder=macos/windows ;;
 android-phone)
@@ -239,15 +228,10 @@ run_dir="$(mktemp -d "${TMPDIR:-/tmp}/learnx-store.XXXXXX")"
 copy_shots() {
   find "$run_dir" -path '*takeScreenshot*' -name '*.png' -exec cp {} "$out"/ \;
 }
-flows=.maestro
-if [ -n "$posture" ]; then
-  # A copy of the flows whose shots open the hinge (see
-  # .maestro/store/subflows/screenshot-posture.yaml).
-  flows="$run_dir/flows"
-  cp -R .maestro "$flows"
-  cp .maestro/store/subflows/screenshot-posture.yaml "$flows/subflows/screenshot.yaml"
+if [ "$flow" = duo ]; then
   # Maestro's takeScreenshot of the inner display is black, so the flow asks
-  # this server for each shot, which saves the inner display (3) with simctl.
+  # this server for each shot there, which saves the inner display (3) with
+  # simctl (.maestro/subflows/screenshot.yaml).
   shot_port_file="$run_dir/shot-port"
   node scripts/e2e/lib/inner-display-shots.mjs "$device" "$out" "$shot_port_file" &
   shot_server=$!
@@ -259,11 +243,9 @@ status=0
 MAESTRO_DEVICE="$device" scripts/e2e/e2e.sh "$platform" \
   --test-output-dir "$run_dir" \
   -e STORE_OUT=store \
-  -e STORE_SUFFIX="$suffix" \
-  -e STORE_POSTURE="$posture" \
   -e STORE_SHOT_URL="${shot_url:-}" \
-  "$flows/store/$flow.yaml" || status=$?
-if [ -n "$posture" ]; then
+  ".maestro/store/$flow.yaml" || status=$?
+if [ "$flow" = duo ]; then
   # Leave the Duo closed, as the next run expects.
   MAESTRO_DEVICE="$device" scripts/e2e/e2e.sh ios -e POSTURE=closed \
     --test-output-dir "$run_dir/close" .maestro/subflows/fold.yaml || true

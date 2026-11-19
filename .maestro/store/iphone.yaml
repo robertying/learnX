@@ -1,7 +1,7 @@
 appId: ${APP_ID}
 name: App Store screenshots on the iPhone
 ---
-# Run by scripts/e2e/store-screenshots.sh (iphone, duo-folded): the iPhone shots
+# Run by scripts/e2e/store-screenshots.sh (iphone): the iPhone shots
 # of the store listing, as STORE_OUT/NN-<slug>.png.
 - runFlow: subflows/start.yaml
 
@@ -47,13 +47,8 @@ name: App Store screenshots on the iPhone
     file: ../subflows/screenshot.yaml
     env:
       NAME: 03-notices-actions
-# Closes the filter menu. Opening the hinge for the shot already closed it
-# (duo-half-open, duo-open).
-- runFlow:
-    when:
-      visible: '(${T_all})(, .*)?'
-    commands:
-      - tapOn: '(${T_all})(, .*)?'
+# Closes the filter menu.
+- tapOn: '(${T_all})(, .*)?'
 - waitForAnimationToEnd
 
 # 4 A notice with an attachment

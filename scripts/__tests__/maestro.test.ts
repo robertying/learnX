@@ -38,13 +38,6 @@ describe('config.yaml', () => {
   });
 });
 
-// scripts/e2e/store-screenshots.sh copies this one over subflows/screenshot.yaml,
-// so it runs from there.
-const runsFrom = (path: string) =>
-  path.endsWith('/store/subflows/screenshot-posture.yaml')
-    ? join(maestroDir, 'subflows')
-    : dirname(path);
-
 describe('flow references', () => {
   const references = flows
     .filter(path => /\.ya?ml$/.test(path))
@@ -56,7 +49,7 @@ describe('flow references', () => {
       ].map(match => ({
         from: relative(maestroDir, path),
         name: match[1],
-        target: join(runsFrom(path), match[1]),
+        target: join(dirname(path), match[1]),
       })),
     );
 
