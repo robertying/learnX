@@ -15,6 +15,7 @@ import { openLink } from 'helpers/openLink';
 import type { SystemIconName } from 'helpers/systemIcons';
 import { useTheme } from 'theme';
 import { isApple } from 'helpers/platform';
+import PageColumn from 'constants/PageColumn';
 
 export interface Feature {
   icon: SystemIconName;
@@ -221,9 +222,9 @@ const styles = StyleSheet.create({
   },
   header: {
     width: '100%',
-    maxWidth: 520,
+    maxWidth: PageColumn.maxWidth,
     alignSelf: 'center',
-    paddingHorizontal: apple ? 40 : 24,
+    paddingHorizontal: PageColumn.textMargin,
   },
   // As tall as the features, up to the room left between the title and the
   // buttons.
@@ -233,9 +234,9 @@ const styles = StyleSheet.create({
   },
   content: {
     width: '100%',
-    maxWidth: 520,
+    maxWidth: PageColumn.maxWidth,
     alignSelf: 'center',
-    paddingHorizontal: apple ? 40 : 24,
+    paddingHorizontal: PageColumn.textMargin,
     paddingBottom: 24,
   },
   // The app icon image has room around it: less pulled in below than Logo's

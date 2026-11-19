@@ -17,6 +17,7 @@ import { setSSOInProgress, useAuthStore, useLoggingIn } from 'data/auth';
 import { login, loginWithOfflineMode } from 'data/login';
 import { useCredentials } from 'data/credentials';
 import { clearLoginCookies } from 'data/source';
+import PageColumn from 'constants/PageColumn';
 import Spacing from 'constants/Spacing';
 import Styles from 'constants/Styles';
 import SafeArea from 'components/SafeArea';
@@ -228,9 +229,19 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: android ? 'stretch' : 'center',
     justifyContent: 'center',
-    width: '80%',
-    // A phone's width, also in a wide iPad or Mac window.
-    maxWidth: 400,
+    ...(android
+      ? {
+          // The welcome page's column, so the fields start where its title
+          // did.
+          width: '100%',
+          maxWidth: PageColumn.maxWidth,
+          paddingHorizontal: PageColumn.margin,
+        }
+      : {
+          width: '80%',
+          // A phone's width, also in a wide iPad or Mac window.
+          maxWidth: 400,
+        }),
     // Every child is a step apart; none has margins of its own.
     gap: Spacing.m,
   },
