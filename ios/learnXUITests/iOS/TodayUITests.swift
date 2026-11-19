@@ -8,10 +8,11 @@ import XCTest
 /// that neither stretches nor collapses; the spinner shows at the top of the list, in the same spot.
 @MainActor
 final class TodayUITests: SimulatorUITestCase {
+  override var onlyOn: (idiom: UIUserInterfaceIdiom, reason: String)? {
+    (.phone, "Today's list is the same on an iPad; the iPhone is enough")
+  }
+
   func testPullToRefreshShowsTheSpinner() throws {
-    guard UIDevice.current.userInterfaceIdiom == .phone else {
-      throw XCTSkip("Today's list is the same on an iPad; the iPhone is enough")
-    }
     try open(tab: "tab-today")
     try waitFor(id: "today-schedule", timeout: 30)
     let bar = try waitFor(idMatching: "今天")
@@ -31,9 +32,6 @@ final class TodayUITests: SimulatorUITestCase {
   }
 
   func testScrollingCollapsesTheLargeTitle() throws {
-    guard UIDevice.current.userInterfaceIdiom == .phone else {
-      throw XCTSkip("Today's list is the same on an iPad; the iPhone is enough")
-    }
     try open(tab: "tab-today")
     try waitFor(id: "today-schedule", timeout: 30)
     // The tabs are one above another in a tab bar down the side.
