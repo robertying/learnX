@@ -17,6 +17,14 @@ public final class PdfModule: Module {
   }
 }
 
+/// Why a PDF didn't open, as `onError`'s `reason` says it.
+enum PdfFailure: String {
+  /// It is encrypted with a password.
+  case password
+  /// It is damaged or isn't a PDF.
+  case unreadable
+}
+
 /// One local PDF in PDFKit's `PDFView`, its pages one under another and fitted to the view's width. The person can
 /// zoom in from there; resizing the view (rotating, a Mac window or an iPad split) fits the pages to the new width
 /// and keeps how far they zoomed in. A document opens at the top of the scroll view's content inset, so a
@@ -29,7 +37,7 @@ final class PdfView: ExpoView {
   let pdfView = PDFView()
   private(set) var url: URL?
   /// Why the document didn't open, as sent to `onError`.
-  private(set) var failure: String?
+  private(set) var failure: PdfFailure?
   /// The scale factor that fits the pages' width, for the width it was last fitted to.
   private(set) var fittedScale: CGFloat?
   /// The scale over fitting the width, which resizing keeps.
@@ -65,20 +73,20 @@ final class PdfView: ExpoView {
       return
     }
     guard let document = PDFDocument(url: url) else {
-      fail("The file isn't a PDF, or is damaged.")
+      fail(.unreadable)
       return
     }
     guard !document.isLocked else {
-      fail("The PDF needs a password.")
+      fail(.password)
       return
     }
     pdfView.document = document
     setNeedsLayout()
   }
 
-  private func fail(_ message: String) {
-    failure = message
-    onError(["message": message])
+  private func fail(_ failure: PdfFailure) {
+    self.failure = failure
+    onError(["reason": failure.rawValue])
   }
 
   override func layoutSubviews() {

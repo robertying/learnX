@@ -1,11 +1,17 @@
 import type { ViewProps } from 'react-native';
 import { requireNativeView } from 'expo';
 
+/** Why a PDF didn't open. */
+export type PdfFailure = 'password' | 'unreadable';
+
 export interface PdfViewProps extends ViewProps {
   /** The downloaded PDF, as a `file:` URI. */
   uri: string;
-  /** The PDF didn't open: it is damaged, needs a password or isn't a PDF. */
-  onError?: (event: { nativeEvent: { message: string } }) => void;
+  /**
+   * The PDF didn't open: it needs a password (`password`), or it is damaged
+   * or isn't a PDF (`unreadable`).
+   */
+  onError?: (event: { nativeEvent: { reason: PdfFailure } }) => void;
 }
 
 /**

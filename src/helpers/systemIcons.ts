@@ -78,6 +78,7 @@ export const systemIcons = {
     android: 'error',
     windows: 'ErrorCircleRegular',
   },
+  locked: { ios: 'lock', android: 'lock', windows: 'LockClosedRegular' },
   done: {
     ios: 'checkmark.circle',
     android: 'check_circle',
@@ -547,6 +548,7 @@ export const materialCodepoints: Record<SystemIconAndroidName, number> = {
   language: 0xe894,
   light_mode: 0xe518,
   location_off: 0xe0c7,
+  lock: 0xe897,
   login: 0xea77,
   logout: 0xe9ba,
   mail: 0xe158,

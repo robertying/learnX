@@ -1,14 +1,14 @@
 {
   "runtimeVersion": "19.1.0",
-  "ios": "ad2a80996e00a656d73cbfed1f0fdff4bda504a8",
-  "android": "357a1610081958873a95936d10ce774107a527c2",
+  "ios": "308e928812b326974925c2b60097ef148f481647",
+  "android": "c7f4db060a7c65cd71f395b067e8c51d592f44fb",
   "sources": {
     "ios": {
       "file src/data/storeVersions.json": "46529c4a96147c7b238c1fb8a460668086e2e2d6",
       "dir ios": "ab196db9a45042350e09b08c5f0fe9bd237f2a16",
       "dir modules/crashlytics/ios": "e1f7e29111e231cd015ba44f6484e6b9aeafc6c2",
       "dir modules/menus/ios": "3d309682cbc43ab11c00b402bb4149d2544d2854",
-      "dir modules/pdf/ios": "726cb7aaa2b36e94dc66a5f24857d3331d75f188",
+      "dir modules/pdf/ios": "1a8adeff5aa55fd42770e66b2a907ddef1ddbb9f",
       "dir modules/quicklook/ios": "772d10aeb7e37cfc0f009637f03105cd9eadd7e8",
       "dir modules/share/ios": "2a94070ea43a25cc9fa52be05e6476219924fe98",
       "dir modules/shortcuts/ios": "77f8113c1737ea6fef56118e978807bcf4eac572",
@@ -68,7 +68,7 @@
       "file src/data/storeVersions.json": "46529c4a96147c7b238c1fb8a460668086e2e2d6",
       "dir android": "ebc85411eb94f3c5127557a7c76def15d2b798d2",
       "dir modules/crashlytics/android": "c197e1f7400e71d52bf820a626fa941218b8e4ae",
-      "dir modules/pdf/android": "d4709f4fcdc08c5d074243b9ac02b5aeb08dfc51",
+      "dir modules/pdf/android": "d3278603d1db604ab01d30ec2cdc73e3c74458de",
       "dir modules/share/android": "69760341fd85cb091ac06c209f12d905b601c4d9",
       "dir modules/updater/android": "3d10cfa1cc60224856437bbe1568f6eccba83103",
       "dir patches": "453f01814b0846875c411b932b47a469e5378ddf",

@@ -121,7 +121,7 @@ import UIKit
     let url = FileManager.default.temporaryDirectory.appendingPathComponent("PdfViewTests.txt")
     try Data("not a pdf".utf8).write(to: url)
     let view = pdfView(width: 400, url: url)
-    #expect(view.failure != nil)
+    #expect(view.failure == .unreadable)
     #expect(view.pdfView.document == nil)
   }
 
@@ -140,7 +140,7 @@ import UIKit
       context.beginPage()
     }
     let view = pdfView(width: 400, url: url)
-    #expect(view.failure != nil)
+    #expect(view.failure == .password)
     #expect(view.pdfView.document == nil)
   }
 
