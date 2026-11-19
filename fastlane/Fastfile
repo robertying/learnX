@@ -700,12 +700,14 @@ def build_android
   # The release config reads LEARNX_RELEASE_* from android/local.properties and
   # signs with android/app/release.keystore. Two flavors (android/app/build.gradle):
   # googlePlay makes the AAB, github the APKs that update themselves in the app.
+  # Separate runs: ABI splits are off while building an AAB (android/app/build.gradle).
   gradle(
     project_dir: File.join(ROOT, "android"),
-    tasks: [
-      "app:bundleGooglePlayRelease", "app:assembleGithubRelease",
-      "app:uploadCrashlyticsSymbolFileGooglePlayRelease", "app:uploadCrashlyticsSymbolFileGithubRelease",
-    ],
+    tasks: ["app:bundleGooglePlayRelease", "app:uploadCrashlyticsSymbolFileGooglePlayRelease"],
+  )
+  gradle(
+    project_dir: File.join(ROOT, "android"),
+    tasks: ["app:assembleGithubRelease", "app:uploadCrashlyticsSymbolFileGithubRelease"],
   )
 
   check_bundle_env!(Dir[File.join(ANDROID_APP, "build/generated/assets/react/{googlePlayRelease,githubRelease}/index.android.bundle")])

@@ -60,7 +60,8 @@ const filledSymbols: Record<TabIcon, SFSymbol> = {
 // Android's navigation bar shows the outlined Material Symbol, and the filled
 // one on the selected tab: vector drawables in android/app/src/main/res/drawable
 // (`tab_<symbol>` and `tab_<symbol>_filled`, drawn from the Material Symbols
-// font), since the bar loads its icons as images.
+// font), since the bar loads its icons as images. Only this name points at
+// them, so res/raw/learnx_keep.xml keeps them from resource shrinking.
 const getTabBarIcon = (icon: TabIcon, focused: boolean) =>
   isApple()
     ? { sfSymbol: focused ? filledSymbols[icon] : systemIcons[icon].ios }

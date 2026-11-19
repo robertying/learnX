@@ -3,9 +3,10 @@
 # so only what this app needs on top of them goes here.
 
 # Crash reports: file names and line numbers in stack traces, and exception
-# class names (Firebase Crashlytics' recommended rules).
+# class names. Only the names: R8 may still remove and optimize exceptions,
+# and Crashlytics deobfuscates the rest with the uploaded mapping file.
 -keepattributes SourceFile,LineNumberTable
--keep public class * extends java.lang.Exception
+-keepnames public class * extends java.lang.Exception
 
 # Classes referenced but never loaded on Android; R8 stops on missing classes
 # without these.
