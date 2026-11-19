@@ -176,6 +176,8 @@ export default {
     "Couldn't open the file. Download it again, or install an app that can open this type of file.",
   previewFailedTitle: "Couldn't Show File",
   previewFailedDescription: 'It may be damaged.',
+  pdfPasswordTitle: 'PDF Needs a Password',
+  pdfPasswordDescription: 'Open it in another app to enter the password.',
   downloadAgain: 'Download Again',
   share: 'Share',
   open: 'Open',

@@ -151,7 +151,7 @@ class PdfiumViewTest {
     // PDFView recycles itself before it reports the error.
     viewer.recycle()
     view.pdfiumFailed(viewer, IllegalStateException("broken"))
-    assertEquals("broken", view.failure)
+    assertEquals(PdfFailure.UNREADABLE, view.failure)
   }
 
   /** A view that left the window while it loads fails for want of its renderer, which isn't the document's fault. */

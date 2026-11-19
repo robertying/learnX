@@ -16,7 +16,7 @@ import {
   QuickLookView,
   showQuickLookPanel,
 } from 'modules/quicklook';
-import { PdfView } from 'modules/pdf';
+import { PdfView, type PdfFailure } from 'modules/pdf';
 import { formatDate, t } from 'helpers/i18n';
 import { displayFileSize } from 'helpers/filename';
 import Spinner from 'components/Spinner';
@@ -93,16 +93,18 @@ const FileDetailContent: React.FC<{
   }, [path, courseFileId]);
 
   const [showInfo, setShowInfo] = useState(false);
-  // The PDF viewer couldn't read the file (damaged, or not a PDF after all).
-  const [previewFailed, setPreviewFailed] = useState(false);
+  // Why the PDF viewer couldn't show the file: it needs a password, or it is
+  // damaged or not a PDF after all.
+  const [previewFailure, setPreviewFailure] = useState<PdfFailure | null>(null);
 
-  const handlePreviewError = () => setPreviewFailed(true);
+  const handlePreviewError = (event: { nativeEvent: { reason: PdfFailure } }) =>
+    setPreviewFailure(event.nativeEvent.reason);
   // The Mac's Quick Look preview had no window to show in: the file's info
   // shows instead, as for a file it can't preview.
   const [quickLookUnavailable, setQuickLookUnavailable] = useState(false);
 
   const handleRedownload = () => {
-    setPreviewFailed(false);
+    setPreviewFailure(null);
     redownload();
   };
 
@@ -161,7 +163,24 @@ const FileDetailContent: React.FC<{
         <View key="loading" testID="file-loading" style={styles.centered}>
           <Spinner progress={progress} />
         </View>
-      ) : !showInfo && canRender && previewFailed ? (
+      ) : !showInfo && canRender && previewFailure === 'password' ? (
+        // The viewer can't ask for the password: another app can (Android's
+        // chooser, iOS's share sheet, the Mac's Quick Look).
+        <StatusView
+          key="preview-locked"
+          testID="file-preview-locked"
+          icon="locked"
+          title={t('pdfPasswordTitle')}
+          description={t('pdfPasswordDescription')}
+          actions={[
+            isAndroid()
+              ? { label: t('open'), onPress: open }
+              : isQuickLookAvailable
+                ? { label: t('quickLook'), onPress: handleQuickLook }
+                : { label: t('share'), onPress: share },
+          ]}
+        />
+      ) : !showInfo && canRender && previewFailure ? (
         <StatusView
           key="preview-failed"
           testID="file-preview-failed"

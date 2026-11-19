@@ -38,10 +38,11 @@ class PdfBackendTest {
 
   @Test
   fun saysWhenEitherViewerNeedsAPassword() {
-    assertEquals(PASSWORD_MESSAGE, errorMessage(PdfPasswordException("locked")))
-    assertEquals(PASSWORD_MESSAGE, errorMessage(PdfiumPasswordException("locked")))
-    assertEquals("broken", errorMessage(IllegalStateException("broken")))
-    assertEquals("java.io.IOException", errorMessage(java.io.IOException()))
+    assertEquals(PdfFailure.PASSWORD, PdfFailure.of(PdfPasswordException("locked")))
+    assertEquals(PdfFailure.PASSWORD, PdfFailure.of(PdfiumPasswordException("locked")))
+    assertEquals(PdfFailure.UNREADABLE, PdfFailure.of(IllegalStateException("broken")))
+    assertEquals(PdfFailure.UNREADABLE, PdfFailure.of(java.io.IOException()))
+    assertEquals(listOf("password", "unreadable"), PdfFailure.entries.map { it.reason })
   }
 
   /** A document is closed only once the render running on the renderer thread is done. */

@@ -72,6 +72,7 @@ import { HeartBrokenRegular } from '@fluentui/react-icons/svg/heart-broken';
 import { HistoryRegular } from '@fluentui/react-icons/svg/history';
 import { InfoRegular } from '@fluentui/react-icons/svg/info';
 import { KeyRegular } from '@fluentui/react-icons/svg/key';
+import { LockClosedRegular } from '@fluentui/react-icons/svg/lock-closed';
 import {
   LibraryFilled,
   LibraryRegular,
@@ -204,6 +205,7 @@ export const fluentIcons: Record<SystemIconWindowsName, FluentIcon> = {
   LibraryRegular,
   LocalLanguageRegular,
   LocationOffRegular,
+  LockClosedRegular,
   MailInboxAllRegular,
   MailInboxRegular,
   MailRegular,

@@ -109,7 +109,7 @@ class PdfViewTest {
     coEvery { loader.openDocument(file, null) } throws PdfPasswordException("locked")
     val view = view()
     view.setUri(file.toString())
-    assertEquals("The PDF needs a password.", view.failure)
+    assertEquals(PdfFailure.PASSWORD, view.failure)
     assertNull(view.document)
   }
 
@@ -118,7 +118,7 @@ class PdfViewTest {
     coEvery { loader.openDocument(file, null) } throws java.io.IOException()
     val view = view()
     view.setUri(file.toString())
-    assertEquals("java.io.IOException", view.failure)
+    assertEquals(PdfFailure.UNREADABLE, view.failure)
   }
 
   /** Leaving File detail while the document still opens: it never shows, and is closed once it has opened. */
