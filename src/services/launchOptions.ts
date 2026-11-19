@@ -98,6 +98,7 @@ const failures = new Set<unknown>([
   'none',
   'offline',
   'serverError',
+  'untrustedDevice',
   'timeout',
   'quickTimeout',
 ]);

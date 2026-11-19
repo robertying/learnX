@@ -35,6 +35,11 @@ export type MockFailure =
   | 'offline'
   /** The server answers with an unexpected status. */
   | 'serverError'
+  /**
+   * Logins are refused for a device fingerprint the SSO server no longer
+   * trusts (it asks for a second factor); other requests go through.
+   */
+  | 'untrustedDevice'
   /** Requests hang, then fail like a timed-out fetch. */
   | 'timeout'
   /**
@@ -145,6 +150,12 @@ const roundTrip = async ({ isLogin = false } = {}) => {
       throw apiError(
         isLogin ? FailReason.ERROR_FETCH_FROM_ID : FailReason.UNEXPECTED_STATUS,
       );
+    case 'untrustedDevice':
+      await wait(randomLatency());
+      if (isLogin) {
+        throw apiError(FailReason.DEVICE_NOT_TRUSTED);
+      }
+      break;
     case 'none':
       await wait(randomLatency());
   }

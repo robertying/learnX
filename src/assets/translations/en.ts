@@ -38,8 +38,14 @@ export default {
   description: 'Description',
   unsentDraft: 'Unsubmitted Draft',
   assignmentSubmission: 'Assignment Submission',
-  loginFailed:
-    "Couldn't log in. Check your connection and that your Tsinghua ID login still works.",
+  loginFailed: "Couldn't log in. Make sure your Tsinghua ID login still works.",
+  loginFailedOffline: "Couldn't log in. Check your internet connection.",
+  loginFailedServerError:
+    "Couldn't log in because of a server error. Try again later.",
+  loginFailedBadCredential:
+    "Couldn't log in. The username or password is incorrect.",
+  loginFailedUntrustedDevice:
+    "Couldn't log in because this device's verification expired. Log in again and finish verification.",
   versionInformation: 'Version',
   sourceCode: 'Source Code',
   website: 'Website',
@@ -326,6 +332,9 @@ export default {
   loggingIn: 'Logging in…',
   syncStatusOffline: 'Offline',
   syncStatusLoginFailed: "Couldn't log in",
+  syncStatusServerError: 'Server error',
+  syncStatusBadCredential: 'Incorrect password',
+  syncStatusUntrustedDevice: 'Device verification expired',
   syncStatusReconnecting: 'Reconnecting…',
   syncStatusUpdated: 'Updated {time}',
   syncStatusLogIn: 'Log In',

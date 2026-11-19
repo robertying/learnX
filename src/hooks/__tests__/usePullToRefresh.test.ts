@@ -88,3 +88,18 @@ it('logs in again without a session, spinning until the login ends', async () =>
   await act(() => useAuthStore.setState({ loggingIn: true }));
   expect(result.current.refreshing).toBe(false);
 });
+
+it.each([
+  ['badCredential', 'loginFailedBadCredential'],
+  ['untrustedDevice', 'loginFailedUntrustedDevice'],
+] as const)(
+  'says why instead of trying a %s login again',
+  async (failure, message) => {
+    useAuthStore.setState({ failure });
+    const { result } = await render(jest.fn());
+    await act(() => result.current.onRefresh());
+    expect(login).not.toHaveBeenCalled();
+    expect(toast).toHaveBeenCalledWith(t(message), 'error');
+    expect(result.current.refreshing).toBe(false);
+  },
+);

@@ -1,6 +1,8 @@
 import { StyleSheet, View } from 'react-native';
 import SystemIcon from 'components/SystemIcon';
 import { requestRelogin, useAuthStore } from 'data/auth';
+import { loginFailedStatus } from 'helpers/loginFailureText';
+import { retriesOnTimer } from 'helpers/loginRetry';
 import { t, timeAgo } from 'helpers/i18n';
 import { Caption, Text } from 'components/Text';
 import { FormSection, FormText, type FormSectionProps } from 'components/Form';
@@ -15,10 +17,10 @@ export interface SyncStatusProps {
 }
 
 /**
- * What a list says while there's no session: offline, or the saved login
- * failed, with how old the shown data is, or null with a session. A failed
- * login offers to log in again; going offline retries by itself
- * (hooks/useReLogin).
+ * What a list says while there's no session: why the saved login failed,
+ * with how old the shown data is, or null with a session. Being offline or a
+ * server error retries by itself (hooks/useReLogin); any other failure needs
+ * the user, so it offers to log in again.
  */
 export const useSyncStatus = (updatedAt?: number) => {
   const loggedIn = useAuthStore(state => state.loggedIn);
@@ -36,20 +38,18 @@ export const useSyncStatus = (updatedAt?: number) => {
     icon: failure === 'offline' ? ('offline' as const) : ('error' as const),
     status: loggingIn
       ? t('syncStatusReconnecting')
-      : failure === 'offline'
-        ? t('syncStatusOffline')
-        : t('syncStatusLoginFailed'),
+      : loginFailedStatus(failure),
     updated: updatedAt
       ? t('syncStatusUpdated', { time: timeAgo(now, updatedAt) })
       : null,
-    canLogIn: failure === 'rejected' && !loggingIn,
+    canLogIn: !retriesOnTimer(failure) && !loggingIn,
   };
 };
 
 /**
  * One row at the top of a list (its header, so it scrolls with the list)
  * while there's no session: the status with how old the data is under it,
- * and Log In at the end after a rejected login. Today shows the same row in
+ * and Log In at the end when the login needs the user. Today shows the same row in
  * its Form (`SyncStatusSection`).
  */
 const SyncStatus: React.FC<SyncStatusProps> = ({ updatedAt }) => {

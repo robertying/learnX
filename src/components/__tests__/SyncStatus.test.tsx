@@ -47,18 +47,32 @@ it('leaves the age out when the list was never fetched', async () => {
   expect(screen.getByText(t('syncStatusOffline'))).toBeTruthy();
 });
 
-it('offers to log in again after a rejected login', async () => {
-  useAuthStore.setState({ failure: 'rejected' });
+it.each([
+  ['badCredential', 'syncStatusBadCredential'],
+  ['untrustedDevice', 'syncStatusUntrustedDevice'],
+  ['failed', 'syncStatusLoginFailed'],
+] as const)(
+  'says why a %s login needs the user and offers to log in again',
+  async (failure, key) => {
+    useAuthStore.setState({ failure });
+    await render(<SyncStatus />);
+    expect(screen.getByText(t(key))).toBeTruthy();
+    await userEvent
+      .setup({ advanceTimers: jest.advanceTimersByTime })
+      .press(screen.getByTestId('sync-status-relogin'));
+    expect(useAuthStore.getState().reloginRequested).toBe(true);
+  },
+);
+
+it('says a server error, without the button: it retries by itself', async () => {
+  useAuthStore.setState({ failure: 'serverError' });
   await render(<SyncStatus />);
-  expect(screen.getByText(t('syncStatusLoginFailed'))).toBeTruthy();
-  await userEvent
-    .setup({ advanceTimers: jest.advanceTimersByTime })
-    .press(screen.getByTestId('sync-status-relogin'));
-  expect(useAuthStore.getState().reloginRequested).toBe(true);
+  expect(screen.getByText(t('syncStatusServerError'))).toBeTruthy();
+  expect(screen.queryByTestId('sync-status-relogin')).toBeNull();
 });
 
 it('says it is reconnecting while a login runs, without the button', async () => {
-  useAuthStore.setState({ failure: 'rejected', loggingIn: true });
+  useAuthStore.setState({ failure: 'failed', loggingIn: true });
   await render(<SyncStatus />);
   expect(screen.getByText(t('syncStatusReconnecting'))).toBeTruthy();
   expect(screen.queryByTestId('sync-status-relogin')).toBeNull();
@@ -81,8 +95,8 @@ describe('as a Form section', () => {
     expect(screen.queryByText(t('syncStatusLogIn'))).toBeNull();
   });
 
-  it('offers to log in again after a rejected login', async () => {
-    useAuthStore.setState({ failure: 'rejected' });
+  it('offers to log in again after a refused login', async () => {
+    useAuthStore.setState({ failure: 'badCredential' });
     await render(<SyncStatusSection />);
     await userEvent
       .setup({ advanceTimers: jest.advanceTimersByTime })

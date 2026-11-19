@@ -29,6 +29,7 @@ const failures: [MockFailure, string][] = [
   ['none', 'Succeed'],
   ['offline', 'Fail: Offline'],
   ['serverError', 'Fail: Server Error'],
+  ['untrustedDevice', 'Fail: Log In From Untrusted Device'],
   ['timeout', 'Fail: Time Out After 20 s'],
   ['quickTimeout', 'Fail: Time Out After 4 s, Retry Sooner'],
 ];

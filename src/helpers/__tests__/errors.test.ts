@@ -2,8 +2,9 @@ import { FailReason } from '@robertying/thu-learn-lib';
 import {
   apiReason,
   errorReason,
-  isBadCredential,
   isNetworkError,
+  isRefusal,
+  loginFailureOf,
   isServerRejection,
 } from 'helpers/errors';
 
@@ -73,13 +74,41 @@ describe('isNetworkError', () => {
   });
 });
 
-describe('isBadCredential', () => {
-  it('spots a wrong password only', () => {
-    expect(isBadCredential({ reason: FailReason.BAD_CREDENTIAL })).toBe(true);
-    expect(isBadCredential({ reason: FailReason.ERROR_FETCH_FROM_ID })).toBe(
-      false,
-    );
-    expect(isBadCredential(null)).toBe(false);
+describe('loginFailureOf', () => {
+  it.each([
+    [{ reason: FailReason.NETWORK_ERROR }, 'offline'],
+    [{ reason: FailReason.REQUEST_TIMEOUT }, 'offline'],
+    [
+      {
+        reason: FailReason.ERROR_FETCH_FROM_ID,
+        extra: { reason: FailReason.NETWORK_ERROR },
+      },
+      'offline',
+    ],
+    [{ reason: FailReason.ERROR_FETCH_FROM_ID }, 'serverError'],
+    [{ reason: FailReason.ERROR_ROAMING }, 'serverError'],
+    [{ reason: FailReason.INVALID_RESPONSE }, 'serverError'],
+    [{ reason: FailReason.UNEXPECTED_STATUS }, 'serverError'],
+    [{ reason: FailReason.OPERATION_FAILED }, 'serverError'],
+    [{ reason: FailReason.NOT_LOGGED_IN }, 'serverError'],
+    [{ reason: FailReason.BAD_CREDENTIAL }, 'badCredential'],
+    [{ reason: FailReason.DEVICE_NOT_TRUSTED }, 'untrustedDevice'],
+    [{ reason: FailReason.NO_CREDENTIAL }, 'failed'],
+    [{ reason: FailReason.ERROR_SETTING_COOKIES }, 'failed'],
+    [new Error('bug'), 'failed'],
+  ])('tells %j apart as %s', (error, failure) => {
+    expect(loginFailureOf(error)).toBe(failure);
+  });
+});
+
+describe('isRefusal', () => {
+  it('is true only for a login refused for its credentials', () => {
+    expect(isRefusal('badCredential')).toBe(true);
+    expect(isRefusal('untrustedDevice')).toBe(true);
+    expect(isRefusal('serverError')).toBe(false);
+    expect(isRefusal('offline')).toBe(false);
+    expect(isRefusal('failed')).toBe(false);
+    expect(isRefusal(null)).toBe(false);
   });
 });
 

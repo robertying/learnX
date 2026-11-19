@@ -20,7 +20,7 @@ import { queryClient } from 'data/queryClient';
 import { clearAccountData } from 'data/accountData';
 import { userQuery } from 'data/queries';
 import type { UserData } from 'data/userData';
-import { errorReason, isBadCredential, isNetworkError } from 'helpers/errors';
+import { errorReason, loginFailureOf } from 'helpers/errors';
 import env from 'helpers/env';
 import { isMockUser } from 'helpers/mock';
 import { retry } from 'helpers/retry';
@@ -90,7 +90,7 @@ export async function login({
       loggingIn: false,
       loggedIn: false,
       error: FailReason.NO_CREDENTIAL,
-      failure: 'rejected',
+      failure: 'failed',
     });
     return;
   }
@@ -104,8 +104,10 @@ export async function login({
   const previousOwner = getDataOwner() ?? getCredentials()?.username ?? null;
 
   try {
-    // Without a connection, another try right away won't help (and a timeout
-    // takes long); the offline retries in useReLogin take over instead.
+    // Only a server error is tried again right away. Without a connection,
+    // another try won't help (and a timeout takes long): the timed retries in
+    // useReLogin take over. A refused login would only be refused again, and
+    // more wrong passwords may lock the account.
     await retry(
       () =>
         resume
@@ -113,9 +115,7 @@ export async function login({
           : // Without a given login, signs in with the saved one.
             loginWithFingerPrint(given),
       {
-        // A wrong password won't become right, and repeated tries may lock
-        // the account.
-        shouldRetry: error => !isNetworkError(error) && !isBadCredential(error),
+        shouldRetry: error => loginFailureOf(error) === 'serverError',
       },
     );
 
@@ -135,10 +135,6 @@ export async function login({
     loggedIn();
     void queryClient.prefetchQuery(userQuery);
   } catch (err) {
-    // Offline when the last attempt got no answer; anything else (a wrong
-    // password, or the server failing the login) is the server turning it
-    // down.
-    const offline = isNetworkError(err);
     useAuthStore.setState({
       loggingIn: false,
       loggedIn: false,
@@ -146,7 +142,7 @@ export async function login({
       // What the SSO server answered (thu-learn-lib's `extra`), which the
       // login screen shows in debug and E2E builds.
       errorDetail: __DEV__ || env.TEST_LOGIN ? errorDetail(err) : null,
-      failure: offline ? 'offline' : 'rejected',
+      failure: loginFailureOf(err),
     });
   }
 }

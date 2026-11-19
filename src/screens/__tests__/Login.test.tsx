@@ -223,6 +223,23 @@ describe('Login', () => {
       expect(loginWithOfflineMode).toHaveBeenCalledTimes(1);
     });
 
+    it.each(['badCredential', 'untrustedDevice'] as const)(
+      'offers only to go offline after a %s login, which retrying would repeat',
+      async failure => {
+        useAuthStore.setState({ failure });
+        await setup();
+        expect(screen.queryByText('Log In with Saved Account')).toBeNull();
+        expect(screen.getByText('Continue Offline')).toBeTruthy();
+      },
+    );
+
+    it('leaves out a saved password the server turned down', async () => {
+      useAuthStore.setState({ failure: 'badCredential' });
+      await setup();
+      expect(screen.getByTestId('login-username').props.value).toBe('student');
+      expect(screen.getByTestId('login-password').props.value).toBe('');
+    });
+
     it('offers network emulation only to a mock account', async () => {
       await setup();
       expect(screen.queryByTestId('login-mock-network')).toBeNull();
@@ -255,13 +272,13 @@ describe('Login', () => {
       useAuthStore.setState({
         loggingIn: false,
         error: FailReason.BAD_CREDENTIAL,
-        failure: 'rejected',
+        failure: 'badCredential',
       }),
     );
     // Debug builds (tests run as one) start with the reason and the server's
     // answer.
     expect(toast).toHaveBeenLastCalledWith(
-      `${FailReason.BAD_CREDENTIAL}\n${t('loginFailed')}`,
+      `${FailReason.BAD_CREDENTIAL}\n${t('loginFailedBadCredential')}`,
       'error',
       { duration: 8000 },
     );
@@ -271,12 +288,12 @@ describe('Login', () => {
       useAuthStore.setState({
         loggingIn: false,
         error: FailReason.ERROR_FETCH_FROM_ID,
-        errorDetail: 'Two-factor page',
-        failure: 'rejected',
+        errorDetail: 'Maintenance page',
+        failure: 'serverError',
       }),
     );
     expect(toast).toHaveBeenLastCalledWith(
-      `${FailReason.ERROR_FETCH_FROM_ID}: Two-factor page\n${t('loginFailed')}`,
+      `${FailReason.ERROR_FETCH_FROM_ID}: Maintenance page\n${t('loginFailedServerError')}`,
       'error',
       { duration: 8000 },
     );
@@ -298,20 +315,22 @@ describe('Login', () => {
           useAuthStore.setState({
             loggingIn: false,
             error: FailReason.BAD_CREDENTIAL,
-            failure: 'rejected',
+            failure: 'badCredential',
           }),
         );
       };
       await fail();
-      expect(toast).toHaveBeenLastCalledWith(t('loginFailed'), 'error', {
-        duration: 8000,
-      });
+      expect(toast).toHaveBeenLastCalledWith(
+        t('loginFailedBadCredential'),
+        'error',
+        { duration: 8000 },
+      );
 
       // The login check flow (.maestro/01-login-check.yaml) reads it.
       (env as { TEST_LOGIN?: boolean }).TEST_LOGIN = true;
       await fail();
       expect(toast).toHaveBeenLastCalledWith(
-        `${FailReason.BAD_CREDENTIAL}\n${t('loginFailed')}`,
+        `${FailReason.BAD_CREDENTIAL}\n${t('loginFailedBadCredential')}`,
         'error',
         { duration: 8000 },
       );

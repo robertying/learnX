@@ -169,6 +169,14 @@ describe('mockSource', () => {
     });
   });
 
+  it('refuses logins from a device the SSO server no longer trusts, and only logins', async () => {
+    setMockNetworkConfig({ failure: 'untrustedDevice' });
+    await expect(mockSource.getSemesterIdList()).resolves.toBeDefined();
+    await expect(mockSource.login()).rejects.toEqual({
+      reason: FailReason.DEVICE_NOT_TRUSTED,
+    });
+  });
+
   it('times out', async () => {
     jest.useFakeTimers();
     setMockNetworkConfig({ failure: 'timeout' });

@@ -3,7 +3,8 @@ import { AppState } from 'react-native';
 import dayjs from 'dayjs';
 import * as Updates from 'expo-updates';
 import { t } from 'helpers/i18n';
-import { loginRetryDelay } from 'helpers/loginRetry';
+import { isRefusal } from 'helpers/errors';
+import { loginRetryDelay, retriesOnTimer } from 'helpers/loginRetry';
 import { toast } from 'components/Toast';
 import { hasSavedLogin } from 'data/credentials';
 import { getAuth, useAuthStore } from 'data/auth';
@@ -43,13 +44,19 @@ export const resetReLogin = () => {
   lastActive.launched = false;
 };
 
-/** Whether a login may start on its own now. */
+/**
+ * Whether a login may start on its own now. Never after the saved login was
+ * refused (a wrong password, a device no longer trusted): it would only be
+ * refused again, and more wrong passwords may lock the account. The user logs
+ * in again from the lists' status row instead.
+ */
 const canLogIn = () => {
   const auth = getAuth();
   return (
     !auth.ssoInProgress &&
     !auth.loggingIn &&
     !auth.reloginRequested &&
+    !isRefusal(auth.failure) &&
     hasSavedLogin()
   );
 };
@@ -58,8 +65,8 @@ const canLogIn = () => {
  * Logs in again with the saved credentials: at launch, when the app comes
  * back after at least 10 minutes in the background (keeping the session if
  * the server still accepts it), and when it comes back without a session.
- * While the server can't be reached, it also retries on its own, less and
- * less often, as long as the app is open. This is the one place that handles
+ * While the server can't be reached or answers with errors, it also retries
+ * on its own, less and less often, as long as the app is open. This is the one place that handles
  * coming back to the app: an over-the-air update first (`services/ota`), which
  * when one starts leaves the rest to the reloaded app, then the session, then,
  * with a session, the waiting server actions, then the open lists that are out
@@ -132,24 +139,26 @@ const useReLogin = () => {
   }, []);
 
   const retry = useEffectEvent(() => {
-    if (canLogIn() && getAuth().failure === 'offline') {
+    if (canLogIn() && retriesOnTimer(getAuth().failure)) {
       retries.current += 1;
       void login({});
     }
   });
 
-  // A login the server turned down isn't retried on a timer: the same
-  // password would only fail again, and might get the account locked.
+  // Only a login that got no answer or a server error is retried on a timer
+  // (helpers/loginRetry), each on its own schedule from the start.
+  const retrying = useRef(failure);
   useEffect(() => {
-    if (failure === null) {
+    if (failure !== retrying.current) {
+      retrying.current = failure;
       retries.current = 0;
     }
-    if (failure !== 'offline' || loggingIn || reloginRequested || !active) {
+    if (!retriesOnTimer(failure) || loggingIn || reloginRequested || !active) {
       return;
     }
     const timer = setTimeout(
       retry,
-      loginRetryDelay(retries.current) * retryDelayScale(),
+      loginRetryDelay(retries.current, failure) * retryDelayScale(),
     );
     return () => clearTimeout(timer);
   }, [failure, loggingIn, reloginRequested, active]);

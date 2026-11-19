@@ -1,14 +1,17 @@
 import { FailReason } from '@robertying/thu-learn-lib';
 import { create } from 'zustand';
-import { isBadCredential } from 'helpers/errors';
+import {
+  apiReason,
+  isRefusedLogin,
+  loginFailureOf,
+  type LoginFailure,
+} from 'helpers/errors';
 
 /**
- * Why the saved login didn't go through: `offline` when the school's server
- * can't be reached at all, `rejected` when it answered but the login failed
- * (a changed password, a revoked device, a server error). The app keeps
- * showing the saved data either way.
+ * Why the saved login didn't go through (`helpers/errors`). The app keeps
+ * showing the saved data whatever it is.
  */
-export type LoginFailure = 'offline' | 'rejected';
+export type { LoginFailure };
 
 /**
  * Login progress. Not persisted: it only means something while the app runs.
@@ -79,17 +82,18 @@ export const noteSession = (sessionToken: string) => {
 /**
  * Notes a failed request (`dataSource` calls it for every one). thu-learn-lib
  * logs in again by itself when a request finds the session expired; when that
- * login is turned down for a wrong password (changed since it was saved), the
- * session is gone, so the lists say the login failed and offer to log in again,
- * as after a failed login at launch. Other errors are the request's own.
+ * login is refused (a password changed since it was saved, or a device the SSO
+ * server no longer trusts), the session is gone, so the lists say why and offer
+ * to log in again, as after a refused login at launch. Other errors are the
+ * request's own.
  */
 export const noteRequestError = (error: unknown) => {
-  if (isBadCredential(error) && getAuth().loggedIn) {
+  if (isRefusedLogin(error) && getAuth().loggedIn) {
     useAuthStore.setState({
       loggedIn: false,
       loggingIn: false,
-      error: FailReason.BAD_CREDENTIAL,
-      failure: 'rejected',
+      error: apiReason(error) ?? FailReason.BAD_CREDENTIAL,
+      failure: loginFailureOf(error),
     });
   }
 };

@@ -1,7 +1,7 @@
 import { AppState } from 'react-native';
 import { act, renderHook } from '@testing-library/react-native';
 import * as Updates from 'expo-updates';
-import { initialAuth, useAuthStore } from 'data/auth';
+import { initialAuth, useAuthStore, type LoginFailure } from 'data/auth';
 import { saveCredentials, clearCredentials } from 'data/credentials';
 import { login } from 'data/login';
 import { queryClient } from 'data/queryClient';
@@ -48,7 +48,7 @@ const launch = async () => {
   jest.mocked(login).mockClear();
 };
 
-const fail = (failure: 'offline' | 'rejected') =>
+const fail = (failure: LoginFailure) =>
   act(() => {
     useAuthStore.setState({ loggingIn: false, loggedIn: false, failure });
   });
@@ -108,9 +108,50 @@ describe('useReLogin', () => {
     expect(login).toHaveBeenCalledTimes(1);
   });
 
-  it('does not retry a login the server turned down', async () => {
+  it('retries a server error after 1, 5 and 15 minutes, then every 30', async () => {
     await launch();
-    await fail('rejected');
+    const retriesAfter = async (minutes: number) => {
+      await fail('serverError');
+      await act(() => jest.advanceTimersByTime(minutes * 60 * 1000 - 1000));
+      expect(login).not.toHaveBeenCalled();
+      await act(() => jest.advanceTimersByTime(1000));
+      expect(login).toHaveBeenCalledTimes(1);
+      jest.mocked(login).mockClear();
+      await act(() => useAuthStore.setState({ loggingIn: true }));
+    };
+    await retriesAfter(1);
+    await retriesAfter(5);
+    await retriesAfter(15);
+    await retriesAfter(30);
+    await retriesAfter(30);
+  });
+
+  it('starts over at the shortest wait when the failure changes', async () => {
+    await launch();
+    await fail('serverError');
+    await act(() => jest.advanceTimersByTime(60 * 1000));
+    await act(() => useAuthStore.setState({ loggingIn: true }));
+    jest.mocked(login).mockClear();
+    await fail('offline');
+    await act(() => jest.advanceTimersByTime(30 * 1000));
+    expect(login).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(['badCredential', 'untrustedDevice'] as const)(
+    'never retries a %s login by itself, also not on coming back',
+    async failure => {
+      await launch();
+      await fail(failure);
+      await act(() => jest.advanceTimersByTime(60 * 60 * 1000));
+      await leaveAndComeBack(2);
+      await leaveAndComeBack(11);
+      expect(login).not.toHaveBeenCalled();
+    },
+  );
+
+  it('does not retry a failed login on a timer', async () => {
+    await launch();
+    await fail('failed');
     await act(() => jest.advanceTimersByTime(60 * 60 * 1000));
     expect(login).not.toHaveBeenCalled();
   });
@@ -203,14 +244,14 @@ describe('useReLogin', () => {
   it("doesn't send the waiting actions without a session", async () => {
     await launch();
     jest.mocked(flushServerActionsWithin).mockClear();
-    await fail('rejected');
+    await fail('failed');
     await leaveAndComeBack(2);
     expect(flushServerActionsWithin).not.toHaveBeenCalled();
   });
 
   it('tries again quietly after a short break without a session', async () => {
     await launch();
-    await fail('rejected');
+    await fail('failed');
     await leaveAndComeBack(2);
     expect(login).toHaveBeenCalledWith({});
   });

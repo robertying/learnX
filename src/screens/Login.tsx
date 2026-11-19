@@ -13,7 +13,12 @@ import Switch from 'components/Switch';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { toast } from 'components/Toast';
 import { setSetting, useSettings } from 'data/settings';
-import { setSSOInProgress, useAuthStore, useLoggingIn } from 'data/auth';
+import {
+  getAuth,
+  setSSOInProgress,
+  useAuthStore,
+  useLoggingIn,
+} from 'data/auth';
 import { login, loginWithOfflineMode } from 'data/login';
 import { useCredentials } from 'data/credentials';
 import { clearLoginCookies } from 'data/source';
@@ -27,6 +32,8 @@ import env from 'helpers/env';
 import { getLiveLogin } from 'services/launchOptions';
 import { isMockUser, MOCK_FINGER_PRINT } from 'helpers/mock';
 import { t } from 'helpers/i18n';
+import { isRefusal } from 'helpers/errors';
+import { loginFailedMessage } from 'helpers/loginFailureText';
 import { mockNetworkTitle } from 'navigation/options';
 import { noteLoginShown } from 'hooks/useLaunchSheet';
 import useKeepAboveKeyboard from 'hooks/useKeepAboveKeyboard';
@@ -45,8 +52,17 @@ const Login: React.FC<Props> = ({ navigation }) => {
   const savedFingerPrint = savedCredentials?.fingerPrint;
 
   const [username, setUsername] = useState(savedUsername ?? '');
-  const [password, setPassword] = useState(savedPassword ?? '');
+  // A saved password the server turned down isn't filled in: the new one is
+  // typed instead.
+  const [password, setPassword] = useState(() =>
+    getAuth().failure === 'badCredential' ? '' : (savedPassword ?? ''),
+  );
 
+  // Logging in with the saved login again only helps when it wasn't refused:
+  // a wrong password would be refused again (and more of them may lock the
+  // account), and a device the server no longer trusts needs SSO's second
+  // factor, which Log In goes through.
+  const refused = useAuthStore(state => isRefusal(state.failure));
   const hasCredential = savedUsername && savedPassword && savedFingerPrint;
 
   // The whole field group, not just the focused field, clears the keyboard.
@@ -65,7 +81,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
     () =>
       useAuthStore.subscribe((state, previous) => {
         if (previous.loggingIn && !state.loggingIn && state.error) {
-          const message = t('loginFailed');
+          const message = loginFailedMessage(state.failure);
           toast(
             // Debug and E2E builds say first why it failed and what the
             // server answered: the toast shows three lines, which the
@@ -193,9 +209,11 @@ const Login: React.FC<Props> = ({ navigation }) => {
             />
             {hasCredential && (
               <>
-                <TextButton onPress={handleRetryLogin}>
-                  {t('retryLogin')}
-                </TextButton>
+                {!refused && (
+                  <TextButton onPress={handleRetryLogin}>
+                    {t('retryLogin')}
+                  </TextButton>
+                )}
                 <TextButton onPress={handleLoginWithOfflineMode}>
                   {t('offlineMode')}
                 </TextButton>
