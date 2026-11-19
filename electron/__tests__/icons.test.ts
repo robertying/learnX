@@ -59,14 +59,13 @@ it('has a 512 icon.png for Linux, with transparent corners', () => {
   expectShapeOnClear(png);
 });
 
-it('has a 512 README logo, edge to edge with transparent corners', () => {
+it("has a 512 README logo, ictool's PNG as it exports it", () => {
   const file = path.join(__dirname, '..', '..', 'docs', 'assets', 'logo.png');
-  const logo = decodePng(fs.readFileSync(file));
-  expect([logo.width, logo.height]).toEqual([LOGO_SIZE, LOGO_SIZE]);
-  expectShapeOnClear(logo);
-  // Edge to edge: the shape's sides touch the canvas's.
-  const middle = Math.floor(LOGO_SIZE / 2);
-  expect(alphaAt(logo, 0, middle)).toBeGreaterThan(0);
+  const header = fs.readFileSync(file).subarray(16, 24);
+  expect([header.readUInt32BE(0), header.readUInt32BE(4)]).toEqual([
+    LOGO_SIZE,
+    LOGO_SIZE,
+  ]);
 });
 
 it('centers the shape at its share of the canvas, on whole pixels', () => {

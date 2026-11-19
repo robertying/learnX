@@ -3,9 +3,9 @@
 // (ios/learnX/AppIcon.icon): icon.ico for Windows and icon.png (512) for
 // Linux, from which electron-builder makes the hicolor sizes; the window and
 // the tray use them too (main.ts, system.ts). It also makes the README's logo
-// (docs/assets/logo.png), edge to edge at 4x its 128 display size and
-// lossless, so it stays sharp on every screen. The outputs are committed:
-// only a Mac with Xcode can make them.
+// (docs/assets/logo.png): ictool's export as it is, at 4x its 128 display
+// size and lossless, so it stays sharp on every screen. The outputs are
+// committed: only a Mac with Xcode can make them.
 //
 //   node electron/icons/generate.ts
 //
@@ -383,11 +383,8 @@ const main = () => {
     throw new Error('Making the icons needs a Mac (sips and its sRGB profile)');
   }
   const work = fs.mkdtempSync(path.join(os.tmpdir(), 'learnx-icons-'));
-  /** The icon at `size`, its shape exported at `fraction` and centered. */
-  const render = (size: number, fraction: number) => {
-    const shape = shapeSize(size, fraction);
-    const file = path.join(work, `${shape}.png`);
-    const srgb = path.join(work, `${shape}-srgb.png`);
+  /** ictool's own export of the shape at `size`, to `file`. */
+  const exportShape = (size: number, file: string) => {
     execFileSync(tool, [
       source,
       '--export-image',
@@ -398,12 +395,19 @@ const main = () => {
       '--rendition',
       'Default',
       '--width',
-      String(shape),
+      String(size),
       '--height',
-      String(shape),
+      String(size),
       '--scale',
       '1',
     ]);
+  };
+  /** The icon at `size`, its shape exported at `fraction` and centered. */
+  const render = (size: number, fraction: number) => {
+    const shape = shapeSize(size, fraction);
+    const file = path.join(work, `${shape}.png`);
+    const srgb = path.join(work, `${shape}-srgb.png`);
+    exportShape(shape, file);
     execFileSync('sips', ['--matchTo', SRGB_PROFILE, file, '--out', srgb], {
       stdio: 'ignore',
     });
@@ -420,7 +424,7 @@ const main = () => {
       encodePng(render(PNG_SIZE, PNG_SHAPE_FRACTION)),
     );
     const logo = path.join(root, 'docs', 'assets', 'logo.png');
-    fs.writeFileSync(logo, encodePng(render(LOGO_SIZE, ICO_SHAPE_FRACTION)));
+    exportShape(LOGO_SIZE, logo);
     console.log(`Wrote ${path.join(out, 'icon.ico')}, icon.png and ${logo}`);
   } finally {
     fs.rmSync(work, { recursive: true, force: true });
