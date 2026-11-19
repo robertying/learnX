@@ -383,6 +383,47 @@ describe('failed requests', () => {
   });
 });
 
+describe('the session token', () => {
+  beforeEach(() => {
+    useCredentialsStore.setState({
+      credentials: {
+        username: '2020000000',
+        password: 'p',
+        fingerPrint: 'fp',
+        fingerGenPrint: '',
+        fingerGenPrint3: '',
+      },
+    });
+  });
+  afterEach(() => {
+    useCredentialsStore.setState({ credentials: null });
+    useAuthStore.setState(initialAuth);
+    endSession();
+  });
+
+  it('is noted once a login settles, failed or not', async () => {
+    await loginWithFingerPrint();
+    expect(getAuth().sessionToken).toBe('token');
+
+    useAuthStore.setState(initialAuth);
+    mockLogin.mockRejectedValueOnce(new Error('offline'));
+    await expect(loginWithFingerPrint()).rejects.toThrow('offline');
+    expect(getAuth().sessionToken).toBe('token');
+  });
+
+  it("is noted after every call, catching thu-learn-lib's own logins", async () => {
+    await dataSource.ensureSession();
+    expect(getAuth().sessionToken).toBe('token');
+
+    useAuthStore.setState(initialAuth);
+    mockMarkNotificationRead.mockRejectedValueOnce(new Error('offline'));
+    await expect(
+      dataSource.markNoticeRead('https://learn.tsinghua.edu.cn/n'),
+    ).rejects.toThrow('offline');
+    expect(getAuth().sessionToken).toBe('token');
+  });
+});
+
 it("isn't taken for a promise, having no then", async () => {
   await expect(Promise.resolve(dataSource)).resolves.toBe(dataSource);
 });

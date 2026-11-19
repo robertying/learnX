@@ -38,11 +38,13 @@ const contentLanguage = (content: string) =>
  * Wraps course-site HTML (notice and assignment descriptions) into a page for
  * AutoHeightWebView, without margins of its own: the page sits in a form row,
  * which has them. KaTeX (~300 KB) is only inlined when the content has
- * math, and dark mode is a small script (`preval/darkMode.js`).
+ * math, and dark mode is a small script (`preval/darkMode.js`). Links and
+ * sources on Web Learning get `csrfToken`, the session's by default.
  */
 export const getWebViewTemplate = (
   content: string,
   colors?: WebViewTemplateColors,
+  csrfToken = dataSource.getCSRFToken(),
 ) => {
   const math = hasMath(content);
   const dark = colors?.dark ?? false;
@@ -117,7 +119,7 @@ export const getWebViewTemplate = (
         document.addEventListener('DOMContentLoaded', function () {
           addCSRFTokenToLinks(
             document,
-            ${JSON.stringify(dataSource.getCSRFToken())},
+            ${JSON.stringify(csrfToken)},
             document.baseURI
           );
         });
