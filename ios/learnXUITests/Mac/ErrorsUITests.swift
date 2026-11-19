@@ -25,12 +25,13 @@ final class ErrorsUITests: LearnXUITestCase {
     try waitFor(id: "sync-status-relogin")
   }
 
-  /// A server that doesn't answer: the login times out after 20 s (the mock server's timeout) and counts as offline,
-  /// then tries again on its own after 30 s (`helpers/loginRetry`), reconnecting meanwhile.
+  /// A server that doesn't answer: the login times out (the mock server's 20 s timeout) and counts as offline, then
+  /// tries again on its own (`helpers/loginRetry`'s 30 s), reconnecting meanwhile. Both waits are scaled down to a
+  /// fifth (`quickTimeout`).
   func testTimeout() throws {
-    try launch(["mockFailure": "timeout"])
-    try waitFor(text: "T_syncStatusOffline", timeout: 40)
-    try waitFor(text: "T_syncStatusReconnecting", timeout: 45)
+    try launch(["mockFailure": "quickTimeout"])
+    try waitFor(text: "T_syncStatusOffline", timeout: 15)
+    try waitFor(text: "T_syncStatusReconnecting", timeout: 15)
   }
 
   /// A password changed on the website while the app is open: the session runs out after the launch login, and the

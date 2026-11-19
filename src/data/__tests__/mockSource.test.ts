@@ -177,6 +177,20 @@ describe('mockSource', () => {
     expect(await pending).toEqual({ reason: FailReason.REQUEST_TIMEOUT });
   });
 
+  it('times out after a fifth of the time with quickTimeout', async () => {
+    jest.useFakeTimers();
+    setMockNetworkConfig({ failure: 'quickTimeout' });
+    let settled = false;
+    const pending = mockSource
+      .getSemesterIdList()
+      .catch((e: unknown) => e)
+      .finally(() => (settled = true));
+    await jest.advanceTimersByTimeAsync(MOCK_TIMEOUT_MS / 5 - 1);
+    expect(settled).toBe(false);
+    await jest.advanceTimersByTimeAsync(1);
+    expect(await pending).toEqual({ reason: FailReason.REQUEST_TIMEOUT });
+  });
+
   it('rejects logins only when asked to', async () => {
     await expect(mockSource.login()).resolves.toBeUndefined();
     setMockNetworkConfig({ loginFails: true });

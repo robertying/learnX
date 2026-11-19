@@ -9,6 +9,7 @@ import { hasSavedLogin } from 'data/credentials';
 import { getAuth, useAuthStore } from 'data/auth';
 import { login } from 'data/login';
 import { queryClient } from 'data/queryClient';
+import { retryDelayScale } from 'data/source';
 import { flushServerActionsWithin } from 'data/serverActions';
 import { updateOnReturn } from 'services/ota';
 
@@ -146,7 +147,10 @@ const useReLogin = () => {
     if (failure !== 'offline' || loggingIn || reloginRequested || !active) {
       return;
     }
-    const timer = setTimeout(retry, loginRetryDelay(retries.current));
+    const timer = setTimeout(
+      retry,
+      loginRetryDelay(retries.current) * retryDelayScale(),
+    );
     return () => clearTimeout(timer);
   }, [failure, loggingIn, reloginRequested, active]);
 };

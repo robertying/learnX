@@ -3,7 +3,7 @@ import mime from 'mime';
 import CookieManager from '@preeternal/react-native-cookie-manager';
 import { noteRequestError, noteSession } from 'data/auth';
 import { getCredentials, loadCredentials } from 'data/credentials';
-import { mockSource } from 'data/mockSource';
+import { mockSource, mockTimeScale } from 'data/mockSource';
 import Urls from 'constants/Urls';
 import { isLearnUrl } from 'helpers/learnUrl';
 import { isMockUser } from 'helpers/mock';
@@ -80,6 +80,12 @@ const isMockSession = () =>
   sessionServer
     ? sessionServer === 'mock'
     : isMockUser(getCredentials()?.username);
+
+/**
+ * What the app's quiet login retries are scaled by: the mock server's
+ * `mockTimeScale` in a mock session, else 1.
+ */
+export const retryDelayScale = () => (isMockSession() ? mockTimeScale() : 1);
 
 /** Forgets which server the session used, e.g. on logout. */
 export const endSession = () => {

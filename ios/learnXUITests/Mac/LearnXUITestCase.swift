@@ -50,13 +50,14 @@ class LearnXUITestCase: XCTestCase {
     XCTAssertTrue(started.waitForExistence(timeout: 60), "the app didn't start")
     closeOtherWindows()
     if element(id: "tab-notices").exists {
+      // The run's own login after the first test: no What's New, so no wait for it.
+      if Self.loggedOutOnce {
+        return
+      }
       // An account an older version left logged in first gets What's New, which covers the sidebar.
       let whatsNew = element(id: "whats-new-continue")
       if whatsNew.waitForExistence(timeout: 2) {
         whatsNew.click()
-      }
-      if Self.loggedOutOnce {
-        return
       }
       try logOut()
     }
