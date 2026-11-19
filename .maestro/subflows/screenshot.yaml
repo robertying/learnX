@@ -5,6 +5,13 @@ appId: ${APP_ID}
 ---
 - waitForAnimationToEnd:
     timeout: 5000
+# Scroll bars stay a while after a list scrolls or loads, longer than an
+# animation lasts: wait 3 s for them to fade, for something that never shows.
+- extendedWaitUntil:
+    visible:
+      id: never-shown
+    timeout: 3000
+    optional: true
 - runFlow:
     when:
       true: ${!DUO_POSTURE}

@@ -17,6 +17,11 @@ name: Google Play screenshots on an Android phone
     file: ../subflows/tab.yaml
     env:
       TAB: 'tab-notices'
+# Plain, for the Play feature graphic
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 02-notices-plain
 # The filter menu open. Android's swipe actions run on release and leave
 # nothing showing, so no card shows its actions.
 - tapOn: '${T_filter}'
