@@ -28,6 +28,7 @@ An Electron app around a React Native Web build of the app's own code, drawn wit
 - `language.ts`: Windows and Linux have no per-app language, so Settings › Language there picks one, applied as Chromium's `--lang` at the next launch, which everything else follows.
 - `notifications.ts` posts notifications and reminders while learnX runs. Windows and Linux have no subtitle, so the course goes in the body. There are no action buttons.
 - `fileShell.ts` does what reaches outside learnX's folders, always through a dialog the user answers or the system. A file that would run as a program opens only after a confirmation. Downloads are served to the file preview from an origin of their own (`app://files/`), so a downloaded file never reaches the app's page or its bridge, and only PDFs and pictures are served.
+- `pdfViewer.ts` gives Chromium's PDF viewer `color-scheme: dark` as its frames load. The viewer is always dark but declares no color scheme, so Chromium draws its scroll bars light otherwise.
 - Tests are in `__tests__`, run by Jest's `tooling` project, which loads the main process as Node does (`babel/jest-node-esm.js`) and the preloads as they ship (`jest/stripTypes.js`).
 
 ## Packaging and updates
