@@ -413,15 +413,20 @@ def build_apple(platform)
   UI.user_error!("The build wrote no source map to #{map}") unless File.exist?(map)
   UI.success("Source map: #{map}")
 
-  # gym zips every dSYM in the archive next to the .ipa / .pkg.
-  dsyms = lane_context[SharedValues::DSYM_OUTPUT_PATH].to_s
-  UI.user_error!("The build wrote no dSYMs") unless File.exist?(dsyms)
+  # Every dSYM in the archive (the app's and its extensions'), zipped next to
+  # the .ipa / .pkg. Not gym's learnX.app.dSYM.zip: gym writes none for a
+  # Mac Catalyst export.
+  archived = Dir[File.join(archive.to_s, "dSYMs/*.dSYM")]
+  UI.user_error!("The archive #{archive} has no dSYMs") if archived.empty?
+  dsyms = dsym_zip_path(platform)
+  FileUtils.rm_f(dsyms)
+  sh("ditto", "-c", "-k", File.join(archive.to_s, "dSYMs"), dsyms)
   upload_dsyms(platform, dsyms)
   path
 end
 
 def dsym_zip_path(platform)
-  File.join(out_dir, platform, "learnX.app.dSYM.zip")
+  File.join(out_dir, platform, "learnX-dSYMs.zip")
 end
 
 # Firebase's upload-symbols, from the firebase-ios-sdk Swift package that the
