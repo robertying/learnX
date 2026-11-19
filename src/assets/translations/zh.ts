@@ -45,7 +45,7 @@ const zh: typeof en = {
   loginFailedServerError: '登录失败，学校服务器出错，请稍后再试。',
   loginFailedBadCredential: '登录失败，用户名或密码错误。',
   loginFailedUntrustedDevice:
-    '登录失败，此设备的验证已过期，请重新登录并完成验证。',
+    '登录失败，此设备已不是信任浏览器，请重新登录并完成多因子认证。',
   versionInformation: '版本',
   sourceCode: '源代码',
   website: '官方网站',
@@ -311,7 +311,7 @@ const zh: typeof en = {
   syncStatusLoginFailed: '登录失败',
   syncStatusServerError: '服务器出错',
   syncStatusBadCredential: '密码错误',
-  syncStatusUntrustedDevice: '设备验证已过期',
+  syncStatusUntrustedDevice: '需要多因子认证',
   syncStatusReconnecting: '正在重新连接…',
   syncStatusUpdated: '{time}更新',
   syncStatusLogIn: '登录',
