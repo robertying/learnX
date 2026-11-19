@@ -131,6 +131,14 @@ it('keeps the page on Tsinghua sites and opens other links outside', async () =>
   expect(useAuthStore.getState().ssoInProgress).toBe(true);
 });
 
+it('lets the app log in by itself again once the page is left without a login', async () => {
+  const { unmount } = await renderScreen();
+  expect(useAuthStore.getState().ssoInProgress).toBe(true);
+  await act(() => unmount());
+  expect(useAuthStore.getState().ssoInProgress).toBe(false);
+  expect(login).not.toHaveBeenCalled();
+});
+
 it("fails without the form's device fingerprint", async () => {
   await renderScreen();
   expect(mockProps.onShouldStartLoadWithRequest({ url: ROAMING })).toBe(false);
