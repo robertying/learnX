@@ -19,14 +19,10 @@ appId: ${APP_ID}
     when:
       true: ${maestro.platform != 'ios' || SPLIT == 'true'}
     commands:
-      - repeat:
-          times: 8
-          while:
-            notVisible:
-              id: ${ID}
-          commands:
-            - runFlow:
-                file: swipe-list.yaml
-                env:
-                  LIST: ${LIST}
-                  DIRECTION: UP
+      - runFlow:
+          file: swipe-until-shown.yaml
+          env:
+            LIST: ${LIST}
+            ID: ${ID}
+            TEXT: ''
+            DIRECTION: UP

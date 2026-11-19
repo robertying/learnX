@@ -11,6 +11,7 @@ import {
 } from 'components/Form';
 import { SyncStatusSection, useSyncStatus } from 'components/SyncStatus';
 import { useAssignments, useFiles, useNotices } from 'data/content';
+import { useCourse } from 'data/queries';
 import { getSettings, setSetting } from 'data/settings';
 import { useWeekSchedule } from 'data/schedule';
 import { useUserData } from 'data/userData';
@@ -37,7 +38,7 @@ import useDetailNavigator, {
 } from 'hooks/useDetailNavigator';
 import useItemStepping from 'hooks/useItemStepping';
 import usePendingTarget from 'hooks/usePendingTarget';
-import { useWindowRestoration } from 'hooks/useWindow';
+import { useWindowRestoration, useWindowTitle } from 'hooks/useWindow';
 import { useMinute } from 'hooks/useClock';
 import usePullToRefresh from 'hooks/usePullToRefresh';
 import useRefreshCommand from 'hooks/useRefreshCommand';
@@ -144,6 +145,19 @@ const Today: React.FC<Props> = ({ navigation }) => {
     (row, i, rows) => rows.findIndex(r => sameDetailRoot(r, row)) === i,
   );
   const detailRoot = useDetailRoot();
+  // The window is named after what's open beside Today.
+  const openedAssignment =
+    detailRoot?.name === 'AssignmentDetail'
+      ? assignmentsQuery.assignments.find(a => a.id === detailRoot.id)
+      : undefined;
+  const openedCourse = useCourse(
+    detailRoot?.name === 'CourseDetail' ? (detailRoot.id ?? '') : '',
+  );
+  useWindowTitle(
+    openedAssignment?.title ||
+      openedCourse?.name ||
+      t(detailRoot?.name === 'Schedule' ? 'schedule' : 'today'),
+  );
   // The row whose page is open beside Today shows as selected.
   const opened = (name: keyof DetailStackParams, id?: string) =>
     sameDetailRoot(detailRoot, { name, id });

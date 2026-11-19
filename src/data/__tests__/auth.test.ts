@@ -3,6 +3,7 @@ import {
   getAuth,
   initialAuth,
   noteRequestError,
+  noteSession,
   useAuthStore,
 } from 'data/auth';
 
@@ -30,5 +31,19 @@ describe('noteRequestError', () => {
     useAuthStore.setState(initialAuth);
     noteRequestError({ reason: FailReason.BAD_CREDENTIAL });
     expect(getAuth()).toEqual(initialAuth);
+  });
+});
+
+describe('noteSession', () => {
+  it('keeps the latest token, without an update when it is the same', () => {
+    const listener = jest.fn();
+    const unsubscribe = useAuthStore.subscribe(listener);
+    noteSession('a');
+    noteSession('a');
+    expect(getAuth().sessionToken).toBe('a');
+    expect(listener).toHaveBeenCalledTimes(1);
+    noteSession('b');
+    expect(getAuth().sessionToken).toBe('b');
+    unsubscribe();
   });
 });

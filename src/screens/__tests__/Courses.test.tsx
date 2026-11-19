@@ -26,7 +26,10 @@ jest.mock('data/content', () => ({
   useAssignments: jest.fn(),
   useFiles: jest.fn(),
 }));
-jest.mock('data/queries', () => ({ useCourses: jest.fn() }));
+jest.mock('data/queries', () => ({
+  useCourses: jest.fn(),
+  useFirstLoad: jest.requireActual('data/queries').useFirstLoad,
+}));
 jest.mock('data/login', () => ({ login: jest.fn() }));
 const mockShow = jest.fn();
 jest.mock('hooks/useDetailNavigator', () => ({

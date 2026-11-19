@@ -8,7 +8,10 @@ import useContentList, { type ContentListQuery } from 'hooks/useContentList';
 import { noticeLists } from 'hooks/useFilteredData';
 import usePendingTarget from 'hooks/usePendingTarget';
 
-jest.mock('data/queries', () => ({ useCourseIds: jest.fn(() => []) }));
+jest.mock('data/queries', () => ({
+  useCourseIds: jest.fn(() => []),
+  useFirstLoad: jest.requireActual('data/queries').useFirstLoad,
+}));
 const mockShow = jest.fn();
 jest.mock('hooks/useDetailNavigator', () => ({ useShowDetail: jest.fn() }));
 jest.mock('hooks/usePendingTarget', () => jest.fn());
@@ -83,6 +86,12 @@ it('shows the loading state, not the pull spinner, for a fetch the app starts', 
   const { result } = await render(query({ isPending: true, isFetching: true }));
   expect(result.current.listProps.loading).toBe(true);
   expect(result.current.listProps.refreshing).toBe(false);
+});
+
+it('shows the loading state, not the empty list, while a login is under way', async () => {
+  useAuthStore.setState({ loggingIn: true });
+  const { result } = await render(query({ isPending: true }));
+  expect(result.current.listProps.loading).toBe(true);
 });
 
 it('opens a tapped item in the detail view', async () => {

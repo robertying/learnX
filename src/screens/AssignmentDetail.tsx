@@ -39,6 +39,7 @@ import {
   FormText,
   FormTitle,
 } from 'components/Form';
+import { useWindowTitle } from 'hooks/useWindow';
 
 type Props = MainStackScreenProps<
   AssignmentDetailParamList,
@@ -53,6 +54,7 @@ const AssignmentDetail: React.FC<Props> = ({ route, navigation }) => {
     assignment?.courseName,
     assignment?.courseTeacherName,
   );
+  useWindowTitle(assignment?.title);
 
   if (!assignment) {
     return <NotFound />;

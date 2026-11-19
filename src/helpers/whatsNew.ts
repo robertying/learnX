@@ -94,13 +94,14 @@ export const releases: Release[] = [
         platforms: ['android'],
       },
       {
-        // For the phone and the Mac; the desktop app needn't announce itself.
+        // For phones and tablets only: the Mac and the desktop app are
+        // desktop apps already.
         icon: 'desktop',
         title: 'whatsNew19ElectronTitle',
         body: 'whatsNew19ElectronBody',
         // The website lists the downloads.
         link: Urls.website,
-        platforms: ['ios', 'mac', 'android'],
+        platforms: ['ios', 'android'],
       },
     ],
   },

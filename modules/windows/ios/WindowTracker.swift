@@ -67,6 +67,19 @@ public enum WindowTracker {
     link(for: windowId).flatMap(URL.init(string:)).map(activity(opening:))
   }
 
+  // MARK: Naming windows
+
+  /// Names a window after what it shows: the Mac lists it by this name in the Dock's and the Window menu, and iPadOS
+  /// in App Exposé, where every window would otherwise be called learnX.
+  @MainActor public static func setTitle(
+    _ title: String,
+    for windowId: String,
+    application: UIApplication = .shared
+  ) {
+    let scene = application.connectedScenes.first { $0.session.persistentIdentifier == windowId }
+    scene?.title = title
+  }
+
   // MARK: Opening windows
 
   static func activity(opening url: URL) -> NSUserActivity {
