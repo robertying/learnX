@@ -63,7 +63,7 @@ jobs:
 
       # Catches shell mistakes before a script only runs on main
       - name: Shell scripts
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: shellcheck --version | head -2 && pnpm lint:shell
 
       # Jest's cache holds Babel output, mostly for node_modules. Its key

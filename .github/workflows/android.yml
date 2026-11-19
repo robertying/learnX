@@ -132,6 +132,7 @@ jobs:
       # environment. Runs even if the unit tests failed, so one push shows
       # both, and reuses their Gradle daemon.
       - name: Build release APK
+        id: apk
         if: >-
           !cancelled() && steps.changes.outputs.changed == 'true' &&
           steps.install.outcome == 'success' && steps.gradle.outcome == 'success' &&
@@ -153,7 +154,7 @@ jobs:
       # and are built over it.
       - name: Build update APKs for E2E
         if: >-
-          !cancelled() && env.E2E == 'true'
+          !cancelled() && env.E2E == 'true' && steps.apk.outcome == 'success'
         run: |
           apk=app/build/outputs/apk/github/release/app-github-x86_64-release.apk
           mkdir -p ../build/e2e-apks/updater

@@ -302,12 +302,25 @@ def use_claude?(options)
   !%w[false no 0].include?(options[:claude].to_s.downcase)
 end
 
+# Publishing a draft GitHub release makes its tag on GitHub, so a checkout
+# that hasn't fetched since has no tag for the last release.
+def fetch_tags
+  return if @tags_fetched
+
+  @tags_fetched = true
+  return if Dir.chdir(ROOT) { system("git", "fetch", "-q", "--tags", "origin") }
+
+  UI.important("Couldn't fetch tags from origin, so the last release may be missing: going by the local tags")
+end
+
 # The newest release tag, as the release-notes skill finds it.
 def last_release_tag
+  fetch_tags
   Dir.chdir(ROOT) { `git tag --list 'v*' --sort=-creatordate`.lines.map(&:strip) }.first
 end
 
 def tagged?(version)
+  fetch_tags
   Dir.chdir(ROOT) { system("git rev-parse -q --verify refs/tags/v#{version} > /dev/null") }
 end
 
@@ -343,10 +356,11 @@ def write_notes_with_claude(path)
     Save the file to #{path} instead of the scratchpad. Don't publish or upload anything.
     This runs unattended, so don't stop to ask: make the best call, and list anything unsure in your reply.
   PROMPT
-  # Read-only git and gh, plus writing the notes file.
+  # Read-only git and gh (and fetching tags, as the skill does first), plus
+  # writing the notes file.
   allowed = [
     "Skill", "Read", "Grep", "Glob", "Write", "Edit",
-    "Bash(git log:*)", "Bash(git show:*)", "Bash(git tag:*)", "Bash(git describe:*)", "Bash(git diff:*)",
+    "Bash(git fetch --tags:*)", "Bash(git log:*)", "Bash(git show:*)", "Bash(git tag:*)", "Bash(git describe:*)", "Bash(git diff:*)",
     "Bash(gh release list:*)", "Bash(gh release view:*)",
   ]
   # claude -p waits for stdin when it isn't a terminal, so give it none.
@@ -692,6 +706,12 @@ def latest_json_path
   File.join(android_out_dir, "latest.json")
 end
 
+# R8's mapping for the AAB, which Google Play needs to deobfuscate the
+# crashes and ANRs it reports (Crashlytics gets it from the Gradle plugin).
+def aab_mapping_path
+  File.join(android_out_dir, "learnX-v#{app_version}-mapping.txt")
+end
+
 def build_android
   verify_versions!
   verify_release_env!
@@ -715,6 +735,9 @@ def build_android
   FileUtils.rm_rf(android_out_dir)
   FileUtils.mkdir_p(android_out_dir)
   FileUtils.cp(File.join(ANDROID_APP, "build/outputs/bundle/googlePlayRelease/app-googlePlay-release.aab"), aab_path)
+  mapping = File.join(ANDROID_APP, "build/outputs/mapping/googlePlayRelease/mapping.txt")
+  UI.user_error!("The AAB build wrote no R8 mapping at #{mapping}") unless File.exist?(mapping)
+  FileUtils.cp(mapping, aab_mapping_path)
 
   # APKs for GitHub Releases and the TUNA mirror. The app's updater reads
   # latest.json from the mirror, downloads learnX-<abi>-v<version>.apk and
@@ -735,7 +758,7 @@ def build_android
   map = sourcemap_path("android")
   FileUtils.mkdir_p(File.dirname(map))
   FileUtils.cp(maps.first, map)
-  write_build_record("android", started, [aab_path, *apk_paths, latest_json_path, map])
+  write_build_record("android", started, [aab_path, aab_mapping_path, *apk_paths, latest_json_path, map])
 
   UI.success("Android release files: #{android_out_dir}")
   UI.success("Source map: #{map}")
@@ -759,15 +782,23 @@ def install_android_bundle
   UI.user_error!("bundletool not found: brew install bundletool") unless system("command -v bundletool > /dev/null")
   signing = android_signing
   apks = aab_path.sub(/\.aab\z/, ".apks")
-  sh(
-    "bundletool", "build-apks", "--connected-device", "--overwrite",
-    "--bundle=#{aab_path}", "--output=#{apks}",
-    "--ks=#{File.join(ANDROID_APP, "release.keystore")}",
-    "--ks-key-alias=#{signing["LEARNX_RELEASE_KEY_ALIAS"]}",
-    "--ks-pass=pass:#{signing["LEARNX_RELEASE_STORE_PASSWORD"]}",
-    "--key-pass=pass:#{signing["LEARNX_RELEASE_KEY_PASSWORD"]}",
-    log: false,
-  )
+  # The passwords go in files only this user can read, not in the command
+  # line, which every process on the Mac can see.
+  Dir.mktmpdir do |dir|
+    passwords = %w[STORE KEY].to_h do |name|
+      file = File.join(dir, name.downcase)
+      File.write(file, signing["LEARNX_RELEASE_#{name}_PASSWORD"], perm: 0o600)
+      [name, file]
+    end
+    sh(
+      "bundletool", "build-apks", "--connected-device", "--overwrite",
+      "--bundle=#{aab_path}", "--output=#{apks}",
+      "--ks=#{File.join(ANDROID_APP, "release.keystore")}",
+      "--ks-key-alias=#{signing["LEARNX_RELEASE_KEY_ALIAS"]}",
+      "--ks-pass=file:#{passwords["STORE"]}",
+      "--key-pass=file:#{passwords["KEY"]}",
+    )
+  end
   sh("bundletool", "install-apks", "--apks=#{apks}")
 end
 
@@ -783,9 +814,9 @@ def upload_android(notes, track)
       end
     end
 
-    mapping = File.join(ANDROID_APP, "build/outputs/mapping/release/mapping.txt")
     options = {
       aab: aab_path,
+      mapping: aab_mapping_path,
       package_name: ANDROID_PACKAGE,
       track: track,
       # A draft release: review and roll it out in Play Console.
@@ -797,7 +828,6 @@ def upload_android(notes, track)
       skip_upload_screenshots: true,
       skip_upload_changelogs: notes.nil?,
     }
-    options[:mapping] = mapping if File.exist?(mapping)
     options[:json_key] = play_json_key if play_json_key
     upload_to_play_store(options)
   end
@@ -959,8 +989,10 @@ end
 def upload_electron(platforms)
   tag = "v#{app_version}"
   assets = electron_assets(platforms)
-  draft = sh("gh", "release", "view", tag, "--repo", GITHUB_REPO, "--json", "isDraft", "--jq", ".isDraft", log: false).strip
-  UI.user_error!("#{tag} is published: add Windows and Linux files before publishing, since the TUNA mirror copies a release on its schedule") unless draft == "true"
+  case github_release_state(tag)
+  when :none then UI.user_error!("No #{tag} release on GitHub: run `bundle exec fastlane github_release` (or `release`) first")
+  when :published then UI.user_error!("#{tag} is published: add Windows and Linux files before publishing, since the TUNA mirror copies a release on its schedule")
+  end
 
   sh("gh", "release", "upload", tag, *assets, "--repo", GITHUB_REPO, "--clobber")
 end
@@ -974,9 +1006,21 @@ def github_token
   token
 end
 
+# Whether GitHub has a v<version> release: :none, :draft or :published.
+def github_release_state(tag)
+  out, err, status = Open3.capture3("gh", "release", "view", tag, "--repo", GITHUB_REPO, "--json", "isDraft", "--jq", ".isDraft")
+  return out.strip == "true" ? :draft : :published if status.success?
+  return :none if err.include?("release not found")
+
+  UI.user_error!("Couldn't look up the #{tag} release on GitHub: #{err.strip}")
+end
+
 def publish_github(notes, electron_platforms: nil)
   version = app_version
+  tag = "v#{version}"
   verify_built!("android")
+  state = github_release_state(tag)
+  UI.user_error!("#{tag} is already published on GitHub; a release can't change it") if state == :published
 
   assets = [latest_json_path, *apk_paths]
   assets += electron_assets(electron_platforms) if electron_platforms
@@ -991,16 +1035,34 @@ def publish_github(notes, electron_platforms: nil)
 
   # A draft: check it and publish it on GitHub. The TUNA mirror and the
   # in-app updater only see published releases.
-  set_github_release(
-    repository_name: GITHUB_REPO,
-    api_token: github_token,
-    name: "v#{version}",
-    tag_name: "v#{version}",
-    commitish: last_git_commit[:commit_hash],
-    description: notes ? notes[:github] : "",
-    is_draft: true,
-    upload_assets: assets,
-  )
+  if state == :none
+    set_github_release(
+      repository_name: GITHUB_REPO,
+      api_token: github_token,
+      name: tag,
+      tag_name: tag,
+      commitish: head_commit,
+      description: notes ? notes[:github] : "",
+      is_draft: true,
+      upload_assets: assets,
+    )
+    return
+  end
+
+  # A draft from an earlier run (GitHub would take a second draft of the same
+  # tag): point it at this commit, give it these notes (notes:none keeps its
+  # own) and replace its files of the same names.
+  UI.important("Updating the draft #{tag} release from an earlier run")
+  Dir.mktmpdir do |dir|
+    edit = ["gh", "release", "edit", tag, "--repo", GITHUB_REPO, "--target", head_commit]
+    if notes
+      file = File.join(dir, "notes.md")
+      File.write(file, notes[:github])
+      edit += ["--notes-file", file]
+    end
+    sh(*edit)
+  end
+  sh("gh", "release", "upload", tag, *assets, "--repo", GITHUB_REPO, "--clobber")
 end
 
 # ---------------------------------------------------------------------------

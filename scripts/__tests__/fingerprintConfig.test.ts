@@ -1,5 +1,6 @@
-// fingerprint.config.js's hook: the build number that `pnpm bump` moves isn't
-// part of the native fingerprint, so a bump keeps ota-fingerprint.json valid.
+// fingerprint.config.js's hook: the version and build number that `pnpm bump`
+// moves aren't part of the native fingerprint, so a bump keeps
+// ota-fingerprint.json valid and a JS-only release keeps its runtime version.
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { FileHookTransformFunction } from '@expo/fingerprint';
@@ -34,17 +35,19 @@ const hashed = (filePath: string, text: string, size = 1024) => {
 const bumped = (text: string) =>
   text
     .replace(/(CURRENT_PROJECT_VERSION = )\d+/g, '$19999')
-    .replace(/(versionCode = )\d+\n/, '$19209999\n');
+    .replace(/(MARKETING_VERSION = )[\d.]+/g, '$199.9.9')
+    .replace(/(versionCode = )\d+\n/, '$19209999\n')
+    .replace(/(versionName = )"[\d.]+"\n/, '$1"99.9.9"\n');
 
 it.each(['ios/learnX.xcodeproj/project.pbxproj', 'android/app/build.gradle'])(
-  'hashes %s the same after a build bump',
+  'hashes %s the same after a version bump',
   filePath => {
     const text = readFileSync(join(__dirname, '../..', filePath), 'utf8');
     expect(bumped(text)).not.toBe(text);
     // Small chunks split the build number's lines.
     expect(hashed(filePath, bumped(text), 7)).toBe(hashed(filePath, text));
     expect(hashed(filePath, text)).not.toMatch(
-      /CURRENT_PROJECT_VERSION = \d|versionCode = \d+\n/,
+      /CURRENT_PROJECT_VERSION = \d|MARKETING_VERSION = \d|versionCode = \d+\n|versionName = "/,
     );
   },
 );
@@ -53,9 +56,9 @@ it('keeps the rest of those files', () => {
   expect(
     hashed(
       'android/app/build.gradle',
-      'a\n        versionCode = 9204555\n        versionName = "19.0.0"\n',
+      'a\n        versionCode = 9204555\n        versionName = "19.0.0"\n            versionName = e2eVersion\n',
     ),
-  ).toBe('a\n        versionName = "19.0.0"\n');
+  ).toBe('a\n            versionName = e2eVersion\n');
 });
 
 it('passes other files through as they come', () => {
