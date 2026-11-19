@@ -25,40 +25,6 @@ const toCookie = (c: BridgeCookie): Cookie => ({
   httpOnly: c.httpOnly,
 });
 
-/**
- * Reads a `Set-Cookie` header's name, value and the attributes the app sets
- * (path, domain, Secure, HttpOnly, Expires, Max-Age).
- */
-export const parseSetCookie = (header: string): Cookie => {
-  const [pair = '', ...attributes] = header.split(';');
-  const separator = pair.indexOf('=');
-  const cookie: Cookie = {
-    name: (separator < 0 ? pair : pair.slice(0, separator)).trim(),
-    value: separator < 0 ? '' : pair.slice(separator + 1).trim(),
-  };
-  for (const attribute of attributes) {
-    const [rawKey = '', ...rest] = attribute.split('=');
-    const key = rawKey.trim().toLowerCase();
-    const value = rest.join('=').trim();
-    if (key === 'path') {
-      cookie.path = value;
-    } else if (key === 'domain') {
-      cookie.domain = value;
-    } else if (key === 'secure') {
-      cookie.secure = true;
-    } else if (key === 'httponly') {
-      cookie.httpOnly = true;
-    } else if (key === 'expires') {
-      cookie.expires = new Date(value).toISOString();
-    } else if (key === 'max-age') {
-      cookie.expires = new Date(
-        Date.now() + Number(value) * 1000,
-      ).toISOString();
-    }
-  }
-  return cookie;
-};
-
 const set = async (url: string, cookie: Cookie) => {
   await bridge().cookies.set({
     url,
@@ -78,8 +44,9 @@ const set = async (url: string, cookie: Cookie) => {
 
 /**
  * Stands in for @preeternal/react-native-cookie-manager in the Electron app,
- * on the window session's cookies (one store, as on Android). The iOS store
- * options have no meaning there and are ignored.
+ * on the window session's cookies (one store, as on Android): what the app
+ * calls there (data/source, helpers/webViewCookies). The iOS store options
+ * have no meaning there and are ignored.
  */
 const CookieManager = {
   get: async (url: string) =>
@@ -87,15 +54,8 @@ const CookieManager = {
       (await bridge().cookies.get(url)).map(c => [c.name, toCookie(c)]),
     ),
   set: (url: string, cookie: Cookie) => set(url, cookie),
-  setFromResponse: (url: string, header: string) =>
-    set(url, parseSetCookie(header)),
   clearByName: async (url: string, name: string) => {
     await bridge().cookies.remove(url, name);
-    return true;
-  },
-  flush: () => bridge().cookies.flush(),
-  clearAll: async () => {
-    await bridge().cookies.clearAll();
     return true;
   },
   clearAllStores: async () => {

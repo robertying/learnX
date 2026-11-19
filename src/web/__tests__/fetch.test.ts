@@ -128,11 +128,14 @@ describe('electronFetch', () => {
     expect(bridge.abortFetch).toHaveBeenCalledWith(id);
   });
 
-  it('resolves when a signal is never aborted', async () => {
+  it('resolves when a signal is never aborted, and lets go of the signal', async () => {
+    const { signal } = new AbortController();
+    const remove = jest.spyOn(signal, 'removeEventListener');
     const res = await electronFetch('https://learn.tsinghua.edu.cn/x', {
-      signal: new AbortController().signal,
+      signal,
     });
     expect(res.status).toBe(200);
+    expect(remove).toHaveBeenCalledWith('abort', expect.any(Function));
   });
 
   it('gives each request its own id', async () => {

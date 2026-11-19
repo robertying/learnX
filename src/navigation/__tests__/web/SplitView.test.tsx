@@ -163,3 +163,30 @@ it('darkens the line while the pointer is over the divider', () => {
   });
   expect(line().backgroundColor).toBe(resting);
 });
+
+it('takes the hidden list out of the keyboard and screen readers in full screen', async () => {
+  const FullScreen = () => {
+    const { toggleMaster } = useContext(SplitViewContext);
+    return (
+      <>
+        <Text onPress={() => toggleMaster(false)}>hide</Text>
+        <Text onPress={() => toggleMaster(true)}>show</Text>
+      </>
+    );
+  };
+  render(
+    <SplitViewProvider
+      showDetail
+      initialTab="A"
+      renderDetail={() => <Text>detail</Text>}
+    >
+      <FullScreen />
+    </SplitViewProvider>,
+  );
+  const inert = () => (master() as HTMLElement & { inert: boolean }).inert;
+  expect(inert()).toBe(false);
+  await act(async () => fireEvent.click(screen.getByText('hide')));
+  expect(inert()).toBe(true);
+  await act(async () => fireEvent.click(screen.getByText('show')));
+  expect(inert()).toBe(false);
+});

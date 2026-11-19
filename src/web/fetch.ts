@@ -5,6 +5,29 @@ let nextId = 1;
 const abortError = () => new DOMException('Aborted', 'AbortError');
 
 /**
+ * The request's answer, or an AbortError once `signal` aborts, which also
+ * stops the request in the main process. The listener goes with the request:
+ * a signal can outlive many requests, and each listener would keep its own.
+ */
+const untilAborted = <T>(
+  pending: Promise<T>,
+  signal: AbortSignal,
+  id: number,
+): Promise<T> => {
+  let onAbort = () => {};
+  const aborted = new Promise<never>((_, reject) => {
+    onAbort = () => {
+      bridge().abortFetch(id);
+      reject(abortError());
+    };
+  });
+  signal.addEventListener('abort', onAbort, { once: true });
+  return Promise.race([pending, aborted]).finally(() =>
+    signal.removeEventListener('abort', onAbort),
+  );
+};
+
+/**
  * `fetch` for http(s) URLs in the Electron app: each request runs in the main
  * process (electron/net.ts), where the browser's cross-origin rules don't
  * apply and the cookies stay in the window's session. thu-learn-lib reads
@@ -47,21 +70,7 @@ export const electronFetch = async (
       // What a browser's fetch rejects with when the network fails.
       throw new TypeError('Network request failed');
     });
-  const res = await (signal
-    ? Promise.race([
-        pending,
-        new Promise<never>((_, reject) =>
-          signal.addEventListener(
-            'abort',
-            () => {
-              bridge().abortFetch(id);
-              reject(abortError());
-            },
-            { once: true },
-          ),
-        ),
-      ])
-    : pending);
+  const res = await (signal ? untilAborted(pending, signal, id) : pending);
 
   const nullBody = [101, 204, 205, 304].includes(res.status);
   const response = new Response(nullBody ? null : res.body, {

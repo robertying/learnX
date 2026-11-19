@@ -161,3 +161,16 @@ it('says when a dropped file couldn’t be copied', async () => {
   await waitFor(() => expect(onDropFailed).toHaveBeenCalled());
   expect(onDrop).not.toHaveBeenCalled();
 });
+
+it('leaves nothing in the cache when a copy is cut short', async () => {
+  const { onDropFailed, target } = renderTarget();
+  jest.mocked(bridge.files.append).mockRejectedValue(new Error('Disk full'));
+  await act(async () => {
+    fireEvent.drop(target, drag([pdf()]));
+  });
+  await waitFor(() => expect(onDropFailed).toHaveBeenCalled());
+  expect(bridge.files.sync).toHaveBeenCalledWith(
+    'remove',
+    expect.stringMatching(/^file:\/\/\/data\/Caches\/picked\/[^/]+$/),
+  );
+});

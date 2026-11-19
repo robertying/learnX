@@ -30,12 +30,6 @@ const useFocusStyles = makeStaticStyles({
 });
 
 /**
- * The Electron app's root: Fluent's theme for the system's light or dark
- * appearance, around the app (index.web.js), so every Fluent component, and
- * the menus and dialogs Fluent draws in portals, takes the same tokens.
- * Alerts show here too (`web/alert`).
- */
-/**
  * Keeps Tabster, Fluent's keyboard and focus manager, for as long as the app
  * runs. Fluent creates it for the controls that use it and disposes of it
  * when the last of them unmounts. A dialog's focus trap hides the rest of
@@ -49,6 +43,12 @@ const KeepTabster = () => {
   return null;
 };
 
+/**
+ * The Electron app's root: Fluent's theme for the system's light or dark
+ * appearance, around the app (index.web.js), so every Fluent component, and
+ * the menus and dialogs Fluent draws in portals, takes the same tokens.
+ * Alerts show here too (`web/alert`).
+ */
 const FluentRoot = ({ children }: PropsWithChildren) => {
   const { dark } = useTheme();
   useFocusStyles();

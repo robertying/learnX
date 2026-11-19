@@ -1,4 +1,4 @@
-import CookieManager, { parseSetCookie } from 'web/packages/cookieManager';
+import CookieManager from 'web/packages/cookieManager';
 import type { Bridge } from 'web/bridge';
 import {
   installBridge,
@@ -12,37 +12,6 @@ beforeEach(() => {
 });
 
 afterEach(uninstallBridge);
-
-describe('parseSetCookie', () => {
-  it('reads the name, value and attributes', () => {
-    expect(
-      parseSetCookie(
-        'JSESSIONID=abc=d; Path=/; Domain=.tsinghua.edu.cn; Secure; HttpOnly; Expires=Wed, 01 Jan 2031 00:00:00 GMT',
-      ),
-    ).toEqual({
-      name: 'JSESSIONID',
-      value: 'abc=d',
-      path: '/',
-      domain: '.tsinghua.edu.cn',
-      secure: true,
-      httpOnly: true,
-      expires: '2031-01-01T00:00:00.000Z',
-    });
-  });
-
-  it('reads an empty value and Max-Age', () => {
-    jest.useFakeTimers({ now: new Date('2026-11-16T00:00:00Z') });
-    expect(parseSetCookie('a=; Max-Age=60; SameSite=Lax')).toEqual({
-      name: 'a',
-      value: '',
-      expires: '2026-11-16T00:01:00.000Z',
-    });
-  });
-
-  it('takes a lone name as an empty cookie', () => {
-    expect(parseSetCookie('flag')).toEqual({ name: 'flag', value: '' });
-  });
-});
 
 it('gets the cookies for a URL by name', async () => {
   jest.mocked(bridge.cookies.get).mockResolvedValue([
@@ -74,7 +43,7 @@ it('gets the cookies for a URL by name', async () => {
   );
 });
 
-it('sets a cookie, also from a Set-Cookie header', async () => {
+it('sets a cookie', async () => {
   expect(
     await CookieManager.set('https://learn.tsinghua.edu.cn', {
       name: 'a',
@@ -91,20 +60,13 @@ it('sets a cookie, also from a Set-Cookie header', async () => {
     }),
   );
 
-  await CookieManager.setFromResponse(
-    'https://id.tsinghua.edu.cn',
-    'JSESSIONID=; path=/; HttpOnly',
-  );
-  expect(bridge.cookies.set).toHaveBeenLastCalledWith({
-    url: 'https://id.tsinghua.edu.cn',
-    name: 'JSESSIONID',
-    value: '',
-    path: '/',
-    domain: undefined,
-    secure: undefined,
-    httpOnly: true,
-    expirationDate: undefined,
+  await CookieManager.set('https://learn.tsinghua.edu.cn', {
+    name: 'b',
+    value: '2',
   });
+  expect(bridge.cookies.set).toHaveBeenLastCalledWith(
+    expect.objectContaining({ name: 'b', expirationDate: undefined }),
+  );
 });
 
 it('clears one cookie, or all of them', async () => {
@@ -115,9 +77,6 @@ it('clears one cookie, or all of them', async () => {
     'https://id.tsinghua.edu.cn',
     'a',
   );
-  expect(await CookieManager.clearAll()).toBe(true);
   expect(await CookieManager.clearAllStores()).toBe(true);
-  expect(bridge.cookies.clearAll).toHaveBeenCalledTimes(2);
-  await CookieManager.flush();
-  expect(bridge.cookies.flush).toHaveBeenCalled();
+  expect(bridge.cookies.clearAll).toHaveBeenCalledTimes(1);
 });
