@@ -1,4 +1,4 @@
-// What patches/expo-widgets@58.0.28.patch changes in ExpoWidgets.podspec:
+// What patches/expo-widgets@58.0.29.patch changes in ExpoWidgets.podspec:
 // the resource script phase names its files through PODS_TARGET_SRCROOT
 // instead of the folder the podspec was read from, so the spec's checksum in
 // ios/Podfile.lock is the same in every checkout.

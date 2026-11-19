@@ -4,7 +4,7 @@ import UIKit
 
 @testable internal import ExpoWidgets
 
-/// What patches/expo-widgets@58.0.28.patch adds to widget layouts on iOS: a `ViewThatFitsView` node (SwiftUI's
+/// What patches/expo-widgets@58.0.29.patch adds to widget layouts on iOS: a `ViewThatFitsView` node (SwiftUI's
 /// ViewThatFits) and the extension's locale in a layout's environment. Nodes are rendered by their type name, as a
 /// widget's layout is, and compared as images with what they should show.
 @MainActor

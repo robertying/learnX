@@ -16,8 +16,8 @@ const DISMISS_MS = 3000;
 const updateDirectory = () => new Directory(Paths.cache, UPDATE_DIR);
 
 /**
- * Deletes a downloaded update, which an install ended by the app closing
- * leaves behind.
+ * Deletes a downloaded update. An install that updated the app ended it before
+ * `installUpdate` could, so the next launch does (`watchUpdates`).
  */
 export const clearDownloadedUpdate = () => {
   try {
