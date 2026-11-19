@@ -52,6 +52,7 @@ class LearnXUITestCase: XCTestCase {
   func logIn() throws {
     let started = element(idMatching: "welcome-continue|login-username|tab-notices")
     XCTAssertTrue(started.waitForExistence(timeout: 60), "the app didn't start")
+    closeOtherWindows()
     if element(id: "tab-notices").exists {
       // An account an older version left logged in first gets What's New, which covers the sidebar.
       let whatsNew = element(id: "whats-new-continue")
@@ -94,6 +95,19 @@ class LearnXUITestCase: XCTestCase {
       notNow.click()
     }
     try waitFor(id: "tab-notices")
+  }
+
+  /// Closes every window but one with its close button. A window left open (`WindowsUITests`, or a run stopped
+  /// midway) comes back at the next launch, and its sidebar would match the tests' queries twice.
+  func closeOtherWindows() {
+    for _ in 0..<5 where windows.count > 1 {
+      app.typeKey(.escape, modifierFlags: [])
+      let close = windows.element(boundBy: 0).buttons["_XCUI:CloseWindow"]
+      if !close.waitForExistence(timeout: 2) {
+        return
+      }
+      close.click()
+    }
   }
 
   func logOut() throws {
@@ -181,6 +195,16 @@ class LearnXUITestCase: XCTestCase {
     field.typeText(text)
   }
 
+  /// Opens `url` as a click on a link elsewhere does, through AppKit's NSWorkspace (which a Mac Catalyst test can
+  /// only reach at run time). Launch Services gives it to the learnX the tests just built. Neither
+  /// XCUIApplication.open(_:) nor UIApplication.open(_:) delivers it on Mac Catalyst.
+  func openInWorkspace(_ url: URL) throws {
+    let workspace = try XCTUnwrap(NSClassFromString("NSWorkspace") as? NSObject.Type)
+      .perform(NSSelectorFromString("sharedWorkspace")).takeUnretainedValue()
+    // Returns a BOOL, not an object: leave it unread.
+    _ = workspace.perform(NSSelectorFromString("openURL:"), with: url)
+  }
+
   // MARK: - Values
 
   /// A value from `scripts/e2e/e2e-env.mjs`: a translation (`T_<key>`) or mock text (`MOCK_*`), as Maestro takes it: a
@@ -225,6 +249,9 @@ class LearnXUITestCase: XCTestCase {
   }
 
   // MARK: - Queries
+
+  /// The app's windows, one per scene: each scene's window has another inside it, which `app.windows` also finds.
+  var windows: XCUIElementQuery { app.children(matching: .window) }
 
   func element(id: String) -> XCUIElement {
     app.descendants(matching: .any)[id]

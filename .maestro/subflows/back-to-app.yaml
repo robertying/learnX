@@ -1,0 +1,13 @@
+# Back to learnX from a system app (calendar-app.yaml, reminders-app.yaml),
+# as it was, and on the iPhone Duo opened again as far as it was
+# (DUO_POSTURE).
+appId: ${APP_ID}
+---
+- launchApp:
+    stopApp: false
+- runFlow:
+    when:
+      true: ${!!DUO_POSTURE}
+    file: fold.yaml
+    env:
+      POSTURE: ${DUO_POSTURE}

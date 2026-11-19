@@ -125,9 +125,16 @@ fi
 # paged tab bar subflows/tab.yaml handles; other devices skip that check.
 # IOS_MAJOR is that simulator's iOS major version (0 on Android): before iOS 26
 # the flows go back with the back button instead of a swipe (subflows/back.yaml).
+# DUO_POSTURE is E2E_DUO_POSTURE (halfFold or flat), which
+# scripts/e2e/e2e-devices.sh sets while the iPhone Duo is open and the app is
+# on its inner display; empty otherwise. SPLIT=true where the app has the
+# split layout, with a detail column beside the list: on an iPad and on the
+# open Duo.
 ipad=false
 ios_major=0
+duo_posture=
 if [ "$platform" = ios ]; then
+  duo_posture="${E2E_DUO_POSTURE:-}"
   # Each device's line, after its runtime's "-- iOS <version> --" heading.
   booted="$(xcrun simctl list devices booted 2>/dev/null |
     awk '/^-- iOS / { version = $3; next } { print version " " $0 }' || true)"
@@ -143,6 +150,11 @@ if [ "$platform" = ios ]; then
     echo "Couldn't read the simulator's iOS version" >&2
     exit 1
   fi
+fi
+
+split=false
+if [ "$ipad" = true ] || [ -n "$duo_posture" ]; then
+  split=true
 fi
 
 # The patched Maestro (scripts/e2e/maestro) sends its touches and typing through
@@ -253,6 +265,8 @@ test_args=(
   -e STATE_CLEARED="${E2E_STATE_CLEARED:-}"
   -e APP_CLOCK="${E2E_CLOCK:-}"
   -e IPAD="$ipad"
+  -e DUO_POSTURE="$duo_posture"
+  -e SPLIT="$split"
   -e IOS_MAJOR="$ios_major"
   -e CALENDAR_URL="$calendar_url"
   -e SHOTS_DIR="${shots_dir:+shots}"

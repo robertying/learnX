@@ -9,11 +9,13 @@ appId: ${APP_ID}
       notVisible:
         id: ${ID}
     commands:
-      - swipe:
-          from:
-            id: ${LIST}
-          direction: DOWN
-- swipe:
-    from:
-      id: ${LIST}
-    direction: DOWN
+      - runFlow:
+          file: swipe-list.yaml
+          env:
+            LIST: ${LIST}
+            DIRECTION: DOWN
+- runFlow:
+    file: swipe-list.yaml
+    env:
+      LIST: ${LIST}
+      DIRECTION: DOWN

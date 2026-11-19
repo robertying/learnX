@@ -3,6 +3,16 @@
 # Calendar in front.
 appId: com.apple.mobilecal
 ---
+# On the open iPhone Duo the system app's tree lacks its right side (the
+# inner-display fix, scripts/e2e/sim-ax-frame.m, doesn't take in the system apps),
+# where its buttons are, so the Duo is closed first; back-to-app.yaml opens
+# it again.
+- runFlow:
+    when:
+      true: ${!!DUO_POSTURE}
+    file: fold.yaml
+    env:
+      POSTURE: closed
 - launchApp:
     stopApp: true
 - runFlow:

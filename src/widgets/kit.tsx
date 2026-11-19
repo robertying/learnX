@@ -12,7 +12,7 @@ import {
   multilineTextAlignment,
 } from '@expo/ui/swift-ui/modifiers';
 import type { WidgetEnvironment } from 'expo-widgets';
-import type { ReactElement, ReactNode } from 'react';
+import type { ComponentProps, ReactElement, ReactNode } from 'react';
 import { PlatformColor } from 'react-native';
 
 type TextStyle = 'caption' | 'footnote' | 'subheadline';
@@ -55,8 +55,8 @@ export function widgetKit() {
     style: 'secondary',
   });
 
-  // SwiftUI's ViewThatFits and a live countdown, from our expo-widgets patch
-  // (@expo/ui has neither). The layout makes their elements itself.
+  // SwiftUI's ViewThatFits, from our expo-widgets patch (@expo/ui doesn't have
+  // it). The layout makes its element itself.
   /** Shows the first of its children that fits, here in height. */
   const ViewThatFits = (props: {
     axes: 'vertical';
@@ -70,23 +70,31 @@ export function widgetKit() {
     }) as unknown as ReactElement;
   /**
    * The time left until `date`, kept live, in days, hours and minutes (no
-   * seconds): at most two of them, or `maxFieldCount`. It takes the width of
-   * its value at render time, so the text before it in a row shortens first.
+   * seconds): at most two of them, or `maxFieldCount` (our @expo/ui patch).
+   * In a Text, it's part of that text. On its own, it takes the width of the
+   * widest value it will show, so the text before it in a row shortens first.
+   * A function, not a component: a Text only takes Text elements as its parts.
    */
-  const Countdown = (props: {
-    date: Date;
+  const countdown = ({
+    date,
+    maxFieldCount,
+    modifiers,
+  }: {
+    date: number;
     maxFieldCount?: number;
-    modifiers: unknown[];
-  }) =>
-    ({
-      type: 'CountdownView',
-      key: null,
-      props,
-    }) as unknown as ReactElement;
+    modifiers?: ComponentProps<typeof Text>['modifiers'];
+  }) => (
+    <Text
+      date={new Date(date)}
+      dateStyle="countdown"
+      maxFieldCount={maxFieldCount}
+      modifiers={modifiers}
+    />
+  );
 
   return {
     ViewThatFits,
-    Countdown,
+    countdown,
     secondary,
     background: containerBackground(
       PlatformColor('systemBackground'),
@@ -169,7 +177,7 @@ export function widgetKit() {
       courseName?: string;
       due: Due;
       textStyle: TextStyle;
-      color: unknown;
+      color: ReturnType<typeof foregroundStyle>;
     }) => (
       <HStack spacing={0}>
         {title ? (
@@ -202,15 +210,15 @@ export function widgetKit() {
             {' · '}
           </Text>
         ) : null}
-        <Countdown
-          date={new Date(due.deadline)}
-          modifiers={[
+        {countdown({
+          date: due.deadline,
+          modifiers: [
             font({ textStyle }),
             color,
             lineLimit(1),
             layoutPriority(1),
-          ]}
-        />
+          ],
+        })}
       </HStack>
     ),
 

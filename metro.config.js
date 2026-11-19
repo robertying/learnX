@@ -65,6 +65,9 @@ const otherTopLevelFolders = new RegExp(
 // Native build outputs inside the local modules and installed packages.
 const nativeBuildOutputs =
   /[\\/](?:android|ios)[\\/](?:build|\.cxx|\.gradle|\.kotlin|Pods)(?:[\\/]|$)/;
+// Tools' caches (Jest's, jest.config.js), thousands of files Metro would
+// otherwise crawl.
+const toolCaches = /[\\/]node_modules[\\/]\.cache[\\/]/;
 
 /** @type {ReturnType<typeof getDefaultConfig>} */
 const config = {
@@ -76,6 +79,7 @@ const config = {
       defaultConfig.resolver.blockList ?? [],
       otherTopLevelFolders,
       nativeBuildOutputs,
+      toolCaches,
     ].flat(),
     resolveRequest: (context, moduleName, platform) => {
       const alias = platform === 'web' ? webAliases[moduleName] : undefined;

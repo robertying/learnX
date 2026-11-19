@@ -4,7 +4,6 @@ import {
   accessibilityLabel,
   font,
   foregroundStyle,
-  layoutPriority,
   lineLimit,
   widgetURL,
 } from '@expo/ui/swift-ui/modifiers';
@@ -61,12 +60,9 @@ function DeadlinesWidget(
         {next ? (
           <Text modifiers={[lineLimit(1)]}>{next.courseName}</Text>
         ) : null}
-        {next ? (
-          <kit.Countdown
-            date={new Date(next.deadline)}
-            modifiers={[lineLimit(1)]}
-          />
-        ) : null}
+        {next
+          ? kit.countdown({ date: next.deadline, modifiers: [lineLimit(1)] })
+          : null}
       </VStack>
     );
   }
@@ -119,30 +115,20 @@ function DeadlinesWidget(
         <Text modifiers={[...titleFont, lineLimit(1)]}>{item.title}</Text>
         {small ? (
           // Too narrow for the full countdown and the course: the time left in
-          // its largest unit, then the course, which shortens.
-          <HStack spacing={0}>
-            <kit.Countdown
-              date={new Date(item.deadline)}
-              maxFieldCount={1}
-              modifiers={[
-                font({ textStyle: 'caption' }),
-                kit.dueColor(item, now),
-                lineLimit(1),
-                layoutPriority(1),
-              ]}
-            />
+          // its largest unit, then the course, in one Text so the course is
+          // what's cut.
+          <Text modifiers={[font({ textStyle: 'caption' }), lineLimit(1)]}>
+            {kit.countdown({
+              date: item.deadline,
+              maxFieldCount: 1,
+              modifiers: [kit.dueColor(item, now)],
+            })}
             <Text
-              modifiers={[
-                font({ textStyle: 'caption' }),
-                kit.secondary,
-                lineLimit(1),
-                accessibilityLabel(item.courseName),
-              ]}
+              modifiers={[kit.secondary, accessibilityLabel(item.courseName)]}
             >
               {` · ${item.courseName}`}
             </Text>
-            <Spacer />
-          </HStack>
+          </Text>
         ) : (
           kit.dueLine({
             courseName: item.courseName,

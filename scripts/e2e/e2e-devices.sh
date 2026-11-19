@@ -11,8 +11,9 @@
 #   ipad-windowed   every flow on an iPad set to Windowed Apps, in the
 #                   app's default window
 #   duo-folded      every flow on the iPhone Duo, closed (outer display)
-#   duo-half-open   the posture flows on the iPhone Duo, half open (90°)
-#   duo-open        the posture flows on the iPhone Duo, fully open (180°)
+#   duo-half-open   every flow on the iPhone Duo, half open (90°)
+#   duo-open        every flow on the iPhone Duo, fully open (180°), where
+#                   the inner display has the split layout
 #   fold-folded     every flow on the Android foldable, folded
 #   fold-unfolded   every flow on the Android foldable, unfolded (the tablet
 #                   layout: split views and a side rail)
@@ -99,25 +100,6 @@ shots() {
 }
 
 log() { printf '\n==> %s\n' "$*"; }
-
-# Run a command, killing it after $1 seconds (simctl io screenshot can hang).
-with_timeout() {
-  local secs="$1"
-  shift
-  "$@" &
-  local pid=$!
-  local waited=0
-  while kill -0 "$pid" 2>/dev/null; do
-    if [ "$waited" -ge "$secs" ]; then
-      kill "$pid" 2>/dev/null || true
-      wait "$pid" 2>/dev/null || true
-      return 124
-    fi
-    sleep 1
-    waited=$((waited + 1))
-  done
-  wait "$pid"
-}
 
 booted_count() {
   local sims emulators
@@ -227,64 +209,16 @@ set_hinge() {
   fi
 }
 
-app_running() {
-  # Not piped into grep -q: it stops reading at the match, and with pipefail
-  # launchctl's SIGPIPE would fail the check.
-  local list
-  list="$(xcrun simctl spawn "$1" launchctl list 2>/dev/null)" || return 1
-  grep -q "UIKitApplication:$ios_app_id" <<<"$list"
-}
-
 # Every flow, on simulator $1 in orientation $2, then the UI tests
 # (ios/learnXUITests/iOS) when $4 is 1: on the iPhone and the iPad, the
-# devices they're for (they set the orientation themselves).
+# devices they're for (they set the orientation themselves). E2E_DUO_POSTURE
+# tells the flows the iPhone Duo is open, and how far (scripts/e2e/e2e.sh).
 run_ios_suite() {
   local udid="$1" orientation="$2" out="$3" ui="${4:-0}"
   MAESTRO_DEVICE="$udid" E2E_ORIENTATION="$orientation" E2E_UI_TESTS="$ui" \
     E2E_SCREENSHOTS="$(shots "$out")" \
     E2E_UI_RESULT="$out/ui.xcresult" scripts/e2e/e2e.sh ios \
     --format junit --output "$out/report.xml" --test-output-dir "$out"
-}
-
-# Log in on the closed Duo, then run each posture flow: it opens its screen
-# while closed (iOS asks before opening a link, in a prompt Maestro can't see
-# and taps by position on the outer display) and opens the Duo to $2. Saves the inner display after each.
-run_duo_postures() {
-  local udid="$1" posture="$2" out="$3" flow name status=0
-  set_hinge "$udid" closed || return 1
-  # A fresh install first where the login subflow doesn't make one itself.
-  if [ -f .maestro/02-reset.yaml ]; then
-    MAESTRO_DEVICE="$udid" scripts/e2e/e2e.sh ios --test-output-dir "$out/reset" \
-      .maestro/02-reset.yaml || return 1
-  fi
-  MAESTRO_DEVICE="$udid" scripts/e2e/e2e.sh ios --test-output-dir "$out/login" \
-    .maestro/subflows/login.yaml || return 1
-  hinge_moved="$udid"
-  for flow in .maestro/postures/*.yaml; do
-    name="$(basename "$flow" .yaml)"
-    log "$name"
-    if ! MAESTRO_DEVICE="$udid" scripts/e2e/e2e.sh ios -e OPEN_POSTURE="$posture" \
-      --test-output-dir "$out/$name" "$flow"; then
-      status=1
-    fi
-    # Display 3 is the inner display (1 is the outer one).
-    with_timeout 30 xcrun simctl io "$udid" screenshot --display=3 \
-      "$out/$name.png" >/dev/null 2>&1 ||
-      echo "screenshot of $name failed" >&2
-    if ! app_running "$udid"; then
-      echo "learnX stopped running after $name" >&2
-      return 1
-    fi
-  done
-  set_hinge "$udid" closed || return 1
-  # A failed flow can leave the system's "Open in learnX?" prompt up, which
-  # Maestro can't see; restart the simulator so the next run starts clean.
-  if [ "$status" != 0 ]; then
-    xcrun simctl shutdown "$udid" || true
-    xcrun simctl boot "$udid" || return 1
-    xcrun simctl bootstatus "$udid" >/dev/null || return 1
-  fi
-  return "$status"
 }
 
 # --- Android -----------------------------------------------------------------
@@ -385,11 +319,13 @@ run_profile() {
     ;;
   duo-half-open)
     use_sim "$duo" E2E_DUO || return 1
-    run_duo_postures "$device" halfFold "$out"
+    set_hinge "$device" halfFold || return 1
+    E2E_DUO_POSTURE=halfFold run_ios_suite "$device" PORTRAIT "$out"
     ;;
   duo-open)
     use_sim "$duo" E2E_DUO || return 1
-    run_duo_postures "$device" flat "$out"
+    set_hinge "$device" flat || return 1
+    E2E_DUO_POSTURE=flat run_ios_suite "$device" PORTRAIT "$out"
     ;;
   fold-folded)
     use_emulator "$avd" E2E_AVD || return 1
