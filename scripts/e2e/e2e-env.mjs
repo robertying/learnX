@@ -107,6 +107,8 @@ const mock = {
     a => a.attachment.name,
   ),
   MOCK_FILE: both('mockFiles', file),
+  // Its course's row in Settings › Downloads is downloads-course-<this>.
+  MOCK_FILE_COURSE_ID: escape(item(zhMock.mockFiles, file).courseId),
   MOCK_IMAGE_FILE: both('mockFiles', imageFile),
   MOCK_OTHER_FILE: both('mockFiles', otherFile),
   MOCK_SEARCH_TERM: searchTerm,
