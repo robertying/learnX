@@ -1,11 +1,15 @@
 import { AppState, Platform } from 'react-native';
 import * as Calendar from 'expo-calendar';
 import { act, renderHook } from '@testing-library/react-native';
-import { getAndRequestPermission } from 'services/calendar/calendars';
+import {
+  getAndRequestPermission,
+  onAccessAnswered,
+} from 'services/calendar/calendars';
 import useCalendarAccess from 'hooks/useCalendarAccess';
 
 jest.mock('services/calendar/calendars', () => ({
   getAndRequestPermission: jest.fn(async () => true),
+  onAccessAnswered: jest.fn(() => () => {}),
 }));
 
 const response = (status: string, canAskAgain = true) =>
@@ -37,6 +41,27 @@ it("leaves Reminders unknown on Android, and can ask again when it's allowed", a
   await act(async () => {});
   expect(result.current.calendar).toBe('undetermined');
   expect(result.current.reminders).toBeNull();
+});
+
+it('checks again after access is asked for elsewhere, until unmounted', async () => {
+  // Turning a sync on asks from outside the hook; a Mac's dialog never sends
+  // the app to the background.
+  const stop = jest.fn();
+  jest.mocked(onAccessAnswered).mockReturnValueOnce(stop);
+  jest
+    .mocked(Calendar.getCalendarPermissions)
+    .mockResolvedValue(response('undetermined'));
+  const { result, unmount } = await renderHook(() => useCalendarAccess());
+  await act(async () => {});
+  expect(result.current.calendar).toBe('undetermined');
+  jest
+    .mocked(Calendar.getCalendarPermissions)
+    .mockResolvedValue(response('granted'));
+  const answered = jest.mocked(onAccessAnswered).mock.calls[0][0];
+  await act(async () => answered());
+  expect(result.current.calendar).toBe('granted');
+  await unmount();
+  expect(stop).toHaveBeenCalled();
 });
 
 it('asks, then checks again', async () => {

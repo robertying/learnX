@@ -46,10 +46,32 @@ const permissions = {
   },
 } as const;
 
+const accessListeners = new Set<() => void>();
+
+/**
+ * Calls `listener` after each answer to a request for calendar or Reminders
+ * access, wherever in the app it was asked, so what shows the access doesn't
+ * wait for the app to come back to the front: a Mac's dialog doesn't make it
+ * leave. Returns a function that stops it.
+ */
+export const onAccessAnswered = (listener: () => void) => {
+  accessListeners.add(listener);
+  return () => {
+    accessListeners.delete(listener);
+  };
+};
+
 /** Whether learnX may use the calendars or Reminders, asking if it may not. */
-export const getAndRequestPermission = async (type: 'calendar' | 'reminder') =>
-  (await hasPermission(type)) ||
-  (await permissions[type].request()).status === 'granted';
+export const getAndRequestPermission = async (
+  type: 'calendar' | 'reminder',
+) => {
+  if (await hasPermission(type)) {
+    return true;
+  }
+  const { status } = await permissions[type].request();
+  accessListeners.forEach(listener => listener());
+  return status === 'granted';
+};
 
 /** Whether learnX may use the calendars or Reminders now, without asking. */
 export const hasPermission = async (type: 'calendar' | 'reminder') =>

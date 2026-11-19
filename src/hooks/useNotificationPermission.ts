@@ -4,6 +4,7 @@ import {
   canScheduleExactAlarms,
   getNotificationPermission,
   NotificationPermission,
+  onPermissionAnswered,
   requestExactAlarms,
   requestNotificationPermission,
 } from 'services/notifications';
@@ -11,7 +12,8 @@ import {
 /**
  * The notification permission and whether reminders can be exact (Android
  * 12 and later), checked again when the app comes back from the system
- * settings, and ways to ask for them.
+ * settings and after each request for the permission, and ways to ask for
+ * them.
  */
 const useNotificationPermission = () => {
   const [permission, setPermission] = useState<NotificationPermission | null>(
@@ -30,7 +32,12 @@ const useNotificationPermission = () => {
         check();
       }
     });
-    return () => sub.remove();
+    // Also after it's asked for elsewhere, e.g. by Setup.
+    const stop = onPermissionAnswered(check);
+    return () => {
+      sub.remove();
+      stop();
+    };
   }, []);
 
   /** Asks if needed; resolves to whether notifications can be shown. */
