@@ -6,15 +6,15 @@ Once you're set up, the code conventions and architecture are in [AGENTS.md](AGE
 
 ## What you need
 
-| Tool                 | Version                                                                                  | Notes                                                                                                                        |
-| -------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Node.js              | `.node-version` (`engines` in `package.json` is the minimum)                             | Any version manager works, but Xcode and Gradle must find `node` too (see [Troubleshooting](#troubleshooting)).              |
-| pnpm                 | Any recent pnpm                                                                          | pnpm switches itself to the version in `packageManager`. Recent Node doesn't ship Corepack: use `npm i -g pnpm` or Homebrew. |
-| macOS + Xcode        | Latest stable Xcode                                                                      | Only for iOS, iPadOS and Mac. Install an iOS simulator runtime from Xcode › Settings › Components.                           |
-| Ruby + Bundler       | `.ruby-version`, from Homebrew                                                           | Only for iOS and Mac. CocoaPods (locked in `Gemfile.lock`) runs through Bundler.                                             |
-| Android Studio + SDK | The SDK Platform, Build-Tools, NDK and CMake versions in `ext` in `android/build.gradle` | Only for Android.                                                                                                            |
-| JDK                  | 17 or newer to run Gradle                                                                | Android Studio's bundled JDK works. The build compiles with a JDK 17 toolchain, which Gradle downloads if missing.           |
-| Electron             | Downloaded by `pnpm electron`                                                            | Only for the Windows and Linux app. Nothing else to install; a Mac dev run also needs Xcode.                                 |
+| Tool                 | Version                                                                                  | Notes                                                                                                                          |
+| -------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Node.js              | `.node-version` (`engines` in `package.json` is the minimum)                             | Any version manager works, but Xcode and Gradle must find `node` too (see [Troubleshooting](#troubleshooting)).                |
+| pnpm                 | Any recent pnpm                                                                          | pnpm switches itself to the version in `packageManager`. Recent Node doesn't ship Corepack: use `npm i -g pnpm` or Homebrew.   |
+| macOS + Xcode        | Latest stable Xcode                                                                      | Only for iOS, iPadOS and Mac. Install an iOS simulator runtime from Xcode › Settings › Components.                             |
+| Ruby + Bundler       | `.ruby-version`, from Homebrew                                                           | For iOS and Mac, where CocoaPods (locked in `Gemfile.lock`) runs through Bundler. `pnpm check` needs Ruby itself, not Bundler. |
+| Android Studio + SDK | The SDK Platform, Build-Tools, NDK and CMake versions in `ext` in `android/build.gradle` | Only for Android.                                                                                                              |
+| JDK                  | 17 or newer to run Gradle                                                                | Android Studio's bundled JDK works. The build compiles with a JDK 17 toolchain, which Gradle downloads if missing.             |
+| Electron             | Downloaded by `pnpm electron`                                                            | Only for the Windows and Linux app. Nothing else to install; a Mac dev run also needs Xcode.                                   |
 
 Use a simulator or emulator at least as new as the oldest OS the app supports (in the README).
 
@@ -167,11 +167,11 @@ Mock data details, and how to add to it, are in [src/data/AGENTS.md](src/data/AG
 Every required pull request check must pass. The JavaScript ones (`.github/workflows/js.yml`) run these:
 
 ```sh
-pnpm check                              # typecheck, lint, format check, over-the-air runtime check, Jest with coverage, ShellCheck
+pnpm check                              # the checks package.json lists under check, as JS / Checks runs them
 scripts/checks/check-release-bundle.sh  # the Android and iOS release JS bundles
 ```
 
-`pnpm check` (see `package.json` for its parts) needs neither `.env` nor any native setup, so you can run it anywhere Node runs (ShellCheck comes from your package manager, for example `brew install shellcheck`); run `pnpm format` to fix formatting. The bundle check needs a `.env` with the mock login and takes a couple of minutes. Lint is strict about a few project rules: Chinese text belongs in `src/assets/translations`, and an intentionally unawaited promise is marked with `void`.
+`pnpm check` needs neither `.env` nor any native setup, only ShellCheck (from your package manager, for example `brew install shellcheck`) and Ruby, for the release lanes' tests (plain minitest, which comes with Ruby, so no `bundle install`); run `pnpm format` to fix formatting. The bundle check needs a `.env` with the mock login and takes a couple of minutes. Lint is strict about a few project rules: Chinese text belongs in `src/assets/translations`, and an intentionally unawaited promise is marked with `void`.
 
 End-to-end flows use [Maestro](https://docs.maestro.dev) against a Release build with the mock login: install it with `scripts/e2e/e2e-build.sh ios <simulator udid>` or `scripts/e2e/e2e-build.sh android <emulator serial>`, then run `pnpm e2e:ios` or `pnpm e2e:android`. See [.maestro/AGENTS.md](.maestro/AGENTS.md).
 

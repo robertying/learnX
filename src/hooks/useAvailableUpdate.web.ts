@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import type { Release } from 'helpers/update';
+import type { Release } from 'services/updateFeed';
 import {
   pendingUpdate,
   releaseUrl,

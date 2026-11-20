@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore, type AuthState } from 'data/auth';
 import { hasSavedLogin } from 'data/credentials';
-import { syncWebViewCookies } from 'helpers/webViewCookies';
+import { syncWebViewCookies } from 'services/webViewCookies';
 
 /**
  * How long content waits for a login under way before it shows anyway (the

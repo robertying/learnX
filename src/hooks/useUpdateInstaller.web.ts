@@ -1,5 +1,5 @@
 import { Alert } from 'react-native';
-import type { Release } from 'helpers/update';
+import type { Release } from 'services/updateFeed';
 import { t } from 'helpers/i18n';
 import type { UpdateStep } from 'services/update';
 import { installUpdate, pendingUpdate } from 'services/electronUpdates';

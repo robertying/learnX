@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Alert } from 'react-native';
 import { queryClient } from 'data/queryClient';
 import { latestReleaseQuery } from 'data/latestRelease';
-import type { Release } from 'helpers/update';
+import type { Release } from 'services/updateFeed';
 import { formatFileSize } from 'helpers/filename';
 import { t, type TextKey } from 'helpers/i18n';
 import { openLink } from 'helpers/openLink';

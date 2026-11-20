@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // The APK mirror for the E2E builds, which look for updates at
-// http://localhost:8198 instead of the TUNA mirror (helpers/update.ts). It
+// http://localhost:8198 instead of the TUNA mirror (services/updateFeed.ts). It
 // serves one APK as a newer release: `latest.json` says its version (99.0.0
 // unless --version says otherwise) and lists the APK under every ABI's name,
 // and any learnX-<abi>-v<version>.apk is that APK. scripts/e2e/e2e-updater.sh

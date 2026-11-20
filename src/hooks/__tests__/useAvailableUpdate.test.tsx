@@ -2,12 +2,12 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react-native';
 import { createElement, type ReactNode } from 'react';
 import { clearQueryCache, queryClient } from 'data/queryClient';
-import { getLatestRelease } from 'helpers/update';
+import { getLatestRelease } from 'services/updateFeed';
 import useAvailableUpdate from 'hooks/useAvailableUpdate';
 import Updater from 'modules/updater';
 
-jest.mock('helpers/update', () => ({
-  ...jest.requireActual('helpers/update'),
+jest.mock('services/updateFeed', () => ({
+  ...jest.requireActual('services/updateFeed'),
   getLatestRelease: jest.fn(),
 }));
 // The APKs: the build that updates itself.

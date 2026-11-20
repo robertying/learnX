@@ -1,10 +1,10 @@
 import { act, renderHook } from '@testing-library/react-native';
 import { initialAuth, noteSession, useAuthStore } from 'data/auth';
 import { useCredentialsStore } from 'data/credentials';
-import { syncWebViewCookies } from 'helpers/webViewCookies';
+import { syncWebViewCookies } from 'services/webViewCookies';
 import useWebSession, { LOGIN_WAIT_MS } from 'hooks/useWebSession';
 
-jest.mock('helpers/webViewCookies', () => ({
+jest.mock('services/webViewCookies', () => ({
   syncWebViewCookies: jest.fn(async () => ''),
 }));
 

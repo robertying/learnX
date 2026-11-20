@@ -1,5 +1,5 @@
 import { queryOptions } from '@tanstack/react-query';
-import { getLatestRelease } from 'helpers/update';
+import { getLatestRelease } from 'services/updateFeed';
 
 /**
  * How often the APKs check the mirror: every so often while open, and on

@@ -3,7 +3,7 @@ import Updater from 'modules/updater';
 import { latestReleaseQuery } from 'data/latestRelease';
 import { queryClient } from 'data/queryClient';
 import { t } from 'helpers/i18n';
-import { isNewerRelease, type Release } from 'helpers/update';
+import { isNewerRelease, type Release } from 'services/updateFeed';
 import { clearDownloadedUpdate } from 'services/update';
 import { notifyOnLogin, notifyUpdate } from 'services/updateNotice';
 

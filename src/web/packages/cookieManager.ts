@@ -45,7 +45,7 @@ const set = async (url: string, cookie: Cookie) => {
 /**
  * Stands in for @preeternal/react-native-cookie-manager in the Electron app,
  * on the window session's cookies (one store, as on Android): what the app
- * calls there (data/source, helpers/webViewCookies). The iOS store options
+ * calls there (data/source, services/webViewCookies). The iOS store options
  * have no meaning there and are ignored.
  */
 const CookieManager = {

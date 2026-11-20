@@ -1,7 +1,7 @@
 import { AppState } from 'react-native';
 import { Directory, File, Paths } from 'expo-file-system';
 import Updater, { type UpdateErrorCode } from 'modules/updater';
-import type { Release } from 'helpers/update';
+import type { Release } from 'services/updateFeed';
 import { downloadInto } from 'services/files/downloads';
 
 /** Where the APK is downloaded to, under Caches; deleted once it's used. */

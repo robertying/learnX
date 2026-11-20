@@ -131,7 +131,7 @@ export const packageConfig = (options: PackageOptions = {}): Configuration => {
     // Where the packaged app finds updates (app-update.yml): the TUNA
     // mirror's copy of the latest GitHub release (`v<version>`, with the
     // mobile and desktop builds of a version), as the Android app's updater
-    // reads it (src/helpers/update.ts). Also makes electron-builder write the
+    // reads it (src/services/updateFeed.ts). Also makes electron-builder write the
     // update files (latest.yml, latest-linux.yml, latest-linux-arm64.yml);
     // nothing is published from here.
     publish: { provider: 'generic', url: updateUrl },

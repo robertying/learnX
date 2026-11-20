@@ -1,5 +1,5 @@
 import env from 'helpers/env';
-import { E2E_UPDATE_URL, getLatestRelease } from 'helpers/update';
+import { E2E_UPDATE_URL, getLatestRelease } from 'services/updateFeed';
 
 const mirror =
   'https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease';

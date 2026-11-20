@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import Updater from 'modules/updater';
 import { latestReleaseQuery, UPDATE_CHECK_INTERVAL } from 'data/latestRelease';
-import { isNewerRelease } from 'helpers/update';
+import { isNewerRelease } from 'services/updateFeed';
 
 /**
  * A newer Android release on the TUNA mirror, or null. Only the APKs check
