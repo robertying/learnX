@@ -47,7 +47,7 @@ A module may have an `index.web.ts(x)` for the Electron app beside its `index.ts
 ## PDFs
 
 - File detail shows a PDF in `modules/pdf`: PDFKit on iOS and the Mac, which fits the pages to the width, keeps the zoom when the view resizes and opens below a translucent header. The Electron app uses Chromium's viewer.
-- On Android, Jetpack's `PdfView` (androidx.pdf) draws the document in an isolated process, so a crash in the renderer can't take the app down; `MainApplication` skips React Native's setup there. Where Jetpack would fall back to the old platform renderer (before Android 15, without the S extension 13 module update), which lays out landscape pages at the wrong size, AndroidPdfViewer on Pdfium draws it instead (`PdfBackend`). `PdfiumView` works around what that library gets wrong: it closes the document on the renderer thread after any render, turns drawing on, and loads again after a resize, which it doesn't refit.
+- On Android, Jetpack's `PdfView` (androidx.pdf) draws the document in an isolated process, so a crash in the renderer can't take the app down; `MainApplication` skips React Native's setup there. Where Jetpack would fall back to the old platform renderer (before Android 15, without the S extension 13 module update), which lays out landscape pages at the wrong size, AndroidPdfViewer on Pdfium draws it instead (`PdfBackend`). `PdfiumView` works around what that library gets wrong: it closes the document on the renderer thread after any render, turns drawing on, loads again after a resize, which it doesn't refit, and, since it draws on a canvas TalkBack can't read, says the file and page ("Lecture 3, page 2 of 14") and turns pages with TalkBack's scroll actions.
 
 ## Sharing files to learnX
 

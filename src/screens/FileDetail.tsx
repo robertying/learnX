@@ -194,6 +194,7 @@ const FileDetailContent: React.FC<{
           <PdfView
             style={Styles.flex1}
             uri={path}
+            title={file.title}
             onError={handlePreviewError}
           />
         ) : kind === 'quickLook' ? (

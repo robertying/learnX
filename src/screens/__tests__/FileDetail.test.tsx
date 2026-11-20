@@ -63,8 +63,11 @@ jest.mock('react-native-webview', () => {
 jest.mock('modules/pdf', () => {
   const { View } = require('react-native');
   return {
-    PdfView: (props: { uri: string; onError?: () => void }) => (
-      <View testID="pdf" {...{ uri: props.uri, onError: props.onError }} />
+    PdfView: (props: { uri: string; title?: string; onError?: () => void }) => (
+      <View
+        testID="pdf"
+        {...{ uri: props.uri, title: props.title, onError: props.onError }}
+      />
     ),
   };
 });
@@ -113,6 +116,7 @@ it('shows progress while downloading, then the PDF, marking it seen', async () =
   downloaded({ path: 'file:///a.pdf' });
   await renderScreen({ id: pdf.id });
   expect(screen.getByTestId('pdf').props.uri).toBe('file:///a.pdf');
+  expect(screen.getByTestId('pdf').props.title).toBe(pdf.title);
   expect(markFileSeen).toHaveBeenCalledWith(pdf.id);
   // White pages stay clear of the header and tab bar, whose text follows the
   // app's dark mode

@@ -8,6 +8,11 @@ export interface PdfViewProps extends ViewProps {
   /** The downloaded PDF, as a `file:` URI. */
   uri: string;
   /**
+   * The file's name. Android's Pdfium view (before Android 15) says it to
+   * TalkBack with the page; the other viewers describe themselves.
+   */
+  title?: string;
+  /**
    * The PDF didn't open: it needs a password (`password`), or it is damaged
    * or isn't a PDF (`unreadable`).
    */

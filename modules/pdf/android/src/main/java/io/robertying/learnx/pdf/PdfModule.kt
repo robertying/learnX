@@ -40,6 +40,8 @@ class PdfModule : Module() {
 
       Prop("uri") { view: PdfView, uri: String -> view.setUri(uri) }
 
+      Prop("title") { view: PdfView, title: String? -> view.setTitle(title) }
+
       OnViewDestroys { view: PdfView -> view.destroy() }
     }
   }
@@ -100,6 +102,10 @@ class PdfView @JvmOverloads constructor(
   internal var page = 0
     private set
 
+  /** The file's name, which AndroidPdfViewer's view says to TalkBack with the page (Jetpack's says its own). */
+  internal var title: String? = null
+    private set
+
   /** Why the document didn't open, as sent to `onError`. */
   internal var failure: PdfFailure? = null
     private set
@@ -116,6 +122,11 @@ class PdfView @JvmOverloads constructor(
     uri = newUri
     page = 0
     open()
+  }
+
+  fun setTitle(value: String?) {
+    title = value
+    (viewer as? PdfiumView)?.title = value
   }
 
   private fun open() {
@@ -157,6 +168,7 @@ class PdfView @JvmOverloads constructor(
       return
     }
     val view = PdfiumView(context)
+    view.title = title
     view.onResize = { pdfiumResized(view) }
     show(view)
     view
@@ -166,7 +178,7 @@ class PdfView @JvmOverloads constructor(
       .enableAnnotationRendering(true)
       .onPageChange(
         object : OnPageChangeListener {
-          override fun onPageChanged(page: Int, pageCount: Int) = pdfiumPageChanged(view, page)
+          override fun onPageChanged(page: Int, pageCount: Int) = pdfiumPageChanged(view, page, pageCount)
         },
       )
       .onError(
@@ -184,9 +196,10 @@ class PdfView @JvmOverloads constructor(
     }
   }
 
-  internal fun pdfiumPageChanged(view: PdfiumView, page: Int) {
+  internal fun pdfiumPageChanged(view: PdfiumView, page: Int, pageCount: Int) {
     if (viewer === view) {
       this.page = page
+      view.pageShown(page, pageCount)
     }
   }
 

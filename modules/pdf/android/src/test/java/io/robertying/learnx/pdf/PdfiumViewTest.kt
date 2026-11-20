@@ -2,10 +2,12 @@ package io.robertying.learnx.pdf
 
 import android.app.Activity
 import android.os.Looper
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction
 import android.widget.FrameLayout
 import expo.modules.kotlin.AppContext
 import io.mockk.mockk
 import io.mockk.mockkClass
+import io.mockk.spyk
 import io.mockk.verify
 import java.io.File
 import org.junit.Assert.assertEquals
@@ -20,6 +22,7 @@ import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
+import org.robolectric.annotation.Config
 import java.time.Duration
 
 /**
@@ -111,7 +114,7 @@ class PdfiumViewTest {
     root.addView(view)
     view.setUri(file().toURI().toString())
     val first = view.viewer as PdfiumView
-    view.pdfiumPageChanged(first, 4)
+    view.pdfiumPageChanged(first, 4, 9)
 
     root.removeView(view)
     assertTrue(first.hasLeftWindow)
@@ -126,7 +129,7 @@ class PdfiumViewTest {
     root.addView(view)
     view.setUri(file().toURI().toString())
     val first = view.viewer as PdfiumView
-    view.pdfiumPageChanged(first, 2)
+    view.pdfiumPageChanged(first, 2, 9)
 
     view.pdfiumResized(first)
     val second = view.viewer as PdfiumView
@@ -135,7 +138,7 @@ class PdfiumViewTest {
 
     // The view it replaced has nothing more to say.
     view.pdfiumResized(first)
-    view.pdfiumPageChanged(first, 7)
+    view.pdfiumPageChanged(first, 7, 9)
     view.pdfiumFailed(first, IllegalStateException("gone"))
     assertSame(second, view.viewer)
     assertEquals(2, view.page)
@@ -171,7 +174,7 @@ class PdfiumViewTest {
     val view = pdfView()
     root.addView(view)
     view.setUri(file().toURI().toString())
-    view.pdfiumPageChanged(view.viewer as PdfiumView, 3)
+    view.pdfiumPageChanged(view.viewer as PdfiumView, 3, 9)
     view.setUri(file().toURI().toString())
     assertEquals(0, view.page)
   }
@@ -185,4 +188,103 @@ class PdfiumViewTest {
     assertNull(view.viewer)
     assertEquals(0, view.childCount)
   }
+
+  @Test
+  fun saysTheFileAndThePage() {
+    val view = PdfiumView(activity)
+    view.title = "Lecture 3"
+    // Loading: only the name.
+    assertEquals("Lecture 3", view.contentDescription)
+
+    view.pageShown(1, 14)
+    assertEquals("Lecture 3, page 2 of 14", view.contentDescription)
+
+    view.title = null
+    assertEquals("Page 2 of 14", view.contentDescription)
+  }
+
+  @Test
+  @Config(qualifiers = "zh")
+  fun saysThePageInChinese() {
+    val view = PdfiumView(activity)
+    view.title = "第三讲"
+    view.pageShown(0, 3)
+    assertEquals("第三讲，第1页，共3页", view.contentDescription)
+  }
+
+  @Test
+  fun takesTheNameAndPagesFromItsFile() {
+    val view = pdfView()
+    view.setTitle("Lecture 3")
+    root.addView(view)
+    view.setUri(file().toURI().toString())
+    val viewer = view.viewer as PdfiumView
+    assertEquals("Lecture 3", viewer.contentDescription)
+
+    view.pdfiumPageChanged(viewer, 4, 9)
+    view.setTitle("Lecture 4")
+    assertEquals("Lecture 4", view.title)
+    assertEquals("Lecture 4", viewer.title)
+    assertEquals("Lecture 4, page 5 of 9", viewer.contentDescription)
+  }
+
+  private fun PdfiumView.actions() =
+    createAccessibilityNodeInfo().let { info -> info.isScrollable to info.actionList.map { it.id } }
+
+  @Test
+  fun offersToTurnThePagesThereAre() {
+    val view = PdfiumView(activity)
+    // Nothing to turn before the document loads.
+    assertFalse(view.actions().first)
+    assertTrue(view.actions().second.none { it == SCROLL_FORWARD || it == SCROLL_BACKWARD })
+
+    view.pageShown(0, 3)
+    assertTrue(view.actions().first)
+    assertTrue(SCROLL_FORWARD in view.actions().second)
+    assertFalse(SCROLL_BACKWARD in view.actions().second)
+
+    view.pageShown(2, 3)
+    assertFalse(SCROLL_FORWARD in view.actions().second)
+    assertTrue(SCROLL_BACKWARD in view.actions().second)
+
+    view.pageShown(0, 1)
+    assertFalse(view.actions().first)
+  }
+
+  @Test
+  fun turnsThePagesForTalkBack() {
+    val view = spyk(PdfiumView(activity))
+    view.pageShown(1, 3)
+    assertTrue(view.performAccessibilityAction(SCROLL_FORWARD, null))
+    verify { view.jumpTo(2, true) }
+    assertTrue(view.performAccessibilityAction(SCROLL_BACKWARD, null))
+    verify { view.jumpTo(0, true) }
+
+    view.pageShown(2, 3)
+    assertFalse(view.performAccessibilityAction(SCROLL_FORWARD, null))
+    verify(exactly = 0) { view.jumpTo(3, any()) }
+  }
+
+  @Test
+  fun leavesOtherActionsToTheView() {
+    val view = spyk(PdfiumView(activity))
+    // Nothing to turn before the document loads.
+    view.performAccessibilityAction(SCROLL_FORWARD, null)
+    view.pageShown(0, 3)
+    view.performAccessibilityAction(AccessibilityAction.ACTION_LONG_CLICK.id, null)
+    verify(exactly = 0) { view.jumpTo(any(), any()) }
+  }
+
+  @Test
+  fun closesWhenReactNativeDestroysTheView() {
+    val view = pdfView()
+    root.addView(view)
+    view.setUri(file().toURI().toString())
+    // The module's first view is registered under its name and as the default.
+    PdfModule().definition().viewManagerDefinitions.values.distinct().single().onViewDestroys!!(view)
+    assertNull(view.viewer)
+  }
 }
+
+private val SCROLL_FORWARD = AccessibilityAction.ACTION_SCROLL_FORWARD.id
+private val SCROLL_BACKWARD = AccessibilityAction.ACTION_SCROLL_BACKWARD.id
