@@ -1,7 +1,13 @@
 // .maestro/10-errors.yaml: failures, each after a mock login and a relaunch
 // with the failure's launch option (services/launchOptions.ts), as the flow's
 // `launchApp` does. No results is in search.e2e.ts.
-import { expect, mockLogin, packagedApp, test } from './fixtures.ts';
+import {
+  expect,
+  loginSubmitted,
+  mockLogin,
+  packagedApp,
+  test,
+} from './fixtures.ts';
 import { exact, text } from './maestroEnv.ts';
 import { byId, openCard, openTab, shown } from './steps.ts';
 
@@ -130,7 +136,9 @@ test('logs in again after rejected logins', async ({ login, relaunch }) => {
   ).toBeVisible({ timeout: 30_000 });
   await expect(byId(window, 'login-username')).toBeVisible();
 
-  // Offline, then the third login goes through.
+  // Offline, then the third login goes through. A typed mock login starts
+  // over from the mock data, so the set-up page shows again, as after the
+  // first login.
   await shown(
     window.getByRole('button', { name: exact('T_offlineMode') }),
   ).click();
@@ -138,9 +146,8 @@ test('logs in again after rejected logins', async ({ login, relaunch }) => {
   await relogin.click();
   await password.fill(mockLogin().password);
   await password.press('Enter');
-  await expect(window.getByTestId('tab-notices')).toBeVisible({
-    timeout: 30_000,
-  });
+  await loginSubmitted(window);
+  await expect(window.getByTestId('tab-notices')).toBeVisible();
   await expect(byId(window, 'login-username')).toBeHidden();
   await expect(relogin).toBeHidden();
 });

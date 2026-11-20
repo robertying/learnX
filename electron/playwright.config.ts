@@ -40,8 +40,9 @@ export default defineConfig({
       ]
     : [['list']],
   use: {
-    // On failure only: a trace (actions, DOM snapshots, console) and a
-    // screenshot of the window.
+    // On failure only: a trace of the test's steps and a screenshot of the
+    // window. Each app's own trace (its windows' actions, DOM snapshots and
+    // console) is kept beside them (e2e/fixtures.ts).
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     actionTimeout: 15_000,
