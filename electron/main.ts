@@ -304,9 +304,14 @@ const handleIpc = (ses: Electron.Session) => {
     fromApp(event);
     return ses.cookies.remove(url, name);
   });
-  ipcMain.handle('cookies:clearAll', event => {
+  // Logout (CookieManager.clearAllStores): everything the web views' session
+  // keeps, not only its cookies. The pages opened in the app (Web Learning,
+  // id.tsinghua.edu.cn, courseX) leave site storage, and its requests an HTTP
+  // cache of Web Learning's replies, which the next person on a shared
+  // computer could read. The app's own data is in APP_PARTITION.
+  ipcMain.handle('cookies:clearAll', async event => {
     fromApp(event);
-    return ses.clearStorageData({ storages: ['cookies'] });
+    await Promise.all([ses.clearStorageData(), ses.clearCache()]);
   });
 
   // A native menu (a card's context menu, a header's menu), resolving with
