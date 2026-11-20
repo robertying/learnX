@@ -42,6 +42,14 @@ Adds `headerSubtitle` (used by `getTitleOptions` in `navigation/options.tsx`).
 
 **Tested by:** `patches/__tests__/native-stack.test.tsx`
 
+## `@shopify/flash-list`
+
+Web (the Electron app): a list that isn't laid out, inside a `display: none` ancestor (a tab that isn't selected, a screen under another in a stack), skips its measuring until it shows, when its `onLayout` measures it again. It measured its rows as 0 px tall there, so every row was in view and rendered, and the recycle pool kept them all once it showed: with a large semester the tabs held about 25,000 elements instead of 2,000, the JS heap 210 MB instead of 50 MB, and opening Notices for the first time took 2.2 s. Native lists are unchanged: a hidden native screen keeps its size.
+
+**Drop when:** Upstream skips measuring a list that isn't laid out on the web.
+
+**Tested by:** `patches/__tests__/web/flash-list.test.tsx`
+
 ## `babel-plugin-react-compiler`
 
 An identifier the compiler writes without a source location gets none, instead of the compiler's own marker for that (a Symbol) as its `loc`, as the compiler's other nodes already do. With Expo's tree shaking on (every production bundle, `metro.config.js`), Metro's workers send each file's AST back to the main process by structured clone, which can't clone a Symbol, so bundling failed with "DataCloneError: Symbol() could not be cloned".

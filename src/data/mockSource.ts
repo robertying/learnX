@@ -4,6 +4,7 @@ import {
   ContentType,
   DetailSelector,
   FailReason,
+  type FavoriteItem,
   Language,
   SemesterInfo,
   SemesterType,
@@ -450,15 +451,47 @@ export const mockSource: AppSource = {
         homeworkDetailFields,
       ),
     ),
-  // Like thu-learn-lib's, the list has `isFavorite` only when asked for.
+  // Like thu-learn-lib's, the list has `isFavorite` only when asked for:
+  // from the account's favorites, or from the favorites passed in.
   getFileList: (courseId, options) =>
-    request(
-      () =>
-        groupByCourse(mock().mockFiles, [courseId])[courseId].map(file =>
-          options?.favorites
+    request(() => {
+      const given = Array.isArray(options?.favorites)
+        ? new Set(
+            options.favorites
+              .filter(f => f.type === ContentType.FILE)
+              .map(f => f.id),
+          )
+        : undefined;
+      return groupByCourse(mock().mockFiles, [courseId])[courseId].map(file =>
+        given
+          ? { ...file, isFavorite: given.has((file as { id: string }).id) }
+          : options?.favorites
             ? withFavorite(file as { id: string })
             : omit(file, ['isFavorite']),
-        ) as any,
+      ) as any;
+    }),
+  // The account's favorites of every course, of one type when asked.
+  getFavorites: options =>
+    request(() =>
+      favoritable()
+        .filter(
+          ({ item, type }) =>
+            mockFavoriteIds().has(item.id) &&
+            (!options?.type || type === options.type) &&
+            (!options?.courseID || item.courseId === options.courseID),
+        )
+        .map(({ item, type }): FavoriteItem => ({
+          id: item.id,
+          type,
+          title: item.title,
+          time: '',
+          state: '',
+          semesterId: mock().mockCurrentSemester,
+          courseId: item.courseId,
+          pinned: false,
+          addedTime: '',
+          itemId: `favorite-${item.id}`,
+        })),
     ),
   // An id the server doesn't know answers HTTP 500; adding twice keeps one.
   addToFavorites: (type, id) =>

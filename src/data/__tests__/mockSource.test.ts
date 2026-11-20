@@ -346,6 +346,57 @@ describe('mockSource', () => {
       ).resolves.toBeUndefined();
       await mockSource.removeFromFavorites(mockAssignments[0].id);
     });
+
+    it('lists the favorites of every course, of one type or one course', async () => {
+      const files = await mockSource.getFavorites({ type: ContentType.FILE });
+      expect(files.map(f => f.id).sort()).toEqual(
+        [...mockFavorites.file].sort(),
+      );
+      expect(files.every(f => f.type === ContentType.FILE)).toBe(true);
+
+      const all = await mockSource.getFavorites();
+      expect(all).toHaveLength(
+        mockFavorites.file.length +
+          mockFavorites.notice.length +
+          mockFavorites.assignment.length,
+      );
+
+      const { courseId } = mockFiles.find(f => f.id === mockFavorites.file[0])!;
+      const ofCourse = await mockSource.getFavorites({
+        type: ContentType.FILE,
+        courseID: courseId,
+      });
+      expect(ofCourse.length).toBeGreaterThan(0);
+      expect(ofCourse.every(f => f.courseId === courseId)).toBe(true);
+    });
+
+    it('marks the favorites passed to the file list, not its own', async () => {
+      const favorite = mockFiles.find(f => f.id === mockFavorites.file[0])!;
+      const other = mockFiles.find(
+        f =>
+          f.courseId === favorite.courseId &&
+          !mockFavorites.file.includes(f.id),
+      )!;
+      const given = [
+        ...(await mockSource.getFavorites({ type: ContentType.FILE })).filter(
+          f => f.id !== favorite.id,
+        ),
+        // Only file favorites count.
+        {
+          ...(await mockSource.getFavorites())[0],
+          id: other.id,
+          type: ContentType.NOTIFICATION,
+        },
+      ];
+      const marked = (
+        await mockSource.getFileList(favorite.courseId, { favorites: given })
+      )
+        .filter(f => (f as { isFavorite?: boolean }).isFavorite)
+        .map(f => f.id);
+      expect(marked).not.toContain(favorite.id);
+      expect(marked).not.toContain(other.id);
+      expect(other).toBeDefined();
+    });
   });
 
   it("works the registrar's calendar out from the courses, in Beijing time", async () => {

@@ -1,0 +1,145 @@
+diff --git a/dist/recyclerview/RecyclerView.js b/dist/recyclerview/RecyclerView.js
+index 6799c8a61bff4607633196097da35c7a6975f0b6..2a23e0767135085e4f837376533053d61003534b 100644
+--- a/dist/recyclerview/RecyclerView.js
++++ b/dist/recyclerview/RecyclerView.js
+@@ -6,7 +6,7 @@ import React, { useCallback, useLayoutEffect, useMemo, useRef, forwardRef, useSt
+ import { Animated, I18nManager, } from "react-native";
+ import { ErrorMessages } from "../errors/ErrorMessages";
+ import { WarningMessages } from "../errors/WarningMessages";
+-import { areDimensionsNotEqual, measureFirstChildLayout, measureItemLayout, measureParentSize, } from "./utils/measureLayout";
++import { areDimensionsNotEqual, isNotRendered, measureFirstChildLayout, measureItemLayout, measureParentSize, } from "./utils/measureLayout";
+ import { RecyclerViewContextProvider, useRecyclerViewContext, } from "./RecyclerViewContextProvider";
+ import { useLayoutState } from "./hooks/useLayoutState";
+ import { useRecyclerViewManager } from "./hooks/useRecyclerViewManager";
+@@ -77,6 +77,10 @@ const RecyclerViewComponent = (props, ref) => {
+             const outerViewSize = measureParentSize(internalViewRef.current);
+             const firstChildViewLayout = measureFirstChildLayout(firstChildViewRef.current, internalViewRef.current);
+             containerViewSizeRef.current = outerViewSize;
++            // Not laid out (hidden): measured again from onLayout once it shows.
++            if (isNotRendered(internalViewRef.current)) {
++                return;
++            }
+             // firstChildViewLayout is already relative to the outer container,
+             // so its x/y directly gives the first item offset.
+             const firstItemOffset = horizontal
+@@ -101,7 +105,8 @@ const RecyclerViewComponent = (props, ref) => {
+     // eslint-disable-next-line react-hooks/exhaustive-deps
+     useLayoutEffect(() => {
+         var _a, _b;
+-        if (pendingChildIds.size > 0) {
++        if (pendingChildIds.size > 0 ||
++            (internalViewRef.current && isNotRendered(internalViewRef.current))) {
+             return;
+         }
+         const layoutInfo = Array.from(refHolder, ([index, viewHolderRef]) => {
+diff --git a/dist/recyclerview/utils/measureLayout.js b/dist/recyclerview/utils/measureLayout.js
+index fd7e062fb7d6ddb257591b295ad14771b4c7fd8a..5cc652e2425fff396e2d62e9678e63a7c38deab9 100644
+--- a/dist/recyclerview/utils/measureLayout.js
++++ b/dist/recyclerview/utils/measureLayout.js
+@@ -77,6 +77,13 @@ export function measureParentSize(view) {
+     const layout = measureLayout(view, undefined);
+     return { width: layout.width, height: layout.height };
+ }
++/**
++ * Whether the view isn't laid out. Never on native, where a hidden screen
++ * keeps its size; see measureLayout.web for the web.
++ */
++export function isNotRendered(_view) {
++    return false;
++}
+ /**
+  * Specific method for easier mocking
+  * Measures the layout of child container of RecyclerView
+diff --git a/dist/recyclerview/utils/measureLayout.web.js b/dist/recyclerview/utils/measureLayout.web.js
+index 17d9812a7e600e634fff576a385cd9c1540858b6..40a55b0aaa4ee2246bc89a36bbb7fe08fd668a4d 100644
+--- a/dist/recyclerview/utils/measureLayout.web.js
++++ b/dist/recyclerview/utils/measureLayout.web.js
+@@ -39,6 +39,14 @@ export function measureParentSize(view) {
+         height: view.clientHeight,
+     };
+ }
++/**
++ * Whether the view isn't laid out: it's inside a `display: none` ancestor (a
++ * hidden tab or a screen under another in a stack). Its size and its items'
++ * then measure 0, which would put every item in view and render them all.
++ */
++export function isNotRendered(view) {
++    return view.getClientRects().length === 0;
++}
+ /**
+  * Measures the layout of child container of RecyclerView
+  */
+diff --git a/src/recyclerview/RecyclerView.tsx b/src/recyclerview/RecyclerView.tsx
+index 3c25e7e893004932b8a13072e01fe2a940d365d4..286757f88a6e024e65ea223398c81bacb6a700cb 100644
+--- a/src/recyclerview/RecyclerView.tsx
++++ b/src/recyclerview/RecyclerView.tsx
+@@ -26,6 +26,7 @@ import { WarningMessages } from "../errors/WarningMessages";
+ import { RVDimension } from "./layout-managers/LayoutManager";
+ import {
+   areDimensionsNotEqual,
++  isNotRendered,
+   measureFirstChildLayout,
+   measureItemLayout,
+   measureParentSize,
+@@ -173,6 +174,10 @@ const RecyclerViewComponent = <T,>(
+       );
+ 
+       containerViewSizeRef.current = outerViewSize;
++      // Not laid out (hidden): measured again from onLayout once it shows.
++      if (isNotRendered(internalViewRef.current)) {
++        return;
++      }
+ 
+       // firstChildViewLayout is already relative to the outer container,
+       // so its x/y directly gives the first item offset.
+@@ -202,7 +207,10 @@ const RecyclerViewComponent = <T,>(
+    */
+   // eslint-disable-next-line react-hooks/exhaustive-deps
+   useLayoutEffect(() => {
+-    if (pendingChildIds.size > 0) {
++    if (
++      pendingChildIds.size > 0 ||
++      (internalViewRef.current && isNotRendered(internalViewRef.current))
++    ) {
+       return;
+     }
+     const layoutInfo = Array.from(refHolder, ([index, viewHolderRef]) => {
+diff --git a/src/recyclerview/utils/measureLayout.ts b/src/recyclerview/utils/measureLayout.ts
+index bbb362c200ce2317efdc153f9920f51bee6744ca..467283445f43a92c11aa1c8cae527c8429f6f008 100644
+--- a/src/recyclerview/utils/measureLayout.ts
++++ b/src/recyclerview/utils/measureLayout.ts
+@@ -105,6 +105,14 @@ export function measureParentSize(view: View): Size {
+   return { width: layout.width, height: layout.height };
+ }
+ 
++/**
++ * Whether the view isn't laid out. Never on native, where a hidden screen
++ * keeps its size; see measureLayout.web for the web.
++ */
++export function isNotRendered(_view: View): boolean {
++  return false;
++}
++
+ /**
+  * Specific method for easier mocking
+  * Measures the layout of child container of RecyclerView
+diff --git a/src/recyclerview/utils/measureLayout.web.ts b/src/recyclerview/utils/measureLayout.web.ts
+index 05bebd332745b74e2b1e21572a682c2b05f97ed7..53436031333d785fd313c225ff7905ce5a9ddf3b 100644
+--- a/src/recyclerview/utils/measureLayout.web.ts
++++ b/src/recyclerview/utils/measureLayout.web.ts
+@@ -57,6 +57,15 @@ export function measureParentSize(view: Element): Size {
+   };
+ }
+ 
++/**
++ * Whether the view isn't laid out: it's inside a `display: none` ancestor (a
++ * hidden tab or a screen under another in a stack). Its size and its items'
++ * then measure 0, which would put every item in view and render them all.
++ */
++export function isNotRendered(view: Element): boolean {
++  return view.getClientRects().length === 0;
++}
++
+ /**
+  * Measures the layout of child container of RecyclerView
+  */
