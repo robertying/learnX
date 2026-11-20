@@ -9,7 +9,7 @@ import {
 } from 'react-native-webview/lib/WebViewTypes';
 import Urls from 'constants/Urls';
 import { getTappedLink } from 'helpers/webContent';
-import { syncWebViewCookies } from 'helpers/webViewCookies';
+import { syncWebViewCookies } from 'services/webViewCookies';
 import { isAndroid, isApple } from 'helpers/platform';
 
 /** Whether a load is the web view's own page: HTML at Web Learning's root. */

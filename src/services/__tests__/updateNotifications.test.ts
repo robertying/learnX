@@ -5,7 +5,7 @@ import { useCredentialsStore } from 'data/credentials';
 import { latestReleaseQuery } from 'data/latestRelease';
 import { resetNotified } from 'data/notified';
 import { clearQueryCache, queryClient } from 'data/queryClient';
-import { getLatestRelease } from 'helpers/update';
+import { getLatestRelease } from 'services/updateFeed';
 import Updater from 'modules/updater';
 import { clearDownloadedUpdate } from 'services/update';
 import { checkForUpdate, watchUpdates } from 'services/updateNotifications';
@@ -13,8 +13,8 @@ import { checkForUpdate, watchUpdates } from 'services/updateNotifications';
 // Loads expo-updates and the Crashlytics module, neither of which Jest can.
 jest.mock('services/crashReporting', () => ({ recordError: jest.fn() }));
 
-jest.mock('helpers/update', () => ({
-  ...jest.requireActual('helpers/update'),
+jest.mock('services/updateFeed', () => ({
+  ...jest.requireActual('services/updateFeed'),
   getLatestRelease: jest.fn(),
 }));
 // The APKs: the build that updates itself.

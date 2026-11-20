@@ -32,8 +32,8 @@ installRejectionTracker();
 // Before the app renders: an action button can launch the app in the
 // background, where it may never render.
 setUpNotificationActions();
-// Keeps the widgets, reminders, Spotlight and App Intents in step with the
-// data, in this runtime whether or not the app renders.
+// Keeps what learnX shows outside the app (services/surfaces) in step with
+// the data, in this runtime whether or not the app renders.
 watchSurfaces();
 // So what's checked when the app comes back (a permission changed in System
 // Settings) is on the Mac too.

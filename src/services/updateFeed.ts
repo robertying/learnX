@@ -5,6 +5,9 @@ import DeviceInfo from 'constants/DeviceInfo';
 import updateMirror from 'constants/updateMirror.json';
 import env from 'helpers/env';
 
+// Where the APKs learn of a new version (`latest.json` on the release mirror),
+// and whether it's newer than the installed app.
+
 /**
  * The TUNA mirror's copy of the latest GitHub release, which the Electron
  * app updates from too (electron/packageConfig.ts reads the same file).
@@ -21,8 +24,7 @@ export const E2E_UPDATE_URL = 'http://localhost:8198';
  * Where releases are published: the TUNA mirror of GitHub Releases, which has
  * `latest.json` and the APKs fastlane's Android build makes.
  */
-export const updateFeedUrl = () =>
-  env.TEST_LOGIN ? E2E_UPDATE_URL : tunaMirrorUrl;
+const updateFeedUrl = () => (env.TEST_LOGIN ? E2E_UPDATE_URL : tunaMirrorUrl);
 
 interface LatestJson {
   version: string;

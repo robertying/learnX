@@ -3,7 +3,7 @@ import FormWebView from 'components/FormWebView';
 import { initialAuth, noteSession, useAuthStore } from 'data/auth';
 import { useCredentialsStore } from 'data/credentials';
 
-jest.mock('helpers/webViewCookies', () => ({
+jest.mock('services/webViewCookies', () => ({
   syncWebViewCookies: jest.fn(async () => ''),
 }));
 

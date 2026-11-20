@@ -11,7 +11,7 @@ jest.mock('data/source', () => ({
   dataSource: { getCSRFToken: () => 'token' },
 }));
 jest.mock('data/serverActions', () => ({ openNotice: jest.fn() }));
-jest.mock('helpers/webViewCookies', () => ({
+jest.mock('services/webViewCookies', () => ({
   syncWebViewCookies: jest.fn(async () => ''),
 }));
 jest.mock('components/AutoHeightWebView', () => {

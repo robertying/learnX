@@ -2,7 +2,7 @@ import { Alert, type AlertButton, Linking } from 'react-native';
 import { act, renderHook } from '@testing-library/react-native';
 import { clearQueryCache } from 'data/queryClient';
 import { t } from 'helpers/i18n';
-import { getLatestRelease } from 'helpers/update';
+import { getLatestRelease } from 'services/updateFeed';
 import useUpdateInstaller from 'hooks/useUpdateInstaller';
 import {
   installsUpdate,
@@ -12,7 +12,7 @@ import {
   UpdateError,
 } from 'services/update';
 
-jest.mock('helpers/update', () => ({ getLatestRelease: jest.fn() }));
+jest.mock('services/updateFeed', () => ({ getLatestRelease: jest.fn() }));
 jest.mock('services/update', () => ({
   ...jest.requireActual<typeof import('services/update')>('services/update'),
   installsUpdate: jest.fn(() => true),

@@ -21,7 +21,7 @@
 # one, they're built (-Pe2eVersion, for the ABI of $ANDROID_ABI, default
 # arm64-v8a) into build/updater-e2e/apks. Boot one emulator (or set
 # MAESTRO_DEVICE), as for scripts/e2e/e2e.sh. UPDATER_E2E_PORT (default 8198) must
-# match the build's (helpers/update.ts).
+# match the build's (services/updateFeed.ts).
 set -euo pipefail
 
 platform="${1:-}"
