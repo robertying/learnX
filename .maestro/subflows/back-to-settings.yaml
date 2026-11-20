@@ -1,6 +1,7 @@
-# Back from a Settings page to Settings, unless the page opened beside it
-# (the split layout, unfolded Android): on iOS by SPLIT, on Android while
-# Settings' list is still visible, as in back.yaml.
+# Back from a Settings page to Settings, unless the page opened beside it (the
+# split layout, unfolded Android): back.yaml on iOS; on Android while Settings'
+# list, which has no label of its own to pass as back.yaml's LIST, is still
+# visible.
 appId: ${APP_ID}
 ---
 - runFlow:
@@ -10,24 +11,8 @@ appId: ${APP_ID}
         id: settings-list
     commands:
       - back
-- runFlow:
-    when:
-      platform: iOS
-      true: ${IOS_MAJOR >= 26 && SPLIT != 'true'}
-    commands:
-      - swipe:
-          start: 1%, 50%
-          end: 80%, 50%
-          duration: 400
-- waitForAnimationToEnd
-# Before iOS 26 only a pan from the very edge pops, which XCTest's swipe
-# doesn't reliably start (in the system's own apps either), and the swipe can
-# land as a tap on a row: tap the back button, the bar's first item, instead.
-- runFlow:
-    when:
-      platform: iOS
-      true: ${IOS_MAJOR < 26 && SPLIT != 'true'}
-    commands:
-      - tapOn:
-          point: 5%, 8%
       - waitForAnimationToEnd
+- runFlow:
+    when:
+      platform: iOS
+    file: back.yaml

@@ -29,12 +29,12 @@ describe('IconButton (iOS)', () => {
     );
   });
 
-  it('draws a contained button at its size, with the badge in its label', async () => {
+  it('draws a button that is on filled at its size, with the badge in its label', async () => {
     await render(
       <IconButton
         icon="settings"
         size={32}
-        mode="contained"
+        pressed
         badge
         accessibilityLabel="Settings"
       />,
@@ -47,12 +47,7 @@ describe('IconButton (iOS)', () => {
   it("says a mode's button is a toggle and whether it's on", async () => {
     await render(
       <>
-        <IconButton
-          icon="select"
-          accessibilityLabel="Select"
-          mode="contained"
-          pressed
-        />
+        <IconButton icon="select" accessibilityLabel="Select" pressed />
         <IconButton
           icon="reorder"
           accessibilityLabel="Reorder"

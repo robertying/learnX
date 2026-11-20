@@ -9,13 +9,12 @@ export type { IconButtonIcon, IconButtonProps } from './IconButton.shared';
 
 /**
  * An icon-only Fluent button (subtle, as in a Windows command bar) with the
- * icon's Fluent System Icon and its label as a tooltip. `contained` shows the
+ * icon's Fluent System Icon and its label as a tooltip. `pressed` shows the
  * button toggled on.
  */
 const IconButton: React.FC<IconButtonProps> = ({
   icon,
   size = 20,
-  mode,
   pressed,
   badge,
   disabled,
@@ -29,8 +28,8 @@ const IconButton: React.FC<IconButtonProps> = ({
   const iconSize = Math.min(size, 20);
   const button = (
     <Button
-      appearance={mode === 'contained' ? 'primary' : 'subtle'}
-      shape={mode === 'contained' ? 'circular' : 'rounded'}
+      appearance={pressed ? 'primary' : 'subtle'}
+      shape={pressed ? 'circular' : 'rounded'}
       disabled={disabled}
       onClick={onPress}
       aria-label={spokenLabel({ accessibilityLabel, badge })}
@@ -43,7 +42,7 @@ const IconButton: React.FC<IconButtonProps> = ({
           color={
             disabled
               ? theme.colors.onSurfaceDisabled
-              : mode === 'contained'
+              : pressed
                 ? // Fluent's text on its accent fill, white in both themes
                   tokens.colorNeutralForegroundOnBrand
                 : theme.colors.onSurface

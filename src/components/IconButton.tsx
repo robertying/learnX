@@ -24,7 +24,6 @@ export type { IconButtonIcon, IconButtonProps } from './IconButton.shared';
 const IconButton: React.FC<IconButtonProps> = ({
   icon,
   size = 24,
-  mode,
   pressed,
   badge,
   disabled,
@@ -34,11 +33,8 @@ const IconButton: React.FC<IconButtonProps> = ({
   style,
 }) => {
   // A borderless button reaches 44 pt, Apple's smallest tap target, beyond
-  // its padding; a contained one is drawn at its size.
-  const buttonSize = Math.max(
-    size + 2 * PADDING,
-    mode === 'contained' ? 0 : MIN_TARGET,
-  );
+  // its padding; one that's on is drawn filled at its size.
+  const buttonSize = Math.max(size + 2 * PADDING, pressed ? 0 : MIN_TARGET);
   const badgeInset = (buttonSize - size) / 2 - 2;
 
   return (
@@ -51,7 +47,7 @@ const IconButton: React.FC<IconButtonProps> = ({
           testID={testID}
           modifiers={[
             labelStyle('iconOnly'),
-            ...(mode === 'contained'
+            ...(pressed
               ? [buttonStyle('bordered'), buttonBorderShape('circle')]
               : [buttonStyle('borderless')]),
             // SF Symbols size with the font; this one draws about `size` tall.
