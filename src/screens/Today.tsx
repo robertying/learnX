@@ -31,6 +31,7 @@ import {
 } from 'helpers/schedule';
 import { beijingDate, showsBeijingTime } from 'helpers/serverTime';
 import { isShownBy } from 'helpers/shown';
+import useFirstListDrawn from 'hooks/useFirstListDrawn';
 import useDetailNavigator, {
   sameDetailRoot,
   useDetailRoot,
@@ -163,6 +164,13 @@ const Today: React.FC<Props> = ({ navigation }) => {
   const opened = (name: keyof DetailStackParams, id?: string) =>
     sameDetailRoot(detailRoot, { name, id });
   const isFocused = useIsFocused();
+  // Drawn once the lists it counts have their first data (or failed).
+  useFirstListDrawn(
+    isFocused &&
+      !assignmentsQuery.isPending &&
+      !noticesQuery.isPending &&
+      !filesQuery.isPending,
+  );
   const detailNavigator = useDetailNavigator();
   useItemStepping(
     detailRows.length,

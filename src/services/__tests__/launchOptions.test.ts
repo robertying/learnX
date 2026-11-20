@@ -5,6 +5,7 @@ import {
   defaultMockNetworkConfig,
   getMockNetworkConfig,
   setMockNetworkConfig,
+  setMockScale,
 } from 'data/mockSource';
 import {
   applyLaunchOptions,
@@ -14,6 +15,11 @@ import {
   withLaunchOptions,
 } from 'services/launchOptions';
 import env from 'test-utils/mocks/env';
+
+jest.mock('data/mockSource', () => ({
+  ...jest.requireActual('data/mockSource'),
+  setMockScale: jest.fn(),
+}));
 
 const mockSettingsGet = jest.fn<unknown, [string]>();
 
@@ -98,6 +104,14 @@ it('reads what happens to the emulated session after the launch login', () => {
   expect(getMockNetworkConfig().sessionExpiry).toBe('passwordChanged');
   applyLaunchOptions({ mockSessionExpiry: 'sometimes' });
   expect(getMockNetworkConfig().sessionExpiry).toBe('passwordChanged');
+});
+
+it('reads how much the emulated server holds', () => {
+  jest.replaceProperty(Platform, 'OS', 'android');
+  applyLaunchOptions({ mockScale: 'huge' });
+  expect(setMockScale).not.toHaveBeenCalled();
+  applyLaunchOptions({ mockScale: 'large' });
+  expect(setMockScale).toHaveBeenCalledWith('large');
 });
 
 it('ignores missing and unknown values', () => {

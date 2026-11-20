@@ -6,7 +6,9 @@ import {
   mockSource,
   mockSubmitAssignment,
   setMockNetworkConfig,
+  setMockScale,
 } from 'data/mockSource';
+import { largeMockSize } from 'data/mockScale';
 import {
   mockAssignments,
   mockCourses,
@@ -430,5 +432,58 @@ describe('mockSource in English', () => {
     expect(en.map(i => (i as any).hasRead)).toEqual(
       zh.map(i => (i as any).hasRead),
     );
+  });
+});
+
+describe('mockSource at the large scale', () => {
+  afterEach(async () => {
+    setMockScale('normal');
+    await mockSource.setLanguage(Language.ZH);
+  });
+
+  const listAll = async () => {
+    const courses = await mockSource.getCourseList(mockCurrentSemester);
+    const lists = await Promise.all(
+      courses.map(async c => ({
+        notices: await mockSource.getNotificationList(c.id),
+        assignments: await mockSource.getHomeworkList(c.id),
+        files: await mockSource.getFileList(c.id),
+      })),
+    );
+    return {
+      courses,
+      notices: lists.flatMap(l => l.notices),
+      assignments: lists.flatMap(l => l.assignments),
+      files: lists.flatMap(l => l.files),
+    };
+  };
+
+  it('answers with the large semester once asked for', async () => {
+    const normal = await listAll();
+    setMockScale('large');
+    const large = await listAll();
+    expect(large.courses.length).toBe(normal.courses.length + 2);
+    // Every added item is in a course of the current semester.
+    expect(large.notices.length - normal.notices.length).toBe(
+      largeMockSize.notices - mockNotices.length,
+    );
+    expect(large.assignments.length - normal.assignments.length).toBe(
+      largeMockSize.assignments - mockAssignments.length,
+    );
+    expect(large.files.length - normal.files.length).toBe(
+      largeMockSize.files - mockFiles.length,
+    );
+  });
+
+  it('keeps English free of Chinese text (ids aside)', async () => {
+    setMockScale('large');
+    await mockSource.setLanguage(Language.EN);
+    const { notices, assignments, files } = await listAll();
+    const han = /[一-鿿]/;
+    for (const item of [...notices, ...assignments, ...files]) {
+      expect(
+        JSON.stringify(item, (key, v) => (key === 'id' ? undefined : v)),
+      ).not.toMatch(han);
+    }
   });
 });

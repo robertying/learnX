@@ -141,7 +141,8 @@
         "src/**/__tests__/**",
         "src/**/*.{spec,test}.{js,ts,tsx}",
         "src/data/mock.ts",
-        "src/data/mockEnglish.ts"
+        "src/data/mockEnglish.ts",
+        "src/data/mockScale.ts"
       ],
       "rules": {
         "learnx/no-han-outside-translations": "off"
