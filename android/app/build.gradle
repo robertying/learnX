@@ -198,15 +198,19 @@ android {
 androidComponents {
     onVariants(selector().all()) { variant ->
         // React Native's Gradle plugin picks its libraries first in any
-        // folder (`**/libreactnative.so`, Hermes, JSI, fbjni, libc++), which
-        // AGP applies before excludes, so the other ABIs' copies (12 MB of
-        // x86) stayed in the universal APK. Picked first only in the ABIs
-        // the app is built for.
+        // folder (`**/libreactnative.so`: NdkConfiguratorUtils.kt, in its
+        // own onVariants, which runs before this one), and AGP applies that
+        // before excludes, so the other ABIs' copies (12 MB of x86) stayed
+        // in the universal APK. The same libraries are picked first only in
+        // the ABIs the app is built for. A variant's property can't be read
+        // here, so the plugin's list is repeated: a library it adds later
+        // and this leaves out fails the build as found twice.
+        def reactNativeLibs = ["libfbjni.so", "libreactnative.so", "libjsi.so", "libc++_shared.so", "libhermesvm.so", "libhermestooling.so"]
         def pickFirsts = variant.packaging.jniLibs.pickFirsts
-        pickFirsts.set(pickFirsts.get().collectMany { pattern ->
-            pattern.startsWith("**/")
-                ? builtAbis.collect { "lib/${it}/${pattern.substring(3)}".toString() }
-                : [pattern]
+        pickFirsts.empty()
+        pickFirsts.addAll(android.packaging.jniLibs.pickFirsts)
+        pickFirsts.addAll(reactNativeLibs.collectMany { lib ->
+            builtAbis.collect { "lib/${it}/${lib}".toString() }
         })
         variant.outputs.each { output ->
             // x86 (2) is no longer built; don't reuse its digit
