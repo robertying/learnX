@@ -83,7 +83,10 @@ the device (the `android-min` profile, from `08-settings` on).
 The driver's instrumentation moves the two pointers with UiAutomator, since `adb shell input` and
 `sendevent` (without root) send only one finger. The fingers sit side by side, at most 40% of the
 screen's shorter side apart and less near a side edge, so a pinch in a split view's pane stays in
-it. On iOS it fails as an unsupported command.
+it. On iOS it fails as an unsupported command. A Maestro release can't read a flow with it at all,
+so the one flow that pinches, `.maestro/pinch/zoom-pdf.yaml`, isn't among the flows `config.yaml`
+runs: `scripts/e2e/e2e.sh android` runs it after them when the Maestro on `PATH` is a build of
+`build.sh`'s with this patch, which `build.sh` lists in `learnx-patches` beside its `bin` folder.
 
 Until a Maestro release includes all of them, build
 it from source and put it first on `PATH`:

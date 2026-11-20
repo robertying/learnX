@@ -1,0 +1,47 @@
+appId: ${APP_ID}
+name: Zoom a PDF with two fingers
+---
+# Android: the PDF viewer zooms in and out under two fingers and keeps showing
+# the file. On API 35 and later (or 30+ with the SDK extension) Jetpack's
+# viewer draws it in a process of its own; on older devices Pdfium does
+# (modules/pdf). Maestro's own builds have no two-finger gesture, so this runs
+# only on the patched Maestro's `pinch` (scripts/e2e/maestro/README.md):
+# scripts/e2e/e2e.sh runs it after the flows when that's the Maestro on PATH.
+# It downloads the mock file again (09-downloads deleted it) and leaves it.
+- runFlow: ../subflows/login.yaml
+- runFlow:
+    file: ../subflows/tab.yaml
+    env:
+      TAB: 'tab-files'
+- runFlow:
+    file: ../subflows/open.yaml
+    env:
+      CARD: '.*(${MOCK_FILE}).*'
+      CARD_ID: file-card
+      DETAIL: file-detail
+- extendedWaitUntil:
+    notVisible:
+      id: file-loading
+    timeout: 60000
+- assertNotVisible:
+    id: 'file-error|file-preview-failed'
+- pinch:
+    scale: 2
+- runFlow:
+    file: ../subflows/shot.yaml
+    env:
+      NAME: pdf-zoomed-in
+- pinch:
+    scale: 0.5
+- runFlow:
+    file: ../subflows/shot.yaml
+    env:
+      NAME: pdf-zoomed-out
+- assertVisible:
+    id: file-detail
+- assertNotVisible:
+    id: 'file-error|file-preview-failed'
+- runFlow:
+    file: ../subflows/back.yaml
+    env:
+      LIST: '${T_filter}'

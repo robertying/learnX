@@ -335,10 +335,27 @@ if [ "$ui_only" = true ]; then
   exit
 fi
 
+# The patches the Maestro on PATH was built with: scripts/e2e/maestro/build.sh
+# lists them next to its bin folder. None for a Maestro release.
+maestro_patches() {
+  local bin
+  bin="$(command -v maestro)" || return 0
+  cat "$(dirname "$bin")/../learnx-patches" 2>/dev/null || true
+}
+
 if [ "$live" = false ]; then
   status=0
   maestro "${device_args[@]+"${device_args[@]}"}" --platform "$platform" test \
     "${test_args[@]}" "$@" || status=$?
+  # Android, after every flow: .maestro/pinch zooms a PDF with the patched
+  # Maestro's two-finger `pinch`, which a Maestro release can't read. Its own
+  # run, so the flows' report (--output) stays theirs.
+  if [ "$platform" = android ] && [ "$has_flow" = false ] &&
+    maestro_patches | grep -qx maestro-pinch.patch; then
+    maestro "${device_args[@]+"${device_args[@]}"}" --platform "$platform" test \
+      "${test_args[@]}" ${test_out:+--test-output-dir "$test_out"} \
+      .maestro/pinch/zoom-pdf.yaml || status=$?
+  fi
   number_shots
   if [ "$platform" = ios ] && [ "$has_flow" = false ] && [ "${E2E_UI_TESTS:-1}" != 0 ]; then
     run_ui_tests || status=$?
