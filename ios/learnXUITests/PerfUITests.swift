@@ -28,9 +28,11 @@ final class PerfUITests: PerfUITestCase {
 
   override var launchOptions: [String: String] { ["mockScale": Self.environment["E2E_PERF_SCALE"] ?? "normal"] }
 
+  private static var runs: Int { Int(environment["E2E_PERF_RUNS"] ?? "") ?? 7 }
+
   private var options: XCTMeasureOptions {
     let options = XCTMeasureOptions()
-    options.iterationCount = Int(Self.environment["E2E_PERF_RUNS"] ?? "") ?? 7
+    options.iterationCount = Self.runs
     return options
   }
 
@@ -38,6 +40,9 @@ final class PerfUITests: PerfUITestCase {
     if Self.environment["E2E_PERF"] != "1" {
       throw XCTSkip("A performance run: set TEST_RUNNER_E2E_PERF=1")
     }
+    // The scripts allow each test 3 minutes, less than a launch through every tab takes over all the iterations (and
+    // XCTest's unrecorded warm-up one) on a simulator: allow a minute an iteration.
+    executionTimeAllowance = TimeInterval(60 * (Self.runs + 2))
     try await super.setUp()
     try waitFor(id: "today", timeout: 30)
     try await Task.sleep(for: Self.settle)
