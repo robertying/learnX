@@ -55,6 +55,11 @@ react {
     debuggableVariants = ["googlePlayDebug", "githubDebug"]
 }
 
+// The ABIs the app is built for, and the others, whose native libraries
+// stay out of every APK and bundle (packaging below).
+def builtAbis = project.property("reactNativeArchitectures").split(",")*.trim()
+def otherAbis = ["armeabi", "armeabi-v7a", "arm64-v8a", "x86", "x86_64", "riscv64", "mips", "mips64"] - builtAbis
+
 // The build tools, NDK, CMake, Java and Kotlin JVM settings come from the root build.gradle,
 // which sets them for every project.
 android {
@@ -121,11 +126,10 @@ android {
     // Crashlytics) also ship x86, which the universal APK took (23 MB),
     // though the app's own libraries aren't built for it, so it couldn't run
     // there. ndk.abiFilters would do the same but AGP refuses it beside ABI
-    // splits.
+    // splits. React Native's own libraries are also picked first for every
+    // ABI, which wins over an exclude: onVariants below narrows that.
     packaging {
         jniLibs {
-            def builtAbis = project.property("reactNativeArchitectures").split(",")*.trim()
-            def otherAbis = ["armeabi", "armeabi-v7a", "arm64-v8a", "x86", "x86_64", "riscv64", "mips", "mips64"] - builtAbis
             excludes.addAll(otherAbis.collect { "lib/${it}/**".toString() })
         }
     }
@@ -193,6 +197,17 @@ android {
 // Play and the universal APK keep versionCode (9200000 + build number).
 androidComponents {
     onVariants(selector().all()) { variant ->
+        // React Native's Gradle plugin picks its libraries first in any
+        // folder (`**/libreactnative.so`, Hermes, JSI, fbjni, libc++), which
+        // AGP applies before excludes, so the other ABIs' copies (12 MB of
+        // x86) stayed in the universal APK. Picked first only in the ABIs
+        // the app is built for.
+        def pickFirsts = variant.packaging.jniLibs.pickFirsts
+        pickFirsts.set(pickFirsts.get().collectMany { pattern ->
+            pattern.startsWith("**/")
+                ? builtAbis.collect { "lib/${it}/${pattern.substring(3)}".toString() }
+                : [pattern]
+        })
         variant.outputs.each { output ->
             // x86 (2) is no longer built; don't reuse its digit
             def abiDigits = ["armeabi-v7a": 1, "arm64-v8a": 3, "x86_64": 4]
