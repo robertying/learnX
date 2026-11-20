@@ -74,3 +74,23 @@ it('needs a run folder', () => {
     execFileSync('node', [script], { encoding: 'utf8', stdio: 'pipe' }),
   ).toThrow(/usage/);
 });
+
+it('reads the latest run of a test output folder', () => {
+  // Maestro puts each run in a timestamped folder of --test-output-dir.
+  const output = dir;
+  dir = join(output, '2026-11-20_014512');
+  mkdirSync(dir);
+  flow('Older run', [entry({ launchAppCommand: {} }, 0, 1000, 0)]);
+  dir = join(output, '2026-11-20_020102');
+  mkdirSync(dir);
+  flow('Show no results and failures', [
+    entry({ launchAppCommand: {} }, 0, 4000, 0),
+  ]);
+  dir = output;
+
+  const out = run();
+
+  expect(out).toContain(`Run ${join(output, '2026-11-20_020102')}`);
+  expect(out).toContain('    4.0 s  Show no results and failures');
+  expect(out).not.toContain('Older run');
+});

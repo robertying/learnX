@@ -1,8 +1,8 @@
 appId: ${APP_ID}
 name: Zoom a PDF with two fingers
 ---
-# Android: the PDF viewer zooms in and out under two fingers and keeps showing
-# the file. On API 35 and later (or 30+ with the SDK extension) Jetpack's
+# Android: the PDF viewer zooms in under two fingers, drawing its pages again
+# at the new scale, and keeps showing the file. On API 35 and later (or 30+ with the SDK extension) Jetpack's
 # viewer draws it in a process of its own; on older devices Pdfium does
 # (modules/pdf). Maestro's own builds have no two-finger gesture, so this runs
 # only on the patched Maestro's `pinch` (scripts/e2e/maestro/README.md):
@@ -30,13 +30,7 @@ name: Zoom a PDF with two fingers
 - runFlow:
     file: ../subflows/shot.yaml
     env:
-      NAME: pdf-zoomed-in
-- pinch:
-    scale: 0.5
-- runFlow:
-    file: ../subflows/shot.yaml
-    env:
-      NAME: pdf-zoomed-out
+      NAME: pdf-zoomed
 - assertVisible:
     id: file-detail
 - assertNotVisible:

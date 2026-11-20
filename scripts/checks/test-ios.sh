@@ -33,7 +33,7 @@ schemes=("$@")
 # under the current total, and raise it as coverage grows.
 min=0
 if [ ${#schemes[@]} -eq 0 ]; then
-  min=86
+  min=88
   for podspec in modules/*/ios/*.podspec; do
     if [ -d "$(dirname "$podspec")/Tests" ]; then
       schemes+=("$(basename "$podspec" .podspec)-Unit-Tests")
