@@ -19,6 +19,7 @@ import { SplitViewContext } from 'navigation/SplitView';
 import type {
   DetailNavigationContainerRef,
   DetailStackParams,
+  RootStackParams,
 } from 'navigation/types';
 
 // Unlike the navigation prop's, this takes a union of screens with the same
@@ -147,6 +148,15 @@ const useDetailNavigator = (): DetailNavigator | undefined => {
 };
 
 /**
+ * The sheets that open the pane's pages that aren't a list's, without a pane
+ * (navigation/index.tsx).
+ */
+const sheets: Record<string, keyof RootStackParams | undefined> = {
+  AssignmentSubmission: 'AssignmentSubmissionStack',
+  CourseX: 'CourseXStack',
+} satisfies Partial<Record<keyof DetailStackParams, keyof RootStackParams>>;
+
+/**
  * Opens an item from a list: in the detail pane beside the list where the
  * split view shows one, and on top of the list otherwise.
  *
@@ -154,7 +164,8 @@ const useDetailNavigator = (): DetailNavigator | undefined => {
  * narrow window) moves into the pane once there is one, so that the item
  * isn't left covering the list. What the pane showed moves onto the list when
  * the pane goes away (the split collapses, as UIKit does with its own), so
- * that it stays on screen. That also covers an item opened just before a new
+ * that it stays on screen; a page no list has (a submission, CourseX) opens
+ * in its sheet. That also covers an item opened just before a new
  * split reported that it is collapsed, as on an iPhone.
  */
 export const useShowDetail = (
@@ -214,22 +225,48 @@ export const useShowDetail = (
     const pages = detailState.routes.filter(
       route => route.name !== 'EmptyDetail',
     );
+    // What the list has no page for (a submission, CourseX) opens in its own
+    // sheet, as it does without a pane, with what was pushed on it.
+    const split = pages.findIndex(
+      route => !stack.routeNames.includes(route.name),
+    );
+    const listPages = split === -1 ? pages : pages.slice(0, split);
+    const sheetPages = split === -1 ? [] : pages.slice(split);
+    const sheet = sheetPages.length > 0 ? sheets[sheetPages[0].name] : null;
     // Only for the list on screen, the top of its stack (Settings on Today,
     // not Today), and not for a screen in the pane itself.
     if (
       stack.key === detailState.key ||
       stack.routes.at(-1)?.key !== routeKey ||
       pages.length === 0 ||
-      pages.some(route => !stack.routeNames.includes(route.name))
+      sheet === undefined
     ) {
       return;
-    }
-    for (const { name, params } of pages) {
-      navigation.dispatch(StackActions.push(name, params));
     }
     container.dispatch(
       CommonActions.reset({ index: 0, routes: [{ name: 'EmptyDetail' }] }),
     );
+    // A page that can't be left (a submission while it uploads) keeps the
+    // pane as it was; it shows again once the split expands.
+    if (
+      container
+        .getRootState()
+        ?.routes.some(route => route.name !== 'EmptyDetail')
+    ) {
+      return;
+    }
+    for (const { name, params } of listPages) {
+      navigation.dispatch(StackActions.push(name, params));
+    }
+    if (sheet) {
+      navigation.dispatch(
+        CommonActions.navigate(sheet, {
+          state: {
+            routes: sheetPages.map(({ name, params }) => ({ name, params })),
+          },
+        }),
+      );
+    }
   });
   const rememberContainer = useEffectEvent(() => {
     lastContainer.current = detailRef?.current ?? null;
