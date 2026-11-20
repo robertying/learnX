@@ -109,3 +109,22 @@ it('reports only to Android in other builds', () => {
   expect(reportFullyDrawn).toHaveBeenCalledTimes(1);
   expect(info).not.toHaveBeenCalled();
 });
+
+it('runs what waits for the first list once it is drawn, and at once after', () => {
+  const { markPerf, afterFirstListDrawn } = load('android', { e2e: false });
+  const waiting = jest.fn();
+  const cancelled = jest.fn();
+  afterFirstListDrawn(waiting);
+  afterFirstListDrawn(cancelled)();
+  markPerf('storesLoaded');
+  expect(waiting).not.toHaveBeenCalled();
+
+  markPerf('firstListDrawn');
+  markPerf('firstListDrawn');
+  expect(waiting).toHaveBeenCalledTimes(1);
+  expect(cancelled).not.toHaveBeenCalled();
+
+  const later = jest.fn();
+  afterFirstListDrawn(later);
+  expect(later).toHaveBeenCalledTimes(1);
+});

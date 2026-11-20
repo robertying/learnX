@@ -27,6 +27,7 @@ import {
   TodayStack,
 } from './stacks';
 import { isAndroid, isApple } from 'helpers/platform';
+import { afterFirstListDrawn } from 'services/perf';
 
 const MainNativeNavigator = createNativeBottomTabNavigator<MainTabParams>();
 const MainSidebarNavigator = createSidebarSplitNavigator<MainTabParams>();
@@ -151,15 +152,40 @@ const tabs: Tab[] = [
 ];
 const mainTabCount = tabs.length;
 
+/**
+ * How long the other tabs wait for the first list to be drawn before they
+ * mount anyway: a window can open on a page without a list (Settings).
+ */
+const FIRST_LIST_WAIT_MS = 2000;
+
 // A tab that only mounts once it's selected shows up empty first. Mounting them
-// all with the first one would delay it, so the rest follow once it has settled,
-// one at a time while idle, in renders that give way to anything the user does.
+// all with the first one would delay it, so the rest follow once its list has
+// been drawn (or, for a window that opens on a page without one, after a
+// moment), one at a time while idle, in renders that give way to anything the
+// user does. Started any earlier, the idle callback runs before the first
+// frame on Android, and the next tab's list is built before the first one is
+// shown.
 const useMountedTabCount = () => {
   const [count, setCount] = useState(1);
+  const [firstDrawn, setFirstDrawn] = useState(false);
   const splitLaidOut = useSplitLaidOut();
 
   useEffect(() => {
-    if (count >= mainTabCount || (nativeSplit && !splitLaidOut)) {
+    const drawn = () => setFirstDrawn(true);
+    const timer = setTimeout(drawn, FIRST_LIST_WAIT_MS);
+    const cancel = afterFirstListDrawn(drawn);
+    return () => {
+      clearTimeout(timer);
+      cancel();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (
+      !firstDrawn ||
+      count >= mainTabCount ||
+      (nativeSplit && !splitLaidOut)
+    ) {
       return;
     }
 
@@ -168,7 +194,7 @@ const useMountedTabCount = () => {
       { timeout: 2000 },
     );
     return () => cancelIdleCallback(handle);
-  }, [count, splitLaidOut]);
+  }, [count, firstDrawn, splitLaidOut]);
 
   return count;
 };
