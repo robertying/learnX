@@ -31,6 +31,12 @@ export type FetchRequest = {
   method: string;
   headers: [string, string][];
   body?: ArrayBuffer;
+  /**
+   * `omit` for a request that must carry no cookies (courseX's upload); any
+   * other value sends the session's, as the page's requests to Tsinghua's
+   * sites need.
+   */
+  credentials?: string;
 };
 
 export type FetchResponse = {
@@ -101,7 +107,7 @@ export const mainFetch = (
       url: req.url,
       method: req.method,
       session,
-      credentials: 'include',
+      credentials: req.credentials === 'omit' ? 'omit' : 'include',
       redirect: 'manual',
     });
     signal?.addEventListener('abort', onAbort, { once: true });

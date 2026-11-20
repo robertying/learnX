@@ -70,6 +70,8 @@ describe('fillSSOScript', () => {
     'https://example.com/login',
     'https://tsinghua.edu.cn.example.com/',
     'http://id.tsinghua.edu.cn/',
+    'https://learn.tsinghua.edu.cn/f/login',
+    'https://www.tsinghua.edu.cn/',
   ])('does nothing on %s', url => {
     const { result, document, observe } = runAt(url);
     expect(result).toBe(true);

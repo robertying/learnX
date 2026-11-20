@@ -63,6 +63,13 @@ node_modules/
 
 # secrets
 .env
+# Signing keys and store credentials, if kept in a checkout (fastlane/.env
+# names where they are): App Store Connect API keys, certificates, profiles
+# and Java keystores (*.keystore is above).
+*.p8
+*.p12
+*.mobileprovision
+*.jks
 
 # Agent worktrees
 .claude/worktrees/

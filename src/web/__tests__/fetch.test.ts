@@ -38,6 +38,7 @@ describe('electronFetch', () => {
       method: 'GET',
       headers: [['cookie', 'a=1']],
       body: undefined,
+      credentials: 'same-origin',
     });
     expect(res.status).toBe(200);
     expect(res.url).toBe('https://learn.tsinghua.edu.cn/f/home');
@@ -60,6 +61,15 @@ describe('electronFetch', () => {
     expect(new Headers(req.headers).get('content-type')).toMatch(
       /^application\/x-www-form-urlencoded/,
     );
+  });
+
+  it('asks for no cookies when the caller omits them', async () => {
+    await electronFetch('https://tsinghua.app/api/learnx/courses', {
+      method: 'POST',
+      credentials: 'omit',
+    });
+    const [, req] = jest.mocked(bridge.fetch).mock.calls[0];
+    expect(req.credentials).toBe('omit');
   });
 
   it('keeps a content type the caller set', async () => {

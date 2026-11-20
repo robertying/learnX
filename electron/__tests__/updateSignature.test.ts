@@ -79,7 +79,11 @@ describe('signedProvider', () => {
     channel = 'latest';
     baseUrl = new URL('https://mirror.test/LatestRelease/');
     updater = { isAddNoCacheQuery: false };
+    requestHeaders: Record<string, string> | null = null;
     constructor(public served: Record<string, string | Error>) {}
+    setRequestHeaders(headers: Record<string, string> | null) {
+      this.requestHeaders = headers;
+    }
     httpRequest = jest.fn(async (url: URL) => {
       const body = this.served[url.pathname.split('/').pop()!];
       if (body instanceof Error || body === undefined) {
@@ -174,6 +178,18 @@ describe('signedProvider', () => {
       });
     },
   );
+
+  it('sends no id of the install with a check', () => {
+    const provider = new Provider({});
+    // What electron-updater hands the provider before each check.
+    provider.setRequestHeaders({
+      'x-user-staging-id': '6b2c1e0a-1d5e-4c41-9d6f-0e2f2a1b3c4d',
+      accept: '*/*',
+    });
+    expect(provider.requestHeaders).toEqual({ accept: '*/*' });
+    provider.setRequestHeaders(null);
+    expect(provider.requestHeaders).toBeNull();
+  });
 
   it('passes on a failure to read the update file', async () => {
     const provider = new Provider({ 'latest.yml': new Error('offline') });

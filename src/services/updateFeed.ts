@@ -48,7 +48,9 @@ export interface Release {
  */
 export const getLatestRelease = async (): Promise<Release> => {
   const feed = updateFeedUrl();
-  const response = await fetch(`${feed}/latest.json`);
+  // Without cookies: the mirror needs none, and the app's requests share a
+  // cookie store with Tsinghua's sites.
+  const response = await fetch(`${feed}/latest.json`, { credentials: 'omit' });
   if (!response.ok) {
     throw new Error(`Mirror answered ${response.status}`);
   }

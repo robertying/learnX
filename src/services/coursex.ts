@@ -5,8 +5,11 @@ import { assertServerWritesAllowed } from 'helpers/serverWrites';
 
 /**
  * Shares the courses with courseX. The server decides what it keeps (new
- * courses, updated schedules), so learnX needs no token. Does nothing for the
- * mock account: its made-up courses must never reach the real courseX.
+ * courses, updated schedules), so learnX needs no token. The upload carries
+ * no cookies: courseX's page in the app (screens/CourseX) may have left some
+ * for tsinghua.app, which would tie the upload to whoever browsed it. Does
+ * nothing for the mock account: its made-up courses must never reach the
+ * real courseX.
  */
 export const uploadCourses = async (courses: Course[]) => {
   if (isMockUser(getCredentials()?.username)) {
@@ -16,6 +19,7 @@ export const uploadCourses = async (courses: Course[]) => {
 
   const res = await fetch('https://tsinghua.app/api/learnx/courses', {
     method: 'POST',
+    credentials: 'omit',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       version: 1,

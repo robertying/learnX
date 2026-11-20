@@ -130,6 +130,20 @@ it('sends the request with the session cookies and follows redirects', async () 
   expect(Buffer.from(res.body).toString()).toBe('hello');
 });
 
+it('sends no cookies for a request that omits them', async () => {
+  const { net, requests } = fakeNet();
+  const pending = mainFetch(net, session, {
+    url: 'https://tsinghua.app/api/learnx/courses',
+    method: 'POST',
+    headers: [],
+    credentials: 'omit',
+  });
+  const [request] = requests;
+  expect(request.options).toMatchObject({ credentials: 'omit' });
+  respond(request, 200, {}, []);
+  await pending;
+});
+
 it('refuses a URL off the allowed sites', async () => {
   const { net, requests } = fakeNet();
   await expect(

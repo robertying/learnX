@@ -56,7 +56,7 @@ learnX doesn't collect your advertising identifier, doesn't show ads, and doesn'
 
 ## Other connections
 
-- The Android app checks the TUNA mirror at Tsinghua (mirrors.tuna.tsinghua.edu.cn) for new versions and downloads updates from it when you ask. The Windows and Linux app checks the same mirror for new versions while it runs; the Windows app and the AppImage download them in the background, and the .deb tells you a new version is out and links to it.
+- The Android app checks the TUNA mirror at Tsinghua (mirrors.tuna.tsinghua.edu.cn) for new versions and downloads updates from it when you ask. The Windows and Linux app checks the same mirror for new versions while it runs and downloads them in the background: the Windows app and the AppImage install them for you, and the .deb opens them in the system's installer when you choose to install from Settings.
 - The changelog opens learnX's releases page on GitHub, and links in notices open the sites they point to. Those sites have their own privacy policies.
 - If you install learnX from the App Store or Google Play, Apple or Google handle the download under their own policies.
 
