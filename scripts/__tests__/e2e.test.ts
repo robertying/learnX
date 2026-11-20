@@ -1,8 +1,8 @@
 // scripts/e2e/e2e.sh hands its arguments to Maestro for the flows and to
 // xcodebuild for the UI tests (--ui), and E2E_SCREENSHOTS adds Maestro's output
 // folder to them. It runs in a copy of its scripts with a made-up .env, where
-// `maestro`, `xcodebuild`, `xcrun` and `node` are stand-ins that log their
-// arguments.
+// `maestro`, `xcodebuild` and `xcrun` are stand-ins that log their arguments,
+// and `node` one that runs only scripts/e2e/lib/booted-sims.mjs.
 import { execFileSync } from 'node:child_process';
 import {
   chmodSync,
@@ -18,6 +18,27 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const scripts = join(__dirname, '../e2e');
+
+// `xcrun simctl list -j devices runtimes`: SIM booted on iOS 27.2.
+const simctl = {
+  devices: {
+    'com.apple.CoreSimulator.SimRuntime.iOS-27-2': [
+      {
+        udid: 'SIM',
+        name: 'iPhone',
+        state: 'Booted',
+        deviceTypeIdentifier:
+          'com.apple.CoreSimulator.SimDeviceType.iPhone-18-Pro',
+      },
+    ],
+  },
+  runtimes: [
+    {
+      identifier: 'com.apple.CoreSimulator.SimRuntime.iOS-27-2',
+      version: '27.2',
+    },
+  ],
+};
 
 let dir: string;
 
@@ -52,10 +73,9 @@ beforeEach(() => {
   mkdirSync(join(dir, 'scripts/e2e/lib'), { recursive: true });
   mkdirSync(join(dir, 'bin'));
   copyFileSync(join(scripts, 'e2e.sh'), join(dir, 'scripts/e2e/e2e.sh'));
-  copyFileSync(
-    join(scripts, 'lib/env.sh'),
-    join(dir, 'scripts/e2e/lib/env.sh'),
-  );
+  for (const file of ['lib/env.sh', 'lib/booted-sims.mjs']) {
+    copyFileSync(join(scripts, file), join(dir, 'scripts/e2e', file));
+  }
   mkdirSync(join(dir, 'scripts/lib'));
   copyFileSync(
     join(scripts, '../lib/derived-data.sh'),
@@ -65,7 +85,13 @@ beforeEach(() => {
     join(dir, '.env'),
     'DUMMY_USERNAME=user\nDUMMY_PASSWORD=pass\n',
   );
-  stub('node', 'echo T_KEY=value');
+  stub(
+    'node',
+    `case "$1" in
+*/booted-sims.mjs) exec "${process.execPath}" "$@" ;;
+*) echo T_KEY=value ;;
+esac`,
+  );
   stub('maestro', `echo "$*" >> "${dir}/maestro.log"`);
   // Makes the result bundle, as a test run does.
   stub(
@@ -79,7 +105,7 @@ done`,
   stub(
     'xcrun',
     `case "$1" in
-simctl) printf -- '-- iOS 27.2 --\\n    iPhone (SIM) (Booted)\\n' ;;
+simctl) echo '${JSON.stringify(simctl)}' ;;
 xcresulttool) echo "$*" >> "${dir}/xcresulttool.log" ;;
 esac`,
   );
@@ -162,5 +188,29 @@ describe('the PDF pinch flow (.maestro/pinch)', () => {
     rmSync(join(dir, 'maestro.log'));
     run(['ios'], { E2E_UI_TESTS: '0' });
     expect(calls('maestro')).toHaveLength(1);
+  });
+});
+
+describe('the simulator’s iOS version and kind', () => {
+  test('come from the booted simulator without MAESTRO_DEVICE', () => {
+    run(['ios', '.maestro/04-tabs.yaml'], { MAESTRO_DEVICE: '' });
+
+    const [maestro] = calls('maestro');
+    expect(maestro).toContain('-e IOS_MAJOR=27');
+    expect(maestro).toContain('-e IPAD=false');
+    expect(maestro).not.toContain('--device');
+  });
+
+  test('come from MAESTRO_DEVICE’s simulator', () => {
+    run(['ios', '.maestro/04-tabs.yaml']);
+
+    expect(calls('maestro')[0]).toContain('-e IOS_MAJOR=27');
+  });
+
+  test('fail the run when no simulator matches', () => {
+    expect(() =>
+      run(['ios', '.maestro/04-tabs.yaml'], { MAESTRO_DEVICE: 'OTHER' }),
+    ).toThrow(/Command failed/);
+    expect(calls('maestro')).toEqual([]);
   });
 });

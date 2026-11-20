@@ -137,19 +137,19 @@ ios_major=0
 duo_posture=
 if [ "$platform" = ios ]; then
   duo_posture="${E2E_DUO_POSTURE:-}"
-  # Each device's line, after its runtime's "-- iOS <version> --" heading.
-  booted="$(xcrun simctl list devices booted 2>/dev/null |
-    awk '/^-- iOS / { version = $3; next } { print version " " $0 }' || true)"
-  if [ -n "${MAESTRO_DEVICE:-}" ]; then
-    booted="$(grep -F "$MAESTRO_DEVICE" <<<"$booted" || true)"
+  # One line per booted simulator (scripts/e2e/lib/booted-sims.mjs): its iOS
+  # version, whether it's an iPad, its UDID and name. The first, without
+  # MAESTRO_DEVICE.
+  booted="$(xcrun simctl list -j devices runtimes 2>/dev/null |
+    node scripts/e2e/lib/booted-sims.mjs ${MAESTRO_DEVICE:+"$MAESTRO_DEVICE"} |
+    head -n 1 || true)"
+  IFS=$'\t' read -r version ipad _ <<<"$booted" || true
+  if [ "$ipad" != true ]; then
+    ipad=false
   fi
-  if grep -q 'iPad' <<<"$booted"; then
-    ipad=true
-  fi
-  version="$(head -n 1 <<<"$booted" | cut -d ' ' -f 1)"
   ios_major="${version%%.*}"
   if ! [[ "$ios_major" =~ ^[0-9]+$ ]]; then
-    echo "Couldn't read the simulator's iOS version" >&2
+    echo "Couldn't find a booted iOS simulator${MAESTRO_DEVICE:+ ($MAESTRO_DEVICE)} to read its iOS version" >&2
     exit 1
   fi
 fi
