@@ -29,8 +29,9 @@ and that the tests it names exist.
 - iOS: `Button` sends its role to the native view as `buttonRole`, since React Native reads a host view's `role` prop as an accessibility role and logs "Unsupported Role value" for `destructive` and `cancel`. `role` still works for widget layouts.
 - Android: the `semantics` modifier takes `heading`, which marks a Compose element as a heading for TalkBack (Form section titles and a detail page's title), and a `Host` with `matchContents` sends its size again, a few times with backoff, while its frame stays 0: the size reaches Yoga as a state update that can be dropped, and was only sent again when the content size changed, so What's New's buttons stayed 0x0 and couldn't be tapped.
 - Android: a `Text` without a typography takes the style its container provides (a list item's headline, supporting text or overline, a button's label) and a text field's text the field's own (bodyLarge), as Material 3's do, instead of a bare 14 sp style with no line height: Form rows were smaller than list cards and three-line rows had room left at the bottom; and the date range picker's headline leaves out the year, as Material 3 shows a range, since two dates with theirs wrapped a few characters at a time in Chinese.
+- Android: Compose UI 1.13 instead of 1.12.1. 1.12 registered a Compose view that detached and re-attached before its deferred registration ran a second time and unregistered it only once, so the view and its whole screen were never freed (header buttons re-added during a header update, as `react-native-screens` did).
 
-**Drop when:** Upstream renames the prop, adds a countdown without seconds to `Text`, adds `heading` to `semantics`, sends a dropped `Host` size again, lets an alignment guide follow the trailing edge, gives text its container's style and lets the range picker's headline be set.
+**Drop when:** Upstream renames the prop, adds a countdown without seconds to `Text`, adds `heading` to `semantics`, sends a dropped `Host` size again, lets an alignment guide follow the trailing edge, gives text its container's style, lets the range picker's headline be set and depends on Compose UI 1.13 or later.
 
 **Tested by:** `patches/__tests__/expo-ui.test.tsx`, `ios/learnXTests/Patches/ExpoUIPatchTests.swift`, `ios/learnXTests/Patches/ExpoUIFontPatchTests.swift`, `ios/learnXTests/Patches/ExpoUICountdownPatchTests.swift`, `android/patch-tests/src/test/java/io/robertying/learnx/patches/ExpoUIPatchTest.kt`; the `Host` size by `.maestro/07-screens.yaml` (What's New)
 
@@ -135,7 +136,7 @@ Mac Catalyst: leaves the pan gesture alone when KVO already subclassed the scrol
 - Vertical bar devices (iPhone Duo): fills the strip above an opaque header.
 - iOS 26: an empty header item badge is the system's red indicator dot; a header `subtitle` shows below the title (ignored on Android).
 - Android: the left header item (Search's Close) stays beside the open search field, also when the header is rebuilt (coming back from a pushed screen), and the field ends where the item's content does, fitted again on every header layout, so Search can be left in one tap with a query in the field.
-- Android: a header update leaves the header's items in the toolbar when they're the same ones in the same order, instead of taking every item out of the window and adding it back. Compose UI 1.12 registers a view that re-attaches before its deferred registration ran a second time and unregisters it only once, so each File detail's @expo/ui header buttons kept the whole closed screen alive (fixed in Compose UI 1.13).
+- Android: a header update leaves the header's items in the toolbar when they're the same ones in the same order, instead of taking every item out of the window and adding it back, which redid each item's attach work on every update; with Compose UI 1.12 it also leaked @expo/ui header buttons and their closed screens (see `@expo/ui`).
 
 **Drop when:** Fixed upstream.
 

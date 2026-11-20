@@ -60,11 +60,9 @@ react {
 def builtAbis = project.property("reactNativeArchitectures").split(",")*.trim()
 def otherAbis = ["armeabi", "armeabi-v7a", "arm64-v8a", "x86", "x86_64", "riscv64", "mips", "mips64"] - builtAbis
 
-// The build tools, NDK, CMake, Java and Kotlin JVM settings come from the root build.gradle,
-// which sets them for every project.
+// The compile SDK, build tools, NDK, CMake, Java and Kotlin JVM settings come from the root
+// build.gradle, which sets them for every project.
 android {
-    compileSdk = rootProject.ext.compileSdkVersion
-
     namespace = "io.robertying.learnx"
 
     defaultConfig {

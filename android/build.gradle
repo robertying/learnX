@@ -3,6 +3,10 @@ buildscript {
         buildToolsVersion = "37.0.0"
         minSdkVersion = 29
         compileSdkVersion = 37
+        // Android 17's minor SDK release (37.1), which Compose UI 1.13 needs
+        // to compile against. Set for every project below, so one platform is
+        // installed.
+        compileSdkMinorVersion = 1
         targetSdkVersion = 37
         ndkVersion = "30.0.16248370"
         cmakeVersion = "4.1.2"
@@ -29,8 +33,9 @@ plugins {
     id 'com.android.application' version '9.5.1' apply false
 }
 
-// Libraries read compileSdk, minSdk and targetSdk from the ext block above.
-// Set for every project (the app and every library): the build tools (no
+// Libraries read minSdk and targetSdk from the ext block above.
+// Set for every project (the app and every library): the compile SDK with its
+// minor release (libraries set only the major one), the build tools (no
 // project sets them, and the Android Gradle plugin's default is an older
 // version Gradle would download), the NDK and CMake (one with its own,
 // expo-widgets' 28.2, would make Gradle download a second NDK), and one Java
@@ -39,6 +44,11 @@ subprojects { subproject ->
     afterEvaluate {
         if (subproject.hasProperty("android")) {
             android {
+                compileSdk {
+                    version = release(rootProject.ext.compileSdkVersion) {
+                        minorApiLevel = rootProject.ext.compileSdkMinorVersion
+                    }
+                }
                 buildToolsVersion = rootProject.ext.buildToolsVersion
                 ndkVersion = rootProject.ext.ndkVersion
                 externalNativeBuild {
