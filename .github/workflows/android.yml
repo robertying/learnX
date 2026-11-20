@@ -95,7 +95,9 @@ jobs:
       # caches, so every run fetched them again, and Maven Central has
       # answered with HTTP 429. The key is Robolectric's version and the SDKs
       # the tests ask for (robolectric.properties and @Config), so it changes
-      # only when the set of jars does.
+      # only when the set of jars does. A new SDK starts from the jars of the
+      # same Robolectric version and downloads only its own; a new
+      # Robolectric's jars are all new.
       - name: Robolectric cache key
         id: robolectric-key
         if: steps.changes.outputs.changed == 'true'
@@ -103,6 +105,7 @@ jobs:
           version=$(sed -n 's/.*robolectricVersion = "\(.*\)".*/\1/p' android/build.gradle)
           sdks=$(grep -rhoE '^sdk=[0-9]+|@Config\(sdk = \[[0-9, ]+\]' --include=robolectric.properties --include='*.kt' modules/*/android/src/test android/app/src/test android/patch-tests/src/test |
             grep -oE '[0-9]+' | sort -un | paste -sd- -)
+          echo "prefix=robolectric-$version-sdk-" >> "$GITHUB_OUTPUT"
           echo "key=robolectric-$version-sdk-$sdks" >> "$GITHUB_OUTPUT"
 
       - name: Restore Robolectric jars
@@ -112,6 +115,7 @@ jobs:
         with:
           path: ~/.m2/repository/org/robolectric
           key: ${{ steps.robolectric-key.outputs.key }}
+          restore-keys: ${{ steps.robolectric-key.outputs.prefix }}
 
       - name: Unit tests
         id: unit-tests

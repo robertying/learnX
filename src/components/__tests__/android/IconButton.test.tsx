@@ -40,7 +40,6 @@ describe('IconButton (Android)', () => {
         <IconButton
           icon="select"
           accessibilityLabel="Select"
-          mode="contained"
           pressed
           testID="select"
           onPress={onPress}
@@ -62,24 +61,20 @@ describe('IconButton (Android)', () => {
 
   it('reads the badge with the label, and grows its touch area with the icon', async () => {
     await render(
-      <>
-        <IconButton
-          icon="settings"
-          accessibilityLabel="Notices"
-          badge
-          size={32}
-          mode="contained"
-          testID="notices"
-          onPress={jest.fn()}
-        />
-        <IconButton icon="refresh" onPress={jest.fn()} />
-      </>,
+      <IconButton
+        icon="settings"
+        accessibilityLabel="Notices"
+        badge
+        size={32}
+        testID="notices"
+        onPress={jest.fn()}
+      />,
     );
     expect(screen.getByLabelText('Notices, New')).toBeTruthy();
-    const button = screen.getByTestId('notices');
-    expect(button.props.variant).toBe('filledTonal');
     // 8 dp around the icon, as around the default 24 dp one
-    expect(button.props.style).toEqual({ width: 48, height: 48 });
-    expect(screen.getAllByRole('button')[1].props.variant).toBeUndefined();
+    expect(screen.getByTestId('notices').props.style).toEqual({
+      width: 48,
+      height: 48,
+    });
   });
 });

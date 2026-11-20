@@ -105,9 +105,19 @@ Mac Catalyst: leaves the pan gesture alone when KVO already subclassed the scrol
 
 ## `react-native-screens`
 
-- Mac: a three-column split keeps whether its sidebar is hidden in user defaults (`sidebarAutosaveName`), as NSSplitView's autosave does; each split view column keeps its own toolbar, as on iPad; the line under a header is the separator color, as the column divider is (UIKit's default is the iPhone's darker line).
+- Split view (`SplitHost`, iOS and Mac):
+  - `maxCollapsedWidth` collapses the split to one column while its own bounds are at most that wide, as in compact width (iOS 17+); it's checked natively in the layout pass of the resize, not after a round trip through React.
+  - On a foldable half open, the columns meet at the hinge (`UIHingeInteraction`), whatever primary column width React asked for, and follow it as the view resizes; unset widths go back to the system's defaults.
+  - `sidebarAutosaveName`: a three-column split keeps whether its sidebar is hidden in user defaults, as NSSplitView's autosave does on the Mac. A display mode UIKit restores with the scene is reported to JS once the split is laid out with it, and `displayMode: 'automatic'` is accepted with any split behavior.
+  - The primary column draws an opaque separator against the secondary one (UIKit draws none), hidden when collapsed; with three columns only the sidebar's bar (and on Mac the supplementary column's, which hold the system's sidebar toggle) is left to UIKit.
+  - Columns are wrapped in new navigation controllers only when they change, since UIKit throws on re-wrapping one nested in a collapsed primary column before iOS 26. A host that joins the window after its columns mounted (inside a tab) picks them up before it joins, so it collapses as it appears, and gets the tab's safe area so its bars don't sit under the tab bar.
+  - `SplitScreen` passes its `style` on.
+- Mac:
+  - Each split view column keeps its own bar instead of competing for the window's single toolbar, as on iPad; stacks in the detail column, nested stacks in the sidebar, and stacks in a modal stay out of the view controller hierarchy for this, with their bars pinned to the first real top safe-area inset.
+  - The line under a header is the separator color, as the column divider is (UIKit's default is the iPhone's darker line).
+  - The toolbar search field's clear button reports the empty text (it doesn't call `textDidChange`); the search bar shows no Cancel button, which only empties the field.
 - Vertical bar devices (iPhone Duo): fills the strip above an opaque header.
-- iOS 26: an empty header item badge is the system's red indicator dot.
+- iOS 26: an empty header item badge is the system's red indicator dot; a header `subtitle` shows below the title (ignored on Android).
 - Android: the left header item (Search's Close) stays beside the open search field, also when the header is rebuilt (coming back from a pushed screen), and the field ends where the item's content does, fitted again on every header layout, so Search can be left in one tap with a query in the field.
 
 **Drop when:** Fixed upstream.

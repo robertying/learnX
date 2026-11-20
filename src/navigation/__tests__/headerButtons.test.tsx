@@ -66,14 +66,14 @@ describe('headerButtons', () => {
     ]);
   });
 
-  it('draws a left side, contained buttons, and skips an entry without an element', async () => {
+  it('draws a left side, a button that is on, and skips an entry without an element', async () => {
     const left = headerButtons('left', [
       {
         id: 'close',
         label: 'Close',
         icon: 'close',
         onPress,
-        contained: true,
+        pressed: true,
       },
       { id: 'nothing' },
     ]);

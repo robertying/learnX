@@ -2,7 +2,6 @@ import { View } from 'react-native';
 import {
   Badge,
   BadgedBox,
-  FilledTonalIconButton,
   Icon,
   IconButton as ComposeIconButton,
   IconToggleButton,
@@ -24,14 +23,13 @@ import { useMaterialTheme } from 'theme';
 export type { IconButtonIcon, IconButtonProps } from './IconButton.shared';
 
 /**
- * A Material 3 icon button in Jetpack Compose: standard, or filled tonal for
- * `contained`. A button with `pressed` is Material's icon toggle button,
- * which TalkBack says is on or off, filled tonal while on.
+ * A Material 3 icon button in Jetpack Compose. A button with `pressed` is
+ * Material's icon toggle button, which TalkBack says is on or off, filled
+ * tonal while on.
  */
 const IconButton: React.FC<IconButtonProps> = ({
   icon,
   size = 24,
-  mode,
   pressed,
   badge,
   disabled,
@@ -41,8 +39,6 @@ const IconButton: React.FC<IconButtonProps> = ({
   style,
 }) => {
   const theme = useMaterialTheme();
-  const Button =
-    mode === 'contained' ? FilledTonalIconButton : ComposeIconButton;
 
   const glyph = (
     <Icon
@@ -85,7 +81,11 @@ const IconButton: React.FC<IconButtonProps> = ({
   return (
     <View style={style}>
       <ThemedHost matchContents>
-        <Button enabled={!disabled} onClick={onPress} modifiers={modifiers}>
+        <ComposeIconButton
+          enabled={!disabled}
+          onClick={onPress}
+          modifiers={modifiers}
+        >
           {badge ? (
             <BadgedBox>
               <BadgedBox.Badge>
@@ -96,7 +96,7 @@ const IconButton: React.FC<IconButtonProps> = ({
           ) : (
             glyph
           )}
-        </Button>
+        </ComposeIconButton>
       </ThemedHost>
     </View>
   );

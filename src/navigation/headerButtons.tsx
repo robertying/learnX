@@ -31,7 +31,7 @@ export interface HeaderButton {
    * For a button that turns a mode on and off: whether it's on, drawn
    * filled and said by screen readers. Leave it out for other buttons.
    */
-  contained?: boolean;
+  pressed?: boolean;
   /** In a glass of its own from iOS 26 instead of sharing its neighbors'. */
   ownGroup?: boolean;
   /** Leaves the button out of the native items (they put it in a menu). */
@@ -90,7 +90,7 @@ const nativeItem = (
     onPress: entry.onPress,
     disabled: entry.disabled,
     // UIKit draws a selected item filled and VoiceOver says "Selected".
-    selected: entry.contained,
+    selected: entry.pressed,
     sharesBackground: entry.ownGroup ? false : undefined,
     // UIKit reads the badge itself, as the item's value ("New items"), so
     // the label stays the button's own.
@@ -118,8 +118,7 @@ const element = (entry: HeaderButton | CustomHeaderEntry) =>
       onPress={entry.onPress}
       disabled={entry.disabled}
       badge={entry.badge}
-      mode={entry.contained ? 'contained' : undefined}
-      pressed={entry.contained}
+      pressed={entry.pressed}
       testID={entry.testID}
     />
   ) : entry.element ? (

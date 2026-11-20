@@ -60,12 +60,7 @@ it('labels an icon button, with its badge and toggled state', () => {
         onPress={onPress}
         badge
       />
-      <IconButton
-        icon="select"
-        accessibilityLabel="Select"
-        mode="contained"
-        pressed
-      />
+      <IconButton icon="select" accessibilityLabel="Select" pressed />
       <IconButton icon="reorder" accessibilityLabel="Reorder" pressed={false} />
       <IconButton icon="search" disabled onPress={onPress} testID="bare" />
     </>,

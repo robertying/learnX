@@ -64,11 +64,11 @@ jobs:
           key: pods-${{ runner.os }}-${{ hashFiles('ios/Podfile.lock', 'patches/**') }}
           restore-keys: pods-${{ runner.os }}-
 
-      # Not --deployment: ExpoWidgets' podspec embeds the checkout's absolute
-      # path, so its checksum in Podfile.lock differs on every machine.
+      # --deployment: the pods are exactly Podfile.lock's, and a Podfile or
+      # native package change that needs a new lock fails here.
       - name: Install pods
         working-directory: ios
-        run: bundle exec pod install
+        run: bundle exec pod install --deployment
         env:
           LANG: en_US.UTF-8
 

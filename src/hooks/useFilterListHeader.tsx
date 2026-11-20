@@ -101,7 +101,7 @@ const useFilterListHeader = ({
 
     if (reorderMode) {
       navigation.setOptions({
-        ...headerButtons('left', [{ ...reorder, contained: true }]),
+        ...headerButtons('left', [{ ...reorder, pressed: true }]),
         ...headerButtons('right', []),
         ...getTitleOptions(
           t('reorder'),
@@ -117,7 +117,7 @@ const useFilterListHeader = ({
       const archiveLabel = restoring ? t('restore') : t('archive');
       navigation.setOptions({
         ...headerButtons('left', [
-          { ...select, contained: true },
+          { ...select, pressed: true },
           {
             id: 'checkAll',
             label: t('checkAll'),
@@ -221,7 +221,7 @@ const useFilterListHeader = ({
                 ),
               },
             ]
-          : [{ ...select, contained: false }, filter],
+          : [{ ...select, pressed: false }, filter],
       ),
       ...headerButtons('right', [
         refreshHeaderButton(refreshing, onRefresh),
