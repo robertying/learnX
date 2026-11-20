@@ -102,6 +102,7 @@ const fakeElectron = (dataDir: string, { packaged = false } = {}) => {
       remove: jest.fn(async () => {}),
     },
     clearStorageData: jest.fn(async () => {}),
+    clearCache: jest.fn(async () => {}),
   });
   const contextBridge = { exposeInMainWorld: jest.fn() };
   const ipcRenderer = {
@@ -370,7 +371,8 @@ describe('the page’s other calls', () => {
 
   it('works the cookies of the web views’ session', async () => {
     await loadMain();
-    const { cookies, clearStorageData } = fake.sessions.get('persist:learnx')!;
+    const { cookies, clearStorageData, clearCache } =
+      fake.sessions.get('persist:learnx')!;
     await expect(
       call('cookies:get', 'https://learn.tsinghua.edu.cn/'),
     ).resolves.toEqual([{ name: 'JSESSIONID', value: 'x' }]);
@@ -379,7 +381,9 @@ describe('the page’s other calls', () => {
     await call('cookies:clearAll');
     expect(cookies.set).toHaveBeenCalledWith({ url: 'https://x', name: 'a' });
     expect(cookies.remove).toHaveBeenCalledWith('https://x', 'a');
-    expect(clearStorageData).toHaveBeenCalledWith({ storages: ['cookies'] });
+    // At logout, its site storage and HTTP cache go too.
+    expect(clearStorageData).toHaveBeenCalledWith();
+    expect(clearCache).toHaveBeenCalled();
   });
 
   it('refuses requests and downloads off the allowed sites', async () => {
