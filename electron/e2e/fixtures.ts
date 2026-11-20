@@ -19,6 +19,7 @@ import {
   type ElectronApplication,
   type Page,
   test as base,
+  type TestInfo,
 } from '@playwright/test';
 import { parse } from 'dotenv';
 import { electronExecutable, outDir } from '../electronApp.ts';
@@ -56,6 +57,16 @@ export const logIn = async (page: Page) => {
   await usernameField.fill(username);
   await page.getByTestId('login-password').fill(password);
   await page.getByTestId('login-password').press('Enter');
+  await loginSubmitted(page);
+};
+
+/**
+ * After the mock account's password is submitted on the login page: closes
+ * the set-up page that a typed mock login opens, since it starts over from the
+ * mock data (data/login.ts), and waits for Today. Maestro's
+ * subflows/login-submitted.yaml does the same.
+ */
+export const loginSubmitted = async (page: Page) => {
   await page.getByRole('button', { name: text('T_notNow') }).click();
   await page.getByTestId('today').waitFor();
 };
@@ -64,7 +75,7 @@ export const logIn = async (page: Page) => {
  * On CI under Linux's X11, which has no display, each worker's apps get an
  * X server of their own (Xvfb, from the xvfb package). The Wayland run
  * (WAYLAND_DISPLAY) has its own compositor; locally the apps use your
- * display, one at a time.
+ * display.
  */
 const ownDisplay =
   process.platform === 'linux' &&
@@ -115,6 +126,8 @@ export interface Running {
   app: ElectronApplication;
   window: Page;
   main: MainProcess;
+  /** Quits the app, once, and saves its trace (`launchApp`). */
+  quit: () => Promise<void>;
 }
 
 interface WorkerFixtures {
@@ -135,7 +148,10 @@ interface Fixtures {
   language: string;
   /** The test's own data folder, deleted after it. */
   dataDir: string;
-  /** Every app the test launched, closed after it. */
+  /**
+   * Every app the test launched, quit after it. A failed test's results keep
+   * each app's trace.
+   */
   launched: Running[];
   app: ElectronApplication;
   window: Page;
@@ -149,12 +165,18 @@ interface Fixtures {
   relaunch: (launch?: Launch) => Promise<Running>;
 }
 
-/** Launches learnX on `dataDir`, with the stand-ins installed. */
+/**
+ * Launches learnX on `dataDir`, with the stand-ins installed. Its windows are
+ * traced (actions, DOM snapshots, console and network) into `trace` when it
+ * quits: Playwright's own `trace` option only records the test's side of an
+ * Electron app.
+ */
 const launchApp = async (
   dataDir: string,
   language: string,
   xDisplay: string | undefined,
   { launchOptions = { mockLatency: 'none' }, args = [], env = {} }: Launch,
+  trace: string,
 ): Promise<Running> => {
   const app = await electron.launch({
     // A launch takes a second or two. Without a limit of its own, one that
@@ -191,12 +213,27 @@ const launchApp = async (
       ...env,
     },
   });
+  await app.context().tracing.start({ snapshots: true, screenshots: true });
   // Nothing reaches the system from here on: dialogs, notifications, the
   // shell and menus are stand-ins.
   const main = mainProcess(app);
   await main.stub();
-  return { app, window: await app.firstWindow(), main };
+  let quitting: Promise<void> | undefined;
+  const quit = () =>
+    (quitting ??= (async () => {
+      // An app that quit by itself has no trace left to save.
+      await app
+        .context()
+        .tracing.stop({ path: trace })
+        .catch(() => {});
+      await app.close().catch(() => {});
+    })());
+  return { app, window: await app.firstWindow(), main, quit };
 };
+
+/** Where the test's next launched app saves its trace. */
+const tracePath = (launched: Running[], testInfo: TestInfo) =>
+  testInfo.outputPath(`app-${launched.length + 1}-trace.zip`);
 
 export const test = base.extend<Fixtures, WorkerFixtures>({
   xDisplay: [
@@ -238,13 +275,35 @@ export const test = base.extend<Fixtures, WorkerFixtures>({
   // Closed before the data folder is deleted: Playwright tears a fixture
   // down before what it depends on.
   // oxlint-disable-next-line no-unused-vars -- a dependency only
-  launched: async ({ dataDir: _ }, provide) => {
+  launched: async ({ dataDir: _ }, provide, testInfo) => {
     const launched: Running[] = [];
     try {
       await provide(launched);
     } finally {
-      for (const { app } of launched) {
-        await app.close().catch(() => {});
+      for (const running of launched) {
+        await running.quit();
+      }
+      // A failed test's results keep the apps' traces; a passed test's keep
+      // nothing, and its results folder goes when only they were in it.
+      const failed = testInfo.status !== testInfo.expectedStatus;
+      for (const [index] of launched.entries()) {
+        const trace = testInfo.outputPath(`app-${index + 1}-trace.zip`);
+        if (!fs.existsSync(trace)) {
+          continue;
+        }
+        if (failed) {
+          // A copy goes in the results' attachments.
+          await testInfo.attach(`app ${index + 1} trace`, { path: trace });
+        }
+        fs.rmSync(trace);
+      }
+      const { outputDir } = testInfo;
+      if (
+        !failed &&
+        fs.existsSync(outputDir) &&
+        fs.readdirSync(outputDir).length === 0
+      ) {
+        fs.rmdirSync(outputDir);
       }
     }
   },
@@ -252,11 +311,15 @@ export const test = base.extend<Fixtures, WorkerFixtures>({
   app: async (
     { appLaunchOptions, appLaunch, language, dataDir, launched, xDisplay },
     provide,
+    testInfo,
   ) => {
-    const running = await launchApp(dataDir, language, xDisplay, {
-      launchOptions: appLaunchOptions,
-      ...appLaunch,
-    });
+    const running = await launchApp(
+      dataDir,
+      language,
+      xDisplay,
+      { launchOptions: appLaunchOptions, ...appLaunch },
+      tracePath(launched, testInfo),
+    );
     launched.push(running);
     await provide(running.app);
   },
@@ -273,14 +336,24 @@ export const test = base.extend<Fixtures, WorkerFixtures>({
     await provide(async (page = window) => logIn(page));
   },
 
-  relaunch: async ({ language, dataDir, launched, xDisplay }, provide) => {
+  relaunch: async (
+    { language, dataDir, launched, xDisplay },
+    provide,
+    testInfo,
+  ) => {
     await provide(async (launch = {}) => {
       // The single-instance lock lives in the data folder: the old app must
       // be gone before the new one starts.
       for (const running of launched) {
-        await running.app.close().catch(() => {});
+        await running.quit();
       }
-      const running = await launchApp(dataDir, language, xDisplay, launch);
+      const running = await launchApp(
+        dataDir,
+        language,
+        xDisplay,
+        launch,
+        tracePath(launched, testInfo),
+      );
       launched.push(running);
       return running;
     });

@@ -1,4 +1,3 @@
-import { dataSource } from 'data/source';
 import { getScriptNonce } from 'helpers/webContent';
 import { isAndroid, isApple, isElectron } from 'helpers/platform';
 
@@ -39,12 +38,12 @@ const contentLanguage = (content: string) =>
  * AutoHeightWebView, without margins of its own: the page sits in a form row,
  * which has them. KaTeX (~300 KB) is only inlined when the content has
  * math, and dark mode is a small script (`preval/darkMode.js`). Links and
- * sources on Web Learning get `csrfToken`, the session's by default.
+ * sources on Web Learning get the session's `csrfToken`.
  */
 export const getWebViewTemplate = (
   content: string,
+  csrfToken: string,
   colors?: WebViewTemplateColors,
-  csrfToken = dataSource.getCSRFToken(),
 ) => {
   const math = hasMath(content);
   const dark = colors?.dark ?? false;

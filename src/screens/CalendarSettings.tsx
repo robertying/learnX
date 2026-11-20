@@ -391,7 +391,9 @@ const SyncCalendarSettings: React.FC<Props> = () => {
           <FormButton
             icon="export"
             title={t('exportSyncedCalendars')}
-            onPress={exportToICS}
+            onPress={() => {
+              void exportToICS();
+            }}
             loading={exporting}
           />
         </FormSection>

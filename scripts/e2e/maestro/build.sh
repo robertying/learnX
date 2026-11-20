@@ -25,9 +25,8 @@ if [ -z "$install" ]; then
   exit 2
 fi
 install="$(cd "$(dirname "$install")" && pwd)/$(basename "$install")"
-# Only an earlier install, or a Maestro checkout an older build.sh built in, is
-# replaced.
-if [ -e "$install" ] && [ ! -x "$install/bin/maestro" ] && [ ! -d "$install/maestro-cli" ]; then
+# Only an earlier install is replaced.
+if [ -e "$install" ] && [ ! -x "$install/bin/maestro" ]; then
   echo "$install isn't an earlier Maestro install; choose another folder" >&2
   exit 2
 fi

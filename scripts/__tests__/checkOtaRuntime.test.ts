@@ -73,7 +73,7 @@ test('only asks to record native changes before the version shipped', () => {
 
 test('names the native sources that changed', () => {
   const sources = (pdf: string) => ({
-    ios: { 'dir ios': '1', 'package node_modules/react-native-pdf': pdf },
+    ios: { 'dir ios': '1', 'package node_modules/react-native-screens': pdf },
     android: {},
   });
   expect(
@@ -82,7 +82,7 @@ test('names the native sources that changed', () => {
       { ...recorded, ios: 'c', sources: sources('3') },
     ),
   ).toMatch(
-    /^Native code changed \(ios: package node_modules\/react-native-pdf\)/,
+    /^Native code changed \(ios: package node_modules\/react-native-screens\)/,
   );
 });
 

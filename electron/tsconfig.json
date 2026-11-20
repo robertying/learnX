@@ -10,8 +10,8 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "nodenext",
-    // The page's side of the preload's bridge (src/web/bridge.ts) and
-    // Playwright's page scripts are typed with the DOM.
+    // The bridge's declaration (src/web/bridgeTypes.ts) and the web views'
+    // preload, which runs in a page, are typed with the DOM.
     "lib": ["esnext", "dom"],
     "types": ["node"],
     "strict": true,

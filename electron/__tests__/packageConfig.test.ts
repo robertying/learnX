@@ -32,7 +32,6 @@ it('names every file it uploads without spaces', () => {
   const names = [
     config.nsis?.artifactName,
     config.linux?.artifactName,
-    config.deb?.artifactName,
     config.win?.executableName,
     config.linux?.executableName,
   ];

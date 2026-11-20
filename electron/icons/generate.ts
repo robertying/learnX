@@ -17,14 +17,13 @@
 // the shape is exported at that size and centered on a transparent canvas:
 // edge to edge on Windows, 108 of 128 on Linux (between GNOME's squares, 104,
 // and circles, 112: a squircle is between the two, and at 104 its round
-// corners and dark fill look small). ictool writes Display P3 at 16 bits a channel; `sips` turns
-// each into 8-bit sRGB, which Windows and Linux assume. macOS also lights the
-// shape's top and bottom edges (its Liquid Glass rim), which ictool can't
-// leave out (no option or icon property turns it off): on a dark window or
-// taskbar it shows as a white line, so `flattenRim` gives that band the
-// color just inside it. The .ico holds 16 to
-// 256; the 256 is stored as a PNG, the others as 32-bit bitmaps, which every
-// Windows reads.
+// corners and dark fill look small). ictool writes Display P3 at 16 bits a
+// channel; `sips` turns each into 8-bit sRGB, which Windows and Linux assume.
+// macOS also lights the shape's top and bottom edges (its Liquid Glass rim),
+// which ictool can't leave out (no option or icon property turns it off): on
+// a dark window or taskbar it shows as a white line, so `flattenRim` gives
+// that band the color just inside it. The .ico holds 16 to 256; the 256 is
+// stored as a PNG, the others as 32-bit bitmaps, which every Windows reads.
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';

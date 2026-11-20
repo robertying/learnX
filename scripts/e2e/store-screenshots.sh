@@ -44,10 +44,9 @@
 # run). The Mac app takes the mode on its own, not the Mac. The device's
 # time zone is Beijing's for the run, so Today shows class times without a
 # Beijing time note, and the app's clock reads STORE_CLOCK, so its times match
-# the status bar's 9:41. Which simulator
-# or emulator model to use depends on the store's size rules: an iPhone of
-# 1206x2622 pixels, a 13-inch iPad, the iPhone Duo, and any Android foldable
-# or tablet emulator.
+# the status bar's 9:41. Which simulator or emulator model to use depends on
+# the store's size rules: an iPhone of 1206x2622 pixels, a 13-inch iPad, the
+# iPhone Duo, and any Android foldable or tablet emulator.
 set -euo pipefail
 
 target="${1:-}"

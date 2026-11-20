@@ -32,11 +32,11 @@ env:
 
 jobs:
   build:
-    # The local modules' JVM unit tests (scripts/checks/test-android.sh) and a release
-    # APK (R8 and the bundled JS; -PciRelease signs it with the debug key and
-    # turns off Crashlytics uploads, android/app/build.gradle). A required
-    # check: on a pull request that changes nothing Android, every step after
-    # the first is skipped and the job passes in seconds.
+    # The local modules' JVM unit tests (scripts/checks/test-android.sh) and
+    # a release APK (R8 and the bundled JS; -PciRelease signs it with the
+    # debug key and turns off Crashlytics uploads, android/app/build.gradle).
+    # A required check: on a pull request that changes nothing Android, every
+    # step after the first is skipped and the job passes in seconds.
     name: Build
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -192,9 +192,8 @@ jobs:
 
   e2e:
     # The Maestro flows (scripts/e2e/e2e.sh) in an emulator on the APK from
-    # Build, in manual runs only. The first flow logs in
-    # through the real SSO login, so it needs id.tsinghua.edu.cn reachable from
-    # the runner. The flows are kept passing here, as on the local devices
+    # Build, in manual runs only. The first flow logs in through the real SSO
+    # login, so it needs id.tsinghua.edu.cn reachable from the runner. The flows are kept passing here, as on the local devices
     # (.maestro/AGENTS.md). No iOS E2E in CI. The emulator runs in Chinese
     # (its system language: a per-app language doesn't survive the flows'
     # clearState); the local devices cover English.

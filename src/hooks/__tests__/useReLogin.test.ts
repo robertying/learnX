@@ -1,7 +1,8 @@
 import { AppState } from 'react-native';
 import { act, renderHook } from '@testing-library/react-native';
 import * as Updates from 'expo-updates';
-import { initialAuth, useAuthStore, type LoginFailure } from 'data/auth';
+import { initialAuth, useAuthStore } from 'data/auth';
+import type { LoginFailure } from 'helpers/errors';
 import {
   REFUSED_LOGIN_RETRY_MS,
   clearCredentials,

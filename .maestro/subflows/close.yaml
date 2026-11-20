@@ -1,6 +1,7 @@
 # Close what opened as a sheet (search, every course's courseX, and pages
 # about the open item where they're sheets, close-item-page.yaml): its Close
-# button on iOS, the system back on Android (hide a keyboard that's up first).
+# button on iOS, the system back on Android (which hides a keyboard that's up
+# instead, so hide it first).
 appId: ${APP_ID}
 ---
 - runFlow:

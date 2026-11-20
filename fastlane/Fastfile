@@ -144,11 +144,8 @@ def apple_package_path(platform)
 end
 
 # ---------------------------------------------------------------------------
-# Release notes (written by the release-notes skill)
-#
-# Four labeled sections, each opened by a `==== <name> ====` line (any order):
-# GitHub Releases, Google Play, App Store (iOS), Mac App Store. Each store
-# section has a `---- English ----` block, then a `---- 中文 ----` block.
+# Release notes (written by the release-notes skill, read by
+# Release.parse_notes)
 
 def default_notes_path
   File.join(out_dir, "release-notes.md")
@@ -685,8 +682,8 @@ end
 # This Mac builds the installers (electron-builder's tools run natively on
 # Apple silicon, no Rosetta), or installers built elsewhere
 # (`pnpm electron:package --win` on a Windows PC, `--linux` on Linux) are
-# copied in with `from:`. Either way the lane
-# checks them against this commit's version before signing and uploading.
+# copied in with `from:`. Either way the lane checks them against this
+# commit's version before signing and uploading.
 
 def electron_out_dir
   File.join(out_dir, "electron")

@@ -72,11 +72,11 @@ const canLogIn = () => {
  * back after at least 10 minutes in the background (keeping the session if
  * the server still accepts it), and when it comes back without a session.
  * While the server can't be reached or answers with errors, it also retries
- * on its own, less and less often, as long as the app is open. This is the one place that handles
- * coming back to the app: an over-the-air update first (`services/ota`), which
- * when one starts leaves the rest to the reloaded app, then the session, then,
- * with a session, the waiting server actions, then the open lists that are out
- * of date.
+ * on its own, less and less often, as long as the app is open. This is the
+ * one place that handles coming back to the app: an over-the-air update first
+ * (`services/ota`), which when one starts leaves the rest to the reloaded app,
+ * then the session, then, with a session, the waiting server actions, then
+ * the open lists that are out of date.
  */
 const useReLogin = () => {
   const appState = useRef(AppState.currentState);

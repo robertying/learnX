@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Packages the Electron app for Windows and Linux with electron-builder
 // (packageConfig.ts): exports the web build and strips the preloads' types,
-// then builds the
-// installers into build/electron/dist. Nothing is signed or published.
+// then builds the installers into build/electron/dist. Nothing is signed or
+// published.
 //
 //   pnpm electron:package                    Windows and Linux
 //   pnpm electron:package --win              Windows only (NSIS, x64 and arm64)

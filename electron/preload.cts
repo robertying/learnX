@@ -54,8 +54,8 @@ const learnx: Bridge = {
     loadHtml: (guestId, html, baseUrl) =>
       ipcRenderer.invoke('webview:loadHtml', guestId, html, baseUrl),
   },
-  // The app's version and build number, and the update waiting for a
-  // restart (updater.ts): null until one has downloaded.
+  // The app's version and build number, and whether it runs without
+  // Chromium's sandbox (an AppImage on Ubuntu 24.04 and later, main.ts).
   appInfo: () => ipcRenderer.sendSync('app:info'),
   relaunch: () => ipcRenderer.send('app:relaunch'),
   // The app's own language, where it has one (language.ts).

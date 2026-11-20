@@ -66,9 +66,8 @@ export const packageConfig = (options: PackageOptions = {}): Configuration => {
     productName: 'learnX',
     copyright: `Copyright © ${new Date().getFullYear()} Rui Ying`,
     // Written into the packaged app's package.json: the version and the build
-    // number (main.ts, Settings › About). The
-    // description is what Windows shows as the file's (Task Manager), with the
-    // author as its company.
+    // number (main.ts, Settings › About). The description is what Windows
+    // shows as the file's (Task Manager), with the author as its company.
     extraMetadata: {
       version: appVersion,
       buildNumber,
@@ -131,9 +130,9 @@ export const packageConfig = (options: PackageOptions = {}): Configuration => {
     // Where the packaged app finds updates (app-update.yml): the TUNA
     // mirror's copy of the latest GitHub release (`v<version>`, with the
     // mobile and desktop builds of a version), as the Android app's updater
-    // reads it (src/services/updateFeed.ts). Also makes electron-builder write the
-    // update files (latest.yml, latest-linux.yml, latest-linux-arm64.yml);
-    // nothing is published from here.
+    // reads it (src/services/updateFeed.ts). Also makes electron-builder write
+    // the update files (latest.yml, latest-linux.yml,
+    // latest-linux-arm64.yml); nothing is published from here.
     publish: { provider: 'generic', url: updateUrl },
     win: {
       // One installer for both: Windows installs the one for its CPU.
@@ -190,12 +189,7 @@ export const packageConfig = (options: PackageOptions = {}): Configuration => {
     // without Rosetta. Every tool these toolsets and the .deb's fpm bring has
     // an arm64 macOS build.
     toolsets: { appimage: '1.0.3', nsis: '1.2.1' },
-    deb: {
-      packageName: 'learnx',
-      // AppImages update themselves; a .deb is updated by installing the
-      // next one.
-      artifactName: 'learnX-linux-${arch}-v${version}.${ext}',
-    },
+    deb: { packageName: 'learnx' },
   };
 };
 

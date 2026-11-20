@@ -4,8 +4,10 @@ import type { LoginFailure } from 'helpers/errors';
  * Seconds between quiet login retries, by why the login failed. Offline: 30 s,
  * 1 m, 2 m, then 5 m, so a connection that comes back is noticed soon. Server
  * errors: 1 m, 5 m, 15 m, then 30 m, since an outage tends to last and every
- * try is a few requests to a server that's struggling. Refused logins aren't
- * retried at all (`helpers/errors`).
+ * try is a few requests to a server that's struggling. Refused logins
+ * (`isRefusal` in helpers/errors) aren't retried on a timer: the app tries a
+ * refused saved login again only a day later (`refusedLoginRetryDue` in
+ * data/credentials).
  */
 const RETRY_DELAYS: Record<'offline' | 'serverError', readonly number[]> = {
   offline: [30, 60, 120, 300],

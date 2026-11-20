@@ -1,12 +1,6 @@
 import { FailReason, isRefusedLogin } from '@robertying/thu-learn-lib';
 import { create } from 'zustand';
-import { apiReason, loginFailureOf, type LoginFailure } from 'helpers/errors';
-
-/**
- * Why the saved login didn't go through (`helpers/errors`). The app keeps
- * showing the saved data whatever it is.
- */
-export type { LoginFailure };
+import { errorReason, loginFailureOf, type LoginFailure } from 'helpers/errors';
 
 /**
  * Login progress. Not persisted: it only means something while the app runs.
@@ -20,7 +14,10 @@ export interface AuthState {
   error: FailReason | null;
   /** Debug builds: what the server answered to the failed login. */
   errorDetail: string | null;
-  /** Set once a failed login has been told apart; null while logged in. */
+  /**
+   * Why the saved login didn't go through, once told apart; null while logged
+   * in. The app keeps showing the saved data whatever it is.
+   */
   failure: LoginFailure | null;
   /** The user asked to log in again from the main UI. */
   reloginRequested: boolean;
@@ -87,7 +84,7 @@ export const noteRequestError = (error: unknown) => {
     useAuthStore.setState({
       loggedIn: false,
       loggingIn: false,
-      error: apiReason(error) ?? FailReason.BAD_CREDENTIAL,
+      error: errorReason(error),
       failure: loginFailureOf(error),
     });
   }

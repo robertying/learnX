@@ -14,11 +14,10 @@
 # xcodebuild builds the Release app with them, in scripts/e2e/e2e-build.sh's
 # DerivedData ($DERIVED_DATA, default
 # ~/Library/Developer/Xcode/DerivedData/learnX-e2e, which checkouts take turns
-# with: scripts/lib/derived-data.sh) and with its build
-# settings, so it reuses the app that script built instead of building it
-# again. The result bundle goes to $E2E_UI_RESULT (default
-# build/e2e/ios-ui.xcresult). A test that runs over 3 minutes is stopped and
-# fails.
+# with: scripts/lib/derived-data.sh) and with its build settings, so it reuses
+# the app that script built instead of building it again. The result bundle
+# goes to $E2E_UI_RESULT (default build/e2e/ios-ui.xcresult). A test that runs
+# over 3 minutes is stopped and fails.
 #
 # --live logs in with the real test account from .env (LIVE_USERNAME /
 # LIVE_PASSWORD / LIVE_FINGERPRINT) instead, and runs only the flows tagged
@@ -79,7 +78,7 @@ fi
 cd "$(dirname "$0")/../.."
 
 if [ "$ui_only" = false ] && ! command -v maestro >/dev/null; then
-  echo "maestro not found: brew install mobile-dev-inc/tap/maestro" >&2
+  echo "maestro not found: put the patched build first on PATH (scripts/e2e/maestro/README.md)" >&2
   exit 1
 fi
 

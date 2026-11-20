@@ -6,7 +6,8 @@
 // mirror's nginx does (differential downloads read the .blockmap files, then
 // the parts of the installer that changed):
 //
-//   GET /<file>    latest.yml, latest-linux.yml, an installer, a .blockmap
+//   GET /<file>    latest.yml, latest-linux.yml, their .sig, an installer, a
+//                  .blockmap
 //
 //   node electron/updateServer.ts <dir> [--port 8299]
 //
@@ -14,7 +15,8 @@
 // http://localhost:8299/` (a test build), or a dev run with LEARNX_UPDATE_URL
 // set to the same. "Release" a version by copying its build's installer,
 // latest*.yml and .blockmap into <dir>, as the mirror copies them from the
-// GitHub release.
+// GitHub release, with each latest*.yml's signature by the key the app
+// trusts (updateSignature.ts): without it, the app takes no update.
 import { createReadStream, existsSync, statSync } from 'node:fs';
 import { createServer } from 'node:http';
 import path from 'node:path';

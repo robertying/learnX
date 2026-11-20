@@ -231,8 +231,8 @@ describe('installerForThisComputer', () => {
         'arm64',
       ),
     ).toBe(true);
-    // electron-builder's ${arch} for each target: x86_64 in an AppImage's
-    // name, amd64 in a .deb's.
+    // A .deb takes the Linux name, with electron-builder's ${arch} for each
+    // target: x86_64 in an AppImage's name, amd64 in a .deb's.
     for (const [arch, appImage, deb] of [
       ['x64', 'x86_64', 'amd64'],
       ['arm64', 'arm64', 'arm64'],
@@ -250,6 +250,5 @@ describe('installerForThisComputer', () => {
         ).toBe(true);
       }
     }
-    expect(config.deb?.artifactName).toBe(config.linux?.artifactName);
   });
 });

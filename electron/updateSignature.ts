@@ -3,11 +3,11 @@
 // is checked against the SHA-512 in it, and the builds carry no publisher
 // signature. So each update file is signed at release time, on the
 // maintainer's Mac, with learnX's own Ed25519 update key, into a detached
-// `<file>.sig` next to it (scripts/release/sign-electron-update.mjs); the app carries
-// the public half (certs/electron-public-key.pem). It reads an update file only
-// through `signedProvider`, which refuses one without a valid signature, or
-// one for another platform or CPU: no update is offered, and the reason is
-// logged.
+// `<file>.sig` next to it (scripts/release/sign-electron-update.mjs); the
+// app carries the public half (certs/electron-public-key.pem). It reads an
+// update file only through `signedProvider`, which refuses one without a
+// valid signature, or one for another platform or CPU: no update is offered,
+// and the reason is logged.
 import { createPublicKey, sign, verify } from 'node:crypto';
 
 /** The signature's file name next to an update file's. */

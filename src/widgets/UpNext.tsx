@@ -51,8 +51,8 @@ function UpNextWidget(
   const beijingDay = (ms: number) =>
     Math.floor((ms + 8 * 60 * 60 * 1000) / 86400000);
   const daysAway = (ms: number) => beijingDay(ms) - beijingDay(now);
-  // Its day (none today, the weekday within a week, else with the date) and
-  // its time: the range, or where that doesn't fit, the start.
+  // Its day (none today, then tomorrow, the weekday within a week, else with
+  // the date) and its time: the range, or where that doesn't fit, the start.
   const when = (c: UpNextWidgetProps['classes'][number], start?: boolean) => {
     const days = daysAway(c.start);
     if (days === 0) {

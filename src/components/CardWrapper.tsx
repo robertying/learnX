@@ -31,9 +31,10 @@ import { isApple, isElectron } from 'helpers/platform';
 // system context menu on iOS, iPadOS and Mac, a Material dropdown on Android,
 // and a native menu in the Electron app (right-click, with hover buttons in
 // place of swipes).
-// Longer than Material 3's menu exit animation (75 ms in Compose).
-const MENU_CLOSE_MS = 300;
 const contextMenuSupported = isApple() || isElectron();
+// How long Android's menu stays mounted after it closes: longer than Material
+// 3's menu exit animation (75 ms in Compose).
+const MENU_CLOSE_MS = 300;
 // The window's menus offer the moves in reorder mode where there's a pointer
 // (the Mac, Windows); a long press drags on iPhone and iPad.
 const pointerMoves = DeviceInfo.isMac() || isElectron();
@@ -123,9 +124,9 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
 
   const [menuVisible, setMenuVisible] = useState(false);
   // Android's menu is a Compose view: mounted on a long press, not with every
-  // row, and unmounted once it has closed. Left mounted, its host took the
-  // card's touches where the menu had opened, so the card's next taps and
-  // long presses there did nothing.
+  // row, and unmounted once it has closed: left mounted, its host takes the
+  // card's touches where the menu opened, so the card's next taps and long
+  // presses there would do nothing.
   const [menuMounted, setMenuMounted] = useState(false);
   useEffect(() => {
     if (menuVisible || !menuMounted) {

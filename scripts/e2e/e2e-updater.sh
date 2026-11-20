@@ -5,10 +5,10 @@
 # for updates at. .maestro/updater/notification.yaml first checks the new
 # version's notification: none while logged out, then posted on logging in,
 # and tapping it opens Settings. .maestro/updater/update.yaml updates to
-# 99.0.0: allowing
-# learnX to install apps, a download whose SHA-256 doesn't match refused, then
-# the update, with the app in the background while it downloads, installed
-# (through Android's confirmation before Android 17). On Android 12+,
+# 99.0.0: allowing learnX to install apps, a download whose SHA-256 doesn't
+# match refused, then the update, with the app in the background while it
+# downloads, installed (through Android's confirmation before Android 17). On
+# Android 12+,
 # .maestro/updater/update-again.yaml then updates to 99.0.1, which Android
 # installs without asking, since learnX installed the version it replaces.
 # After each, it checks that Android installed that version and names learnX

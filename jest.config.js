@@ -1,8 +1,8 @@
 // Fixed time zone so date formatting is the same on every machine
 process.env.TZ = 'Asia/Shanghai';
 
-// Tests that make commits in temporary repos (changedFiles.test.ts) leave
-// them unsigned, whatever the machine's Git config says, so a signing setup
+// Tests that make commits in temporary repos (scripts/__tests__) leave them
+// unsigned, whatever the machine's Git config says, so a signing setup
 // (1Password, a hardware key) doesn't prompt during a run. Workers and the
 // Git processes they start inherit this.
 {

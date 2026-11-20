@@ -6,9 +6,9 @@ name: App Store screenshots on the iPhone Duo
 # 10 shots for both displays, so the shots are grouped by posture: closed
 # (outer display), half open, then fully open (inner display, in the split
 # layout as on iPad). The hinge moves with subflows/fold.yaml, so it needs the
-# patched Maestro (scripts/e2e/maestro) first on PATH. Each group sets
-# DUO_POSTURE and SPLIT for its subflows, which scripts/e2e/e2e.sh sets for a
-# whole run.
+# patched Maestro (scripts/e2e/maestro) first on PATH. Each group sets SPLIT
+# for its subflows (scripts/e2e/e2e.sh sets it once for a whole run), and
+# DUO_POSTURE, with which ../subflows/screenshot.yaml saves the inner display.
 - runFlow:
     file: ../subflows/fold.yaml
     env:

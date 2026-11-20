@@ -67,7 +67,7 @@ import UIKit
     #expect(isClose(view.pdfView.maxScaleFactor, fit * PdfView.maxZoom))
   }
 
-  /// The scale factor used to be set before its limits, so shrinking held it at the old minimum.
+  /// PDFView clamps the scale factor to its old limits, so shrinking needs the limits lowered first.
   @Test func fitsThePageWhenTheViewShrinks() throws {
     let view = pdfView(width: 800, url: try document())
     resize(view, width: 400)

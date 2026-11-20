@@ -167,9 +167,9 @@ export interface SplitViewProps {
  * The split view of Android and the Electron app, drawn in JS: the list
  * beside the detail pane once the window is wide enough (`showDetail`), the
  * list alone otherwise. iOS, iPadOS and Mac lay out theirs natively
- * (`NativeSplitView`). It holds the whole
- * main UI, tab bar and sheets included, and the pane shows the detail stack
- * of the selected tab (`SplitTab`); screens outside the tabs use that one.
+ * (`NativeSplitView`). It holds the whole main UI, tab bar and sheets
+ * included, and the pane shows the detail stack of the selected tab
+ * (`SplitTab`); screens outside the tabs use that one.
  */
 const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
   showDetail,

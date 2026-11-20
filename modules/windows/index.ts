@@ -15,8 +15,8 @@ declare class WindowsModule extends NativeModule<WindowsEvents> {
   supportsMultipleWindows(): boolean;
   /**
    * The window that links, menu commands, notification taps and toasts are
-   * for: the key window, or the one a link was just delivered to. Null
-   * until UIKit names one.
+   * for: the one the person last touched, clicked or brought to the front, or
+   * the one a link was just delivered to. Null until UIKit names one.
    */
   targetWindowId(): string | null;
   /**

@@ -49,8 +49,8 @@ export const useSyncStatus = (updatedAt?: number) => {
 /**
  * One row at the top of a list (its header, so it scrolls with the list)
  * while there's no session: the status with how old the data is under it,
- * and Log In at the end when the login needs the user. Today shows the same row in
- * its Form (`SyncStatusSection`).
+ * and Log In at the end when the login needs the user. Today shows the same
+ * row in its Form (`SyncStatusSection`).
  */
 const SyncStatus: React.FC<SyncStatusProps> = ({ updatedAt }) => {
   const theme = useTheme();

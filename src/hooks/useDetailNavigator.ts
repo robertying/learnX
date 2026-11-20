@@ -165,8 +165,8 @@ const sheets: Record<string, keyof RootStackParams | undefined> = {
  * isn't left covering the list. What the pane showed moves onto the list when
  * the pane goes away (the split collapses, as UIKit does with its own), so
  * that it stays on screen; a page no list has (a submission, CourseX) opens
- * in its sheet. That also covers an item opened just before a new
- * split reported that it is collapsed, as on an iPhone.
+ * in its sheet. That also covers an item opened just before a new split
+ * reported that it is collapsed, as on an iPhone.
  */
 export const useShowDetail = (
   /** The list screen's own. */

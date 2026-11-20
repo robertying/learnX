@@ -21,8 +21,8 @@ const electron = () =>
  * Downloads a file on mount (from the cache when it is there) and offers
  * re-download, share, save where people pick (Mac, Electron) and open
  * (Android, Electron). The Electron app also shows the file in its folder.
- * On Android a non-PDF opens by itself after the
- * download when the setting is on.
+ * On Android a non-PDF opens by itself after the download when the setting
+ * is on.
  *
  * Only the file given on first render is used: FileDetail remounts its
  * content when the download fields change.

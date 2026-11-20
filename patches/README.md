@@ -8,7 +8,7 @@ To change one: `pnpm patch <pkg>@<version>`, edit the folder it prints, then
 `pnpm patch-commit <folder>`. Paths in a patch are relative to the package
 folder. `scripts/checks/check-patches.sh` fails the iOS and Android builds when a
 patch isn't applied to `node_modules` (`pnpm install --force` fixes that; then run `pod install` in `ios/` again,
-since the reinstall wipes the `sqlite3.h` that expo-sqlite's pod copies in). It also fails when a patch changes Android code that Expo ships prebuilt (`local-maven-repo` in the package) and its Gradle project (the package name without the scope's `@`, `/` as `-`: `expo-ui` for `@expo/ui`) isn't in `expo.autolinking.android.buildFromSource` in `package.json`, since the app would link the unpatched build. And it fails when a `react-native` patch changes native code (`.m`, `.mm`, `.h`, `.cpp`, `.swift`, `.java`, `.kt`): the app links React Native's native code prebuilt on both platforms, so make such a change in learnX's own native code.
+since the reinstall wipes the `sqlite3.h` that expo-sqlite's pod copies in). It also fails when a patch changes Android code that Expo ships prebuilt (`local-maven-repo` in the package) and its Gradle project (the package name without the scope's `@`, `/` as `-`: `expo-ui` for `@expo/ui`) isn't in `expo.autolinking.android.buildFromSource` in `package.json`, since the app would link the unpatched build. And it fails when a `react-native` patch changes native code (C, C++, Objective-C, Swift, Java or Kotlin): the app links React Native's native code prebuilt on both platforms, so make such a change in learnX's own native code.
 
 Before bumping a patched package, check whether the new release fixes the
 issue upstream; drop the patch if so.

@@ -1,8 +1,9 @@
 // Keeps the packaged app up to date with electron-updater: checks shortly
 // after launch and every few hours, downloads in the background, and installs
 // when the app quits, or at once when the user restarts from Settings
-// (`learnx.updates.install`); a .deb's the user installs from Settings. Updates come from the TUNA mirror's copy of the
-// latest GitHub release (`v<version>`, the mobile apps' too), through
+// (`learnx.updates.install`); a .deb's update Settings opens in the system's
+// installer instead. Updates come from the TUNA mirror's copy of the latest
+// GitHub release (`v<version>`, the mobile apps' too), through
 // electron-updater's generic provider as app-update.yml names it
 // (packageConfig.ts). Builds are unsigned, so Windows checks no publisher
 // signature on the installer; electron-updater checks its SHA-512 against

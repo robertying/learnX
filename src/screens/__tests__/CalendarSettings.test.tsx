@@ -251,7 +251,8 @@ it('exports, deletes and opens the system settings', async () => {
   const user = userEvent.setup();
   await renderScreen();
   await user.press(screen.getByText(t('exportSyncedCalendars')));
-  expect(exportToICS).toHaveBeenCalled();
+  // Synced calendars, not a range of dates (that's the Electron app's).
+  expect(exportToICS).toHaveBeenCalledWith();
   await user.press(
     screen.getByText(t('deleteSyncedCalendarsAndRemindersEllipsis')),
   );
