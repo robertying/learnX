@@ -1,6 +1,8 @@
 import { queryOptions, useMutation, useQuery } from '@tanstack/react-query';
 import {
+  ContentType,
   type ExcellentHomework,
+  type FavoriteItem,
   type Homework,
   type CourseNotificationBase,
   type HomeworkBase,
@@ -65,9 +67,10 @@ const courseIdsOf = async (semesterId: string) =>
  * list fails only when every course does), and CourseDetail refreshing a single
  * course's items into it.
  */
-const createContent = <T extends { id: string; courseId: string }>({
+const createContent = <T extends { id: string; courseId: string }, Run = void>({
   name,
   fetchCourse: fetchFromServer,
+  startRun,
   fields,
   sort,
   priority,
@@ -86,7 +89,14 @@ const createContent = <T extends { id: string; courseId: string }>({
     courseId: string,
     cached: T[],
     options: { refresh: boolean },
+    run?: Run,
   ) => Promise<object[]>;
+  /**
+   * What the courses fetched together share (`fetchCourses`, so a list
+   * fetch or a background sync), e.g. one request every course needs the
+   * answer of. Courses fetched one at a time get none.
+   */
+  startRun?: () => Run;
   sort: (items: T[]) => T[];
   /** Lower lists get their courses fetched first when several refresh. */
   priority: number;
@@ -144,10 +154,13 @@ const createContent = <T extends { id: string; courseId: string }>({
     ).filter(item => item.courseId === courseId);
 
   /** Fetches a course's items, reusing what the semester list has cached. */
-  const fetchCourse = (semesterId: string, courseId: string) =>
-    fetchFromServer(courseId, cachedOf(semesterId, courseId), {
-      refresh: false,
-    });
+  const fetchCourse = (semesterId: string, courseId: string, run?: Run) =>
+    fetchFromServer(
+      courseId,
+      cachedOf(semesterId, courseId),
+      { refresh: false },
+      run,
+    );
 
   /**
    * Fetches these courses' items through the limiter shared by every list,
@@ -165,13 +178,14 @@ const createContent = <T extends { id: string; courseId: string }>({
     const failed = new Map<string, unknown>();
     let done = false;
     const late = () => deadline !== undefined && Date.now() >= deadline;
+    const run = startRun?.();
     const runs = courseIds.map(courseId =>
       courseFetches(async () => {
         if (late()) {
           return;
         }
         try {
-          const items = await fetchCourse(semesterId, courseId);
+          const items = await fetchCourse(semesterId, courseId, run);
           if (!done) {
             fetched.set(courseId, items);
           }
@@ -531,18 +545,37 @@ export const useAssignments = () => {
 };
 
 /**
- * A course's files, with `isFavorite` filled in by thu-learn-lib from the
- * course's file favorites (the file list has no such field). If those fail,
- * so does the course, which keeps what was cached.
+ * The account's file favorites, of every course, asked for once the first
+ * course of a run needs them and shared by the rest.
  */
-const fetchFiles = (courseId: string) =>
-  dataSource.getFileList(courseId, { favorites: true });
+const fileFavorites = () => {
+  let favorites: Promise<readonly FavoriteItem[]> | undefined;
+  return () =>
+    (favorites ??= dataSource.getFavorites({ type: ContentType.FILE }));
+};
 
-const files = createContent<File>({
+/**
+ * A course's files, with `isFavorite` filled in by thu-learn-lib from the file
+ * favorites (the file list has no such field): the run's, fetched once for all
+ * its courses instead of once a course, or else the course's own. If they
+ * fail, so does the course, which keeps what was cached.
+ */
+const fetchFiles = async (
+  courseId: string,
+  _cached: File[],
+  _options: { refresh: boolean },
+  favorites?: () => Promise<readonly FavoriteItem[]>,
+) =>
+  dataSource.getFileList(courseId, {
+    favorites: favorites ? await favorites() : true,
+  });
+
+const files = createContent<File, () => Promise<readonly FavoriteItem[]>>({
   name: 'files',
   fields: fileFields,
   priority: 2,
   fetchCourse: fetchFiles,
+  startRun: fileFavorites,
   sort: byNewest(file => file.uploadTime),
 });
 
