@@ -26,6 +26,7 @@ const container = {
   ready: false,
   isReady: () => false,
   dispatch: jest.fn(),
+  addListener: jest.fn(),
   getRootState: () => ({ key: 'detail', routeNames: detailRouteNames }),
 };
 container.isReady = () => container.ready;
@@ -256,14 +257,26 @@ describe('what the pane showed when it goes away', () => {
   };
 
   const getRootState = container.getRootState;
+  /** A pane that shows `names`, and is emptied by a reset unless `held`. */
+  const showInPane = (names: string[], held = false) => {
+    const pane = { held, state: paneState(...names) };
+    container.getRootState = (() => pane.state) as never;
+    container.dispatch.mockImplementation(() => {
+      if (!pane.held) {
+        pane.state = paneState('EmptyDetail');
+      }
+    });
+    return pane;
+  };
   afterEach(() => {
     container.getRootState = getRootState;
+    container.dispatch.mockReset();
+    container.addListener.mockReset();
   });
 
   it('moves onto the list, as UIKit does when a split collapses', async () => {
     container.ready = true;
-    container.getRootState = (() =>
-      paneState('NoticeDetail', 'FileDetail')) as never;
+    showInPane(['NoticeDetail', 'FileDetail']);
     const navigation = listNavigation('Notices');
     const setShown = await renderList(navigation);
     container.dispatch.mockClear();
@@ -278,9 +291,101 @@ describe('what the pane showed when it goes away', () => {
     );
   });
 
+  it('opens a page no list has in its sheet, with what was pushed on it', async () => {
+    container.ready = true;
+    showInPane(['NoticeDetail', 'AssignmentSubmission', 'FileDetail']);
+    const navigation = listNavigation('Notices');
+    const setShown = await renderList(navigation);
+    container.dispatch.mockClear();
+
+    await setShown(false);
+    expect(navigation.dispatch.mock.calls).toEqual([
+      [StackActions.push('NoticeDetail', { id: 'p0' })],
+      [
+        CommonActions.navigate('AssignmentSubmissionStack', {
+          state: {
+            routes: [
+              { name: 'AssignmentSubmission', params: { id: 'p1' } },
+              { name: 'FileDetail', params: { id: 'p2' } },
+            ],
+          },
+        }),
+      ],
+    ]);
+    expect(container.dispatch).toHaveBeenCalledWith(
+      CommonActions.reset({ index: 0, routes: [{ name: 'EmptyDetail' }] }),
+    );
+  });
+
+  it('opens CourseX in its sheet', async () => {
+    container.ready = true;
+    showInPane(['CourseX']);
+    const navigation = listNavigation('Notices');
+    const setShown = await renderList(navigation);
+
+    await setShown(false);
+    expect(navigation.dispatch.mock.calls).toEqual([
+      [
+        CommonActions.navigate('CourseXStack', {
+          state: { routes: [{ name: 'CourseX', params: { id: 'p0' } }] },
+        }),
+      ],
+    ]);
+  });
+
+  it('waits for a page that holds itself (a submission uploading) to go', async () => {
+    container.ready = true;
+    const pane = showInPane(['NoticeDetail', 'AssignmentSubmission'], true);
+    const stop = jest.fn();
+    container.addListener.mockReturnValue(stop);
+    const navigation = listNavigation('Notices');
+    const setShown = await renderList(navigation);
+
+    await setShown(false);
+    expect(navigation.dispatch).not.toHaveBeenCalled();
+    expect(container.addListener).toHaveBeenCalledWith(
+      'state',
+      expect.any(Function),
+    );
+    // Submitted: it goes back, and the assignment under it moves.
+    pane.held = false;
+    pane.state = paneState('NoticeDetail');
+    await act(() => container.addListener.mock.lastCall![1]());
+    expect(stop).toHaveBeenCalled();
+    expect(navigation.dispatch.mock.calls).toEqual([
+      [StackActions.push('NoticeDetail', { id: 'p0' })],
+    ]);
+  });
+
+  it('stops waiting once the pane is back', async () => {
+    container.ready = true;
+    showInPane(['NoticeDetail', 'AssignmentSubmission'], true);
+    const stop = jest.fn();
+    container.addListener.mockReturnValue(stop);
+    const navigation = listNavigation('Notices');
+    const setShown = await renderList(navigation);
+
+    await setShown(false);
+    expect(stop).not.toHaveBeenCalled();
+    await setShown(true);
+    expect(stop).toHaveBeenCalled();
+  });
+
+  it('leaves a page with neither a list nor a sheet in the pane', async () => {
+    container.ready = true;
+    showInPane(['NoticeDetail', 'Unknown']);
+    const navigation = listNavigation('Notices');
+    const setShown = await renderList(navigation);
+    container.dispatch.mockClear();
+
+    await setShown(false);
+    expect(navigation.dispatch).not.toHaveBeenCalled();
+    expect(container.dispatch).not.toHaveBeenCalled();
+  });
+
   it('leaves an empty pane alone', async () => {
     container.ready = true;
-    container.getRootState = (() => paneState('EmptyDetail')) as never;
+    showInPane(['EmptyDetail']);
     const navigation = listNavigation('Notices');
     const setShown = await renderList(navigation);
     container.dispatch.mockClear();
@@ -292,7 +397,7 @@ describe('what the pane showed when it goes away', () => {
 
   it('is left to the list on top (Settings on Today)', async () => {
     container.ready = true;
-    container.getRootState = (() => paneState('NoticeDetail')) as never;
+    showInPane(['NoticeDetail']);
     const navigation = listNavigation('Notices', 'Settings');
     const setShown = await renderList(navigation, 0);
     await setShown(false);

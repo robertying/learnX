@@ -54,3 +54,11 @@ it("opens the app's notification page on iOS", async () => {
   await openSystemSettings('notifications');
   expect(openSettings).toHaveBeenCalledTimes(1);
 });
+
+it("does nothing when the settings can't open", async () => {
+  jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(false);
+  jest
+    .spyOn(Linking, 'openSettings')
+    .mockRejectedValue(new Error('Unable to open settings'));
+  await expect(openSystemSettings('security')).resolves.toBeUndefined();
+});

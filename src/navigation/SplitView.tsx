@@ -78,6 +78,21 @@ export const TabSplitContext: React.FC<
 };
 
 /**
+ * A view out of sight that React Native Web hides from screen readers but not
+ * from the keyboard, so that Tab doesn't go through its buttons unseen:
+ * `inert` takes it out of both, as the native views are (Electron app).
+ */
+const useInert = (inert: boolean) => {
+  const view = useRef<ComponentRef<typeof View>>(null);
+  useEffect(() => {
+    if (isElectron()) {
+      (view.current as unknown as HTMLElement).inert = inert;
+    }
+  }, [inert]);
+  return view;
+};
+
+/**
  * A tab's own layer of the pane, stacked with the other tabs'. Tabs that
  * aren't selected stay mounted, natively too, so that they keep their
  * navigation state and don't have to be laid out again. Fabric doesn't mount
@@ -85,16 +100,20 @@ export const TabSplitContext: React.FC<
  */
 export const TabLayer: React.FC<
   React.PropsWithChildren<{ selected: boolean }>
-> = ({ selected, children }) => (
-  <View
-    style={[StyleSheet.absoluteFill, !selected && styles.hiddenLayer]}
-    pointerEvents={selected ? 'auto' : 'none'}
-    accessibilityElementsHidden={!selected}
-    importantForAccessibility={selected ? 'auto' : 'no-hide-descendants'}
-  >
-    {children}
-  </View>
-);
+> = ({ selected, children }) => {
+  const layer = useInert(!selected);
+  return (
+    <View
+      ref={layer}
+      style={[StyleSheet.absoluteFill, !selected && styles.hiddenLayer]}
+      pointerEvents={selected ? 'auto' : 'none'}
+      accessibilityElementsHidden={!selected}
+      importantForAccessibility={selected ? 'auto' : 'no-hide-descendants'}
+    >
+      {children}
+    </View>
+  );
+};
 
 /**
  * A tab inside the JS split (`SplitViewProvider`): its lists open items in
@@ -203,16 +222,8 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
   );
   const showMaster = !fullScreenTabs.has(selectedTab);
   const masterHidden = showDetail && !showMaster;
-  // The hidden list is only moved off the window's edge, and React Native
-  // Web hides it from screen readers but not from the keyboard: Tab would
-  // still go through its buttons and cards, unseen. `inert` takes it out of
-  // both, as the native split does.
-  const master = useRef<ComponentRef<typeof View>>(null);
-  useEffect(() => {
-    if (isElectron()) {
-      (master.current as unknown as HTMLElement).inert = masterHidden;
-    }
-  }, [masterHidden]);
+  // The hidden list is only moved off the window's edge.
+  const master = useInert(masterHidden);
   const toggleTabMaster = useCallback(
     (tab: string, show: boolean) =>
       setFullScreenTabs(tabs => {

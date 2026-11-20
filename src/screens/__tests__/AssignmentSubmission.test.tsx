@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import { Alert, Keyboard, Platform } from 'react-native';
 import { act, render, screen, userEvent } from '@testing-library/react-native';
+import { usePreventRemove } from '@react-navigation/native';
 import { showChoices } from 'components/choiceSheet';
 import { mockAssignments } from 'data/mock';
 import { saveSubmissionDraft } from 'data/submissionDrafts';
@@ -16,6 +17,11 @@ import AssignmentSubmission from 'screens/AssignmentSubmission';
 import { screenProps } from 'test-utils/screenProps';
 
 jest.mock('components/choiceSheet', () => ({ showChoices: jest.fn() }));
+// The navigator's own (`useBackKeys`' tests hold a page with it).
+jest.mock('@react-navigation/native', () => ({
+  ...jest.requireActual('@react-navigation/native'),
+  usePreventRemove: jest.fn(),
+}));
 let mockAssignment: Assignment | undefined;
 jest.mock('data/content', () => ({ useAssignment: () => mockAssignment }));
 jest.mock('hooks/useAssignmentSubmission', () => ({
@@ -44,19 +50,10 @@ const unsubmitted = mockAssignments.find(
 )!;
 const withUpload = mockAssignments.find(a => !!a.submittedAttachment)!;
 
-// The sheet's stack in the root navigator
-const parent = {
-  setOptions: jest.fn(),
-  getState: () => ({
-    index: 0,
-    routes: [{ name: 'AssignmentSubmissionStack' }],
-  }),
-};
 const navigation = {
   setOptions: jest.fn(),
   push: jest.fn(),
   goBack: jest.fn(),
-  getParent: () => parent,
 };
 
 const renderScreen = (assignment: Assignment | undefined = unsubmitted) => {
@@ -133,17 +130,20 @@ it('keeps the Draft Saved footer in place, hidden, until there is a draft', asyn
   expect(screen.getByText(t('draftSaved')).props.modifiers).toHaveLength(2);
 });
 
-it("can't be swiped away while uploading", async () => {
+it("can't be left while uploading", async () => {
   await renderScreen();
+  expect(usePreventRemove).toHaveBeenLastCalledWith(
+    false,
+    expect.any(Function),
+  );
   expect(navigation.setOptions).toHaveBeenCalledWith({ gestureEnabled: true });
-  expect(parent.setOptions).toHaveBeenLastCalledWith({ gestureEnabled: true });
   jest.mocked(useSubmitAssignment).mockReturnValue({
     ...submit,
     uploading: true,
   } as never);
   await renderScreen();
+  expect(usePreventRemove).toHaveBeenLastCalledWith(true, expect.any(Function));
   expect(navigation.setOptions).toHaveBeenCalledWith({ gestureEnabled: false });
-  expect(parent.setOptions).toHaveBeenLastCalledWith({ gestureEnabled: false });
 });
 
 it('adds the late deadline once the deadline has passed', async () => {
@@ -169,11 +169,22 @@ it('submits only once there is something to send', async () => {
 });
 
 it('stops saving the draft and goes back once submitted', async () => {
+  jest.mocked(useSubmitAssignment).mockReturnValue({
+    ...submit,
+    uploading: true,
+  } as never);
   await renderScreen();
-  const onDone = jest.mocked(useSubmitAssignment).mock.calls[0][2];
-  onDone();
+  const onDone = jest.mocked(useSubmitAssignment).mock.lastCall![2];
+  // Gone back only once the upload no longer holds the page.
+  let heldOnGoBack: boolean | undefined;
+  navigation.goBack.mockImplementationOnce(() => {
+    heldOnGoBack = jest.mocked(usePreventRemove).mock.lastCall![0];
+  });
+  jest.mocked(useSubmitAssignment).mockReturnValue({ ...submit } as never);
+  await act(() => onDone());
   expect(stop).toHaveBeenCalled();
-  expect(navigation.goBack).toHaveBeenCalled();
+  expect(navigation.goBack).toHaveBeenCalledTimes(1);
+  expect(heldOnGoBack).toBe(false);
 });
 
 it('picks from documents or photos, with the keyboard down', async () => {

@@ -9,7 +9,7 @@ import useAppCommand from 'hooks/useAppCommand';
 
 type Container = Pick<
   NavigationContainerRef<ParamListBase>,
-  'isReady' | 'getCurrentOptions' | 'getRootState' | 'dispatch'
+  'isReady' | 'getRootState' | 'dispatch'
 >;
 type ContainerRef = { current: Container | null };
 
@@ -34,15 +34,11 @@ const stackToPop = (state: State | undefined): State | undefined => {
 };
 
 /**
- * Pops `state`'s top page in `container`: not where a swipe may not take it
- * away either (a submission while it uploads).
+ * Pops `state`'s top page in `container`. A page that can't be left (a
+ * submission while it uploads) holds itself (`usePreventRemove`).
  */
 const pop = (container: Container, state: State | undefined) => {
-  if (
-    !state?.key ||
-    (container.getCurrentOptions() as { gestureEnabled?: boolean } | undefined)
-      ?.gestureEnabled === false
-  ) {
+  if (!state?.key) {
     return false;
   }
   container.dispatch({ ...StackActions.pop(), target: state.key });

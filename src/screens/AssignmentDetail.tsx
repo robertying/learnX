@@ -129,6 +129,9 @@ const AssignmentDetailContent: React.FC<{
   // Past the deadline but still taking late submissions.
   const lateOpen =
     !!lateSubmissionDeadline && dayjs(now).isBefore(lateSubmissionDeadline);
+  // Submissions are taken until the late submission deadline, when there is
+  // one, as the late submission reminders say.
+  const submittable = !closed || lateOpen;
 
   // An empty description shows as text, with no web view to wait for.
   const hasDescription = !!description?.trim();
@@ -157,7 +160,7 @@ const AssignmentDetailContent: React.FC<{
       id: 'submit',
       label: t('submit'),
       icon: 'upload',
-      disabled: closed,
+      disabled: !submittable,
       onPress: handleSubmit,
     },
   ]);

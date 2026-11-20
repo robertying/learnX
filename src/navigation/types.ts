@@ -172,7 +172,10 @@ export type RootStackParams = {
   WhatsNewStack: NavigatorScreenParams<WhatsNewStackParams>;
 };
 
-/** The root on Android, where the split view is drawn in JS. */
+/**
+ * The root on Android and in the Electron app, where the split view is drawn
+ * in JS.
+ */
 export type AndroidRootStackParams = {
   Main: undefined;
   CourseXStack: NavigatorScreenParams<CourseXStackParams> | undefined;

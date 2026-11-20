@@ -2,7 +2,7 @@
 
 Navigators, split views, headers, startup hooks and taps from outside the app. How screens open items is in `src/screens/AGENTS.md`.
 
-- `App.tsx` only sets up the providers and picks login or main UI. Each platform has its own split view (UIKit's on iPhone and iPad, a sidebar of tabs on the Mac, one drawn in JS on Android), and all of them provide `SplitViewContext`. Every tab has a detail pane of its own on every platform, and its own full screen: File detail's Full Screen hides that tab's list only.
+- `App.tsx` only sets up the providers and picks login or main UI. Each platform has its own split view (UIKit's on iPhone and iPad, a sidebar of tabs on the Mac, one drawn in JS on Android and in the Electron app), and all of them provide `SplitViewContext`. Every tab has a detail pane of its own on every platform, and its own full screen: File detail's Full Screen hides that tab's list only.
 - A stack lists the item detail screens it shows with `renderItemDetails([...])` and the settings screens with `renderSettingDetails()`; its param list is built from `ItemDetailParams` and `SettingDetailParams` in `navigation/types.ts` to match.
 - Startup work lives in hooks (`useMainStartup` and the hooks `App.tsx` calls), not in components. Android's update check compares with the installed app's native version, not `package.json`'s, which an over-the-air update can change.
 - Taps from outside the app (notifications, widgets and other `learnx://` links, Spotlight) all go through `useOpenTarget`: it shows the item's list and sets a pending target, which the list opens with `usePendingTarget`, in its split view's detail pane when there is one. The target types, their routes and the `learnx://` links are in `helpers/openTarget`.

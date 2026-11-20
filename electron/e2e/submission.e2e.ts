@@ -113,3 +113,25 @@ test('ignores a drag that carries no file', async ({ window, login }) => {
   await expect(byId(window, 'file-drop-overlay')).toHaveCount(0);
   await expect(window.getByTestId('submissionFilename')).toHaveCount(0);
 });
+
+test('keeps the submission, in its sheet, when the window narrows', async ({
+  app,
+  window,
+  login,
+}) => {
+  await login();
+  await openSubmission(window);
+  await byId(window, 'submissionContent').fill('My answer');
+
+  // Too narrow for the detail pane: the assignment goes onto the list and
+  // the submission into its sheet, with what was typed.
+  await app.evaluate(({ BrowserWindow }) =>
+    BrowserWindow.getAllWindows()[0].setSize(600, 800),
+  );
+  const close = shown(window.getByRole('button', { name: exact('T_close') }));
+  await expect(close).toBeVisible();
+  await expect(byId(window, 'submissionContent')).toHaveValue('My answer');
+  await close.click();
+  await expect(byId(window, 'assignmentSubmission')).toBeHidden();
+  await expect(byId(window, 'assignment-detail')).toBeVisible();
+});
