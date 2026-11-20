@@ -797,6 +797,14 @@ describe('an E2E run', () => {
     expect(fake.app.dock.hide).not.toHaveBeenCalled();
   });
 
+  it('keeps drawing a window that others cover on Windows', async () => {
+    await onPlatform('win32', () => loadMain());
+    expect(fake.app.commandLine.appendSwitch).toHaveBeenCalledWith(
+      'disable-features',
+      'CalculateNativeWinOcclusion',
+    );
+  });
+
   it("takes no input from the system's pointer, only the tests'", async () => {
     await onPlatform('win32', () => loadMain());
     const [win] = fake.windows;

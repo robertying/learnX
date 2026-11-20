@@ -402,11 +402,14 @@ describe('fetching course by course', () => {
               ...rest,
             )) as typeof getFileList);
 
-    const { fetched, failed, timedOut } = await contentLists.files.fetchCourses(
-      semesterId,
-      ids,
-      { deadline: Date.now() + 200 },
-    );
+    // On a fake clock the deadline comes only when the stuck course is all
+    // that's left, however slow the machine.
+    jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
+    const run = contentLists.files.fetchCourses(semesterId, ids, {
+      deadline: Date.now() + 200,
+    });
+    await jest.runAllTimersAsync();
+    const { fetched, failed, timedOut } = await run;
 
     expect(timedOut).toBe(true);
     expect(fetched.has(slow)).toBe(false);

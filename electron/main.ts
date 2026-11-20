@@ -111,6 +111,16 @@ if (process.platform === 'darwin') {
     // regular app, in the Dock.
     app.setActivationPolicy('regular');
   }
+} else if (background && process.platform === 'win32') {
+  // Windows tells Chromium which windows others cover completely, and it
+  // treats those as hidden: they hardly draw, like a window never shown. The
+  // tests' windows open in the same place, each behind the others, so one can
+  // sit under another test's for its whole run (a new app's welcome page
+  // once took over 30 s to come up).
+  app.commandLine.appendSwitch(
+    'disable-features',
+    'CalculateNativeWinOcclusion',
+  );
 }
 
 // On Windows, everything learnX keeps (the saved login, settings, cached
