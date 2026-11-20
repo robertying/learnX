@@ -260,6 +260,26 @@ class PdfiumViewTest {
 
     view.pageShown(2, 3)
     assertFalse(view.performAccessibilityAction(SCROLL_FORWARD, null))
+    verify(exactly = 0) { view.jumpTo(3, any()) }
+  }
+
+  @Test
+  fun leavesOtherActionsToTheView() {
+    val view = spyk(PdfiumView(activity))
+    // Nothing to turn before the document loads.
+    view.performAccessibilityAction(SCROLL_FORWARD, null)
+    view.pageShown(0, 3)
+    view.performAccessibilityAction(AccessibilityAction.ACTION_LONG_CLICK.id, null)
+    verify(exactly = 0) { view.jumpTo(any(), any()) }
+  }
+
+  @Test
+  fun closesWhenReactNativeDestroysTheView() {
+    val view = pdfView()
+    root.addView(view)
+    view.setUri(file().toURI().toString())
+    PdfModule().definition().viewManagerDefinitions.values.single().onViewDestroys!!(view)
+    assertNull(view.viewer)
   }
 }
 
