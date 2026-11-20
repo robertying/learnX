@@ -107,6 +107,9 @@ export const packageConfig = (options: PackageOptions = {}): Configuration => {
       ...mainProcessFiles(),
       'icons/icon.png',
       'icons/icon.ico',
+      // The main process's packages ship source maps (js-yaml's are 0.55 MB)
+      // that nothing in the app reads.
+      '!**/node_modules/**/*.map',
       { from: '../build/electron/web', to: 'web' },
       // The preloads, stripped of their types (preloads.ts, package.ts).
       {

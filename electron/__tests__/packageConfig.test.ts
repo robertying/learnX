@@ -185,6 +185,10 @@ it('installs for the current user, and uninstalling removes learnX’s data', ()
   );
 });
 
+it("leaves the packages' source maps out", () => {
+  expect(packageConfig().files).toContain('!**/node_modules/**/*.map');
+});
+
 it('packages what the main process shares with the page', () => {
   expect(packageConfig().files).toContainEqual({
     from: '../src/constants',
