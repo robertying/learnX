@@ -8,6 +8,17 @@ const {
   wrapWithReanimatedMetroConfig,
 } = require('react-native-reanimated/metro-config');
 
+// Expo's tree shaking (and the graph optimization it needs) for production
+// bundles: release builds, updates and the Electron app's web build. Metro
+// otherwise bundles every export of every module a file imports: all of
+// Fluent UI through its index, every size of each Fluent icon, the encode
+// tables of entities that only decoding is imported from. Development
+// bundles aren't optimized either way. The CLI reads these when it starts
+// Metro, after loading this file. Metro's workers need
+// patches/babel-plugin-react-compiler to send the ASTs back.
+process.env.EXPO_UNSTABLE_METRO_OPTIMIZE_GRAPH = '1';
+process.env.EXPO_UNSTABLE_TREE_SHAKING = '1';
+
 // babel/inline-env.js inlines .env and babel-plugin-preval inlines the files
 // in src/helpers/preval at transform time, and Metro's cache only tracks the
 // file being transformed, not the repo's own Babel plugins (babel/) either.
