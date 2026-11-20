@@ -1,7 +1,8 @@
 name: JS
 
 # The JS checks every pull request must pass: Checks (typecheck, lint, format,
-# runtime version, ShellCheck, Jest) and Release bundles. Both are required.
+# runtime version, ShellCheck, Jest, the release lanes' Ruby tests) and Release
+# bundles. Both are required.
 # Android is in android.yml, the Apple builds in apple.yml and the Windows and
 # Linux app in electron.yml.
 on:
@@ -29,8 +30,8 @@ env:
 
 jobs:
   checks:
-    # Typecheck, lint, format, the over-the-air runtime version, ShellCheck
-    # and Jest (with its coverage thresholds)
+    # Typecheck, lint, format, the over-the-air runtime version, ShellCheck,
+    # Jest (with its coverage thresholds) and the release lanes' Ruby tests
     name: Checks
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -65,6 +66,18 @@ jobs:
       - name: Shell scripts
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: shellcheck --version | head -2 && pnpm lint:shell
+
+      # The release logic the Fastfile uses (fastlane/release.rb). Plain Ruby
+      # and minitest, which comes with Ruby, so no gems to install. The Ruby
+      # version comes from .ruby-version.
+      - name: Set up Ruby
+        id: ruby
+        if: ${{ !cancelled() }}
+        uses: ruby/setup-ruby@f9c4492e86def3e644ab32a0ef185eda5b0c20d0 # v1.342.0
+
+      - name: Release lane tests
+        if: ${{ !cancelled() && steps.install.outcome == 'success' && steps.ruby.outcome == 'success' }}
+        run: pnpm test:fastlane
 
       # Jest's cache holds Babel output, mostly for node_modules. Its key
       # follows what changes that output (the Babel plugins in babel/ too,
