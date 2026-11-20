@@ -2,6 +2,7 @@
 // notifications in step with a plan, and the triggers they go off by.
 import * as Notifications from 'expo-notifications';
 import { isAndroid } from 'helpers/platform';
+import { perfCount } from 'services/perfSurfaces';
 
 /** A notification to have scheduled, by an identifier that names it. */
 export interface PlannedNotification {
@@ -38,6 +39,7 @@ export const immediateTrigger = (
 
 /** The scheduled notifications whose identifiers `matches` accepts. */
 export const getScheduled = async (matches: (identifier: string) => boolean) =>
+  perfCount('notifGetAll') ||
   (await Notifications.getAllScheduledNotificationsAsync()).filter(n =>
     matches(n.identifier),
   );
@@ -100,10 +102,20 @@ export const reconcileScheduled = async (
     ...scheduled
       .map(n => n.identifier)
       .filter(id => !wanted.has(id) && !keep(id))
-      .map(id => Notifications.cancelScheduledNotificationAsync(id)),
+      .map(
+        id => (
+          perfCount('notifCancel'),
+          Notifications.cancelScheduledNotificationAsync(id)
+        ),
+      ),
     // Scheduling an identifier again replaces it.
     ...plan
       .filter(n => !isCurrent(n))
-      .map(n => Notifications.scheduleNotificationAsync(n)),
+      .map(
+        n => (
+          perfCount('notifSchedule'),
+          Notifications.scheduleNotificationAsync(n)
+        ),
+      ),
   ]);
 };

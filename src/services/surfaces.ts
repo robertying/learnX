@@ -29,6 +29,7 @@ import {
 } from 'services/calendar/classes';
 import { uploadCourses } from 'services/coursex';
 import { recordError } from 'services/crashReporting';
+import { perfCount, perfTime } from 'services/perfSurfaces';
 import {
   cancelClassReminders,
   syncClassReminders,
@@ -393,7 +394,10 @@ let running: Promise<void> = Promise.resolve();
  */
 export const refreshSurfaces = () => {
   running = running.then(async () => {
+    perfCount('refreshes');
+    const perfAll = performance.now();
     const inputs = readInputs();
+    perfTime('readInputs', performance.now() - perfAll);
     const checkMissing = shouldCheckMissing(inputs);
     if (checkMissing) {
       missingChecked = { at: Date.now(), resumes: inputs.resumes };
@@ -407,14 +411,18 @@ export const refreshSurfaces = () => {
         continue;
       }
       lastDeps.set(surface.name, deps);
+      const perfStart = performance.now();
       try {
         await surface.update(inputs);
+        perfTime(surface.name, performance.now() - perfStart);
+        perfCount(`ran ${surface.name}`);
       } catch (error) {
         // Tried again with the next change.
         lastDeps.delete(surface.name);
         recordError(error, `Updating ${surface.name}`);
       }
     }
+    perfTime('refreshTotal', performance.now() - perfAll);
   });
   return running;
 };

@@ -45,6 +45,8 @@ export interface LaunchOptions {
    * (`data/mockScale`); `normal` is the default.
    */
   mockScale?: unknown;
+  /** TEMPORARY perf pass 7 */
+  perfSurfaces?: unknown;
   /**
    * `true` shows what the app keeps as JSON in place of the app, for the
    * upgrade test (`screens/StoreReport`, mock account only).
@@ -190,6 +192,14 @@ export const applyLaunchOptions = (initialProps?: LaunchOptions) => {
   const mockScale = read('mockScale', initialProps);
   if (isScale(mockScale)) {
     setMockScale(mockScale);
+  }
+  // TEMPORARY perf pass 7
+  if (read('perfSurfaces', initialProps)) {
+    const { afterFirstListDrawn } =
+      require('services/perf') as typeof import('services/perf');
+    const { runPerfScenario } =
+      require('services/perfSurfaces') as typeof import('services/perfSurfaces');
+    afterFirstListDrawn(runPerfScenario);
   }
 
   if (__DEV__ || env.TEST_LOGIN) {

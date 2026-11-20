@@ -20,6 +20,7 @@ import {
 } from 'helpers/widgetDeadlines';
 import type { DeadlineWidgetProps, UpNextWidgetProps } from 'widgets/props';
 import { isAndroid, isApple } from 'helpers/platform';
+import { perfCount } from 'services/perfSurfaces';
 
 // Each layout imports only its own platform's @expo/ui components.
 const deadlinesWidget = (): Widget<DeadlineWidgetProps> | undefined =>
@@ -81,6 +82,7 @@ export function updateDeadlineWidget(
   const options = { hiddenCourses, archived, limit: WIDGET_DEADLINES };
   if (isApple()) {
     const timeline = deadlineTimeline(assignments, options);
+    perfCount('widgetDeadlines');
     widget.updateTimeline(
       timeline.map(entry => ({
         date: new Date(entry.date),
@@ -90,6 +92,7 @@ export function updateDeadlineWidget(
   } else {
     // No timelines: the layout drops what has passed by its own clock as
     // it's redrawn, so it gets a few more than it shows.
+    perfCount('widgetDeadlines');
     widget.updateSnapshot(toProps(upcomingDeadlines(assignments, options)));
   }
 }
@@ -155,6 +158,7 @@ export function updateUpNextWidget(classes: UpcomingClass[] = []) {
   if (key === lastUpNext) {
     return;
   }
+  perfCount('widgetUpNext');
   if (isApple()) {
     widget.updateTimeline(
       upNextTimes(classes).map(date => ({ date: new Date(date), props })),
