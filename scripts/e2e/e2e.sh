@@ -13,7 +13,8 @@
 # of device (an iPhone, an iPad, an iPad mini) and skips itself on others.
 # xcodebuild builds the Release app with them, in scripts/e2e/e2e-build.sh's
 # DerivedData ($DERIVED_DATA, default
-# ~/Library/Developer/Xcode/DerivedData/learnX-e2e) and with its build
+# ~/Library/Developer/Xcode/DerivedData/learnX-e2e, which checkouts take turns
+# with: scripts/lib/derived-data.sh) and with its build
 # settings, so it reuses the app that script built instead of building it
 # again. The result bundle goes to $E2E_UI_RESULT (default
 # build/e2e/ios-ui.xcresult). A test that runs over 3 minutes is stopped and
@@ -84,6 +85,8 @@ fi
 
 # shellcheck source=scripts/e2e/lib/env.sh
 . scripts/e2e/lib/env.sh
+# shellcheck source=scripts/lib/derived-data.sh
+. scripts/lib/derived-data.sh
 if [ "$live" = true ]; then
   if [ -n "${CI:-}" ]; then
     echo "--live is for local runs only, never CI" >&2
@@ -296,7 +299,10 @@ run_ui_tests() {
   # TEST_LOGIN=1 as in scripts/e2e/e2e-build.sh: the app xcodebuild installs
   # replaces that build, and the flows' login check needs it.
   # TEST_RUNNER_-prefixed variables reach the test runner without the prefix.
-  TEST_LOGIN=1 TEST_RUNNER_E2E_USERNAME="$username" TEST_RUNNER_E2E_PASSWORD="$password" \
+  # The DerivedData folder is shared with other checkouts, which take turns
+  # (scripts/lib/derived-data.sh).
+  with_derived_lock "$derived" env TEST_LOGIN=1 \
+    TEST_RUNNER_E2E_USERNAME="$username" TEST_RUNNER_E2E_PASSWORD="$password" \
     xcodebuild test \
     -workspace ios/learnX.xcworkspace \
     -scheme learnXUITests \
@@ -329,10 +335,27 @@ if [ "$ui_only" = true ]; then
   exit
 fi
 
+# The patches the Maestro on PATH was built with: scripts/e2e/maestro/build.sh
+# lists them next to its bin folder. None for a Maestro release.
+maestro_patches() {
+  local bin
+  bin="$(command -v maestro)" || return 0
+  cat "$(dirname "$bin")/../learnx-patches" 2>/dev/null || true
+}
+
 if [ "$live" = false ]; then
   status=0
   maestro "${device_args[@]+"${device_args[@]}"}" --platform "$platform" test \
     "${test_args[@]}" "$@" || status=$?
+  # Android, after every flow: .maestro/pinch zooms a PDF with the patched
+  # Maestro's two-finger `pinch`, which a Maestro release can't read. Its own
+  # run, so the flows' report (--output) stays theirs.
+  if [ "$platform" = android ] && [ "$has_flow" = false ] &&
+    maestro_patches | grep -qx maestro-pinch.patch; then
+    maestro "${device_args[@]+"${device_args[@]}"}" --platform "$platform" test \
+      "${test_args[@]}" ${test_out:+--test-output-dir "$test_out"} \
+      .maestro/pinch/zoom-pdf.yaml || status=$?
+  fi
   number_shots
   if [ "$platform" = ios ] && [ "$has_flow" = false ] && [ "${E2E_UI_TESTS:-1}" != 0 ]; then
     run_ui_tests || status=$?

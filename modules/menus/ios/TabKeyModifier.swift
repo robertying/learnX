@@ -22,14 +22,17 @@ struct TabKeyModifier: ViewModifier, Record {
     modifiers.subtracting(.capsLock) == (backward ? .shift : [])
   }
 
-  func body(content: Content) -> some View {
-    content.onKeyPress(.tab, phases: .down) { press in
-      guard handles(press.modifiers) else {
-        return .ignored
-      }
-      eventDispatcher?([Self.type: [:]])
-      return .handled
+  /// A Tab pressed with `modifiers`: sent to JS if this Tab takes them, else left to the field.
+  func press(_ modifiers: EventModifiers) -> KeyPress.Result {
+    guard handles(modifiers) else {
+      return .ignored
     }
+    eventDispatcher?([Self.type: [:]])
+    return .handled
+  }
+
+  func body(content: Content) -> some View {
+    content.onKeyPress(.tab, phases: .down) { press($0.modifiers) }
   }
 
   static func register() {

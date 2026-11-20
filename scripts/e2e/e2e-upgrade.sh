@@ -35,6 +35,8 @@ baseline="${BASELINE_DIR:-$HOME/Library/Caches/learnX-e2e/18.0.3-2}"
 
 # shellcheck source=scripts/e2e/lib/env.sh
 . scripts/e2e/lib/env.sh
+# shellcheck source=scripts/lib/derived-data.sh
+. scripts/lib/derived-data.sh
 username="$(read_env DUMMY_USERNAME)"
 password="$(read_env DUMMY_PASSWORD)"
 if [ -z "$username" ] || [ -z "$password" ]; then
@@ -137,8 +139,11 @@ scripts/e2e/e2e.sh "$platform" .maestro/upgrade/1-use-18.0.3.yaml
 if [ "${SKIP_CURRENT_BUILD:-}" = 1 ]; then
   case "$platform" in
   ios)
-    app="${DERIVED_DATA:-$HOME/Library/Developer/Xcode/DerivedData/learnX-e2e}/Build/Products/Release-iphonesimulator/learnX.app"
-    xcrun simctl install "$device" "$app"
+    derived="${DERIVED_DATA:-$HOME/Library/Developer/Xcode/DerivedData/learnX-e2e}"
+    if ! with_derived_lock "$derived" install_built "$derived" "$device"; then
+      echo "No build of this checkout in $derived: run without SKIP_CURRENT_BUILD" >&2
+      exit 1
+    fi
     ;;
   android)
     adb -s "$device" install -r -d "android/app/build/outputs/apk/github/release/app-github-${ANDROID_ABI:-arm64-v8a}-release.apk"

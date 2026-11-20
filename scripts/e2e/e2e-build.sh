@@ -15,7 +15,8 @@
 #   scripts/e2e/e2e-build.sh android <emulator serial>
 #
 # iOS: DerivedData goes to $DERIVED_DATA (default
-# ~/Library/Developer/Xcode/DerivedData/learnX-e2e); the build is for that
+# ~/Library/Developer/Xcode/DerivedData/learnX-e2e, which every checkout
+# shares, taking turns: scripts/lib/derived-data.sh); the build is for that
 # simulator's architecture and makes no dSYM, so nothing goes to Crashlytics.
 # One build serves every simulator of that architecture (iPhone, iPad, Duo):
 # install it on another with `xcrun simctl install <udid> <app>`. A simulator
@@ -35,6 +36,8 @@ if [ -z "$platform" ] || [ -z "$device" ]; then
 fi
 
 cd "$(dirname "$0")/../.."
+# shellcheck source=scripts/lib/derived-data.sh
+. scripts/lib/derived-data.sh
 
 export TEST_LOGIN=1
 # The key E2E builds trust for over-the-air updates (scripts/e2e/e2e-ota.sh).
@@ -62,18 +65,23 @@ ios)
     destination=(-destination "generic/platform=iOS Simulator" ARCHS="$(uname -m)"
       IPHONEOS_DEPLOYMENT_TARGET="$runtime_version")
   fi
-  xcodebuild build \
-    -workspace ios/learnX.xcworkspace \
-    -scheme learnX \
-    -configuration Release \
-    "${destination[@]}" \
-    -derivedDataPath "$derived" \
-    -quiet \
-    DEBUG_INFORMATION_FORMAT=dwarf \
-    COMPILER_INDEX_STORE_ENABLE=NO
-  app="$derived/Build/Products/Release-iphonesimulator/learnX.app"
-  xcrun simctl install "$device" "$app"
-  echo "Installed $app"
+  # Built and installed in one turn with the folder, which other checkouts
+  # share (scripts/lib/derived-data.sh). `&&`: errexit is off in a function
+  # whose status is tested.
+  build_and_install() {
+    xcodebuild build \
+      -workspace ios/learnX.xcworkspace \
+      -scheme learnX \
+      -configuration Release \
+      "${destination[@]}" \
+      -derivedDataPath "$derived" \
+      -quiet \
+      DEBUG_INFORMATION_FORMAT=dwarf \
+      COMPILER_INDEX_STORE_ENABLE=NO &&
+      xcrun simctl install "$device" "$derived/Build/Products/Release-iphonesimulator/learnX.app"
+  }
+  with_derived_lock "$derived" build_and_install
+  echo "Installed $derived/Build/Products/Release-iphonesimulator/learnX.app"
   ;;
 android)
   abi="${ANDROID_ABI:-arm64-v8a}"

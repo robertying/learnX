@@ -7,7 +7,8 @@
 #   scripts/checks/test-ios.sh <simulator udid> [scheme...]
 #
 # DerivedData goes to $DERIVED_DATA (default
-# ~/Library/Developer/Xcode/DerivedData/learnX-tests), result bundles to
+# ~/Library/Developer/Xcode/DerivedData/learnX-tests, which every checkout
+# shares, taking turns: scripts/lib/derived-data.sh), result bundles to
 # $DERIVED_DATA/results. Extra xcodebuild arguments (e.g. build settings) can
 # go in $XCODEBUILD_ARGS, split on spaces. Run `pod install` first after adding
 # a module's tests.
@@ -21,6 +22,8 @@ fi
 shift
 
 cd "$(dirname "$0")/../.."
+# shellcheck source=scripts/lib/derived-data.sh
+. scripts/lib/derived-data.sh
 
 derived="${DERIVED_DATA:-$HOME/Library/Developer/Xcode/DerivedData/learnX-tests}"
 results="$derived/results"
@@ -30,7 +33,7 @@ schemes=("$@")
 # under the current total, and raise it as coverage grows.
 min=0
 if [ ${#schemes[@]} -eq 0 ]; then
-  min=86
+  min=88
   for podspec in modules/*/ios/*.podspec; do
     if [ -d "$(dirname "$podspec")/Tests" ]; then
       schemes+=("$(basename "$podspec" .podspec)-Unit-Tests")
@@ -41,31 +44,35 @@ fi
 
 read -ra extra_args <<<"${XCODEBUILD_ARGS:-}"
 
-rm -rf "$results"
-mkdir -p "$results"
-
 failed=()
-for scheme in "${schemes[@]}"; do
-  echo "▸ $scheme"
-  if ! xcodebuild test \
-    -workspace ios/learnX.xcworkspace \
-    -scheme "$scheme" \
-    -configuration Debug \
-    -destination "id=$device" \
-    -derivedDataPath "$derived" \
-    -enableCodeCoverage YES \
-    -resultBundlePath "$results/$scheme.xcresult" \
-    -quiet \
-    "${extra_args[@]+"${extra_args[@]}"}"; then
-    failed+=("$scheme")
-  fi
-done
+# The tests and the coverage of their results, in one turn with the folder.
+run_tests() {
+  rm -rf "$results"
+  mkdir -p "$results"
 
-# Coverage of the app's and the modules' own Swift (not their tests, not pods),
-# each file from the run that covers it best, failing below `min`.
-for result in "$results"/*.xcresult; do
-  xcrun xccov view --report --json "$result" 2>/dev/null || true
-done | node scripts/checks/native-coverage.mjs --min="$min" "$PWD" || failed+=(coverage)
+  for scheme in "${schemes[@]}"; do
+    echo "▸ $scheme"
+    if ! xcodebuild test \
+      -workspace ios/learnX.xcworkspace \
+      -scheme "$scheme" \
+      -configuration Debug \
+      -destination "id=$device" \
+      -derivedDataPath "$derived" \
+      -enableCodeCoverage YES \
+      -resultBundlePath "$results/$scheme.xcresult" \
+      -quiet \
+      "${extra_args[@]+"${extra_args[@]}"}"; then
+      failed+=("$scheme")
+    fi
+  done
+
+  # Coverage of the app's and the modules' own Swift (not their tests, not
+  # pods), each file from the run that covers it best, failing below `min`.
+  for result in "$results"/*.xcresult; do
+    xcrun xccov view --report --json "$result" 2>/dev/null || true
+  done | node scripts/checks/native-coverage.mjs --min="$min" "$PWD" || failed+=(coverage)
+}
+with_derived_lock "$derived" run_tests
 
 if [ ${#failed[@]} -gt 0 ]; then
   echo "Failed: ${failed[*]}" >&2
