@@ -589,6 +589,11 @@ describe('Deadlines on iOS', () => {
   const render = (widgetFamily?: string, props = deadlineProps) =>
     layout(props, { widgetFamily, colorScheme: 'dark' });
 
+  // The entry's date counts until the widget's own clock is past it.
+  beforeEach(() => {
+    jest.spyOn(Date, 'now').mockReturnValue(now);
+  });
+
   it('colors due dates red under a day and orange by tomorrow, by its clock', () => {
     const widget = layout(
       { ...deadlineProps, deadlines: coloredDeadlines },
@@ -736,6 +741,28 @@ describe('Deadlines on iOS', () => {
       total: 12,
     });
     expect(childrenOf(many)).toHaveLength(10);
+  });
+
+  it('drops the deadlines passed by its own clock once the timeline has run out', () => {
+    const props = {
+      ...deadlineProps,
+      deadlines: [deadline('gone', at('09:00')), ...deadlineProps.deadlines],
+      total: 10,
+    };
+    const drawn = (date: number, family = 'systemMedium') =>
+      layout(props, { widgetFamily: family, date: new Date(date) });
+    // The last entry, drawn again after it: the clock is past it.
+    const stale = version(drawn(at('08:00')), 5);
+    expect(texts(stale)).not.toContain('Assignment gone');
+    expect(texts(stale)).toContain('Assignment d5');
+    expect(texts(stale)).toContain('+4');
+    expect(texts(drawn(at('08:00'), 'accessoryRectangular'))[0]).toBe(
+      'Assignment d1',
+    );
+    // An entry drawn ahead of its time goes by its own date.
+    jest.spyOn(Date, 'now').mockReturnValue(at('07:00'));
+    expect(texts(version(drawn(at('08:00')), 5))).toContain('Assignment gone');
+    expect(texts(version(drawn(now), 5))).not.toContain('Assignment gone');
   });
 
   it('says when nothing is due', () => {

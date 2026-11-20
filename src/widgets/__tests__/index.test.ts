@@ -65,19 +65,26 @@ describe('updateDeadlineWidget', () => {
     expect(iosWidget.updateTimeline).not.toHaveBeenCalled();
   });
 
+  const many = Array.from({ length: 12 }, (_, i) =>
+    assignment(`a${i}`, `2026-03-${String(16 + i).padStart(2, '0')}T00:00:00Z`),
+  );
+
   it('gives Android more deadlines than it shows, to drop passed ones', () => {
     jest.replaceProperty(Platform, 'OS', 'android');
-    const many = Array.from({ length: 12 }, (_, i) =>
-      assignment(
-        `a${i}`,
-        `2026-03-${String(16 + i).padStart(2, '0')}T00:00:00Z`,
-      ),
-    );
     updateDeadlineWidget(many, options);
 
     const [props] = jest.mocked(androidWidget.updateSnapshot).mock.calls[0];
     expect(props.deadlines).toHaveLength(10);
     expect(props.total).toBe(12);
+  });
+
+  it('gives iOS as many deadlines as a large widget shows', () => {
+    jest.replaceProperty(Platform, 'OS', 'ios');
+    updateDeadlineWidget(many, options);
+
+    const [entries] = jest.mocked(iosWidget.updateTimeline).mock.calls[0];
+    expect(entries[0].props.deadlines).toHaveLength(10);
+    expect(entries[0].props.total).toBe(12);
   });
 
   it('empties the widget when there are no assignments', () => {

@@ -36,20 +36,9 @@ function UpNextWidget(
 ) {
   'widget';
   const colors = kit.colors(environment);
-  // Fallbacks for before the app first sends its strings. Widget layouts run
-  // in their own runtime without the app's translations.
-  /* oxlint-disable learnx/no-han-outside-translations */
-  const zh = kit.chinese(environment);
-  // English in sentence case, as Android writes it (helpers/sentenceCase).
-  const title = props.title || (zh ? '下一节课' : 'Next up');
-  // U+2005 is the gap iOS draws between Chinese and Latin (helpers/cjk),
-  // which Android doesn't.
-  const noClasses =
-    props.noClasses ||
-    (zh
-      ? '打开 learnX 后，这里会显示课程'
-      : 'Open learnX to show your classes here');
-  /* oxlint-enable learnx/no-han-outside-translations */
+  const firstRun = kit.firstRun(environment);
+  const title = props.title || firstRun.upNext;
+  const noClasses = props.noClasses || firstRun.noClasses;
 
   const now = Date.now();
   const classes = (props.classes ?? []).filter(c => c.end > now);
