@@ -41,6 +41,14 @@ jest.mock('hooks/useMainCommands', () => jest.fn());
 jest.mock('hooks/useLaunchSheet', () => jest.fn());
 jest.mock('hooks/useMainStartup', () => jest.fn());
 jest.mock('hooks/useSettingsBadge', () => jest.fn(() => false));
+// What waits for the launch's first list to be drawn.
+const mockDrawnCallbacks: (() => void)[] = [];
+jest.mock('services/perf', () => ({
+  afterFirstListDrawn: (callback: () => void) => {
+    mockDrawnCallbacks.push(callback);
+    return () => {};
+  },
+}));
 
 let mockLayout = {
   nativeSplit: true,
@@ -87,6 +95,7 @@ const lazy = () => config().screens.map(s => s.options?.lazy);
 const idle: (() => void)[] = [];
 beforeEach(() => {
   idle.length = 0;
+  mockDrawnCallbacks.length = 0;
   globalThis.requestIdleCallback = jest.fn(callback => {
     idle.push(callback as () => void);
     return idle.length;
@@ -104,6 +113,8 @@ const tabBarIcon = (index: number, focused = false) =>
   });
 
 const runIdle = () => act(() => idle.shift()!());
+const drawFirstList = () =>
+  act(() => mockDrawnCallbacks.splice(0).forEach(callback => callback()));
 
 const iPhone = { nativeSplit: true, sidebarSplit: false, settingsTab: false };
 const mac = { nativeSplit: true, sidebarSplit: true, settingsTab: true };
@@ -111,7 +122,7 @@ const android = { nativeSplit: false, sidebarSplit: false, settingsTab: false };
 // The Electron app: Android's JS split, with Settings in its navigation pane
 const electron = { nativeSplit: false, sidebarSplit: false, settingsTab: true };
 
-it('shows five tabs in the tab bar, mounting the first and then the rest one by one', async () => {
+it('shows five tabs in the tab bar, mounting the first and then, once its list is drawn, the rest one by one', async () => {
   const MainTab = loadMainTab(iPhone);
   await render(<MainTab />);
   expect(config().screens.map(s => s.name)).toEqual([
@@ -130,6 +141,9 @@ it('shows five tabs in the tab bar, mounting the first and then the rest one by 
     tabBarButtonTestID: 'tab-notices',
   });
   expect(lazy()).toEqual([false, true, true, true, true]);
+  // Nothing more until the first tab's list is on screen.
+  expect(idle).toHaveLength(0);
+  await drawFirstList();
 
   for (let mounted = 2; mounted <= 5; mounted++) {
     await runIdle();
@@ -142,7 +156,23 @@ it('waits for a split to be laid out before mounting the other tabs', async () =
   jest.mocked(useSplitLaidOut).mockReturnValue(false);
   const MainTab = loadMainTab(iPhone);
   await render(<MainTab />);
+  await drawFirstList();
   expect(idle).toHaveLength(0);
+});
+
+it('mounts the other tabs after a moment when no list is drawn', async () => {
+  jest.mocked(useSplitLaidOut).mockReturnValue(true);
+  jest.useFakeTimers();
+  try {
+    const MainTab = loadMainTab(iPhone);
+    await render(<MainTab />);
+    await act(() => jest.advanceTimersByTime(1999));
+    expect(idle).toHaveLength(0);
+    await act(() => jest.advanceTimersByTime(1));
+    expect(idle).toHaveLength(1);
+  } finally {
+    jest.useRealTimers();
+  }
 });
 
 it('wraps each tab in a split of its own, with outline SF Symbols, filled when selected', async () => {

@@ -9,11 +9,15 @@ import { isApple } from 'helpers/platform';
  * its content (`useFirstListDrawn`: Today's, or the tab's a window opens on),
  * after `bundleStart`, which `setupEnv` marks as the bundle starts running.
  * Each is marked once per JS runtime, as a User Timing mark (React Native
- * DevTools and the Electron app's DevTools show them).
+ * DevTools and the Electron app's DevTools show them). The first list drawn
+ * also starts what waits for the first screen (`afterFirstListDrawn`).
  */
 export type PerfMark = 'storesLoaded' | 'firstListDrawn';
 
 const marks: Partial<Record<PerfMark, number>> = {};
+
+/** What waits for the first list to be drawn (`afterFirstListDrawn`). */
+const drawnCallbacks = new Set<() => void>();
 
 /** React Native's own startup timing, on `performance.now()`'s clock. */
 interface StartupTiming {
@@ -37,7 +41,26 @@ export const markPerf = (name: PerfMark) => {
     if (env.TEST_LOGIN) {
       report();
     }
+    const callbacks = [...drawnCallbacks];
+    drawnCallbacks.clear();
+    callbacks.forEach(callback => callback());
   }
+};
+
+/**
+ * Runs `callback` once this runtime's first list has been drawn
+ * (`firstListDrawn`), or right away if it has: for work the launch's first
+ * screen shouldn't wait for. Returns a function that cancels it.
+ */
+export const afterFirstListDrawn = (callback: () => void) => {
+  if (marks.firstListDrawn !== undefined) {
+    callback();
+    return () => {};
+  }
+  drawnCallbacks.add(callback);
+  return () => {
+    drawnCallbacks.delete(callback);
+  };
 };
 
 /**
