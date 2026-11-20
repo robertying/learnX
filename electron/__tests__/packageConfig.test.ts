@@ -185,6 +185,14 @@ it('installs for the current user, and uninstalling removes learnX’s data', ()
   );
 });
 
+it("keeps Chromium's strings for the app's languages only", () => {
+  expect(packageConfig().electronLanguages).toEqual([
+    'en-US',
+    'zh-CN',
+    'zh-TW',
+  ]);
+});
+
 it("leaves the packages' source maps out", () => {
   expect(packageConfig().files).toContain('!**/node_modules/**/*.map');
 });

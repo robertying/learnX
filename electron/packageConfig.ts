@@ -82,6 +82,11 @@ export const packageConfig = (options: PackageOptions = {}): Configuration => {
       // The .deb's Homepage field, which electron-builder requires.
       homepage: 'https://github.com/robertying/learnX',
     },
+    // Chromium's strings only for the languages the app speaks (55 locales
+    // are 49 MB on Windows). In a system language left out, Chromium falls
+    // back to en-US, the language the app shows there anyway; it reads
+    // Hong Kong's and Macau's Chinese from zh-TW.
+    electronLanguages: ['en-US', 'zh-CN', 'zh-TW'],
     // Windows' file version: the version and the build number.
     buildVersion: `${appVersion}.${buildNumber}`,
     directories: {
