@@ -14,20 +14,28 @@ interface SyncRun {
   courses?: Record<string, { fetched: number; total: number }>;
 }
 
-/** The background syncs the app saved (data/syncLog), oldest first. */
 /** Why a packaged app skips a test that uses the tray's menu. */
 const TRAY_MENU = 'only a dev run lets the test reach the tray’s menu';
 
+/**
+ * The background syncs the app saved (data/syncLog), oldest first. Only the
+ * app's own storage folder (main.ts) is searched: Chromium's session folders
+ * make and delete temporary folders while they're read, which fails the read.
+ */
 const syncRuns = (dataDir: string): SyncRun[] => {
+  const storage = path.join(dataDir, 'userData', 'storage');
+  if (!fs.existsSync(storage)) {
+    return [];
+  }
   const file = fs
-    .readdirSync(dataDir, { recursive: true })
+    .readdirSync(storage, { recursive: true })
     .map(String)
     .find(name => path.basename(name) === fileName('syncLog'));
   if (!file) {
     return [];
   }
   const stored = JSON.parse(
-    fs.readFileSync(path.join(dataDir, file), 'utf8'),
+    fs.readFileSync(path.join(storage, file), 'utf8'),
   ) as { state: { runs: SyncRun[] } };
   return stored.state.runs;
 };
