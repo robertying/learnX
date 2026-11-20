@@ -43,8 +43,9 @@ const base = {
     // Navigation, thu-learn-lib (and some of its dependencies) and mime ship
     // ESM or untranspiled source, so they go through Babel (entities is nested
     // under thu-learn-lib, newer and ESM-only; he resolves to its .mjs build).
-    // @expo/ui is replaced by stand-ins, but its patch test loads the real one.
-    'node_modules/(?!((jest-)?react-native[^/]*|@react-native[^/]*|@react-navigation|@robertying/thu-learn-lib|@expo/ui|node-fetch-native|fetch-cookie|entities|mime|he)/)',
+    // @expo/ui is replaced by stand-ins and FlashList is mocked, but their
+    // patch tests load the real ones.
+    'node_modules/(?!((jest-)?react-native[^/]*|@react-native[^/]*|@react-navigation|@robertying/thu-learn-lib|@expo/ui|@shopify/flash-list|node-fetch-native|fetch-cookie|entities|mime|he)/)',
   ],
 };
 
@@ -132,7 +133,7 @@ module.exports = {
     {
       displayName: 'web',
       cacheDirectory: base.cacheDirectory,
-      roots: ['<rootDir>/src', '<rootDir>/modules'],
+      roots: ['<rootDir>/src', '<rootDir>/modules', '<rootDir>/patches'],
       testEnvironment: 'jsdom',
       haste: { defaultPlatform: 'web', platforms: ['web'] },
       moduleNameMapper: {
