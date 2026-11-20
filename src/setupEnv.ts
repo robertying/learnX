@@ -7,3 +7,7 @@
 // module of its own that index.js imports before anything else: statements
 // in index.js itself would run only after every import was evaluated.
 process.env.EXPO_PUBLIC_USE_RN_FETCH = '1';
+
+// The bundle has started running (services/perf reads the mark): this module
+// runs first.
+performance.mark('bundleStart');

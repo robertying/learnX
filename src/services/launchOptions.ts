@@ -5,7 +5,9 @@ import {
   type MockLatency,
   type MockSessionExpiry,
   setMockNetworkConfig,
+  setMockScale,
 } from 'data/mockSource';
+import type { MockScale } from 'data/mockScale';
 import env from 'helpers/env';
 import { isApple } from 'helpers/platform';
 import type { WindowProps } from 'hooks/useWindow';
@@ -37,6 +39,12 @@ export interface LaunchOptions {
    * `passwordChanged`; see `MockNetworkConfig.sessionExpiry`).
    */
   mockSessionExpiry?: unknown;
+  /**
+   * `large` grows the mock account's semester to a busy real one (more
+   * courses, hundreds of items, long notices) for performance runs
+   * (`data/mockScale`); `normal` is the default.
+   */
+  mockScale?: unknown;
   /**
    * `true` shows what the app keeps as JSON in place of the app, for the
    * upgrade test (`screens/StoreReport`, mock account only).
@@ -93,6 +101,10 @@ const latencies = new Set<unknown>(['none', 'normal', 'slow']);
 
 const isLatency = (value: unknown): value is MockLatency =>
   latencies.has(value);
+
+const scales = new Set<unknown>(['normal', 'large']);
+
+const isScale = (value: unknown): value is MockScale => scales.has(value);
 
 const failures = new Set<unknown>([
   'none',
@@ -174,6 +186,10 @@ export const applyLaunchOptions = (initialProps?: LaunchOptions) => {
   const sessionExpiry = read('mockSessionExpiry', initialProps);
   if (isExpiry(sessionExpiry)) {
     setMockNetworkConfig({ sessionExpiry });
+  }
+  const mockScale = read('mockScale', initialProps);
+  if (isScale(mockScale)) {
+    setMockScale(mockScale);
   }
 
   if (__DEV__ || env.TEST_LOGIN) {

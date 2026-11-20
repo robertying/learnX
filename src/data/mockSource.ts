@@ -11,6 +11,7 @@ import {
 } from '@robertying/thu-learn-lib';
 import dayjs from 'dayjs';
 import { favoriteContentTypes } from 'data/pendingActions';
+import type { MockScale } from 'data/mockScale';
 import type { AppSource } from 'data/source';
 import { sessionsFromCourses } from 'helpers/schedule';
 import { beijingClock, beijingDate } from 'helpers/serverTime';
@@ -18,13 +19,41 @@ import { beijingClock, beijingDate } from 'helpers/serverTime';
 /** The language the app last asked the emulated server for. */
 let language: Language = Language.ZH;
 
-/** The mock data in the language asked for; English has its own texts. */
-const mock = (): typeof import('data/mock') =>
-  language === Language.EN
-    ? (
-        require('data/mockEnglish') as typeof import('data/mockEnglish')
-      ).mockInEnglish()
-    : require('data/mock');
+let scale: MockScale = 'normal';
+const large = new Map<Language, typeof import('data/mock')>();
+
+/**
+ * How much the emulated server holds (`mockScale` launch argument, for
+ * performance runs). Set before the first request: a change shows at the next
+ * refresh.
+ */
+export const setMockScale = (value: MockScale) => {
+  scale = value;
+};
+
+/**
+ * The mock data in the language asked for (English has its own texts), grown
+ * to a large semester when `scale` asks, once per language.
+ */
+const mock = (): typeof import('data/mock') => {
+  const written: typeof import('data/mock') =
+    language === Language.EN
+      ? (
+          require('data/mockEnglish') as typeof import('data/mockEnglish')
+        ).mockInEnglish()
+      : require('data/mock');
+  if (scale === 'normal') {
+    return written;
+  }
+  let data = large.get(language);
+  if (!data) {
+    data = (
+      require('data/mockScale') as typeof import('data/mockScale')
+    ).largeMock(written, language);
+    large.set(language, data);
+  }
+  return data;
+};
 
 export type MockLatency = 'none' | 'normal' | 'slow';
 

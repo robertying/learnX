@@ -65,3 +65,4 @@ The app can be used without a real Tsinghua account: enter `DUMMY_USERNAME` / `D
 - Attachments and files download real sample files from `mock-files/` (from `main` on GitHub, so a new sample only works once merged). `mock-files/generate.py` rebuilds them; add a sample there rather than linking to outside files.
 - Assignment submission is disabled after the deadline, so keep some mock deadlines in the future.
 - The mock semester starts a fixed number of weeks before now (`mockSemesterStart`), so the current week is always the same, and the emulated timetable is worked out from the mock courses' class times.
+- The `mockScale` launch argument (`large`) makes the emulated server answer with a busy semester for performance runs (`data/mockScale`): copies of the written items, made the same way every run, added to them. The written data stays as it is, so the flows and the App Review account see only it.

@@ -11,6 +11,9 @@ class SimulatorUITestCase: XCTestCase {
   /// The emulated server's delay (`services/launchOptions.ts`): none, normal or slow.
   var mockLatency: String { "none" }
 
+  /// More launch arguments (`services/launchOptions.ts`), as `-name value`.
+  var launchOptions: [String: String] { [:] }
+
   /// The kind of device the class's tests are for, and why: on another they're skipped before the app launches,
   /// which would take seconds for nothing.
   var onlyOn: (idiom: UIUserInterfaceIdiom, reason: String)? { nil }
@@ -22,6 +25,9 @@ class SimulatorUITestCase: XCTestCase {
     }
     app = XCUIApplication()
     app.launchArguments += ["-AppleLanguages", "(zh-Hans)", "-AppleLocale", "zh_CN", "-mockLatency", mockLatency]
+    for (name, value) in launchOptions {
+      app.launchArguments += ["-\(name)", value]
+    }
     app.launch()
     try logIn()
   }

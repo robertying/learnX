@@ -39,6 +39,12 @@
 - Run them with `pnpm e2e:mac` on the Release app, with no other learnX Mac app open. They take over the pointer and keyboard and log out of the learnX Mac app, so start them only when the Mac isn't otherwise in use; they aren't in CI. Keep them in step when a flow changes.
 - `ios/learnXUITests/iOS` checks what a flow can't see (pixels while a gesture is held, the split view's state across a relaunch), each test skipped on devices it isn't for. `pnpm e2e:ios` runs them after the flows. They aren't in CI.
 
+## Performance
+
+- Performance is measured on E2E builds, which are Release. The `mockScale` launch argument (`large`) grows the mock account's semester to a busy real one (`data/mockScale`); measure at `normal` and `large`.
+- `services/perf` marks when the bundle starts running, when the stores have loaded and when the first list is drawn with its content, as User Timing marks in every build. E2E builds also log the launch's marks as `learnX perf {…}` and, on iOS and the Mac, where release builds don't log, keep the last launches' in user defaults (`perfLaunches`). Android reports the first list drawn as the launch's full display (`reportFullyDrawn`, in every build), which `am start -W` and Google Play's startup vitals read.
+- `PerfUITests` (`ios/learnXUITests`, for iOS and the Mac) measure launches with XCTest's metrics, starting logged in with the semester cached. They're skipped unless the test runner has `E2E_PERF=1` (the class has the other settings); the numbers are in the result bundle (`xcrun xcresulttool get test-results metrics`).
+
 ## Store screenshots
 
 - `pnpm store:screenshots <target>` takes the App Store and Google Play screenshots with the flows in `.maestro/store/`, in Chinese; the script's header lists the targets and what each needs. Each shot waits for its screen first, so a wrong screen fails the run instead of being saved. `mac` is an XCUITest and takes over the pointer, so start it by hand.

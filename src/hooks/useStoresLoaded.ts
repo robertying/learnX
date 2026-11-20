@@ -4,6 +4,7 @@ import { loadCredentials } from 'data/credentials';
 import { forgetLoginAfterReinstall } from 'data/install';
 import { restoreQueryCache } from 'data/queryClient';
 import { recordError } from 'services/crashReporting';
+import { markPerf } from 'services/perf';
 
 /**
  * Loads what the first screen needs: the saved login, the user data saved by
@@ -26,6 +27,7 @@ const loadStores = async () => {
       recordError(result.reason, 'Loading stores at launch');
     }
   }
+  markPerf('storesLoaded');
 };
 
 /** Whether the stores the first screen reads have loaded. */

@@ -11,6 +11,7 @@ import { getSettings, setSetting, useSettings } from 'data/settings';
 import useDetailNavigator, { useDetailRoot } from 'hooks/useDetailNavigator';
 import useFilterListHeader from 'hooks/useFilterListHeader';
 import { scrollInsetBehavior } from 'constants/scrollInsetBehavior';
+import useFirstListDrawn from 'hooks/useFirstListDrawn';
 import useItemStepping from 'hooks/useItemStepping';
 import useRefreshCommand from 'hooks/useRefreshCommand';
 import useListSelection from 'hooks/useListSelection';
@@ -268,6 +269,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   // Menu bar commands and their shortcuts on iPad and Mac, for the list on
   // screen. Every tab's list stays mounted.
   const isFocused = useIsFocused();
+  useFirstListDrawn(isFocused && !loading);
   const commandsEnabled = isFocused && !selectionMode && !reorderMode;
   useRefreshCommand(
     { refreshing, onRefresh: () => onRefresh?.() },

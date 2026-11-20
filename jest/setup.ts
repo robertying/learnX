@@ -1,5 +1,11 @@
 import './common';
 
+// React Native's runtime has the User Timing API (services/perf marks with
+// it); the preset's stand-in for `performance` only has `now`.
+if (!('mark' in performance)) {
+  Object.assign(performance, { mark: jest.fn() });
+}
+
 // Modules every test gets a stand-in for: native modules, ESM-only packages
 // and native views. Each stand-in is in jest/mocks/ and says what it does;
 // jest/common.ts has the ones the Electron app's tests share.
@@ -49,6 +55,8 @@ jest.mock('../modules/shortcuts', () => ({ __esModule: true, default: null }));
 // The APK updater (Android's github flavor only); tests that install an
 // update mock it themselves.
 jest.mock('../modules/updater', () => ({ __esModule: true, default: null }));
+// Startup reporting (Android only); services/perf's tests mock it themselves.
+jest.mock('../modules/perf', () => ({ __esModule: true, default: null }));
 
 // Native views
 jest.mock('@expo/ui', () => require('./mocks/expoUi'));
