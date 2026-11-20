@@ -114,7 +114,8 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   const detailRoot = useDetailRoot();
   const openedId =
     detailRoot?.name === detailScreens[type] ? detailRoot.id : undefined;
-  // A window on iPad or Mac comes back to this list and item after a relaunch.
+  // The window comes back to this list and item after an over-the-air reload,
+  // and on iPad or Mac after a relaunch.
   useWindowRestoration({ type, id: openedId });
   const opened = openedId
     ? [all, hidden, archived ?? []].flat().find(item => item.id === openedId)
@@ -343,7 +344,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
           dragEnabled={reorderMode}
           // Only reorder mode drags. Outside it the list's pan would still
           // activate on a long press and cancel the card's own, so Android's
-          // card menu never opened on Courses.
+          // card menu wouldn't open on Courses.
           panEnabled={reorderMode}
           panActivateAfterLongPress={520}
           onReorder={handleReorderDone}

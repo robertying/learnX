@@ -34,6 +34,6 @@ for project in "${projects[@]}"; do
   reports+=("modules/$project/android/build/reports/coverage/test/debug/report.xml")
 done
 reports+=("android/app/build/reports/coverage/test/googlePlay/debug/report.xml#io/robertying/learnx/dialog")
-# Fails below this line coverage of the modules' and the dialog module's Kotlin. Keep it just under
-# the current total; raise it as coverage grows.
+# Fails below this line coverage of the modules' and the dialog module's
+# Kotlin. Keep it just under the current total; raise it as coverage grows.
 node scripts/checks/android-coverage.mjs --min=99 "${reports[@]}"

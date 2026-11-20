@@ -12,9 +12,9 @@
 // - runtime version changed with no native change: older builds would stop
 //   getting updates for nothing. Put it back.
 // Record the new state with `pnpm ota:check --write`.
-// Fingerprints can differ between machines (files a build left behind), so
-// CI's, from a clean checkout, are the ones to record: a failing check prints
-// them.
+// Fingerprints can differ between checkouts (untracked files a build or tool
+// left in one), so CI's, from a clean checkout, are the ones to record: a
+// failing check prints them.
 import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';

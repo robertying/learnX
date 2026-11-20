@@ -22,8 +22,8 @@ export interface LaunchOptions {
   mockLatency?: unknown;
   /**
    * How the emulated server fails for a mock account (`offline`,
-   * `serverError`, `timeout`, `quickTimeout`), so flows can reach the error
-   * states.
+   * `serverError`, `untrustedDevice`, `timeout`, `quickTimeout`), so flows
+   * can reach the error states.
    */
   mockFailure?: unknown;
   /**

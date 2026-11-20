@@ -1,7 +1,8 @@
-// learnX around its window on Windows and Linux: the tray icon, closing to the tray,
-// the background sync's timer, notifications (notifications.ts), files
-// opened, saved and picked (fileShell.ts), Start at login and the Windows
-// Jump List. main.ts sets it up; the page reaches it through preload.cts.
+// learnX around its window on Windows and Linux: the tray icon, closing to
+// the tray, the background sync's timer, notifications (notifications.ts),
+// files opened, saved and picked (fileShell.ts), Start at login and the
+// Windows Jump List. main.ts sets it up; the page reaches it through
+// preload.cts.
 //
 // Nothing is registered with the system unless the user asks: Start at login
 // is written only when its switch in Settings changes, and never from a dev
@@ -510,8 +511,6 @@ export const setUpSystem = ({
      */
     startsHidden: () => platform === 'win32' && argv.includes(HIDDEN_ARG),
     present,
-    /** A dev run's logged notifications, for its inspector. */
-    devShown,
     /** Serves a download to the file preview (`app://files/…`). */
     servePreview: (request: Request): Promise<Response> =>
       fileShell.servePreview(request, url => net.fetch(url)),

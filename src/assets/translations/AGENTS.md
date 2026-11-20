@@ -9,7 +9,7 @@ Every user-visible string is a key in `en.ts` and `zh.ts`, with the same keys in
 - A string shown on its own starts with a capital letter, also after a " · " ("Fri, Nov 20 · Due in 3 hours"), so no code capitalizes a translated string. Only a piece filled into another string (`graduateSchedule`) starts lowercase.
 - Only a button, row or menu item that asks to confirm a destructive action ends with an ellipsis, "…" in both languages ("Log Out…", "Delete…", "Discard Draft…"). Nothing else does: not other confirmations (Submit), pickers, share sheets or menus. Alert titles and buttons never do, so a label used both ways has an `…Ellipsis` key for the one that asks (`logout` / `logoutEllipsis`). The Mac menu bar's Settings… is the exception: a macOS command that opens a window ends with one.
 - Errors start with "Couldn't …". Success toasts are short ("Deleted").
-- Use the platform's own words: Log In / Log Out, OK, Full Screen, Show in Finder (Mac), Photo Library, Choose File, and "System Settings" for the OS settings app. Android never mentions Reminders.
+- Use the platform's own words: Log In / Log Out, OK, Full Screen, Show in Finder (Mac), Photo Library (Photos on Android), Choose File, and "System Settings" for the OS settings app. Android never mentions Reminders.
 - Archive's opposite is Unarchive (key `restore`). A grader's comment is "Grader Comments".
 - Confirmation alerts name the action on their button (Log Out, Delete, Submit, Join, Continue), never "OK"; destructive actions use the destructive style.
 - Permission prompts start with what the access is for ("Choose files to attach to an assignment submission.").
@@ -19,7 +19,7 @@ Every user-visible string is a key in `en.ts` and `zh.ts`, with the same keys in
 
 - Write the Chinese first, as a Chinese speaker would say it, then the English; never translate a Chinese string word for word from the English.
 - Use the Web Learning site's terms for its content: 公告 for notices (the system's notifications stay 通知), 已批改 for the graded status, 评语 for a grader's comment, 批阅 only in grader and graded-time lines. Say 截止时间 or 作业截止, not 截止日期. The app says 未读 where the site says 未浏览.
-- Use the system's terms for system things: 筛选, 文稿, 访达, 照片图库, 系统设置.
+- Use the system's terms for system things: 筛选, 文稿, 访达, 照片图库 (照片 on Android), 系统设置.
 - Address the user as 你, never 您, and call the app "learnX", not "App".
 - An error says what failed with 失败 (登录失败, 作业同步失败：…), the pair of 成功 on success; 无法 is only for what learnX can't do (`如果learnX无法发送通知…`).
 - Full-width punctuation (，。：) in Chinese text. A message ends with 。 when its English ends with a period.

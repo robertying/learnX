@@ -67,10 +67,11 @@ const getTabBarIcon = (icon: TabIcon, focused: boolean) =>
     ? { sfSymbol: focused ? filledSymbols[icon] : systemIcons[icon].ios }
     : { uri: `tab_${systemIcons[icon].android}${focused ? '_filled' : ''}` };
 
-// UIKit only moves the tab bar into the vertical bar when the tab bar controller
-// contains the split view, so each tab gets its own split. The JS split (Android,
-// the Electron app) holds all the tabs, with a detail stack for each. The Mac's sidebar navigator gives
-// each tab its own detail stack itself.
+// UIKit only moves the tab bar into the vertical bar when the tab bar
+// controller contains the split view, so each tab gets its own split. The JS
+// split (Android, the Electron app) holds all the tabs, with a detail stack
+// for each. The Mac's sidebar navigator gives each tab its own detail stack
+// itself.
 const withSplit = (name: keyof MainTabParams, Master: React.ComponentType) =>
   sidebarSplit
     ? Master

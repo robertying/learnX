@@ -59,7 +59,8 @@ const Today: React.FC<Props> = ({ navigation }) => {
   const now = useMinute();
   // The Schedule a Jump List task asked for (Electron).
   usePendingTarget('schedule', () => show('Schedule'));
-  // A window on iPad or Mac comes back to Today after a relaunch.
+  // The window comes back to Today after an over-the-air update reloads the
+  // JS, and on iPad and Mac after a relaunch.
   useWindowRestoration({ type: 'today' });
 
   // the timetable follows Beijing days, also on a phone in another time zone

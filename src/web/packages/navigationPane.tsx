@@ -153,8 +153,8 @@ const PaneItem = ({
  * Windows' navigation pane (NavigationView) at the window's leading edge,
  * drawn into `WindowFrame`'s slot. It shows the tabs' icons and titles,
  * expanded in a wide window and as a rail of icons in a narrower one, with
- * the menu button switching between them for good, and Settings at its foot. Each
- * tab's screen stays mounted once shown.
+ * the menu button switching between them for good, and Settings at its foot.
+ * Each tab's screen stays mounted once shown.
  */
 function TabNavigator({
   id,

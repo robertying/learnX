@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import AutoHeightWebView from 'components/AutoHeightWebView';
 import { FormView, type FormRowPosition } from 'components/Form';
 import { getWebViewTemplate } from 'helpers/html';
@@ -26,8 +26,7 @@ const FormWebView: React.FC<{
 }> = ({ content, accessibilityLabel, position }) => {
   const theme = useTheme();
   const [ready, setReady] = useState(false);
-  const needsSession = useMemo(() => loadsFromWebLearning(content), [content]);
-  const csrfToken = useWebSession(needsSession);
+  const csrfToken = useWebSession(loadsFromWebLearning(content));
   return (
     <FormView loading={!ready} position={position}>
       {/* Nothing while it waits for a login: the spinner shows. */}
@@ -36,16 +35,12 @@ const FormWebView: React.FC<{
           <AutoHeightWebView
             accessibilityLabel={isElectron() ? accessibilityLabel : undefined}
             source={{
-              html: getWebViewTemplate(
-                content,
-                {
-                  dark: theme.dark,
-                  // The form row's own color shows through.
-                  backgroundColor: 'transparent',
-                  ...webContentColors(theme),
-                },
-                csrfToken,
-              ),
+              html: getWebViewTemplate(content, csrfToken, {
+                dark: theme.dark,
+                // The form row's own color shows through.
+                backgroundColor: 'transparent',
+                ...webContentColors(theme),
+              }),
             }}
             onReady={() => setReady(true)}
           />

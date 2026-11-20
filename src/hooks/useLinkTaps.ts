@@ -19,9 +19,9 @@ const initialUrlHandled = new Set<string>();
  * or the list) and of calendar events and reminders (an assignment, a course
  * or Today). Handles the link that launched the app as well as links while it
  * runs, and after an over-the-air update reloaded the JS, what the window
- * showed before (`takeReloadLink`), and in debug and E2E builds the mock network link
- * (`applyMockNetworkLink`). Other learnx:// links (the share extension's) are
- * left alone.
+ * showed before (`takeReloadLink`), and in debug and E2E builds the mock
+ * network link (`applyMockNetworkLink`). Other learnx:// links (the share
+ * extension's) are left alone.
  */
 const useLinkTaps = () => {
   const open = useEffectEvent(useOpenTarget());

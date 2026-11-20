@@ -33,8 +33,8 @@ type Props = NativeStackScreenProps<RootStackParams, 'Setup'>;
  * Reminders, off unless an earlier version synced them.
  * (Settings has them all off until chosen.) Done saves the choices, closes,
  * and then asks for the permissions they need; notifications chosen stay on
- * if that's denied, and start working once they're allowed. Opened by `useLaunchSheet`,
- * once, also on an update for a user who never saw it.
+ * if that's denied, and start working once they're allowed. Opened by
+ * `useLaunchSheet`, once, also on an update for a user who never saw it.
  */
 const Setup: React.FC<Props> = ({ navigation, route }) => {
   const notifications = useSettings(settings => settings.notifications);

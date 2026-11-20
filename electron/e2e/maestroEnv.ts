@@ -1,6 +1,6 @@
 // The texts the Maestro flows match, from the same source
-// (scripts/e2e/e2e-env.mjs): `T_<key>` translations and `MOCK_*` mock items, each
-// an English|Chinese alternation, so a flow ports with the same values.
+// (scripts/e2e/e2e-env.mjs): `T_<key>` translations and `MOCK_*` mock items,
+// each an English|Chinese alternation, so a flow ports with the same values.
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 

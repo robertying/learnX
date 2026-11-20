@@ -15,8 +15,9 @@ export const createRootNavigation = (): RootNavigation =>
  * This window's main navigation container, for screens that open a page over
  * the whole window from where they have no navigation prop for it: a split
  * view's detail pane is a navigation tree of its own (`DetailContainer`).
- * Android's root has the same sheets under the same names. One per window,
- * since each window on iPad and Mac has its own (`hooks/useWindow`).
+ * The root of Android and the Electron app has the same sheets under the same
+ * names. One per window, since each window on iPad and Mac has its own
+ * (`hooks/useWindow`).
  */
 export const RootNavigationContext = createContext<RootNavigation | null>(null);
 

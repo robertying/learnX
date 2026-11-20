@@ -18,8 +18,8 @@ const toAccess = ({
 /**
  * Whether learnX may use the calendars and (on Apple platforms) Reminders,
  * checked again when the app comes back from the system settings and after
- * each request for it; null until
- * known. `request` asks for one, if the system still lets the app ask.
+ * each request for it; null until known. `request` asks for one, if the
+ * system still lets the app ask.
  */
 const useCalendarAccess = () => {
   const [calendar, setCalendar] = useState<CalendarAccess | null>(null);

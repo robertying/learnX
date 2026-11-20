@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // A real update of the packaged app, end to end, as scripts/e2e/e2e-updater.sh
 // does for the Android APKs: on Windows the NSIS installer, on Linux the
-// AppImage (a .deb only offers its download, which updates.e2e.ts covers).
+// AppImage (a .deb's update only downloads and opens in the system's
+// installer, which updates.e2e.ts covers).
 //
 //   pnpm e2e:electron:update [--skip-export] [-- <Playwright options>]
 //

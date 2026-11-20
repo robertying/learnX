@@ -89,12 +89,13 @@ const Modals =
 
 /**
  * Search, CourseX, the semesters and a submission, over the whole window:
- * page sheets on iOS, iPadOS and Mac, and on Android above the split view
- * (the root navigator there), not inside the list's pane. A page about the
- * whole app (Search, every course's CourseX, the semesters from an item that
- * isn't in the semester shown) always opens here; one about the item open
- * in a split view's detail pane (a course's CourseX, an assignment's
- * submission) is pushed in that pane, and opens here only where there is none.
+ * page sheets on iOS, iPadOS and Mac, and on Android and in the Electron app
+ * above the split view (the root navigator there), not inside the list's
+ * pane. A page about the whole app (Search, every course's CourseX, the
+ * semesters from an item that isn't in the semester shown) always opens
+ * here; one about the item open in a split view's detail pane (a course's
+ * CourseX, an assignment's submission) is pushed in that pane, and opens
+ * here only where there is none.
  */
 const renderModals = () => (
   <Modals.Group screenOptions={sheetOptions}>
@@ -116,7 +117,8 @@ const renderModals = () => (
 const renderMainScreens = () => (
   <>
     <RootNavigator.Screen name="MainTab" component={MainTab} />
-    {/* Android shows these above its split view (AndroidRootNavigator). */}
+    {/* Android and the Electron app show these above their split view
+        (AndroidRootNavigator). */}
     {nativeSplit && renderModals()}
     {nativeSplit && renderSheets()}
   </>

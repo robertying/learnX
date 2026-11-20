@@ -43,9 +43,9 @@
 #   E2E_AVD            a foldable emulator, such as a Pixel Fold (fold-*)
 #   E2E_IPHONE_MIN     an iPhone on the iOS 17.5 runtime (iphone-min)
 #   E2E_AVD_MIN        a phone emulator on API 29 (android-min)
-# The ipad-windowed and iPhone Duo profiles need the patched Maestro
-# (scripts/e2e/maestro/build.sh: it finds an app outside the full screen and folds
-# the Duo with setFoldPosture): put its bin folder first on PATH.
+# The iOS profiles and android-min need the patched Maestro, and the fold
+# profiles also zoom a PDF with it (scripts/e2e/maestro/README.md says what
+# each patch is for): put its bin folder first on PATH.
 #
 # E2E_SCREENSHOTS=1 saves each profile's screenshots (scripts/e2e/e2e.sh) to
 # its results' screenshots/ folder.

@@ -1,5 +1,6 @@
-// Debug builds: every kind of notification learnX posts, made from the
-// cached items through the same code a sync uses, for reviewing their text.
+// Debug builds: the content notifications and reminders learnX posts, made
+// from the cached items through the same code a sync uses, for reviewing
+// their text.
 // E2E builds: the one notification a flow asks for at launch, to press its
 // action buttons (`postNotification` in services/launchOptions).
 import dayjs from 'dayjs';

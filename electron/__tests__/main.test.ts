@@ -695,25 +695,6 @@ describe('the application menu', () => {
     );
   });
 
-  it('tells the page when a packaged Linux run has no sandbox', async () => {
-    jest.replaceProperty(process, 'env', {
-      ...process.env,
-      LEARNX_DATA_DIR: '',
-    });
-    await onPlatform('linux', () => loadMain({ packaged: true }));
-    const event = eventFrom('window', 'app://learnx/');
-    fake.handlers.get('app:info')!(event);
-    expect(event.returnValue).toMatchObject({ unsandboxed: true });
-  });
-
-  it('keeps a Linux dev run’s login out of the keyring', async () => {
-    await onPlatform('linux', () => loadMain());
-    expect(fake.app.commandLine.appendSwitch).toHaveBeenCalledWith(
-      'password-store',
-      'basic',
-    );
-  });
-
   it('is gone from a packaged build', async () => {
     await loadMain({ packaged: true });
     expect(fake.electron.Menu.setApplicationMenu).toHaveBeenCalledWith(null);

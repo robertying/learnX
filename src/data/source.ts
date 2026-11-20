@@ -222,10 +222,10 @@ const realSource = new Proxy({} as AppSource, {
  * `data/mockSource` while the session is the mock account's. Picked per call,
  * so logging in or out switches it; nothing else in the app checks for the
  * mock account to pick a server. Every failed call is noted (`noteRequestError`
- * in `data/auth`), so a wrong password found by thu-learn-lib's own re-login
- * ends the session wherever the request came from: a list, a server action, a
- * download or a submission. After every call, the session's token is noted
- * too (`noteSession`), so a login thu-learn-lib ran by itself reloads the web
+ * in `data/auth`), so a login refused in thu-learn-lib's own re-login ends the
+ * session wherever the request came from: a list, a server action, a download
+ * or a submission. After every call, the session's token is noted too
+ * (`noteSession`), so a login thu-learn-lib ran by itself reloads the web
  * content that needs the session.
  */
 export const dataSource = new Proxy({} as AppSource, {
@@ -365,11 +365,11 @@ export const ensureSession = async () => {
 /**
  * The one thu-learn-lib helper in this JS runtime, so its logins never overlap
  * (it runs one at a time, and requests that find the session expired wait for
- * it) and it remembers a password the server turned down. It sends requests
- * with React Native's fetch, whose cookies live in the system's store, which
- * the web views, file downloads and the submission upload use too, and clears
- * the SSO cookies there before every login, the ones it starts by itself for
- * an expired session included.
+ * it) and it remembers a login the server refused. It sends requests with
+ * React Native's fetch, whose cookies live in the system's store, which the
+ * web views, file downloads and the submission upload use too, and clears the
+ * SSO cookies there before every login, the ones it starts by itself for an
+ * expired session included.
  */
 const helper = new Learn2018Helper({
   clearLoginCookies: () => clearLoginCookies(),

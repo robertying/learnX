@@ -24,9 +24,10 @@ export interface ChoiceSheet {
 /**
  * Asks which of a few things to do, as each platform does: an action sheet
  * on iOS, iPadOS and Mac, with Cancel last; a dialog on Android and in the
- * Electron app, the first choice as its main button. Android's dialog holds at most two choices.
- * On iPad and Mac the sheet is a popover in the middle of the window, so a
- * form row that asks uses `FormChoiceButton`, whose sheet points at the row.
+ * Electron app, the first choice as its main button. Android's dialog holds
+ * at most two choices. On iPad and Mac the sheet is a popover in the middle
+ * of the window, so a form row that asks uses `FormChoiceButton`, whose sheet
+ * points at the row.
  */
 export const showChoices = ({
   title,

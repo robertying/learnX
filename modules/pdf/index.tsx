@@ -8,8 +8,8 @@ export interface PdfViewProps extends ViewProps {
   /** The downloaded PDF, as a `file:` URI. */
   uri: string;
   /**
-   * The file's name. Android's Pdfium view (before Android 15) says it to
-   * TalkBack with the page; the other viewers describe themselves.
+   * The file's name. Android's Pdfium view says it to TalkBack with the page;
+   * the other viewers describe themselves.
    */
   title?: string;
   /**
@@ -21,7 +21,8 @@ export interface PdfViewProps extends ViewProps {
 
 /**
  * A downloaded PDF, its pages one under another and fitted to the view's
- * width: PDFKit on iOS and the Mac, Jetpack's PDF viewer on Android.
+ * width: PDFKit on iOS and the Mac; on Android, Jetpack's PDF viewer, or
+ * Pdfium where Jetpack would use the old platform renderer (`PdfBackend`).
  */
 export const PdfView: React.ComponentType<PdfViewProps> = requireNativeView(
   'LearnXPdf',

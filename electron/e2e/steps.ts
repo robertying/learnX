@@ -1,6 +1,6 @@
 // The Maestro flows' subflows (.maestro/subflows) for the Electron app: the
 // same steps by the same test IDs and texts. The window is wide enough for
-// the split views, so a detail opens beside its list and there's no back.
+// the split views, so a detail opens beside its list instead of over it.
 import type { Locator, Page } from '@playwright/test';
 import { expect } from './fixtures.ts';
 import { exact, text } from './maestroEnv.ts';

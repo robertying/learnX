@@ -254,9 +254,9 @@ export const createFiles = (
 
     /**
      * Downloads `url` into `uri` with the session's cookies, following
-     * redirects on the allowed sites (`downloadAllowedUrl`). Rejects on a status other than 2xx as
-     * expo-file-system does ("Unable to download a file: server returned
-     * HTTP 403"), leaving no file behind.
+     * redirects on the allowed sites (`downloadAllowedUrl`). Rejects on a
+     * status other than 2xx as expo-file-system does ("Unable to download a
+     * file: server returned HTTP 403"), leaving no file behind.
      *
      * A download that hears nothing from the server for a minute (before the
      * response or between its pieces) fails, as a request does (net.ts).

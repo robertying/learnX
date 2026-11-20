@@ -87,8 +87,9 @@ const useMainStartup = () => {
 
   // What the user tapped outside the app (a notification, a widget row or
   // another learnx:// link, a Spotlight result, or the Electron app's Jump
-  // List), including the one that launched it. Each goes through `useOpenTarget`, which shows the item's
-  // list and leaves the item to it (`usePendingTarget`).
+  // List), including the one that launched it. Each goes through
+  // `useOpenTarget`, which shows the item's list and leaves the item to it
+  // (`usePendingTarget`).
   useNotificationTaps();
   useLinkTaps();
   useSpotlightTaps();

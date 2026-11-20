@@ -37,7 +37,7 @@ export function widgetKit() {
   'widget';
   // The padding around the content, in dp.
   const padding = 12;
-  // Handled by patches/expo-widgets@58.0.29.patch; other platforms ignore it.
+  // Handled by our expo-widgets patch; other platforms ignore it.
   const openUrl = (url: string | undefined) =>
     url ? [{ $type: 'openUrl', url }] : [];
 

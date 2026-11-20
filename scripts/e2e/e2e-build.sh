@@ -22,8 +22,8 @@
 # install it on another with `xcrun simctl install <udid> <app>`. A simulator
 # older than the deployment target (17.6, which has no simulator: the oldest
 # is 17.5) gets a build that targets its version, so the flows can run on the
-# oldest iOS the app supports (scripts/e2e/e2e-devices.sh iphone-min); install that
-# build only on simulators as old.
+# oldest iOS the app supports (scripts/e2e/e2e-devices.sh iphone-min); install
+# that build only on simulators as old.
 # Android: -PciRelease (R8, signed with the debug key, no Crashlytics uploads),
 # for the ABI of $ANDROID_ABI (default arm64-v8a, as on Apple silicon).
 set -euo pipefail

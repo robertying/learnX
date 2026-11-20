@@ -11,8 +11,8 @@
 // - `MOCK_*`: mock items (`data/mock.ts`, `data/mockEnglish.ts`) the flows
 //   open, as an alternation of their English and Chinese texts. A flow matches
 //   one inside a card's label as `'.*(${MOCK_NOTICE}).*'`.
-// - `STORE_SEARCH_TERM`: what the store screenshots (.maestro/store/), which
-//   are in Chinese, search for.
+// - `STORE_SEARCH_TERM`: what the store screenshots (.maestro/store/) search
+//   for, in the shots' language (below).
 //
 // scripts/e2e/e2e.sh passes each line to Maestro with -e, scripts/e2e/e2e-mac.sh to
 // the Mac app's UI tests as an environment variable. Node strips the types.

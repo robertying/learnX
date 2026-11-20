@@ -288,8 +288,8 @@ export const LoginStack = () => {
         component={SSO}
         options={props => ({
           ...getModalScreenOptions(t('sso'))(props),
-          // A full-screen modal never appears on the Mac (#1108), so the Mac
-          // gets the page sheet Setup and What's New have there.
+          // A full-screen modal never appears on the Mac, so the Mac gets the
+          // page sheet Setup and What's New have there.
           presentation: DeviceInfo.isMac() ? 'pageSheet' : 'fullScreenModal',
         })}
       />

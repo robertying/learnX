@@ -12,7 +12,7 @@ description: Write learnX release notes since the last tag, as separate texts fo
 
 ## File shape
 
-Four sections, each opened by its label line exactly as written here, in this order. Inside each store section, a `---- English (en-US) ----` block first (the stores show English first, so it's filled in first), then a `---- 中文（<locale>）----` block. Leave a blank line around every label line.
+Four sections, each opened by its label line exactly as written here, in this order. Inside each store section, a `---- English (en-US) ----` block first, in the order the stores list the languages, then a `---- 中文（<locale>）----` block (still written first, as "Writing" says). Leave a blank line around every label line.
 
 ```
 ==== GitHub Releases ====

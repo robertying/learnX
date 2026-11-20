@@ -8,7 +8,7 @@ internal import LearnXWindows
 class SceneDelegate: ExpoAppSceneDelegate {
   #if targetEnvironment(macCatalyst)
   // Wide enough for the list beside the narrowest detail pane
-  // (splitViewMinDetailWidth in src/constants/Numbers.ts). Any narrower, and
+  // (minDetailWidth in src/constants/SplitSizes.ts). Any narrower, and
   // UIKit shows the detail pane alone, with nothing to bring the list back.
   private static let minimumWindowWidth: CGFloat = 760
   #endif

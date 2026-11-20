@@ -37,8 +37,8 @@ export const isNetworkError = (err: unknown): boolean =>
  * - `failed`: anything else, such as a login SSO didn't capture.
  *
  * Only `offline` and `serverError` can go through by trying the same login
- * again; the refused ones (thu-learn-lib's `isRefusedLogin`) can't, and more wrong passwords
- * may lock the account.
+ * again; the refused ones (thu-learn-lib's `isRefusedLogin`) can't, and more
+ * wrong passwords may lock the account.
  */
 export type LoginFailure =
   | 'offline'
