@@ -16,7 +16,10 @@ import { systemIcons } from 'helpers/systemIcons';
 import useBackSwipeEdge, { backSwipeEdgeWidth } from 'hooks/useBackSwipeEdge';
 import useCardSwipe from 'hooks/useCardSwipe';
 import CardMenu from './CardMenu';
-import CardSwipeAction, { SwipeSide } from './CardSwipeAction';
+import CardSwipeAction, {
+  CardSwipeActionPlaceholder,
+  SwipeSide,
+} from './CardSwipeAction';
 import Touchable, { rowHighlight } from './Touchable';
 import SelectionMark from './SelectionMark';
 import SystemIcon from './SystemIcon';
@@ -157,6 +160,12 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
         trailing: swipeAction(actions, swipeSettings.left),
       };
   const rowWidth = useSharedValue(0);
+  // The swipe actions mount when a finger first touches the card, or a swipe
+  // starts without one (a trackpad), not with every row: a list draws a
+  // screenful of cards at once, and each action is animated styles, a
+  // reaction and native views. A plain view stands in until then.
+  const [swipeArmed, setSwipeArmed] = useState(false);
+  const armSwipe = () => setSwipeArmed(true);
   const moveActions =
     reorderMode && onMove
       ? [
@@ -286,7 +295,10 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
     (side: SwipeSide) =>
     (_progress: SharedValue<number>, translation: SharedValue<number>) => {
       const action = swipeActions[side];
-      return action ? (
+      if (!action) {
+        return null;
+      }
+      return swipeArmed ? (
         <CardSwipeAction
           side={side}
           action={action}
@@ -295,7 +307,9 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
           onArmedChange={armed => onArmedChange(side, armed)}
           onPress={() => onActionPress(side)}
         />
-      ) : null;
+      ) : (
+        <CardSwipeActionPlaceholder action={action} />
+      );
     };
 
   const handlePress = () => {
@@ -342,6 +356,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
           : theme.colors.surface,
       }}
       onPress={press}
+      onPressIn={swipeArmed ? undefined : armSwipe}
       onLongPress={handleLongPress}
       onLayout={({ nativeEvent }) => rowWidth.set(nativeEvent.layout.width)}
       testID={testID}
@@ -458,7 +473,10 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
       }
       // A swipe that starts at the screen's edge goes back, not to the card.
       hitSlop={backSwipeEdge ? { left: -backSwipeEdgeWidth } : undefined}
-      onSwipeableOpenStartDrag={onStartDrag}
+      onSwipeableOpenStartDrag={() => {
+        armSwipe();
+        onStartDrag();
+      }}
       onSwipeableWillOpen={onWillOpen}
       onSwipeableOpen={onOpen}
       onSwipeableWillClose={onWillClose}

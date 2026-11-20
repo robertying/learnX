@@ -28,6 +28,7 @@ const ReanimatedSwipeable = ({
   hitSlop,
   renderLeftActions,
   renderRightActions,
+  onSwipeableOpenStartDrag,
   onSwipeableWillOpen,
   onSwipeableOpen,
   onSwipeableWillClose,
@@ -37,6 +38,7 @@ const ReanimatedSwipeable = ({
   hitSlop?: unknown;
   renderLeftActions?: RenderActions;
   renderRightActions?: RenderActions;
+  onSwipeableOpenStartDrag?: (direction: SwipeDirection) => void;
   onSwipeableWillOpen?: (direction: SwipeDirection) => void;
   onSwipeableOpen?: (direction: SwipeDirection) => void;
   onSwipeableWillClose?: (direction: SwipeDirection) => void;
@@ -48,6 +50,7 @@ const ReanimatedSwipeable = ({
       {...{
         enabled,
         swipeHitSlop: hitSlop,
+        onSwipeableOpenStartDrag,
         onSwipeableWillOpen,
         onSwipeableOpen,
         onSwipeableWillClose,

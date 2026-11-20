@@ -89,11 +89,14 @@ const useFileDownload = (file: DownloadableFile) => {
   };
 
   const save = async () => {
+    // Picked outside the `try`, which React Compiler can't compile with a
+    // conditional expression inside.
+    const actions = electron();
+    const saveAs = actions
+      ? () => actions.saveFileAs(downloadable, path)
+      : () => saveFileOnMac(downloadable, path);
     try {
-      const actions = electron();
-      const saved = actions
-        ? await actions.saveFileAs(downloadable, path)
-        : await saveFileOnMac(downloadable, path);
+      const saved = await saveAs();
       if (saved) {
         toast(
           t('saveFileSucceeded', { name: fileNameOf(downloadable) }),
