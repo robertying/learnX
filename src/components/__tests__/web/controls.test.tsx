@@ -60,15 +60,24 @@ it('labels an icon button, with its badge and toggled state', () => {
         onPress={onPress}
         badge
       />
-      <IconButton icon="filter" accessibilityLabel="Filter" mode="contained" />
+      <IconButton
+        icon="select"
+        accessibilityLabel="Select"
+        mode="contained"
+        pressed
+      />
+      <IconButton icon="reorder" accessibilityLabel="Reorder" pressed={false} />
       <IconButton icon="search" disabled onPress={onPress} testID="bare" />
     </>,
   );
   fireEvent.click(screen.getByRole('button', { name: 'Refresh, New' }));
   expect(onPress).toHaveBeenCalledTimes(1);
-  expect(
-    screen.getByRole('button', { name: 'Filter' }).getAttribute('aria-pressed'),
-  ).toBe('true');
+  // A mode's button says whether it's on; other buttons aren't toggles.
+  const pressed = (name: string) =>
+    screen.getByRole('button', { name }).getAttribute('aria-pressed');
+  expect(pressed('Select')).toBe('true');
+  expect(pressed('Reorder')).toBe('false');
+  expect(pressed('Refresh, New')).toBeNull();
   fireEvent.click(screen.getByTestId('bare'));
   expect(onPress).toHaveBeenCalledTimes(1);
 });
@@ -151,8 +160,11 @@ it('selects tabs and scopes', () => {
   );
   fireEvent.click(screen.getByRole('tab', { name: 'Files' }));
   expect(onSelect).toHaveBeenLastCalledWith(1);
-  const [all, mine] = screen.getAllByRole('radio');
-  expect(mine.getAttribute('aria-checked')).toBe('true');
+  const all = screen.getByRole('button', { name: 'All' });
+  const mine = screen.getByRole('button', { name: 'Mine' });
+  expect(mine.getAttribute('aria-pressed')).toBe('true');
+  expect(all.getAttribute('aria-pressed')).toBe('false');
+  expect(screen.queryByRole('radio')).toBeNull();
   fireEvent.click(all);
   expect(onSelect).toHaveBeenLastCalledWith(0);
 });
@@ -160,7 +172,7 @@ it('selects tabs and scopes', () => {
 it('shows progress, a spinner with its percentage, and dividers', () => {
   renderFluent(
     <>
-      <ProgressBar progress={1.5} />
+      <ProgressBar progress={1.5} accessibilityLabel="Uploading" />
       <Spinner progress={0.42} />
       <Spinner />
       <Divider />
@@ -174,6 +186,9 @@ it('shows progress, a spinner with its percentage, and dividers', () => {
     screen.getAllByRole('progressbar')[0].getAttribute('aria-valuenow'),
   ).toBe('1');
   expect(screen.getByText('42%')).toBeTruthy();
+  // Every bar is named for screen readers: by its label, or as loading.
+  expect(screen.getByRole('progressbar', { name: 'Uploading' })).toBeTruthy();
+  expect(screen.getByRole('progressbar', { name: 'Loading' })).toBeTruthy();
   expect(screen.getAllByRole('separator')).toHaveLength(2);
   expect(screen.getByTestId('host')).toBeTruthy();
 });
@@ -189,6 +204,11 @@ it('draws an icon in its color, filled where it has a variant', () => {
   expect(container.querySelectorAll('svg')).toHaveLength(2);
 });
 
+it('has no heading for a detail pane with nothing open', () => {
+  renderFluent(<HeaderTitle title="" />);
+  expect(screen.queryByRole('heading')).toBeNull();
+});
+
 it('titles a header and searches from it', () => {
   const onChangeText = jest.fn();
   renderFluent(
@@ -201,7 +221,10 @@ it('titles a header and searches from it', () => {
       />
     </>,
   );
-  expect(screen.getByRole('heading', { name: 'Notices' })).toBeTruthy();
+  // The page's heading, above its sections' level 2.
+  expect(
+    screen.getByRole('heading', { name: 'Notices', level: 1 }),
+  ).toBeTruthy();
   expect(screen.getByText('Unread')).toBeTruthy();
   const box = screen.getByRole('searchbox', { name: 'Search' });
   expect((box as HTMLInputElement).value).toBe('hw');
@@ -307,19 +330,25 @@ describe('DateRangePicker', () => {
   });
 });
 
-it('shows a toast until it times out, and hides it on an empty one', () => {
+it('shows a toast in a status region that stays, until it times out, and hides it on an empty one', () => {
   jest.useFakeTimers();
   renderFluent(<Toast />);
+  // There before the first toast, so screen readers announce what comes in.
+  const region = screen.getByRole('status');
+  expect(region.getAttribute('aria-live')).toBe('polite');
+  expect(region.textContent).toBe('');
   act(() => toast('Saved', 'success'));
-  expect(screen.getByRole('status').textContent).toBe('Saved');
+  expect(screen.getByRole('status')).toBe(region);
+  expect(region.textContent).toBe('Saved');
   act(() => {
     jest.advanceTimersByTime(3000);
   });
-  expect(screen.queryByRole('status')).toBeNull();
+  expect(screen.queryByTestId('toast')).toBeNull();
+  expect(region.textContent).toBe('');
   act(() => toast('Plain', 'none', { duration: 100 }));
   expect(screen.getByText('Plain')).toBeTruthy();
   act(() => toast('', 'none'));
-  expect(screen.queryByRole('status')).toBeNull();
+  expect(screen.queryByTestId('toast')).toBeNull();
 });
 
 it('draws the other states of the small controls', () => {

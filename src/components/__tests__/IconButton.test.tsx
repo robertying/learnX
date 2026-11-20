@@ -1,5 +1,9 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
-import { buttonStyle, frame } from '@expo/ui/swift-ui/modifiers';
+import {
+  accessibilityAddTraits,
+  buttonStyle,
+  frame,
+} from '@expo/ui/swift-ui/modifiers';
 import IconButton from 'components/IconButton';
 
 describe('IconButton (iOS)', () => {
@@ -38,6 +42,33 @@ describe('IconButton (iOS)', () => {
     expect(buttonStyle).toHaveBeenCalledWith('bordered');
     expect(frame).toHaveBeenCalledWith({ width: 48, height: 48 });
     expect(screen.getByText('Settings, New')).toBeTruthy();
+  });
+
+  it("says a mode's button is a toggle and whether it's on", async () => {
+    await render(
+      <>
+        <IconButton
+          icon="select"
+          accessibilityLabel="Select"
+          mode="contained"
+          pressed
+        />
+        <IconButton
+          icon="reorder"
+          accessibilityLabel="Reorder"
+          pressed={false}
+        />
+        <IconButton icon="search" accessibilityLabel="Search" />
+      </>,
+    );
+    expect(accessibilityAddTraits).toHaveBeenCalledWith([
+      'isToggle',
+      'isSelected',
+    ]);
+    expect(accessibilityAddTraits).toHaveBeenCalledWith(['isToggle']);
+    expect(accessibilityAddTraits).toHaveBeenCalledTimes(2);
+    expect(screen.getByRole('button', { name: 'Select' })).toBeSelected();
+    expect(screen.getByRole('button', { name: 'Reorder' })).not.toBeSelected();
   });
 
   it('keeps a small borderless button at the 44 pt tap target', async () => {

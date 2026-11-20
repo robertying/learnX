@@ -10,6 +10,7 @@ const WebviewTag: React.FC<{
   src: string;
   partition: string;
   webpreferences?: string;
+  title?: string;
   style: CSSProperties;
 }> = props => createElement('webview', props);
 

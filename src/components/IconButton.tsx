@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 import { Button } from '@expo/ui/swift-ui';
 import {
+  accessibilityAddTraits,
   buttonBorderShape,
   buttonStyle,
   disabled as disabledModifier,
@@ -24,6 +25,7 @@ const IconButton: React.FC<IconButtonProps> = ({
   icon,
   size = 24,
   mode,
+  pressed,
   badge,
   disabled,
   onPress,
@@ -56,6 +58,14 @@ const IconButton: React.FC<IconButtonProps> = ({
             font({ size: Math.round(size * 0.85) }),
             frame({ width: buttonSize, height: buttonSize }),
             disabledModifier(!!disabled),
+            // VoiceOver says a toggle button's state.
+            ...(pressed !== undefined
+              ? [
+                  accessibilityAddTraits(
+                    pressed ? ['isToggle', 'isSelected'] : ['isToggle'],
+                  ),
+                ]
+              : []),
           ]}
         />
       </ThemedHost>

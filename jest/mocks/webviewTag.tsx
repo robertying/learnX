@@ -30,6 +30,12 @@ export class MockWebview extends EventTarget {
   stop = jest.fn();
   executeJavaScript = jest.fn(async () => undefined);
   focus = jest.fn();
+  /** The frame the element draws in its shadow root. */
+  frame = { title: '' };
+  shadowRoot = {
+    querySelector: (selector: string) =>
+      selector === 'iframe' ? this.frame : null,
+  } as unknown as ShadowRoot;
 
   attach(id: number) {
     this.id = id;

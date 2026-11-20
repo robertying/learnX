@@ -6,6 +6,7 @@ import {
 } from '@expo/ui/jetpack-compose';
 import {
   fillMaxWidth,
+  semantics,
   testID as testIDModifier,
 } from '@expo/ui/jetpack-compose/modifiers';
 import { withGutter, type TextButtonProps } from './TextButton.shared';
@@ -25,6 +26,7 @@ const typography = {
  */
 const TextButton: React.FC<TextButtonProps> = ({
   children,
+  accessibilityLabel,
   onPress,
   disabled,
   size = 'regular',
@@ -38,7 +40,12 @@ const TextButton: React.FC<TextButtonProps> = ({
     <ComposeTextButton
       onClick={onPress}
       enabled={!disabled}
-      modifiers={testID ? [testIDModifier(testID)] : undefined}
+      modifiers={[
+        ...(testID ? [testIDModifier(testID)] : []),
+        ...(accessibilityLabel
+          ? [semantics({ contentDescription: accessibilityLabel })]
+          : []),
+      ]}
     >
       <Label size={size} bold={bold} struck={struck}>
         {children}

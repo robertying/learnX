@@ -16,6 +16,7 @@ const IconButton: React.FC<IconButtonProps> = ({
   icon,
   size = 20,
   mode,
+  pressed,
   badge,
   disabled,
   onPress,
@@ -33,7 +34,7 @@ const IconButton: React.FC<IconButtonProps> = ({
       disabled={disabled}
       onClick={onPress}
       aria-label={spokenLabel({ accessibilityLabel, badge })}
-      aria-pressed={mode === 'contained' ? true : undefined}
+      aria-pressed={pressed}
       data-testid={testID}
       icon={
         <SystemIcon

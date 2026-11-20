@@ -379,7 +379,11 @@ const AssignmentSubmissionContent: React.FC<{
           ) : null}
         </Form>
         {uploading ? (
-          <PageProgressBar progress={progress} testID="uploadProgress" />
+          <PageProgressBar
+            progress={progress}
+            accessibilityLabel={t('uploadingSubmission')}
+            testID="uploadProgress"
+          />
         ) : null}
       </FormScreen>
     </FileDropTarget>

@@ -191,6 +191,7 @@ const ComposeButton = ({
     style={fromModifiers(modifiers).size}
     {...{ variant }}
     accessibilityRole="button"
+    accessibilityLabel={fromModifiers(modifiers).accessibilityLabel}
     accessibilityState={{ disabled: enabled === false }}
     disabled={enabled === false}
     onPress={onClick}
@@ -199,6 +200,29 @@ const ComposeButton = ({
   </Pressable>
 );
 export const IconButton = ComposeButton;
+/** Material's toggle button: checked or not, as TalkBack says it. */
+export const IconToggleButton = ({
+  checked,
+  onCheckedChange,
+  enabled,
+  modifiers,
+  children,
+}: BoxProps & {
+  checked: boolean;
+  onCheckedChange?: (checked: boolean) => void;
+  enabled?: boolean;
+}) => (
+  <Pressable
+    testID={fromModifiers(modifiers).testID}
+    style={fromModifiers(modifiers).size}
+    accessibilityRole="checkbox"
+    accessibilityState={{ checked, disabled: enabled === false }}
+    disabled={enabled === false}
+    onPress={() => onCheckedChange?.(!checked)}
+  >
+    {children}
+  </Pressable>
+);
 export const FilledTonalIconButton = (
   props: Parameters<typeof ComposeButton>[0],
 ) => <ComposeButton {...props} variant="filledTonal" />;
@@ -233,12 +257,15 @@ export const CircularProgressIndicator = () => <View testID="progress" />;
 
 export const LinearProgressIndicator = ({
   progress,
+  modifiers,
 }: {
   progress?: number;
+  modifiers?: Modifier[];
 }) => (
   <View
     testID="progress"
     accessibilityRole="progressbar"
+    accessibilityLabel={fromModifiers(modifiers).accessibilityLabel}
     accessibilityValue={
       progress == null ? undefined : { min: 0, max: 100, now: progress * 100 }
     }

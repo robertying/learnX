@@ -13,6 +13,7 @@ const fontSizes = { small: 12, regular: 14, large: 14 } as const;
  */
 const TextButton: React.FC<TextButtonProps> = ({
   children,
+  accessibilityLabel,
   onPress,
   disabled,
   size = 'regular',
@@ -30,6 +31,7 @@ const TextButton: React.FC<TextButtonProps> = ({
         size={size === 'small' ? 'small' : 'medium'}
         disabled={disabled}
         onClick={onPress}
+        aria-label={accessibilityLabel}
         data-testid={testID}
         style={{
           color: disabled

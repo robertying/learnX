@@ -50,6 +50,8 @@ export interface WebviewElement extends EventTarget {
   stop: () => void;
   executeJavaScript: (code: string) => Promise<unknown>;
   focus: () => void;
+  /** Where the element draws its frame. */
+  shadowRoot?: ShadowRoot | null;
 }
 
 /** What a ref to the web view offers, as react-native-webview's does. */
@@ -370,6 +372,7 @@ const WebPage: React.FC<Props> = ({
   injectedJavaScript,
   injectedJavaScriptBeforeContentLoaded,
   onShouldStartLoadWithRequest,
+  accessibilityLabel,
   ...eventProps
 }) => {
   const element = useRef<WebviewElement | null>(null);
@@ -452,6 +455,16 @@ const WebPage: React.FC<Props> = ({
       } as WebViewSource);
     }
   }, [guest, html, baseUrl, uri, headers]);
+
+  // A frame's name, which screen readers say as they enter it: the
+  // element draws an iframe of its own (in its shadow root), which is what
+  // they find, so the name goes there once it is attached.
+  useEffect(() => {
+    const frame = element.current?.shadowRoot?.querySelector('iframe');
+    if (frame && accessibilityLabel) {
+      frame.title = accessibilityLabel;
+    }
+  }, [guest, accessibilityLabel]);
 
   const flat = StyleSheet.flatten(style) ?? {};
   return (

@@ -274,6 +274,12 @@ describe('Search', () => {
       expect(screen.getByText('Midterm room change')).toBeTruthy();
       expect(screen.getByText('Midterm review problems')).toBeTruthy();
       expect(screen.getAllByText(/^Week \d notes$/)).toHaveLength(3);
+      // Screen readers hear which kind each See All is for.
+      expect(
+        jest.requireMock<{ accessibilityLabel: jest.Mock }>(
+          '@expo/ui/swift-ui/modifiers',
+        ).accessibilityLabel,
+      ).toHaveBeenCalledWith('See All, Notices');
       await userEvent
         .setup({ advanceTimers: jest.advanceTimersByTime })
         .press(screen.getByText('See All'));
