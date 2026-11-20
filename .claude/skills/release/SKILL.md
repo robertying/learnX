@@ -8,7 +8,7 @@ description: Bump the learnX version, build release binaries (iOS, Mac, Android,
 A release runs on a Mac with [fastlane](https://docs.fastlane.tools) (`fastlane/Fastfile`; `bundle exec fastlane lanes` lists every lane and its options). Follow the steps in order. Each one says what it needs from the person; everything else runs without asking.
 
 - Don't upload, submit or publish anything unless asked. Build lanes and `preflight` are safe to run: the builds send only their symbols to Crashlytics, which no user sees.
-- Don't change release tooling (the Fastfile, `scripts/release`, this skill) in the middle of a release, and never on the release commit. When something in it is wrong, work around it, write down what happened and how, and fix it afterwards in a pull request.
+- Don't change release tooling (the Fastfile, `fastlane/release.rb`, `scripts/release`, this skill) in the middle of a release, and never on the release commit. When something in it is wrong, work around it, write down what happened and how, and fix it afterwards in a pull request, with a test in `fastlane/test/` when the fix is in `fastlane/release.rb` (`pnpm test:fastlane`).
 - Keep a short journal of the run in `build/release/v<version>/release-journal.md`: what ran, what failed, what was skipped. The next release starts from it.
 - Run each fastlane lane as its own command (`bundle exec fastlane ios build`). Don't loop over lane names held in one string: zsh doesn't split them.
 - Long lanes (a build is 10 to 30 minutes per platform) run in the background, with their output in a log file.

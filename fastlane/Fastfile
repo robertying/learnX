@@ -5,6 +5,11 @@ require "json"
 require "open3"
 require "shellwords"
 require "tmpdir"
+require_relative "release"
+
+# Release's checks stop a lane with fastlane's own error, which prints the
+# message without a stack trace.
+Release.fail_with { |message| UI.user_error!(message) }
 
 # Actions run from the repo root, but `sh` and Dir.pwd run from ./fastlane,
 # so every path below is absolute.
@@ -19,8 +24,6 @@ APP_IDENTIFIER = "io.robertying.learnX"
 # The Appfile sets this only for `android` lanes; the top-level `release` and
 # `bump` lanes need it too.
 ANDROID_PACKAGE = "io.robertying.learnx"
-# The Android versionCode is this plus the iOS build number (18.0.3: 4530 -> 9204530).
-ANDROID_VERSION_CODE_BASE = 9_200_000
 APK_ABIS = %w[x86_64 arm64-v8a armeabi-v7a universal].freeze
 
 skip_docs
@@ -32,14 +35,8 @@ def app_version
   JSON.parse(File.read(PACKAGE_JSON))["version"]
 end
 
-# CURRENT_PROJECT_VERSION: the project level sets it for the app and the share extension, and the
-# widget target sets its own. All of them must match.
 def build_numbers
-  File.read(PBXPROJ).scan(/CURRENT_PROJECT_VERSION = (\d+);/).flatten.map(&:to_i)
-end
-
-def marketing_version_count
-  File.read(PBXPROJ).scan(/MARKETING_VERSION = [\d.]+;/).size
+  Release.build_numbers(File.read(PBXPROJ))
 end
 
 def build_number
@@ -47,28 +44,14 @@ def build_number
 end
 
 def android_version_code
-  ANDROID_VERSION_CODE_BASE + build_number
+  Release.android_version_code(build_number)
 end
 
 def verify_versions!
-  version = app_version
-  pbxproj = File.read(PBXPROJ)
-  gradle = File.read(GRADLE)
-  problems = []
-  problems << "ios MARKETING_VERSION" unless pbxproj.scan(/MARKETING_VERSION = #{Regexp.escape(version)};/).size == marketing_version_count
-  problems << "ios CURRENT_PROJECT_VERSION (#{build_numbers.uniq.join(', ')})" unless build_numbers.uniq.size == 1
-  problems << "android versionName" unless gradle.include?(%(versionName = "#{version}"))
-  problems << "android versionCode" unless gradle.include?("versionCode = #{android_version_code}")
+  problems = Release.version_problems(app_version, File.read(PBXPROJ), File.read(GRADLE))
   return if problems.empty?
 
-  UI.user_error!("#{problems.join(', ')} out of sync with package.json #{version} (build #{build_number}). Run `bundle exec fastlane bump`.")
-end
-
-def replace_in_file!(path, from, to, count:)
-  text = File.read(path)
-  found = text.scan(from).size
-  UI.user_error!("Expected #{count} × #{from.inspect} in #{path}, found #{found}") unless found == count
-  File.write(path, text.gsub(from, to))
+  UI.user_error!("#{problems.join(', ')} out of sync with package.json #{app_version} (build #{build_number}). Run `bundle exec fastlane bump`.")
 end
 
 # ---------------------------------------------------------------------------
@@ -90,13 +73,7 @@ def clear_sourcemaps(platform)
 end
 
 # ---------------------------------------------------------------------------
-# Build records
-#
-# Each build lane writes build.json next to its output: the commit, version
-# and build number it built, and the SHA-256 of each file it made. The upload
-# lanes take only a build of this commit, with this version and build number,
-# from a clean tree, whose files haven't changed since; the release lanes
-# build only when there's no such build (or with rebuild:true).
+# Build records (Release.build_record says what they hold)
 
 def head_commit
   Dir.chdir(ROOT) { `git rev-parse HEAD`.strip }
@@ -116,39 +93,25 @@ def start_build_record(platform)
 end
 
 def write_build_record(platform, started, files, extra = {})
-  record = {
-    platform: platform,
-    version: app_version,
-    build: build_number,
-    commit: started[:commit],
-    dirty: started[:dirty],
-    files: files.sort.to_h { |file| [file.delete_prefix("#{out_dir}/"), Digest::SHA256.file(file).hexdigest] },
-  }.merge(extra)
+  record = Release.build_record(
+    platform: platform, version: app_version, build: build_number,
+    commit: started[:commit], dirty: started[:dirty], out_dir: out_dir, files: files, extra: extra,
+  )
   FileUtils.mkdir_p(File.dirname(build_record_path(platform)))
   File.write(build_record_path(platform), "#{JSON.pretty_generate(record)}\n")
 end
 
-# Why the platform's build can't be uploaded from this checkout, or nil.
-def build_record_problem(platform)
+def build_record(platform)
   path = build_record_path(platform)
-  return "no #{platform} build of v#{app_version} yet" unless File.exist?(path)
-
-  record = JSON.parse(File.read(path))
-  return "the #{platform} build is v#{record['version']} (#{record['build']}), not v#{app_version} (#{build_number})" unless record["version"] == app_version && record["build"] == build_number
-  return "the #{platform} build is of #{record['commit'][0, 8]}, not HEAD #{head_commit[0, 8]}" unless record["commit"] == head_commit
-  return "the #{platform} build was made from uncommitted changes" if record["dirty"]
-
-  changed = record["files"].reject do |file, sha|
-    full = File.join(out_dir, file)
-    File.exist?(full) && Digest::SHA256.file(full).hexdigest == sha
-  end
-  return "#{changed.keys.join(', ')} changed or went missing since the #{platform} build" unless changed.empty?
-
-  nil
+  File.exist?(path) ? JSON.parse(File.read(path)) : nil
 end
 
-def build_record(platform)
-  JSON.parse(File.read(build_record_path(platform)))
+# Why the platform's build can't be uploaded from this checkout, or nil.
+def build_record_problem(platform)
+  Release.build_record_problem(
+    build_record(platform),
+    platform: platform, version: app_version, build: build_number, head: head_commit, out_dir: out_dir,
+  )
 end
 
 def verify_built!(platform)
@@ -209,7 +172,7 @@ end
 # store_notes:false keeps the stores' text as it is (set by hand in App Store
 # Connect or Play Console) and still gives the GitHub release its notes.
 def store_notes?(options)
-  !%w[false no 0].include?(options[:store_notes].to_s.downcase)
+  !Release.off?(options[:store_notes])
 end
 
 # A store's part of the notes, or nil when that store keeps its own text.
@@ -242,64 +205,12 @@ def release_notes(path)
 
   file = File.expand_path(path, ROOT)
   UI.user_error!("Release notes not found: #{file}") unless File.exist?(file)
-  text = File.read(file, encoding: "UTF-8")
-  if text.include?(NOTES_TODO)
-    UI.user_error!("#{file} still has #{NOTES_TODO} placeholders. Finish the notes and delete them first.")
-  end
-  sections = notes_sections(text, file)
-  notes = {
-    github: sections.fetch("GitHub Releases"),
-    play: split_languages(sections.fetch("Google Play"), "Google Play"),
-    ios: split_languages(sections.fetch("App Store (iOS)"), "App Store (iOS)"),
-    mac: split_languages(sections.fetch("Mac App Store"), "Mac App Store"),
-  }
-  notes[:play].each do |lang, text|
-    UI.user_error!("Google Play notes (#{lang}) are #{text.length} characters; the limit is 500") if text.length > 500
-  end
-  notes
+  Release.parse_notes(File.read(file, encoding: "UTF-8"), file)
 end
-
-NOTES_SECTIONS = ["GitHub Releases", "Google Play", "App Store (iOS)", "Mac App Store"].freeze
-NOTES_SECTION_LINE = /^={4,}[ \t]*(.*?)[ \t]*=*[ \t]*$/
-
-# { "GitHub Releases" => text, ... } from the `==== <name> ====` lines.
-def notes_sections(text, file)
-  parts = text.split(NOTES_SECTION_LINE, -1)
-  parts.shift # Anything before the first section line, such as a comment.
-  sections = parts.each_slice(2).to_h { |name, body| [name, body.to_s.strip] }
-  unknown = sections.keys - NOTES_SECTIONS
-  missing = NOTES_SECTIONS - sections.keys
-  if unknown.any? || missing.any? || parts.size != NOTES_SECTIONS.size * 2
-    UI.user_error!("#{file} needs one `==== <name> ====` line for each of #{NOTES_SECTIONS.join(', ')}; found #{parts.each_slice(2).map(&:first).inspect}")
-  end
-  sections
-end
-
-NOTES_LANGUAGE_LINE = /^-{4,}[ \t]*(.*?)[ \t]*-*[ \t]*$/
-
-# { en:, zh: } from a store section's `---- English ----` and `---- 中文 ----` blocks.
-def split_languages(section, name)
-  parts = section.split(NOTES_LANGUAGE_LINE, -1)
-  parts.shift
-  blocks = parts.each_slice(2).to_h { |label, body| [label, body.to_s.strip] }
-  zh = blocks.select { |label, _| label.start_with?("中文") }.values
-  en = blocks.select { |label, _| label.start_with?("English") }.values
-  if blocks.size != 2 || zh.size != 1 || en.size != 1 || zh.first.empty? || en.first.empty?
-    UI.user_error!("#{name} notes need a `---- English ----` block and a `---- 中文 ----` block, found #{blocks.keys.inspect}")
-  end
-  { en: en.first, zh: zh.first }
-end
-
-# The fallback draft marks what's left to write with this, and the release
-# lanes refuse notes that still have it.
-NOTES_TODO = "TODO(release-notes)"
-
-# Commits users never see, left out of the fallback draft.
-INTERNAL_COMMIT = /\A(Bump|Release|Merge|Update dependency|chore|ci|build)\b|\bfastlane\b|\bskills?\b/i
 
 # claude:false skips Claude Code (fastlane may pass the string).
 def use_claude?(options)
-  !%w[false no 0].include?(options[:claude].to_s.downcase)
+  !Release.off?(options[:claude])
 end
 
 # Publishing a draft GitHub release makes its tag on GitHub, so a checkout
@@ -340,7 +251,7 @@ def write_notes(use_claude: true)
   else
     write_fallback_notes(path)
     UI.important("Wrote a draft from the commit list instead: #{path}")
-    UI.important("Fill in every #{NOTES_TODO}; the release lanes won't upload notes that still have one.")
+    UI.important("Fill in every #{Release::NOTES_TODO}; the release lanes won't upload notes that still have one.")
   end
   path
 end
@@ -383,72 +294,7 @@ def write_fallback_notes(path)
   tag = last_release_tag
   range = tag ? "#{tag}..HEAD" : "HEAD"
   log = Dir.chdir(ROOT) { `git log --no-merges --format=%s #{range.shellescape}` }
-  commits = log.lines.map(&:strip).reject { |line| line.empty? || line.match?(INTERNAL_COMMIT) }
-  list = commits.empty? ? "- #{NOTES_TODO}" : commits.map { |line| "- #{line}" }.join("\n")
-  short = commits.empty? ? "- #{NOTES_TODO}" : commits.map { |line| "- #{line.sub(/\s*\(#\d+\)\z/, '')}" }.join("\n")
-
-  store = lambda do |zh_locale, en_locale|
-    <<~STORE.strip
-      ---- English (#{en_locale}) ----
-
-      # Features
-
-      - #{NOTES_TODO}: only this platform's changes, or "Fix minor issues." under # Fixes
-
-      # Fixes
-
-      - #{NOTES_TODO}
-
-      ---- 中文（#{zh_locale}）----
-
-      # 功能
-
-      - #{NOTES_TODO}：只写这个平台的改动，没有就在 # 修复 下写"修复若干小问题。"
-
-      # 修复
-
-      - #{NOTES_TODO}
-    STORE
-  end
-
-  File.write(path, <<~NOTES)
-    <!-- #{NOTES_TODO}: Claude Code didn't write these. Commits since #{tag || 'the first commit'}; keep what users see: -->
-    <!--
-    #{short}
-    -->
-
-    ==== GitHub Releases ====
-
-    # 功能
-
-    - #{NOTES_TODO}
-
-    # 修复
-
-    - #{NOTES_TODO}
-
-    ---
-
-    # Features
-
-    #{list}
-
-    # Fixes
-
-    - #{NOTES_TODO}
-
-    ==== Google Play ====
-
-    #{store.call('zh-CN', 'en-US')}
-
-    ==== App Store (iOS) ====
-
-    #{store.call('zh-Hans', 'en-US')}
-
-    ==== Mac App Store ====
-
-    #{store.call('zh-Hans', 'en-US')}
-  NOTES
+  File.write(path, Release.fallback_notes(log.lines, tag))
 end
 
 def print_notes(path)
@@ -842,65 +688,22 @@ end
 # copied in with `from:`. Either way the lane
 # checks them against this commit's version before signing and uploading.
 
-ELECTRON_PLATFORMS = {
-  "win" => %w[latest.yml],
-  "linux" => %w[latest-linux.yml latest-linux-arm64.yml],
-}.freeze
-
 def electron_out_dir
   File.join(out_dir, "electron")
 end
 
 def electron_platforms(options)
-  platforms = (options[:platforms] || ELECTRON_PLATFORMS.keys.join(",")).to_s.split(",").map(&:strip)
-  unknown = platforms - ELECTRON_PLATFORMS.keys
-  UI.user_error!("Unknown platforms: #{unknown.join(', ')} (win, linux)") unless unknown.empty?
-  platforms
+  Release.electron_platforms(options[:platforms])
 end
 
 def electron_update_file_paths(platforms)
-  platforms.flat_map { |platform| ELECTRON_PLATFORMS[platform] }.map { |name| File.join(electron_out_dir, name) }
-end
-
-# The files an update file names: its installers (`path:` and each `url:`),
-# with their SHA-512s, and their blockmaps where they exist.
-def electron_update_entries(yml)
-  text = File.read(yml)
-  urls = text.scan(/^\s*(?:-\s*)?(?:url|path):\s*['"]?([^'"\s]+)['"]?\s*$/).flatten.uniq
-  hashes = text.scan(/^\s*(?:-\s*)?url:\s*['"]?([^'"\s]+)['"]?\s*\n\s*sha512:\s*['"]?([^'"\s]+)/).to_h
-  { version: text[/^version:\s*['"]?([^'"\s]+)/, 1], files: urls, sha512: hashes }
+  platforms.flat_map { |platform| Release::ELECTRON_PLATFORMS[platform] }.map { |name| File.join(electron_out_dir, name) }
 end
 
 # Every update file is for this version, and every installer it names is
-# here with that SHA-512: a build from another commit, or a half-copied
-# folder, is refused before anything is signed.
+# here with that SHA-512 (Release.electron_file_problems).
 def verify_electron_files!(platforms)
-  version = app_version
-  problems = []
-  electron_update_file_paths(platforms).each do |yml|
-    name = File.basename(yml)
-    unless File.exist?(yml)
-      problems << "#{name} is missing"
-      next
-    end
-    entry = electron_update_entries(yml)
-    problems << "#{name} is for version #{entry[:version].inspect}, not #{version}" unless entry[:version] == version
-    entry[:files].each do |file|
-      path = File.join(electron_out_dir, file)
-      unless File.exist?(path)
-        problems << "#{name} names #{file}, which is missing"
-        next
-      end
-      expected = entry[:sha512][file]
-      problems << "#{file}'s SHA-512 doesn't match #{name}" if expected && Digest::SHA512.file(path).base64digest != expected
-    end
-  end
-  # The .debs aren't in any update file: their names carry the version
-  # (learnX-<target>-v<version>, electron/packageConfig.ts).
-  Dir[File.join(electron_out_dir, "*.{exe,AppImage,deb}")].each do |path|
-    problems << "#{File.basename(path)} isn't version #{version}" unless File.basename(path).include?("-v#{version}.")
-  end
-  problems << "no .deb for Linux" if platforms.include?("linux") && Dir[File.join(electron_out_dir, "*.deb")].empty?
+  problems = Release.electron_file_problems(electron_out_dir, platforms, app_version)
   UI.user_error!("Electron release files in #{electron_out_dir}: #{problems.join('; ')}") unless problems.empty?
 end
 
@@ -1009,10 +812,7 @@ end
 # Whether GitHub has a v<version> release: :none, :draft or :published.
 def github_release_state(tag)
   out, err, status = Open3.capture3("gh", "release", "view", tag, "--repo", GITHUB_REPO, "--json", "isDraft", "--jq", ".isDraft")
-  return out.strip == "true" ? :draft : :published if status.success?
-  return :none if err.include?("release not found")
-
-  UI.user_error!("Couldn't look up the #{tag} release on GitHub: #{err.strip}")
+  Release.github_release_state(tag, status.success?, out, err)
 end
 
 def publish_github(notes, electron_platforms: nil)
@@ -1101,7 +901,7 @@ def uploaded_builds
       errors << "Google Play (#{track}): #{e.message}"
       []
     end
-    builds["Google Play"] = codes.map(&:to_i).max - ANDROID_VERSION_CODE_BASE unless codes.empty?
+    builds["Google Play"] = codes.map(&:to_i).max - Release::ANDROID_VERSION_CODE_BASE unless codes.empty?
   else
     errors << "Google Play: no GOOGLE_PLAY_CONSOLE_JSON_KEY or SUPPLY_JSON_KEY in fastlane/.env"
   end
@@ -1129,15 +929,7 @@ end
 
 # Why the release commit's CI isn't green, or nil.
 def ci_problem(sha)
-  runs = gh_json("api", "repos/#{GITHUB_REPO}/commits/#{sha}/check-runs?per_page=100").fetch("check_runs")
-  return "no CI runs on #{sha[0, 8]}" if runs.empty?
-
-  running = runs.reject { |run| run["status"] == "completed" }.map { |run| run["name"] }
-  failed = runs.select { |run| %w[failure cancelled timed_out action_required].include?(run["conclusion"]) }.map { |run| run["name"] }
-  return "failed on #{sha[0, 8]}: #{failed.uniq.join(', ')}" unless failed.empty?
-  return "still running on #{sha[0, 8]}: #{running.uniq.join(', ')}" unless running.empty?
-
-  nil
+  Release.ci_problem(gh_json("api", "repos/#{GITHUB_REPO}/commits/#{sha}/check-runs?per_page=100").fetch("check_runs"), sha)
 end
 
 ELECTRON_WORKFLOW = "electron.yml"
@@ -1153,8 +945,7 @@ def electron_update_e2e_problem(sha)
   return "never run on #{sha[0, 8]}" if runs.empty?
 
   runs.each do |run|
-    jobs = gh_json("run", "view", run["databaseId"].to_s, "--json", "jobs").fetch("jobs").select { |job| job["name"].start_with?("Update E2E") }
-    return nil if jobs.size >= 2 && jobs.all? { |job| job["conclusion"] == "success" }
+    return nil if Release.update_e2e_passed?(gh_json("run", "view", run["databaseId"].to_s, "--json", "jobs").fetch("jobs"))
   end
   return "still running on #{sha[0, 8]}" if runs.any? { |run| run["status"] != "completed" }
 
@@ -1177,7 +968,7 @@ def run_electron_update_e2e(options)
   UI.user_error!("Started the workflow but found no run for #{sha[0, 8]}; check https://github.com/#{GITHUB_REPO}/actions/workflows/#{ELECTRON_WORKFLOW}") unless run
   id = run["databaseId"].to_s
   UI.success("Electron update E2E: https://github.com/#{GITHUB_REPO}/actions/runs/#{id}")
-  return if %w[false no 0].include?(options[:wait].to_s.downcase)
+  return if Release.off?(options[:wait])
 
   sh("gh", "run", "watch", id, "--repo", GITHUB_REPO, "--exit-status", "--interval", "60")
 end
@@ -1203,7 +994,7 @@ def preflight(options)
     results << [name, problem, warn]
   end
   sha = head_commit
-  electron = !%w[false no 0].include?(options[:electron].to_s.downcase)
+  electron = !Release.off?(options[:electron])
 
   check.call("Clean tree at a commit on origin/main") do
     next "uncommitted changes (git status)" if tree_dirty?
@@ -1298,28 +1089,24 @@ lane :bump do |options|
   UI.user_error!("Invalid version '#{version}': expected x.y.z") unless version.match?(/\A\d+\.\d+\.\d+\z/)
   verify_versions!
 
-  next_build = ->(base) { version == current ? base + 1 : (base / 10 + 1) * 10 }
-  new_build = next_build.call(build)
+  new_build = Release.next_build(current, version, build)
   if options[:build]
     UI.user_error!("Invalid build '#{options[:build]}': expected a whole number") unless options[:build].to_s.match?(/\A\d+\z/)
     new_build = options[:build].to_i
     UI.user_error!("Build #{new_build} must be above the current build #{build}") unless new_build > build
-  elsif !%w[false no 0].include?(options[:remote].to_s.downcase)
+  elsif !Release.off?(options[:remote])
     uploaded, errors = uploaded_builds
     errors.each { |error| UI.important("Couldn't check the uploaded builds of #{error}") }
     highest = uploaded.values.max
-    if highest && highest >= new_build
-      new_build = next_build.call(highest)
+    new_build = Release.next_build(current, version, build, highest)
+    if highest && highest >= Release.next_build(current, version, build)
       UI.important("Uploaded builds go up to #{highest} (#{uploaded.map { |name, b| "#{name} #{b}" }.join(', ')}), so the next is #{new_build}")
     end
   end
-  new_code = ANDROID_VERSION_CODE_BASE + new_build
-
-  replace_in_file!(PACKAGE_JSON, %("version": "#{current}"), %("version": "#{version}"), count: 1)
-  replace_in_file!(PBXPROJ, "MARKETING_VERSION = #{current};", "MARKETING_VERSION = #{version};", count: marketing_version_count)
-  replace_in_file!(PBXPROJ, "CURRENT_PROJECT_VERSION = #{build};", "CURRENT_PROJECT_VERSION = #{new_build};", count: build_numbers.size)
-  replace_in_file!(GRADLE, %(versionName = "#{current}"), %(versionName = "#{version}"), count: 1)
-  replace_in_file!(GRADLE, "versionCode = #{ANDROID_VERSION_CODE_BASE + build}", "versionCode = #{new_code}", count: 1)
+  paths = { package_json: PACKAGE_JSON, pbxproj: PBXPROJ, gradle: GRADLE }
+  texts = Release.bump_texts(paths.transform_values { |path| File.read(path) }, from: [current, build], to: [version, new_build])
+  paths.each { |key, path| File.write(path, texts[key]) }
+  new_code = Release.android_version_code(new_build)
 
   UI.success("#{current} (#{build}) -> #{version} (#{new_build}, Android #{new_code})")
 end
@@ -1347,7 +1134,7 @@ lane :build do |options|
   build_apple("ios")
   build_apple("macos")
   build_android
-  build_electron(options) unless %w[false no 0].include?(options[:electron].to_s.downcase)
+  build_electron(options) unless Release.off?(options[:electron])
 end
 
 desc "Upload everything to App Store Connect (not submitted for review), Google Play (a draft on track:) and a draft GitHub release."
