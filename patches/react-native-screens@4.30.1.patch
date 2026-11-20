@@ -1,8 +1,29 @@
 diff --git a/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfig.kt b/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfig.kt
-index 68b8d852b8433a05e02372356d00a10530ccb8c9..87aab9aa54efb6d31002bcdfe4d7ad4432acffc1 100644
+index 68b8d852b8433a05e02372356d00a10530ccb8c9..90807ab2e819d8e8b740be7514377bf9b9de94b7 100644
 --- a/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfig.kt
 +++ b/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfig.kt
-@@ -360,7 +360,11 @@ class ScreenStackHeaderConfig(
+@@ -344,9 +344,17 @@ class ScreenStackHeaderConfig(
+         }
+ 
+         // subviews
+-        for (i in toolbar.childCount - 1 downTo 0) {
+-            if (toolbar.getChildAt(i) is ScreenStackHeaderSubview) {
+-                toolbar.removeViewAt(i)
++        // Subviews already in the toolbar in the same order stay there: taking them out of the
++        // window and back on every header update made Compose UI 1.12 (@expo/ui header buttons)
++        // register the view twice, and the second registration kept the whole popped screen alive.
++        val placedSubviews =
++            (0 until toolbar.childCount).map { toolbar.getChildAt(it) }.filterIsInstance<ScreenStackHeaderSubview>()
++        val keepPlaced = placedSubviews == configSubviews.filter { it.type !== ScreenStackHeaderSubview.Type.BACK }
++        if (!keepPlaced) {
++            for (i in toolbar.childCount - 1 downTo 0) {
++                if (toolbar.getChildAt(i) is ScreenStackHeaderSubview) {
++                    toolbar.removeViewAt(i)
++                }
+             }
+         }
+ 
+@@ -360,7 +368,11 @@ class ScreenStackHeaderConfig(
          while (i < size) {
              val view = configSubviews[i]
              val type = view.type
@@ -15,6 +36,17 @@ index 68b8d852b8433a05e02372356d00a10530ccb8c9..87aab9aa54efb6d31002bcdfe4d7ad44
                  view.setHiddenBySearchBar(isSearchBarExpanded)
              }
              if (type === ScreenStackHeaderSubview.Type.BACK) {
+@@ -397,7 +409,9 @@ class ScreenStackHeaderConfig(
+                 else -> {}
+             }
+             view.layoutParams = params
+-            toolbar.addView(view)
++            if (!keepPlaced) {
++                toolbar.addView(view)
++            }
+             i++
+         }
+ 
 diff --git a/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.kt b/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.kt
 index fa1b77317f609983ae2434764174072e51130550..accd2ad385dc7935d1cdd1c73d027faed5605084 100644
 --- a/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.kt
