@@ -18,7 +18,12 @@ import {
   type TabNavigationState,
   type TabRouterOptions,
 } from '@react-navigation/native';
-import { Button, Portal, Tooltip } from '@fluentui/react-components';
+import {
+  Button,
+  Portal,
+  Tooltip,
+  useArrowNavigationGroup,
+} from '@fluentui/react-components';
 import BadgeDot from 'components/Badge';
 import SystemIcon from 'components/SystemIcon';
 import { Text } from 'components/Text';
@@ -182,6 +187,14 @@ function TabNavigator({
       screenOptions,
     });
 
+  // One stop for Tab, with the arrow keys between the tabs, as a tab list
+  // and Windows' navigation pane take them: Tab goes on to the page.
+  const arrowKeys = useArrowNavigationGroup({
+    axis: 'vertical',
+    circular: true,
+    memorizeCurrent: true,
+  });
+
   const selectedKey = state.routes[state.index].key;
   const [shown, setShown] = useState([selectedKey]);
   if (!shown.includes(selectedKey)) {
@@ -251,7 +264,13 @@ function TabNavigator({
         </Tooltip>
       </View>
       {/* One list of tabs, Settings at its foot included. */}
-      <View role="tablist" style={styles.items}>
+      <View
+        role="tablist"
+        aria-orientation="vertical"
+        // React Native Web's `dataSet` writes Tabster's data attribute.
+        {...({ dataSet: { tabster: arrowKeys['data-tabster'] } } as object)}
+        style={styles.items}
+      >
         {state.routes.filter(r => r.name !== 'SettingStack').map(renderItem)}
         <View style={styles.footer}>{settings.map(renderItem)}</View>
       </View>

@@ -379,7 +379,12 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
               {title}
             </Paragraph>
             {more && key !== 'top' ? (
-              <TextButton size="small" onPress={() => setScope(key)}>
+              <TextButton
+                size="small"
+                // Each section has one: say which.
+                accessibilityLabel={`${t('seeAll')}, ${title}`}
+                onPress={() => setScope(key)}
+              >
                 {t('seeAll')}
               </TextButton>
             ) : null}

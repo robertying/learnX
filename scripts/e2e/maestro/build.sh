@@ -34,21 +34,25 @@ fi
 # The upstream commit the patches were written against.
 base="${MAESTRO_BASE:-aaa248d7fd4ca4924444dc027af9c7a62a9be348}"
 
+# The patches, in the order they apply.
+patches=(
+  "$here/maestro-display.patch"
+  "$here/maestro-fold-posture.patch"
+  "$here/maestro-hierarchy-fallback.patch"
+  "$here/maestro-tiny-elements.patch"
+  "$here/maestro-springboard-alerts.patch"
+  "$here/maestro-instrumentation-shell.patch"
+  "$here/maestro-sim-touch.patch"
+  "$here/maestro-inner-display-tree.patch"
+  "$here/maestro-inner-display-alerts.patch"
+  "$here/maestro-pinch.patch"
+)
 # A checkout of the base with the patches applied, in folder $1.
 patched_checkout() {
   git init -q "$1"
   git -C "$1" fetch -q --depth 1 https://github.com/mobile-dev-inc/Maestro.git "$base"
   git -C "$1" checkout -q -B learnx-patched FETCH_HEAD
-  git -C "$1" -c commit.gpgsign=false am -q "$here/maestro-display.patch" \
-    "$here/maestro-fold-posture.patch" \
-    "$here/maestro-hierarchy-fallback.patch" \
-    "$here/maestro-tiny-elements.patch" \
-    "$here/maestro-springboard-alerts.patch" \
-    "$here/maestro-instrumentation-shell.patch" \
-    "$here/maestro-sim-touch.patch" \
-    "$here/maestro-inner-display-tree.patch" \
-    "$here/maestro-inner-display-alerts.patch" \
-    "$here/maestro-pinch.patch"
+  git -C "$1" -c commit.gpgsign=false am -q "${patches[@]}"
 }
 
 if [ -n "${MAESTRO_SOURCE:-}" ]; then
@@ -112,6 +116,9 @@ fi
 # Swap the install in only once it is complete.
 rm -rf "$install.new"
 cp -R maestro-cli/build/install/maestro "$install.new"
+# The patches it has, one name a line, for scripts/e2e/e2e.sh to know which
+# commands it takes.
+printf '%s\n' "${patches[@]##*/}" >"$install.new/learnx-patches"
 rm -rf "$install"
 mv "$install.new" "$install"
 echo "$install/bin"

@@ -40,6 +40,7 @@ const run = (args: string[], env: Record<string, string> = {}) =>
       ...process.env,
       PATH: `${join(dir, 'bin')}:${process.env.PATH}`,
       MAESTRO_DEVICE: 'SIM',
+      DERIVED_DATA: join(dir, 'DerivedData', 'learnX-e2e'),
       E2E_SCREENSHOTS: 'shots',
       ...env,
     },
@@ -54,6 +55,11 @@ beforeEach(() => {
   copyFileSync(
     join(scripts, 'lib/env.sh'),
     join(dir, 'scripts/e2e/lib/env.sh'),
+  );
+  mkdirSync(join(dir, 'scripts/lib'));
+  copyFileSync(
+    join(scripts, '../lib/derived-data.sh'),
+    join(dir, 'scripts/lib/derived-data.sh'),
   );
   writeFileSync(
     join(dir, '.env'),
@@ -93,6 +99,9 @@ test('--ui gives xcodebuild only its own arguments and exports the attachments',
   expect(calls('xcresulttool')).toEqual([
     'xcresulttool export attachments --path build/e2e/ios-ui.xcresult --output-path shots/ui-tests',
   ]);
+  // It took its turn with the DerivedData folder and let go of it
+  // (scripts/lib/derived-data.sh).
+  expect(existsSync(join(dir, 'DerivedData', 'learnX-e2e.lock'))).toBe(false);
 });
 
 test('a flow run gives Maestro its output folder and runs no UI tests', () => {
@@ -117,4 +126,41 @@ test('without E2E_SCREENSHOTS, nothing is exported', () => {
 
   expect(calls('xcodebuild')).toHaveLength(1);
   expect(calls('xcresulttool')).toEqual([]);
+});
+
+describe('the PDF pinch flow (.maestro/pinch)', () => {
+  beforeEach(() => {
+    stub('adb', 'true');
+  });
+
+  test('runs after the flows on Android, on a Maestro built with the pinch patch', () => {
+    // As scripts/e2e/maestro/build.sh lists them, beside its bin folder.
+    writeFileSync(
+      join(dir, 'learnx-patches'),
+      'maestro-display.patch\nmaestro-pinch.patch\n',
+    );
+    run(['android', '--format', 'junit', '--output', 'report.xml']);
+
+    const [flows, pinch] = calls('maestro');
+    expect(flows).toContain('--output report.xml');
+    expect(flows).toMatch(/ \.maestro$/);
+    // Its own run: the flows' report stays theirs.
+    expect(pinch).not.toContain('--output');
+    expect(pinch).toContain('--test-output-dir shots/.maestro');
+    expect(pinch).toMatch(/ \.maestro\/pinch\/zoom-pdf\.yaml$/);
+  });
+
+  test("doesn't run on a Maestro release, on iOS or with flows named", () => {
+    run(['android']);
+    expect(calls('maestro')).toHaveLength(1);
+
+    writeFileSync(join(dir, 'learnx-patches'), 'maestro-pinch.patch\n');
+    rmSync(join(dir, 'maestro.log'));
+    run(['android', '.maestro/09-downloads.yaml']);
+    expect(calls('maestro')).toHaveLength(1);
+
+    rmSync(join(dir, 'maestro.log'));
+    run(['ios'], { E2E_UI_TESTS: '0' });
+    expect(calls('maestro')).toHaveLength(1);
+  });
 });

@@ -6,9 +6,17 @@ import type { ProgressBarProps } from './ProgressBar.shared';
 export type { ProgressBarProps } from './ProgressBar.shared';
 
 /** Fluent's determinate progress bar, in the accent color. */
-const ProgressBar: React.FC<ProgressBarProps> = ({ progress, style }) => (
+const ProgressBar: React.FC<ProgressBarProps> = ({
+  progress,
+  accessibilityLabel,
+  style,
+}) => (
   <View style={style}>
-    <FluentProgressBar value={clampProgress(progress)} max={1} />
+    <FluentProgressBar
+      value={clampProgress(progress)}
+      max={1}
+      aria-label={accessibilityLabel}
+    />
   </View>
 );
 

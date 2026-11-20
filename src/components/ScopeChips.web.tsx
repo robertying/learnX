@@ -12,15 +12,14 @@ const ScopeChips: React.FC<ScopeChipsProps> = ({
   selectedIndex,
   onSelect,
 }) => (
-  <View style={styles.row} role="radiogroup">
+  <View style={styles.row} role="group">
     {titles.map((title, index) => (
       <ToggleButton
         key={title}
         shape="circular"
         size="small"
+        // Said as pressed or not, as a toggle button is.
         checked={index === selectedIndex}
-        role="radio"
-        aria-checked={index === selectedIndex}
         onClick={() => onSelect(index)}
       >
         {title}

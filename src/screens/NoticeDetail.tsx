@@ -98,7 +98,7 @@ const NoticeDetailContent: React.FC<{
         ) : null}
         <FormSection>
           {content?.trim() ? (
-            <FormWebView content={content} />
+            <FormWebView content={content} accessibilityLabel={title} />
           ) : (
             <FormParagraph text={t('noNoticeContent')} />
           )}

@@ -114,6 +114,27 @@ test('--apply removes only that worktree, its DerivedData and its pushed branch'
   expect(existsSync(main)).toBe(true);
 });
 
+test('refuses while a script builds or tests in its DerivedData', () => {
+  const { wt, dd } = addWorktree('done');
+  git(wt, 'push', '-q', 'origin', 'done');
+  // As scripts/lib/derived-data.sh holds it: a live run's pid.
+  mkdirSync(`${dd}.lock`);
+  writeFileSync(join(`${dd}.lock`, 'pid'), `${process.pid}\n`);
+  writeFileSync(join(`${dd}.lock`, 'checkout'), `${main}\n`);
+
+  const result = clean('--apply', wt);
+
+  expect(result.status).toBe(1);
+  expect(result.stderr).toContain(`a run from ${main} is using ${dd}`);
+  expect(existsSync(wt)).toBe(true);
+  expect(existsSync(dd)).toBe(true);
+
+  // Once that run has ended, its lock no longer counts.
+  writeFileSync(join(`${dd}.lock`, 'pid'), '999999999\n');
+  expect(clean('--apply', wt).status).toBe(0);
+  expect(existsSync(dd)).toBe(false);
+});
+
 test('runs from inside the worktree it removes', () => {
   const { wt } = addWorktree('done');
   git(wt, 'push', '-q', 'origin', 'done');

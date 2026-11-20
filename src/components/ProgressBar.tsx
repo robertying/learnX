@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Animated, StyleSheet, View } from 'react-native';
 import { ProgressView } from '@expo/ui/swift-ui';
-import { animation, Animation } from '@expo/ui/swift-ui/modifiers';
+import {
+  accessibilityLabel as accessibilityLabelModifier,
+  animation,
+  Animation,
+} from '@expo/ui/swift-ui/modifiers';
 import ThemedHost from 'components/ThemedHost';
 import DeviceInfo from 'constants/DeviceInfo';
 import { clampProgress } from 'helpers/progress';
@@ -23,20 +27,33 @@ const ProgressBar: React.FC<ProgressBarProps> = props =>
     <SwiftUIBar {...props} />
   );
 
-const SwiftUIBar: React.FC<ProgressBarProps> = ({ progress, style }) => {
+const SwiftUIBar: React.FC<ProgressBarProps> = ({
+  progress,
+  accessibilityLabel,
+  style,
+}) => {
   const value = clampProgress(progress);
 
   return (
     <ThemedHost matchContents={{ vertical: true }} style={style}>
       <ProgressView
         value={value}
-        modifiers={[animation(Animation.easeInOut({ duration: 0.2 }), value)]}
+        modifiers={[
+          animation(Animation.easeInOut({ duration: 0.2 }), value),
+          ...(accessibilityLabel
+            ? [accessibilityLabelModifier(accessibilityLabel)]
+            : []),
+        ]}
       />
     </ThemedHost>
   );
 };
 
-const MacProgressBar: React.FC<ProgressBarProps> = ({ progress, style }) => {
+const MacProgressBar: React.FC<ProgressBarProps> = ({
+  progress,
+  accessibilityLabel,
+  style,
+}) => {
   const theme = useTheme();
   const value = clampProgress(progress);
   const [scale] = useState(() => new Animated.Value(value));
@@ -52,6 +69,7 @@ const MacProgressBar: React.FC<ProgressBarProps> = ({ progress, style }) => {
     <View
       accessible
       accessibilityRole="progressbar"
+      accessibilityLabel={accessibilityLabel}
       accessibilityValue={{ min: 0, max: 100, now: Math.round(value * 100) }}
       style={[styles.track, style]}
     >

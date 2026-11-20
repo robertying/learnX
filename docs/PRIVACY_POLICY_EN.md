@@ -7,7 +7,7 @@ learnX is a free, open-source app for Tsinghua University's Web Learning, made b
 ## In short
 
 - Your Tsinghua username, password, and course content stay on your device and are only sent to Tsinghua's own servers, unless you turn on Course Information Sharing (below).
-- I don't run a server for learnX and don't collect your account, courses, notices, assignments, files, or grades.
+- I don't collect your account, courses, notices, assignments, files, or grades. When the app checks my update server for updates, it doesn't send them either (see Other connections).
 - Crash reports and basic usage statistics go to Google Firebase (not from the Windows and Linux app). They don't include your login or course content.
 - Course Information Sharing (courseX) is off until you turn it on. When on, it uploads public information about your courses this semester, never information about you.
 
@@ -56,6 +56,7 @@ learnX doesn't collect your advertising identifier, doesn't show ads, and doesn'
 
 ## Other connections
 
+- The iOS, iPadOS, macOS, and Android apps check my update server (ota.tsinghua.app) for updates to the app's code when they start, and when you come back to them after an hour or more away, and download an update when there is one. A check carries the app's version and platform, the update it's running, and a random installation identifier, and, if the app quit with an error the last time it ran, that error. It carries nothing from your account or courses.
 - The Android app checks the TUNA mirror at Tsinghua (mirrors.tuna.tsinghua.edu.cn) for new versions and downloads updates from it when you ask. The Windows and Linux app checks the same mirror for new versions while it runs and downloads them in the background: the Windows app and the AppImage install them for you, and the .deb opens them in the system's installer when you choose to install from Settings.
 - The changelog opens learnX's releases page on GitHub, and links in notices open the sites they point to. Those sites have their own privacy policies.
 - If you install learnX from the App Store or Google Play, Apple or Google handle the download under their own policies.

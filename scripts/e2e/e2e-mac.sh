@@ -13,7 +13,8 @@
 # XCUITest can hang quitting the app (in tearDown), which would otherwise stall
 # the run.
 # DerivedData goes to $DERIVED_DATA (default
-# ~/Library/Developer/Xcode/DerivedData/learnX-e2e-mac), the result bundle to
+# ~/Library/Developer/Xcode/DerivedData/learnX-e2e-mac, which every checkout
+# shares, taking turns: scripts/lib/derived-data.sh), the result bundle to
 # build/e2e/mac.xcresult.
 set -euo pipefail
 
@@ -21,6 +22,8 @@ cd "$(dirname "$0")/../.."
 
 # shellcheck source=scripts/e2e/lib/env.sh
 . scripts/e2e/lib/env.sh
+# shellcheck source=scripts/lib/derived-data.sh
+. scripts/lib/derived-data.sh
 username="$(read_env DUMMY_USERNAME)"
 password="$(read_env DUMMY_PASSWORD)"
 if [ -z "$username" ] || [ -z "$password" ]; then
@@ -66,7 +69,10 @@ esac
 # E2E_CLOCK: the moment the store screenshots' app clock starts from,
 # E2E_LANGUAGE their language and E2E_APPEARANCE their light or dark mode
 # (scripts/e2e/store-screenshots.sh).
-TEST_RUNNER_E2E_USERNAME="$username" TEST_RUNNER_E2E_PASSWORD="$password" \
+# The DerivedData folder is shared with other checkouts, which take turns
+# (scripts/lib/derived-data.sh).
+with_derived_lock "$derived" env \
+  TEST_RUNNER_E2E_USERNAME="$username" TEST_RUNNER_E2E_PASSWORD="$password" \
   TEST_RUNNER_E2E_CLOCK="${E2E_CLOCK:-}" \
   TEST_RUNNER_E2E_LANGUAGE="${E2E_LANGUAGE:-}" \
   TEST_RUNNER_E2E_APPEARANCE="${E2E_APPEARANCE:-}" \

@@ -3,6 +3,7 @@ import AutoHeightWebView from 'components/AutoHeightWebView';
 import { FormView, type FormRowPosition } from 'components/Form';
 import { getWebViewTemplate } from 'helpers/html';
 import { loadsFromWebLearning } from 'helpers/learnUrl';
+import { isElectron } from 'helpers/platform';
 import useWebSession from 'hooks/useWebSession';
 import { useTheme, webContentColors } from 'theme';
 
@@ -15,9 +16,14 @@ import { useTheme, webContentColors } from 'theme';
  */
 const FormWebView: React.FC<{
   content: string;
+  /**
+   * What the content is, said by screen readers in the Electron app, where
+   * it is a frame of its own. The phones read it inline with the page.
+   */
+  accessibilityLabel: string;
   /** Set by `FormSection` on Android, for the row's corners. */
   position?: FormRowPosition;
-}> = ({ content, position }) => {
+}> = ({ content, accessibilityLabel, position }) => {
   const theme = useTheme();
   const [ready, setReady] = useState(false);
   const needsSession = useMemo(() => loadsFromWebLearning(content), [content]);
@@ -28,6 +34,7 @@ const FormWebView: React.FC<{
       <>
         {csrfToken !== null && (
           <AutoHeightWebView
+            accessibilityLabel={isElectron() ? accessibilityLabel : undefined}
             source={{
               html: getWebViewTemplate(
                 content,

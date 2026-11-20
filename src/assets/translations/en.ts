@@ -587,6 +587,7 @@ export default {
   a11yDone: 'Ended',
   a11yStruck: 'Will be replaced or removed',
   a11yListWidth: 'List width',
+  a11yLoading: 'Loading',
   openInNewWindow: 'Open in New Window',
   moveUp: 'Move Up',
   moveDown: 'Move Down',

@@ -188,15 +188,13 @@ name: Show no results and failures
     timeout: 10000
 # Continue Offline goes back to the saved data, still offering to log in.
 - tapOn: '${T_offlineMode}'
-# Leaving the login page after a typed password, some iOS devices ask to save
-# it (the system's own labels), which hides the app until dismissed.
-- tapOn:
-    text: 'Not Now|现在不|以后'
-    optional: true
-- extendedWaitUntil:
-    visible:
-      id: sync-status-relogin
-    timeout: 10000
+- runFlow:
+    file: subflows/save-password.yaml
+    env:
+      SHOWN: '${T_syncStatusLogIn}'
+      STAYED: '${T_offlineMode}'
+- assertVisible:
+    id: sync-status-relogin
 # The third login goes through: the login page and the status go away. The
 # page starts without the turned-down password again, so it's typed again.
 - tapOn:
@@ -209,20 +207,9 @@ name: Show no results and failures
     id: login-password
 - inputText: ${PASSWORD}
 - pressKey: Enter
-# Some iOS devices ask to save the password first (the system's own labels).
-- tapOn:
-    text: 'Not Now|现在不|以后'
-    optional: true
 # A typed mock login starts over from the mock data, so the set-up page shows
-# again, as after the first login (subflows/login-form.yaml).
-- extendedWaitUntil:
-    visible:
-      id: setup-not-now
-    timeout: 15000
-    optional: true
-- tapOn:
-    id: setup-not-now
-    optional: true
+# again, as after the first login.
+- runFlow: subflows/login-submitted.yaml
 - extendedWaitUntil:
     visible:
       id: 'tab-notices'

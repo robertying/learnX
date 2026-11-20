@@ -3,6 +3,7 @@ import { scrollInsetBehavior } from 'constants/scrollInsetBehavior';
 import { StyleSheet } from 'react-native';
 import WebView, { type WebViewProps } from 'react-native-webview';
 import PageProgressBar from 'components/PageProgressBar';
+import { t } from 'helpers/i18n';
 import SafeArea from 'components/SafeArea';
 import useWebViewProgress from 'hooks/useWebViewProgress';
 import { isApple } from 'helpers/platform';
@@ -24,7 +25,10 @@ const ScreenWebView: React.FC<
   return (
     <SafeArea>
       {progress.loading ? (
-        <PageProgressBar progress={progress.progress} />
+        <PageProgressBar
+          progress={progress.progress}
+          accessibilityLabel={t('a11yLoading')}
+        />
       ) : null}
       <WebView
         ref={ref}

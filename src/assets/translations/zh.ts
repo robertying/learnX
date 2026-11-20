@@ -557,6 +557,7 @@ const zh: typeof en = {
   a11yDone: '已结束',
   a11yStruck: '将被替换或删除',
   a11yListWidth: '列表宽度',
+  a11yLoading: '正在载入',
   openInNewWindow: '在新窗口中打开',
   moveUp: '上移',
   moveDown: '下移',

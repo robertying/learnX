@@ -9,10 +9,12 @@ import { isApple } from 'helpers/platform';
  * and right below the header: on iPhone and iPad, where the page is under the header, it keeps
  * clear of the top safe area, which includes the header (`underHeader`).
  */
-const PageProgressBar: React.FC<{ progress: number; testID?: string }> = ({
-  progress,
-  testID,
-}) =>
+const PageProgressBar: React.FC<{
+  progress: number;
+  /** What loads, for screen readers. */
+  accessibilityLabel: string;
+  testID?: string;
+}> = ({ progress, accessibilityLabel, testID }) =>
   isApple() && underHeader() ? (
     <SafeAreaView
       edges={{ top: true }}
@@ -20,11 +22,17 @@ const PageProgressBar: React.FC<{ progress: number; testID?: string }> = ({
       pointerEvents="none"
       testID={testID}
     >
-      <ProgressBar progress={progress} />
+      <ProgressBar
+        progress={progress}
+        accessibilityLabel={accessibilityLabel}
+      />
     </SafeAreaView>
   ) : (
     <View style={styles.overlay} pointerEvents="none" testID={testID}>
-      <ProgressBar progress={progress} />
+      <ProgressBar
+        progress={progress}
+        accessibilityLabel={accessibilityLabel}
+      />
     </View>
   );
 

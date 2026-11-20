@@ -42,6 +42,7 @@ import {
   MainStackScreenProps,
 } from 'navigation/types';
 import useHeaderButtons from 'hooks/useHeaderButtons';
+import useInert from 'hooks/useInert';
 import useRefreshCommand from 'hooks/useRefreshCommand';
 import SegmentedTabs from 'components/SegmentedTabs';
 import { SafeAreaView } from 'react-native-screens/experimental';
@@ -210,8 +211,14 @@ const CourseDetailContent: React.FC<{
     route: {
       key: string;
     };
-  }) => {
-    switch (sceneRoute.key) {
+  }) => (
+    <CoursePage selected={sceneRoute.key === routes[index].key}>
+      {renderList(sceneRoute.key)}
+    </CoursePage>
+  );
+
+  const renderList = (key: string) => {
+    switch (key) {
       case 'notice':
         return (
           <CourseItemList
@@ -334,6 +341,23 @@ const CourseDetailContent: React.FC<{
         initialLayout={{ width: initialWidth }}
       />
     </SafeArea>
+  );
+};
+
+/**
+ * One of the pager's pages, which all stay mounted side by side: the ones
+ * not selected are inert in the Electron app, so Tab doesn't go through
+ * their cards and scroll the pager to them under the selected tab.
+ */
+const CoursePage: React.FC<React.PropsWithChildren<{ selected: boolean }>> = ({
+  selected,
+  children,
+}) => {
+  const page = useInert(!selected);
+  return (
+    <View ref={page} style={Styles.flex1}>
+      {children}
+    </View>
   );
 };
 

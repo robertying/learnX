@@ -22,6 +22,11 @@ export interface IconButtonProps {
   size?: number;
   /** `contained` puts the icon on a filled circle, to show a mode is on. */
   mode?: 'contained';
+  /**
+   * For a button that turns a mode on and off (Select, Reorder): whether
+   * it's on, which screen readers say. Leave it out for other buttons.
+   */
+  pressed?: boolean;
   /** Shows a dot on the icon, for something new behind the button. */
   badge?: boolean;
   disabled?: boolean;

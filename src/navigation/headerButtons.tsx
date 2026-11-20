@@ -27,7 +27,10 @@ export interface HeaderButton {
   disabled?: boolean;
   /** A dot for something new behind the button. */
   badge?: boolean;
-  /** Draws the `IconButton` filled, to show its mode is on. */
+  /**
+   * For a button that turns a mode on and off: whether it's on, drawn
+   * filled and said by screen readers. Leave it out for other buttons.
+   */
   contained?: boolean;
   /** In a glass of its own from iOS 26 instead of sharing its neighbors'. */
   ownGroup?: boolean;
@@ -114,6 +117,7 @@ const element = (entry: HeaderButton | CustomHeaderEntry) =>
       disabled={entry.disabled}
       badge={entry.badge}
       mode={entry.contained ? 'contained' : undefined}
+      pressed={entry.contained}
       testID={entry.testID}
     />
   ) : entry.element ? (

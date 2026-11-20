@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { AccessibilityInfo, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { create } from 'zustand';
 import SystemIcon from 'components/SystemIcon';
 import { Text } from 'components/Text';
@@ -60,7 +60,6 @@ export const toast = (
     type,
     duration: options?.duration ?? defaultDurations[type],
   }));
-  AccessibilityInfo.announceForAccessibility(text);
 };
 
 /**
@@ -84,35 +83,41 @@ export const Toast: React.FC = () => {
     return () => clearTimeout(timer);
   }, [id, text, duration]);
 
-  if (!text) {
-    return null;
-  }
   const icon = icons[type];
+  // The status region is always there, so a screen reader announces each
+  // toast's text as it comes in: one that appears together with its text
+  // isn't announced by every screen reader (React Native Web's
+  // `announceForAccessibility` does nothing).
   return (
-    <View style={styles.wrapper} pointerEvents="box-none">
-      <View
-        key={id}
-        role="status"
-        aria-live="polite"
-        testID="toast"
-        style={[
-          styles.toast,
-          {
-            backgroundColor: theme.colors.surfaceContainer,
-            borderColor: theme.colors.outlineVariant,
-          },
-        ]}
-      >
-        {icon ? (
-          <SystemIcon
-            name={icon.name}
-            size={20}
-            color={theme.colors.status[icon.tone]}
-            filled
-          />
-        ) : null}
-        <Text style={styles.text}>{text}</Text>
-      </View>
+    <View
+      role="status"
+      aria-live="polite"
+      style={styles.wrapper}
+      pointerEvents="box-none"
+    >
+      {text ? (
+        <View
+          key={id}
+          testID="toast"
+          style={[
+            styles.toast,
+            {
+              backgroundColor: theme.colors.surfaceContainer,
+              borderColor: theme.colors.outlineVariant,
+            },
+          ]}
+        >
+          {icon ? (
+            <SystemIcon
+              name={icon.name}
+              size={20}
+              color={theme.colors.status[icon.tone]}
+              filled
+            />
+          ) : null}
+          <Text style={styles.text}>{text}</Text>
+        </View>
+      ) : null}
     </View>
   );
 };

@@ -41,7 +41,9 @@ it('lays out sections of rows with their titles and footers', () => {
       </FormSection>
     </Form>,
   );
-  expect(screen.getByRole('heading', { name: 'Account' })).toBeTruthy();
+  expect(
+    screen.getByRole('heading', { name: 'Account', level: 2 }),
+  ).toBeTruthy();
   expect(screen.getByText('About the account')).toBeTruthy();
   expect(screen.getByText('Rui')).toBeTruthy();
   expect(screen.getByText('A')).toBeTruthy();

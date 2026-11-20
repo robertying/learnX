@@ -17,9 +17,13 @@ const HeaderTitle: React.FC<HeaderTitleProps> = ({
   ellipsizeMode = 'tail',
 }) => (
   <View style={styles.root}>
+    {/* The page's heading, level 1 as a page title is, under which its
+        sections' headings are level 2 (Form). A detail pane with nothing
+        open has no title, and no heading. */}
     <Text
       variant="title"
-      role="heading"
+      role={title ? 'heading' : undefined}
+      aria-level={title ? 1 : undefined}
       numberOfLines={1}
       ellipsizeMode={ellipsizeMode}
     >

@@ -171,6 +171,7 @@ export interface Bridge {
     get: (url: string) => Promise<BridgeCookie[]>;
     set: (details: BridgeCookieDetails) => Promise<void>;
     remove: (url: string, name: string) => Promise<void>;
+    /** At logout: the cookies, with the web views' site storage and HTTP cache. */
     clearAll: () => Promise<void>;
   };
   storage: {

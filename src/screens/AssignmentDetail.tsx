@@ -250,7 +250,10 @@ const AssignmentDetailContent: React.FC<{
         </FormSection>
         <FormSection title={t('description')}>
           {hasDescription ? (
-            <FormWebView content={description ?? ''} />
+            <FormWebView
+              content={description ?? ''}
+              accessibilityLabel={t('description')}
+            />
           ) : !attachment ? (
             <FormParagraph text={t('noAssignmentDescription')} />
           ) : null}

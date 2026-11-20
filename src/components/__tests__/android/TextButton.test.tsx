@@ -40,4 +40,11 @@ describe('TextButton (Android)', () => {
       textDecorationLine: 'line-through',
     });
   });
+
+  it('says its own label to TalkBack where it has one', async () => {
+    await render(
+      <TextButton accessibilityLabel="See All, Notices">See All</TextButton>,
+    );
+    expect(screen.getByLabelText('See All, Notices')).toBeTruthy();
+  });
 });

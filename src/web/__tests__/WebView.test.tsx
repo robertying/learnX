@@ -339,6 +339,13 @@ describe('WebView', () => {
     expect(mockViews[0].loadURL).not.toHaveBeenCalled();
   });
 
+  it("names its frame for screen readers once it's attached", async () => {
+    const view = await renderAttached(
+      <WebView source={{ html: '<p>x</p>' }} accessibilityLabel="Notice" />,
+    );
+    expect(view.frame.title).toBe('Notice');
+  });
+
   it('loads the source with its scripts once attached', async () => {
     const view = await renderAttached(
       <WebView

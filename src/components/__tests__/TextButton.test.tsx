@@ -1,5 +1,5 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
-import { font, padding } from '@expo/ui/swift-ui/modifiers';
+import { accessibilityLabel, font, padding } from '@expo/ui/swift-ui/modifiers';
 import TextButton from 'components/TextButton';
 import { withGutter } from 'components/TextButton.shared';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -96,5 +96,12 @@ describe('TextButton (iOS)', () => {
     expect(screen.getByText('Open')).toBeTruthy();
     await userEvent.setup().press(screen.getByTestId('open'));
     expect(onPress).toHaveBeenCalled();
+  });
+
+  it('says its own label to screen readers where it has one', async () => {
+    await render(
+      <TextButton accessibilityLabel="See All, Notices">See All</TextButton>,
+    );
+    expect(accessibilityLabel).toHaveBeenCalledWith('See All, Notices');
   });
 });

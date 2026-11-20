@@ -24,7 +24,7 @@ jest.mock('components/AutoHeightWebView', () => {
 });
 
 it('shows the content in the page template, with a spinner until it has rendered', async () => {
-  await render(<FormWebView content="<p>Hi</p>" />);
+  await render(<FormWebView content="<p>Hi</p>" accessibilityLabel="Notice" />);
   expect(screen.getByTestId('progress')).toBeTruthy();
   const page = screen.getByText('<p>Hi</p>', { exact: false });
   expect(page.props.children).toContain('<html');
@@ -55,7 +55,7 @@ describe('with an image from Web Learning', () => {
 
   it('waits for the login under way, then loads with its token', async () => {
     useAuthStore.setState({ loggingIn: true });
-    await render(<FormWebView content={content} />);
+    await render(<FormWebView content={content} accessibilityLabel="Notice" />);
     expect(screen.getByTestId('progress')).toBeTruthy();
     expect(screen.queryByTestId('ready')).toBeNull();
 
@@ -70,7 +70,7 @@ describe('with an image from Web Learning', () => {
 
   it('loads again with the new token after a later login', async () => {
     useAuthStore.setState({ loggedIn: true, sessionToken: 'old-token' });
-    await render(<FormWebView content={content} />);
+    await render(<FormWebView content={content} accessibilityLabel="Notice" />);
     await act(async () => {});
     expect(screen.getByText('old-token', { exact: false })).toBeTruthy();
     await userEvent.press(screen.getByTestId('ready'));

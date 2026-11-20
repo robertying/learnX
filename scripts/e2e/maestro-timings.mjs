@@ -4,11 +4,12 @@
 //
 //   node scripts/e2e/maestro-timings.mjs <run folder> [how many commands]
 //
-// The run folder is the one holding a folder per flow. It prints each flow's
-// time, then the time each kind of command took and the commands that took
-// longest, both by their own time: a runFlow's or repeat's own time is
-// checking its `when` or `while` condition, its commands' time is counted
-// under them. A `visible` / `notVisible` condition that waits out Maestro's
+// The run folder is the one holding a folder per flow; given the test output
+// folder, which holds a timestamped one per run, it reads the latest. It
+// prints each flow's time, then the time each kind of command took and the
+// commands that took longest, both by their own time: a runFlow's or
+// repeat's own time is checking its `when` or `while` condition, its
+// commands' time is counted under them. A `visible` / `notVisible` condition that waits out Maestro's
 // lookup timeout (7 s) shows up here as a slow skipped runFlow or repeat.
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -45,11 +46,29 @@ const add = (totals, key, ms) => {
   totals.set(key, total);
 };
 
+/** Whether folder `d` holds a run: a folder per flow, with its commands. */
+const isRun = d =>
+  readdirSync(d, { withFileTypes: true }).some(
+    entry =>
+      entry.isDirectory() && existsSync(join(d, entry.name, 'commands.json')),
+  );
+const latest = isRun(dir)
+  ? undefined
+  : readdirSync(dir, { withFileTypes: true })
+      .filter(entry => entry.isDirectory() && isRun(join(dir, entry.name)))
+      .map(entry => entry.name)
+      .sort()
+      .at(-1);
+const run = latest ? join(dir, latest) : dir;
+if (latest) {
+  console.log(`Run ${run}\n`);
+}
+
 const flows = [];
 const byKind = new Map();
 const byCommand = new Map();
-for (const name of readdirSync(dir).sort()) {
-  const file = join(dir, name, 'commands.json');
+for (const name of readdirSync(run).sort()) {
+  const file = join(run, name, 'commands.json');
   if (!existsSync(file)) {
     continue;
   }
