@@ -215,12 +215,13 @@ export const useShowDetail = (
   });
   // The pane's container, still there (out of sight) once it collapses.
   const lastContainer = useRef<DetailContainer>(null);
-  const moveToList = useEffectEvent(() => {
+  /** Whether a page held the pane, so nothing moved. */
+  const moveToList = useEffectEvent((): boolean => {
     const container = lastContainer.current;
     const detailState = container?.getRootState();
     const stack = listNavigation?.getState();
     if (!container || !detailState || !stack) {
-      return;
+      return false;
     }
     const pages = detailState.routes.filter(
       route => route.name !== 'EmptyDetail',
@@ -241,19 +242,19 @@ export const useShowDetail = (
       pages.length === 0 ||
       sheet === undefined
     ) {
-      return;
+      return false;
     }
     container.dispatch(
       CommonActions.reset({ index: 0, routes: [{ name: 'EmptyDetail' }] }),
     );
     // A page that can't be left (a submission while it uploads) keeps the
-    // pane as it was; it shows again once the split expands.
+    // pane as it is.
     if (
       container
         .getRootState()
         ?.routes.some(route => route.name !== 'EmptyDetail')
     ) {
-      return;
+      return true;
     }
     for (const { name, params } of listPages) {
       navigation.dispatch(StackActions.push(name, params));
@@ -267,6 +268,7 @@ export const useShowDetail = (
         }),
       );
     }
+    return false;
   });
   const rememberContainer = useEffectEvent(() => {
     lastContainer.current = detailRef?.current ?? null;
@@ -279,8 +281,19 @@ export const useShowDetail = (
       moveToDetail();
     } else if (hadDetail.current) {
       hadDetail.current = false;
-      moveToList();
+      // A held pane moves once it changes (the upload done, the submission
+      // goes back), until it expands again.
+      const container = lastContainer.current;
+      if (moveToList() && container) {
+        const stop = container.addListener('state', () => {
+          if (!moveToList()) {
+            stop();
+          }
+        });
+        return stop;
+      }
     }
+    return undefined;
   }, [detailNavigator]);
 
   return (name, ...params) => {
