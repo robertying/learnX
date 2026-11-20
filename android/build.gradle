@@ -3,10 +3,10 @@ buildscript {
         buildToolsVersion = "37.0.0"
         minSdkVersion = 29
         compileSdkVersion = 37
-        // Android 17's minor SDK release (37.1), which Compose UI 1.13 needs
-        // to compile against. Set for every project below, so one platform is
-        // installed.
-        compileSdkMinorVersion = 1
+        // Android 17's minor SDK release (37.2): Compose UI 1.13 needs 37.1 or
+        // later to compile against. Set for every project below, so one
+        // platform is installed.
+        compileSdkMinorVersion = 2
         targetSdkVersion = 37
         ndkVersion = "30.0.16248370"
         cmakeVersion = "4.1.2"
