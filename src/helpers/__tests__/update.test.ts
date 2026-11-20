@@ -6,7 +6,7 @@ const mirror =
 
 const fetchMock = jest.fn<
   Promise<{ ok: boolean; status: number; json: () => Promise<unknown> }>,
-  [string]
+  [string, RequestInit?]
 >(async () => ({
   ok: true,
   status: 200,
@@ -23,14 +23,16 @@ beforeEach(() => {
   globalThis.fetch = fetchMock as unknown as typeof fetch;
 });
 
-it("links the APK for the phone's ABI, with its checksum and size", async () => {
+it("links the APK for the phone's ABI, with its checksum and size, asking without cookies", async () => {
   await expect(getLatestRelease()).resolves.toEqual({
     version: '19.0.0',
     url: `${mirror}/learnX-arm64-v19.0.0.apk`,
     sha256: 'abc',
     size: 1,
   });
-  expect(fetchMock).toHaveBeenCalledWith(`${mirror}/latest.json`);
+  expect(fetchMock).toHaveBeenCalledWith(`${mirror}/latest.json`, {
+    credentials: 'omit',
+  });
 });
 
 it('links the APK without a checksum where latest.json lists none', async () => {
@@ -54,7 +56,9 @@ it('asks the local test server in E2E builds', async () => {
     await expect(getLatestRelease()).resolves.toMatchObject({
       url: `${E2E_UPDATE_URL}/learnX-arm64-v19.0.0.apk`,
     });
-    expect(fetchMock).toHaveBeenCalledWith(`${E2E_UPDATE_URL}/latest.json`);
+    expect(fetchMock).toHaveBeenCalledWith(`${E2E_UPDATE_URL}/latest.json`, {
+      credentials: 'omit',
+    });
   } finally {
     delete testEnv.TEST_LOGIN;
   }

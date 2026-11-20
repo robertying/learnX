@@ -99,8 +99,8 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
     };
 
   const handleMessage = (event: WebViewMessageEvent) => {
-    // Only Tsinghua's own pages, like the injected script (preval/sso.js),
-    // which holds the password.
+    // Only Tsinghua's own pages, where the injected scripts run (preval/sso.js,
+    // which holds the password, only on id.tsinghua.edu.cn).
     if (!isTsinghuaUrl(event.nativeEvent.url)) {
       return;
     }

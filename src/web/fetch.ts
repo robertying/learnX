@@ -64,6 +64,7 @@ export const electronFetch = async (
       method: request.method,
       headers: [...headers],
       body,
+      credentials: request.credentials,
     })
     .catch((error: unknown) => {
       console.warn(`Request to ${request.url} failed: ${String(error)}`);

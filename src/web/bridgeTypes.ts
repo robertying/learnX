@@ -35,6 +35,8 @@ export interface BridgeRequest {
   method: string;
   headers: [string, string][];
   body?: ArrayBuffer;
+  /** `omit` sends no cookies and keeps none it gets; anything else sends the session's. */
+  credentials?: RequestCredentials;
 }
 
 export interface BridgeResponse {
