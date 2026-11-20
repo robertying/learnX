@@ -35,6 +35,7 @@ patchedDependencies:
   'react-native-pager-view@10.0.3': patches/react-native-pager-view@10.0.3.patch
   'expo-background-task@58.0.13': patches/expo-background-task@58.0.13.patch
   '@react-navigation/native-stack@7.21.1': patches/@react-navigation__native-stack@7.21.1.patch
+  'babel-plugin-react-compiler@1.0.0': patches/babel-plugin-react-compiler@1.0.0.patch
 
 # Agent skills that packages ship. Agents here work from the repo's own
 # AGENTS.md files and .claude/skills, so none are taken from dependencies.

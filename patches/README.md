@@ -42,6 +42,14 @@ Adds `headerSubtitle` (used by `getTitleOptions` in `navigation/options.tsx`).
 
 **Tested by:** `patches/__tests__/native-stack.test.tsx`
 
+## `babel-plugin-react-compiler`
+
+An identifier the compiler writes without a source location gets none, instead of the compiler's own marker for that (a Symbol) as its `loc`, as the compiler's other nodes already do. With Expo's tree shaking on (the Electron app's web build, `electron/webExport.ts`), Metro's workers send each file's AST back to the main process by structured clone, which can't clone a Symbol, so the export failed with "DataCloneError: Symbol() could not be cloned".
+
+**Drop when:** Upstream's `codegenPlace` skips `GeneratedSource` locations.
+
+**Tested by:** `patches/__tests__/babel-plugin-react-compiler.test.ts`; the Electron E2E tests (their web build)
+
 ## `expo-background-task`
 
 iOS: submits the task as a background app refresh task (`BGAppRefreshTaskRequest`) instead of a processing task, which iOS runs only while the device is idle, usually overnight on the charger; app refresh runs through the day, as often as the app is used. It keeps upstream's identifier, which `ios/learnX/Info.plist` lists.

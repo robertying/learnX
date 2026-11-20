@@ -76,7 +76,7 @@ jobs:
         if: steps.changes.outputs.changed == 'true'
         run: |
           bash scripts/ci/write-e2e-env.sh
-          pnpm exec expo export --platform web --output-dir build/electron/web
+          node electron/webExport.ts build/electron/web
         env:
           CI: '1'
           # Metro keeps its cache in the temp folder.

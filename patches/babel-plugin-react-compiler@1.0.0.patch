@@ -1,0 +1,15 @@
+diff --git a/dist/index.js b/dist/index.js
+index ac4a79e741a176252312419e439be74cc80998e5..39ee63ba2ba6ac6006ae9b5defa866760cafe2e8 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -92664,7 +92664,9 @@ function codegenPlace(cx, place) {
+     suggestions: null
+   });
+   const identifier4 = convertIdentifier(place.identifier);
+-  identifier4.loc = place.loc;
++  if (place.loc != null && place.loc != GeneratedSource) {
++    identifier4.loc = place.loc;
++  }
+   return identifier4;
+ }
+ function convertIdentifier(identifier4) {
