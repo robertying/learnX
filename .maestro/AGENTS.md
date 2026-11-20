@@ -43,7 +43,7 @@
 
 - Performance is measured on E2E builds, which are Release. The `mockScale` launch argument (`large`) grows the mock account's semester to a busy real one (`data/mockScale`); measure at `normal` and `large`.
 - `services/perf` marks when the bundle starts running, when the stores have loaded and when the first list is drawn with its content, as User Timing marks in every build. E2E builds also log the launch's marks as `learnX perf {…}` and, on iOS and the Mac, where release builds don't log, keep the last launches' in user defaults (`perfLaunches`). Android reports the first list drawn as the launch's full display (`reportFullyDrawn`, in every build), which `am start -W` and Google Play's startup vitals read.
-- `PerfUITests` (`ios/learnXUITests/iOS` and `Mac`) measure launches with XCTest's metrics, starting logged in with the semester cached. They're skipped unless the test runner has `E2E_PERF=1` (`PerfRun` has the other settings); the numbers are in the result bundle (`xcrun xcresulttool get test-results metrics`).
+- `PerfUITests` (`ios/learnXUITests`, for iOS and the Mac) measure launches with XCTest's metrics, starting logged in with the semester cached. They're skipped unless the test runner has `E2E_PERF=1` (the class has the other settings); the numbers are in the result bundle (`xcrun xcresulttool get test-results metrics`).
 
 ## Store screenshots
 
