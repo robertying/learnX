@@ -5,6 +5,12 @@ import {
   type ParamListBase,
 } from '@react-navigation/native';
 import { Windows } from 'modules/windows';
+import { kvStorage } from 'data/storage';
+import {
+  RELOAD_LINKS_KEY,
+  forgetWindowLinksForReload,
+  keepWindowLinksForReload,
+} from 'services/windows';
 import {
   DetailPane,
   useIsPrimaryWindow,
@@ -109,9 +115,14 @@ describe('useWindow', () => {
     expect(Windows!.setWindowLink).not.toHaveBeenCalled();
   });
 
-  it('remembers nothing with one window', async () => {
+  it('remembers one window only for a reload of the JS', async () => {
     await renderHook(() => useWindowRestoration({ type: 'today' }));
     expect(Windows!.setWindowLink).not.toHaveBeenCalled();
+    keepWindowLinksForReload();
+    expect(JSON.parse(kvStorage.getItem(RELOAD_LINKS_KEY) as string)).toEqual(
+      expect.objectContaining({ '': 'learnx://today' }),
+    );
+    forgetWindowLinksForReload();
   });
 
   it('names a window after what its focused screen shows', async () => {

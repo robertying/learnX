@@ -3,7 +3,7 @@ import { Linking } from 'react-native';
 import { getUrlTarget } from 'helpers/openTarget';
 import useOpenTarget from 'hooks/useOpenTarget';
 import { applyMockNetworkLink } from 'services/launchOptions';
-import { isTargetWindow } from 'services/windows';
+import { isTargetWindow, takeReloadLink } from 'services/windows';
 import { useWindow } from 'hooks/useWindow';
 
 /**
@@ -18,7 +18,8 @@ const initialUrlHandled = new Set<string>();
  * Opens learnx:// links: those of tapped widget rows (the assignment's detail,
  * or the list) and of calendar events and reminders (an assignment, a course
  * or Today). Handles the link that launched the app as well as links while it
- * runs, and in debug and E2E builds the mock network link
+ * runs, and after an over-the-air update reloaded the JS, what the window
+ * showed before (`takeReloadLink`), and in debug and E2E builds the mock network link
  * (`applyMockNetworkLink`). Other learnx:// links (the share extension's) are
  * left alone.
  */
@@ -39,9 +40,12 @@ const useLinkTaps = () => {
 
     if (!initialUrlHandled.has(windowId ?? '')) {
       initialUrlHandled.add(windowId ?? '');
-      // A window of its own (iPad, Mac) is told its link by the scene
-      // delegate: React Native only knows the one that launched the app.
-      if (windowId) {
+      const reloaded = takeReloadLink(windowId);
+      if (reloaded) {
+        handle(reloaded);
+      } else if (windowId) {
+        // A window of its own (iPad, Mac) is told its link by the scene
+        // delegate: React Native only knows the one that launched the app.
         handle(initialURL);
       } else {
         Linking.getInitialURL()

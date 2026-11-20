@@ -1,4 +1,8 @@
 import * as Updates from 'expo-updates';
+import {
+  forgetWindowLinksForReload,
+  keepWindowLinksForReload,
+} from 'services/windows';
 
 /**
  * How long the app has to have been in the background before coming back
@@ -26,7 +30,8 @@ const fetchUpdate = async () => {
  * app meanwhile), or else checks for one in the background. Resolves true when
  * an update is starting: `hooks/useReLogin`, which handles coming back, then
  * leaves the session and the lists to the app the update starts, rather than
- * begin a login and fetches that the reload would cut off.
+ * begin a login and fetches that the reload would cut off. Each window opens
+ * again at the tab and item it showed (`keepWindowLinksForReload`).
  */
 export const updateOnReturn = async (
   awayMs: number,
@@ -39,11 +44,13 @@ export const updateOnReturn = async (
     void fetchUpdate();
     return false;
   }
+  keepWindowLinksForReload();
   try {
     await Updates.reloadAsync();
     return true;
   } catch {
     // Carry on with the running bundle; the update starts at the next launch.
+    forgetWindowLinksForReload();
     return false;
   }
 };
