@@ -149,13 +149,13 @@ const FormContent: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
     return list;
   }
 
-  const handleRefresh = async () => {
+  // `finally` on the promise: React Compiler skips a component with a
+  // `try` that has no `catch`.
+  const handleRefresh = () => {
     setRefreshing(true);
-    try {
-      await onRefresh();
-    } finally {
-      setRefreshing(false);
-    }
+    return Promise.resolve()
+      .then(onRefresh)
+      .finally(() => setRefreshing(false));
   };
 
   return (

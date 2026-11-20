@@ -211,15 +211,17 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
   // after mounting. Coming back from a result doesn't refocus it.
   const searchBarFocused = useRef(false);
   useEffect(() => {
-    let attempts = 0;
+    // Counted in an object: React Compiler skips a component whose closures
+    // increment a variable they capture.
+    const tries = { count: 0 };
     const focusSearchBar = () => {
-      if (searchBarFocused.current || attempts >= 8) {
+      if (searchBarFocused.current || tries.count >= 8) {
         return;
       }
-      if (attempts === 0 && initialQuery) {
+      if (tries.count === 0 && initialQuery) {
         searchBarRef.current?.setText(initialQuery);
       }
-      attempts++;
+      tries.count += 1;
       searchBarRef.current?.focus();
     };
     const timers = [50, 200, 400, 700, 1000].map(delay =>
