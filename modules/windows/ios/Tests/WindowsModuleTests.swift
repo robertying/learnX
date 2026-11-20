@@ -1,4 +1,4 @@
-import ExpoModulesCore
+@testable import ExpoModulesCore
 import Testing
 import UIKit
 
