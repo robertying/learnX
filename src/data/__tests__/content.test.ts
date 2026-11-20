@@ -1,5 +1,8 @@
 import dayjs from 'dayjs';
-import type { HomeworkListOptions } from '@robertying/thu-learn-lib';
+import {
+  ContentType,
+  type HomeworkListOptions,
+} from '@robertying/thu-learn-lib';
 import {
   assignmentsQuery,
   contentLists,
@@ -18,7 +21,7 @@ import {
   useNotices,
   useRefreshCourseNotices,
 } from 'data/content';
-import { mockCurrentSemester } from 'data/mock';
+import { mockCurrentSemester, mockFavorites } from 'data/mock';
 import { mockInEnglish } from 'data/mockEnglish';
 import {
   defaultMockNetworkConfig,
@@ -489,6 +492,57 @@ describe('files', () => {
     );
     await refreshCourseFiles(semesterId, courseId);
     expect(queryClient.getQueryData(key)).toEqual(files);
+  });
+
+  it('asks for the file favorites once for every course of a fetch', async () => {
+    const getFavorites = jest.spyOn(mockSource, 'getFavorites');
+    const getFileList = jest.spyOn(mockSource, 'getFileList');
+    const files = await queryClient.fetchQuery(filesQuery(semesterId));
+
+    expect(getFavorites).toHaveBeenCalledTimes(1);
+    expect(getFavorites).toHaveBeenCalledWith({ type: ContentType.FILE });
+    const favorites = await getFavorites.mock.results[0].value;
+    expect(favorites.length).toBeGreaterThan(0);
+    expect(getFileList).toHaveBeenCalledTimes(courseIds.size);
+    for (const [, options] of getFileList.mock.calls) {
+      expect(options).toEqual({ favorites });
+    }
+    expect(
+      files
+        .filter(f => f.isFavorite)
+        .map(f => f.id)
+        .sort(),
+    ).toEqual(
+      mockFiles
+        .filter(
+          f => courseIds.has(f.courseId) && mockFavorites.file.includes(f.id),
+        )
+        .map(f => f.id)
+        .sort(),
+    );
+  });
+
+  it('keeps every course as cached when the file favorites fail', async () => {
+    const cached = await queryClient.fetchQuery(filesQuery(semesterId));
+    jest
+      .spyOn(mockSource, 'getFavorites')
+      .mockRejectedValue(new Error('server error'));
+    await expect(
+      queryClient.fetchQuery({ ...filesQuery(semesterId), staleTime: 0 }),
+    ).rejects.toThrow('server error');
+    expect(queryClient.getQueryData(filesQuery(semesterId).queryKey)).toEqual(
+      cached,
+    );
+  });
+
+  it("refreshing one course asks for that course's favorites with its list", async () => {
+    await queryClient.fetchQuery(filesQuery(semesterId));
+    const getFavorites = jest.spyOn(mockSource, 'getFavorites');
+    const getFileList = jest.spyOn(mockSource, 'getFileList');
+    const [courseId] = courseIds;
+    await refreshCourseFiles(semesterId, courseId);
+    expect(getFavorites).not.toHaveBeenCalled();
+    expect(getFileList).toHaveBeenCalledWith(courseId, { favorites: true });
   });
 });
 

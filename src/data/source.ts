@@ -45,6 +45,7 @@ export type DataSource = Pick<
   | 'getHomeworkList'
   | 'getExcellentHomeworkDetail'
   | 'getFileList'
+  | 'getFavorites'
   | 'getCalendar'
   | 'addToFavorites'
   | 'removeFromFavorites'
