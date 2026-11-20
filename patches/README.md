@@ -105,11 +105,11 @@ Android: picks with `ACTION_GET_CONTENT` so cloud and local providers both show.
 
 ## `react-native-bottom-tabs`
 
-iOS: lets SwiftUI pick an SF Symbol tab icon's variant (filled in the tab bar, outline in the iPad sidebar) instead of forcing the outline; keeps the system label font when no size is set; removes a stale Mac Catalyst 27 toolbar tab bar when the navigator unmounts; sidebar state; gives tab bar buttons their `testID` when the tabs mount while XCUITest or VoiceOver is connected (UIKit copies a tab's identifier to its button only when it makes the button, before SwiftUI sets it).
+iOS: lets SwiftUI pick an SF Symbol tab icon's variant (filled in the tab bar, outline in the iPad sidebar) instead of forcing the outline; keeps the system label font when no size is set; removes a stale Mac Catalyst 27 toolbar tab bar when the navigator unmounts; sidebar state; gives tab bar buttons their `testID` when the tabs mount while XCUITest or VoiceOver is connected (UIKit copies a tab's identifier to its button only when it makes the button, before SwiftUI sets it). The tab bar's delegate no longer holds itself through its tap handler, so each one made for the tab bar is freed when the next replaces it.
 
 **Drop when:** Fixed upstream.
 
-**Tested by:** `ios/learnXTests/Patches/BottomTabsPatchTests.swift`; the column bars and the sidebar state by `ios/learnXUITests/iOS/SplitViewUITests.swift` (iPad); the Mac toolbar by `ios/learnXUITests/Mac/TabsUITests.swift` (logs out and in); the button identifiers by the Maestro flows (`.maestro/subflows/tab.yaml` after a login)
+**Tested by:** `ios/learnXTests/Patches/BottomTabsPatchTests.swift` (incl. the delegate); the column bars and the sidebar state by `ios/learnXUITests/iOS/SplitViewUITests.swift` (iPad); the Mac toolbar by `ios/learnXUITests/Mac/TabsUITests.swift` (logs out and in); the button identifiers by the Maestro flows (`.maestro/subflows/tab.yaml` after a login)
 
 ## `react-native-pager-view`
 
@@ -135,10 +135,11 @@ Mac Catalyst: leaves the pan gesture alone when KVO already subclassed the scrol
 - Vertical bar devices (iPhone Duo): fills the strip above an opaque header.
 - iOS 26: an empty header item badge is the system's red indicator dot; a header `subtitle` shows below the title (ignored on Android).
 - Android: the left header item (Search's Close) stays beside the open search field, also when the header is rebuilt (coming back from a pushed screen), and the field ends where the item's content does, fitted again on every header layout, so Search can be left in one tap with a query in the field.
+- Android: a header update leaves the header's items in the toolbar when they're the same ones in the same order, instead of taking every item out of the window and adding it back. Compose UI 1.12 registers a view that re-attaches before its deferred registration ran a second time and unregisters it only once, so each File detail's @expo/ui header buttons kept the whole closed screen alive (fixed in Compose UI 1.13).
 
 **Drop when:** Fixed upstream.
 
-**Tested by:** `patches/__tests__/react-native-screens.test.tsx`, `patches/__tests__/native-stack.test.tsx`, `ios/learnXTests/Patches/ScreensPatchTests.swift`; `maxCollapsedWidth` by `ios/learnXUITests/iOS/SplitViewUITests.swift` (iPad mini); the Mac column bars by `ios/learnXUITests/Mac/TabsUITests.swift` and search field by `ios/learnXUITests/Mac/SearchUITests.swift`; Android's Close beside the search field by `.maestro/06-search.yaml`
+**Tested by:** `patches/__tests__/react-native-screens.test.tsx`, `patches/__tests__/native-stack.test.tsx`, `ios/learnXTests/Patches/ScreensPatchTests.swift`; `maxCollapsedWidth` by `ios/learnXUITests/iOS/SplitViewUITests.swift` (iPad mini); the Mac column bars by `ios/learnXUITests/Mac/TabsUITests.swift` and search field by `ios/learnXUITests/Mac/SearchUITests.swift`; Android's Close beside the search field by `.maestro/06-search.yaml`; header items still answering after header updates by the flows' Filter and Search buttons (`.maestro/subflows/filter.yaml`, `search.yaml`)
 
 ## `react-native-tab-view`
 

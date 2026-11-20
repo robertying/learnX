@@ -69,7 +69,7 @@ index 3992f27d10f09ef450273017254ca2a2b8272f6f..3e4528ed9ae3e9712e2e9db1545f8b4e
      if labeled != false {
        Text(title ?? "")
 diff --git a/ios/TabItemEventModifier.swift b/ios/TabItemEventModifier.swift
-index 674e602d5b959b1c12362efdd3d7800e6917aa4f..17ee79d895cd1132c5512ddd2a7f5a301580c12d 100644
+index 674e602d5b959b1c12362efdd3d7800e6917aa4f..00464f24f8621d09203da9987367c66abb9e8282 100644
 --- a/ios/TabItemEventModifier.swift
 +++ b/ios/TabItemEventModifier.swift
 @@ -8,6 +8,8 @@ import UIKit
@@ -160,7 +160,12 @@ index 674e602d5b959b1c12362efdd3d7800e6917aa4f..17ee79d895cd1132c5512ddd2a7f5a30
    private let delegate = TabBarDelegate()
  
    func body(content: Content) -> some View {
-@@ -88,13 +150,28 @@ struct TabItemEventModifier: ViewModifier {
+@@ -85,16 +147,33 @@ struct TabItemEventModifier: ViewModifier {
+   }
+ 
+   func handle(tabController: UITabBarController) {
++    // Not `self`: the modifier holds the delegate, so a closure over it would hold itself.
++    let onTabEvent = onTabEvent
      delegate.onClick = { index, identifier in
        onTabEvent(index, identifier, false)
      }
@@ -189,7 +194,7 @@ index 674e602d5b959b1c12362efdd3d7800e6917aa4f..17ee79d895cd1132c5512ddd2a7f5a30
      // Remove existing long press gestures
      if let existingGestures = tabController.tabBar.gestureRecognizers {
        for gesture in existingGestures where gesture is UILongPressGestureRecognizer {
-@@ -154,9 +231,13 @@ private class LongPressGestureHandler: NSObject {
+@@ -154,9 +233,13 @@ private class LongPressGestureHandler: NSObject {
  extension View {
    /**
     Event for tab items. Returns true if should prevent default (switching tabs).
