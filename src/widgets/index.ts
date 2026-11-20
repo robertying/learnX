@@ -59,8 +59,11 @@ const toProps = ({
   locale: widgetLocale(),
 });
 
-/** Deadlines in the Android widget's props; it shows as many as fit. */
-const ANDROID_DEADLINES = 10;
+/**
+ * Deadlines in the widget's props: as many as a large widget shows, and a few
+ * to spare when it drops the ones that have passed by its own clock.
+ */
+const WIDGET_DEADLINES = 10;
 
 /**
  * Shows the open assignments' deadlines in the home screen widget. Pass no
@@ -75,8 +78,9 @@ export function updateDeadlineWidget(
   if (!widget) {
     return;
   }
-  const timeline = deadlineTimeline(assignments, { hiddenCourses, archived });
+  const options = { hiddenCourses, archived, limit: WIDGET_DEADLINES };
   if (isApple()) {
+    const timeline = deadlineTimeline(assignments, options);
     widget.updateTimeline(
       timeline.map(entry => ({
         date: new Date(entry.date),
@@ -86,15 +90,7 @@ export function updateDeadlineWidget(
   } else {
     // No timelines: the layout drops what has passed by its own clock as
     // it's redrawn, so it gets a few more than it shows.
-    widget.updateSnapshot(
-      toProps(
-        upcomingDeadlines(assignments, {
-          hiddenCourses,
-          archived,
-          limit: ANDROID_DEADLINES,
-        }),
-      ),
-    );
+    widget.updateSnapshot(toProps(upcomingDeadlines(assignments, options)));
   }
 }
 

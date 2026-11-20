@@ -36,8 +36,14 @@ function DeadlinesWidget(
   const firstRun = kit.firstRun(environment.locale);
   const title = props.title || firstRun.deadlines;
   const empty = props.empty || firstRun.noDeadlines;
-  const deadlines = props.deadlines ?? [];
-  const now = (environment.date ?? new Date()).getTime();
+  // The entry's time, or the widget's own clock once that's later: after the
+  // last entry WidgetKit keeps showing it, and draws it again whenever it asks
+  // for a timeline, so the deadlines that have passed since drop off, as on
+  // Android, until the app sends a new timeline.
+  const now = Math.max(Date.now(), environment.date?.getTime() ?? 0);
+  const all = props.deadlines ?? [];
+  const deadlines = all.filter(d => d.deadline > now);
+  const total = (props.total ?? 0) - (all.length - deadlines.length);
   // No link until the app has sent its first props.
   const openUrl = (url: string | undefined) => (url ? [widgetURL(url)] : []);
 
@@ -174,9 +180,9 @@ function DeadlinesWidget(
       const count = most - i;
       return {
         key: String(count),
-        top: header(props.total - count),
+        top: header(total - count),
         rows: deadlines.slice(0, count).map(row),
-        cut: props.total > count,
+        cut: total > count,
       };
     }),
     spacing,

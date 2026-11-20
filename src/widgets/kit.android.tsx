@@ -131,11 +131,28 @@ export function widgetKit() {
       { $type: 'contentDescription', text: parts.filter(Boolean).join(', ') },
     ],
     /**
-     * Whether the system language is Chinese, for the text shown before the
-     * app has sent its translated strings.
+     * The text a widget shows before the app has sent its own, asking to open
+     * the app: the widget runtime has no translations, so it follows the
+     * system language, as on iOS (widgets/kit). English in sentence case, as
+     * Android writes it (helpers/sentenceCase); U+2005 is the gap iOS draws
+     * between Chinese and Latin (helpers/cjk), which Android doesn't.
      */
-    chinese: (environment: AndroidWidgetEnvironment) =>
-      (environment.locale ?? '').startsWith('zh'),
+    firstRun: (environment: AndroidWidgetEnvironment) =>
+      /* oxlint-disable learnx/no-han-outside-translations */
+      (environment.locale ?? '').startsWith('zh')
+        ? {
+            deadlines: '作业截止',
+            noDeadlines: '打开 learnX 后，这里会显示作业',
+            upNext: '下一节课',
+            noClasses: '打开 learnX 后，这里会显示课程',
+          }
+        : {
+            deadlines: 'Deadlines',
+            noDeadlines: 'Open learnX to show your deadlines here',
+            upNext: 'Next up',
+            noClasses: 'Open learnX to show your classes here',
+          },
+    /* oxlint-enable learnx/no-han-outside-translations */
     /**
      * The widget's own background, with the launcher's corner radius, marked
      * (our patch's `appWidgetBackground`) as the background the launcher

@@ -35,19 +35,9 @@ function DeadlinesWidget(
 ) {
   'widget';
   const colors = kit.colors(environment);
-  // Fallbacks for before the app first sends its strings. Widget layouts run
-  // in their own runtime without the app's translations.
-  /* oxlint-disable learnx/no-han-outside-translations */
-  const zh = kit.chinese(environment);
-  const title = props.title || (zh ? '作业截止' : 'Deadlines');
-  const empty =
-    props.empty ||
-    // U+2005 is the gap iOS draws between Chinese and Latin (helpers/cjk),
-    // which Android doesn't.
-    (zh
-      ? '打开 learnX 后，这里会显示作业'
-      : 'Open learnX to show your deadlines here');
-  /* oxlint-enable learnx/no-han-outside-translations */
+  const firstRun = kit.firstRun(environment);
+  const title = props.title || firstRun.deadlines;
+  const empty = props.empty || firstRun.noDeadlines;
   const now = Date.now();
   // The deadline's color by the app's rule (deadlineUrgency in
   // helpers/assignments): red under a day left, orange when it's due by the
