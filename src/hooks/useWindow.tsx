@@ -78,14 +78,15 @@ export const useIsPrimaryWindow = () => {
 
 /**
  * Remembers what this window shows while the calling screen is focused, so
- * that it reopens there after a relaunch (iPad and Mac).
+ * that it reopens there after the JS reloads for an over-the-air update, and
+ * on iPad and Mac after a relaunch (`services/windows`).
  */
 export const useWindowRestoration = (target: OpenTarget) => {
   const { windowId } = useWindow();
   const focused = useIsFocused();
   const link = getTargetUrl(target);
   useEffect(() => {
-    if (windowId && focused) {
+    if (focused) {
       setWindowLink(windowId, link);
     }
   }, [windowId, focused, link]);

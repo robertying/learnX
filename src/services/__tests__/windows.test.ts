@@ -1,13 +1,18 @@
 import { DeviceEventEmitter } from 'react-native';
 import { Windows } from 'modules/windows';
+import { kvStorage } from 'data/storage';
 import {
+  RELOAD_LINKS_KEY,
   canOpenWindows,
   followMacActivation,
+  forgetWindowLinksForReload,
   isTargetWindow,
+  keepWindowLinksForReload,
   openWindow,
   registerWindow,
   setWindowLink,
   setWindowTitle,
+  takeReloadLink,
   targetWindow,
 } from 'services/windows';
 
@@ -82,6 +87,50 @@ describe('windows', () => {
     openWindow('learnx://notice/n1');
     await Promise.resolve();
     expect(Windows!.openWindow).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('window links kept for a reload', () => {
+  afterEach(() => forgetWindowLinksForReload());
+
+  it('saves what each open window shows, and drops closed windows', () => {
+    open('a');
+    const removeB = registerWindow('b');
+    setWindowLink('a', 'learnx://today');
+    setWindowLink('b', 'learnx://notice/n1');
+    removeB();
+    keepWindowLinksForReload();
+    expect(JSON.parse(kvStorage.getItem(RELOAD_LINKS_KEY) as string)).toEqual({
+      a: 'learnx://today',
+    });
+  });
+
+  it('saves the one window without an id (iPhone, Android)', () => {
+    setWindowLink(undefined, 'learnx://assignment/a1');
+    expect(Windows!.setWindowLink).not.toHaveBeenCalled();
+    keepWindowLinksForReload();
+    expect(JSON.parse(kvStorage.getItem(RELOAD_LINKS_KEY) as string)).toEqual(
+      expect.objectContaining({ '': 'learnx://assignment/a1' }),
+    );
+  });
+
+  it('forgets the links when the reload does not start', () => {
+    keepWindowLinksForReload();
+    forgetWindowLinksForReload();
+    expect(kvStorage.getItem(RELOAD_LINKS_KEY)).toBeNull();
+  });
+
+  // The first call reads the saved links for the rest of the runtime.
+  it('gives each window its link once, and deletes the saved links', () => {
+    kvStorage.setItem(
+      RELOAD_LINKS_KEY,
+      JSON.stringify({ a: 'learnx://today', '': 'learnx://courses' }),
+    );
+    expect(takeReloadLink('a')).toBe('learnx://today');
+    expect(kvStorage.getItem(RELOAD_LINKS_KEY)).toBeNull();
+    expect(takeReloadLink('a')).toBeUndefined();
+    expect(takeReloadLink(undefined)).toBe('learnx://courses');
+    expect(takeReloadLink('b')).toBeUndefined();
   });
 });
 

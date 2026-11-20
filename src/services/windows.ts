@@ -1,6 +1,7 @@
 import { DeviceEventEmitter } from 'react-native';
 import { create } from 'zustand';
 import { Windows } from 'modules/windows';
+import { kvStorage } from 'data/storage';
 import { isElectron } from 'helpers/platform';
 
 /**
@@ -25,10 +26,12 @@ export const registerWindow = (id: string) => {
   useWindowsStore.setState(({ ids }) => ({
     ids: ids.includes(id) ? ids : [...ids, id],
   }));
-  return () =>
+  return () => {
+    shownLinks.delete(id);
     useWindowsStore.setState(({ ids }) => ({
       ids: ids.filter(other => other !== id),
     }));
+  };
 };
 
 /** The window that does the app-wide work: the oldest one still open. */
@@ -56,9 +59,70 @@ export const openWindow = (link: string) => {
   void Windows?.openWindow(link).catch(() => {});
 };
 
-/** What the window `id` shows, to reopen after a relaunch. */
-export const setWindowLink = (id: string, link: string) => {
-  Windows?.setWindowLink(id, link);
+/**
+ * The learnx:// link of what each window shows, by id (the empty string with
+ * one window), for a reload of the JS (`keepWindowLinksForReload`).
+ */
+const shownLinks = new Map<string, string>();
+
+/**
+ * What the window `id` shows (a tab, and the item open in it): reopened after
+ * a reload of the JS on every platform, and after a relaunch on iPad and Mac
+ * by the window's own restoration.
+ */
+export const setWindowLink = (id: string | undefined, link: string) => {
+  shownLinks.set(id ?? '', link);
+  if (id) {
+    Windows?.setWindowLink(id, link);
+  }
+};
+
+/** Where the windows' links wait for the JS a reload starts. */
+export const RELOAD_LINKS_KEY = 'reloadWindowLinks';
+
+/**
+ * Saves what every window shows, just before an over-the-air update reloads
+ * the JS, so each window opens there again (`takeReloadLink`) rather than at
+ * its first tab. A window's id outlives the reload; its native restoration
+ * only runs when the system connects it again, which a reload doesn't.
+ */
+export const keepWindowLinksForReload = () => {
+  kvStorage.setItem(
+    RELOAD_LINKS_KEY,
+    JSON.stringify(Object.fromEntries(shownLinks)),
+  );
+};
+
+/** Drops the saved links, e.g. when the reload didn't start. */
+export const forgetWindowLinksForReload = () => {
+  kvStorage.removeItem(RELOAD_LINKS_KEY);
+};
+
+let reloadLinks: Record<string, unknown> | null = null;
+
+/**
+ * The link the window `id` showed before the JS reloaded, once; undefined
+ * after any other start. The saved links are read and deleted at the first
+ * call, so a later launch never reopens them.
+ */
+export const takeReloadLink = (id: string | undefined) => {
+  if (!reloadLinks) {
+    reloadLinks = {};
+    try {
+      const saved = kvStorage.getItem(RELOAD_LINKS_KEY);
+      if (typeof saved === 'string') {
+        kvStorage.removeItem(RELOAD_LINKS_KEY);
+        const parsed: unknown = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object') {
+          reloadLinks = parsed as Record<string, unknown>;
+        }
+      }
+    } catch {}
+  }
+  const key = id ?? '';
+  const link = reloadLinks[key];
+  delete reloadLinks[key];
+  return typeof link === 'string' ? link : undefined;
 };
 
 /**

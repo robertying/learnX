@@ -1,5 +1,7 @@
 import * as Updates from 'expo-updates';
+import { kvStorage } from 'data/storage';
 import { OTA_AWAY_MS, updateOnReturn } from 'services/ota';
+import { RELOAD_LINKS_KEY, setWindowLink } from 'services/windows';
 
 beforeEach(() => {
   jest.replaceProperty(Updates, 'isEnabled', true);
@@ -28,19 +30,27 @@ describe('updateOnReturn', () => {
     expect(Updates.reloadAsync).not.toHaveBeenCalled();
   });
 
-  it('starts a downloaded update after an hour in the background', async () => {
+  it('starts a downloaded update after an hour in the background, keeping what the window shows', async () => {
+    setWindowLink(undefined, 'learnx://notice/n1');
+    jest.mocked(Updates.reloadAsync).mockImplementationOnce(async () => {
+      expect(JSON.parse(kvStorage.getItem(RELOAD_LINKS_KEY) as string)).toEqual(
+        { '': 'learnx://notice/n1' },
+      );
+    });
+
     await expect(updateOnReturn(OTA_AWAY_MS, true)).resolves.toBe(true);
 
     expect(Updates.reloadAsync).toHaveBeenCalledTimes(1);
     expect(Updates.checkForUpdateAsync).not.toHaveBeenCalled();
   });
 
-  it('carries on when the update cannot start', async () => {
+  it('carries on when the update cannot start, without keeping the links', async () => {
     jest
       .mocked(Updates.reloadAsync)
       .mockRejectedValueOnce(new Error('no update'));
 
     await expect(updateOnReturn(OTA_AWAY_MS, true)).resolves.toBe(false);
+    expect(kvStorage.getItem(RELOAD_LINKS_KEY)).toBeNull();
   });
 
   it('keeps running when the server cannot be reached', async () => {
