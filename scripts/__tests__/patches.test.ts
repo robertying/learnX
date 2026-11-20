@@ -1,7 +1,7 @@
-// Every patch in patches/ comes with tests of what it changes, listed in the
-// "Tested by" column of patches/README.md. These checks keep the table in step
-// with the patches and the tests it names, and the comments that name a patch
-// file in step with its version.
+// Every patch in patches/ comes with tests of what it changes, listed under
+// "Tested by" in its section of patches/README.md. These checks keep the
+// sections in step with the patches and the tests they name, and the comments
+// that name a patch file in step with its version.
 import { execFileSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -14,19 +14,23 @@ const patched = readdirSync(patchesDir)
   .filter(name => name.endsWith('.patch'))
   .map(name => name.replace(/@[^@]+\.patch$/, '').replace('__', '/'));
 
-const rows = readFileSync(join(patchesDir, 'README.md'), 'utf8')
-  .split('\n')
-  .filter(line => line.startsWith('| `'))
-  .map(line => {
-    const cells = line.split('|').map(cell => cell.trim());
-    return { name: cells[1].replace(/`/g, ''), testedBy: cells.at(-2)! };
-  });
+// A section is a "## `<package>`" heading, what the patch changes, "Drop
+// when" and "Tested by".
+const sections = readFileSync(join(patchesDir, 'README.md'), 'utf8')
+  .split(/^## /m)
+  .slice(1)
+  .map(section => ({
+    name: /^`([^`]+)`$/m.exec(section)?.[1] ?? section.split('\n')[0],
+    testedBy: /^\*\*Tested by:\*\* (.*)$/m.exec(section)?.[1] ?? '',
+  }));
 
-it('has a row for every patch, and no other', () => {
-  expect(rows.map(row => row.name).sort()).toEqual([...patched].sort());
+it('has a section for every patch, and no other', () => {
+  expect(sections.map(section => section.name).sort()).toEqual(
+    [...patched].sort(),
+  );
 });
 
-it.each(rows)('names how $name is tested, and the tests exist', row => {
+it.each(sections)('names how $name is tested, and the tests exist', row => {
   expect(row.testedBy).not.toBe('');
   const paths = [...row.testedBy.matchAll(/`([^`]+\/[^`]*)`/g)].map(
     match => match[1],
