@@ -223,6 +223,8 @@ class PdfiumViewTest {
 
     view.pdfiumPageChanged(viewer, 4, 9)
     view.setTitle("Lecture 4")
+    assertEquals("Lecture 4", view.title)
+    assertEquals("Lecture 4", viewer.title)
     assertEquals("Lecture 4, page 5 of 9", viewer.contentDescription)
   }
 
@@ -278,7 +280,8 @@ class PdfiumViewTest {
     val view = pdfView()
     root.addView(view)
     view.setUri(file().toURI().toString())
-    PdfModule().definition().viewManagerDefinitions.values.single().onViewDestroys!!(view)
+    // The module's first view is registered under its name and as the default.
+    PdfModule().definition().viewManagerDefinitions.values.distinct().single().onViewDestroys!!(view)
     assertNull(view.viewer)
   }
 }
