@@ -158,6 +158,9 @@ it('lists every tab, Settings too, and says its badge', () => {
       tab.getAttribute('aria-label'),
     ),
   ).toEqual(['First', 'Two', `Settings, ${t('a11yNewBadge')}`]);
+  // One Tab stop, with the arrow keys between the tabs (Tabster's mover).
+  expect(tabs.getAttribute('aria-orientation')).toBe('vertical');
+  expect(tabs.getAttribute('data-tabster')).toContain('mover');
 });
 
 it("finds a tab's icon from its Android drawable name", () => {

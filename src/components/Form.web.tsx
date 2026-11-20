@@ -99,7 +99,12 @@ export const FormSection: React.FC<FormSectionProps> = ({
 }) => (
   <View style={styles.section}>
     {title ? (
-      <Text variant="label" role="heading" style={styles.sectionTitle}>
+      <Text
+        variant="label"
+        role="heading"
+        aria-level={2}
+        style={styles.sectionTitle}
+      >
         {title}
       </Text>
     ) : null}
@@ -299,7 +304,12 @@ const RowContent: React.FC<
       {trailing}
     </View>
     {progress !== undefined ? (
-      <ProgressBar value={progress} max={1} thickness="medium" />
+      <ProgressBar
+        value={progress}
+        max={1}
+        thickness="medium"
+        aria-label={title}
+      />
     ) : null}
   </View>
 );
@@ -630,7 +640,7 @@ export const FormTitle: React.FC<FormTitleProps> = ({
   testID,
 }) => (
   <View testID={testID} style={styles.title}>
-    <Title variant="largeTitle" role="heading" selectable>
+    <Title variant="largeTitle" role="heading" aria-level={2} selectable>
       {title}
     </Title>
     {subtitle ? <Caption variant="body">{subtitle}</Caption> : null}

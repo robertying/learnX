@@ -8,6 +8,12 @@ import {
 export interface TextButtonProps {
   /** The label. */
   children: string;
+  /**
+   * What screen readers say instead, where the label alone doesn't say
+   * enough (a See All under each section). Start it with the label, so
+   * Voice Control finds the button by what it shows.
+   */
+  accessibilityLabel?: string;
   onPress?: () => void;
   disabled?: boolean;
   /**

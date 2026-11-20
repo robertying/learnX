@@ -5,9 +5,7 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
-  type ComponentRef,
 } from 'react';
 import { StyleSheet, View } from 'react-native';
 import {
@@ -16,7 +14,7 @@ import {
 } from '@react-navigation/native';
 import type { DetailNavigationContainerRef, DetailStackParams } from './types';
 import SplitSizes from 'constants/SplitSizes';
-import { isElectron } from 'helpers/platform';
+import useInert from 'hooks/useInert';
 import { saveMasterWidth, savedMasterWidth } from './paneLayout';
 import { useRootNavigation } from './rootNavigation';
 import SplitDivider from './SplitDivider';
@@ -75,21 +73,6 @@ export const TabSplitContext: React.FC<
       {children}
     </SplitViewContext.Provider>
   );
-};
-
-/**
- * A view out of sight that React Native Web hides from screen readers but not
- * from the keyboard, so that Tab doesn't go through its buttons unseen:
- * `inert` takes it out of both, as the native views are (Electron app).
- */
-const useInert = (inert: boolean) => {
-  const view = useRef<ComponentRef<typeof View>>(null);
-  useEffect(() => {
-    if (isElectron()) {
-      (view.current as unknown as HTMLElement).inert = inert;
-    }
-  }, [inert]);
-  return view;
 };
 
 /**

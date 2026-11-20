@@ -221,7 +221,7 @@ const useFilterListHeader = ({
                 ),
               },
             ]
-          : [select, filter],
+          : [{ ...select, contained: false }, filter],
       ),
       ...headerButtons('right', [
         refreshHeaderButton(refreshing, onRefresh),

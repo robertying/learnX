@@ -23,3 +23,16 @@ it('holds the Mac line between 0 and 1', async () => {
   await render(<ProgressBar progress={-1} />);
   expect(screen.getByRole('progressbar')).toHaveAccessibilityValue({ now: 0 });
 });
+
+it('names the bar for screen readers by what it measures', async () => {
+  const { accessibilityLabel } = jest.requireMock<{
+    accessibilityLabel: jest.Mock;
+  }>('@expo/ui/swift-ui/modifiers');
+  await render(<ProgressBar progress={0.5} accessibilityLabel="Uploading" />);
+  expect(accessibilityLabel).toHaveBeenCalledWith('Uploading');
+  jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+  await screen.rerender(
+    <ProgressBar progress={0.5} accessibilityLabel="Uploading" />,
+  );
+  expect(screen.getByRole('progressbar', { name: 'Uploading' })).toBeTruthy();
+});

@@ -9,14 +9,21 @@ const overlay = () => {
 };
 
 it('keeps clear of the header the page is laid out under', async () => {
-  await render(<PageProgressBar progress={0.5} />);
+  await render(<PageProgressBar progress={0.5} accessibilityLabel="Loading" />);
   expect(overlay()?.props.edges).toEqual({ top: true });
 });
 
 it("sits right at the page's top on Mac, below the opaque header", async () => {
   jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
-  await render(<PageProgressBar progress={0.5} testID="upload" />);
+  await render(
+    <PageProgressBar
+      progress={0.5}
+      accessibilityLabel="Uploading"
+      testID="upload"
+    />,
+  );
   expect(overlay()?.props.edges).toBeUndefined();
   expect(screen.getByTestId('upload')).toBe(screen.root);
-  expect(screen.getByRole('progressbar')).toBeTruthy();
+  // Named for screen readers by what it measures.
+  expect(screen.getByRole('progressbar', { name: 'Uploading' })).toBeTruthy();
 });

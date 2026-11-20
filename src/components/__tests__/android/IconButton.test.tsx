@@ -33,6 +33,33 @@ describe('IconButton (Android)', () => {
     expect(onPress).not.toHaveBeenCalled();
   });
 
+  it("is Material's toggle button for a mode, read as on or off", async () => {
+    const onPress = jest.fn();
+    await render(
+      <>
+        <IconButton
+          icon="select"
+          accessibilityLabel="Select"
+          mode="contained"
+          pressed
+          testID="select"
+          onPress={onPress}
+        />
+        <IconButton
+          icon="reorder"
+          accessibilityLabel="Reorder"
+          pressed={false}
+        />
+      </>,
+    );
+    const [on, off] = screen.getAllByRole('checkbox');
+    expect(on).toBeChecked();
+    expect(off).not.toBeChecked();
+    expect(screen.getByLabelText('Select')).toBeTruthy();
+    await userEvent.setup().press(screen.getByTestId('select'));
+    expect(onPress).toHaveBeenCalledTimes(1);
+  });
+
   it('reads the badge with the label, and grows its touch area with the icon', async () => {
     await render(
       <>

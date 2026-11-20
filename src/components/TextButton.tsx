@@ -1,6 +1,7 @@
 import { PlatformColor } from 'react-native';
 import { Button, Text } from '@expo/ui/swift-ui';
 import {
+  accessibilityLabel as accessibilityLabelModifier,
   buttonStyle,
   contentShape,
   disabled as disabledModifier,
@@ -52,6 +53,7 @@ const struckModifiers = [
  */
 const TextButton: React.FC<TextButtonProps> = ({
   children,
+  accessibilityLabel,
   onPress,
   disabled,
   size = 'regular',
@@ -72,6 +74,9 @@ const TextButton: React.FC<TextButtonProps> = ({
     ...oneLine,
     ...(struck ? struckModifiers : []),
     ...(disabled ? [disabledModifier(true)] : []),
+    ...(accessibilityLabel
+      ? [accessibilityLabelModifier(accessibilityLabel)]
+      : []),
   ];
 
   const inset = isMac ? macPadding : iosPadding[size];
