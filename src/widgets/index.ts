@@ -66,10 +66,18 @@ const toProps = ({
  */
 const WIDGET_DEADLINES = 10;
 
+/** What the Deadlines widget was last given, so unchanged props are skipped. */
+let lastDeadlines: string | undefined;
+
 /**
  * Shows the open assignments' deadlines in the home screen widget. Pass no
  * assignments (e.g. after logging out) to empty it. Throws when the widget
  * can't be updated; `services/surfaces` reports it and tries again.
+ *
+ * Each update makes the system draw the widget again (on iOS out of a daily
+ * budget while the app is in the background), and the assignments change
+ * with what the widget doesn't show, such as a favorite, so an update that
+ * would show the same is skipped.
  */
 export function updateDeadlineWidget(
   assignments: Assignment[],
@@ -81,19 +89,32 @@ export function updateDeadlineWidget(
   }
   const options = { hiddenCourses, archived, limit: WIDGET_DEADLINES };
   if (isApple()) {
-    const timeline = deadlineTimeline(assignments, options);
+    const timeline = deadlineTimeline(assignments, options).map(entry => ({
+      date: entry.date,
+      props: toProps(entry.deadlines),
+    }));
+    // The first entry is for now, which moves on with each update: the
+    // timeline sent before shows the same while what comes after matches.
+    const key = JSON.stringify([timeline[0].props, ...timeline.slice(1)]);
+    if (key === lastDeadlines) {
+      return;
+    }
     perfCount('widgetDeadlines');
     widget.updateTimeline(
-      timeline.map(entry => ({
-        date: new Date(entry.date),
-        props: toProps(entry.deadlines),
-      })),
+      timeline.map(entry => ({ ...entry, date: new Date(entry.date) })),
     );
+    lastDeadlines = key;
   } else {
     // No timelines: the layout drops what has passed by its own clock as
     // it's redrawn, so it gets a few more than it shows.
+    const props = toProps(upcomingDeadlines(assignments, options));
+    const key = JSON.stringify(props);
+    if (key === lastDeadlines) {
+      return;
+    }
     perfCount('widgetDeadlines');
-    widget.updateSnapshot(toProps(upcomingDeadlines(assignments, options)));
+    widget.updateSnapshot(props);
+    lastDeadlines = key;
   }
 }
 

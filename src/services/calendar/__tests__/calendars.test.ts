@@ -267,6 +267,74 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
     });
   });
 
+  it('writes an event again only when it changed or went', async () => {
+    const a1 = assignment('a1');
+    const a2 = assignment('a2');
+    await saveAsUser('calendar', [a1]);
+    expect(assignments.createEvent).toHaveBeenCalledTimes(1);
+    const update = jest.fn(async () => {});
+    mocked.ExpoCalendarEvent.get.mockResolvedValue({ update });
+    assignments.listEvents.mockResolvedValue([{ id: 'new-event' }]);
+    assignments.createEvent.mockResolvedValueOnce({ id: 'e2' });
+
+    // a1 as it was written, a2 new.
+    await saveAsUser('calendar', [a1, a2]);
+    expect(mocked.ExpoCalendarEvent.get).not.toHaveBeenCalled();
+    expect(assignments.createEvent).toHaveBeenCalledTimes(2);
+
+    // a1 renamed: written again.
+    assignments.listEvents.mockResolvedValue([
+      { id: 'new-event' },
+      { id: 'e2' },
+    ]);
+    await saveAsUser('calendar', [{ ...a1, title: 'Renamed' }, a2]);
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Renamed · Calculus' }),
+    );
+
+    // a2 deleted in Calendar: made again.
+    assignments.listEvents.mockResolvedValue([{ id: 'new-event' }]);
+    mocked.ExpoCalendarEvent.get.mockRejectedValue(new Error('Not found'));
+    await saveAsUser('calendar', [{ ...a1, title: 'Renamed' }, a2]);
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(assignments.createEvent).toHaveBeenCalledTimes(3);
+    expect(getCalendarSync().syncedCalendarAssignments).toEqual({
+      a1: 'new-event',
+      a2: 'new-event',
+    });
+  });
+
+  it('writes every event again when the settings change', async () => {
+    const a1 = assignment('a1');
+    await saveAsUser('calendar', [a1]);
+    const update = jest.fn(async () => {});
+    mocked.ExpoCalendarEvent.get.mockResolvedValue({ update });
+    assignments.listEvents.mockResolvedValue([{ id: 'new-event' }]);
+
+    setSetting('calendarEventLength', 60);
+    await saveAsUser('calendar', [a1]);
+    expect(update).toHaveBeenCalledTimes(1);
+  });
+
+  it('writes again what failed, and keeps what was written', async () => {
+    const a1 = assignment('a1');
+    const a2 = assignment('a2');
+    assignments.createEvent
+      .mockResolvedValueOnce({ id: 'e1' })
+      .mockRejectedValueOnce(new Error('Busy'));
+    await expect(saveAsUser('calendar', [a1, a2])).rejects.toThrow('Busy');
+    expect(getCalendarSync().writtenCalendarAssignments).toEqual({
+      a1: expect.any(String),
+    });
+
+    assignments.listEvents.mockResolvedValue([{ id: 'e1' }]);
+    assignments.createEvent.mockResolvedValueOnce({ id: 'e2' });
+    await saveAsUser('calendar', [a1, a2]);
+    expect(assignments.createEvent).toHaveBeenCalledTimes(3);
+    expect(mocked.ExpoCalendarEvent.get).not.toHaveBeenCalled();
+  });
+
   it('takes over matching events when the saved ids are gone', async () => {
     const a1 = assignment('a1');
     const a2 = { ...assignment('a2'), title: 'Lab' };
@@ -449,6 +517,8 @@ describe('removeCalendars', () => {
     expect(getCalendarSync()).toEqual({
       syncedCalendarAssignments: {},
       syncedReminderAssignments: {},
+      writtenCalendarAssignments: {},
+      writtenReminderAssignments: {},
       writtenClassWeeks: {},
     });
   });

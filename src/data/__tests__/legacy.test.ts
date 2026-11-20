@@ -162,6 +162,8 @@ describe('importing user data saved by 18.0.x', () => {
       courseCalendarId: 'cal-2',
       syncedCalendarAssignments: { a1: 'e1', a2: 'e2' },
       syncedReminderAssignments: {},
+      writtenCalendarAssignments: {},
+      writtenReminderAssignments: {},
       writtenClassWeeks: {},
     });
     expect(m.appState.useAppStateStore.getState()).toEqual({
