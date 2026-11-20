@@ -86,9 +86,13 @@ const modifier = (node: Node, name: string) =>
 /**
  * Each Text's words, a countdown (our @expo/ui patch) or relative date as
  * `in <ISO time>`. A Text made of parts gives its words and its Texts in order.
- * `spoken`: what VoiceOver reads instead, a label or nothing for a hidden one.
+ * `spoken`: what VoiceOver reads instead, a label or nothing for a hidden one;
+ * a Text made of parts is one Text to SwiftUI, read as its parts run together.
  */
 const texts = (node: Node, spoken = false): string[] => {
+  if (spoken && node.type === 'Text' && !isText(node)) {
+    return [partsSpoken(node)];
+  }
   if (spoken && modifier(node, 'accessibilityHidden')) {
     return [];
   }
@@ -116,6 +120,19 @@ const texts = (node: Node, spoken = false): string[] => {
         )
     : childrenOf(node).flatMap(child => texts(child, spoken));
 };
+
+/** A Text made of parts as VoiceOver reads it: its parts' words in a row. */
+const partsSpoken = (node: Node): string =>
+  [node.props.children]
+    .flat(Infinity)
+    .map(child =>
+      typeof child === 'string'
+        ? child
+        : child && typeof child === 'object'
+          ? texts(child as Node, true).join('')
+          : '',
+    )
+    .join('');
 
 /**
  * What VoiceOver reads for each element a layout combines
@@ -318,15 +335,10 @@ describe('Up Next on iOS', () => {
     expect(
       texts(render('systemMedium', { ...upNextProps, locale: 'zh_Hans' })),
     ).toContain('Ends in');
-    // VoiceOver reads each class as one element, without the dot.
+    // VoiceOver reads each class as one element, without the dot ("in …"
+    // stands for the countdown).
     expect(spoken(oneLater)).toEqual([
-      [
-        'Course now',
-        'now-time',
-        '六教6A414',
-        'Ends in ',
-        `in ${iso(at('11:25'))}`,
-      ],
+      ['Course now', 'now-time', '六教6A414', `Ends in in ${iso(at('11:25'))}`],
       ['Course later', 'Tomorrow later-time'],
     ]);
     // Each class opens its course; no deadlines.
@@ -715,11 +727,11 @@ describe('Deadlines on iOS', () => {
     ).toEqual([1, 1, 1]);
     expect(texts(version(widget, 1)).slice(0, 2)).toEqual(['Deadlines', '+8']);
     expect(links(widget)).toEqual([]);
+    // The time left and the course are one Text: a pause between them.
     expect(spoken(version(widget, 3))).toEqual(
       [1, 2, 3].map(i => [
         `Assignment d${i}`,
-        `in ${iso(at('23:59') + i * DAY)}`,
-        `Course of d${i}`,
+        `in ${iso(at('23:59') + i * DAY)}, Course of d${i}`,
       ]),
     );
   });
