@@ -130,7 +130,12 @@ function DeadlinesWidget(
               modifiers: [kit.dueColor(item, now)],
             })}
             <Text
-              modifiers={[kit.secondary, accessibilityLabel(item.courseName)]}
+              // Read without the dot, but with a pause: VoiceOver reads the
+              // parts of one Text in a row.
+              modifiers={[
+                kit.secondary,
+                accessibilityLabel(`, ${item.courseName}`),
+              ]}
             >
               {` · ${item.courseName}`}
             </Text>

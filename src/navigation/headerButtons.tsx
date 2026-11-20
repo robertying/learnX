@@ -89,6 +89,8 @@ const nativeItem = (
     },
     onPress: entry.onPress,
     disabled: entry.disabled,
+    // UIKit draws a selected item filled and VoiceOver says "Selected".
+    selected: entry.contained,
     sharesBackground: entry.ownGroup ? false : undefined,
     // UIKit reads the badge itself, as the item's value ("New items"), so
     // the label stays the button's own.

@@ -78,6 +78,9 @@ describe('headerButtons', () => {
       { id: 'nothing' },
     ]);
     expect(left.headerRight).toBeUndefined();
+    expect(left.unstable_headerLeftItems!({} as never)).toEqual([
+      expect.objectContaining({ identifier: 'close', selected: true }),
+    ]);
     const HeaderLeft = left.headerLeft as () => React.ReactElement;
     await render(<HeaderLeft />);
     expect(screen.getAllByRole('button')).toHaveLength(1);
