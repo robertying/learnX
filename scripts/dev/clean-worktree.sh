@@ -21,10 +21,12 @@
 # another worktree is still someone's work is not something a script can
 # tell. It refuses the main checkout, a worktree that `git worktree lock`
 # locked, one with uncommitted changes or commits on no remote branch (unless
-# --discard-changes), and one that a running process other than a shell or a
-# Claude session has files open in. Shared caches (~/.gradle, the pnpm store,
-# CocoaPods' cache, DerivedData's ModuleCache.noindex and
-# CompilationCache.noindex, simulators and emulators) are never touched.
+# --discard-changes), one that a running process other than a shell or a
+# Claude session has files open in, and one whose DerivedData folder a script
+# is building or testing in (its lock, scripts/lib/derived-data.sh). Shared
+# caches (~/.gradle, the pnpm store, CocoaPods' cache, DerivedData's
+# ModuleCache.noindex and CompilationCache.noindex, simulators and emulators)
+# are never touched.
 set -euo pipefail
 
 apply=0
@@ -131,6 +133,16 @@ for d in "$dd_root"/*/; do
   case "$ws" in
   "$wt"/*) derived+=("$d") ;;
   esac
+done
+
+# The scripts' named DerivedData folders (learnX-e2e, ...) are shared by
+# every checkout, the worktree's only if it built there last; a run holding
+# one's lock (scripts/lib/derived-data.sh) is building or testing in it.
+for d in ${derived[@]+"${derived[@]}"}; do
+  pid="$(cat "$d.lock/pid" 2>/dev/null || true)"
+  if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+    refuse "a run from $(cat "$d.lock/checkout" 2>/dev/null || echo "another checkout") is using $d"
+  fi
 done
 
 # Xcode's temporary files for those DerivedData folders, named after their

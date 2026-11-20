@@ -63,6 +63,8 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/../.."
+# shellcheck source=scripts/lib/derived-data.sh
+. scripts/lib/derived-data.sh
 
 all_profiles="iphone ipad ipad-landscape ipad-windowed duo-folded duo-half-open duo-open fold-folded fold-unfolded"
 profiles="${*:-$all_profiles}"
@@ -94,7 +96,7 @@ passed=""
 # Devices the Release app was installed on in this run (E2E_BUILD=1).
 installed=""
 # The Release app built for the simulators in this run.
-ios_app=""
+ios_built=false
 # The UDID or serial of the device the current profile runs on.
 device=""
 
@@ -138,6 +140,9 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# Where e2e-build.sh builds the iOS app.
+ios_derived="${DERIVED_DATA:-$HOME/Library/Developer/Xcode/DerivedData/learnX-e2e}"
+
 # With E2E_BUILD=1, build the Release app and install it on device $2 (once
 # per run; the iOS build is reused for every simulator).
 install_app() {
@@ -145,13 +150,15 @@ install_app() {
     return 0
   fi
   log "Installing the Release app on $2"
-  if [ "$1" = ios ] && [ -n "$ios_app" ]; then
-    xcrun simctl install "$2" "$ios_app" || return 1
+  # Every simulator takes the iOS build e2e-build.sh made for the first,
+  # unless another checkout has built over it since (scripts/lib/derived-data.sh).
+  if [ "$1" = ios ] && [ "$ios_built" = true ] &&
+    with_derived_lock "$ios_derived" install_built "$ios_derived" "$2"; then
+    :
   else
     scripts/e2e/e2e-build.sh "$1" "$2" || return 1
     if [ "$1" = ios ]; then
-      # Where e2e-build.sh puts it; every simulator takes the same build.
-      ios_app="${DERIVED_DATA:-$HOME/Library/Developer/Xcode/DerivedData/learnX-e2e}/Build/Products/Release-iphonesimulator/learnX.app"
+      ios_built=true
     fi
   fi
   installed="$installed $2"
