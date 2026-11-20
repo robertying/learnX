@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pdf_page">第%1$d页，共%2$d页</string>
+    <string name="pdf_titled_page">%1$s，第%2$d页，共%3$d页</string>
+</resources>
