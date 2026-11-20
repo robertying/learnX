@@ -53,7 +53,7 @@ it('is blocked in debug builds until server writes are allowed', async () => {
   expect(post).not.toHaveBeenCalled();
 });
 
-it('uploads the courses to the courseX route, with no token', async () => {
+it('uploads the courses to the courseX route, with no token or cookies', async () => {
   await uploadCourses([
     course,
     { ...course, id: 'c2', timeAndLocation: undefined },
@@ -63,6 +63,7 @@ it('uploads the courses to the courseX route, with no token', async () => {
     'https://tsinghua.app/api/learnx/courses',
     expect.objectContaining({
       method: 'POST',
+      credentials: 'omit',
       headers: { 'Content-Type': 'application/json' },
     }),
   );

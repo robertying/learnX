@@ -56,7 +56,7 @@ learnX 不收集广告标识符，不展示广告，也不会在其他应用或�
 
 ## 其他连接
 
-- Android 版会查询清华 TUNA 镜像站（mirrors.tuna.tsinghua.edu.cn）是否有新版本，并在你要求时从那里下载更新。Windows 和 Linux 版在运行时查询同一镜像是否有新版本；Windows 版和 AppImage 在后台下载更新，.deb 版提示有新版本并提供下载链接。
+- Android 版会查询清华 TUNA 镜像站（mirrors.tuna.tsinghua.edu.cn）是否有新版本，并在你要求时从那里下载更新。Windows 和 Linux 版在运行时查询同一镜像是否有新版本，并在后台下载：Windows 版和 AppImage 会自动安装更新，.deb 版则由你在设置中通过系统的安装程序安装。
 - 更新日志会打开 learnX 在 GitHub 上的发布页面，公告中的链接会打开其指向的网站。这些网站有各自的隐私政策。
 - 如果你从 App Store 或 Google Play 安装 learnX，下载由 Apple 或 Google 按其各自的政策处理。
 

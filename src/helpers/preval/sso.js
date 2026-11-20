@@ -1,10 +1,12 @@
 (function () {
   'use strict';
 
-  // Holds the password: only ever run on Tsinghua's own pages over HTTPS.
+  // Holds the password: only ever run on the login server that asks for it,
+  // over HTTPS. The web view may follow a link to another of Tsinghua's
+  // sites, whose scripts could read the fields this fills.
   if (
     window.location.protocol !== 'https:' ||
-    !/(^|\.)tsinghua\.edu\.cn$/.test(window.location.hostname)
+    window.location.hostname !== 'id.tsinghua.edu.cn'
   ) {
     return true;
   }

@@ -117,10 +117,19 @@ const installerProblem = (
 };
 
 /**
+ * The header electron-updater sends with every check (the update file and its
+ * signature): a random id it keeps in the data folder (`.updaterId`), for
+ * staged rollouts, which learnX's releases don't use. It would let the mirror
+ * tell installs apart across checks, so it's left out.
+ */
+const STAGING_ID_HEADER = 'x-user-staging-id';
+
+/**
  * electron-updater's generic provider, reading the update file only with a
  * valid signature, and only if it names installers for this computer: an
- * error otherwise, which the updater logs (updater.ts). Takes
- * electron-updater's pieces as arguments, so tests can give stand-ins.
+ * error otherwise, which the updater logs (updater.ts). It sends no id of
+ * the install. Takes electron-updater's pieces as arguments, so tests can
+ * give stand-ins.
  */
 export const signedProvider = ({
   GenericProvider,
@@ -150,6 +159,19 @@ export const signedProvider = ({
   arch?: string;
 }) =>
   class SignedProvider extends GenericProvider {
+    // electron-updater hands every check's headers here, the staging id among
+    // them; downloads take theirs elsewhere, without it.
+    setRequestHeaders(headers: Record<string, string> | null) {
+      super.setRequestHeaders(
+        headers &&
+          Object.fromEntries(
+            Object.entries(headers).filter(
+              ([name]) => name.toLowerCase() !== STAGING_ID_HEADER,
+            ),
+          ),
+      );
+    }
+
     async getLatestVersion() {
       const channelFile = getChannelFilename(this.channel as string);
       // Both from the same moment's copy: a cached update file with a fresh
