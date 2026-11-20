@@ -5,6 +5,9 @@
 // test crawl. CI runs this under a headless Wayland compositor too
 // (electron.yml, "Electron window on Wayland"), where such a window fails
 // every check; under xvfb's X11 a window draws whether it shows or not.
+// Windows also hardly draws a window that others cover completely, as the
+// tests' windows, all in one place, can be (main.ts).
+import type { Page } from '@playwright/test';
 import { expect, test } from './fixtures.ts';
 
 test('shows the window, with its page drawn at full rate', async ({
@@ -47,9 +50,39 @@ test('shows the window, with its page drawn at full rate', async ({
       { timeout: 30_000 },
     )
     .toBeGreaterThan(16);
-  // Frames at a screen's rate, not a hidden window's few a second: the
-  // page's animation frames in one second.
-  const frames = await window.evaluate(
+  // Frames at a screen's rate, not a hidden window's few a second.
+  expect(await framesInASecond(window)).toBeGreaterThan(20);
+});
+
+test('keeps drawing at full rate under another window', async ({
+  app,
+  window,
+}) => {
+  test.skip(
+    process.platform !== 'win32',
+    'only Windows hardly draws a window that others cover (main.ts)',
+  );
+  await window.getByTestId('welcome-continue').waitFor();
+  // As another test's window can be, the same size and in the same place,
+  // but never taking the focus.
+  await app.evaluate(({ BrowserWindow }) => {
+    const [win] = BrowserWindow.getAllWindows();
+    const cover = new BrowserWindow({
+      ...win!.getBounds(),
+      show: false,
+      focusable: false,
+      alwaysOnTop: true,
+    });
+    cover.showInactive();
+  });
+  // Windows works out which windows are covered a moment after one moves.
+  await window.waitForTimeout(1000);
+  expect(await framesInASecond(window)).toBeGreaterThan(20);
+});
+
+/** The page's animation frames in one second. */
+const framesInASecond = (window: Page) =>
+  window.evaluate(
     () =>
       new Promise<number>(resolve => {
         let count = 0;
@@ -65,5 +98,3 @@ test('shows the window, with its page drawn at full rate', async ({
         requestAnimationFrame(tick);
       }),
   );
-  expect(frames).toBeGreaterThan(20);
-});

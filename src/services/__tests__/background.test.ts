@@ -215,7 +215,12 @@ it('keeps what came back when time runs out, deadlines first', async () => {
     updatedAt: fetchedAt,
   });
 
-  const result = await syncContent({ budget: 200 });
+  // On a fake clock the budget runs out only when the stuck course is all
+  // that's left, however slow the machine.
+  jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
+  const syncing = syncContent();
+  await jest.runAllTimersAsync();
+  const result = await syncing;
 
   expect(result.status).toBe('synced');
   // Everything after the stuck course still ran, assignments first.
@@ -295,7 +300,12 @@ it('stays on the shown semester when its check takes the budget', async () => {
   jest
     .spyOn(mockSource, 'getCurrentSemester')
     .mockImplementation(() => new Promise(() => {}));
-  expect(await syncContent({ budget: 50 })).toEqual({ status: 'failed' });
+  // On a fake clock only the check that never answers uses up the budget;
+  // in real time a busy machine can spend it logging in first.
+  jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
+  const syncing = syncContent();
+  await jest.runAllTimersAsync();
+  expect(await syncing).toEqual({ status: 'failed' });
   expect(getUserData().currentSemester).toBe(semesterId);
   expect(useSyncLogStore.getState().runs[0].timedOut).toBe(true);
 });
