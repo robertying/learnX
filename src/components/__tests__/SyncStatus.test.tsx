@@ -1,20 +1,39 @@
 import { act, render, screen, userEvent } from '@testing-library/react-native';
 import SyncStatus, { SyncStatusSection } from 'components/SyncStatus';
 import { initialAuth, useAuthStore } from 'data/auth';
+import { queryClient } from 'data/queryClient';
+import { queryKeys } from 'data/queryKeys';
+import { resetUserData, useUserDataStore } from 'data/userData';
 import { t } from 'helpers/i18n';
 
 const now = Date.parse('2026-11-10T08:00:00Z');
+const semesterId = '2026-2027-1';
+
+/** The semester's lists, last fetched at these times (ms). */
+const fetchedAt = (...times: number[]) =>
+  [
+    queryKeys.courses(semesterId),
+    queryKeys.content('notices', semesterId),
+    queryKeys.content('assignments', semesterId),
+    queryKeys.content('files', semesterId),
+  ].forEach((key, i) =>
+    queryClient.setQueryData(key, [], { updatedAt: times[i] ?? times[0] }),
+  );
 
 beforeEach(() => {
   jest.useFakeTimers({ now });
+  useUserDataStore.setState({ currentSemester: semesterId });
 });
 
 afterEach(() => {
   useAuthStore.setState(initialAuth);
+  queryClient.clear();
+  resetUserData();
 });
 
 it('stays hidden while logged in or before a login has failed', async () => {
-  await render(<SyncStatus updatedAt={now} />);
+  fetchedAt(now);
+  await render(<SyncStatus />);
   expect(screen.queryByTestId('sync-status')).toBeNull();
   await act(() => useAuthStore.setState({ loggedIn: true }));
   expect(screen.queryByTestId('sync-status')).toBeNull();
@@ -22,7 +41,8 @@ it('stays hidden while logged in or before a login has failed', async () => {
 
 it('says it is offline and how old the data is', async () => {
   useAuthStore.setState({ failure: 'offline' });
-  await render(<SyncStatus updatedAt={now - 5 * 60 * 1000} />);
+  fetchedAt(now - 5 * 60 * 1000);
+  await render(<SyncStatus />);
   expect(screen.getByText(t('syncStatusOffline'))).toBeTruthy();
   expect(
     screen.getByText(t('syncStatusUpdated', { time: '5 minutes ago' })),
@@ -35,16 +55,34 @@ it('says it is offline and how old the data is', async () => {
 it('says data fetched this minute was updated just now', async () => {
   jest.setSystemTime(now + 30 * 1000);
   useAuthStore.setState({ failure: 'offline' });
-  await render(<SyncStatus updatedAt={now + 30 * 1000} />);
+  fetchedAt(now + 30 * 1000);
+  await render(<SyncStatus />);
   expect(
     screen.getByText(t('syncStatusUpdated', { time: 'a few seconds ago' })),
   ).toBeTruthy();
 });
 
-it('leaves the age out when the list was never fetched', async () => {
+// Each list is refreshed on its own, so they were fetched at different times;
+// every screen says how old the oldest is.
+it('says how old the oldest list is', async () => {
   useAuthStore.setState({ failure: 'offline' });
-  await render(<SyncStatus updatedAt={0} />);
+  fetchedAt(
+    now - 12 * 60 * 60 * 1000,
+    now - 5 * 60 * 60 * 1000,
+    now - 13 * 60 * 60 * 1000,
+    now - 60 * 1000,
+  );
+  await render(<SyncStatus />);
+  expect(
+    screen.getByText(t('syncStatusUpdated', { time: '13 hours ago' })),
+  ).toBeTruthy();
+});
+
+it('leaves the age out when nothing was ever fetched', async () => {
+  useAuthStore.setState({ failure: 'offline' });
+  await render(<SyncStatus />);
   expect(screen.getByText(t('syncStatusOffline'))).toBeTruthy();
+  expect(screen.queryByText(/Updated/)).toBeNull();
 });
 
 it.each([
@@ -81,13 +119,15 @@ it('says it is reconnecting while a login runs, without the button', async () =>
 describe('as a Form section', () => {
   it('stays hidden with a session', async () => {
     useAuthStore.setState({ loggedIn: true });
-    await render(<SyncStatusSection updatedAt={now} />);
+    fetchedAt(now);
+    await render(<SyncStatusSection />);
     expect(screen.queryByTestId('sync-status')).toBeNull();
   });
 
   it('shows the status with the age under it', async () => {
     useAuthStore.setState({ failure: 'offline' });
-    await render(<SyncStatusSection updatedAt={now - 5 * 60 * 1000} />);
+    fetchedAt(now - 5 * 60 * 1000);
+    await render(<SyncStatusSection />);
     expect(screen.getByText(t('syncStatusOffline'))).toBeTruthy();
     expect(
       screen.getByText(t('syncStatusUpdated', { time: '5 minutes ago' })),

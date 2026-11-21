@@ -19,7 +19,6 @@ export interface ContentListQuery {
   refetch: (options: { cancelRefetch: boolean }) => Promise<{
     isError: boolean;
   }>;
-  dataUpdatedAt: number;
 }
 
 /**
@@ -75,7 +74,6 @@ const useContentList = <
       refreshing: pullToRefresh.refreshing,
       loading,
       onRefresh: pullToRefresh.onRefresh,
-      updatedAt: query.dataUpdatedAt,
     },
   };
 };
