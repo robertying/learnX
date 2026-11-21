@@ -464,8 +464,7 @@ export default {
   notifyClassReminders: 'Class Reminders',
   notifyClassReminder: 'Class Reminder',
   classReminderOffset: 'Remind Before (Minutes)',
-  classStartsAt: 'Starts at {time}',
-  classStartsAtBeijing: 'Starts at {time} Beijing Time',
+  classStartsAtBeijing: '{time} Beijing Time',
   notifyClassRemindersCaption:
     'Reminds you before each class on your course schedule. Opening learnX keeps them up to date for the next week or so.',
   notifySummary: '{count} Updates in {courses} Courses',

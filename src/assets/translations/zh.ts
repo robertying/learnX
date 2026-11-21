@@ -412,7 +412,7 @@ const zh: typeof en = {
   notifyGradeCount: '{count}项作业已批改',
   notifyDeadlineChangeCount: '{count}项作业截止时间变更',
   notifyComments: '评语',
-  notifyNewComment: '新评语',
+  notifyNewComment: '作业新评语',
   notifyCommentCount: '{count}条新评语',
   notifyGroupSubmissions: '小组提交',
   notifyGroupSubmitted: '小组作业已提交',
@@ -438,8 +438,7 @@ const zh: typeof en = {
   notifyClassReminders: '上课提醒',
   notifyClassReminder: '上课提醒',
   classReminderOffset: '提前提醒（分钟）',
-  classStartsAt: '{time}上课',
-  classStartsAtBeijing: '北京时间{time}上课',
+  classStartsAtBeijing: '北京时间{time}',
   notifyClassRemindersCaption:
     '在课表上每节课开始前提醒你。打开learnX会更新接下来约一周的提醒。',
   notifySummary: '{courses}门课程有{count}条更新',

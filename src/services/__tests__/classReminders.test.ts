@@ -90,14 +90,14 @@ describe('classReminderContent', () => {
     expect(classReminderContent(upcoming('a', 0, { start }))).toEqual({
       title: 'Class Reminder',
       subtitle: 'Course a',
-      body: 'Starts at 09:50 · Room 101',
+      body: '09:50 · Room 101',
       data: { type: 'course', id: 'a' },
       threadIdentifier: 'classes',
       interruptionLevel: 'timeSensitive',
     });
     expect(
       classReminderContent(upcoming('a', 0, { start, location: '' })).body,
-    ).toBe('Starts at 09:50');
+    ).toBe('09:50');
     // Today, when the class matches no course.
     expect(
       classReminderContent(upcoming('a', 0, { courseId: undefined })).data,
@@ -109,7 +109,7 @@ describe('classReminderContent', () => {
     // Los Angeles (UTC-8)
     jest.spyOn(Date.prototype, 'getTimezoneOffset').mockReturnValue(480);
     expect(classReminderContent(upcoming('a', 0, { start })).body).toBe(
-      'Starts at 09:50 Beijing Time · Room 101',
+      '09:50 Beijing Time · Room 101',
     );
   });
 });

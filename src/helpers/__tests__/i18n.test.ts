@@ -178,7 +178,7 @@ describe('spacing between Chinese and Latin', () => {
   });
 
   it('is left to the system on iOS', () => {
-    expect(reminder()).toBe('北京时间上午9:50上课');
+    expect(reminder()).toBe('北京时间上午9:50');
     expect(t('todayClassCount', { count: 3 })).toBe('今天3节课');
     expect(spaceCjk('经管新楼A109')).toBe('经管新楼A109');
   });
@@ -186,7 +186,7 @@ describe('spacing between Chinese and Latin', () => {
   it('is added on Android, in strings, dates, times and between them', () => {
     android();
     const gap = CJK_GAP;
-    expect(reminder()).toBe(`北京时间上午${gap}9:50${gap}上课`);
+    expect(reminder()).toBe(`北京时间上午${gap}9:50`);
     expect(t('todayClassCount', { count: 3 })).toBe(`今天${gap}3${gap}节课`);
     expect(t('reloadApp')).toBe(`重新加载${gap}learnX`);
     expect(formatDate(dayjs('2026-11-12T21:30'), 'shortDateTimeFormat')).toBe(
@@ -241,7 +241,7 @@ describe('English capitalization', () => {
     expect(t('notifyNoticeCount', { count: 3 })).toBe('3 new notices');
     expect(t('createNewGitHubIssue')).toBe('Open a GitHub issue');
     expect(t('classStartsAtBeijing', { time: '9:50' })).toBe(
-      'Starts at 9:50 Beijing time',
+      '9:50 Beijing time',
     );
     expect(t('openSystemSettings')).toBe('Open System Settings');
     expect(t('sso')).toBe(

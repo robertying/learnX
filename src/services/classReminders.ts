@@ -90,9 +90,11 @@ export const classReminderContent = ({
   subtitle: courseName,
   body: [
     // In Beijing time, as Today lists the class, saying so on a phone elsewhere
-    t(showsBeijingTime(start) ? 'classStartsAt' : 'classStartsAtBeijing', {
-      time: formatTime(beijingWallClock(start)),
-    }),
+    showsBeijingTime(start)
+      ? formatTime(beijingWallClock(start))
+      : t('classStartsAtBeijing', {
+          time: formatTime(beijingWallClock(start)),
+        }),
     location,
   ]
     .filter(Boolean)
