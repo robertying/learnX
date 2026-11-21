@@ -8,6 +8,7 @@ import {
   card,
   drawn,
   openCard,
+  openMenu,
   openTab,
   search,
   shown,
@@ -85,8 +86,10 @@ test('goes back in a sheet, and closes it with Esc', async ({
 
   // Esc closes a menu in the sheet, not the sheet.
   await search(window, maestroEnv().MOCK_SEARCH_TERM);
-  await shown(window.getByRole('button', { name: exact('T_filter') })).click();
-  await expect(window.getByRole('menu')).toBeVisible();
+  await openMenu(
+    window,
+    shown(window.getByRole('button', { name: exact('T_filter') })),
+  );
   await window.keyboard.press('Escape');
   await expect(window.getByRole('menu')).toBeHidden();
   await expect(byId(window, 'search-box')).toBeVisible();

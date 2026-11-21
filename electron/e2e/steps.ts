@@ -78,9 +78,23 @@ export const cardAction = async (
   await main.chooseMenuItem(exact(action));
 };
 
+/**
+ * Opens the menu `button` drops and waits until it takes keys: Fluent moves
+ * focus into a menu a moment after it shows, while it fades in. A key
+ * pressed before that goes to whatever had focus, or to a tooltip still
+ * showing (which Esc closes instead of the menu).
+ */
+export const openMenu = async (window: Page, button: Locator) => {
+  await button.click();
+  await expect(window.getByRole('menu').locator(':focus')).toBeAttached();
+};
+
 /** subflows/filter.yaml: a choice of the list's Filter menu. */
 export const filter = async (window: Page, choice: string) => {
-  await shown(window.getByRole('button', { name: exact('T_filter') })).click();
+  await openMenu(
+    window,
+    shown(window.getByRole('button', { name: exact('T_filter') })),
+  );
   await window
     .getByRole('menuitemradio', { name: new RegExp(text(choice).source) })
     .click();
