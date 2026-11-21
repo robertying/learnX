@@ -75,6 +75,20 @@ describe('shownContent', () => {
     });
     expect(shownContent({}, 'linux')).toEqual({ title: '', body: '' });
   });
+
+  it("joins the body's lines on Linux, whose banner shows one", () => {
+    const lines = {
+      title: 'Deadline Reminder',
+      subtitle: 'Probability',
+      body: 'Homework 6\nDue today at 23:59',
+    };
+    expect(shownContent(lines, 'win32').body).toBe(
+      'Probability\nHomework 6\nDue today at 23:59',
+    );
+    expect(shownContent(lines, 'linux').body).toBe(
+      'Probability · Homework 6 · Due today at 23:59',
+    );
+  });
 });
 
 describe('createNotifier', () => {

@@ -29,19 +29,19 @@ export interface ContentItem {
   key: string;
   courseId: string;
   courseName: string;
-  /** The item's own name, the title of a notification about it alone. */
+  /** The item's own name, the first line of a notification about it alone. */
   title: string;
-  /** What happened to it, the body of a notification about it alone. */
-  detail: string;
+  /** More about it (when it's due, a preview), the line after its name. */
+  detail?: string;
   /** Its line in a notification listing several of its kind. */
   line: string;
   target: Required<ItemTarget>;
 }
 
 /**
- * One notification. The title names what it's about (the item, or how many
- * there are), the subtitle the course, and the body what happened, as in Mail
- * and Calendar.
+ * One notification. The title says what happened ("New Assignment", or how
+ * many: "3 New Assignments"), the subtitle names the course, and the body the
+ * item and more about it, or lists the items, so its kind reads at a glance.
  */
 export interface ContentNotification {
   title: string;
@@ -66,6 +66,17 @@ export interface PickContext {
   archived: Record<BookmarkType, readonly string[]>;
   now?: dayjs.Dayjs;
 }
+
+/** A notification's title for one item of a kind. */
+const singleTitles: Record<ContentKind, () => string> = {
+  notices: () => t('notifyNewNotice'),
+  files: () => t('notifyNewFile'),
+  assignments: () => t('notifyNewAssignment'),
+  grades: () => t('notifyGraded'),
+  comments: () => t('notifyNewComment'),
+  deadlineChanges: () => t('notifyDeadlineChanged'),
+  groupSubmissions: () => t('notifyGroupSubmitted'),
+};
 
 /** A notification's title for `count` items of a kind. */
 const countTitles: Record<ContentKind, (count: number) => string> = {
@@ -162,7 +173,7 @@ export const pickContentItems = (
           ...base('notices', n),
           key: `notice:${n.id}`,
           title: n.title,
-          detail: preview(n.content) || t('notifyNewNotice'),
+          detail: preview(n.content),
           line: n.title,
         });
       }
@@ -175,7 +186,7 @@ export const pickContentItems = (
           ...base('files', f),
           key: `file:${f.id}`,
           title: f.title,
-          detail: joined(t('notifyNewFile'), f.fileType?.toUpperCase(), f.size),
+          detail: joined(f.fileType?.toUpperCase(), f.size),
           line: f.title,
         });
       }
@@ -190,7 +201,7 @@ export const pickContentItems = (
           ...base('assignments', a),
           key: `assignment:${a.id}`,
           title: a.title,
-          detail: joined(t('notifyNewAssignment'), due),
+          detail: due,
           line: joined(a.title, due),
         });
       }
@@ -198,16 +209,14 @@ export const pickContentItems = (
   }
   if (settings.grades) {
     for (const { after: a } of diff.assignments.graded) {
-      const grade = gradeLabel(a);
-      const graded = grade
-        ? t('notifyGraded', { grade })
-        : t('notifyGradedNoGrade');
+      const label = gradeLabel(a);
+      const grade = label && t('notifyGrade', { grade: label });
       add({
         ...base('grades', a),
         key: `graded:${a.id}:${a.grade ?? ''}:${a.gradeLevel ?? ''}`,
         title: a.title,
-        detail: joined(graded, preview(a.gradeContent)),
-        line: joined(a.title, graded),
+        detail: joined(grade, preview(a.gradeContent)),
+        line: joined(a.title, grade),
       });
     }
     for (const { after: a } of diff.assignments.commented) {
@@ -216,8 +225,8 @@ export const pickContentItems = (
         ...base('comments', a),
         key: `comment:${a.id}:${hash(comment)}`,
         title: a.title,
-        detail: t('notifyNewComment', { comment }),
-        line: joined(a.title, t('notifyNewCommentShort')),
+        detail: comment,
+        line: a.title,
       });
     }
   }
@@ -243,7 +252,6 @@ export const pickContentItems = (
         ...base('groupSubmissions', a),
         key: groupSubmittedKey(a.id),
         title: a.title,
-        detail: t('notifyGroupSubmitted'),
         line: a.title,
       });
     }
@@ -252,9 +260,10 @@ export const pickContentItems = (
 };
 
 /**
- * One notification per course and kind: a single item names itself and says
- * what happened, and opens itself; several are counted ("3 New Files") and
- * listed, and open their list.
+ * One notification per course and kind, titled with what happened: a single
+ * item is named on the first line and described on the next, and opens
+ * itself; several are counted ("3 New Files") and listed, and open their
+ * list.
  */
 export const groupContentItems = (
   items: ContentItem[],
@@ -270,9 +279,13 @@ export const groupContentItems = (
     const single = group.length === 1;
     return {
       kind: first.kind,
-      title: single ? first.title : countTitles[first.kind](group.length),
+      title: single
+        ? singleTitles[first.kind]()
+        : countTitles[first.kind](group.length),
       subtitle: first.courseName,
-      body: single ? first.detail : group.map(i => i.line).join('\n'),
+      body: (single ? [first.title, first.detail] : group.map(i => i.line))
+        .filter(Boolean)
+        .join('\n'),
       threadId: first.courseId,
       target: single ? first.target : { type: first.target.type },
       ids: group.length === 1 ? undefined : group.map(i => i.target.id),

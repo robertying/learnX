@@ -110,9 +110,9 @@ it('sends a test notification about the newest notice', async () => {
   // In the format a sync posts it in.
   expect(postNotification).toHaveBeenCalledWith(
     expect.objectContaining({
-      title: 'Midterm',
+      title: 'New Notice',
       subtitle: 'Calculus',
-      body: 'New notice',
+      body: 'Midterm',
       target: { type: 'notice', id: 'n1' },
     }),
   );

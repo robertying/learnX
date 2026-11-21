@@ -44,9 +44,9 @@ it('makes a single and a grouped notification of every kind, and the summary', (
   expect(notifications).toHaveLength(15);
   expect(notifications[0]).toEqual(
     expect.objectContaining({
-      title: 'Notice 1',
+      title: 'New Notice',
       subtitle: 'Course 1',
-      body: 'New notice',
+      body: 'Notice 1',
       target: { type: 'notice', id: 'n1' },
     }),
   );
@@ -64,12 +64,12 @@ it('makes a single and a grouped notification of every kind, and the summary', (
   const single = (kind: string) =>
     notifications.find(n => n.kind === kind && !n.ids)?.body;
   expect(single('grades')).toBe(
-    'Graded: 95 · Well done. Part 2 misses the empty-tree case.',
+    'Assignment 1\nGrade: 95 · Well done. Part 2 misses the empty-tree case.',
   );
   expect(single('comments')).toBe(
-    'New comment: Well done. Part 2 misses the empty-tree case.',
+    'Assignment 1\nWell done. Part 2 misses the empty-tree case.',
   );
-  expect(single('groupSubmissions')).toBe('Submitted by your group');
+  expect(single('groupSubmissions')).toBe('Assignment 1');
 });
 
 it('points every sample at an item that exists, so tapping it opens it', () => {
@@ -91,20 +91,22 @@ it('makes a deadline reminder an hour ahead', () => {
     now,
   );
   expect(reminder).toMatchObject({
-    title: 'Essay',
+    title: 'Deadline Reminder',
     subtitle: 'Writing',
-    body: 'Due today at 13:00',
+    body: 'Essay\nDue today at 13:00',
   });
 });
 
 it('makes the late submission reminders', () => {
   const assignment = { id: 'a1', title: 'Essay', courseName: 'Writing' };
-  expect(sampleReminder(assignment as never, now, 'lateOpen').body).toBe(
-    'Deadline passed · Late submission until Nov 13 12:00',
-  );
-  expect(sampleReminder(assignment as never, now, 'lateDue').body).toBe(
-    'Late submission closes today at 13:00',
-  );
+  expect(sampleReminder(assignment as never, now, 'lateOpen')).toMatchObject({
+    title: 'Deadline Passed',
+    body: 'Essay\nLate submission until Nov 13 12:00',
+  });
+  expect(sampleReminder(assignment as never, now, 'lateDue')).toMatchObject({
+    title: 'Late Submission Reminder',
+    body: 'Essay\nLate submission closes today at 13:00',
+  });
 });
 
 it('posts them all', async () => {
@@ -113,7 +115,9 @@ it('posts them all', async () => {
   expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(4);
   expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith(
     expect.objectContaining({
-      content: expect.objectContaining({ title: 'Assignment 1' }),
+      content: expect.objectContaining({
+        body: expect.stringMatching(/^Assignment 1\n/),
+      }),
     }),
   );
 });
@@ -201,7 +205,8 @@ describe('postLaunchNotification', () => {
     expect(postNotification).toHaveBeenCalledTimes(1);
     expect(postNotification).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: 'Notice 2',
+        title: 'New Notice',
+        body: 'Notice 2',
         target: { type: 'notice', id: 'n2' },
       }),
     );
@@ -225,8 +230,12 @@ describe('postLaunchNotification', () => {
     await expect(postLaunchNotification('reminder:a1')).resolves.toBe(true);
     expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith({
       content: expect.objectContaining({
-        title: 'Assignment 1',
-        data: expect.objectContaining({ type: 'assignment', id: 'a1' }),
+        title: 'Deadline Reminder',
+        data: expect.objectContaining({
+          type: 'assignment',
+          id: 'a1',
+          title: 'Assignment 1',
+        }),
       }),
       trigger: immediateTrigger('deadlines'),
     });
@@ -239,7 +248,8 @@ describe('postLaunchNotification', () => {
     await expect(posted).resolves.toBe(true);
     expect(postNotification).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: 'Assignment 1',
+        title: 'New Assignment',
+        body: expect.stringMatching(/^Assignment 1\n/),
         target: { type: 'assignment', id: 'a1' },
       }),
     );

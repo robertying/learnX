@@ -125,13 +125,9 @@ describe('pickContentItems', () => {
     ]);
     expect(items.map(i => [i.title, i.detail, i.line])).toEqual([
       ['Notice n1', expect.any(String), 'Notice n1'],
-      ['File f1', expect.stringMatching(/^New file/), 'File f1'],
-      [
-        'Assignment a1',
-        'New assignment · Due Nov 10 10:00',
-        'Assignment a1 · Due Nov 10 10:00',
-      ],
-      ['Assignment a2', 'Graded: A', 'Assignment a2 · Graded: A'],
+      ['File f1', expect.stringMatching(/^PPTX · /), 'File f1'],
+      ['Assignment a1', 'Due Nov 10 10:00', 'Assignment a1 · Due Nov 10 10:00'],
+      ['Assignment a2', 'Grade: A', 'Assignment a2 · Grade: A'],
       [
         'Assignment a3',
         `Now due Nov 11 10:00 (was Nov 10 10:00)`,
@@ -218,8 +214,8 @@ describe('pickContentItems', () => {
     ];
     const items = pickContentItems(diff, context());
     expect(items.map(i => [i.kind, i.detail, i.line])).toEqual([
-      ['grades', 'Graded: 95 · Good work', 'Assignment a · Graded: 95'],
-      ['comments', 'New comment: Redo part 3', 'Assignment b · New comment'],
+      ['grades', 'Grade: 95 · Good work', 'Assignment a · Grade: 95'],
+      ['comments', 'Redo part 3', 'Assignment b'],
     ]);
     expect(items[1].key).toMatch(/^comment:b:\w+$/);
     expect(
@@ -246,7 +242,7 @@ describe('pickContentItems', () => {
         kind: 'groupSubmissions',
         key: groupSubmittedKey('a'),
         title: 'Assignment a',
-        detail: 'Submitted by your group',
+        line: 'Assignment a',
       }),
     ]);
     expect(
@@ -284,9 +280,9 @@ describe('groupContentItems', () => {
     expect(notifications).toEqual([
       {
         kind: 'notices',
-        title: 'Notice n1',
+        title: 'New Notice',
         subtitle: 'Calculus',
-        body: 'Preview of the notice',
+        body: 'Notice n1\nPreview of the notice',
         threadId: 'c1',
         target: { type: 'notice', id: 'n1' },
         keys: ['notice:n1'],

@@ -162,9 +162,11 @@ describe('syncDeadlineReminders', () => {
     expect(schedule.mock.calls[0][0]).toMatchObject({
       identifier: `deadline-reminder:new:${now + 10 * hour}:60`,
       content: {
-        title: 'Assignment new',
+        title: 'Deadline Reminder',
         subtitle: expect.any(String),
-        body: expect.stringMatching(/^Due (today|tomorrow) at \d\d:\d\d$/),
+        body: expect.stringMatching(
+          /^Assignment new\nDue (today|tomorrow) at \d\d:\d\d$/,
+        ),
         data: { type: 'assignment', id: 'new' },
         interruptionLevel: 'timeSensitive',
       },
@@ -204,8 +206,9 @@ describe('syncDeadlineReminders', () => {
     );
     expect(schedule.mock.calls[0][0]).toMatchObject({
       content: {
+        title: 'Late Submission Reminder',
         body: expect.stringMatching(
-          /^Late submission closes (today|tomorrow) at \d\d:\d\d$/,
+          /^Assignment a\nLate submission closes (today|tomorrow) at \d\d:\d\d$/,
         ),
         data: { type: 'assignment', id: 'a', deadline: now + 3 * hour },
       },
@@ -303,7 +306,11 @@ describe('remindLaterDate', () => {
 describe('remindLater', () => {
   const notification = {
     request: {
-      content: { title: 'Essay', subtitle: 'Calculus', body: 'Old text' },
+      content: {
+        title: 'Deadline Reminder',
+        subtitle: 'Calculus',
+        body: 'Old text',
+      },
     },
   } as unknown as Notifications.Notification;
 
@@ -314,7 +321,12 @@ describe('remindLater', () => {
   it('replaces the put-off reminder, its text as of when it shows again', async () => {
     jest.replaceProperty(Platform, 'OS', 'ios');
     const deadline = now + 5 * hour;
-    await remindLater(notification, { id: 'a', deadline, kind: 'lateDue' });
+    await remindLater(notification, {
+      id: 'a',
+      deadline,
+      kind: 'lateDue',
+      title: 'Essay',
+    });
     expect(schedule).toHaveBeenCalledWith({
       identifier: 'deadline-later:a',
       content: reminderContent(
@@ -325,8 +337,10 @@ describe('remindLater', () => {
       trigger: { type: 'date', date: now + hour },
     });
     expect(schedule.mock.calls[0][0].content).toMatchObject({
+      title: 'Late Submission Reminder',
       subtitle: 'Calculus',
-      data: { kind: 'lateDue' },
+      body: expect.stringMatching(/^Essay\n/),
+      data: { kind: 'lateDue', title: 'Essay' },
     });
   });
 
@@ -342,7 +356,7 @@ describe('remindLater', () => {
       channelId: 'deadlines',
     });
     expect(schedule.mock.calls[0][0].content).toMatchObject({
-      title: '',
+      title: 'Deadline reminder',
       subtitle: '',
       data: { kind: 'due' },
     });

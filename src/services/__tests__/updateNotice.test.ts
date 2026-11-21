@@ -34,8 +34,8 @@ it('says a new version is out, opening Settings', async () => {
   await update();
   expect(schedule).toHaveBeenCalledWith({
     content: {
-      title: t('foundNewVersion', { version: '19.1.0' }),
-      body: 'Body',
+      title: t('notifyNewVersion'),
+      body: 'v19.1.0\nBody',
       data: { type: 'update' },
     },
     trigger: { channelId: 'updates' },

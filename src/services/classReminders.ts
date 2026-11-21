@@ -76,9 +76,9 @@ export const planClassReminders = (
 };
 
 /**
- * A reminder's text: the course, then when it starts and where, as Calendar
- * shows an event. Tapping it opens the course, or Today when the class
- * matches no course.
+ * A reminder's text, titled with its kind as the other notifications are: the
+ * course, then when the class starts and where. Tapping it opens the course,
+ * or Today when the class matches no course.
  */
 export const classReminderContent = ({
   courseId,
@@ -86,7 +86,8 @@ export const classReminderContent = ({
   location,
   start,
 }: UpcomingClass) => ({
-  title: courseName,
+  title: t('notifyClassReminder'),
+  subtitle: courseName,
   body: [
     // In Beijing time, as Today lists the class, saying so on a phone elsewhere
     t(showsBeijingTime(start) ? 'classStartsAt' : 'classStartsAtBeijing', {

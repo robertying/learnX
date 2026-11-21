@@ -72,9 +72,7 @@ describe('times of day', () => {
     mockLocale.current = 'zh-CN';
     dayjs.locale('zh-cn');
     expect(formatTime(evening)).toBe('下午9:30');
-    expect(formatDate(evening, 'shortDateTimeFormat')).toBe(
-      '11月12日 下午9:30',
-    );
+    expect(formatDate(evening, 'shortDateTimeFormat')).toBe('11月12日下午9:30');
   });
 
   it('keep other placeholders of a format', () => {
@@ -192,7 +190,7 @@ describe('spacing between Chinese and Latin', () => {
     expect(t('todayClassCount', { count: 3 })).toBe(`今天${gap}3${gap}节课`);
     expect(t('reloadApp')).toBe(`重新加载${gap}learnX`);
     expect(formatDate(dayjs('2026-11-12T21:30'), 'shortDateTimeFormat')).toBe(
-      `11${gap}月${gap}12${gap}日 下午${gap}9:30`,
+      `11${gap}月${gap}12${gap}日下午${gap}9:30`,
     );
     expect(
       timeRange(dayjs('2026-11-12T16:00'), dayjs('2026-11-12T17:35')),

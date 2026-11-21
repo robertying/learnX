@@ -227,6 +227,8 @@ export interface NotificationData extends ItemTarget {
   deadline?: number;
   /** A deadline reminder's kind (`ReminderKind` in services/deadlineReminders). */
   kind?: string;
+  /** A deadline reminder's assignment name, for Remind Later. */
+  title?: string;
 }
 
 /**
@@ -271,6 +273,7 @@ export const getNotificationData = (
         : undefined,
     deadline: typeof data.deadline === 'number' ? data.deadline : undefined,
     kind: typeof data.kind === 'string' ? data.kind : undefined,
+    title: typeof data.title === 'string' ? data.title : undefined,
   };
 };
 

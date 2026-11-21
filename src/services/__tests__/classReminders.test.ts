@@ -88,7 +88,8 @@ describe('classReminderContent', () => {
   it('says the course, then when and where', () => {
     const start = new Date(2026, 10, 9, 9, 50).valueOf();
     expect(classReminderContent(upcoming('a', 0, { start }))).toEqual({
-      title: 'Course a',
+      title: 'Class Reminder',
+      subtitle: 'Course a',
       body: 'Starts at 09:50 · Room 101',
       data: { type: 'course', id: 'a' },
       threadIdentifier: 'classes',
@@ -130,7 +131,11 @@ describe('syncClassReminders', () => {
     expect(cancel.mock.calls).toEqual([['class-reminder:gone:1:15']]);
     expect(schedule).toHaveBeenCalledTimes(1);
     expect(schedule.mock.calls[0][0]).toMatchObject({
-      content: { title: 'Course new', data: { type: 'course', id: 'new' } },
+      content: {
+        title: 'Class Reminder',
+        subtitle: 'Course new',
+        data: { type: 'course', id: 'new' },
+      },
       trigger: { type: 'date', date: now + 285 * minute },
     });
   });
