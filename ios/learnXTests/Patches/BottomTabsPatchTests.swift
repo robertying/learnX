@@ -1,3 +1,4 @@
+import SwiftUI
 import Testing
 import UIKit
 
@@ -41,5 +42,19 @@ import UIKit
       released = tabView
     }
     #expect(released == nil)
+  }
+
+  @Test func tabBarDelegateIsReleasedWithItsModifier() throws {
+    let tabController = UITabBarController()
+    weak var delegate: UITabBarControllerDelegate?
+    try autoreleasepool {
+      let view = EmptyView().onTabItemEvent({ _, _, _ in false }, onSelectTab: { _, _ in })
+      let modified = try #require(view as? ModifiedContent<EmptyView, TabItemEventModifier>)
+      modified.modifier.handle(tabController: tabController)
+      delegate = tabController.delegate
+      #expect(delegate != nil)
+    }
+    // The tab bar controller holds its delegate weakly, so only the modifier keeps it.
+    #expect(delegate == nil)
   }
 }

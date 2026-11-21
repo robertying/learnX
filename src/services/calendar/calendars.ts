@@ -35,7 +35,6 @@ import { CalendarError } from 'services/calendar/errors';
 import { buildICS } from 'helpers/calendar/ics';
 import { isApple } from 'helpers/platform';
 import { hash } from 'helpers/text';
-import { perfCount } from 'services/perfSurfaces';
 
 const permissions = {
   calendar: {
@@ -357,7 +356,6 @@ const listEntryIds = async (
   calendar: Calendar.ExpoCalendar,
   inputs: AssignmentEventInput[],
 ) => {
-  perfCount('calendarList');
   if (isReminderList(type)) {
     return (await calendar.listReminders()).map(r => r.id);
   }
@@ -395,7 +393,7 @@ export const assignmentEntriesMissing = async (
 
 /** The synced event or reminder with this id; throws when it's gone. */
 const getEntry = (type: AssignmentEventType, id: string) =>
-  perfCount('calendarGet') || isReminderList(type)
+  isReminderList(type)
     ? Calendar.ExpoCalendarReminder.get(id)
     : Calendar.ExpoCalendarEvent.get(id);
 
@@ -446,14 +444,12 @@ const saveAssignmentEvent = async (
       removeEventIdForAssignment(type, assignmentId);
     }
     if (saved) {
-      perfCount('calendarUpdate');
       await (entry.reminder
         ? (saved as Calendar.ExpoCalendarReminder).update(entry.details)
         : (saved as Calendar.ExpoCalendarEvent).update(entry.details));
       return;
     }
   }
-  perfCount('calendarCreate');
   const id = entry.reminder
     ? (await calendar.createReminder(entry.details)).id
     : (await calendar.createEvent(entry.details)).id;

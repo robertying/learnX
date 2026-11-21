@@ -20,7 +20,6 @@ import {
 } from 'helpers/widgetDeadlines';
 import type { DeadlineWidgetProps, UpNextWidgetProps } from 'widgets/props';
 import { isAndroid, isApple } from 'helpers/platform';
-import { perfCount } from 'services/perfSurfaces';
 
 // Each layout imports only its own platform's @expo/ui components.
 const deadlinesWidget = (): Widget<DeadlineWidgetProps> | undefined =>
@@ -99,7 +98,6 @@ export function updateDeadlineWidget(
     if (key === lastDeadlines) {
       return;
     }
-    perfCount('widgetDeadlines');
     widget.updateTimeline(
       timeline.map(entry => ({ ...entry, date: new Date(entry.date) })),
     );
@@ -112,7 +110,6 @@ export function updateDeadlineWidget(
     if (key === lastDeadlines) {
       return;
     }
-    perfCount('widgetDeadlines');
     widget.updateSnapshot(props);
     lastDeadlines = key;
   }
@@ -179,7 +176,6 @@ export function updateUpNextWidget(classes: UpcomingClass[] = []) {
   if (key === lastUpNext) {
     return;
   }
-  perfCount('widgetUpNext');
   if (isApple()) {
     widget.updateTimeline(
       upNextTimes(classes).map(date => ({ date: new Date(date), props })),

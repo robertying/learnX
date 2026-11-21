@@ -20,6 +20,7 @@ import { Windows } from 'test-utils/mocks/windows';
 
 // The real component, its props recorded
 jest.mock('components/CardSwipeAction', () => ({
+  ...jest.requireActual('components/CardSwipeAction'),
   __esModule: true,
   default: jest.fn(jest.requireActual('components/CardSwipeAction').default),
 }));
@@ -279,6 +280,29 @@ describe('swipe actions', () => {
       .queryAllByTestId(/^card-/, hidden)
       .map(el => el.props.testID);
   const swipeable = () => screen.getByTestId('swipeable').props;
+  // A finger on the card mounts its swipe actions.
+  const touch = () => act(() => fireEvent(touchable(), 'pressIn'));
+  const renderTouched = async (props?: CardWrapperProps) => {
+    const view = await render(card(props));
+    await touch();
+    return view;
+  };
+
+  it('stands in plain views for the actions until the card is touched', async () => {
+    await render(card());
+    expect(CardSwipeAction).not.toHaveBeenCalled();
+    expect(swipeKeys('right')).toEqual([]);
+    expect(swipeKeys('left')).toEqual([]);
+    await touch();
+    expect(swipeKeys('right')).toEqual(['card-archive']);
+    expect(swipeKeys('left')).toEqual(['card-fav']);
+  });
+
+  it('mounts the actions when a swipe starts without a touch (a trackpad)', async () => {
+    await render(card());
+    await act(() => swipeable().onSwipeableOpenStartDrag(SwipeDirection.RIGHT));
+    expect(swipeKeys('right')).toEqual(['card-archive']);
+  });
 
   it("leaves the screen's edge to the swipe back where there is one", async () => {
     await render(card());
@@ -289,7 +313,7 @@ describe('swipe actions', () => {
   });
 
   it('archives on a right swipe and favorites on a left one by default', async () => {
-    await render(card());
+    await renderTouched();
     expect(swipeEnabled()).toBe(true);
     expect(swipeKeys('right')).toEqual(['card-archive']);
     expect(swipeKeys('left')).toEqual(['card-fav']);
@@ -297,7 +321,7 @@ describe('swipe actions', () => {
 
   it('follows the choices in Settings', async () => {
     setSetting('swipeActions', { right: 'fav', left: 'none' });
-    const view = await render(card());
+    const view = await renderTouched();
     expect(swipeKeys('right')).toEqual(['card-fav']);
     expect(swipeKeys('left')).toEqual([]);
 
@@ -319,7 +343,7 @@ describe('swipe actions', () => {
   it('runs the pressed action with the tap a full swipe plays, and closes the swipe', async () => {
     const onToggleFav = jest.fn();
     const onToggleArchived = jest.fn();
-    await render(card({ onToggleFav, onToggleArchived, fav: true }));
+    await renderTouched({ onToggleFav, onToggleArchived, fav: true });
     await user.press(swipeAction('card-fav'));
     expect(onToggleFav).toHaveBeenCalled();
     expect(mockSwipeableMethods.close).toHaveBeenCalled();
@@ -342,7 +366,7 @@ describe('swipe actions', () => {
 
   it('runs a full swipe once let go, with a tick as it gets there', async () => {
     const onToggleFav = jest.fn();
-    await render(card({ onToggleFav }));
+    await renderTouched({ onToggleFav });
     const trailing = jest
       .mocked(CardSwipeAction)
       .mock.calls.map(([props]) => props)
@@ -356,7 +380,7 @@ describe('swipe actions', () => {
 
   it("hides or shows a course on Archive's side", async () => {
     const onToggleHidden = jest.fn();
-    await render(card({ onToggleHidden, hidden: true }));
+    await renderTouched({ onToggleHidden, hidden: true });
     expect(swipeKeys('right')).toEqual(['card-hide']);
     expect(swipeKeys('left')).toEqual([]);
     await user.press(swipeAction('card-hide'));
@@ -364,7 +388,7 @@ describe('swipe actions', () => {
   });
 
   it('only unarchives an archived card', async () => {
-    await render(card({ archived: true }));
+    await renderTouched({ archived: true });
     expect(swipeKeys('right')).toEqual(['card-archive']);
     expect(swipeKeys('left')).toEqual([]);
   });

@@ -72,6 +72,15 @@ const CardSwipeAction: React.FC<CardSwipeActionProps> = ({
   );
 };
 
+/**
+ * Stands in for a card's swipe action until the card is first touched
+ * (`CardWrapper`): as wide, so the swipe opens as far. Clear, since both
+ * sides' panels overlap and only the moving card says which one shows.
+ */
+export const CardSwipeActionPlaceholder: React.FC<
+  Pick<CardSwipeActionProps, 'action'>
+> = () => <View style={styles.root} />;
+
 const styles = StyleSheet.create({
   // The whole card's width, so the swipe opens all the way across.
   root: {

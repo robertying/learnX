@@ -5,7 +5,6 @@ import Storage from 'expo-sqlite/kv-store';
 import { displayFileSize } from 'helpers/filename';
 import { hash, removeTags } from 'helpers/text';
 import { recordError } from 'services/crashReporting';
-import { perfCount, perfTime } from 'services/perfSurfaces';
 
 /** Spotlight shows two or three lines; the rest is only searched. */
 const MAX_DETAILS_LENGTH = 500;
@@ -182,11 +181,6 @@ const replaceItems = (domain: SpotlightDomain, list: Entry[]) => {
     return;
   }
   indexed[domain] = after;
-  perfCount('spotlightWrites');
-  perfCount(
-    'spotlightItemsSent',
-    before ? changed.length + removed.length : items.length,
-  );
   enqueue(async () => {
     const next = { ...saved, [domain]: after };
     const state = stateOf(next);
@@ -224,7 +218,6 @@ export async function updateSpotlight(
     return;
   }
   await whenLoaded();
-  const perfStart = performance.now();
   const hidden = new Set(hiddenCourses);
   const shown = <T extends { courseId: string }>(
     items: T[],
@@ -243,7 +236,6 @@ export async function updateSpotlight(
   if (files) {
     replaceItems('file', shown(files, fileSpotlightItem));
   }
-  perfTime('spotlightCompute', performance.now() - perfStart);
   await queue;
 }
 
