@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 import SystemIcon from 'components/SystemIcon';
 import { requestRelogin, useAuthStore } from 'data/auth';
+import { useLastSyncAt } from 'data/lastSync';
 import { loginFailedStatus } from 'helpers/loginFailureText';
 import { retriesOnTimer } from 'helpers/loginRetry';
 import { t, timeAgo } from 'helpers/i18n';
@@ -11,21 +12,18 @@ import { useMinute } from 'hooks/useClock';
 import { useTheme } from 'theme';
 import Spacing from 'constants/Spacing';
 
-export interface SyncStatusProps {
-  /** When the list's data was last fetched (ms), 0 if never. */
-  updatedAt?: number;
-}
-
 /**
  * What a list says while there's no session: why the saved login failed,
- * with how old the shown data is, or null with a session. Being offline or a
+ * with how old the app's data is (`useLastSyncAt`, the same on every
+ * screen), or null with a session. Being offline or a
  * server error retries by itself (hooks/useReLogin); any other failure needs
  * the user, so it offers to log in again.
  */
-export const useSyncStatus = (updatedAt?: number) => {
+export const useSyncStatus = () => {
   const loggedIn = useAuthStore(state => state.loggedIn);
   const loggingIn = useAuthStore(state => state.loggingIn);
   const failure = useAuthStore(state => state.failure);
+  const updatedAt = useLastSyncAt();
 
   // Keeps "updated … ago" current.
   const now = useMinute();
@@ -52,9 +50,9 @@ export const useSyncStatus = (updatedAt?: number) => {
  * and Log In at the end when the login needs the user. Today shows the same
  * row in its Form (`SyncStatusSection`).
  */
-const SyncStatus: React.FC<SyncStatusProps> = ({ updatedAt }) => {
+const SyncStatus: React.FC = () => {
   const theme = useTheme();
-  const sync = useSyncStatus(updatedAt);
+  const sync = useSyncStatus();
 
   if (!sync) {
     return null;
@@ -112,9 +110,9 @@ const styles = StyleSheet.create({
  * it isn't there, with the first section's margin.
  */
 export const SyncStatusSection: React.FC<
-  SyncStatusProps & Pick<FormSectionProps, 'first' | 'last'>
-> = ({ updatedAt, first, last }) => {
-  const sync = useSyncStatus(updatedAt);
+  Pick<FormSectionProps, 'first' | 'last'>
+> = ({ first, last }) => {
+  const sync = useSyncStatus();
 
   if (!sync) {
     return null;

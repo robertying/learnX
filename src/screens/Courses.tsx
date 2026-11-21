@@ -26,7 +26,6 @@ const Courses: React.FC<Props> = ({ navigation }) => {
     isFetching: fetching,
     isPending,
     refetch,
-    dataUpdatedAt,
   } = useCourses();
   const courseOrder = useUserData(data => data.courseOrder);
   const courses = sortByOrder(fetchedCourses, courseOrder);
@@ -79,7 +78,6 @@ const Courses: React.FC<Props> = ({ navigation }) => {
         refreshing={pullToRefresh.refreshing}
         loading={loading}
         onRefresh={pullToRefresh.onRefresh}
-        updatedAt={dataUpdatedAt}
       />
     </SafeArea>
   );

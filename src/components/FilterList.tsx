@@ -89,8 +89,6 @@ export interface FilterListProps<T> {
    */
   loading?: boolean;
   onRefresh?: () => void;
-  /** When the list's data was last fetched (ms), shown while offline. */
-  updatedAt?: number;
 }
 
 const FilterList = <T extends Notice | Assignment | File | Course>({
@@ -110,7 +108,6 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   refreshing,
   loading = false,
   onRefresh,
-  updatedAt,
 }: FilterListProps<T>) => {
   const detailNavigator = useDetailNavigator();
   // The item open beside the list, which its row shows as selected.
@@ -327,7 +324,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     data,
     // In the list, so that the list is the screen's first scroll view: iOS
     // collapses the large title as it scrolls.
-    ListHeaderComponent: <SyncStatus updatedAt={updatedAt} />,
+    ListHeaderComponent: <SyncStatus />,
     renderItem,
     keyExtractor: (item: T) => item.id,
     // No pull to refresh while selecting or reordering (a pull would start a

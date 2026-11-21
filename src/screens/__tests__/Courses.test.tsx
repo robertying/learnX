@@ -49,7 +49,6 @@ const coursesResult = (overrides: object = {}) =>
     isFetching: false,
     isPending: false,
     refetch,
-    dataUpdatedAt: 42,
     ...overrides,
   } as never);
 
@@ -102,7 +101,6 @@ it("counts each course's unread notices, open assignments and new files", async 
       unreadFileCount: 1,
     }),
   ]);
-  expect(mockList.updatedAt).toBe(42);
 });
 
 it('orders the courses as arranged, and keeps hidden ones apart', async () => {

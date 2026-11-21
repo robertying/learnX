@@ -29,7 +29,6 @@ const query = (overrides: Partial<ContentListQuery> = {}) => ({
   isFetching: false,
   isPending: false,
   refetch: jest.fn(async () => ({ isError: false })),
-  dataUpdatedAt: 42,
   ...overrides,
 });
 
@@ -62,7 +61,6 @@ it('splits the items into the filters', async () => {
     type: 'notice',
     refreshing: false,
     loading: false,
-    updatedAt: 42,
   });
 });
 
