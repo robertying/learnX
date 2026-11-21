@@ -28,6 +28,13 @@ export interface CalendarSyncState {
   syncedCalendarAssignments: Record<string, string>;
   /** Reminder id (iOS) or event id (Android) by assignment id. */
   syncedReminderAssignments: Record<string, string>;
+  /**
+   * What each assignment's event or reminder was last written from (a hash
+   * of its details), by assignment id, so one is written again only when it
+   * changed.
+   */
+  writtenCalendarAssignments: Record<string, string>;
+  writtenReminderAssignments: Record<string, string>;
   /** When each sync last finished without an error (ms), for Settings. */
   lastSynced?: Partial<Record<SyncKind, number>>;
   /**
@@ -44,6 +51,8 @@ export type SyncKind = 'courseSchedule' | AssignmentEventType;
 export const emptyCalendarSync = (): CalendarSyncState => ({
   syncedCalendarAssignments: {},
   syncedReminderAssignments: {},
+  writtenCalendarAssignments: {},
+  writtenReminderAssignments: {},
   writtenClassWeeks: {},
 });
 
@@ -69,6 +78,11 @@ const syncedKey = (type: AssignmentEventType) =>
     ? 'syncedCalendarAssignments'
     : 'syncedReminderAssignments';
 
+const writtenKey = (type: AssignmentEventType) =>
+  type === 'calendar'
+    ? 'writtenCalendarAssignments'
+    : 'writtenReminderAssignments';
+
 /** The events or reminders made for assignments, by assignment id. */
 export const getAssignmentEventIds = (type: AssignmentEventType) =>
   getCalendarSync()[syncedKey(type)];
@@ -90,10 +104,33 @@ export const removeEventIdForAssignment = (
   assignmentId: string,
 ) => {
   const key = syncedKey(type);
+  const written = writtenKey(type);
   useCalendarSyncStore.setState(state => {
     const { [assignmentId]: _removed, ...synced } = state[key];
-    return { [key]: synced };
+    const { [assignmentId]: _written, ...rest } = state[written];
+    return { [key]: synced, [written]: rest };
   });
+};
+
+/** What the assignments' events or reminders were last written from. */
+export const getAssignmentsWritten = (type: AssignmentEventType) =>
+  getCalendarSync()[writtenKey(type)];
+
+/**
+ * Notes what these assignments' events or reminders were just written from
+ * (hashes by assignment id), in one change for the whole sync.
+ */
+export const setAssignmentsWritten = (
+  type: AssignmentEventType,
+  written: Record<string, string>,
+) => {
+  if (Object.keys(written).length === 0) {
+    return;
+  }
+  const key = writtenKey(type);
+  useCalendarSyncStore.setState(state => ({
+    [key]: { ...state[key], ...written },
+  }));
 };
 
 /** Notes that a sync just finished without an error. */
@@ -129,7 +166,10 @@ export const clearClassWeeksWritten = () => {
 };
 
 export const clearEventIds = (type: AssignmentEventType) => {
-  useCalendarSyncStore.setState({ [syncedKey(type)]: {} });
+  useCalendarSyncStore.setState({
+    [syncedKey(type)]: {},
+    [writtenKey(type)]: {},
+  });
 };
 
 /** Forgets the synced calendars and events, as when sync is turned off. */

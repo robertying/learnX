@@ -29,6 +29,11 @@ describe('updateDeadlineWidget', () => {
     jest.useFakeTimers({ now: new Date('2026-03-15T12:00:00Z') });
   });
 
+  afterEach(() => {
+    // Clears what was last sent, so each test sends.
+    updateDeadlineWidget([], options);
+  });
+
   it('gives iOS an entry now and one as each deadline changes color or passes', () => {
     jest.replaceProperty(Platform, 'OS', 'ios');
     updateDeadlineWidget(assignments, options);
@@ -87,8 +92,39 @@ describe('updateDeadlineWidget', () => {
     expect(entries[0].props.total).toBe(12);
   });
 
+  it('skips an iOS timeline that would show the same, even later on', () => {
+    jest.replaceProperty(Platform, 'OS', 'ios');
+    updateDeadlineWidget(assignments, options);
+    // A favorite changes the list, not what the widget shows.
+    jest.setSystemTime(new Date('2026-03-15T13:00:00Z'));
+    updateDeadlineWidget(
+      assignments.map(a => ({ ...a, bookmarked: true })),
+      options,
+    );
+    expect(iosWidget.updateTimeline).toHaveBeenCalledTimes(1);
+
+    // Past the first change (b turning orange), the timeline moves on.
+    jest.setSystemTime(new Date('2026-03-15T17:00:00Z'));
+    updateDeadlineWidget(assignments, options);
+    expect(iosWidget.updateTimeline).toHaveBeenCalledTimes(2);
+
+    updateDeadlineWidget(assignments, { ...options, archived: ['a'] });
+    expect(iosWidget.updateTimeline).toHaveBeenCalledTimes(3);
+  });
+
+  it('gives Android a snapshot once for the same props', () => {
+    jest.replaceProperty(Platform, 'OS', 'android');
+    updateDeadlineWidget(assignments, options);
+    updateDeadlineWidget([...assignments], options);
+    expect(androidWidget.updateSnapshot).toHaveBeenCalledTimes(1);
+
+    updateDeadlineWidget(assignments.slice(1), options);
+    expect(androidWidget.updateSnapshot).toHaveBeenCalledTimes(2);
+  });
+
   it('empties the widget when there are no assignments', () => {
     jest.replaceProperty(Platform, 'OS', 'android');
+    updateDeadlineWidget(assignments, options);
     updateDeadlineWidget([], options);
 
     expect(androidWidget.updateSnapshot).toHaveBeenCalledWith(
@@ -228,6 +264,7 @@ describe('a widget that is missing or fails', () => {
   afterEach(() => {
     jest.restoreAllMocks();
     updateUpNextWidget();
+    updateDeadlineWidget([], options);
   });
 
   it('does nothing where there are no widgets', () => {
@@ -248,6 +285,8 @@ describe('a widget that is missing or fails', () => {
     expect(() => updateDeadlineWidget(assignments, options)).toThrow(
       'no widget host',
     );
+    updateDeadlineWidget(assignments, options);
+    expect(androidWidget.updateSnapshot).toHaveBeenCalledTimes(2);
 
     jest.mocked(androidUpNext.updateSnapshot).mockImplementationOnce(() => {
       throw new Error('no widget host');

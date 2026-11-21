@@ -99,6 +99,11 @@ it('swipes like Gmail: right archives and left favorites once the card slides of
   await render(card({ onToggleFav, onToggleArchived }));
   const swipeable = screen.getByTestId('swipeable').props;
   expect(swipeable.enabled).toBe(true);
+  // A finger on the card mounts the actions.
+  expect(
+    screen.queryByTestId('card-archive', { includeHiddenElements: true }),
+  ).toBeNull();
+  await act(() => fireEvent(cardElement(), 'pressIn'));
   // full-width backgrounds, hidden from TalkBack, which has the card's actions
   const archive = within(
     screen.getByTestId('swipe-actions-left', { includeHiddenElements: true }),

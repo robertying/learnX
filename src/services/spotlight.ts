@@ -141,10 +141,37 @@ let loaded: Promise<void> | undefined;
 
 const whenLoaded = () => (loaded ??= load());
 
-const replaceItems = (domain: SpotlightDomain, items: SpotlightItem[]) => {
+interface Entry {
+  item: SpotlightItem;
+  hash: string;
+}
+
+/**
+ * Each list item's Spotlight item and its hash, by the list item. A list
+ * keeps the items that didn't change when it's fetched again or one item is
+ * marked read, so only new and changed ones are worked out again: each takes
+ * its text out of HTML.
+ */
+const entries = new WeakMap<object, Entry>();
+
+const entryOf = <T extends object>(
+  source: T,
+  toItem: (source: T) => SpotlightItem,
+) => {
+  let entry = entries.get(source);
+  if (!entry) {
+    const item = toItem(source);
+    entry = { item, hash: hash(JSON.stringify(item)) };
+    entries.set(source, entry);
+  }
+  return entry;
+};
+
+const replaceItems = (domain: SpotlightDomain, list: Entry[]) => {
+  const items = list.map(entry => entry.item);
   const before = indexed[domain];
   const after = Object.fromEntries(
-    items.map(item => [item.id, hash(JSON.stringify(item))]),
+    list.map(entry => [entry.item.id, entry.hash]),
   );
   const changed = items.filter(item => before?.[item.id] !== after[item.id]);
   const removed = before
@@ -192,17 +219,22 @@ export async function updateSpotlight(
   }
   await whenLoaded();
   const hidden = new Set(hiddenCourses);
-  const shown = <T extends { courseId: string }>(items: T[]) =>
-    items.filter(item => !hidden.has(item.courseId));
+  const shown = <T extends { courseId: string }>(
+    items: T[],
+    toItem: (source: T) => SpotlightItem,
+  ) =>
+    items
+      .filter(item => !hidden.has(item.courseId))
+      .map(item => entryOf(item, toItem));
 
   if (notices) {
-    replaceItems('notice', shown(notices).map(noticeSpotlightItem));
+    replaceItems('notice', shown(notices, noticeSpotlightItem));
   }
   if (assignments) {
-    replaceItems('assignment', shown(assignments).map(assignmentSpotlightItem));
+    replaceItems('assignment', shown(assignments, assignmentSpotlightItem));
   }
   if (files) {
-    replaceItems('file', shown(files).map(fileSpotlightItem));
+    replaceItems('file', shown(files, fileSpotlightItem));
   }
   await queue;
 }

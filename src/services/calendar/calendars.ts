@@ -6,9 +6,11 @@ import {
   clearClassWeeksWritten,
   clearEventIds,
   getAssignmentEventIds,
+  getAssignmentsWritten,
   getCalendarSync,
   removeEventIdForAssignment,
   resetCalendarSync,
+  setAssignmentsWritten,
   setEventIdForAssignment,
   setSyncedCalendarId,
   type SyncedCalendar,
@@ -32,6 +34,7 @@ import {
 import { CalendarError } from 'services/calendar/errors';
 import { buildICS } from 'helpers/calendar/ics';
 import { isApple } from 'helpers/platform';
+import { hash } from 'helpers/text';
 
 const permissions = {
   calendar: {
@@ -394,49 +397,108 @@ const getEntry = (type: AssignmentEventType, id: string) =>
     ? Calendar.ExpoCalendarReminder.get(id)
     : Calendar.ExpoCalendarEvent.get(id);
 
+type EntryDetails =
+  | {
+      reminder: true;
+      details: ReturnType<typeof buildAssignmentReminderDetails>;
+    }
+  | {
+      reminder: false;
+      details: ReturnType<typeof buildAssignmentEventDetails>;
+    };
+
+/** What the assignment's event or reminder says. */
+const entryDetails = (
+  type: AssignmentEventType,
+  settings: SettingsState,
+  input: AssignmentEventInput,
+): EntryDetails =>
+  isReminderList(type)
+    ? {
+        reminder: true,
+        details: buildAssignmentReminderDetails(settings, input),
+      }
+    : {
+        reminder: false,
+        details: buildAssignmentEventDetails(settings, input),
+      };
+
 /**
  * Updates the assignment's event or reminder, or creates it when there is
  * none or the user deleted it.
  */
-export const saveAssignmentEvent = async (
+const saveAssignmentEvent = async (
   type: AssignmentEventType,
-  settings: SettingsState,
   calendar: Calendar.ExpoCalendar,
-  input: AssignmentEventInput,
+  assignmentId: string,
+  entry: EntryDetails,
 ) => {
-  const { assignmentId } = input;
   const syncedId = getAssignmentEventIds(type)[assignmentId];
-  const reminder = isReminderList(type);
 
   if (syncedId) {
-    let entry;
+    let saved;
     try {
-      entry = await getEntry(type, syncedId);
+      saved = await getEntry(type, syncedId);
     } catch {
       // Deleted outside learnX: made again below.
       removeEventIdForAssignment(type, assignmentId);
     }
-    if (entry) {
-      await (reminder
-        ? (entry as Calendar.ExpoCalendarReminder).update(
-            buildAssignmentReminderDetails(settings, input),
-          )
-        : (entry as Calendar.ExpoCalendarEvent).update(
-            buildAssignmentEventDetails(settings, input),
-          ));
+    if (saved) {
+      await (entry.reminder
+        ? (saved as Calendar.ExpoCalendarReminder).update(entry.details)
+        : (saved as Calendar.ExpoCalendarEvent).update(entry.details));
       return;
     }
   }
-  const id = reminder
-    ? (
-        await calendar.createReminder(
-          buildAssignmentReminderDetails(settings, input),
-        )
-      ).id
-    : (await calendar.createEvent(buildAssignmentEventDetails(settings, input)))
-        .id;
+  const id = entry.reminder
+    ? (await calendar.createReminder(entry.details)).id
+    : (await calendar.createEvent(entry.details)).id;
   if (id) {
     setEventIdForAssignment(type, assignmentId, id);
+  }
+};
+
+/**
+ * Writes each assignment's event or reminder that isn't there as it was last
+ * written: never written, changed since, or deleted outside learnX. Each
+ * write is a save to the calendar store (and, for an iCloud calendar, an
+ * upload), while the sync runs with every change to the assignments, most
+ * of which leave the entries as they are.
+ */
+const saveAssignmentEvents = async (
+  type: AssignmentEventType,
+  settings: SettingsState,
+  calendar: Calendar.ExpoCalendar,
+  inputs: AssignmentEventInput[],
+) => {
+  if (inputs.length === 0) {
+    return;
+  }
+  const synced = getAssignmentEventIds(type);
+  const written = getAssignmentsWritten(type);
+  // One listing tells which entries are still there, so the unchanged ones
+  // need no read each; when it fails, every entry is written.
+  const present = await listEntryIds(type, calendar, inputs).then(
+    ids => new Set(ids),
+    () => new Set<string | undefined>(),
+  );
+  const done: Record<string, string> = {};
+  const results = await Promise.allSettled(
+    inputs.map(async input => {
+      const entry = entryDetails(type, settings, input);
+      const key = hash(JSON.stringify(entry.details));
+      const id = synced[input.assignmentId];
+      if (id && present.has(id) && written[input.assignmentId] === key) {
+        return;
+      }
+      await saveAssignmentEvent(type, calendar, input.assignmentId, entry);
+      done[input.assignmentId] = key;
+    }),
+  );
+  setAssignmentsWritten(type, done);
+  const failure = results.find(result => result.status === 'rejected');
+  if (failure) {
+    throw failure.reason;
   }
 };
 
@@ -481,10 +543,7 @@ export const saveAssignmentsToReminderOrCalendar = async (
 
   const inputs = buildAssignmentEventInputs(assignments, getCachedCourses());
   await adoptExistingEntries(type, calendar, inputs);
-
-  await Promise.all(
-    inputs.map(input => saveAssignmentEvent(type, settings, calendar, input)),
-  );
+  await saveAssignmentEvents(type, settings, calendar, inputs);
   await removeAssignmentEvents(type, removed);
 };
 

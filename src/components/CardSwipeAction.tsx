@@ -101,6 +101,28 @@ const CardSwipeAction: React.FC<CardSwipeActionProps> = ({
   );
 };
 
+/**
+ * Stands in for a card's swipe action until the card is first touched
+ * (`CardWrapper`): as wide, so the swipe opens as far, and in the action's
+ * color, so a swipe that starts before the action mounts shows its color.
+ */
+export const CardSwipeActionPlaceholder: React.FC<
+  Pick<CardSwipeActionProps, 'action'>
+> = ({ action }) => {
+  const theme = useTheme();
+  return (
+    <View
+      style={[
+        styles.root,
+        {
+          backgroundColor: theme.colors.statusContainer[action.tone],
+          opacity: statusContainerOpacity,
+        },
+      ]}
+    />
+  );
+};
+
 const styles = StyleSheet.create({
   // Its width is how far the card rests open.
   root: {
