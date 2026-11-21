@@ -181,7 +181,7 @@ const Setup: React.FC<Props> = ({ navigation, route }) => {
           >
             <FormToggle
               icon="calendar"
-              title={t('setupCourseCalendar')}
+              title={t('setupScheduleCalendar')}
               value={choices.schedule}
               onValueChange={choose('schedule')}
             />

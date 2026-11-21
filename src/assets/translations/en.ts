@@ -86,16 +86,16 @@ export default {
   submissionContent: 'Content',
   submissionAttachment: 'Attachment',
   uploadingSubmission: 'Uploading…',
-  courseScheduleSyncSucceeded: 'Course schedule synced',
-  courseScheduleSyncPartial:
-    "Some weeks of the course schedule couldn't be fetched and were left as they were. Try syncing again later.",
-  courseScheduleSyncNoCalendarPermission:
-    "Couldn't sync the course schedule. Give learnX full access to Calendars in System Settings. If it already has access, restart learnX.",
-  courseScheduleSyncNoCalendarPermissionAndroid:
-    "Couldn't sync the course schedule. Allow calendar access for learnX in System Settings.",
-  courseScheduleSyncRepetitiveError:
-    "Couldn't sync the course schedule. Make sure you're on the campus network and try again. If it keeps failing, pick a shorter date range.",
-  courseScheduleSyncNoCourse:
+  scheduleSyncSucceeded: 'Schedule synced',
+  scheduleSyncPartial:
+    "Some weeks of the schedule couldn't be fetched and were left as they were. Try syncing again later.",
+  scheduleSyncNoCalendarPermission:
+    "Couldn't sync the schedule. Give learnX full access to Calendars in System Settings. If it already has access, restart learnX.",
+  scheduleSyncNoCalendarPermissionAndroid:
+    "Couldn't sync the schedule. Allow calendar access for learnX in System Settings.",
+  scheduleSyncRepetitiveError:
+    "Couldn't sync the schedule. Make sure you're on the campus network and try again. If it keeps failing, pick a shorter date range.",
+  scheduleSyncNoClasses:
     'No classes in this date range. Check Web Learning for a schedule.',
   openSystemSettings: 'Open System Settings',
   deleteSyncedCalendarsAndReminders: 'Delete Synced Calendars & Reminders',
@@ -134,13 +134,13 @@ export default {
   calendarAndReminderAccessCaption:
     "If learnX can't access your calendars or reminders, allow it in System Settings.",
   exportSyncedCalendarsDescription:
-    "Saves the course schedule and assignments already synced to your calendar as an .ics file that other calendar apps can import. Reminders aren't included.",
+    "Saves the schedule and assignments already synced to your calendar as an .ics file that other calendar apps can import. Reminders aren't included.",
   calendarExportNoCalendarPermission:
     "Couldn't export. Give learnX full access to Calendars in System Settings. If it already has access, restart learnX.",
   calendarExportNoCalendarPermissionAndroid:
     "Couldn't export. Allow calendar access for learnX in System Settings.",
   calendarExportNoEvent:
-    'Nothing to export. Sync the course schedule or assignments to your calendar first.',
+    'Nothing to export. Sync the schedule or assignments to your calendar first.',
   calendarExportFailed: "Couldn't export. Try again.",
   graduate: 'Graduate Student',
   syncCourseSchedule: 'Sync More Dates',
@@ -383,7 +383,7 @@ export default {
   download: 'Download',
   saveFileSucceeded: 'Saved {name}',
   calendarExportWithoutClasses:
-    "Saved {name}, but without your classes: the course schedule couldn't be loaded.",
+    "Saved {name}, but without your classes: the schedule couldn't be loaded.",
   saveFileFailed: "Couldn't save the file",
   sso: 'Electronic ID Service System of Tsinghua University',
   ssoNote:
@@ -466,7 +466,7 @@ export default {
   classReminderOffset: 'Remind Before (Minutes)',
   classStartsAtBeijing: '{time} Beijing Time',
   notifyClassRemindersCaption:
-    'Reminds you before each class on your course schedule. Opening learnX keeps them up to date for the next week or so.',
+    'Reminds you before each class on your schedule. Opening learnX keeps them up to date for the next week or so.',
   notifySummary: '{count} Updates in {courses} Courses',
   notifyDeadlineRemindersCaption:
     "Reminds you of unsubmitted assignments before they're due, and when they can still be submitted late. Works alongside Calendar and Reminders alerts.",
@@ -521,10 +521,10 @@ export default {
   semesterSummer: 'Summer',
   shareFile: 'Share File',
   submissionAttachmentName: '{title} Submission.{ext}',
-  courseScheduleSyncOffCaption:
-    "Adds this week's and next week's {type} classes to your calendar and keeps them up to date with the course schedule.",
-  courseScheduleSyncOnCaption:
-    "This week's and next week's {type} classes are kept up to date with the course schedule and the settings above. For more weeks, choose Sync More Dates and pick the dates; those classes are kept up to date too.",
+  scheduleSyncOffCaption:
+    "Adds this week's and next week's {type} classes to your calendar and keeps them up to date with the schedule.",
+  scheduleSyncOnCaption:
+    "This week's and next week's {type} classes are kept up to date with the schedule and the settings above. For more weeks, choose Sync More Dates and pick the dates; those classes are kept up to date too.",
   syncDatesBeijingCaption: 'The dates you pick are in Beijing time.',
   graduateSchedule: 'graduate',
   undergraduateSchedule: 'undergraduate',
@@ -613,7 +613,7 @@ export default {
   setupNewContent: 'New Content',
   setupCalendarSection: 'Calendar',
   setupCalendar: 'Add Assignments to Calendar',
-  setupCourseCalendar: 'Add Course Schedule to Calendar',
+  setupScheduleCalendar: 'Add Schedule to Calendar',
   setupReminders: 'Add Assignments to Reminders',
   assignmentsInCalendarSection: 'Assignments in Calendar',
   assignmentsInRemindersSection: 'Assignments in Reminders',

@@ -77,7 +77,7 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 
 ### 今天
 
-- 打开就能看到今天的课程、快截止的作业和各门课的新内容
+- 打开就能看到今天的课、快截止的作业和各门课的新内容
 - 课表：查看未来七天的课
 
 ### 课程内容

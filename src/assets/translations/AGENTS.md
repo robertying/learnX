@@ -11,6 +11,7 @@ Every user-visible string is a key in `en.ts` and `zh.ts`, with the same keys in
 - Errors start with "Couldn't …". Success toasts are short ("Deleted").
 - Use the platform's own words: Log In / Log Out, OK, Full Screen, Show in Finder (Mac), Photo Library (Photos on Android), Choose File, and "System Settings" for the OS settings app. Android never mentions Reminders.
 - Archive's opposite is Unarchive (key `restore`). A grader's comment is "Grader Comments".
+- A course (课程) is a subject for the whole semester; a class (课, 上课) is one meeting of it at a time and place (Next Class, Class Reminders, "No classes today"); the timetable of classes (课表) is the schedule ("Couldn't sync the schedule."). Text read away from the app, such as permission prompts and the privacy policy, says "class schedule". Never "course schedule".
 - Confirmation alerts name the action on their button (Log Out, Delete, Submit, Join, Continue), never "OK"; destructive actions use the destructive style.
 - Permission prompts start with what the access is for ("Choose files to attach to an assignment submission.").
 - Debug-only screens (Network Emulation, Allow Server Writes) stay in English and aren't translated.
@@ -18,6 +19,7 @@ Every user-visible string is a key in `en.ts` and `zh.ts`, with the same keys in
 ## Chinese
 
 - Write the Chinese first, as a Chinese speaker would say it, then the English; never translate a Chinese string word for word from the English.
+- 课程 is a course, never a single meeting of one: that is 课 (下一节课, 今天的课, 之后的课) or 上课 (上课提醒). The timetable is 课表.
 - Use the Web Learning site's terms for its content: 公告 for notices (the system's notifications stay 通知), 已批改 for the graded status, 评语 for a grader's comment, 批阅 only in grader and graded-time lines. Say 截止时间 or 作业截止, not 截止日期. The app says 未读 where the site says 未浏览.
 - Use the system's terms for system things: 筛选, 文稿, 访达, 照片图库 (照片 on Android), 系统设置.
 - Address the user as 你, never 您, and call the app "learnX", not "App".

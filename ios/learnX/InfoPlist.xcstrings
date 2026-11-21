@@ -33,7 +33,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "learnX syncs your course schedule and assignments to Calendar. It reads your list of calendars to choose where to add events, and can delete the calendars it created."
+            "value" : "learnX syncs your class schedule and assignments to Calendar. It reads your list of calendars to choose where to add events, and can delete the calendars it created."
           }
         },
         "zh-Hans" : {
@@ -56,7 +56,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "learnX syncs your course schedule and assignments to Calendar, and can delete the calendars it created."
+            "value" : "learnX syncs your class schedule and assignments to Calendar, and can delete the calendars it created."
           }
         },
         "zh-Hans" : {

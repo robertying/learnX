@@ -72,7 +72,7 @@ it("groups new content in the tabs' order, then classes, assignments and calenda
     t('notifyClassReminders'),
     t('notifyDeadlineReminders'),
     t('notifyGrades'),
-    t('setupCourseCalendar'),
+    t('setupScheduleCalendar'),
     t('setupCalendar'),
     t('setupReminders'),
   ]);
@@ -92,7 +92,7 @@ it('offers only calendar sync on Android, which has no Reminders', async () => {
   await renderScreen();
   expect(screen.getByText(t('setupCalendarSection'))).toBeTruthy();
   expect(
-    screen.getByRole('switch', { name: t('setupCourseCalendar') }),
+    screen.getByRole('switch', { name: t('setupScheduleCalendar') }),
   ).toBeTruthy();
   expect(screen.queryByText(t('setupReminders'))).toBeNull();
 });
@@ -142,7 +142,7 @@ it("doesn't ask with every notification off, and turns timetable, calendar and R
   ] as const) {
     await toggle(t(label), false);
   }
-  await toggle(t('setupCourseCalendar'), true);
+  await toggle(t('setupScheduleCalendar'), true);
   await toggle(t('setupCalendar'), true);
   await toggle(t('setupReminders'), true);
   await userEvent.press(screen.getByTestId('setup-done'));
@@ -178,7 +178,7 @@ it('asks for calendar and Reminders access before notifications, one at a time',
     return true;
   });
   await renderScreen();
-  await toggle(t('setupCourseCalendar'), true);
+  await toggle(t('setupScheduleCalendar'), true);
   await toggle(t('setupCalendar'), true);
   await toggle(t('setupReminders'), true);
   await userEvent.press(screen.getByTestId('setup-done'));
@@ -200,7 +200,7 @@ it('keeps sync an earlier version turned on, without syncing again', async () =>
   setSetting('courseCalendarSync', true);
   await renderScreen({ update: true });
   expect(
-    screen.getByRole('switch', { name: t('setupCourseCalendar') }),
+    screen.getByRole('switch', { name: t('setupScheduleCalendar') }),
   ).toBeChecked();
   expect(
     screen.getByRole('switch', { name: t('setupCalendar') }),
@@ -227,7 +227,7 @@ it('closes without changes on Not Now, on either platform', async () => {
 it('offers no calendar sync in the Electron app', async () => {
   jest.replaceProperty(Platform, 'OS', 'web');
   await renderScreen();
-  expect(screen.queryByText(t('setupCourseCalendar'))).toBeNull();
+  expect(screen.queryByText(t('setupScheduleCalendar'))).toBeNull();
   expect(screen.queryByText(t('setupCalendar'))).toBeNull();
   expect(screen.getByText(t('setupCaption'))).toBeTruthy();
 });
