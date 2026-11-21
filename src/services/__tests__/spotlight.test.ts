@@ -89,6 +89,24 @@ it('replaces the domain again after a failed update', async () => {
   expect(Spotlight.replaceItems).toHaveBeenCalledTimes(2);
 });
 
+it('works out each list item once, and again only when it changes', async () => {
+  const text = require('helpers/text') as typeof import('helpers/text');
+  const removeTags = jest.spyOn(text, 'removeTags');
+  const list = mockNotices.slice(0, 2).map((n, i) => ({
+    ...n,
+    id: `item${i}`,
+  })) as Notice[];
+  await updateSpotlight({ notices: list }, options);
+  expect(removeTags).toHaveBeenCalledTimes(2);
+
+  // One notice marked read: a new list with the other notice as it was.
+  const read = [{ ...list[0], hasRead: true }, list[1]];
+  await updateSpotlight({ notices: read }, options);
+  expect(removeTags).toHaveBeenCalledTimes(3);
+  // Nothing Spotlight shows changed.
+  expect(Spotlight.updateItems).not.toHaveBeenCalled();
+});
+
 it('keeps assignments in their own domain', async () => {
   await updateSpotlight(
     { assignments: mockAssignments.slice(0, 1) },
