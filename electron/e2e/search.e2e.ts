@@ -2,7 +2,7 @@
 // archived items with the filter menu and opens a result.
 import { expect, test } from './fixtures.ts';
 import { exact, maestroEnv, text } from './maestroEnv.ts';
-import { byId, card, openTab, search, shown } from './steps.ts';
+import { byId, card, openMenu, openTab, search, shown } from './steps.ts';
 
 test('searches and opens a result', async ({ window, login }) => {
   await login();
@@ -29,11 +29,11 @@ test('searches and opens a result', async ({ window, login }) => {
   const archived = window.getByRole('menuitemcheckbox', {
     name: text('T_archived'),
   });
-  await filterMenu.click();
+  await openMenu(window, filterMenu);
   await archived.click();
   await window.keyboard.press('Escape');
   await expect(card(window, 'MOCK_SEARCH_NOTICE')).toBeVisible();
-  await filterMenu.click();
+  await openMenu(window, filterMenu);
   await expect(archived).toHaveAttribute('aria-checked', 'false');
   await archived.click();
   await window.keyboard.press('Escape');
