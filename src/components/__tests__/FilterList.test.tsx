@@ -178,6 +178,13 @@ it('shows the filter picked for its tab, with counts in the menu', async () => {
   expect(screen.getByText('Item z')).toBeTruthy();
 });
 
+it('keeps the list, and where it is scrolled to, when the filter changes', async () => {
+  await renderList();
+  const list = screen.getByTestId('filter-list');
+  await act(() => header().onFilterSelect('archived'));
+  expect(screen.getByTestId('filter-list')).toBe(list);
+});
+
 it('tells the last row it is last', async () => {
   await renderList();
   expect(screen.getByText('last c')).toBeTruthy();
