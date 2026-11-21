@@ -72,6 +72,10 @@ if (!process.env.NODE_OPTIONS?.includes('--no-experimental-webstorage')) {
 
 /** @type {import('jest').Config} */
 module.exports = {
+  // As in metro.config.js: Watchman serves a git worktree under
+  // .claude/worktrees from the outer checkout's watch, which ignores it, so
+  // Jest would find no tests there. Its own crawler takes a tenth of a second.
+  watchman: false,
   // Count every source file, not only the ones some test imports.
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',

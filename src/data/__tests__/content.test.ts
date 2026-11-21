@@ -13,6 +13,7 @@ import {
   refreshCourseAssignments,
   refreshCourseFiles,
   refreshCourseNotices,
+  resetContentOverrides,
   showFavorite,
   useAssignments,
   useExcellentHomeworkDetail,
@@ -70,6 +71,9 @@ const isNewestFirst = (notices: Notice[]) =>
 beforeEach(() => {
   setMockNetworkConfig({ ...defaultMockNetworkConfig, latency: 'none' });
   clearQueryCache();
+  // A course refreshed in an earlier test, in the same millisecond as this
+  // test's fetch starts, would otherwise count as refreshed since.
+  resetContentOverrides();
 });
 
 describe('notices', () => {
