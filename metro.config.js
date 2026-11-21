@@ -54,8 +54,8 @@ const webAliases = require('./src/web/aliases.json');
 const defaultConfig = getDefaultConfig(__dirname);
 const upstreamResolveRequest = defaultConfig.resolver?.resolveRequest;
 
-// What Metro crawls and watches. Without Watchman (`react-native start` falls
-// back to its own crawler and file watcher) it reads every folder under the
+// What Metro crawls and watches. Metro uses its own crawler and file watcher,
+// never Watchman (`useWatchman` below), so it reads every folder under the
 // project root it isn't told to skip, and warns about each one that vanishes
 // while it reads it: agent worktrees under .claude being installed, Pods and
 // Gradle outputs being rebuilt, lock folders build scripts create and remove.
@@ -63,9 +63,8 @@ const upstreamResolveRequest = defaultConfig.resolver?.resolveRequest;
 // top level (index.js, package.json, app.json) stay, since the app imports
 // them. Metro tests these patterns against absolute paths while crawling and
 // against paths relative to the project root while watching, so each takes
-// either form. With Watchman installed, .watchmanconfig skips the same
-// top-level folders. The Electron app's logo (`components/Logo.web.tsx`) is
-// its icon in electron/icons, the one folder of electron/ the web build reads.
+// either form. The Electron app's logo (`components/Logo.web.tsx`) is its icon
+// in electron/icons, the one folder of electron/ the web build reads.
 const escape = (/** @type {string} */ text) =>
   text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const appFolders = ['src', 'modules', 'node_modules', 'electron[\\\\/]icons'];
@@ -86,6 +85,11 @@ const config = {
   cacheVersion: inlinedInputsHash(),
   resolver: {
     ...defaultConfig.resolver,
+    // Watchman serves a checkout inside another watched one (a git worktree
+    // under .claude/worktrees) from the outer watch, where that folder is
+    // ignored, so Metro would find no files there. Metro's own crawler is
+    // about as fast here.
+    useWatchman: false,
     blockList: [
       defaultConfig.resolver.blockList ?? [],
       otherTopLevelFolders,
