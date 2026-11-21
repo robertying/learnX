@@ -42,6 +42,20 @@ const addWorktree = (name: string) => {
   return { wt, dd };
 };
 
+const commitFile = (cwd: string, name: string, text: string) => {
+  writeFileSync(join(cwd, name), text);
+  git(cwd, 'add', name);
+  git(cwd, 'commit', '-q', '-m', name);
+};
+
+/** Lands the branch's changes on origin/main as one new commit, as GitHub's
+ * squash merge does, leaving the branch's own commits on no remote branch. */
+const squashMerge = (branch: string) => {
+  git(main, 'merge', '-q', '--squash', branch);
+  git(main, 'commit', '-q', '-m', `squash ${branch}`);
+  git(main, 'push', '-q', 'origin', 'main');
+};
+
 const cleanFrom = (cwd: string, ...args: string[]) =>
   spawnSync('bash', [script, ...args], {
     cwd,
@@ -75,6 +89,7 @@ beforeEach(() => {
   git(main, 'commit', '--allow-empty', '-q', '-m', 'base');
   git(main, 'remote', 'add', 'origin', join(root, 'origin.git'));
   git(main, 'push', '-q', 'origin', 'main');
+  git(main, 'remote', 'set-head', 'origin', 'main');
   // Shared caches sit next to the per-workspace folders.
   mkdirSync(join(derivedData, 'ModuleCache.noindex'));
 });
@@ -188,7 +203,7 @@ test.each([
     'commits on no remote branch',
     () => {
       const { wt } = addWorktree('unpushed');
-      git(wt, 'commit', '--allow-empty', '-q', '-m', 'work');
+      commitFile(wt, 'work.txt', 'work');
       return wt;
     },
     'commits on no remote branch',
@@ -203,11 +218,41 @@ test.each([
 
 test('--discard-changes removes a worktree with unpushed work, and keeps its branch', () => {
   const { wt } = addWorktree('abandoned');
-  git(wt, 'commit', '--allow-empty', '-q', '-m', 'work');
+  commitFile(wt, 'work.txt', 'work');
   writeFileSync(join(wt, 'new.txt'), 'x');
   const result = clean('--apply', '--discard-changes', wt);
   expect(result.status).toBe(0);
   expect(result.stdout).toContain('keeps branch abandoned');
   expect(existsSync(wt)).toBe(false);
   expect(branches()).toContain('abandoned');
+});
+
+test('removes a squash-merged worktree and its branch', () => {
+  const { wt } = addWorktree('squashed');
+  commitFile(wt, 'a.txt', 'a');
+  commitFile(wt, 'b.txt', 'b');
+  squashMerge('squashed');
+  // origin/main moved on after the merge.
+  commitFile(main, 'later.txt', 'later');
+  git(main, 'push', '-q', 'origin', 'main');
+
+  const dryRun = clean(wt);
+  expect(dryRun.stdout).toContain('its changes are in origin/main');
+
+  const result = clean('--apply', wt);
+  expect(result.status).toBe(0);
+  expect(existsSync(wt)).toBe(false);
+  expect(branches()).not.toContain('squashed');
+});
+
+test('refuses a squash-merged worktree with work after the merge', () => {
+  const { wt } = addWorktree('more');
+  commitFile(wt, 'a.txt', 'a');
+  squashMerge('more');
+  commitFile(wt, 'b.txt', 'b');
+
+  const result = clean('--apply', wt);
+  expect(result.status).toBe(1);
+  expect(result.stderr).toContain('commits on no remote branch');
+  expect(existsSync(wt)).toBe(true);
 });

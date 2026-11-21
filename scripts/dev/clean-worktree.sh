@@ -12,7 +12,8 @@
 # - the Xcode DerivedData folders whose workspace is in that worktree, under
 #   Xcode's DerivedData location ($DERIVED_DATA_ROOT overrides it), and the
 #   temporary files Xcode keeps for them;
-# - its local branch, when a remote branch has the branch's last commit.
+# - its local branch, when a remote branch has the branch's last commit or a
+#   remote's default branch already has its changes (a squash merge).
 # Apps built there are unregistered from Launch Services first, so the share
 # sheet and learnx:// links don't keep pointing at a deleted copy
 # (unregister-apps.sh unregisters every stray copy, wherever it was built).
@@ -21,8 +22,9 @@
 # another worktree is still someone's work is not something a script can
 # tell. It refuses the main checkout, a worktree that `git worktree lock`
 # locked, one with uncommitted changes or commits on no remote branch (unless
-# --discard-changes), one that a running process other than a shell or a
-# Claude session has files open in, and one whose DerivedData folder a script
+# --discard-changes; commits whose changes a squash merge already put in a
+# remote's default branch don't count), one that a running process other than
+# a shell or a Claude session has files open in, and one whose DerivedData folder a script
 # is building or testing in (its lock, scripts/lib/derived-data.sh). Shared
 # caches (~/.gradle, the pnpm store, CocoaPods' cache, DerivedData's
 # ModuleCache.noindex and CompilationCache.noindex, simulators and emulators)
@@ -84,13 +86,26 @@ done < <(g worktree list --porcelain | sed -n 's/^worktree //p')
 [ ! -e "$gitdir/locked" ] ||
   refuse "$wt is locked ($(cat "$gitdir/locked")); git worktree unlock it first if it's yours"
 
+# The remote default branch (origin/main) that already has every change HEAD
+# makes, as after a squash merge: merging HEAD into it leaves its tree as it
+# is. A conflict, or any change it lacks, means HEAD still holds work.
+landed_in=""
+while IFS= read -r ref; do
+  [ -n "$ref" ] || continue
+  merged="$(git -C "$wt" merge-tree --write-tree "$ref" HEAD 2>/dev/null | head -1)" || continue
+  if [ "$merged" = "$(git -C "$wt" rev-parse "$ref^{tree}")" ]; then
+    landed_in="${ref#refs/remotes/}"
+    break
+  fi
+done < <(git -C "$wt" for-each-ref --format='%(symref)' 'refs/remotes/*/HEAD')
+
 if [ "$discard" = 0 ]; then
   changes="$(git -C "$wt" status --porcelain)"
   [ -z "$changes" ] ||
     refuse "$wt has uncommitted changes (--discard-changes drops them):
 $changes"
   unpushed="$(git -C "$wt" log --oneline HEAD --not --remotes | head -5)"
-  [ -z "$unpushed" ] ||
+  [ -z "$unpushed" ] || [ -n "$landed_in" ] ||
     refuse "$wt has commits on no remote branch (push them, or --discard-changes drops them):
 $unpushed"
 fi
@@ -159,7 +174,8 @@ done
 
 branch="$(git -C "$wt" symbolic-ref -q --short HEAD || true)"
 drop_branch=0
-if [ -n "$branch" ] && [ -n "$(g branch -r --contains "refs/heads/$branch" 2>/dev/null)" ]; then
+if [ -n "$branch" ] && { [ -n "$landed_in" ] ||
+  [ -n "$(g branch -r --contains "refs/heads/$branch" 2>/dev/null)" ]; }; then
   drop_branch=1
 fi
 
@@ -174,7 +190,9 @@ if [ "${#temp[@]}" -gt 0 ]; then
   echo "Xcode's temporary files for it in $tmp_root: ${#temp[@]}, $(human "$(size "${temp[@]}")")"
 fi
 if [ -n "$branch" ]; then
-  if [ "$drop_branch" = 1 ]; then
+  if [ "$drop_branch" = 1 ] && [ -n "$landed_in" ]; then
+    echo "branch $branch (its changes are in $landed_in)"
+  elif [ "$drop_branch" = 1 ]; then
     echo "branch $branch (also on a remote)"
   else
     echo "keeps branch $branch: no remote branch has its last commit"
