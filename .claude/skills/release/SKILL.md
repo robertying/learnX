@@ -15,7 +15,7 @@ A release runs on a Mac with [fastlane](https://docs.fastlane.tools) (`fastlane/
 
 ## 1. Set up the checkout
 
-- `bundle install` once (the Ruby in `.ruby-version`, e.g. Homebrew's), then `pnpm install` and `cd ios && bundle exec pod install` (the locked CocoaPods and `Podfile.lock`; not `pnpm pod:update`, which also updates pods).
+- `bundle install` once (the Ruby in `.ruby-version`, e.g. Homebrew's), then `pnpm install` and `cd ios && bundle exec pod install` (the locked CocoaPods and `Podfile.lock`; not `pnpm pod:update`, which also updates pods). The build lanes install again before building, from the lockfiles only (step 5), so a reused checkout can't put another branch's packages into a release.
 - Secrets go in `fastlane/.env` (git-ignored; fastlane loads it); the `ENV` reads in `fastlane/Fastfile` are the keys it takes. Android signing reads `android/local.properties` (copy its `.example`) and `android/app/release.keystore`.
 - The build lanes need the repo-root `.env` with the mock login (`DUMMY_USERNAME`, `DUMMY_PASSWORD`; `babel/inline-env.js` inlines it). A worktree has none: copy it from the main checkout. After building, the lanes check that each JS bundle has the mock login and no other `.env` value.
 
@@ -33,7 +33,7 @@ A release runs on a Mac with [fastlane](https://docs.fastlane.tools) (`fastlane/
 
 ## 4. Preflight
 
-`bundle exec fastlane preflight` checks, in about a minute, everything the release needs besides the builds: a clean tree at a commit on `origin/main` with green CI, versions in sync and not yet tagged, a build number above every uploaded build (which also proves the App Store Connect and Play keys work), Android signing, `.env`, the notes, a What's New entry for a feature release, free disk space, and for Windows and Linux the update signing key and a passing update test. Fix every ✗ before building. `electron:false` leaves out Windows and Linux.
+`bundle exec fastlane preflight` checks, in about a minute, everything the release needs besides the builds: a clean tree at the latest commit on `origin/main` (pull first) with green CI, versions in sync and not yet tagged, a build number above every uploaded build (which also proves the App Store Connect and Play keys work), Android signing, `.env`, the notes, a What's New entry for a feature release, free disk space, and for Windows and Linux the update signing key and a passing update test. Fix every ✗ before building. `electron:false` leaves out Windows and Linux.
 
 - It reads the Electron update signing key from 1Password (`op read` at `LEARNX_UPDATE_SIGNING_KEY_REF`), so **tell the person to approve the 1Password prompt** first; it gives up after about a minute. The 1Password app's CLI integration has to be on.
 - The update test: `bundle exec fastlane electron update_e2e` starts the Electron workflow by hand on `main` (which must be the release commit) and waits for its `Update E2E tests` jobs, Windows and Linux, which install an older test version, serve a newer one and check that the app updates from Settings ("Packaging and updates" in `electron/AGENTS.md`). Start it right after pushing (`wait:false` doesn't wait) so it runs while the apps build. `pnpm e2e:electron:update` on a Windows or Linux computer where learnX isn't installed runs the same test.
@@ -41,6 +41,8 @@ A release runs on a Mac with [fastlane](https://docs.fastlane.tools) (`fastlane/
 ## 5. Build
 
 `bundle exec fastlane build` builds everything into `build/release/v<version>/` without uploading: iOS, Mac, Android, then Windows and Linux (`electron:false` skips those; a failed Electron build leaves the others). `<ios|mac|android|electron> build` builds one.
+
+- Every build starts from the lockfiles and from scratch: it runs `pnpm install --frozen-lockfile --force` (which applies the patches again) and, for iOS and Mac, `pod install --deployment`, then builds clean (Xcode's clean, Gradle's `clean`), and the store bundles skip Metro's cache. A build that changes a tracked file (`Podfile.lock`, say) is recorded as dirty, and the upload lanes refuse it.
 
 - iOS and Mac: the store binaries, and every dSYM in the archive zipped next to them and uploaded to Crashlytics (`bundle exec fastlane <ios|mac> symbols` uploads them again, e.g. after a network failure). Android: the AAB with its R8 mapping (the upload gives it to Google Play, which deobfuscates its crash reports with it), the self-updating APKs with `latest.json` ("Updating the Android app" in `modules/AGENTS.md`), and native symbols uploaded to Crashlytics. `bundle exec fastlane android install_bundle` installs that AAB on the connected device through `bundletool` (`brew install bundletool`), split the way Google Play splits it.
 - Each build keeps its JS source map in `sourcemaps/` (earlier builds' maps of the version are removed). Crashlytics doesn't symbolicate JS, so these are kept: `bundle exec fastlane symbolicate` decodes a report's stack with them ("Crash reporting" in `modules/AGENTS.md`).

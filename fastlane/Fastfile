@@ -92,10 +92,12 @@ def start_build_record(platform)
   { commit: head_commit, dirty: tree_dirty? }
 end
 
+# Dirty when the tree was dirty at the start or is now: a build that changed a
+# tracked file (Podfile.lock, Package.resolved) didn't build the commit.
 def write_build_record(platform, started, files, extra = {})
   record = Release.build_record(
     platform: platform, version: app_version, build: build_number,
-    commit: started[:commit], dirty: started[:dirty], out_dir: out_dir, files: files, extra: extra,
+    commit: started[:commit], dirty: started[:dirty] || tree_dirty?, out_dir: out_dir, files: files, extra: extra,
   )
   FileUtils.mkdir_p(File.dirname(build_record_path(platform)))
   File.write(build_record_path(platform), "#{JSON.pretty_generate(record)}\n")
@@ -300,6 +302,35 @@ def print_notes(path)
 end
 
 # ---------------------------------------------------------------------------
+# Dependencies
+
+# Release builds use exactly what the lockfiles name, whatever the checkout
+# installed last: a reused worktree can hold another branch's node_modules or
+# Pods. --force links every package again from the store and applies the
+# patches again, so it also undoes a file edited inside node_modules; CocoaPods'
+# --deployment fails rather than change Podfile.lock. Once per lane run.
+def install_locked_dependencies(pods: false)
+  unless @js_dependencies_installed
+    sh("pnpm", "--dir", ROOT, "install", "--frozen-lockfile", "--force")
+    @js_dependencies_installed = true
+  end
+  return if !pods || @pods_installed
+
+  cocoapods(podfile: File.join(ROOT, "ios/Podfile"), deployment: true, use_bundle_exec: true)
+  @pods_installed = true
+end
+
+# React Native's build scripts bundle with --reset-cache, so a store build
+# never takes a transform Metro cached for another checkout or an older
+# dependency, but Expo's `export:embed` drops that flag when CI is set.
+def without_ci
+  saved = ENV.delete("CI")
+  yield
+ensure
+  ENV["CI"] = saved if saved
+end
+
+# ---------------------------------------------------------------------------
 # .env secrets
 
 # The mock login, which every release build inlines from the repo-root .env
@@ -365,6 +396,7 @@ def build_apple(platform)
   verify_versions!
   verify_release_env!
   verify_ota_config!
+  install_locked_dependencies(pods: true)
   started = start_build_record(platform)
   clear_sourcemaps(platform)
   map = sourcemap_path(platform)
@@ -385,7 +417,7 @@ def build_apple(platform)
     output_name: "learnX",
   }
   options[:catalyst_platform] = "macos" if platform == "macos"
-  path = build_app(options)
+  path = without_ci { build_app(options) }
 
   archive = lane_context[SharedValues::XCODEBUILD_ARCHIVE]
   check_bundle_env!(Dir[File.join(archive.to_s, "Products/Applications/*.app/**/main.jsbundle")])
@@ -559,19 +591,28 @@ def build_android
   verify_versions!
   verify_release_env!
   verify_ota_config!
+  install_locked_dependencies
   started = start_build_record("android")
+  # A clean build, as the Apple builds are: Gradle would otherwise keep the JS
+  # bundle of an earlier build when no .js or .ts file outside node_modules
+  # changed (React Native's bundle task tracks only those), so a release that
+  # changed only packages, patches, JSON or .env would ship the old bundle.
+  # Gradle's build cache still serves the native tasks whose inputs match.
+  without_ci { gradle(project_dir: File.join(ROOT, "android"), task: "clean") }
   # The release config reads LEARNX_RELEASE_* from android/local.properties and
   # signs with android/app/release.keystore. Two flavors (android/app/build.gradle):
   # googlePlay makes the AAB, github the APKs that update themselves in the app.
   # Separate runs: ABI splits are off while building an AAB (android/app/build.gradle).
-  gradle(
-    project_dir: File.join(ROOT, "android"),
-    tasks: ["app:bundleGooglePlayRelease", "app:uploadCrashlyticsSymbolFileGooglePlayRelease"],
-  )
-  gradle(
-    project_dir: File.join(ROOT, "android"),
-    tasks: ["app:assembleGithubRelease", "app:uploadCrashlyticsSymbolFileGithubRelease"],
-  )
+  without_ci do
+    gradle(
+      project_dir: File.join(ROOT, "android"),
+      tasks: ["app:bundleGooglePlayRelease", "app:uploadCrashlyticsSymbolFileGooglePlayRelease"],
+    )
+    gradle(
+      project_dir: File.join(ROOT, "android"),
+      tasks: ["app:assembleGithubRelease", "app:uploadCrashlyticsSymbolFileGithubRelease"],
+    )
+  end
 
   check_bundle_env!(Dir[File.join(ANDROID_APP, "build/generated/assets/react/{googlePlayRelease,githubRelease}/index.android.bundle")])
 
@@ -727,6 +768,7 @@ def build_electron(options)
     end
   else
     verify_release_env!
+    install_locked_dependencies
     flags = platforms.map { |platform| "--#{platform}" }
     # Outside Bundler's environment: its RUBYOPT and BUNDLE_GEMFILE would
     # load this Gemfile into the Ruby that electron-builder's fpm (the .deb)
@@ -993,10 +1035,17 @@ def preflight(options)
   sha = head_commit
   electron = !Release.off?(options[:electron])
 
-  check.call("Clean tree at a commit on origin/main") do
+  check.call("Clean tree at origin/main") do
     next "uncommitted changes (git status)" if tree_dirty?
 
-    Dir.chdir(ROOT) { system("git", "merge-base", "--is-ancestor", sha, origin_main) } ? nil : "HEAD #{sha[0, 8]} isn't on origin/main: push it, since the GitHub release points at it"
+    main = origin_main
+    next nil if sha == main
+
+    if Dir.chdir(ROOT) { system("git", "merge-base", "--is-ancestor", sha, main) }
+      "HEAD #{sha[0, 8]} is behind origin/main #{main[0, 8]}: pull, so the release has everything on main"
+    else
+      "HEAD #{sha[0, 8]} isn't on origin/main: push it, since the GitHub release points at it"
+    end
   end
   check.call("Versions in sync") { verify_versions! && nil }
   check.call("v#{app_version} not released yet") { tagged?(app_version) ? "v#{app_version} is tagged: run `pnpm bump`" : nil }
@@ -1118,7 +1167,7 @@ lane :notes do |options|
   UI.important("Review and edit #{path}, then run a release lane; it picks the file up without notes:.")
 end
 
-desc "Check everything a release needs before building: a clean, pushed commit with green CI, versions, a build number above every upload,"
+desc "Check everything a release needs before building: a clean tree at the latest commit on origin/main with green CI, versions, a build number above every upload,"
 desc "the App Store Connect and Play keys, Android signing, .env, the notes, and for Windows and Linux the signing key (1Password asks to approve) and the update E2E run."
 desc "Usage: bundle exec fastlane preflight [notes:<file>|none] [electron:false]"
 lane :preflight do |options|

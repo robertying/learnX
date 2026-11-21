@@ -21,9 +21,13 @@ process.env.EXPO_UNSTABLE_TREE_SHAKING = '1';
 
 // babel/inline-env.js inlines .env and babel-plugin-preval inlines the files
 // in src/helpers/preval at transform time, and Metro's cache only tracks the
-// file being transformed, not the repo's own Babel plugins (babel/) either.
-// Hashing them all into the cache version makes a change take effect on the
-// next Metro start, without --reset-cache.
+// file being transformed and the Babel config files, not the repo's own Babel
+// plugins (babel/) or the installed ones (babel-preset-expo, the React
+// Compiler, Worklets, and their patches). Hashing them all into the cache
+// version, the installed packages through the lockfile, makes a change take
+// effect on the next Metro start, without --reset-cache. Over-the-air updates
+// and the Electron app's web build use this cache, as every checkout on the
+// computer shares it; the store builds start from an empty one.
 const inlinedInputsHash = () => {
   const folderFiles = (/** @type {string} */ dir) =>
     fs
@@ -32,6 +36,7 @@ const inlinedInputsHash = () => {
       .map(name => path.join(__dirname, dir, name));
   const files = [
     path.join(__dirname, '.env'),
+    path.join(__dirname, 'pnpm-lock.yaml'),
     ...folderFiles('src/helpers/preval'),
     ...folderFiles('babel'),
   ];
