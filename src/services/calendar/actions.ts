@@ -41,7 +41,7 @@ const failed = (key: TextKey, err: unknown): ToastMessage => {
 const noCalendarPermission = (
   key:
     | 'assignmentSyncNoCalendarPermission'
-    | 'courseScheduleSyncNoCalendarPermission'
+    | 'scheduleSyncNoCalendarPermission'
     | 'deleteFailedNoCalendarPermission'
     | 'calendarExportNoCalendarPermission',
 ): ToastMessage => ({
@@ -52,9 +52,9 @@ const noCalendarPermission = (
 export const courseSyncErrorToast = (err: unknown): ToastMessage => {
   switch (calendarErrorCode(err)) {
     case 'calendarPermission':
-      return noCalendarPermission('courseScheduleSyncNoCalendarPermission');
+      return noCalendarPermission('scheduleSyncNoCalendarPermission');
     default:
-      return { text: t('courseScheduleSyncRepetitiveError'), type: 'error' };
+      return { text: t('scheduleSyncRepetitiveError'), type: 'error' };
   }
 };
 
@@ -121,7 +121,7 @@ export const syncCourseSchedule = async (
     );
 
     if (classes.length === 0 && failedRanges.length === 0) {
-      return { text: t('courseScheduleSyncNoCourse'), type: 'warning' };
+      return { text: t('scheduleSyncNoClasses'), type: 'warning' };
     }
     await saveClassesToCalendar(
       classes,
@@ -134,9 +134,9 @@ export const syncCourseSchedule = async (
     );
     setLastSynced('courseSchedule');
     if (failedRanges.length > 0) {
-      return { text: t('courseScheduleSyncPartial'), type: 'warning' };
+      return { text: t('scheduleSyncPartial'), type: 'warning' };
     }
-    return { text: t('courseScheduleSyncSucceeded'), type: 'success' };
+    return { text: t('scheduleSyncSucceeded'), type: 'success' };
   } catch (err) {
     return courseSyncErrorToast(err);
   }

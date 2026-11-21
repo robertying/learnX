@@ -9,7 +9,7 @@
   </string-array>
   <string name="deadlines_display_name">Deadlines</string>
   <string name="deadlines_description">Your upcoming assignment deadlines.</string>
-  <string name="up_next_display_name">Next up</string>
+  <string name="up_next_display_name">Next class</string>
   <string name="up_next_description">Your current or next class, and the ones after it.</string>
 </resources>
 

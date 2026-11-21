@@ -7,8 +7,8 @@ const zh: typeof en = {
   assignments: '作业',
   widgetDeadlines: '作业截止',
   widgetNoDeadlines: '暂无待交作业',
-  widgetUpNext: '下一节课',
-  widgetLater: '后续课程',
+  widgetNextClass: '下一节课',
+  widgetLater: '之后的课',
   widgetStartsIn: '距上课',
   widgetEndsIn: '距下课',
   widgetNoClasses: '近期无课',
@@ -84,16 +84,15 @@ const zh: typeof en = {
   submissionContent: '内容',
   submissionAttachment: '附件',
   uploadingSubmission: '正在上传…',
-  courseScheduleSyncSucceeded: '课表同步成功',
-  courseScheduleSyncPartial:
-    '部分周的课表获取失败，已保留原有日程，请稍后重新同步。',
-  courseScheduleSyncNoCalendarPermission:
+  scheduleSyncSucceeded: '课表同步成功',
+  scheduleSyncPartial: '部分周的课表获取失败，已保留原有日程，请稍后重新同步。',
+  scheduleSyncNoCalendarPermission:
     '课表同步失败：请在系统设置中允许learnX完全访问日历；如已允许，请重启learnX。',
-  courseScheduleSyncNoCalendarPermissionAndroid:
+  scheduleSyncNoCalendarPermissionAndroid:
     '课表同步失败：请在系统设置中允许learnX访问日历。',
-  courseScheduleSyncRepetitiveError:
+  scheduleSyncRepetitiveError:
     '课表同步失败：请连接校园网后重试；如果仍然失败，请缩短同步的日期范围。',
-  courseScheduleSyncNoCourse: '此日期范围内没有课，请在网络学堂查看课表。',
+  scheduleSyncNoClasses: '此日期范围内没有课，请在网络学堂查看课表。',
   openSystemSettings: '打开系统设置',
   deleteSyncedCalendarsAndReminders: '删除已同步的日历与提醒事项',
   deleteSyncedCalendarsAndRemindersEllipsis: '删除已同步的日历与提醒事项…',
@@ -193,13 +192,13 @@ const zh: typeof en = {
   electronNotificationsCaption: 'learnX仅在运行时发送通知和提醒。',
   exportCalendar: '导出日历（.ics）',
   exportCalendarDescription:
-    '将所选日期内的课程和未截止的作业保存为日历文件（.ics），可导入Outlook等日历应用。',
+    '将所选日期内的课和未截止的作业保存为日历文件（.ics），可导入Outlook等日历应用。',
   exportRangeTitle: '选择导出日期',
   exportRangeSave: '导出',
   dropToAttach: '拖放文件以添加附件',
   dropFailed: '附件添加失败',
   calendarExportNoEventElectron:
-    '没有可导出的内容：本学期已没有剩余的课程或未截止的作业。',
+    '没有可导出的内容：本学期已没有剩下的课或未截止的作业。',
   notifyDeadlineRemindersCaptionElectron:
     '在未提交的作业截止前提醒你，截止后仍可补交时也会提醒。',
   missingUsername: '请输入用户名或学号',
@@ -359,7 +358,7 @@ const zh: typeof en = {
   download: '下载',
   saveFileSucceeded: '已保存“{name}”',
   calendarExportWithoutClasses:
-    '已保存“{name}”，但课表加载失败，其中不含课程。',
+    '已保存“{name}”，但课表加载失败，文件中没有课。',
   saveFileFailed: '文件保存失败',
   sso: '清华大学用户电子身份服务系统',
   ssoNote:
@@ -493,10 +492,10 @@ const zh: typeof en = {
   semesterSummer: '夏季学期',
   shareFile: '分享文件',
   submissionAttachmentName: '{title}-提交.{ext}',
-  courseScheduleSyncOffCaption:
-    '将本周和下周的{type}课程添加到日历，并随课表自动更新。',
-  courseScheduleSyncOnCaption:
-    '本周和下周的{type}课程会随课表和以上设置自动更新。如需同步更多周，请点按“同步更多日期”并选择日期，这些课程同样会自动更新。',
+  scheduleSyncOffCaption:
+    '将{type}课表中本周和下周的课添加到日历，并自动更新。',
+  scheduleSyncOnCaption:
+    '{type}课表中本周和下周的课会随课表和以上设置自动更新。如需同步更多周，请点按“同步更多日期”并选择日期，这些课同样会自动更新。',
   syncDatesBeijingCaption: '所选日期按北京时间计算。',
   graduateSchedule: '研究生',
   undergraduateSchedule: '本科生',
@@ -550,7 +549,7 @@ const zh: typeof en = {
   todayOneUnreadNotice: '1条未读公告',
   todayNewFiles: '{count}个新文件',
   todayOneNewFile: '1个新文件',
-  todayFromCourses: '根据课程时间推算，可能未包含放假和调课。',
+  todayFromCourses: '根据各课程的上课时间推算，可能未包含放假和调课。',
   todayCalendarFailed: '课表更新失败，显示的是{time}的课表。',
   forward: '前进',
   openInBrowser: '在浏览器中打开',
@@ -570,7 +569,7 @@ const zh: typeof en = {
   // Welcome, set-up and What's New
   welcomeTitle: '欢迎使用learnX',
   welcomeTodayTitle: '今天一目了然',
-  welcomeTodayBody: '当天的课程、即将截止的作业和各课程的新内容。',
+  welcomeTodayBody: '当天的课、即将截止的作业和各门课程的新内容。',
   welcomeCoursesTitle: '所有课程尽在一处',
   welcomeCoursesBody: '公告、作业和文件，离线也能查看。',
   welcomeDeadlinesTitle: '不再错过截止时间',
@@ -581,7 +580,7 @@ const zh: typeof en = {
   setupNewContent: '新内容',
   setupCalendarSection: '日历',
   setupCalendar: '将作业添加到日历',
-  setupCourseCalendar: '将课表添加到日历',
+  setupScheduleCalendar: '将课表添加到日历',
   setupReminders: '将作业添加到提醒事项',
   assignmentsInCalendarSection: '日历中的作业',
   assignmentsInRemindersSection: '提醒事项中的作业',
@@ -594,7 +593,7 @@ const zh: typeof en = {
   whatsNewTitle: 'learnX {version}新功能',
   fullChangelog: '完整更新日志',
   whatsNew19TodayTitle: '今天',
-  whatsNew19TodayBody: '新的首个标签页，汇总当天课程、即将截止的作业和新内容。',
+  whatsNew19TodayBody: '新的首个标签页，汇总当天的课、即将截止的作业和新内容。',
   whatsNew19WidgetsTitle: '小组件',
   whatsNew19WidgetsBody: '不打开learnX也能看到作业截止和下一节课。',
   whatsNew19NotificationsTitle: '通知',

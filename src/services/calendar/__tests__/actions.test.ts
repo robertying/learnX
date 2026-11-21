@@ -61,11 +61,11 @@ describe('error toasts', () => {
 
   it('maps course sync errors', () => {
     expect(courseSyncErrorToast(error('calendarPermission'))).toEqual({
-      text: t('courseScheduleSyncNoCalendarPermission'),
+      text: t('scheduleSyncNoCalendarPermission'),
       type: 'error',
     });
     expect(courseSyncErrorToast(new Error('Network'))).toEqual({
-      text: t('courseScheduleSyncRepetitiveError'),
+      text: t('scheduleSyncRepetitiveError'),
       type: 'error',
     });
   });
@@ -147,7 +147,7 @@ describe('syncCourseSchedule', () => {
       .mockResolvedValue({ classes: events, failedRanges: [] } as never);
 
     await expect(syncCourseSchedule(start, end, true)).resolves.toEqual({
-      text: t('courseScheduleSyncSucceeded'),
+      text: t('scheduleSyncSucceeded'),
       type: 'success',
     });
     expect(ensureSession).toHaveBeenCalled();
@@ -172,7 +172,7 @@ describe('syncCourseSchedule', () => {
       .mockResolvedValue({ classes: events, failedRanges } as never);
 
     await expect(syncCourseSchedule(start, end, false)).resolves.toEqual({
-      text: t('courseScheduleSyncPartial'),
+      text: t('scheduleSyncPartial'),
       type: 'warning',
     });
     expect(saveClassesToCalendar).toHaveBeenCalledWith(
@@ -188,7 +188,7 @@ describe('syncCourseSchedule', () => {
       .mockResolvedValue({ classes: [], failedRanges: [] });
 
     await expect(syncCourseSchedule(start, end, false)).resolves.toEqual({
-      text: t('courseScheduleSyncNoCourse'),
+      text: t('scheduleSyncNoClasses'),
       type: 'warning',
     });
     expect(saveClassesToCalendar).not.toHaveBeenCalled();
@@ -203,7 +203,7 @@ describe('syncCourseSchedule', () => {
       .mockImplementation(fail('calendarPermission'));
 
     await expect(syncCourseSchedule(start, end, false)).resolves.toEqual({
-      text: t('courseScheduleSyncNoCalendarPermission'),
+      text: t('scheduleSyncNoCalendarPermission'),
       type: 'error',
     });
   });

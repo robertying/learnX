@@ -188,18 +188,18 @@ const SyncCalendarSettings: React.FC<Props> = () => {
             courseCalendarSync
               ? footer(
                   [
-                    t('courseScheduleSyncOnCaption', { type: scheduleType }),
+                    t('scheduleSyncOnCaption', { type: scheduleType }),
                     // Picked days are Beijing days, as the timetable's.
                     awayFromBeijing && t('syncDatesBeijingCaption'),
                   ],
                   'courseSchedule',
                 )
-              : t('courseScheduleSyncOffCaption', { type: scheduleType })
+              : t('scheduleSyncOffCaption', { type: scheduleType })
           }
         >
           <FormToggle
             icon="calendar"
-            title={t('setupCourseCalendar')}
+            title={t('setupScheduleCalendar')}
             value={courseCalendarSync}
             testID="calendar-course-sync"
             onValueChange={handleCourseSync}

@@ -143,9 +143,9 @@ export const upNextProps = (classes: UpcomingClass[]): UpNextWidgetProps => ({
         : undefined,
     };
   }),
-  title: t('widgetUpNext'),
+  title: t('widgetNextClass'),
   now: t('todayNow'),
-  next: t('widgetUpNext'),
+  next: t('widgetNextClass'),
   later: t('widgetLater'),
   startsIn: t('widgetStartsIn'),
   endsIn: t('widgetEndsIn'),

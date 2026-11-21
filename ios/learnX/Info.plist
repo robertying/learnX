@@ -76,9 +76,9 @@
 	<key>NSApplicationCrashOnExceptions</key>
 	<true/>
 	<key>NSCalendarsFullAccessUsageDescription</key>
-	<string>learnX syncs your course schedule and assignments to Calendar. It reads your list of calendars to choose where to add events, and can delete the calendars it created.</string>
+	<string>learnX syncs your class schedule and assignments to Calendar. It reads your list of calendars to choose where to add events, and can delete the calendars it created.</string>
 	<key>NSCalendarsUsageDescription</key>
-	<string>learnX syncs your course schedule and assignments to Calendar, and can delete the calendars it created.</string>
+	<string>learnX syncs your class schedule and assignments to Calendar, and can delete the calendars it created.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Take a photo to attach to an assignment submission.</string>
 	<key>NSDesktopFolderUsageDescription</key>

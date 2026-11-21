@@ -19,7 +19,7 @@ const noCalendar = new CalendarError('calendarPermission');
 
 it('asks for calendar access without iOS full access or a restart', () => {
   expect(courseSyncErrorToast(noCalendar).text).toBe(
-    t('courseScheduleSyncNoCalendarPermissionAndroid'),
+    t('scheduleSyncNoCalendarPermissionAndroid'),
   );
   expect(assignmentSyncErrorToast(noCalendar).text).toBe(
     t('assignmentSyncNoCalendarPermissionAndroid'),

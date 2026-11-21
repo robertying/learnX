@@ -18,7 +18,7 @@
         }
       }
     },
-    "Next Up" : {
+    "Next Class" : {
       "extractionState" : "manual",
       "localizations" : {
         "zh-Hans" : {
@@ -41,13 +41,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "正在上的课或下一节课，以及之后的课程。"
+            "value" : "正在上的课或下一节课，以及之后的课。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "正在上的课或下一节课，以及之后的课程。"
+            "value" : "正在上的课或下一节课，以及之后的课。"
           }
         }
       }

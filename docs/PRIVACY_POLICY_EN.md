@@ -22,7 +22,7 @@ To log in, learnX asks for your Tsinghua username and password. When you log in 
 
 ## Your course content
 
-learnX downloads your courses, notices, files, assignments, grades, and course schedule from Web Learning and keeps them on your device so you can read them offline. Files you download are saved on your device. Actions you take, such as submitting an assignment or adding a favorite, are sent to Web Learning, just as on its website.
+learnX downloads your courses, notices, files, assignments, grades, and class schedule from Web Learning and keeps them on your device so you can read them offline. Files you download are saved on your device. Actions you take, such as submitting an assignment or adding a favorite, are sent to Web Learning, just as on its website.
 
 Your settings, archived and hidden items, and submission drafts are also kept only on your device. Logging out or deleting the app removes them.
 
@@ -33,7 +33,7 @@ On Windows, uninstalling learnX removes everything it kept: your saved login, se
 Each of these runs on your device and sends nothing to me:
 
 - **Notifications.** learnX checks Web Learning in the background and posts notifications on your device for new content, grades, deadline changes, deadline reminders, and class reminders. There is no push server.
-- **Calendar and Reminders.** Only when you turn on sync, learnX adds your course schedule and assignments to the calendar or reminders list you choose. It reads the list of your calendars to let you choose one, and doesn't read your other events.
+- **Calendar and Reminders.** Only when you turn on sync, learnX adds your class schedule and assignments to the calendar or reminders list you choose. It reads the list of your calendars to let you choose one, and doesn't read your other events.
 - **Widgets, Spotlight, and Siri.** learnX shares upcoming deadlines, classes, and recent items with its widgets, and on Apple devices adds notices, assignments, and files to the system's on-device search index. You can remove them by turning the feature off or logging out.
 - **Camera, photos, and files.** learnX only reads a photo or file you pick or share to it, to attach it to an assignment submission. It saves images to your photo library only when you ask.
 

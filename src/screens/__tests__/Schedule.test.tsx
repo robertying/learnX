@@ -102,7 +102,7 @@ it("lists the next seven days' classes by day, from both weeks", async () => {
   expect(screen.getByText('Course c')).toBeOnTheScreen();
   expect(
     screen.getByText(
-      'Based on course times. Holidays and rescheduled classes may not be reflected.',
+      'Based on class times. Holidays and rescheduled classes may not be reflected.',
     ),
   ).toBeOnTheScreen();
 
@@ -156,7 +156,7 @@ it('prefers the note on classes worked out from courses', async () => {
   mockSources['2026-11-16'] = 'courses';
   await setup();
   expect(screen.queryByText(/Couldn't update/)).toBeNull();
-  expect(screen.getByText(/Based on course times/)).toBeOnTheScreen();
+  expect(screen.getByText(/Based on class times/)).toBeOnTheScreen();
 });
 
 it('puts a refresh button in the header on a Mac', async () => {

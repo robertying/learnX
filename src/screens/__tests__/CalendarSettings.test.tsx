@@ -97,13 +97,13 @@ it('turns course schedule sync on through the sync hook', async () => {
   // Off, the note says what the switch does, not the settings it hides.
   expect(
     screen.getByText(
-      t('courseScheduleSyncOffCaption', { type: t('undergraduateSchedule') }),
+      t('scheduleSyncOffCaption', { type: t('undergraduateSchedule') }),
     ),
   ).toBeTruthy();
   // Its options show only while it's on.
   expect(screen.queryByText(t('classAlarm'))).toBeNull();
   expect(screen.queryByText(t('syncCourseSchedule'))).toBeNull();
-  await toggle(t('setupCourseCalendar'), true);
+  await toggle(t('setupScheduleCalendar'), true);
   expect(setCourseSyncEnabled).toHaveBeenCalledWith(true);
 });
 
@@ -113,7 +113,7 @@ it('saves the course schedule settings and opens the range picker', async () => 
   await renderScreen();
   expect(
     screen.getByText(
-      t('courseScheduleSyncOnCaption', { type: t('graduateSchedule') }),
+      t('scheduleSyncOnCaption', { type: t('graduateSchedule') }),
     ),
   ).toBeTruthy();
   await toggle(t('courseEventOmitLocation'), true);
@@ -289,7 +289,7 @@ it('says when each sync last finished, while it is on', async () => {
   await renderScreen();
   expect(screen.getAllByText(lastSynced, { exact: false })).toHaveLength(2);
   // On the caption's next line, not a paragraph of its own.
-  const caption = t('courseScheduleSyncOnCaption', {
+  const caption = t('scheduleSyncOnCaption', {
     type: t('undergraduateSchedule'),
   });
   expect(screen.getByText(`${caption}\n${lastSynced}`)).toBeTruthy();
