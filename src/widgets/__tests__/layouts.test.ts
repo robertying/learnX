@@ -582,7 +582,7 @@ describe('Up Next on iOS', () => {
     expect(modifier(english, 'widgetURL')).toBeUndefined();
     expect(
       texts(layout(initial, { locale: 'zh-Hans_CN', date: new Date(now) })),
-    ).toEqual(['下一节课', '打开learnX后，这里会显示课程']);
+    ).toEqual(['下一节课', '打开learnX后，这里会显示接下来的课']);
     expect(
       texts(
         layout(initial, {
@@ -1102,7 +1102,7 @@ describe('Up Next on Android', () => {
     ]);
     expect(texts(layout(initial, { locale: 'zh-Hans' }))).toEqual([
       '下一节课',
-      '打开 learnX 后，这里会显示课程',
+      '打开 learnX 后，这里会显示接下来的课',
     ]);
   });
 });

@@ -549,7 +549,7 @@ const zh: typeof en = {
   todayOneUnreadNotice: '1条未读公告',
   todayNewFiles: '{count}个新文件',
   todayOneNewFile: '1个新文件',
-  todayFromCourses: '根据课程时间推算，可能未包含放假和调课。',
+  todayFromCourses: '根据各课程的上课时间推算，可能未包含放假和调课。',
   todayCalendarFailed: '课表更新失败，显示的是{time}的课表。',
   forward: '前进',
   openInBrowser: '在浏览器中打开',

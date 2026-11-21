@@ -144,7 +144,7 @@ export function widgetKit() {
             deadlines: '作业截止',
             noDeadlines: '打开 learnX 后，这里会显示作业',
             upNext: '下一节课',
-            noClasses: '打开 learnX 后，这里会显示课程',
+            noClasses: '打开 learnX 后，这里会显示接下来的课',
           }
         : {
             deadlines: 'Deadlines',

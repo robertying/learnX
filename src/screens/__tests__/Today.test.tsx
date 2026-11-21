@@ -148,7 +148,7 @@ it('shows the current and next class, and opens a course', async () => {
   expect(screen.getByText('1 unread notice')).toBeOnTheScreen();
   expect(
     screen.getByText(
-      'Based on course times. Holidays and rescheduled classes may not be reflected.',
+      'Based on class times. Holidays and rescheduled classes may not be reflected.',
     ),
   ).toBeOnTheScreen();
 
@@ -228,7 +228,7 @@ it('says when the calendar failed, and leaves out a week before term', async () 
 it('has no note for a calendar that loaded, and counts the week', async () => {
   Object.assign(mockSchedule, { source: 'calendar', failed: false });
   await setup();
-  expect(screen.queryByText(/Based on course times/)).toBeNull();
+  expect(screen.queryByText(/Based on class times/)).toBeNull();
   expect(jest.mocked(getTitleOptions).mock.lastCall![1]).toMatch(/Week 9$/);
 });
 

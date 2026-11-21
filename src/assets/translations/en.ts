@@ -579,7 +579,7 @@ export default {
   todayNewFiles: '{count} new files',
   todayOneNewFile: '1 new file',
   todayFromCourses:
-    'Based on course times. Holidays and rescheduled classes may not be reflected.',
+    'Based on class times. Holidays and rescheduled classes may not be reflected.',
   todayCalendarFailed:
     "Couldn't update the schedule. Showing the one from {time}.",
   forward: 'Forward',
