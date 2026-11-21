@@ -36,8 +36,8 @@ export const notifyUpdate = async ({
   try {
     await Notifications.scheduleNotificationAsync({
       content: {
-        title: t('foundNewVersion', { version }),
-        body,
+        title: t('notifyNewVersion'),
+        body: `v${version}\n${body}`,
         // Opens Settings, with the update on top.
         data: { type: 'update' },
       },

@@ -197,13 +197,19 @@ export const planDeadlineReminders = (
     .slice(0, max);
 };
 
-const reminderBodies: Record<
+const reminderTitles: Record<ReminderKind, () => string> = {
+  due: () => t('notifyDeadlineReminder'),
+  lateOpen: () => t('notifyLateOpen'),
+  lateDue: () => t('notifyLateReminder'),
+};
+
+const reminderDetails: Record<
   ReminderKind,
   (deadline: number, showsAt: number) => string
 > = {
   due: (deadline, showsAt) => deadlineDayTime(deadline, showsAt),
   lateOpen: deadline =>
-    t('notifyLateOpen', {
+    t('notifyLateUntil', {
       date: formatDate(deadline, 'shortDateTimeFormat'),
     }),
   lateDue: (deadline, showsAt) =>
@@ -211,20 +217,23 @@ const reminderBodies: Record<
 };
 
 /**
- * A reminder's text: the assignment, its course and when it's due (the day as
- * of when it shows), as a content notification about one item reads. The
- * late kinds say when late submission closes instead. Its data keeps the
- * kind, so Remind Later can say it again as of its new time.
+ * A reminder's text, as a content notification about one item reads: what
+ * kind of reminder it is, the course, then the assignment and when it's due
+ * (the day as of when it shows). The late kinds say when late submission
+ * closes instead. Its data keeps the assignment's name and the kind, so
+ * Remind Later can say it again as of its new time.
  */
 export const reminderContent = (
   { id, title, courseName, deadline }: WidgetDeadline,
   showsAt: number,
   kind: ReminderKind = 'due',
 ) => ({
-  title,
+  title: reminderTitles[kind](),
   subtitle: courseName,
-  body: reminderBodies[kind](deadline, showsAt),
-  data: { type: 'assignment', id, deadline, kind },
+  body: [title, reminderDetails[kind](deadline, showsAt)]
+    .filter(Boolean)
+    .join('\n'),
+  data: { type: 'assignment', id, deadline, kind, title },
   categoryIdentifier: notificationCategories.deadline,
   // Stacked together in the iOS notification center.
   threadIdentifier: notificationChannels.deadlines,
@@ -317,17 +326,18 @@ export const remindLater = async (
     id,
     deadline,
     kind = 'due',
-  }: { id: string; deadline: number; kind?: ReminderKind },
+    title = '',
+  }: { id: string; deadline: number; kind?: ReminderKind; title?: string },
 ) => {
   const date = remindLaterDate(deadline);
   if (date === null) {
     return;
   }
-  const { title, subtitle } = notification.request.content;
+  const { subtitle } = notification.request.content;
   await Notifications.scheduleNotificationAsync({
     identifier: `${LATER_PREFIX}${id}`,
     content: reminderContent(
-      { id, title: title ?? '', courseName: subtitle ?? '', deadline },
+      { id, title, courseName: subtitle ?? '', deadline },
       date,
       kind,
     ),

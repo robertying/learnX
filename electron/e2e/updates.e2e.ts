@@ -213,7 +213,7 @@ const updateNotifications = async (main: {
   shownNotifications: () => Promise<{ title?: string; body?: string }[]>;
 }) =>
   (await main.shownNotifications()).filter(({ title }) =>
-    text('T_foundNewVersion').test(title ?? ''),
+    exact('T_notifyNewVersion').test(title ?? ''),
   );
 
 test('says a downloaded update in a notification that opens Settings', async ({
@@ -236,7 +236,7 @@ test('says a downloaded update in a notification that opens Settings', async ({
     })
     .toBe(1);
   const [notification] = await updateNotifications(main);
-  expect(notification.title).toContain(VERSION);
+  expect(notification.body).toContain(`v${VERSION}`);
   expect(notification.body).toMatch(text('T_updateNotificationReadyBody'));
 
   await main.clickNotification();

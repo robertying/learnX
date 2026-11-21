@@ -55,7 +55,8 @@ export const dueAt = (
  * What a notification shows. Windows and Linux have no subtitle, so the
  * course (the subtitle in the approved format) leads the body there: on a
  * line of its own on Windows, and before a " · " on Linux, where GNOME's
- * banner shows the body as one line and would run the two together.
+ * banner shows the body as one line and would run lines together, so the
+ * body's own lines are joined with " · " there too.
  */
 export const shownContent = (
   content: NotificationRequest['content'],
@@ -66,11 +67,15 @@ export const shownContent = (
   if (platform === 'darwin') {
     return { title, subtitle: content.subtitle, body };
   }
+  if (platform === 'linux') {
+    return {
+      title,
+      body: [content.subtitle, ...body.split('\n')].filter(Boolean).join(' · '),
+    };
+  }
   return {
     title,
-    body: [content.subtitle, body]
-      .filter(Boolean)
-      .join(platform === 'linux' ? ' · ' : '\n'),
+    body: [content.subtitle, body].filter(Boolean).join('\n'),
   };
 };
 

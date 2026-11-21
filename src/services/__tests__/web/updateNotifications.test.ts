@@ -67,8 +67,8 @@ it('says when an update has downloaded', async () => {
   await ready({ version: '19.1.0' });
   expect(posted()).toEqual([
     {
-      title: t('foundNewVersion', { version: '19.1.0' }),
-      body: t('updateNotificationReadyBody'),
+      title: t('notifyNewVersion'),
+      body: `v19.1.0\n${t('updateNotificationReadyBody')}`,
     },
   ]);
 });
@@ -76,7 +76,9 @@ it('says when an update has downloaded', async () => {
 it('says when a .deb has downloaded, to open from Settings', async () => {
   await ready({ version: '19.2.0', opensInstaller: true });
   expect(posted()).toEqual([
-    expect.objectContaining({ body: t('updateNotificationDebBody') }),
+    expect.objectContaining({
+      body: `v19.2.0\n${t('updateNotificationDebBody')}`,
+    }),
   ]);
 });
 
@@ -101,7 +103,7 @@ it('says an update found before logging in once, after the login', async () => {
   await new Promise(resolve => setTimeout(resolve));
   expect(posted()).toEqual([
     expect.objectContaining({
-      title: t('foundNewVersion', { version: '19.4.0' }),
+      body: expect.stringMatching(/^v19\.4\.0\n/),
     }),
   ]);
 });

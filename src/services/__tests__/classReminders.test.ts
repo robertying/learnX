@@ -88,15 +88,16 @@ describe('classReminderContent', () => {
   it('says the course, then when and where', () => {
     const start = new Date(2026, 10, 9, 9, 50).valueOf();
     expect(classReminderContent(upcoming('a', 0, { start }))).toEqual({
-      title: 'Course a',
-      body: 'Starts at 09:50 · Room 101',
+      title: 'Class Reminder',
+      subtitle: 'Course a',
+      body: '09:50 · Room 101',
       data: { type: 'course', id: 'a' },
       threadIdentifier: 'classes',
       interruptionLevel: 'timeSensitive',
     });
     expect(
       classReminderContent(upcoming('a', 0, { start, location: '' })).body,
-    ).toBe('Starts at 09:50');
+    ).toBe('09:50');
     // Today, when the class matches no course.
     expect(
       classReminderContent(upcoming('a', 0, { courseId: undefined })).data,
@@ -108,7 +109,7 @@ describe('classReminderContent', () => {
     // Los Angeles (UTC-8)
     jest.spyOn(Date.prototype, 'getTimezoneOffset').mockReturnValue(480);
     expect(classReminderContent(upcoming('a', 0, { start })).body).toBe(
-      'Starts at 09:50 Beijing Time · Room 101',
+      '09:50 Beijing Time · Room 101',
     );
   });
 });
@@ -130,7 +131,11 @@ describe('syncClassReminders', () => {
     expect(cancel.mock.calls).toEqual([['class-reminder:gone:1:15']]);
     expect(schedule).toHaveBeenCalledTimes(1);
     expect(schedule.mock.calls[0][0]).toMatchObject({
-      content: { title: 'Course new', data: { type: 'course', id: 'new' } },
+      content: {
+        title: 'Class Reminder',
+        subtitle: 'Course new',
+        data: { type: 'course', id: 'new' },
+      },
       trigger: { type: 'date', date: now + 285 * minute },
     });
   });

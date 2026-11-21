@@ -74,6 +74,7 @@ export const handleNotificationAction = async (
           id: data.id,
           deadline: data.deadline,
           kind: isReminderKind(data.kind) ? data.kind : undefined,
+          title: data.title,
         });
       }
       break;

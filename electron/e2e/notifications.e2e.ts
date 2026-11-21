@@ -5,7 +5,7 @@
 // (system.ts), which the test reads back and clicks through the same path.
 import type { Page } from '@playwright/test';
 import { expect, packagedApp, test } from './fixtures.ts';
-import { text } from './maestroEnv.ts';
+import { exact, text } from './maestroEnv.ts';
 import {
   byId,
   openSettings,
@@ -71,7 +71,7 @@ test('reminds of a deadline and opens the assignment from it', async ({
     .toBeGreaterThan(0);
   const reminders = await scheduled(window);
   const reminder = reminders.find(r =>
-    text('MOCK_ASSIGNMENT').test(r.content.title ?? ''),
+    text('MOCK_ASSIGNMENT').test(r.content.body ?? ''),
   );
   expect(reminder, JSON.stringify(reminders)).toBeDefined();
   expect(reminder!.trigger.value).toBeGreaterThan(Date.now());
@@ -86,7 +86,8 @@ test('reminds of a deadline and opens the assignment from it', async ({
     .poll(async () => (await main.shownNotifications()).length)
     .toBe(1);
   const [shownReminder] = await main.shownNotifications();
-  expect(shownReminder.title).toMatch(text('MOCK_ASSIGNMENT'));
+  expect(shownReminder.title).toMatch(exact('T_notifyDeadlineReminder'));
+  expect(shownReminder.body).toMatch(text('MOCK_ASSIGNMENT'));
 
   await main.clickNotification();
   await expect.poll(() => main.windowVisible()).toBe(true);

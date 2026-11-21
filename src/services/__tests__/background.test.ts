@@ -1,4 +1,5 @@
 import { assignmentsQuery, filesQuery, noticesQuery } from 'data/content';
+import { t } from 'helpers/i18n';
 import {
   mockAssignments,
   mockCourses,
@@ -392,8 +393,11 @@ describe('notifyContent', () => {
       jest.mocked(Notifications.scheduleNotificationAsync).mock.calls[0][0]
         .content,
     ).toMatchObject({
-      title: unread.title,
+      title: t('notifyNewNotice'),
       subtitle: unread.courseName,
+      body: expect.stringMatching(
+        new RegExp(`^${RegExp.escape(unread.title)}\n`),
+      ),
       threadIdentifier: unread.courseId,
       data: { type: 'notice', id: unread.id },
     });
