@@ -11,10 +11,12 @@ import { getSettings, setSetting, useSettings } from 'data/settings';
 import useDetailNavigator, { useDetailRoot } from 'hooks/useDetailNavigator';
 import useFilterListHeader from 'hooks/useFilterListHeader';
 import { scrollInsetBehavior } from 'constants/scrollInsetBehavior';
+import useFilterScrollPositions from 'hooks/useFilterScrollPositions';
 import useFirstListDrawn from 'hooks/useFirstListDrawn';
 import useItemStepping from 'hooks/useItemStepping';
 import useRefreshCommand from 'hooks/useRefreshCommand';
 import useListSelection from 'hooks/useListSelection';
+import { hasGlassHeader } from 'navigation/options';
 import type { DetailStackParams, RootStackParams } from 'navigation/types';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -142,6 +144,10 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     hidden,
   });
   const isCourse = type === 'course';
+  const { listRef, onScroll } = useFilterScrollPositions<FilterSelection, T>(
+    filterSelected,
+    { underHeader: hasGlassHeader },
+  );
 
   const options = filterOptions({
     unfinishedCount: unfinished?.length,
@@ -354,7 +360,14 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
           onIndexChange={handleDragChange}
         />
       ) : (
-        <FlatList key={filterSelected} {...listProps} />
+        // Kept as the filter changes, each filter at its own position
+        // (`useFilterScrollPositions`); the course list starts over.
+        <FlatList
+          ref={listRef}
+          onScroll={onScroll}
+          scrollToOverflowEnabled={hasGlassHeader}
+          {...listProps}
+        />
       )}
     </View>
   );

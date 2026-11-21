@@ -1,4 +1,4 @@
-import { FlashList, FlashListProps } from '@shopify/flash-list';
+import { FlashList, FlashListProps, FlashListRef } from '@shopify/flash-list';
 import { scrollInsetBehavior } from 'constants/scrollInsetBehavior';
 import DeviceInfo from 'constants/DeviceInfo';
 import RefreshControl from './RefreshControl';
@@ -14,7 +14,7 @@ function FlatList<T>({
   progressViewOffset,
   refreshControl,
   ...props
-}: FlashListProps<T>) {
+}: FlashListProps<T> & { ref?: React.Ref<FlashListRef<T>> }) {
   const isMac = DeviceInfo.isMac();
   return (
     <FlashList
