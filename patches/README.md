@@ -29,7 +29,7 @@ and that the tests it names exist.
 - iOS: `Button` sends its role to the native view as `buttonRole`, since React Native reads a host view's `role` prop as an accessibility role and logs "Unsupported Role value" for `destructive` and `cancel`. `role` still works for widget layouts.
 - Android: the `semantics` modifier takes `heading`, which marks a Compose element as a heading for TalkBack (Form section titles and a detail page's title), and a `Host` with `matchContents` sends its size again, a few times with backoff, while its frame stays 0: the size reaches Yoga as a state update that can be dropped, and was only sent again when the content size changed, so What's New's buttons stayed 0x0 and couldn't be tapped.
 - Android: a `Text` without a typography takes the style its container provides (a list item's headline, supporting text or overline, a button's label) and a text field's text the field's own (bodyLarge), as Material 3's do, instead of a bare 14 sp style with no line height: Form rows were smaller than list cards and three-line rows had room left at the bottom; and the date range picker's headline leaves out the year, as Material 3 shows a range, since two dates with theirs wrapped a few characters at a time in Chinese.
-- Android: Compose UI 1.13 and Material 3 1.5.0 instead of 1.12.1 and 1.5.0-beta01. 1.12 registered a Compose view that detached and re-attached before its deferred registration ran a second time and unregistered it only once, so the view and its whole screen were never freed (header buttons re-added during a header update, as `react-native-screens` did).
+- Android: Compose UI 1.13 and Material 3 1.5.0 instead of 1.12.1 and 1.5.0-beta01. 1.12 registered a Compose view that detached and re-attached before its deferred registration ran a second time and unregistered it only once, so the view and its whole screen were never freed (header buttons re-added during a header update, as upstream `react-native-screens` does).
 
 **Drop when:** Upstream renames the prop, adds a countdown without seconds to `Text`, adds `heading` to `semantics`, sends a dropped `Host` size again, lets an alignment guide follow the trailing edge, gives text its container's style, lets the range picker's headline be set and depends on Compose UI 1.13 or later.
 
@@ -106,7 +106,7 @@ Android: picks with `ACTION_GET_CONTENT` so cloud and local providers both show.
 
 ## `react-native-bottom-tabs`
 
-iOS: lets SwiftUI pick an SF Symbol tab icon's variant (filled in the tab bar, outline in the iPad sidebar) instead of forcing the outline; keeps the system label font when no size is set; removes a stale Mac Catalyst 27 toolbar tab bar when the navigator unmounts; sidebar state; gives tab bar buttons their `testID` when the tabs mount while XCUITest or VoiceOver is connected (UIKit copies a tab's identifier to its button only when it makes the button, before SwiftUI sets it). The tab bar's delegate no longer holds itself through its tap handler, so each one made for the tab bar is freed when the next replaces it.
+iOS: lets SwiftUI pick an SF Symbol tab icon's variant (filled in the tab bar, outline in the iPad sidebar) instead of forcing the outline; keeps the system label font when no size is set; removes a stale Mac Catalyst 27 toolbar tab bar when the navigator unmounts; sidebar state; gives tab bar buttons their `testID` when the tabs mount while XCUITest or VoiceOver is connected (UIKit copies a tab's identifier to its button only when it makes the button, before SwiftUI sets it). The tab bar's delegate doesn't hold itself through its tap handler (upstream's captures the modifier, which owns the delegate), so each one made for the tab bar is freed when the next replaces it.
 
 **Drop when:** Fixed upstream.
 
@@ -136,7 +136,7 @@ Mac Catalyst: leaves the pan gesture alone when KVO already subclassed the scrol
 - Vertical bar devices (iPhone Duo): fills the strip above an opaque header.
 - iOS 26: an empty header item badge is the system's red indicator dot; a header `subtitle` shows below the title (ignored on Android).
 - Android: the left header item (Search's Close) stays beside the open search field, also when the header is rebuilt (coming back from a pushed screen), and the field ends where the item's content does, fitted again on every header layout, so Search can be left in one tap with a query in the field.
-- Android: a header update leaves the header's items in the toolbar when they're the same ones in the same order, instead of taking every item out of the window and adding it back, which redid each item's attach work on every update; with Compose UI 1.12 it also leaked @expo/ui header buttons and their closed screens (see `@expo/ui`).
+- Android: a header update leaves the header's items in the toolbar when they're the same ones in the same order, instead of taking every item out of the window and adding it back, which redid each item's attach work on every update.
 
 **Drop when:** Fixed upstream.
 
