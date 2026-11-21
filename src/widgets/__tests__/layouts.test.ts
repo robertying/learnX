@@ -576,7 +576,7 @@ describe('Up Next on iOS', () => {
     expect(initial.classes).toEqual([]);
     const english = layout(initial, { locale: 'en_US', date: new Date(now) });
     expect(texts(english)).toEqual([
-      'Next Up',
+      'Next Class',
       'Open learnX to show your classes here',
     ]);
     expect(modifier(english, 'widgetURL')).toBeUndefined();
@@ -1097,7 +1097,7 @@ describe('Up Next on Android', () => {
       url: '',
     } as never;
     expect(texts(layout(initial, {}))).toEqual([
-      'Next up',
+      'Next class',
       'Open learnX to show your classes here',
     ]);
     expect(texts(layout(initial, { locale: 'zh-Hans' }))).toEqual([

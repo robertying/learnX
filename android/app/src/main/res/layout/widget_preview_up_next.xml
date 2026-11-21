@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The Next Up widget in the widget picker (Android 12+, xml/up_next_info.xml): what
+<!-- The Next Class widget in the widget picker (Android 12+, xml/up_next_info.xml): what
      src/widgets/UpNext.android.tsx draws, with sample classes. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@android:id/background"

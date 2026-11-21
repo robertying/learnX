@@ -149,7 +149,7 @@ export function widgetKit() {
         : {
             deadlines: 'Deadlines',
             noDeadlines: 'Open learnX to show your deadlines here',
-            upNext: 'Next up',
+            upNext: 'Next class',
             noClasses: 'Open learnX to show your classes here',
           },
     /* oxlint-enable learnx/no-han-outside-translations */

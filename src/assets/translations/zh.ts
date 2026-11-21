@@ -7,7 +7,7 @@ const zh: typeof en = {
   assignments: '作业',
   widgetDeadlines: '作业截止',
   widgetNoDeadlines: '暂无待交作业',
-  widgetUpNext: '下一节课',
+  widgetNextClass: '下一节课',
   widgetLater: '之后的课',
   widgetStartsIn: '距上课',
   widgetEndsIn: '距下课',
