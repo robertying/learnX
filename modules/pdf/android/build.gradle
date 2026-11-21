@@ -16,7 +16,9 @@ dependencies {
   implementation 'androidx.pdf:pdf-document-service:1.0.0-beta01'
   // Where Jetpack's viewer would use the old platform renderer (PdfBackend).
   implementation 'dev.zwander:pdfviewer:5.0.0'
-  // 2.0.3 changed a constructor that pdfviewer 5.0.0, built against 2.0.0, calls.
+  // Held at 2.0.2. 2.0.3 added a parameter with a default to its `Config` data class, which removed the constructor that
+  // pdfviewer 5.0.0 (compiled against 2.0.0) calls, so PDFView throws NoSuchMethodError. 2.0.3 has no PDFium change and
+  // its new locks cover helpers pdfviewer doesn't call. Move it once a pdfviewer release depends on 2.0.3 or newer.
   implementation 'io.legere:pdfiumandroid:2.0.2'
   implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0'
   testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0'
