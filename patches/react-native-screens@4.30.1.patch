@@ -9,9 +9,9 @@ index 68b8d852b8433a05e02372356d00a10530ccb8c9..90807ab2e819d8e8b740be7514377bf9
 -        for (i in toolbar.childCount - 1 downTo 0) {
 -            if (toolbar.getChildAt(i) is ScreenStackHeaderSubview) {
 -                toolbar.removeViewAt(i)
-+        // Subviews already in the toolbar in the same order stay there: taking them out of the
-+        // window and back on every header update made Compose UI 1.12 (@expo/ui header buttons)
-+        // register the view twice, and the second registration kept the whole popped screen alive.
++        // Subviews already in the toolbar in the same order stay there: taking every one out of
++        // the window and adding it back on each header update redid its attach work (for @expo/ui
++        // header buttons, registering each Compose view again).
 +        val placedSubviews =
 +            (0 until toolbar.childCount).map { toolbar.getChildAt(it) }.filterIsInstance<ScreenStackHeaderSubview>()
 +        val keepPlaced = placedSubviews == configSubviews.filter { it.type !== ScreenStackHeaderSubview.Type.BACK }
