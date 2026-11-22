@@ -194,19 +194,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Allow learnX to access your microphone."
+            "value" : "Record sound with a video you take to attach to an assignment submission."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "允许learnX访问你的麦克风。"
+            "value" : "拍摄视频作为作业附件时录制声音。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "允许learnX访问你的麦克风。"
+            "value" : "拍摄视频作为作业附件时录制声音。"
           }
         }
       }

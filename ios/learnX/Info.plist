@@ -77,7 +77,7 @@
 	<key>NSFileProviderDomainUsageDescription</key>
 	<string>Choose files to attach to an assignment submission.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Allow learnX to access your microphone.</string>
+	<string>Record sound with a video you take to attach to an assignment submission.</string>
 	<key>NSNetworkVolumesUsageDescription</key>
 	<string>Choose files to attach to an assignment submission.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
