@@ -5,7 +5,7 @@
 // (webviewPreload.cts). The page decides which loads go ahead, as a React
 // Native web view's `onShouldStartLoadWithRequest` does, and this process
 // keeps every page on the sites below whatever it decides.
-import { allowedHost } from './net.ts';
+import { allowedHost, httpsUrl } from './net.ts';
 import { readShared } from './shared.ts';
 
 /**
@@ -22,7 +22,8 @@ export const HTML_LOAD_TIMEOUT_MS = 30_000;
 
 /**
  * Whether a web view may show `url`: Tsinghua's sites and courseX, as the
- * app's requests (net.ts), and learnX's GitHub pages for the changelog.
+ * app's requests (net.ts), and learnX's GitHub pages for the changelog, all
+ * over https.
  */
 export const webviewAllowedUrl = (url: string): boolean => {
   let parsed;
@@ -31,13 +32,12 @@ export const webviewAllowedUrl = (url: string): boolean => {
   } catch {
     return false;
   }
-  if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+  if (parsed.protocol !== 'https:') {
     return false;
   }
   return (
     allowedHost(parsed.hostname) ||
-    (parsed.protocol === 'https:' &&
-      parsed.hostname === 'github.com' &&
+    (parsed.hostname === 'github.com' &&
       /^\/robertying\/learnX(\/|$)/i.test(parsed.pathname))
   );
 };
@@ -332,9 +332,10 @@ export const createWebviews = ({
 
     /**
      * Decides on a web view's top-level load (`webRequest.onBeforeRequest`
-     * for main frames, so a form's POST goes ahead as it was sent): the page
-     * decides, and a load it allows off the allowed sites opens in the
-     * system's browser instead. Anything else passes.
+     * for main frames, so a form's POST goes ahead as it was sent): plain
+     * http to the allowed sites goes to https instead, the page decides, and
+     * a load it allows off the allowed sites opens in the system's browser
+     * instead. Anything else passes.
      */
     onBeforeRequest: (
       details: Electron.OnBeforeRequestListenerDetails,
@@ -353,6 +354,12 @@ export const createWebviews = ({
       // HTML the app is showing (loadHtml): already its own decision.
       if (htmlLoads.has(`${guest.id} ${details.url}`)) {
         callback({});
+        return;
+      }
+      // Asked again about the https load it becomes.
+      const upgraded = httpsUrl(details.url);
+      if (upgraded) {
+        callback({ redirectURL: upgraded });
         return;
       }
       void ask(guest, {

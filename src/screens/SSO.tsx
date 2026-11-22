@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Linking } from 'react-native';
+import type WebView from 'react-native-webview';
 import type { WebViewMessageEvent } from 'react-native-webview';
 import type { OnShouldStartLoadWithRequest } from 'react-native-webview/lib/WebViewTypes';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -27,19 +28,31 @@ type Props = NativeStackScreenProps<LoginStackParams, 'SSO'>;
 
 const TSINGHUA_HOST = /(^|\.)tsinghua\.edu\.cn$/;
 
-/**
- * Whether `url` is on one of Tsinghua's sites, over https unless `http` is
- * allowed.
- */
-const isTsinghuaUrl = (url: string, { http = false } = {}) => {
+/** Whether `url` is on one of Tsinghua's sites, over https. */
+const isTsinghuaUrl = (url: string) => {
   try {
     const { protocol, hostname } = new URL(url);
-    return (
-      (protocol === 'https:' || (http && protocol === 'http:')) &&
-      TSINGHUA_HOST.test(hostname)
-    );
+    return protocol === 'https:' && TSINGHUA_HOST.test(hostname);
   } catch {
     return false;
+  }
+};
+
+/**
+ * `url` over https when it's a plain http URL on one of Tsinghua's sites,
+ * which all serve https; null for anything else. The app allows no cleartext
+ * to them, so the login cookies never go out in the clear.
+ */
+const httpsTsinghuaUrl = (url: string) => {
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'http:' || !TSINGHUA_HOST.test(parsed.hostname)) {
+      return null;
+    }
+    parsed.protocol = 'https:';
+    return parsed.toString();
+  } catch {
+    return null;
   }
 };
 
@@ -47,6 +60,7 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
   const username = route.params.username;
   const password = route.params.password;
 
+  const webView = useRef<WebView>(null);
   const [fingerPrint] = useState(generateFingerprint);
   const formData = useRef<{
     username: string;
@@ -69,18 +83,29 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
 
   const handleShouldStartLoadWithRequest: OnShouldStartLoadWithRequest =
     event => {
-      if (!event.url.startsWith(LEARN_ROAMING_URL)) {
+      // A page that goes to one of Tsinghua's sites over http goes there over
+      // https instead.
+      const upgraded =
+        event.isTopFrame === false ? null : httpsTsinghuaUrl(event.url);
+      const url = upgraded ?? event.url;
+      if (!url.startsWith(LEARN_ROAMING_URL)) {
+        if (upgraded) {
+          webView.current?.injectJavaScript(
+            `location.replace(${JSON.stringify(upgraded)}); true;`,
+          );
+          return false;
+        }
         // Frames load as they like; the page itself stays on Tsinghua's
         // sites, and a link elsewhere opens outside the app.
         if (
           event.isTopFrame === false ||
-          event.url === 'about:blank' ||
-          isTsinghuaUrl(event.url, { http: true })
+          url === 'about:blank' ||
+          isTsinghuaUrl(url)
         ) {
           return true;
         }
-        if (/^https?:/i.test(event.url)) {
-          Linking.openURL(event.url).catch(() => {});
+        if (/^https?:/i.test(url)) {
+          Linking.openURL(url).catch(() => {});
         }
         return false;
       }
@@ -137,6 +162,7 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
 
   return (
     <ScreenWebView
+      ref={webView}
       source={{
         uri: SSO_LOGIN_URL,
         headers: {

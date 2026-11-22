@@ -11,7 +11,7 @@ import {
 describe('webviewAllowedUrl', () => {
   it.each([
     ['https://id.tsinghua.edu.cn/do/off/ui/auth/login/form/x/0', true],
-    ['http://learn.tsinghua.edu.cn/f/x', true],
+    ['http://learn.tsinghua.edu.cn/f/x', false],
     ['https://tsinghua.app/courses/1', true],
     ['https://github.com/robertying/learnX/releases', true],
     ['https://github.com/robertying/learnx', true],
@@ -213,6 +213,16 @@ describe('createWebviews', () => {
     webviews.answer(host as never, lastAsk(host)[1].requestId, false);
     await expect(refused).resolves.toEqual({ cancel: true });
     expect(openExternal).not.toHaveBeenCalled();
+  });
+
+  it('sends a load over plain http to the allowed sites over https', async () => {
+    const { webviews, host, guest } = setup();
+    await expect(
+      load(webviews, guest, 'http://learn.tsinghua.edu.cn/f/x?a=1', 'POST'),
+    ).resolves.toEqual({
+      redirectURL: 'https://learn.tsinghua.edu.cn/f/x?a=1',
+    });
+    expect(host.sent).toEqual([]);
   });
 
   it('opens an allowed load off the allowed sites in the browser', async () => {
