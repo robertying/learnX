@@ -48,6 +48,45 @@ describe('loadCredentials', () => {
     expect(SecureStore.getItemAsync).toHaveBeenCalledTimes(2); // new + legacy
   });
 
+  it('reads storage again after a failed read', async () => {
+    keychain.set(m.LEGACY_AUTH_KEY, legacyAuth(credentials));
+    // The legacy key can't be read while the iPhone is locked.
+    jest
+      .mocked(SecureStore.getItemAsync)
+      .mockResolvedValueOnce(null)
+      .mockRejectedValueOnce(new Error('errSecInteractionNotAllowed'));
+    await expect(m.loadCredentials()).resolves.toBeNull();
+    expect(keychain.has(m.LEGACY_AUTH_KEY)).toBe(true);
+
+    await expect(m.loadCredentials()).resolves.toEqual(credentials);
+    expect(m.getCredentials()).toEqual(credentials);
+    expect(keychain.has(m.LEGACY_AUTH_KEY)).toBe(false);
+    // Read once more after that success, and not again.
+    await m.loadCredentials();
+    expect(SecureStore.getItemAsync).toHaveBeenCalledTimes(4);
+  });
+
+  it('shares a read in flight, even one that fails', async () => {
+    jest
+      .mocked(SecureStore.getItemAsync)
+      .mockRejectedValueOnce(new Error('keystore'));
+    const [a, b] = await Promise.all([
+      m.loadCredentials(),
+      m.loadCredentials(),
+    ]);
+    expect([a, b]).toEqual([null, null]);
+    expect(SecureStore.getItemAsync).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps a login that finished while a read failed', async () => {
+    jest
+      .mocked(SecureStore.getItemAsync)
+      .mockRejectedValueOnce(new Error('keystore'));
+    const loading = m.loadCredentials();
+    await m.saveCredentials(credentials);
+    await expect(loading).resolves.toEqual(credentials);
+  });
+
   it('moves a logged-in 18.0.3 install to the new key', async () => {
     keychain.set(m.LEGACY_AUTH_KEY, legacyAuth(credentials));
     await expect(m.loadCredentials()).resolves.toEqual(credentials);
