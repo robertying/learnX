@@ -152,20 +152,26 @@ let loading: Promise<void> | null = null;
 
 /**
  * Reads the saved login into memory, then resolves to the current one. Safe to
- * call more than once: storage is read only the first time, and later calls
- * resolve to the login as it is now (after a logout or a login as someone
- * else), not as it was at that first read. Resolves to null if nothing is
- * saved or the read fails.
+ * call more than once: storage is read only until a read succeeds, and later
+ * calls resolve to the login as it is now (after a logout or a login as
+ * someone else), not as it was at that read. Resolves to null if nothing is
+ * saved or the read fails. A failed read is tried again by the next call: the
+ * keychain can refuse it for a while (a background task on a locked iPhone
+ * reading the legacy key, a passing Keystore error), and the saved login must
+ * not look logged out until the app is restarted.
  */
 export const loadCredentials = async () => {
-  loading ??= read()
-    .catch(() => null)
-    .then(credentials => {
+  loading ??= read().then(
+    credentials => {
       // A login that finished while the read was in flight wins.
       if (!getCredentials()) {
         useCredentialsStore.setState({ credentials });
       }
-    });
+    },
+    () => {
+      loading = null;
+    },
+  );
   await loading;
   return getCredentials();
 };
