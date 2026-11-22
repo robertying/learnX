@@ -40,6 +40,8 @@ module Release
 
   # CURRENT_PROJECT_VERSION: the project level sets it for the app and the
   # share extension, and the widget target sets its own. All of them must match.
+  # The committed number is only what local builds get: release builds pass
+  # their own (next_build).
   def self.build_numbers(pbxproj)
     pbxproj.scan(/CURRENT_PROJECT_VERSION = (\d+);/).flatten.map(&:to_i)
   end
@@ -48,8 +50,8 @@ module Release
     pbxproj.scan(/MARKETING_VERSION = [\d.]+;/).size
   end
 
-  # What's out of step with package.json's version and the build number, as
-  # names of the settings; none when everything matches.
+  # What's out of step with package.json's version and the committed build
+  # number, as names of the settings; none when everything matches.
   def self.version_problems(version, pbxproj, gradle)
     builds = build_numbers(pbxproj)
     problems = []
@@ -60,30 +62,41 @@ module Release
     problems
   end
 
-  # The build number `bump` moves to: a new version starts at the next
+  # The build number a release build gets. It's never committed: main keeps
+  # the app version (committed with the runtime version, in a pull request),
+  # and `bump` writes each build's number to a git-ignored file next to the
+  # build (build/release/v<version>/build-number), which the build lanes pass
+  # to Xcode, Gradle and electron-builder. A new version starts at the next
   # multiple of 10, a rebuild of the same version adds 1, and both start above
-  # every build the stores already have (`uploaded`, nil when unknown).
-  def self.next_build(current_version, version, build, uploaded = nil)
-    step = ->(base) { version == current_version ? base + 1 : (base / 10 + 1) * 10 }
-    candidate = step.call(build)
-    uploaded && uploaded >= candidate ? step.call(uploaded) : candidate
+  # `highest`: the committed number, this checkout's last build number and
+  # every build the stores already have, since builds uploaded between
+  # releases take numbers too. `built` says whether this version already has a
+  # build (here or in App Store Connect).
+  def self.next_build(highest, built:)
+    built ? highest + 1 : (highest / 10 + 1) * 10
   end
 
-  # The version files' texts moved from `from` to `to` ([version, build]
-  # pairs), checking each setting is replaced as many times as it appears.
+  # Why main's app version can't move from `current` to `target`, or nil.
+  # A version moves only once it has shipped to the production track (its
+  # v<version> tag, which publishing the GitHub release makes): until then
+  # every build of the coming release, betas included, keeps it.
+  def self.version_bump_problem(current, target, released:)
+    return "Invalid version '#{target}': expected x.y.z" unless target.match?(/\A\d+\.\d+\.\d+\z/)
+    return "The version is already #{current}" if target == current
+    return "v#{current} hasn't shipped to production yet (no v#{current} tag), so the coming release stays #{current}: a version moves only once the last one shipped" unless released
+    return "#{target} isn't above #{current}" unless Gem::Version.new(target) > Gem::Version.new(current)
+
+    nil
+  end
+
+  # The version files' texts moved from version `from` to `to`, checking each
+  # setting is replaced as many times as it appears. Build numbers stay.
   def self.bump_texts(texts, from:, to:)
-    (from_version, from_build), (to_version, to_build) = from, to
     package_json, pbxproj, gradle = texts.values_at(:package_json, :pbxproj, :gradle)
     {
-      package_json: replace(package_json, "package.json", %("version": "#{from_version}"), %("version": "#{to_version}"), 1),
-      pbxproj: replace(
-        replace(pbxproj, "project.pbxproj", "MARKETING_VERSION = #{from_version};", "MARKETING_VERSION = #{to_version};", marketing_version_count(pbxproj)),
-        "project.pbxproj", "CURRENT_PROJECT_VERSION = #{from_build};", "CURRENT_PROJECT_VERSION = #{to_build};", build_numbers(pbxproj).size
-      ),
-      gradle: replace(
-        replace(gradle, "build.gradle", %(versionName = "#{from_version}"), %(versionName = "#{to_version}"), 1),
-        "build.gradle", "versionCode = #{android_version_code(from_build)}", "versionCode = #{android_version_code(to_build)}", 1
-      ),
+      package_json: replace(package_json, "package.json", %("version": "#{from}"), %("version": "#{to}"), 1),
+      pbxproj: replace(pbxproj, "project.pbxproj", "MARKETING_VERSION = #{from};", "MARKETING_VERSION = #{to};", marketing_version_count(pbxproj)),
+      gradle: replace(gradle, "build.gradle", %(versionName = "#{from}"), %(versionName = "#{to}"), 1),
     }
   end
 

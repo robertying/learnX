@@ -7,9 +7,9 @@
 
 const { execFileSync } = require('child_process');
 
-// The version and build number change with every `pnpm bump` and don't make
-// a build's native code any different to the JS it runs, so these lines of
-// the files that hold them don't count: a release that changes only JS keeps
+// The app version and the committed build number don't make a build's native
+// code any different to the JS it runs, so these lines of the files that hold
+// them don't count: a release that changes only JS keeps
 // the runtime version, which is set in app.json, not taken from the app's
 // version.
 const versionLines = {

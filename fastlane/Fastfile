@@ -35,12 +35,25 @@ def app_version
   JSON.parse(File.read(PACKAGE_JSON))["version"]
 end
 
-def build_numbers
-  Release.build_numbers(File.read(PBXPROJ))
+# The build number in the Xcode project and build.gradle: what local builds
+# get. Release builds never change it (Release.next_build).
+def committed_build_number
+  Release.build_numbers(File.read(PBXPROJ)).max
 end
 
+# This version's release build number, which `bump` keeps out of the repo.
+def build_number_path(version = app_version)
+  File.join(ROOT, "build/release/v#{version}/build-number")
+end
+
+def local_build_number(version = app_version)
+  path = build_number_path(version)
+  File.exist?(path) ? File.read(path).strip.to_i : nil
+end
+
+# The build number release builds and uploads use.
 def build_number
-  build_numbers.max
+  local_build_number || UI.user_error!("No build number for v#{app_version} in #{build_number_path}: run `pnpm bump`")
 end
 
 def android_version_code
@@ -51,7 +64,7 @@ def verify_versions!
   problems = Release.version_problems(app_version, File.read(PBXPROJ), File.read(GRADLE))
   return if problems.empty?
 
-  UI.user_error!("#{problems.join(', ')} out of sync with package.json #{app_version} (build #{build_number}). Run `bundle exec fastlane bump`.")
+  UI.user_error!("#{problems.join(', ')} out of sync with package.json #{app_version} (build #{committed_build_number}).")
 end
 
 # ---------------------------------------------------------------------------
@@ -229,6 +242,9 @@ def last_release_tag
   Dir.chdir(ROOT) { `git tag --list 'v*' --sort=-creatordate`.lines.map(&:strip) }.first
 end
 
+# Whether `version` has shipped to the production track: publishing its
+# GitHub release, which goes out with the store releases, makes the v<version>
+# tag. Betas (TestFlight, Play testing tracks) don't count.
 def tagged?(version)
   fetch_tags
   Dir.chdir(ROOT) { system("git rev-parse -q --verify refs/tags/v#{version} > /dev/null") }
@@ -238,7 +254,7 @@ end
 # use_claude is false or Claude Code isn't available or fails.
 def write_notes(use_claude: true)
   if tagged?(app_version)
-    UI.user_error!("v#{app_version} is already released. Run `bundle exec fastlane bump version:x.y.z` first, so the notes are for the next version.")
+    UI.user_error!("v#{app_version} is already released. Bump the version on main first (`pnpm bump minor`, in a pull request), so the notes are for the next version.")
   end
   path = default_notes_path
   FileUtils.mkdir_p(File.dirname(path))
@@ -404,7 +420,9 @@ def build_apple(platform)
 
   # react-native-xcode.sh writes the composed Hermes source map to SOURCEMAP_FILE.
   # gym passes xcargs to the export too, so the auth args must not also go in export_xcargs.
-  xcargs = ["-allowProvisioningUpdates", *xcode_auth_args, "SOURCEMAP_FILE=#{map}"]
+  # The build number goes on the command line, which sets it for every target
+  # (the app and its extensions), so the project file keeps the committed one.
+  xcargs = ["-allowProvisioningUpdates", *xcode_auth_args, "CURRENT_PROJECT_VERSION=#{build_number}", "SOURCEMAP_FILE=#{map}"]
   options = {
     workspace: File.join(ROOT, "ios/learnX.xcworkspace"),
     scheme: "learnX",
@@ -604,13 +622,18 @@ def build_android
   # googlePlay makes the AAB, github the APKs that update themselves in the app.
   # Separate runs: ABI splits are off while building an AAB (android/app/build.gradle).
   without_ci do
+    # The build number goes in as a Gradle property (android/app/build.gradle),
+    # so build.gradle keeps the committed one.
+    properties = { "learnxBuildNumber" => build_number.to_s }
     gradle(
       project_dir: File.join(ROOT, "android"),
       tasks: ["app:bundleGooglePlayRelease", "app:uploadCrashlyticsSymbolFileGooglePlayRelease"],
+      properties: properties,
     )
     gradle(
       project_dir: File.join(ROOT, "android"),
       tasks: ["app:assembleGithubRelease", "app:uploadCrashlyticsSymbolFileGithubRelease"],
+      properties: properties,
     )
   end
 
@@ -755,6 +778,7 @@ end
 # here with the release .env's mock login, as the mobile release bundles are.
 def build_electron(options)
   verify_versions!
+  build_number
   platforms = electron_platforms(options)
   started = start_build_record("electron")
   FileUtils.rm_rf(electron_out_dir)
@@ -773,7 +797,7 @@ def build_electron(options)
     # Outside Bundler's environment: its RUBYOPT and BUNDLE_GEMFILE would
     # load this Gemfile into the Ruby that electron-builder's fpm (the .deb)
     # brings, which then fails for gems it doesn't have.
-    Bundler.with_unbundled_env { sh("pnpm", "electron:package", *flags) }
+    Bundler.with_unbundled_env { sh("pnpm", "electron:package", *flags, "--build", build_number.to_s) }
     check_bundle_env!(Dir[File.join(ROOT, "build/electron/web/_expo/static/js/web/*.js")])
     FileUtils.cp(electron_release_files(File.join(ROOT, "build/electron/dist")), electron_out_dir)
   end
@@ -947,6 +971,18 @@ def uploaded_builds
   [builds, errors]
 end
 
+# Whether App Store Connect has an iOS build of `version`, so the next one
+# is a rebuild (false when it can't tell).
+def asc_has_version?(version)
+  return false unless asc_api_key?
+
+  app_store_connect_api_key
+  latest_testflight_build_number(app_identifier: APP_IDENTIFIER, platform: "ios", version: version, initial_build_number: 0).to_i.positive?
+rescue StandardError => e
+  UI.important("Couldn't check App Store Connect for builds of v#{version}: #{e.message}")
+  false
+end
+
 # ---------------------------------------------------------------------------
 # GitHub checks
 
@@ -1048,10 +1084,13 @@ def preflight(options)
     end
   end
   check.call("Versions in sync") { verify_versions! && nil }
-  check.call("v#{app_version} not released yet") { tagged?(app_version) ? "v#{app_version} is tagged: run `pnpm bump`" : nil }
-  check.call("Build #{build_number} above every uploaded build") do
+  check.call("v#{app_version} not released yet") { tagged?(app_version) ? "v#{app_version} is tagged: bump the version on main in a pull request (`pnpm bump minor`)" : nil }
+  build = local_build_number
+  check.call("Build #{build || '(none)'} above every uploaded build") do
+    next "no build number for v#{app_version}: run `pnpm bump`" unless build
+
     uploaded, errors = uploaded_builds
-    taken = uploaded.select { |_, build| build >= build_number }
+    taken = uploaded.select { |_, uploaded_build| uploaded_build >= build }
     next "#{taken.map { |name, build| "#{name} has #{build}" }.join(', ')}: run `pnpm bump`, which starts above them" unless taken.empty?
     next "couldn't check #{errors.join('; ')}" unless errors.empty?
 
@@ -1105,7 +1144,7 @@ def preflight(options)
     end
   end
 
-  UI.header("Preflight v#{app_version} (#{build_number}) at #{sha[0, 8]}")
+  UI.header("Preflight v#{app_version} (#{build || 'no build number'}) at #{sha[0, 8]}")
   results.each do |name, problem, warn|
     if problem.nil?
       UI.success("✓ #{name}")
@@ -1123,44 +1162,54 @@ end
 # ---------------------------------------------------------------------------
 # Lanes
 
-desc "Set the app version everywhere and bump the build number."
-desc "A new version moves the build number to the next multiple of 10; the same version adds 1 (a rebuild)."
-desc "Either way it starts above the highest build App Store Connect and Google Play already have (uploads between releases take numbers too); remote:false skips that check."
-desc "build: sets the build number itself, which must be above the current one."
-desc "Usage: bundle exec fastlane bump version:18.1.0 build:<number> [remote:false]   (no version: rebuild of the current one; no build: the rule above)"
+desc "With version: moves main's app version on every platform, for a pull request; only once the current version has shipped (its v<version> tag),"
+desc "since every build of a coming release, betas included, keeps its version. Without: picks this version's next release build number,"
+desc "which stays out of the repo (build/release/v<version>/build-number, which the build lanes pass to Xcode, Gradle and electron-builder)."
+desc "A version's first build starts at the next multiple of 10, later ones add 1, and both start above every build App Store Connect and Google Play"
+desc "already have (uploads between releases take numbers too); remote:false skips asking them. build: sets the number itself."
+desc "Usage: bundle exec fastlane bump [version:19.1.0] | [build:<number>] [remote:false]"
 lane :bump do |options|
-  current = app_version
-  build = build_number
-  version = (options[:version] || current).to_s.delete_prefix("v")
-  UI.user_error!("Invalid version '#{version}': expected x.y.z") unless version.match?(/\A\d+\.\d+\.\d+\z/)
   verify_versions!
+  current = app_version
+  if options[:version]
+    UI.user_error!("version: and build: go in separate runs: the version is committed, the build number isn't") if options[:build]
+    version = options[:version].to_s.delete_prefix("v")
+    problem = Release.version_bump_problem(current, version, released: tagged?(current))
+    UI.user_error!(problem) if problem
 
-  new_build = Release.next_build(current, version, build)
+    paths = { package_json: PACKAGE_JSON, pbxproj: PBXPROJ, gradle: GRADLE }
+    texts = Release.bump_texts(paths.transform_values { |path| File.read(path) }, from: current, to: version)
+    paths.each { |key, path| File.write(path, texts[key]) }
+    UI.success("#{current} -> #{version}. Commit it in a pull request, with the runtime version if native code changed (\"Over-the-air updates\" in AGENTS.md).")
+    next
+  end
+
+  local = local_build_number
   if options[:build]
     UI.user_error!("Invalid build '#{options[:build]}': expected a whole number") unless options[:build].to_s.match?(/\A\d+\z/)
     new_build = options[:build].to_i
-    UI.user_error!("Build #{new_build} must be above the current build #{build}") unless new_build > build
-  elsif !Release.off?(options[:remote])
-    uploaded, errors = uploaded_builds
-    errors.each { |error| UI.important("Couldn't check the uploaded builds of #{error}") }
-    highest = uploaded.values.max
-    new_build = Release.next_build(current, version, build, highest)
-    if highest && highest >= Release.next_build(current, version, build)
-      UI.important("Uploaded builds go up to #{highest} (#{uploaded.map { |name, b| "#{name} #{b}" }.join(', ')}), so the next is #{new_build}")
+  else
+    highest = [committed_build_number, local].compact.max
+    built = !local.nil?
+    unless Release.off?(options[:remote])
+      uploaded, errors = uploaded_builds
+      errors.each { |error| UI.important("Couldn't check the uploaded builds of #{error}") }
+      highest = [highest, *uploaded.values].max
+      built ||= asc_has_version?(current)
+      UI.important("Uploaded builds go up to #{uploaded.values.max} (#{uploaded.map { |name, b| "#{name} #{b}" }.join(', ')})") unless uploaded.empty?
     end
+    new_build = Release.next_build(highest, built: built)
   end
-  paths = { package_json: PACKAGE_JSON, pbxproj: PBXPROJ, gradle: GRADLE }
-  texts = Release.bump_texts(paths.transform_values { |path| File.read(path) }, from: [current, build], to: [version, new_build])
-  paths.each { |key, path| File.write(path, texts[key]) }
-  new_code = Release.android_version_code(new_build)
-
-  UI.success("#{current} (#{build}) -> #{version} (#{new_build}, Android #{new_code})")
+  UI.user_error!("Build #{new_build} must be above this version's last build #{local}") if local && new_build <= local
+  FileUtils.mkdir_p(File.dirname(build_number_path))
+  File.write(build_number_path, "#{new_build}\n")
+  UI.success("v#{current} build #{local || '(none)'} -> #{new_build} (Android #{Release.android_version_code(new_build)}), in #{build_number_path}")
 end
 
 desc "Write the release notes with Claude Code (`claude -p` and the release-notes skill) for review."
 desc "Saves build/release/v<version>/release-notes.md, which the release lanes use when no notes: is given."
 desc "Without Claude Code (or with claude:false), writes a draft with the commit list and TODOs to fill in."
-desc "Usage: bundle exec fastlane notes [claude:false]   (run `bump` first, so the version is the new one)"
+desc "Usage: bundle exec fastlane notes [claude:false]"
 lane :notes do |options|
   path = write_notes(use_claude: use_claude?(options))
   print_notes(path)

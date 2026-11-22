@@ -5,12 +5,16 @@
 // fingerprint.config.js) at the current runtime version:
 // - native code changed and that runtime version has shipped (a v<version>
 //   tag exists): an update published for it would reach builds whose native
-//   code can't run it. Set it to the app version of the release this goes in
-//   (AGENTS.md, "Over-the-air updates").
+//   code can't run it. Set it to the app version of the release this goes in,
+//   which is main's app version unless that has shipped too; then move main's
+//   app version first (`pnpm bump minor`). The two move together (AGENTS.md,
+//   "Over-the-air updates").
 // - native code changed before that version shipped: no build has it yet, so
 //   only the record changes.
 // - runtime version changed with no native change: older builds would stop
 //   getting updates for nothing. Put it back.
+// - the runtime version isn't main's app version after it moved, or is ahead
+//   of it: it's always the app version of a release.
 // Record the new state with `pnpm ota:check --write`.
 // Fingerprints can differ between checkouts (untracked files a build or tool
 // left in one), so CI's, from a clean checkout, are the ones to record: a
@@ -78,13 +82,23 @@ const changedSources = (recorded = {}, current = {}) =>
     key => recorded[key] !== current[key],
   );
 
+/** Whether x.y.z version `a` is below `b`. */
+const below = (a, b) => {
+  const [x, y] = [a, b].map(v => v.split('.').map(Number));
+  const i = x.findIndex((part, index) => part !== y[index]);
+  return i !== -1 && x[i] < y[i];
+};
+
 /**
  * What to tell the developer, or null when the record matches. `released`
- * says whether the recorded runtime version has shipped; it asks origin, so
- * it's only called when native code changed (the check works offline
- * otherwise).
+ * says whether a version has shipped; it asks origin, so it's only called
+ * when native code changed (the check works offline otherwise). `appVersion`
+ * is package.json's.
  */
-export const verdict = (recorded, current, released) => {
+export const verdict = (recorded, current, released, appVersion) => {
+  if (below(appVersion, current.runtimeVersion)) {
+    return `The app version ${appVersion} is behind the over-the-air runtime version ${current.runtimeVersion}, which is always the app version of a release: move the app version to ${current.runtimeVersion} (\`pnpm bump ${current.runtimeVersion}\`).`;
+  }
   const nativeChanged =
     recorded.ios !== current.ios || recorded.android !== current.android;
   const changes = ['ios', 'android']
@@ -100,13 +114,23 @@ export const verdict = (recorded, current, released) => {
   }
   const record = `Record it in ota-fingerprint.json:\n${JSON.stringify(current, null, 2)}`;
   if (nativeChanged && !runtimeChanged) {
-    if (!released()) {
+    if (!released(current.runtimeVersion)) {
       return `Native code changed (${changes}) before ${current.runtimeVersion} shipped, so the runtime version can stay. ${record}`;
     }
-    return `Native code changed (${changes}) but the over-the-air runtime version is still ${current.runtimeVersion}, which has shipped: set runtimeVersion in app.json to the app version of the release this goes in ("Over-the-air updates" in AGENTS.md). ${record}`;
+    const next =
+      appVersion !== current.runtimeVersion && !released(appVersion)
+        ? `set runtimeVersion in app.json to ${appVersion}, the app version of the coming release`
+        : `move the app version to the coming release's (\`pnpm bump minor\`, or patch or major), since ${appVersion} has shipped too, and set runtimeVersion in app.json to the same version`;
+    return `Native code changed (${changes}) but the over-the-air runtime version is still ${current.runtimeVersion}, which has shipped: ${next} ("Over-the-air updates" in AGENTS.md). ${record}`;
   }
   if (runtimeChanged && !nativeChanged) {
     return `The over-the-air runtime version changed from ${recorded.runtimeVersion} to ${current.runtimeVersion} with no native change, so older builds would stop getting updates: put it back to ${recorded.runtimeVersion}.`;
+  }
+  if (current.runtimeVersion !== appVersion) {
+    return `The over-the-air runtime version moved to ${current.runtimeVersion}, but the app version is ${appVersion}: they move together, so set both to the coming release's version ("Over-the-air updates" in AGENTS.md).`;
+  }
+  if (released(current.runtimeVersion)) {
+    return `The over-the-air runtime version moved to ${current.runtimeVersion}, which has already shipped with other native code: move the app version to the coming release's (\`pnpm bump minor\`, or patch or major) and set runtimeVersion to the same version ("Over-the-air updates" in AGENTS.md).`;
   }
   return `Native code and the runtime version changed. ${record}`;
 };
@@ -126,6 +150,9 @@ const main = () => {
   const { runtimeVersion } = JSON.parse(
     readFileSync(join(root, 'app.json'), 'utf8'),
   );
+  const { version: appVersion } = JSON.parse(
+    readFileSync(join(root, 'package.json'), 'utf8'),
+  );
   const ios = fingerprint('ios');
   const android = fingerprint('android');
   const current = {
@@ -141,9 +168,7 @@ const main = () => {
     return;
   }
   const recorded = JSON.parse(readFileSync(recordPath, 'utf8'));
-  const message = verdict(recorded, current, () =>
-    isReleased(recorded.runtimeVersion),
-  );
+  const message = verdict(recorded, current, isReleased, appVersion);
   if (message) {
     console.error(message);
     const prints = { ios, android };
