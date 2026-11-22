@@ -1,6 +1,7 @@
-// fingerprint.config.js's hook: the version and build number that `pnpm bump`
-// moves aren't part of the native fingerprint, so a bump keeps
-// ota-fingerprint.json valid and a JS-only release keeps its runtime version.
+// fingerprint.config.js's hook: the app version that `pnpm bump` moves and
+// the committed build number aren't part of the native fingerprint, so a bump
+// keeps ota-fingerprint.json valid and a JS-only release keeps its runtime
+// version.
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { FileHookTransformFunction } from '@expo/fingerprint';

@@ -8,7 +8,7 @@ import {
 
 const root = path.join(__dirname, '..', '..');
 
-it('reads the build number pnpm bump keeps', () => {
+it("reads the Xcode project's build number", () => {
   expect(
     buildNumberOf(
       'CURRENT_PROJECT_VERSION = 4544;\nCURRENT_PROJECT_VERSION = 4544;',
