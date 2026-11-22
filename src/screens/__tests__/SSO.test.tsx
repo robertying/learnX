@@ -123,12 +123,50 @@ it('keeps the page on Tsinghua sites and opens other links outside', async () =>
   expect(load('https://cdn.example/frame', false)).toBe(true);
   expect(load('https://example.com/help')).toBe(false);
   expect(openURL).toHaveBeenCalledWith('https://example.com/help');
-  // The sites' own http links stay, as before.
-  expect(load('http://learn.tsinghua.edu.cn/')).toBe(true);
   expect(load('https://tsinghua.edu.cn.example.com/')).toBe(false);
+  expect(load('http://tsinghua.edu.cn.example.com/')).toBe(false);
   expect(load('weixin://dl')).toBe(false);
-  expect(openURL).toHaveBeenCalledTimes(2);
+  expect(openURL).toHaveBeenCalledTimes(3);
   expect(useAuthStore.getState().ssoInProgress).toBe(true);
+});
+
+it('goes to Tsinghua sites over https when the page goes there over http', async () => {
+  const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined);
+  await renderScreen();
+  const injectJavaScript = jest.fn();
+  mockProps.ref.current = { injectJavaScript };
+  const load = (url: string, isTopFrame?: boolean) =>
+    mockProps.onShouldStartLoadWithRequest({ url, isTopFrame });
+
+  expect(load('http://id.tsinghua.edu.cn/do/x?a=1#f')).toBe(false);
+  expect(injectJavaScript).toHaveBeenCalledWith(
+    'location.replace("https://id.tsinghua.edu.cn/do/x?a=1#f"); true;',
+  );
+  // A frame isn't moved; the system refuses its cleartext load.
+  expect(load('http://learn.tsinghua.edu.cn/frame', false)).toBe(true);
+  expect(injectJavaScript).toHaveBeenCalledTimes(1);
+  expect(openURL).not.toHaveBeenCalled();
+});
+
+it('logs in when the SSO hands over to Web Learning over http', async () => {
+  await renderScreen();
+  const injectJavaScript = jest.fn();
+  mockProps.ref.current = { injectJavaScript };
+  await submit({
+    fingerPrint: 'fp',
+    fingerGenPrint: 'g',
+    fingerGenPrint3: 'g3',
+  });
+
+  expect(
+    mockProps.onShouldStartLoadWithRequest({
+      url: 'http://learn.tsinghua.edu.cn/f/j_spring_security_thauth_roaming_entry?ticket=1',
+    }),
+  ).toBe(false);
+  expect(login).toHaveBeenCalledWith(
+    expect.objectContaining({ fingerPrint: 'fp' }),
+  );
+  expect(injectJavaScript).not.toHaveBeenCalled();
 });
 
 it('lets the app log in by itself again once the page is left without a login', async () => {

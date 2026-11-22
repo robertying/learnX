@@ -12,7 +12,10 @@ export const allowedHost = (host: string): boolean =>
   host.endsWith('.tsinghua.edu.cn') ||
   host === 'tsinghua.app';
 
-/** Whether the main process may fetch `url`: http(s) to an allowed host. */
+/**
+ * Whether the main process may fetch `url`: https to an allowed host. Never
+ * plain http, which would send the login cookies in the clear.
+ */
 export const allowedUrl = (url: string): boolean => {
   let parsed;
   try {
@@ -20,10 +23,25 @@ export const allowedUrl = (url: string): boolean => {
   } catch {
     return false;
   }
-  return (
-    (parsed.protocol === 'https:' || parsed.protocol === 'http:') &&
-    allowedHost(parsed.hostname)
-  );
+  return parsed.protocol === 'https:' && allowedHost(parsed.hostname);
+};
+
+/**
+ * `url` over https when it's plain http to an allowed host, which all serve
+ * https; null for anything else.
+ */
+export const httpsUrl = (url: string): string | null => {
+  let parsed;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return null;
+  }
+  if (parsed.protocol !== 'http:' || !allowedHost(parsed.hostname)) {
+    return null;
+  }
+  parsed.protocol = 'https:';
+  return parsed.toString();
 };
 
 export type FetchRequest = {
@@ -61,17 +79,23 @@ export const TIMEOUT_MS = { idle: 60_000, upload: 5 * 60_000 };
  * Sends a request with `net.request`, following redirects itself to record
  * the final URL: Electron's `net.fetch` leaves `Response.url` empty and can't
  * take `redirect: 'manual'`, and thu-learn-lib reads the final URL (an expired
- * session ends on login_timeout). A redirect off the allowed sites is refused.
+ * session ends on login_timeout). An http URL on the allowed sites, given or
+ * redirected to, is sent over https; a redirect off them is refused.
  */
+const MAX_UPGRADES = 20;
+
 export const mainFetch = (
   net: Pick<typeof Electron.net, 'request'>,
   session: Electron.Session,
   req: FetchRequest,
   signal?: AbortSignal,
   timeoutMs: { idle: number; upload: number } = TIMEOUT_MS,
+  /** Redirects to http already sent over https, as Chromium caps its own. */
+  upgrades = 0,
 ): Promise<FetchResponse> =>
   new Promise((resolve, reject) => {
-    if (!allowedUrl(req.url)) {
+    const target = httpsUrl(req.url) ?? req.url;
+    if (!allowedUrl(target)) {
       reject(new Error(`Not an allowed URL: ${req.url}`));
       return;
     }
@@ -101,10 +125,10 @@ export const mainFetch = (
         ms,
       );
     };
-    let url = req.url;
+    let url = target;
     let redirected = false;
     const request = net.request({
-      url: req.url,
+      url: target,
       method: req.method,
       session,
       credentials: req.credentials === 'omit' ? 'omit' : 'include',
@@ -114,7 +138,34 @@ export const mainFetch = (
     for (const [name, value] of req.headers) {
       request.setHeader(name, value);
     }
-    request.on('redirect', (_status, _method, redirectUrl) => {
+    request.on('redirect', (status, method, redirectUrl) => {
+      const upgraded = httpsUrl(redirectUrl);
+      if (upgraded && upgrades < MAX_UPGRADES) {
+        // net.request can't be pointed elsewhere, so this one stops and the
+        // redirect continues over https as a new request, with the method
+        // (and body) the redirect asks for.
+        if (settle()) {
+          request.abort();
+          const sameMethod = method === req.method;
+          mainFetch(
+            net,
+            session,
+            {
+              ...req,
+              url: upgraded,
+              method,
+              body: sameMethod ? req.body : undefined,
+              headers: sameMethod
+                ? req.headers
+                : req.headers.filter(([name]) => !/^content-/i.test(name)),
+            },
+            signal,
+            timeoutMs,
+            upgrades + 1,
+          ).then(res => resolve({ ...res, redirected: true }), reject);
+        }
+        return;
+      }
       if (!allowedUrl(redirectUrl)) {
         fail(new Error(`Redirected off the allowed sites: ${redirectUrl}`));
         return;
