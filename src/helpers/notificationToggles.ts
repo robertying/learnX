@@ -38,3 +38,16 @@ export const notificationToggles: Record<
 
 /** New content, in the tabs' order: the first section on both pages. */
 export const newContentToggles = ['notices', 'assignments', 'files'] as const;
+
+/**
+ * What the background sync finds while learnX isn't open, so what stops
+ * when the system doesn't let it run. Reminders are scheduled ahead and
+ * still come.
+ */
+export const syncedToggles = [
+  ...newContentToggles,
+  'grades',
+  'deadlineChanges',
+  'groupSubmissions',
+  'appUpdates',
+] as const satisfies NotificationToggle[];

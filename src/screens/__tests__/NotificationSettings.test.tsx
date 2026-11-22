@@ -8,6 +8,7 @@ import {
 import { toast } from 'components/Toast';
 import { getSettings, resetSettings, setSetting } from 'data/settings';
 import { t } from 'helpers/i18n';
+import { syncedToggles } from 'helpers/notificationToggles';
 import { openSystemSettings } from 'helpers/systemSettings';
 import useNotificationPermission from 'hooks/useNotificationPermission';
 import NotificationSettings from 'screens/NotificationSettings';
@@ -31,6 +32,7 @@ const permission = (
     request,
     exactAlarms: true,
     requestExact,
+    backgroundRefresh: 'on',
     ...overrides,
   });
 
@@ -186,6 +188,72 @@ it('says when the Electron app notifies, with no system settings to open', async
     screen.getByText(t('notifyDeadlineRemindersCaptionElectron')),
   ).toBeTruthy();
   expect(screen.queryByText(t('openSystemSettings'))).toBeNull();
+});
+
+describe('background refresh', () => {
+  const turnOnFiles = () =>
+    setSetting('notifications', {
+      ...getSettings().notifications,
+      files: true,
+    });
+
+  it('says when it is off and opens the system settings', async () => {
+    permission({ backgroundRefresh: 'off' });
+    turnOnFiles();
+    await renderScreen();
+    expect(screen.getByText(t('backgroundRefreshOffCaption'))).toBeTruthy();
+    await userEvent.press(screen.getByText(t('turnOnBackgroundRefresh')));
+    expect(openSystemSettings).toHaveBeenCalledWith('backgroundRefresh');
+  });
+
+  it('says so on Android in its own words', async () => {
+    jest.replaceProperty(Platform, 'OS', 'android');
+    permission({ backgroundRefresh: 'off' });
+    turnOnFiles();
+    await renderScreen();
+    expect(
+      screen.getByText(t('backgroundUsageRestrictedCaption')),
+    ).toBeTruthy();
+    expect(screen.getByText(t('allowBackgroundUsage'))).toBeTruthy();
+  });
+
+  it('only explains when the device does not allow it', async () => {
+    permission({ backgroundRefresh: 'managed' });
+    turnOnFiles();
+    await renderScreen();
+    expect(screen.getByText(t('backgroundRefreshManagedCaption'))).toBeTruthy();
+    expect(screen.queryByTestId('background-refresh-turn-on')).toBeNull();
+  });
+
+  it.each(['on', 'lowPower', null] as const)(
+    'says nothing when it is %s',
+    async backgroundRefresh => {
+      permission({ backgroundRefresh });
+      turnOnFiles();
+      await renderScreen();
+      expect(screen.queryByTestId('background-refresh-turn-on')).toBeNull();
+    },
+  );
+
+  it('says nothing when only reminders are on, which still come', async () => {
+    permission({ backgroundRefresh: 'off' });
+    setSetting('notifications', {
+      ...getSettings().notifications,
+      ...Object.fromEntries(syncedToggles.map(key => [key, false])),
+      deadlineReminders: true,
+      classReminders: true,
+    });
+    await renderScreen();
+    expect(screen.queryByTestId('background-refresh-turn-on')).toBeNull();
+  });
+
+  it('waits for notifications to be allowed first', async () => {
+    permission({ permission: 'denied', backgroundRefresh: 'off' });
+    turnOnFiles();
+    await renderScreen();
+    expect(screen.getByTestId('notifications-turn-on')).toBeTruthy();
+    expect(screen.queryByTestId('background-refresh-turn-on')).toBeNull();
+  });
 });
 
 describe('New Versions', () => {
