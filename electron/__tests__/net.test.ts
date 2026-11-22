@@ -205,16 +205,70 @@ it('sends plain http on the allowed sites over https', async () => {
   });
 });
 
-it('refuses a redirect to plain http', async () => {
+it('follows a redirect to plain http on the allowed sites over https', async () => {
+  const { net, requests } = fakeNet();
+  const pending = mainFetch(net, session, {
+    url: 'https://learn.tsinghua.edu.cn/f/login',
+    method: 'POST',
+    headers: [
+      ['content-type', 'text/plain'],
+      ['x-one', 'v'],
+    ],
+    body: new TextEncoder().encode('hi').buffer,
+  });
+  // A 302 after a POST goes on as a GET, without the body.
+  requests[0].emit('redirect', 302, 'GET', 'http://learn.tsinghua.edu.cn/f');
+  expect(requests[0].followed).toBe(0);
+  expect(requests[0].aborted).toBe(true);
+  expect(requests[1].options).toMatchObject({
+    url: 'https://learn.tsinghua.edu.cn/f',
+    method: 'GET',
+  });
+  expect(requests[1].headers).toEqual({ 'x-one': 'v' });
+  expect(requests[1].written).toEqual([]);
+
+  // A 307 keeps the method and the body.
+  requests[1].emit('redirect', 307, 'GET', 'http://learn.tsinghua.edu.cn/g');
+  expect(requests[2].options).toMatchObject({
+    url: 'https://learn.tsinghua.edu.cn/g',
+    method: 'GET',
+  });
+  respond(requests[2], 200, {}, ['ok']);
+  await expect(pending).resolves.toMatchObject({
+    url: 'https://learn.tsinghua.edu.cn/g',
+    redirected: true,
+    status: 200,
+  });
+});
+
+it('keeps the body when a redirect to http keeps the method', async () => {
+  const { net, requests } = fakeNet();
+  const pending = mainFetch(net, session, {
+    url: 'https://learn.tsinghua.edu.cn/f/login',
+    method: 'POST',
+    headers: [['content-type', 'text/plain']],
+    body: new TextEncoder().encode('hi').buffer,
+  });
+  requests[0].emit('redirect', 307, 'POST', 'http://learn.tsinghua.edu.cn/f');
+  expect(requests[1].options).toMatchObject({ method: 'POST' });
+  expect(requests[1].headers).toEqual({ 'content-type': 'text/plain' });
+  expect(Buffer.concat(requests[1].written).toString()).toBe('hi');
+  respond(requests[1], 200, {}, []);
+  await pending;
+});
+
+it('stops sending redirects to http over https after 20', async () => {
   const { net, requests } = fakeNet();
   const pending = mainFetch(net, session, {
     url: 'https://learn.tsinghua.edu.cn/',
     method: 'GET',
     headers: [],
   });
-  requests[0].emit('redirect', 302, 'GET', 'http://learn.tsinghua.edu.cn/f');
+  for (let i = 0; i <= 20; i++) {
+    requests[i].emit('redirect', 302, 'GET', 'http://learn.tsinghua.edu.cn/');
+  }
   await expect(pending).rejects.toThrow('Redirected off the allowed sites');
-  expect(requests[0].followed).toBe(0);
+  expect(requests).toHaveLength(21);
 });
 
 it('aborts with its signal, and rejects on errors', async () => {
