@@ -4,7 +4,8 @@
 // confirmation, and the page's script fills in learnX's form there. Nothing
 // is sent to Tsinghua: the made-up account is never submitted. Needs
 // id.tsinghua.edu.cn, which CI's runners abroad can't always reach: tagged
-// @network, and skipped (not failed) when it doesn't answer.
+// @network, and skipped (not failed) when it doesn't answer, whether before
+// the test or when the web view loads it.
 import type { Page } from '@playwright/test';
 import { expect, test } from './fixtures.ts';
 import { exact } from './maestroEnv.ts';
@@ -42,10 +43,91 @@ const guest = (window: Page, script: string) =>
     }
   }, script);
 
+interface LoadFailure {
+  code: number;
+  description: string;
+  url: string;
+}
+
+/**
+ * Keeps the web view's failed main frame loads in the page, from the
+ * `did-fail-load` events Electron sends the <webview>. They don't bubble, so
+ * a capturing listener on the document hears them. Call it before the web
+ * view opens.
+ */
+const recordLoadFailures = (window: Page) =>
+  window.evaluate(() => {
+    const failures: LoadFailure[] = [];
+    Object.assign(globalThis, { e2eLoadFailures: failures });
+    document.addEventListener(
+      'did-fail-load',
+      event => {
+        const { errorCode, errorDescription, validatedURL, isMainFrame } =
+          event as Event & {
+            errorCode: number;
+            errorDescription: string;
+            validatedURL: string;
+            isMainFrame: boolean;
+          };
+        if (isMainFrame) {
+          failures.push({
+            code: errorCode,
+            description: errorDescription,
+            url: validatedURL,
+          });
+        }
+      },
+      true,
+    );
+  });
+
+/**
+ * Whether a Chromium net error is the network's: a time out (-7), a changed
+ * network (-21), a connection or host name error (-100 to -199) or an empty
+ * answer (-324). Not a load the app stopped (-3) or blocked (-20), nor a
+ * certificate (-2xx) or other HTTP (-3xx) error.
+ */
+const isNetworkError = (code: number) =>
+  code === -7 ||
+  code === -21 ||
+  code === -324 ||
+  (code <= -100 && code >= -199);
+
+/**
+ * Waits for the web view to show Tsinghua's login page. When the web view
+ * couldn't load it for the network's sake (recordLoadFailures), the site
+ * stopped answering after the check before the test, so this skips as that
+ * check does.
+ */
+const expectSSOPage = async (window: Page) => {
+  let failure: LoadFailure | undefined;
+  await expect
+    .poll(
+      async () => {
+        const failures = await window.evaluate(
+          () =>
+            (globalThis as unknown as { e2eLoadFailures: LoadFailure[] })
+              .e2eLoadFailures,
+        );
+        failure = failures.find(
+          ({ code, url }) => url.startsWith(SSO) && isNetworkError(code),
+        );
+        return failure ? 'failed' : guest(window, 'location.hostname');
+      },
+      { timeout: 30_000 },
+    )
+    .toMatch(/^(?:id\.tsinghua\.edu\.cn|failed)$/);
+  test.skip(
+    failure !== undefined,
+    `${SSO} stopped answering: ${failure?.description} (${failure?.code})`,
+  );
+};
+
 const fillLogin = async (window: Page) => {
   await window.getByTestId('welcome-continue').click();
   await window.getByTestId('login-username').fill(NOBODY);
   await window.getByTestId('login-password').fill('not-a-password');
+  await recordLoadFailures(window);
 };
 
 test(
@@ -56,9 +138,7 @@ test(
     await window.getByRole('button', { name: exact('T_login') }).click();
     await window.getByRole('button', { name: exact('T_continue') }).click();
 
-    await expect
-      .poll(() => guest(window, 'location.hostname'), { timeout: 30_000 })
-      .toBe('id.tsinghua.edu.cn');
+    await expectSSOPage(window);
     // learnX's script filled in the form, which stays unsent.
     await expect
       .poll(
@@ -96,8 +176,6 @@ test(
     await expect(window.locator('webview')).toHaveCount(0);
     // Its own press does.
     await window.keyboard.press('Enter');
-    await expect
-      .poll(() => guest(window, 'location.hostname'), { timeout: 30_000 })
-      .toBe('id.tsinghua.edu.cn');
+    await expectSSOPage(window);
   },
 );
