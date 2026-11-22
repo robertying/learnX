@@ -98,7 +98,7 @@ The E2E flows run on Maestro built from source with learnX's patches (`scripts/e
 | GitHub Actions       | every `uses:` in `.github/workflows/*.yml`, pinned to a full commit SHA with the tag in a comment, as in learnX                                                                                    | as in learnX's inventory                                       |
 
 1. Branch in the library's checkout and move everything above to its latest release, as the [Rules](#rules) say for learnX. A runtime package can only move to a release that still bundles in React Native (Metro): no `node:` modules or Node-only APIs (the library's `AGENTS.md` names the rest).
-2. `pnpm format`, then `pnpm typecheck`, `pnpm lint --deny-warnings`, `pnpm test:coverage` and `pnpm build`, and `npm pack --dry-run` to check the tarball still holds only `lib`, `src`, the license, the readme and `package.json`. Don't run `pnpm test:live`: it logs in with a borrowed account, and its owner says when.
+2. `pnpm format`, then `pnpm typecheck`, `pnpm lint --deny-warnings`, `pnpm test:coverage` and `pnpm build`, and `npm pack --dry-run` to check the tarball still holds only `lib`, `src`, the license, the readme and `package.json`. Don't run `pnpm test:live` unless the maintainer asks for it.
 3. A moved runtime package (or a change in what the library does) goes in the library's `CHANGELOG.md` under the next version. Development-only moves need no entry.
 4. Open its pull request. Releasing is the maintainer's: they merge, bump `version`, and push the tag that publishes to npm. learnX takes the new version in step 4 of [Order](#order) only once it's on npm; if it isn't yet, say so in learnX's pull request and leave the library where it is.
 
