@@ -117,11 +117,11 @@ const zh: typeof en = {
   turnOnBackgroundRefresh: '开启后台App刷新',
   allowBackgroundUsage: '允许后台使用',
   backgroundRefreshOffCaption:
-    '后台App刷新已关闭，learnX未打开时无法检查新内容并发送通知。如果learnX的设置中没有此项，请先在“通用 › 后台App刷新”中开启。',
+    '后台App刷新已关闭，learnX未打开时无法检查新内容并发送通知。如果learnX的设置中没有此项，请先开启“设置 › 通用 › 后台App刷新”。',
   backgroundRefreshManagedCaption:
     '此设备不允许learnX使用后台App刷新，learnX未打开时无法检查新内容并发送通知。',
   backgroundUsageRestrictedCaption:
-    'learnX的后台电池使用受到限制，未打开时无法检查新内容并发送通知。',
+    'learnX的后台使用受到限制，未打开时无法检查新内容并发送通知。',
   allowCalendarAccess: '允许访问日历',
   allowRemindersAccess: '允许访问提醒事项',
   calendarOffCaption: '允许访问日历前，learnX无法更新同步到日历的作业。',
