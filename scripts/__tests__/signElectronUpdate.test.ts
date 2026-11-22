@@ -115,6 +115,17 @@ it('refuses an update file for another version, writing nothing', () => {
 it('finds the committed public key when run as a script', () => {
   const keyFile = path.join(dir, 'key.pem');
   fs.writeFileSync(keyFile, keys.privateKey);
+  // Run as a script, it checks the update files against package.json's
+  // version, which moves with every release.
+  const { version } = JSON.parse(
+    fs.readFileSync(path.join(__dirname, '../../package.json'), 'utf8'),
+  ) as { version: string };
+  for (const name of updateFiles(dir)) {
+    fs.writeFileSync(
+      path.join(dir, name),
+      `version: ${version}\npath: ${name}\n`,
+    );
+  }
   const { status, stderr } = spawnSync(
     'node',
     [
