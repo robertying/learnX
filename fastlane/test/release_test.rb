@@ -75,60 +75,58 @@ class VersionsTest < Minitest::Test
   end
 
   def test_next_build
-    assert_equal 4570, Release.next_build("19.0.0", "19.1.0", 4560)
-    assert_equal 4570, Release.next_build("19.0.0", "19.1.0", 4562)
-    assert_equal 4561, Release.next_build("19.0.0", "19.0.0", 4560)
+    assert_equal 4570, Release.next_build(4560, built: false)
+    assert_equal 4570, Release.next_build(4562, built: false)
+    assert_equal 4561, Release.next_build(4560, built: true)
+    assert_equal 4563, Release.next_build(4562, built: true)
   end
 
-  def test_next_build_starts_above_the_stores
-    assert_equal 4570, Release.next_build("19.0.0", "19.1.0", 4560, 4565)
-    assert_equal 4580, Release.next_build("19.0.0", "19.1.0", 4560, 4570)
-    assert_equal 4564, Release.next_build("19.0.0", "19.0.0", 4560, 4563)
-    assert_equal 4561, Release.next_build("19.0.0", "19.0.0", 4560, nil)
+  def test_version_bump_only_after_the_version_shipped
+    assert_nil Release.version_bump_problem("19.0.0", "19.1.0", released: true)
+    assert_match(/hasn't shipped to production/, Release.version_bump_problem("19.1.0", "19.2.0", released: false))
+    assert_match(/already 19.1.0/, Release.version_bump_problem("19.1.0", "19.1.0", released: true))
+    assert_match(/isn't above/, Release.version_bump_problem("19.1.0", "19.0.9", released: true))
+    assert_match(/isn't above/, Release.version_bump_problem("19.10.0", "19.9.0", released: true))
+    assert_match(/Invalid version/, Release.version_bump_problem("19.1.0", "19.2", released: true))
   end
 
   def test_android_version_code
     assert_equal 9_204_530, Release.android_version_code(4530)
   end
 
-  def bump(texts, to)
-    Release.bump_texts(texts, from: ["19.0.0", 4560], to: to)
-  end
-
   def texts
     { package_json: %({\n  "version": "19.0.0",\n  "dependencies": { "x": "19.0.0" }\n}\n), pbxproj: PBXPROJ, gradle: GRADLE }
   end
 
-  def test_bump_texts
-    bumped = bump(texts, ["19.1.0", 4570])
+  def test_bump_texts_move_only_the_version
+    bumped = Release.bump_texts(texts, from: "19.0.0", to: "19.1.0")
     assert_equal texts[:package_json].sub(%("version": "19.0.0"), %("version": "19.1.0")), bumped[:package_json]
-    assert_equal PBXPROJ.gsub("4560", "4570").gsub("19.0.0", "19.1.0"), bumped[:pbxproj]
-    assert_equal %(versionCode = 9204570\nversionName = "19.1.0"\n), bumped[:gradle]
+    assert_equal PBXPROJ.gsub("19.0.0", "19.1.0"), bumped[:pbxproj]
+    assert_equal %(versionCode = 9204560\nversionName = "19.1.0"\n), bumped[:gradle]
     assert_equal [], Release.version_problems("19.1.0", bumped[:pbxproj], bumped[:gradle])
   end
 
-  def test_a_rebuild_bumps_only_the_build
-    bumped = bump(texts, ["19.0.0", 4561])
-    assert_equal texts[:package_json], bumped[:package_json]
-    assert_equal PBXPROJ.gsub("4560", "4561"), bumped[:pbxproj]
-    assert_equal [], Release.version_problems("19.0.0", bumped[:pbxproj], bumped[:gradle])
-  end
-
   def test_bump_refuses_files_out_of_step
-    error = assert_raises(Release::Error) { bump(texts.merge(gradle: GRADLE.sub("9204560", "9204550")), ["19.1.0", 4570]) }
-    assert_equal %(Expected 1 × "versionCode = 9204560" in build.gradle, found 0), error.message
-    widget_behind = PBXPROJ.sub(/4560;(?=\nMARKETING_VERSION = 19.0.0;\n\z)/, "4559;")
-    assert_raises(Release::Error) { bump(texts.merge(pbxproj: widget_behind), ["19.1.0", 4570]) }
+    error = assert_raises(Release::Error) { Release.bump_texts(texts.merge(gradle: GRADLE.sub("19.0.0", "18.0.0")), from: "19.0.0", to: "19.1.0") }
+    assert_equal %(Expected 1 × "versionName = \\"19.0.0\\"" in build.gradle, found 0), error.message
+    one_behind = PBXPROJ.sub(/19.0.0;\n\z/, "18.0.0;\n")
+    assert_raises(Release::Error) { Release.bump_texts(texts.merge(pbxproj: one_behind), from: "19.0.0", to: "19.1.0") }
   end
 
   def test_the_repo_bumps_cleanly
     files = { package_json: "package.json", pbxproj: "ios/learnX.xcodeproj/project.pbxproj", gradle: "android/app/build.gradle" }
     repo = files.transform_values { |path| File.read(File.join(ROOT, path)) }
     version = JSON.parse(repo[:package_json])["version"]
-    build = Release.build_numbers(repo[:pbxproj]).first
-    bumped = Release.bump_texts(repo, from: [version, build], to: ["99.0.0", build + 10])
+    bumped = Release.bump_texts(repo, from: version, to: "99.0.0")
     assert_equal "99.0.0", JSON.parse(bumped[:package_json])["version"]
     assert_equal [], Release.version_problems("99.0.0", bumped[:pbxproj], bumped[:gradle])
+  end
+
+  # Release builds pass their number to Gradle; build.gradle must use it.
+  def test_gradle_takes_the_release_build_number
+    gradle = File.read(File.join(ROOT, "android/app/build.gradle"))
+    assert_includes gradle, %(findProperty("learnxBuildNumber"))
+    assert_includes gradle, "versionCode = 9_200_000 + (releaseBuild as int)"
   end
 end
 

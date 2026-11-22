@@ -70,7 +70,13 @@ android {
         minSdk = rootProject.ext.minSdkVersion
         targetSdk = rootProject.ext.targetSdkVersion
         versionCode = 9204560
-        versionName = "19.0.0"
+        versionName = "19.1.0"
+        // A release build's number, which is never committed: fastlane's build
+        // lanes pass -PlearnxBuildNumber=<n> (the Xcode builds get the same n).
+        def releaseBuild = findProperty("learnxBuildNumber")
+        if (releaseBuild) {
+            versionCode = 9_200_000 + (releaseBuild as int)
+        }
         // A newer build of the same app for scripts/e2e/e2e-updater.sh to update
         // to: -Pe2eVersion=99.0.<n> names it so and raises the version code
         // by n + 1.

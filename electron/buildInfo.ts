@@ -1,7 +1,8 @@
 // The app's version and build number, which the Electron app shares with
 // the mobile apps: the version is package.json's, and the build number is the
-// Xcode project's CURRENT_PROJECT_VERSION, which `pnpm bump` keeps (as
-// fastlane's `build_number` reads it).
+// Xcode project's CURRENT_PROJECT_VERSION. That's the committed one, which
+// only local builds get: a release build passes its own (`--build`), which is
+// never committed.
 import fs from 'node:fs';
 import path from 'node:path';
 

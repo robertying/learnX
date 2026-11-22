@@ -10,6 +10,9 @@
 //   pnpm electron:package --skip-export      reuse the last web export
 //   pnpm electron:package --dir              the unpacked apps only (x64 and
 //                                            arm64), no installers
+//   pnpm electron:package --build 4570       a release build's number, which
+//                                            is never committed (fastlane's
+//                                            build lane passes it)
 //   pnpm electron:package --allow-placeholder-key
 //                                            installers while the update key
 //                                            is the placeholder: never release
