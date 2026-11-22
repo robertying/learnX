@@ -1,5 +1,6 @@
 // scripts/release/bump.sh turns `pnpm bump …` into the arguments of
-// fastlane's bump lane (which has the version and build rules). A stand-in
+// fastlane's bump lane (which has the version and build rules): a version for
+// main, or a release build number that stays out of the repo. A stand-in
 // `bundle` records what the script would run.
 import { spawnSync } from 'node:child_process';
 import {
@@ -66,18 +67,10 @@ it.each([
 it.each([
   [['--build', '4560'], 'exec fastlane bump build:4560'],
   [['build', '--build', '4560'], 'exec fastlane bump build:4560'],
-  [
-    ['19.0.0', '--build', '4560'],
-    'exec fastlane bump version:19.0.0 build:4560',
-  ],
-  [
-    ['--build', '4560', 'minor'],
-    'exec fastlane bump version:18.5.0 build:4560',
-  ],
   [['--offline'], 'exec fastlane bump remote:false'],
   [
-    ['patch', '--offline', '--build', '4560'],
-    'exec fastlane bump version:18.4.3 build:4560 remote:false',
+    ['--offline', '--build', '4560'],
+    'exec fastlane bump build:4560 remote:false',
   ],
 ])('passes the build number of %j to the lane', (args, expected) => {
   expect(bump(...args)).toBe(expected);
@@ -89,6 +82,10 @@ it.each([
   [['--build', '45.6']],
   [['patch', 'minor']],
   [['nonsense']],
+  // The version is committed and the build number isn't: separate runs.
+  [['19.0.0', '--build', '4560']],
+  [['--build', '4560', 'minor']],
+  [['patch', '--offline']],
 ])('rejects %j', args => {
   expect(bump(...args)).toMatchObject({
     status: 1,

@@ -12,10 +12,15 @@ interface State {
   sources?: Record<string, Record<string, string>>;
 }
 
+/**
+ * `released`: whether every version has shipped, or the versions that have.
+ * `appVersion`: package.json's, the current runtime version unless given.
+ */
 const verdict = (
   recorded: State,
   current: State,
-  released = true,
+  released: boolean | string[] = true,
+  appVersion = current.runtimeVersion,
 ): string | null =>
   JSON.parse(
     execFileSync(
@@ -24,7 +29,8 @@ const verdict = (
         '--input-type=module',
         '-e',
         `const { verdict } = await import(${JSON.stringify(script)});
-process.stdout.write(JSON.stringify(verdict(${JSON.stringify(recorded)}, ${JSON.stringify(current)}, () => ${released})));`,
+const released = ${JSON.stringify(released)};
+process.stdout.write(JSON.stringify(verdict(${JSON.stringify(recorded)}, ${JSON.stringify(current)}, v => Array.isArray(released) ? released.includes(v) : released, ${JSON.stringify(appVersion)})));`,
       ],
       { encoding: 'utf8' },
     ),
@@ -45,7 +51,7 @@ test("doesn't ask origin whether it shipped unless native code changed", () => {
         '--input-type=module',
         '-e',
         `const { verdict } = await import(${JSON.stringify(script)});
-verdict(${JSON.stringify(recorded)}, ${JSON.stringify(current)}, () => { throw new Error('offline'); });`,
+verdict(${JSON.stringify(recorded)}, ${JSON.stringify(current)}, () => { throw new Error('offline'); }, ${JSON.stringify(current.runtimeVersion)});`,
       ],
       { stdio: 'pipe' },
     );
@@ -58,8 +64,39 @@ verdict(${JSON.stringify(recorded)}, ${JSON.stringify(current)}, () => { throw n
 
 test('asks for a new runtime version when native code changed', () => {
   expect(verdict(recorded, { ...recorded, android: 'c' })).toMatch(
-    /^Native code changed \(android: see the fingerprint\) but the over-the-air runtime version is still 19\.0\.0, which has shipped/,
+    /^Native code changed \(android: see the fingerprint\) but the over-the-air runtime version is still 19\.0\.0, which has shipped: move the app version to the coming release's \(`pnpm bump minor`/,
   );
+});
+
+test("names main's app version as the new runtime version when it hasn't shipped", () => {
+  expect(
+    verdict(recorded, { ...recorded, ios: 'c' }, ['19.0.0'], '19.1.0'),
+  ).toMatch(/set runtimeVersion in app\.json to 19\.1\.0, the app version/);
+});
+
+test('moves the runtime version only together with the app version', () => {
+  const current = { runtimeVersion: '19.1.0', ios: 'c', android: 'd' };
+  expect(verdict(recorded, current, ['19.0.0'], '19.0.0')).toMatch(
+    /app version 19\.0\.0 is behind the over-the-air runtime version 19\.1\.0/,
+  );
+  expect(
+    verdict(
+      recorded,
+      { ...current, runtimeVersion: '19.0.5' },
+      ['19.0.0'],
+      '19.1.0',
+    ),
+  ).toMatch(/moved to 19\.0\.5, but the app version is 19\.1\.0/);
+  expect(verdict(recorded, current, ['19.0.0', '19.1.0'])).toMatch(
+    /moved to 19\.1\.0, which has already shipped/,
+  );
+  expect(verdict(recorded, current, ['19.0.0'])).toContain(
+    JSON.stringify(current, null, 2),
+  );
+});
+
+test('passes a JS-only version ahead of the runtime version', () => {
+  expect(verdict(recorded, recorded, true, '19.0.1')).toBeNull();
 });
 
 test('only asks to record native changes before the version shipped', () => {
@@ -94,7 +131,7 @@ test('refuses a new runtime version without a native change', () => {
 
 test('asks to record a new runtime version that comes with native changes', () => {
   const current = { runtimeVersion: '19.1.0', ios: 'c', android: 'd' };
-  expect(verdict(recorded, current)).toContain(
+  expect(verdict(recorded, current, ['19.0.0'])).toContain(
     JSON.stringify(current, null, 2),
   );
 });
