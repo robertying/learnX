@@ -25,6 +25,11 @@ class BackgroundRefreshModuleTest {
   }
 
   @Test
+  fun isOnWithoutAContext() {
+    assertEquals("on", backgroundRefreshState(null))
+  }
+
+  @Test
   fun isOffWhenBackgroundUseIsRestricted() {
     activityManager.setBackgroundRestricted(true)
     assertEquals("off", backgroundRefreshState(context))
