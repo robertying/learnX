@@ -29,6 +29,9 @@ import { mainProcess, type MainProcess } from './mainProcess.ts';
 const electronDir = path.join(import.meta.dirname, '..');
 const root = path.join(electronDir, '..');
 
+/** The mock account's files (`main.serveSites`). */
+export const mockFilesDir = path.join(root, 'mock-files');
+
 /** The packaged app under test, if any (LEARNX_E2E_APP). */
 export const packagedApp = process.env.LEARNX_E2E_APP;
 

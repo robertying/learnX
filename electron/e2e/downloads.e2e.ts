@@ -3,7 +3,7 @@
 // the flow does) and deletes them.
 import fs from 'node:fs';
 import path from 'node:path';
-import { expect, test } from './fixtures.ts';
+import { expect, mockFilesDir, test } from './fixtures.ts';
 import { exact, text } from './maestroEnv.ts';
 import {
   byId,
@@ -13,6 +13,11 @@ import {
   openTab,
   shown,
 } from './steps.ts';
+
+// The mock account's files come from this checkout, not GitHub.
+test.beforeEach(async ({ main }) => {
+  await main.serveSites({ mockFilesDir });
+});
 
 test('downloads a file, exports it, then deletes it', async ({
   window,

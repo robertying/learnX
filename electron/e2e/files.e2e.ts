@@ -6,9 +6,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { ElectronApplication } from '@playwright/test';
-import { expect, test } from './fixtures.ts';
+import { expect, mockFilesDir, test } from './fixtures.ts';
 import { exact, text } from './maestroEnv.ts';
 import { byId, card, goBack, openCard, openTab, shown } from './steps.ts';
+
+// The mock account's files come from this checkout, not GitHub.
+test.beforeEach(async ({ main }) => {
+  await main.serveSites({ mockFilesDir });
+});
 
 /** The URLs of the window's frames: the PDF preview is one of them. */
 const frameUrls = (app: ElectronApplication) =>
