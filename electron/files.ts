@@ -11,7 +11,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { TIMEOUT_MS, allowedUrl } from './net.ts';
 
 /** Where the mock account's files come from (src/data/mock.ts). */
-const MOCK_FILES =
+export const MOCK_FILES =
   'https://raw.githubusercontent.com/robertying/learnX/main/mock-files/';
 
 /**

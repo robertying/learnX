@@ -5,6 +5,7 @@
 // for the test to read back. The fixtures install them before a test starts,
 // so nothing reaches the system.
 import type { ElectronApplication } from '@playwright/test';
+import { MOCK_FILES } from '../files.ts';
 import { readShared } from '../shared.ts';
 
 /** What the stand-ins recorded, in the main process. */
@@ -151,25 +152,56 @@ export const mainProcess = (app: ElectronApplication) => ({
     ),
 
   /**
-   * Serves `html` for every page of Tsinghua's login site
-   * (id.tsinghua.edu.cn) in the web views' session, at its own https URL, so
-   * the app's host checks and injected scripts run as on the real site.
-   * Every other request goes out as usual.
+   * Serves, in the web views' session (whose requests the app's downloads
+   * use too), sites a test would otherwise reach over the internet, at their
+   * own https URLs, so the app's host checks and injected scripts run as on
+   * the real sites:
+   * - `loginPage`: every page of Tsinghua's login site (id.tsinghua.edu.cn);
+   * - `mockFilesDir`: the mock account's files (MOCK_FILES in
+   *   src/data/mock.ts), from this checkout's `mock-files`.
+   *
+   * Every other request goes out as usual, but through this handler, which
+   * DevTools' `Fetch` doesn't see: loadHtml (webviews.ts) can't answer a
+   * load then, so only tests that need it call it.
    */
-  serveLoginSite: (html: string) =>
+  serveSites: (sites: { loginPage?: string; mockFilesDir?: string }) =>
     app.evaluate(
       ({ net, session }, given) => {
+        const fs = process.getBuiltinModule('node:fs');
+        const path = process.getBuiltinModule('node:path');
         session
           .fromPartition(given.partition)
-          .protocol.handle('https', request =>
-            new URL(request.url).hostname === 'id.tsinghua.edu.cn'
-              ? new Response(given.html, {
-                  headers: { 'content-type': 'text/html; charset=utf-8' },
-                })
-              : net.fetch(request, { bypassCustomProtocolHandlers: true }),
-          );
+          .protocol.handle('https', request => {
+            const url = new URL(request.url);
+            const mockFile = `${url.origin}${url.pathname}`.startsWith(
+              given.mockFiles,
+            )
+              ? decodeURIComponent(
+                  url.pathname.slice(new URL(given.mockFiles).pathname.length),
+                )
+              : undefined;
+            if (url.hostname === 'id.tsinghua.edu.cn' && given.loginPage) {
+              return new Response(given.loginPage, {
+                headers: { 'content-type': 'text/html; charset=utf-8' },
+              });
+            }
+            if (mockFile !== undefined && given.mockFilesDir) {
+              const file = path.join(given.mockFilesDir, mockFile);
+              return file.startsWith(given.mockFilesDir + path.sep) &&
+                fs.statSync(file, { throwIfNoEntry: false })?.isFile()
+                ? new Response(fs.readFileSync(file), {
+                    headers: { 'content-type': 'application/octet-stream' },
+                  })
+                : new Response('Not found', { status: 404 });
+            }
+            return net.fetch(request, { bypassCustomProtocolHandlers: true });
+          });
       },
-      { html, partition: readShared('webviewPartition.json').partition },
+      {
+        ...sites,
+        mockFiles: MOCK_FILES,
+        partition: readShared('webviewPartition.json').partition,
+      },
     ),
 
   /** What the stand-ins have recorded so far. */

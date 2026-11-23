@@ -4,7 +4,7 @@
 // confirmation, and the page's script fills in learnX's form there.
 //
 // The login site is a stand-in, ssoLoginPage.html, served at
-// id.tsinghua.edu.cn's own URLs (main.serveLoginSite), so the app's host
+// id.tsinghua.edu.cn's own URLs (main.serveSites), so the app's host
 // checks and injected scripts run as on the real site, without the tests
 // depending on CI's runners reaching Tsinghua. A change to the real login
 // page shows up in manual testing, not here.
@@ -21,7 +21,7 @@ const LOGIN_PAGE = fs.readFileSync(
 );
 
 test.beforeEach(async ({ main }) => {
-  await main.serveLoginSite(LOGIN_PAGE);
+  await main.serveSites({ loginPage: LOGIN_PAGE });
 });
 
 /**
