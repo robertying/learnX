@@ -1101,6 +1101,7 @@ export const mockUserData: UserData = {
   },
   hiddenCourses: [research.id],
   courseOrder: [],
+  collapsedFileCategories: {},
   // Fetched from the emulated server, like a real account.
   currentSemester: null,
   latestSemester: null,

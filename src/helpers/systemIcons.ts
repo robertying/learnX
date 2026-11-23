@@ -358,6 +358,16 @@ export const systemIcons = {
     android: 'arrow_forward',
     windows: 'ArrowRightRegular',
   },
+  disclosureExpanded: {
+    ios: 'chevron.down',
+    android: 'expand_more',
+    windows: 'ChevronDownRegular',
+  },
+  disclosureCollapsed: {
+    ios: 'chevron.forward',
+    android: 'chevron_right',
+    windows: 'ChevronRightRegular',
+  },
   close: { ios: 'xmark', android: 'close', windows: 'DismissRegular' },
   refresh: {
     ios: 'arrow.clockwise',
@@ -510,6 +520,7 @@ export const materialCodepoints: Record<SystemIconAndroidName, number> = {
   check: 0xe5ca,
   check_circle: 0xe86c,
   checklist: 0xe6b1,
+  chevron_right: 0xe5cc,
   close: 0xe5cd,
   cloud_off: 0xe2c1,
   code: 0xe86f,
@@ -524,6 +535,7 @@ export const materialCodepoints: Record<SystemIconAndroidName, number> = {
   error: 0xe000,
   event_busy: 0xe615,
   event_upcoming: 0xf238,
+  expand_more: 0xe5cf,
   favorite: 0xe87d,
   feedback: 0xe87f,
   file_export: 0xf3b2,

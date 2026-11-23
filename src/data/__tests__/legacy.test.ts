@@ -181,6 +181,7 @@ describe('importing user data saved by 18.0.x', () => {
       archived: { notice: ['n2'], assignment: [], file: ['f1'] },
       hiddenCourses: ['c3'],
       courseOrder: ['c2', 'c1'],
+      collapsedFileCategories: {},
       currentSemester: '2025-2026-1',
       latestSemester: null,
     });

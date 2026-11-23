@@ -13,7 +13,11 @@ import {
 import { Assignment, Course, File, Notice } from 'data/types/state';
 import { useCourse } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
-import { useUserData, type BookmarkType } from 'data/userData';
+import {
+  toggleFileCategory,
+  useUserData,
+  type BookmarkType,
+} from 'data/userData';
 import { toggleArchived, toggleFavorite } from 'services/listActions';
 import {
   useAssignments,
@@ -30,7 +34,9 @@ import Empty from 'components/Empty';
 import SafeArea from 'components/SafeArea';
 import FlatList from 'components/FlatList';
 import ListBackground from 'components/ListBackground';
+import SystemIcon from 'components/SystemIcon';
 import { Paragraph } from 'components/Text';
+import Touchable from 'components/Touchable';
 import {
   groupCourseFiles,
   type FileCategoryHeading,
@@ -56,6 +62,7 @@ import { hasGlassHeader } from 'navigation/options';
 import { isApple } from 'helpers/platform';
 import { scrollInsetBehavior } from 'constants/scrollInsetBehavior';
 import { useWindowTitle } from 'hooks/useWindow';
+import { useTheme } from 'theme';
 
 type NavigationProp = MainStackNavigationProp<
   CourseDetailParamList,
@@ -65,6 +72,7 @@ type NavigationProp = MainStackNavigationProp<
 interface CourseItemListProps<T extends Notice | Assignment | File> {
   data: (T | FileCategoryHeading)[];
   header?: React.ReactElement;
+  onToggleCategory?: (key: string) => void;
   card: React.FC<{
     data: T;
     fav?: boolean;
@@ -89,6 +97,7 @@ interface CourseItemListProps<T extends Notice | Assignment | File> {
 const CourseItemList = <T extends Notice | Assignment | File>({
   data,
   header,
+  onToggleCategory,
   card: Card,
   detailScreen,
   type,
@@ -97,6 +106,7 @@ const CourseItemList = <T extends Notice | Assignment | File>({
 }: CourseItemListProps<T>) => {
   const navigation = useNavigation<NavigationProp>();
   const loggedIn = useLoggedIn();
+  const theme = useTheme();
   // Every item of the course, archived ones too, which their cards show as
   // such (Unarchive in their actions).
   const archivedIds = useUserData(userData => userData.archived[type]);
@@ -122,13 +132,25 @@ const CourseItemList = <T extends Notice | Assignment | File>({
         renderItem={({ item, index }) => {
           if ('heading' in item) {
             return (
-              <Paragraph
-                accessibilityRole="header"
-                variant="label"
+              <Touchable
+                accessibilityRole="button"
+                accessibilityLabel={item.heading}
+                aria-expanded={item.expanded}
+                onPress={() => onToggleCategory?.(item.key)}
                 style={styles.categoryHeading}
+                type="opacity"
               >
-                {item.heading}
-              </Paragraph>
+                <Paragraph variant="label" style={Styles.flex1}>
+                  {item.heading}
+                </Paragraph>
+                <SystemIcon
+                  name={
+                    item.expanded ? 'disclosureExpanded' : 'disclosureCollapsed'
+                  }
+                  size={16}
+                  color={theme.colors.onSurfaceMedium}
+                />
+              </Touchable>
             );
           }
           const next = data[index + 1];
@@ -215,6 +237,9 @@ const CourseDetailContent: React.FC<{
 
   const [index, setIndex] = useState(0);
   const [filesByCategory, setFilesByCategory] = useState(false);
+  const collapsedFileCategories = useUserData(
+    data => data.collapsedFileCategories[course.id],
+  );
   // The floating tabs' height, which the lists scroll clear of.
   const [tabsHeight, setTabsHeight] = useState(0);
 
@@ -276,7 +301,11 @@ const CourseDetailContent: React.FC<{
           <CourseItemList
             data={
               filesByCategory
-                ? groupCourseFiles(courseFiles, t('uncategorized'))
+                ? groupCourseFiles(
+                    courseFiles,
+                    t('uncategorized'),
+                    collapsedFileCategories,
+                  )
                 : courseFiles
             }
             header={
@@ -288,6 +317,9 @@ const CourseDetailContent: React.FC<{
                   onSelect={i => setFilesByCategory(i === 1)}
                 />
               ) : undefined
+            }
+            onToggleCategory={categoryKey =>
+              toggleFileCategory(course.id, categoryKey)
             }
             card={FileCard}
             detailScreen="FileDetail"
@@ -408,9 +440,12 @@ const CoursePage: React.FC<React.PropsWithChildren<{ selected: boolean }>> = ({
 
 const styles = StyleSheet.create({
   categoryHeading: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.s,
+    minHeight: 48,
     paddingHorizontal: Spacing.m,
-    paddingTop: Spacing.m,
-    paddingBottom: Spacing.xs,
+    paddingVertical: Spacing.s,
   },
   floatingTabs: {
     position: 'absolute',

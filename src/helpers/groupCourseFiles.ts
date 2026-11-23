@@ -3,6 +3,7 @@ import type { File } from 'data/types/state';
 export interface FileCategoryHeading {
   key: string;
   heading: string;
+  expanded: boolean;
 }
 
 /**
@@ -12,32 +13,34 @@ export interface FileCategoryHeading {
 export const groupCourseFiles = (
   files: readonly File[],
   uncategorizedTitle: string,
+  collapsedKeys: readonly string[] = [],
 ): (File | FileCategoryHeading)[] => {
-  const categories = new Map<string, (File | FileCategoryHeading)[]>();
-  const uncategorized: File[] = [];
+  const groups = new Map<string, [FileCategoryHeading, ...File[]]>();
+  const uncategorizedKey = 'uncategorized';
+  const collapsed = new Set(collapsedKeys);
   for (const file of files) {
-    const category = file.category;
-    if (!category?.title.trim()) {
-      uncategorized.push(file);
-      continue;
+    const category = file.category?.title.trim() ? file.category : undefined;
+    const key = category ? `category:${category.id}` : uncategorizedKey;
+    let group = groups.get(key);
+    if (!group) {
+      group = [
+        {
+          key,
+          heading: category?.title ?? uncategorizedTitle,
+          expanded: !collapsed.has(key),
+        },
+      ];
+      groups.set(key, group);
     }
-    const group = categories.get(category.id);
-    if (group) {
+    if (group[0].expanded) {
       group.push(file);
-    } else {
-      categories.set(category.id, [
-        { key: `category:${category.id}`, heading: category.title },
-        file,
-      ]);
     }
   }
 
-  const groups = [...categories.values()];
-  if (uncategorized.length) {
-    groups.push([
-      { key: 'uncategorized', heading: uncategorizedTitle },
-      ...uncategorized,
-    ]);
+  const uncategorized = groups.get(uncategorizedKey);
+  if (uncategorized) {
+    groups.delete(uncategorizedKey);
+    groups.set(uncategorizedKey, uncategorized);
   }
-  return groups.flat();
+  return [...groups.values()].flat();
 };

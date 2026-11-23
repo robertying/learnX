@@ -32,6 +32,8 @@ export interface UserData {
   hiddenCourses: string[];
   /** Course ids in the order the user dragged them into. */
   courseOrder: string[];
+  /** Collapsed file category keys, by course id. */
+  collapsedFileCategories: Partial<Record<string, string[]>>;
   /**
    * The semester the app shows. Starts as the school's current semester and
    * can be changed in Settings.
@@ -50,6 +52,7 @@ export const emptyUserData = (): UserData => ({
   archived: { notice: [], assignment: [], file: [] },
   hiddenCourses: [],
   courseOrder: [],
+  collapsedFileCategories: {},
   currentSemester: null,
   latestSemester: null,
 });
@@ -179,6 +182,21 @@ export const setCourseHidden = (courseId: string, flag: boolean) => {
 
 export const setCourseOrder = (courseIds: string[]) => {
   useUserDataStore.setState({ courseOrder: courseIds });
+};
+
+export const toggleFileCategory = (courseId: string, categoryKey: string) => {
+  useUserDataStore.setState(state => {
+    const current = state.collapsedFileCategories[courseId] ?? [];
+    const next = toggle(current, [categoryKey], !current.includes(categoryKey));
+    const collapsedFileCategories = {
+      ...state.collapsedFileCategories,
+      [courseId]: next,
+    };
+    if (!next.length) {
+      delete collapsedFileCategories[courseId];
+    }
+    return { collapsedFileCategories };
+  });
 };
 
 export const setCurrentSemester = (semesterId: string) => {
