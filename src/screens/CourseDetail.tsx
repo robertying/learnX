@@ -30,9 +30,15 @@ import Empty from 'components/Empty';
 import SafeArea from 'components/SafeArea';
 import FlatList from 'components/FlatList';
 import ListBackground from 'components/ListBackground';
+import { Paragraph } from 'components/Text';
+import {
+  groupCourseFiles,
+  type FileCategoryHeading,
+} from 'helpers/groupCourseFiles';
 import { t } from 'helpers/i18n';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import { SplitViewContext } from 'navigation/SplitView';
+import Spacing from 'constants/Spacing';
 import Styles from 'constants/Styles';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
@@ -57,7 +63,8 @@ type NavigationProp = MainStackNavigationProp<
 >;
 
 interface CourseItemListProps<T extends Notice | Assignment | File> {
-  data: T[];
+  data: (T | FileCategoryHeading)[];
+  header?: React.ReactElement;
   card: React.FC<{
     data: T;
     fav?: boolean;
@@ -81,6 +88,7 @@ interface CourseItemListProps<T extends Notice | Assignment | File> {
 /** One of the course's notices, assignments and files tabs. */
 const CourseItemList = <T extends Notice | Assignment | File>({
   data,
+  header,
   card: Card,
   detailScreen,
   type,
@@ -109,22 +117,42 @@ const CourseItemList = <T extends Notice | Assignment | File>({
       )}
       <FlatList
         data={data}
-        renderItem={({ item, index }) => (
-          <Card
-            data={item}
-            last={index === data.length - 1}
-            fav={!!item.isFavorite}
-            onToggleFav={() => toggleFavorite(type, item.id, !!item.isFavorite)}
-            archived={archivedSet.has(item.id)}
-            onToggleArchived={() =>
-              toggleArchived(type, [item.id], archivedSet.has(item.id))
-            }
-            hideCourseName
-            markArchived
-            onPress={() => navigation.push(detailScreen, { id: item.id })}
-          />
-        )}
-        keyExtractor={item => item.id}
+        ListHeaderComponent={header}
+        getItemType={item => ('heading' in item ? 'heading' : type)}
+        renderItem={({ item, index }) => {
+          if ('heading' in item) {
+            return (
+              <Paragraph
+                accessibilityRole="header"
+                variant="label"
+                style={styles.categoryHeading}
+              >
+                {item.heading}
+              </Paragraph>
+            );
+          }
+          const next = data[index + 1];
+          return (
+            <Card
+              data={item}
+              last={!next || 'heading' in next}
+              fav={!!item.isFavorite}
+              onToggleFav={() =>
+                toggleFavorite(type, item.id, !!item.isFavorite)
+              }
+              archived={archivedSet.has(item.id)}
+              onToggleArchived={() =>
+                toggleArchived(type, [item.id], archivedSet.has(item.id))
+              }
+              hideCourseName
+              markArchived
+              onPress={() => navigation.push(detailScreen, { id: item.id })}
+            />
+          );
+        }}
+        keyExtractor={item =>
+          'heading' in item ? item.key : `item:${item.id}`
+        }
         refreshing={refresh.isPending}
         onRefresh={handleRefresh}
         contentInsetAdjustmentBehavior={scrollInsetBehavior}
@@ -186,6 +214,7 @@ const CourseDetailContent: React.FC<{
   const refreshFiles = useRefreshCourseFiles(course.id);
 
   const [index, setIndex] = useState(0);
+  const [filesByCategory, setFilesByCategory] = useState(false);
   // The floating tabs' height, which the lists scroll clear of.
   const [tabsHeight, setTabsHeight] = useState(0);
 
@@ -241,10 +270,25 @@ const CourseDetailContent: React.FC<{
             topInset={tabsHeight}
           />
         );
-      case 'file':
+      case 'file': {
+        const courseFiles = files.filter(file => file.courseId === course.id);
         return (
           <CourseItemList
-            data={files.filter(i => i.courseId === course.id)}
+            data={
+              filesByCategory
+                ? groupCourseFiles(courseFiles, t('uncategorized'))
+                : courseFiles
+            }
+            header={
+              courseFiles.length ? (
+                <SegmentedTabs
+                  accessibilityLabel={t('courseFileView')}
+                  titles={[t('filesByTime'), t('filesByCategory')]}
+                  selectedIndex={filesByCategory ? 1 : 0}
+                  onSelect={i => setFilesByCategory(i === 1)}
+                />
+              ) : undefined
+            }
             card={FileCard}
             detailScreen="FileDetail"
             type="file"
@@ -252,6 +296,7 @@ const CourseDetailContent: React.FC<{
             topInset={tabsHeight}
           />
         );
+      }
       default:
         return null;
     }
@@ -362,6 +407,11 @@ const CoursePage: React.FC<React.PropsWithChildren<{ selected: boolean }>> = ({
 };
 
 const styles = StyleSheet.create({
+  categoryHeading: {
+    paddingHorizontal: Spacing.m,
+    paddingTop: Spacing.m,
+    paddingBottom: Spacing.xs,
+  },
   floatingTabs: {
     position: 'absolute',
     // Its own height, not the screen's (SafeAreaView flexes by default).
