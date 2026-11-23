@@ -45,6 +45,12 @@ A module may have an `index.web.ts(x)` for the Electron app beside its `index.ts
 - Quick Look draws Office documents only while the app is active: a preview opened while another app is in front stays blank until learnX comes to the front. Inside the preview, the layout is Quick Look's own.
 - The floating panel (⌘Y, as Space opens it in Finder) works for any downloaded file. Its controller joins the key window's responder chain, where the panel looks for it.
 
+## The menu bar on the Mac
+
+- macOS never launches an app for its background tasks, and Mac Catalyst's `BGTaskScheduler` doesn't run them reliably while it's open, so the Mac syncs on a timer of its own while learnX runs (`runInMenuBar` in `services/background`, which `index.js` starts). Its menu bar item, which stays while learnX runs, keeps it running without a window, as the Electron app's tray does on Windows.
+- `modules/menubar` uses AppKit through `ios/MacMenuBar`, an AppKit bundle the app embeds for Mac Catalyst only, as Quick Look does (`MenuBarHosting.swift` is compiled on both sides): the status item, the Dock icon (shown only while a window is open, by switching the activation policy) and the launch event, which says whether macOS opened learnX as a login item.
+- Open at Login (Settings) adds the app itself as a login item with `SMAppService`. Opened that way, learnX connects no window: the scene delegate closes the ones UIKit would restore, and the app delegate starts the React Native host without one, so JS runs, syncs and shows the menu bar item. A window opens when the user asks for one: from the menu bar item, or by opening learnX again, which brings it to the front.
+
 ## PDFs
 
 - File detail shows a PDF in `modules/pdf`: PDFKit on iOS and the Mac, which fits the pages to the width, keeps the zoom when the view resizes and opens below a translucent header. The Electron app uses Chromium's viewer.

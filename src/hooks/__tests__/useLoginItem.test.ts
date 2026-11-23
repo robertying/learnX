@@ -1,5 +1,8 @@
 import { act, renderHook, waitFor } from '@testing-library/react-native';
+import DeviceInfo from 'constants/DeviceInfo';
 import useLoginItem from 'hooks/useLoginItem';
+import { MenuBar } from 'modules/menubar';
+import { recordError } from 'services/crashReporting';
 // The Electron app's, which Metro picks on web.
 import useElectronLoginItem from 'hooks/useLoginItem.web';
 import {
@@ -7,13 +10,73 @@ import {
   uninstallBridge,
 } from 'test-utils/mocks/electronBridge';
 
+jest.mock('modules/menubar', () => ({
+  MenuBar: { getOpenAtLogin: jest.fn(), setOpenAtLogin: jest.fn() },
+}));
+jest.mock('services/crashReporting', () => ({ recordError: jest.fn() }));
+
 afterEach(() => {
   uninstallBridge();
 });
 
-it('is never offered on the phones', async () => {
+it('is never offered on iPhone or iPad', async () => {
   const { result } = await renderHook(() => useLoginItem());
+  await act(async () => {});
   expect(result.current).toBeNull();
+  expect(MenuBar!.getOpenAtLogin).not.toHaveBeenCalled();
+});
+
+describe('on the Mac', () => {
+  beforeEach(() => {
+    jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+    jest.mocked(MenuBar!.getOpenAtLogin).mockResolvedValue('off');
+  });
+
+  it('reads the login item, and writes only a change', async () => {
+    jest.mocked(MenuBar!.setOpenAtLogin).mockResolvedValue('on');
+    const { result } = await renderHook(() => useLoginItem());
+    await waitFor(() => expect(result.current?.enabled).toBe(false));
+    await act(() => result.current!.set(false));
+    expect(MenuBar!.setOpenAtLogin).not.toHaveBeenCalled();
+    await act(() => result.current!.set(true));
+    expect(MenuBar!.setOpenAtLogin).toHaveBeenCalledWith(true);
+    expect(result.current!.enabled).toBe(true);
+  });
+
+  it('shows what macOS took, and goes back when it fails', async () => {
+    // Turned off in System Settings, which only the user can change.
+    jest
+      .mocked(MenuBar!.setOpenAtLogin)
+      .mockResolvedValueOnce('requiresApproval');
+    const { result } = await renderHook(() => useLoginItem());
+    await waitFor(() => expect(result.current).not.toBeNull());
+    await act(() => result.current!.set(true));
+    expect(result.current!.enabled).toBe(false);
+
+    const error = new Error('no login item');
+    jest.mocked(MenuBar!.setOpenAtLogin).mockRejectedValueOnce(error);
+    await act(() => result.current!.set(true));
+    expect(result.current!.enabled).toBe(false);
+    expect(recordError).toHaveBeenCalledWith(error, 'Changing Open at Login');
+  });
+
+  it('isn’t offered when reading fails, or after unmounting', async () => {
+    jest.mocked(MenuBar!.getOpenAtLogin).mockRejectedValueOnce(new Error());
+    const failed = await renderHook(() => useLoginItem());
+    await act(async () => {});
+    expect(failed.result.current).toBeNull();
+
+    let answer: (state: 'on') => void = () => {};
+    jest.mocked(MenuBar!.getOpenAtLogin).mockReturnValueOnce(
+      new Promise(resolve => {
+        answer = resolve;
+      }),
+    );
+    const { result, unmount } = await renderHook(() => useLoginItem());
+    await unmount();
+    await act(async () => answer('on'));
+    expect(result.current).toBeNull();
+  });
 });
 
 describe('in the Electron app', () => {

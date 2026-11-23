@@ -11,7 +11,7 @@ import {
 } from 'components/Form';
 import { setSetting, useSettings } from 'data/settings';
 import DeviceInfo from 'constants/DeviceInfo';
-import { isElectron } from 'helpers/platform';
+import { isApple, isElectron } from 'helpers/platform';
 import useAvailableUpdate from 'hooks/useAvailableUpdate';
 import useUpdateInstaller from 'hooks/useUpdateInstaller';
 import useLoginItem from 'hooks/useLoginItem';
@@ -76,7 +76,8 @@ const Settings: React.FC<Props> = ({ navigation }) => {
     onViewChangelog: () => show('Changelog'),
   });
   const whatsNew = latestWhatsNew();
-  // Electron on Windows (and a Mac dev run): off until the user turns it on.
+  // The Mac, and Electron on Windows (and a Mac dev run): off until the user
+  // turns it on.
   const loginItem = useLoginItem();
   // Electron on Windows and Linux, which have no per-app language.
   const appLanguage = useAppLanguage();
@@ -198,11 +199,15 @@ const Settings: React.FC<Props> = ({ navigation }) => {
           />
         </FormSection>
         {loginItem && (
-          <FormSection footer={t('startAtLoginCaption')}>
+          <FormSection
+            footer={
+              isApple() ? t('openAtLoginCaption') : t('startAtLoginCaption')
+            }
+          >
             <FormToggle
               icon="open"
               testID="settings-start-at-login"
-              title={t('startAtLogin')}
+              title={isApple() ? t('openAtLogin') : t('startAtLogin')}
               value={loginItem.enabled}
               onValueChange={value => {
                 void loginItem.set(value);

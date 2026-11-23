@@ -16,7 +16,10 @@ import { setUpNotificationActions } from './src/services/notificationActions';
 // first runs: a background launch runs only this file, without mounting the
 // app. Metro inlines requires, so the import where the task is registered
 // (useMainStartup) would load the module only once the app has mounted.
-import { watchAssignmentChanges } from './src/services/background';
+import {
+  runInMenuBar,
+  watchAssignmentChanges,
+} from './src/services/background';
 import { watchSurfaces } from './src/services/surfaces';
 import { watchUpdates } from './src/services/updateNotifications';
 import { withLaunchOptions } from './src/services/launchOptions';
@@ -40,6 +43,9 @@ watchSurfaces();
 followMacActivation();
 // Notifies about grades and moved deadlines the app itself fetches while open.
 watchAssignmentChanges();
+// The Mac: in the menu bar and syncing while learnX runs, with or without a
+// window.
+runInMenuBar();
 // Checks for a new version where learnX updates itself, and says when one is
 // out.
 watchUpdates();

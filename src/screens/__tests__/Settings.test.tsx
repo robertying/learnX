@@ -1,4 +1,4 @@
-import { Alert, Linking } from 'react-native';
+import { Alert, Linking, Platform } from 'react-native';
 import { QueryClientProvider } from '@tanstack/react-query';
 import {
   act,
@@ -243,13 +243,23 @@ describe('Start at login', () => {
     const set = jest.fn();
     jest.mocked(useLoginItem).mockReturnValue({ enabled: false, set });
     await renderScreen();
-    expect(screen.getByText(t('startAtLoginCaption'))).toBeTruthy();
+    // The Mac's: Open at Login, in the menu bar.
+    expect(screen.getByText(t('openAtLoginCaption'))).toBeTruthy();
     await fireEvent(
       screen.getByTestId('settings-start-at-login'),
       'valueChange',
       true,
     );
     expect(set).toHaveBeenCalledWith(true);
+  });
+
+  it('says the Electron app starts in the tray', async () => {
+    jest.replaceProperty(Platform, 'OS', 'web');
+    jest
+      .mocked(useLoginItem)
+      .mockReturnValue({ enabled: true, set: jest.fn() });
+    await renderScreen();
+    expect(screen.getByText(t('startAtLoginCaption'))).toBeTruthy();
   });
 });
 

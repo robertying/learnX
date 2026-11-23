@@ -31,6 +31,8 @@ import { startOfWeek } from 'helpers/schedule';
 import { waitAtMost } from 'helpers/waitAtMost';
 import { beijingDate } from 'helpers/serverTime';
 import DeviceInfo from 'constants/DeviceInfo';
+import { t } from 'helpers/i18n';
+import { MenuBar } from 'modules/menubar';
 
 export type SyncResult =
   /** Not logged in, no courses cached yet, or the login failed. */
@@ -413,23 +415,39 @@ TaskManager.defineTask(FETCH_ALL_CONTENT_TASK, async () =>
 let macTimer: ReturnType<typeof setInterval> | null = null;
 
 /**
- * Runs the sync every 15 minutes while learnX runs, in front or not, with its
- * windows open or closed (closing the last one leaves it running). macOS
- * never launches an app for its background tasks and doesn't run them
- * reliably while it's open, so the Mac keeps its own timer, as Mail does.
- * App Nap may delay a run while learnX isn't in front: the sync is
- * discretionary work, which macOS is free to put off.
+ * The Mac: shows learnX in the menu bar and syncs every 15 minutes while it
+ * runs, in front or not, with its windows open or closed. macOS never
+ * launches an app for its background tasks and doesn't run them reliably
+ * while it's open, so the Mac keeps its own timer, and its menu bar item
+ * keeps it running without a window (opened at login, or after the last
+ * window closed). App Nap may put a run off while learnX isn't in front: the
+ * sync is discretionary work, which macOS is free to delay. index.js calls
+ * it, since JS starts without a window at login; safe to call again.
  */
-const startMacSync = () => {
-  macTimer ??= setInterval(() => {
+export const runInMenuBar = () => {
+  if (!DeviceInfo.isMac() || macTimer) {
+    return;
+  }
+  macTimer = setInterval(() => {
     void runSync(MAC_SYNC_BUDGET_MS);
   }, SYNC_INTERVAL_MINUTES * 60_000);
+  MenuBar?.addListener('onCheckForNewContent', () => {
+    void runSync(MAC_SYNC_BUDGET_MS);
+  });
+  MenuBar?.showItem({
+    open: t('trayOpen'),
+    checkForNewContent: t('trayCheckForNewItems'),
+    quit: t('trayQuit'),
+  }).catch(error => recordError(error, 'Showing the menu bar item'));
 };
 
-/** Schedules the sync; safe to call again, as each new primary window does. */
+/**
+ * Has the system run the sync about every 15 minutes, where it runs tasks for
+ * apps (iOS and Android; the Electron app's stand-in, web/packages). The
+ * Mac syncs on its own timer instead (`runInMenuBar`).
+ */
 export const setUpBackgroundFetch = async () => {
   if (DeviceInfo.isMac()) {
-    startMacSync();
     return;
   }
   await BackgroundTask.registerTaskAsync(FETCH_ALL_CONTENT_TASK, {

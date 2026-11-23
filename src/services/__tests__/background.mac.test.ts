@@ -12,7 +12,13 @@ import { queryClient } from 'data/queryClient';
 import { ensureSession } from 'data/source';
 import { useSyncLogStore } from 'data/syncLog';
 import { setCurrentSemester } from 'data/userData';
-import { SYNC_BUDGET_MS, setUpBackgroundFetch } from 'services/background';
+import { t } from 'helpers/i18n';
+import { MenuBar } from 'modules/menubar';
+import {
+  SYNC_BUDGET_MS,
+  runInMenuBar,
+  setUpBackgroundFetch,
+} from 'services/background';
 import { checkForUpdate } from 'services/updateNotifications';
 
 jest.mock('expo-background-task', () => ({
@@ -20,6 +26,12 @@ jest.mock('expo-background-task', () => ({
   registerTaskAsync: jest.fn(),
 }));
 jest.mock('expo-task-manager', () => ({ defineTask: jest.fn() }));
+jest.mock('modules/menubar', () => ({
+  MenuBar: {
+    showItem: jest.fn(() => Promise.resolve()),
+    addListener: jest.fn(),
+  },
+}));
 jest.mock('services/updateNotifications', () => ({
   checkForUpdate: jest.fn(() => Promise.resolve()),
 }));
@@ -61,10 +73,17 @@ it('syncs on its own timer on the Mac, with more time than a system task', async
     .mockImplementation(
       () => new Promise(resolve => setTimeout(resolve, SYNC_BUDGET_MS + 5_000)),
     );
-  // Each new primary window sets it up again.
-  await setUpBackgroundFetch();
+  runInMenuBar();
+  // Safe to call again; the system's task isn't scheduled on the Mac.
+  runInMenuBar();
   await setUpBackgroundFetch();
   expect(BackgroundTask.registerTaskAsync).not.toHaveBeenCalled();
+  expect(MenuBar!.showItem).toHaveBeenCalledTimes(1);
+  expect(MenuBar!.showItem).toHaveBeenCalledWith({
+    open: t('trayOpen'),
+    checkForNewContent: t('trayCheckForNewItems'),
+    quit: t('trayQuit'),
+  });
 
   await jest.advanceTimersByTimeAsync(15 * 60_000 - 1);
   expect(checkForUpdate).not.toHaveBeenCalled();
@@ -81,7 +100,16 @@ it('syncs on its own timer on the Mac, with more time than a system task', async
     expect.objectContaining({ status: 'synced' }),
   ]);
 
-  // One timer, however often it was set up.
+  // One timer, however often it was started.
   await jest.advanceTimersByTimeAsync(15 * 60_000);
   expect(checkForUpdate).toHaveBeenCalledTimes(2);
+
+  // Check for New Content in the menu bar item's menu.
+  await jest.advanceTimersByTimeAsync(SYNC_BUDGET_MS + 10_000);
+  expect(MenuBar!.addListener).toHaveBeenCalledTimes(1);
+  const [event, onCheck] = jest.mocked(MenuBar!.addListener).mock.calls[0];
+  expect(event).toBe('onCheckForNewContent');
+  (onCheck as () => void)();
+  await jest.advanceTimersByTimeAsync(SYNC_BUDGET_MS + 10_000);
+  expect(checkForUpdate).toHaveBeenCalledTimes(3);
 });

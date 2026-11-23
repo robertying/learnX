@@ -1,4 +1,5 @@
 internal import Expo
+internal import LearnXMenuBar
 internal import LearnXMenus
 internal import LearnXWindows
 import ObjectiveC
@@ -32,10 +33,23 @@ class AppDelegate: ExpoAppDelegate, @MainActor ExpoReactNativeFactoryProvider {
     reactNativeDelegate = delegate
     reactNativeFactory = factory
 
-    return super.application(
+    let launched = super.application(
       application,
       didFinishLaunchingWithOptions: launchOptions
     )
+    #if targetEnvironment(macCatalyst)
+    MenuBar.start()
+    if MenuBar.opensHidden {
+      // Opened as a login item, with no window: JS starts without one, to sync and show the menu bar item. A
+      // window opened later joins this runtime.
+      factory.rootViewFactory.initializeReactHost(
+        withLaunchOptions: launchOptions,
+        bundleConfiguration: factory.bundleConfiguration,
+        devMenuConfiguration: factory.devMenuConfiguration ?? .default()
+      )
+    }
+    #endif
+    return launched
   }
 
   /// Windows closed for good (swiped away in App Exposé) have nothing left to restore.
