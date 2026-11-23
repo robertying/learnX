@@ -1,8 +1,10 @@
 #!/bin/bash
 # Removes one linked git worktree of learnX and what was built for it outside
-# it, to free the disk once the work in it is done. Dry run by default: it
-# prints what it would remove and how much space that frees; pass --apply to
-# remove it.
+# it, once the work in it is done. Removing only the folder, as
+# `git worktree remove` does, leaves its DerivedData behind and the Mac apps
+# built there registered with Launch Services. Dry run by default: it prints
+# what it would remove and how much space that frees; pass --apply to remove
+# it.
 #
 #   scripts/dev/clean-worktree.sh [--apply] [--discard-changes] <worktree>
 #
