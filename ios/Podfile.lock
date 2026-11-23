@@ -186,6 +186,10 @@ PODS:
   - hermes-engine (260318099.0.5):
     - hermes-engine/Pre-built (= 260318099.0.5)
   - hermes-engine/Pre-built (260318099.0.5)
+  - LearnXBackground (1.0.0):
+    - ExpoModulesCore
+  - LearnXBackground/Tests (1.0.0):
+    - ExpoModulesCore
   - LearnXCrashlytics (1.0.0):
     - ExpoModulesCore
   - LearnXCrashlytics/Tests (1.0.0):
@@ -2470,6 +2474,8 @@ DEPENDENCIES:
   - fmt (from `build/rndeps-facades/fmt`)
   - glog (from `build/rndeps-facades/glog`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
+  - LearnXBackground (from `../modules/background/ios`)
+  - LearnXBackground/Tests (from `../modules/background/ios`)
   - LearnXCrashlytics (from `../modules/crashlytics/ios`)
   - LearnXCrashlytics/Tests (from `../modules/crashlytics/ios`)
   - LearnXMenus (from `../modules/menus/ios`)
@@ -2671,6 +2677,8 @@ EXTERNAL SOURCES:
   hermes-engine:
     :podspec: "../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec"
     :tag: hermes-v260318099.0.5
+  LearnXBackground:
+    :path: "../modules/background/ios"
   LearnXCrashlytics:
     :path: "../modules/crashlytics/ios"
   LearnXMenus:
@@ -2914,6 +2922,7 @@ SPEC CHECKSUMS:
   fmt: ba0886e864ebb21d14c98b2e12e164b8002f5b93
   glog: 3cf7cb46f743c4bc758ae3e6d9c15bd1b4cfd6d4
   hermes-engine: 79484fc4e58f328d01b9339ef899ca633d3702ee
+  LearnXBackground: c67cd3c149af17b097e581c348fca80f581b7654
   LearnXCrashlytics: f54c9b50163ce8255ee9148b00819a6203273c3e
   LearnXMenus: 2dcfdffd7d21297d1235b14669f1256ec039f030
   LearnXPdf: 56c8308a1a67a23f6def9c35f208a0a3f16b52d1
