@@ -245,12 +245,16 @@ const Today: React.FC<Props> = ({ navigation }) => {
     classes.length > 0 && !showsBeijingTime(now)
       ? `${t('todayClasses')} · ${t('beijingTime')}`
       : t('todayClasses');
+  // The day's total until a class ends, then the classes left, which count
+  // the one going on.
   const classCount =
     classes.length === 0
       ? t('todayNoClasses')
       : remaining.length === 0
         ? t('todayNoMoreClasses')
-        : tCount('todayOneClass', 'todayClassCount', classes.length);
+        : remaining.length < classes.length
+          ? tCount('todayOneClassLeft', 'todayClassesLeft', remaining.length)
+          : tCount('todayOneClass', 'todayClassCount', classes.length);
 
   return (
     <FormScreen>
