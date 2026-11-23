@@ -1,0 +1,21 @@
+<!doctype html>
+<!--
+  A stand-in for id.tsinghua.edu.cn's login form (sso.e2e.ts): only the
+  fields learnX's injected script (src/helpers/preval/sso.js) fills in and
+  reads. Nothing here is sent anywhere.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Login</title>
+  </head>
+  <body>
+    <form id="theform" method="post" action="/do/off/ui/auth/login/check">
+      <input id="i_user" name="i_user" type="text" />
+      <input id="i_pass" name="i_pass" type="password" />
+      <input name="fingerPrint" type="hidden" />
+      <input name="singleLogin" type="checkbox" />
+      <button type="submit">Log in</button>
+    </form>
+  </body>
+</html>

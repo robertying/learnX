@@ -5,6 +5,7 @@
 // for the test to read back. The fixtures install them before a test starts,
 // so nothing reaches the system.
 import type { ElectronApplication } from '@playwright/test';
+import { readShared } from '../shared.ts';
 
 /** What the stand-ins recorded, in the main process. */
 export interface MainRecord {
@@ -147,6 +148,28 @@ export const mainProcess = (app: ElectronApplication) => ({
         };
       },
       answers,
+    ),
+
+  /**
+   * Serves `html` for every page of Tsinghua's login site
+   * (id.tsinghua.edu.cn) in the web views' session, at its own https URL, so
+   * the app's host checks and injected scripts run as on the real site.
+   * Every other request goes out as usual.
+   */
+  serveLoginSite: (html: string) =>
+    app.evaluate(
+      ({ net, session }, given) => {
+        session
+          .fromPartition(given.partition)
+          .protocol.handle('https', request =>
+            new URL(request.url).hostname === 'id.tsinghua.edu.cn'
+              ? new Response(given.html, {
+                  headers: { 'content-type': 'text/html; charset=utf-8' },
+                })
+              : net.fetch(request, { bypassCustomProtocolHandlers: true }),
+          );
+      },
+      { html, partition: readShared('webviewPartition.json').partition },
     ),
 
   /** What the stand-ins have recorded so far. */
