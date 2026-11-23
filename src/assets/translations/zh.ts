@@ -546,6 +546,8 @@ const zh: typeof en = {
   todayNoMoreClasses: '今天的课已上完',
   todayClassCount: '今天{count}节课',
   todayOneClass: '今天1节课',
+  todayClassesLeft: '今天还剩{count}节课',
+  todayOneClassLeft: '今天还剩1节课',
   schedule: '课表',
   scheduleToday: '今天',
   scheduleTomorrow: '明天',

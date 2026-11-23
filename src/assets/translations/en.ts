@@ -575,6 +575,8 @@ export default {
   todayNoMoreClasses: 'No more classes today',
   todayClassCount: '{count} classes today',
   todayOneClass: '1 class today',
+  todayClassesLeft: '{count} classes left today',
+  todayOneClassLeft: '1 class left today',
   schedule: 'Schedule',
   scheduleToday: 'Today',
   scheduleTomorrow: 'Tomorrow',

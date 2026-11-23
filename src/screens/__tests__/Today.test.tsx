@@ -178,6 +178,21 @@ it("counts the day's classes and opens the schedule", async () => {
   );
 });
 
+it('counts the classes left once one has ended', async () => {
+  jest.useFakeTimers({ now: dayjs().hour(12).minute(0).toDate() });
+  mockSessions.push(
+    session('a', 'a', -120, -60),
+    session('b', 'b', -30, 30),
+    session('c', 'c', 60, 120),
+  );
+  await setup();
+  expect(screen.getByText('2 classes left today')).toBeOnTheScreen();
+
+  mockSessions.splice(1, 1);
+  await setup();
+  expect(screen.getByText('1 class left today')).toBeOnTheScreen();
+});
+
 it('opens the schedule a Jump List task asked for', async () => {
   setPendingTarget({ type: 'schedule', id: 'week' });
   const { navigation } = await setup();
