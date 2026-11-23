@@ -13,18 +13,26 @@ import { exact } from './maestroEnv.ts';
 const NOBODY = 'learnx-e2e-nobody';
 const SSO = 'https://id.tsinghua.edu.cn/';
 
-/** Whether Tsinghua's login site answers within a few seconds. */
-const reachable = async () => {
+/**
+ * Why Tsinghua's login site doesn't answer within a few seconds, as the
+ * error's code (ECONNRESET, UND_ERR_CONNECT_TIMEOUT, TimeoutError...), or
+ * null when it answers, whatever its status.
+ */
+const unreachable = async () => {
   try {
     await fetch(SSO, { method: 'HEAD', signal: AbortSignal.timeout(10_000) });
-    return true;
-  } catch {
-    return false;
+    return null;
+  } catch (error) {
+    const { cause, name } = error as Error & {
+      cause?: { code?: string };
+    };
+    return cause?.code ?? name;
   }
 };
 
 test.beforeEach(async () => {
-  test.skip(!(await reachable()), `${SSO} doesn't answer from here`);
+  const reason = await unreachable();
+  test.skip(reason !== null, `${SSO} doesn't answer from here: ${reason}`);
 });
 
 /**
