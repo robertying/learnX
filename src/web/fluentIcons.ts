@@ -15,6 +15,7 @@ import { ArrowRightRegular } from '@fluentui/react-icons/svg/arrow-right';
 import { ArrowSortRegular } from '@fluentui/react-icons/svg/arrow-sort';
 import { ArrowSwapRegular } from '@fluentui/react-icons/svg/arrow-swap';
 import { ArrowSyncRegular } from '@fluentui/react-icons/svg/arrow-sync';
+import { ArrowSyncOffRegular } from '@fluentui/react-icons/svg/arrow-sync-off';
 import { ArrowUndoRegular } from '@fluentui/react-icons/svg/arrow-undo';
 import { ArrowUpRegular } from '@fluentui/react-icons/svg/arrow-up';
 import { ArrowUploadRegular } from '@fluentui/react-icons/svg/arrow-upload';
@@ -155,6 +156,7 @@ export const fluentIcons: Record<SystemIconWindowsName, FluentIcon> = {
   ArrowSortRegular,
   ArrowSwapRegular,
   ArrowSyncRegular,
+  ArrowSyncOffRegular,
   ArrowUndoRegular,
   ArrowUpRegular,
   ArrowUploadRegular,

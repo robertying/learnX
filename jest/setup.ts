@@ -55,6 +55,12 @@ jest.mock('../modules/shortcuts', () => ({ __esModule: true, default: null }));
 // The APK updater (Android's github flavor only); tests that install an
 // update mock it themselves.
 jest.mock('../modules/updater', () => ({ __esModule: true, default: null }));
+// Background refresh's state; services/notifications' tests mock it
+// themselves.
+jest.mock('../modules/background', () => ({
+  __esModule: true,
+  default: null,
+}));
 // Startup reporting (Android only); services/perf's tests mock it themselves.
 jest.mock('../modules/perf', () => ({ __esModule: true, default: null }));
 

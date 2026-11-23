@@ -75,6 +75,7 @@ beforeEach(() => {
     request,
     exactAlarms: true,
     requestExact: jest.fn(),
+    backgroundRefresh: 'on',
   });
 });
 

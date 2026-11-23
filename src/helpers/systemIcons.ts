@@ -176,6 +176,11 @@ export const systemIcons = {
     android: 'notifications_off',
     windows: 'AlertOffRegular',
   },
+  backgroundRefreshOff: {
+    ios: 'exclamationmark.arrow.triangle.2.circlepath',
+    android: 'sync_disabled',
+    windows: 'ArrowSyncOffRegular',
+  },
   calendarOff: {
     ios: 'calendar.badge.exclamationmark',
     android: 'event_busy',
@@ -579,6 +584,7 @@ export const materialCodepoints: Record<SystemIconAndroidName, number> = {
   swap_vert: 0xe8d5,
   swipe: 0xe9ec,
   sync: 0xe627,
+  sync_disabled: 0xe628,
   system_update: 0xe62a,
   unarchive: 0xe169,
   undo: 0xe166,

@@ -3,6 +3,9 @@ import { t } from 'helpers/i18n';
 import { isItemType, ItemTarget, OpenTarget } from 'helpers/openTarget';
 import { immediateTrigger } from 'services/scheduledNotifications';
 import { isAndroid } from 'helpers/platform';
+import BackgroundRefresh, {
+  type BackgroundRefreshState,
+} from 'modules/background';
 
 /**
  * Action buttons a notification shows, by what it is about. Identifiers
@@ -177,6 +180,20 @@ export const canScheduleExactAlarms = async () => {
     return false;
   }
 };
+
+/**
+ * Whether the system lets the background sync run, which is what finds new
+ * content to notify about while learnX isn't open. `on` where there's
+ * nothing to check (the Electron app) or the check fails.
+ */
+export const getBackgroundRefreshState =
+  async (): Promise<BackgroundRefreshState> => {
+    try {
+      return (await BackgroundRefresh?.getState()) ?? 'on';
+    } catch {
+      return 'on';
+    }
+  };
 
 /**
  * Opens the system page that allows exact alarms (Android 12 and later) and

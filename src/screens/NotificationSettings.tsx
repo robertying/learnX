@@ -14,12 +14,13 @@ import { t } from 'helpers/i18n';
 import {
   newContentToggles,
   notificationToggles,
+  syncedToggles,
   type NotificationToggle,
 } from 'helpers/notificationToggles';
 import { openSystemSettings } from 'helpers/systemSettings';
 import useNotificationPermission from 'hooks/useNotificationPermission';
 import { SettingsStackParams } from 'navigation/types';
-import { isApple, isElectron } from 'helpers/platform';
+import { isAndroid, isApple, isElectron } from 'helpers/platform';
 import { checksForUpdates } from 'services/updateNotifications';
 
 type Props = NativeStackScreenProps<
@@ -36,7 +37,7 @@ const assignmentToggles = [
 
 const NotificationSettings: React.FC<Props> = () => {
   const notifications = useSettings(settings => settings.notifications);
-  const { permission, request, exactAlarms, requestExact } =
+  const { permission, request, exactAlarms, requestExact, backgroundRefresh } =
     useNotificationPermission();
   const showExact =
     (notifications.deadlineReminders || notifications.classReminders) &&
@@ -71,8 +72,10 @@ const NotificationSettings: React.FC<Props> = () => {
   // Only where learnX updates itself: the APKs and the Windows and Linux app.
   const showUpdates = checksForUpdates();
 
+  const isOn = (key: NotificationToggle) =>
+    notifications[key] && (key !== 'appUpdates' || showUpdates);
   const anyOn = (Object.keys(notificationToggles) as NotificationToggle[]).some(
-    key => notifications[key] && (key !== 'appUpdates' || showUpdates),
+    isOn,
   );
 
   /**
@@ -81,6 +84,16 @@ const NotificationSettings: React.FC<Props> = () => {
    * the system settings.
    */
   const blocked = permission !== null && permission !== 'granted' && anyOn;
+
+  /**
+   * The system doesn't let the background sync run, so what it finds can't
+   * be notified about while learnX is closed. Low Power Mode is left out:
+   * it's on for every app and ends by itself.
+   */
+  const syncBlocked =
+    !blocked &&
+    (backgroundRefresh === 'off' || backgroundRefresh === 'managed') &&
+    syncedToggles.some(isOn);
 
   return (
     <FormScreen>
@@ -97,6 +110,31 @@ const NotificationSettings: React.FC<Props> = () => {
                   : request()
               }
             />
+          </FormSection>
+        )}
+        {syncBlocked && (
+          <FormSection
+            footer={
+              isAndroid()
+                ? t('backgroundUsageRestrictedCaption')
+                : backgroundRefresh === 'managed'
+                  ? t('backgroundRefreshManagedCaption')
+                  : t('backgroundRefreshOffCaption')
+            }
+          >
+            {/* Screen Time or device management decides; nothing to open. */}
+            {backgroundRefresh === 'off' && (
+              <FormButton
+                testID="background-refresh-turn-on"
+                icon="backgroundRefreshOff"
+                title={
+                  isAndroid()
+                    ? t('allowBackgroundUsage')
+                    : t('turnOnBackgroundRefresh')
+                }
+                onPress={() => openSystemSettings('backgroundRefresh')}
+              />
+            )}
           </FormSection>
         )}
         <FormSection

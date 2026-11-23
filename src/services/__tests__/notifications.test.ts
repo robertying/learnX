@@ -3,6 +3,7 @@ import * as Notifications from 'expo-notifications';
 import {
   canScheduleExactAlarms,
   configureNotifications,
+  getBackgroundRefreshState,
   getNotificationData,
   getNotificationPermission,
   getNotificationTarget,
@@ -12,6 +13,12 @@ import {
   requestNotificationPermission,
 } from 'services/notifications';
 import { getTargetUrl, getUrlTarget } from 'helpers/openTarget';
+import BackgroundRefresh from 'modules/background';
+
+jest.mock('modules/background', () => ({
+  __esModule: true,
+  default: { getState: jest.fn(async () => 'off') },
+}));
 
 const response = (data: unknown) =>
   ({
@@ -292,5 +299,27 @@ describe('configureNotifications', () => {
         .mocked(Notifications.setNotificationChannelAsync)
         .mock.calls.map(([id]) => id),
     ).toEqual(['content', 'deadlines', 'classes', 'updates']);
+  });
+});
+
+describe('getBackgroundRefreshState', () => {
+  it('reads the system', async () => {
+    await expect(getBackgroundRefreshState()).resolves.toBe('off');
+  });
+
+  it('is on when it cannot be read', async () => {
+    jest
+      .mocked(BackgroundRefresh!.getState)
+      .mockRejectedValueOnce(new Error('no module'));
+    await expect(getBackgroundRefreshState()).resolves.toBe('on');
+  });
+
+  it('is on without the native module', async () => {
+    jest.replaceProperty(
+      jest.requireMock<{ default: unknown }>('modules/background'),
+      'default',
+      null,
+    );
+    await expect(getBackgroundRefreshState()).resolves.toBe('on');
   });
 });

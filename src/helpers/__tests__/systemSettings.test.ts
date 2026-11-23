@@ -62,3 +62,16 @@ it("does nothing when the settings can't open", async () => {
     .mockRejectedValue(new Error('Unable to open settings'));
   await expect(openSystemSettings('security')).resolves.toBeUndefined();
 });
+
+it("opens the app's page for background refresh", async () => {
+  jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(false);
+  const openSettings = jest.spyOn(Linking, 'openSettings').mockResolvedValue();
+  const openURL = jest.spyOn(Linking, 'openURL');
+  await openSystemSettings('backgroundRefresh');
+  jest.replaceProperty(Platform, 'OS', 'android');
+  const sendIntent = jest.spyOn(Linking, 'sendIntent');
+  await openSystemSettings('backgroundRefresh');
+  expect(openSettings).toHaveBeenCalledTimes(2);
+  expect(openURL).not.toHaveBeenCalled();
+  expect(sendIntent).not.toHaveBeenCalled();
+});

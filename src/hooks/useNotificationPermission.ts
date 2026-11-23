@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { AppState } from 'react-native';
+import type { BackgroundRefreshState } from 'modules/background';
 import {
   canScheduleExactAlarms,
+  getBackgroundRefreshState,
   getNotificationPermission,
   NotificationPermission,
   onPermissionAnswered,
@@ -10,8 +12,9 @@ import {
 } from 'services/notifications';
 
 /**
- * The notification permission and whether reminders can be exact (Android
- * 12 and later), checked again when the app comes back from the system
+ * The notification permission, whether reminders can be exact (Android 12
+ * and later) and whether the system lets the background sync run, checked
+ * again when the app comes back from the system
  * settings and after each request for the permission, and ways to ask for
  * them.
  */
@@ -20,11 +23,14 @@ const useNotificationPermission = () => {
     null,
   );
   const [exactAlarms, setExactAlarms] = useState<boolean | null>(null);
+  const [backgroundRefresh, setBackgroundRefresh] =
+    useState<BackgroundRefreshState | null>(null);
 
   useEffect(() => {
     const check = () => {
       getNotificationPermission().then(setPermission, () => {});
       canScheduleExactAlarms().then(setExactAlarms, () => {});
+      void getBackgroundRefreshState().then(setBackgroundRefresh);
     };
     check();
     const sub = AppState.addEventListener('change', state => {
@@ -55,7 +61,7 @@ const useNotificationPermission = () => {
     setExactAlarms(await requestExactAlarms());
   };
 
-  return { permission, request, exactAlarms, requestExact };
+  return { permission, request, exactAlarms, requestExact, backgroundRefresh };
 };
 
 export default useNotificationPermission;

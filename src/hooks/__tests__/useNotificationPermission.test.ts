@@ -2,6 +2,7 @@ import { AppState } from 'react-native';
 import { act, renderHook } from '@testing-library/react-native';
 import {
   canScheduleExactAlarms,
+  getBackgroundRefreshState,
   getNotificationPermission,
   onPermissionAnswered,
   requestExactAlarms,
@@ -12,6 +13,7 @@ import useNotificationPermission from 'hooks/useNotificationPermission';
 jest.mock('services/notifications', () => ({
   getNotificationPermission: jest.fn(async () => 'undetermined'),
   canScheduleExactAlarms: jest.fn(async () => false),
+  getBackgroundRefreshState: jest.fn(async () => 'off'),
   requestNotificationPermission: jest.fn(async () => 'granted'),
   requestExactAlarms: jest.fn(async () => true),
   onPermissionAnswered: jest.fn(() => () => {}),
@@ -25,16 +27,18 @@ const render = async () => {
   return hook;
 };
 
-it('checks both permissions on mount', async () => {
+it('checks the permissions and background refresh on mount', async () => {
   const { result } = await render();
   expect(result.current.permission).toBe('undetermined');
   expect(result.current.exactAlarms).toBe(false);
+  expect(result.current.backgroundRefresh).toBe('off');
 });
 
 it('checks again when the app comes back from the system settings', async () => {
   const { result } = await render();
   jest.mocked(getNotificationPermission).mockResolvedValue('granted');
   jest.mocked(canScheduleExactAlarms).mockResolvedValue(true);
+  jest.mocked(getBackgroundRefreshState).mockResolvedValue('on');
   const listener = addListener.mock.calls[0][1];
 
   await act(async () => listener('background'));
@@ -43,8 +47,10 @@ it('checks again when the app comes back from the system settings', async () => 
   await act(async () => listener('active'));
   expect(result.current.permission).toBe('granted');
   expect(result.current.exactAlarms).toBe(true);
+  expect(result.current.backgroundRefresh).toBe('on');
   jest.mocked(getNotificationPermission).mockResolvedValue('undetermined');
   jest.mocked(canScheduleExactAlarms).mockResolvedValue(false);
+  jest.mocked(getBackgroundRefreshState).mockResolvedValue('off');
 });
 
 it('checks again after the permission is asked for elsewhere, until unmounted', async () => {

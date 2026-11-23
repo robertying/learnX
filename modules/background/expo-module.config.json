@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["BackgroundRefreshModule"]
+  },
+  "android": {
+    "modules": ["io.robertying.learnx.background.BackgroundRefreshModule"]
+  }
+}

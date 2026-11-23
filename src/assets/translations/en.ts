@@ -119,6 +119,14 @@ export default {
   turnOnNotifications: 'Turn On Notifications',
   notificationsOffCaption:
     "Notifications for learnX are turned off in System Settings, so the ones turned on below won't appear.",
+  turnOnBackgroundRefresh: 'Turn On Background App Refresh',
+  allowBackgroundUsage: 'Allow Background Usage',
+  backgroundRefreshOffCaption:
+    "Background App Refresh is off for learnX, so it can't check for new content or notify you while it isn't open. If learnX's settings don't show it, first turn on Settings › General › Background App Refresh.",
+  backgroundRefreshManagedCaption:
+    "This device doesn't allow Background App Refresh for learnX, so it can't check for new content or notify you while it isn't open.",
+  backgroundUsageRestrictedCaption:
+    "Background usage is restricted for learnX, so it can't check for new content or notify you while it isn't open.",
   allowCalendarAccess: 'Allow Calendar Access',
   allowRemindersAccess: 'Allow Reminders Access',
   calendarOffCaption:
