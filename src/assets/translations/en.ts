@@ -213,6 +213,8 @@ export default {
   trayOpen: 'Open learnX',
   trayCheckForNewItems: 'Check for New Content',
   trayQuit: 'Quit learnX',
+  macNotificationsCaption:
+    "learnX checks for new content every 15 minutes while it's running, also with its windows closed.",
   electronNotificationsCaption:
     "learnX sends notifications and reminders only while it's running.",
   exportCalendar: 'Export Calendar (.ics)',

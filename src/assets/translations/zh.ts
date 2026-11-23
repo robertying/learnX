@@ -197,6 +197,8 @@ const zh: typeof en = {
   trayOpen: '打开learnX',
   trayCheckForNewItems: '检查新内容',
   trayQuit: '退出learnX',
+  macNotificationsCaption:
+    'learnX运行时（包括关闭所有窗口后）每15分钟检查一次新内容。',
   electronNotificationsCaption: 'learnX仅在运行时发送通知和提醒。',
   exportCalendar: '导出日历（.ics）',
   exportCalendarDescription:

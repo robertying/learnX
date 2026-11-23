@@ -42,7 +42,8 @@ public final class BackgroundRefreshModule: Module {
 
   @MainActor
   static func state(of system: BackgroundRefreshSystem) -> BackgroundRefreshState {
-    // The Mac has no such setting, and runs the task while the app is open.
+    // The Mac has no such setting. Its background tasks don't run, so learnX syncs on a timer of its own there while
+    // it runs (src/services/background.ts).
     if system.isMacCatalystApp {
       return .on
     }

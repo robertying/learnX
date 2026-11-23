@@ -22,6 +22,7 @@ import useNotificationPermission from 'hooks/useNotificationPermission';
 import { SettingsStackParams } from 'navigation/types';
 import { isAndroid, isApple, isElectron } from 'helpers/platform';
 import { checksForUpdates } from 'services/updateNotifications';
+import DeviceInfo from 'constants/DeviceInfo';
 
 type Props = NativeStackScreenProps<
   SettingsStackParams,
@@ -142,7 +143,9 @@ const NotificationSettings: React.FC<Props> = () => {
           footer={
             isElectron()
               ? t('electronNotificationsCaption')
-              : t('notificationsCaption')
+              : DeviceInfo.isMac()
+                ? t('macNotificationsCaption')
+                : t('notificationsCaption')
           }
         >
           {newContentToggles.map(renderToggle)}

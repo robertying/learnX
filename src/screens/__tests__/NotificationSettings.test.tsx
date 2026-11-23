@@ -6,6 +6,7 @@ import {
   userEvent,
 } from '@testing-library/react-native';
 import { toast } from 'components/Toast';
+import DeviceInfo from 'constants/DeviceInfo';
 import { getSettings, resetSettings, setSetting } from 'data/settings';
 import { t } from 'helpers/i18n';
 import { syncedToggles } from 'helpers/notificationToggles';
@@ -188,6 +189,13 @@ it('says when the Electron app notifies, with no system settings to open', async
     screen.getByText(t('notifyDeadlineRemindersCaptionElectron')),
   ).toBeTruthy();
   expect(screen.queryByText(t('openSystemSettings'))).toBeNull();
+});
+
+it('says the Mac checks while learnX runs', async () => {
+  jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+  await renderScreen();
+  expect(screen.getByText(t('macNotificationsCaption'))).toBeTruthy();
+  expect(screen.queryByText(t('notificationsCaption'))).toBeNull();
 });
 
 describe('background refresh', () => {

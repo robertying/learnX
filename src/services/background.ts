@@ -30,6 +30,7 @@ import { calendarWeekQuery } from 'data/schedule';
 import { startOfWeek } from 'helpers/schedule';
 import { waitAtMost } from 'helpers/waitAtMost';
 import { beijingDate } from 'helpers/serverTime';
+import DeviceInfo from 'constants/DeviceInfo';
 
 export type SyncResult =
   /** Not logged in, no courses cached yet, or the login failed. */
@@ -362,29 +363,76 @@ export const watchAssignmentChanges = () => {
 
 const FETCH_ALL_CONTENT_TASK = 'FETCH_ALL_CONTENT_TASK';
 
+/** How often the sync runs, at the soonest. */
+const SYNC_INTERVAL_MINUTES = 15;
+
+/**
+ * How long a sync on the Mac's own timer may take. Nothing ends it there, and
+ * App Nap slows a learnX that isn't in front, so it gets longer than a system
+ * task.
+ */
+export const MAC_SYNC_BUDGET_MS = 60_000;
+
+/** The sync under way, which a run that comes meanwhile waits for. */
+let currentSync: Promise<SyncResult['status']> | null = null;
+
+/**
+ * Syncs, notifies about what's new and checks for a new version, unless a
+ * run is already under way, whose result it then returns.
+ */
+const runSync = (budget?: number) => {
+  currentSync ??= (async () => {
+    // A new version of the APKs, at most every few hours; next to the sync,
+    // so a slow mirror doesn't eat its time.
+    const updateChecked = checkForUpdate();
+    const result = await syncContent({ budget });
+    if (result.status === 'synced') {
+      try {
+        await notifyContent(result.diff);
+      } catch (error) {
+        recordError(error, 'Posting new content notifications');
+      }
+    }
+    await updateChecked;
+    return result.status;
+  })().finally(() => {
+    currentSync = null;
+  });
+  return currentSync;
+};
+
 // Runs when index.js imports this module, so the task exists on a background
 // launch too.
 
-TaskManager.defineTask(FETCH_ALL_CONTENT_TASK, async () => {
-  // A new version of the APKs, at most every few hours; next to the sync, so
-  // a slow mirror doesn't eat its time.
-  const updateChecked = checkForUpdate();
-  const result = await syncContent();
-  if (result.status === 'synced') {
-    try {
-      await notifyContent(result.diff);
-    } catch (error) {
-      recordError(error, 'Posting new content notifications');
-    }
-  }
-  await updateChecked;
-  return result.status === 'failed'
+TaskManager.defineTask(FETCH_ALL_CONTENT_TASK, async () =>
+  (await runSync()) === 'failed'
     ? BackgroundTask.BackgroundTaskResult.Failed
-    : BackgroundTask.BackgroundTaskResult.Success;
-});
+    : BackgroundTask.BackgroundTaskResult.Success,
+);
 
+let macTimer: ReturnType<typeof setInterval> | null = null;
+
+/**
+ * Runs the sync every 15 minutes while learnX runs, in front or not, with its
+ * windows open or closed (closing the last one leaves it running). macOS
+ * never launches an app for its background tasks and doesn't run them
+ * reliably while it's open, so the Mac keeps its own timer, as Mail does.
+ * App Nap may delay a run while learnX isn't in front: the sync is
+ * discretionary work, which macOS is free to put off.
+ */
+const startMacSync = () => {
+  macTimer ??= setInterval(() => {
+    void runSync(MAC_SYNC_BUDGET_MS);
+  }, SYNC_INTERVAL_MINUTES * 60_000);
+};
+
+/** Schedules the sync; safe to call again, as each new primary window does. */
 export const setUpBackgroundFetch = async () => {
+  if (DeviceInfo.isMac()) {
+    startMacSync();
+    return;
+  }
   await BackgroundTask.registerTaskAsync(FETCH_ALL_CONTENT_TASK, {
-    minimumInterval: 15,
+    minimumInterval: SYNC_INTERVAL_MINUTES,
   });
 };
