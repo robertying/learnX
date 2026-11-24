@@ -12,8 +12,8 @@
 		5A0710000000000000001004 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 5A0710000000000000001003 /* FirebaseCrashlytics */; };
 		5A0710000000000000001006 /* FirebaseAnalyticsCore in Frameworks */ = {isa = PBXBuildFile; productRef = 5A0710000000000000001005 /* FirebaseAnalyticsCore */; };
 		5A0710000000000000002003 /* MacPreviewHosting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000002002 /* MacPreviewHosting.swift */; };
-		5A0710000000000000003003 /* MenuBarHosting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000003002 /* MenuBarHosting.swift */; };
 		5A0710000000000000002004 /* MacPreview.bundle in Embed Mac Plugins */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000002001 /* MacPreview.bundle */; platformFilter = maccatalyst; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		5A0710000000000000003003 /* MenuBarHosting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000003002 /* MenuBarHosting.swift */; };
 		5A0710000000000000003004 /* MacMenuBar.bundle in Embed Mac Plugins */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000003001 /* MacMenuBar.bundle */; platformFilter = maccatalyst; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		5E191CFA541A0D10472C77C2 /* Pods_learnXTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C3928D6036512F98EC224CA /* Pods_learnXTests.framework */; };
 		66752A57317AE195AB987FFB /* Pods_learnX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DE528F5AED26E2F21053210 /* Pods_learnX.framework */; };
@@ -110,8 +110,8 @@
 		5A0710000000000000000E01 /* learnXTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = learnXTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A0710000000000000000F01 /* learnXUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = learnXUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A0710000000000000002001 /* MacPreview.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacPreview.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
-		5A0710000000000000003001 /* MacMenuBar.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacMenuBar.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A0710000000000000002002 /* MacPreviewHosting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MacPreviewHosting.swift; path = ../modules/quicklook/ios/MacPreviewHosting.swift; sourceTree = SOURCE_ROOT; };
+		5A0710000000000000003001 /* MacMenuBar.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacMenuBar.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A0710000000000000003002 /* MenuBarHosting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MenuBarHosting.swift; path = ../modules/menubar/ios/MenuBarHosting.swift; sourceTree = SOURCE_ROOT; };
 		98A6289E98CCDFCA5DBBFDA4 /* Pods-ExpoWidgetsTarget.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ExpoWidgetsTarget.release.xcconfig"; path = "Target Support Files/Pods-ExpoWidgetsTarget/Pods-ExpoWidgetsTarget.release.xcconfig"; sourceTree = "<group>"; };
 		A06F308A48D477954EECD356 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-learnX/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
@@ -1304,6 +1304,38 @@
 			};
 			name = Debug;
 		};
+		5A071000000000000000200F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSPrincipalClass = LXMacPreviewHost;
+				LIBRARY_SEARCH_PATHS = (
+					"$(SDKROOT)/usr/lib/swift",
+					"$(inherited)",
+				);
+				"LIBRARY_SEARCH_PATHS[sdk=macosx*]" = (
+					"$(SDKROOT)/usr/lib/swift",
+					"$(SDKROOT)/System/iOSSupport/usr/lib/swift",
+					"$(inherited)",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.6;
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
+				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = io.robertying.learnX.MacPreview;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_VERSION = 6.0;
+				WRAPPER_EXTENSION = bundle;
+			};
+			name = Release;
+		};
 		5A071000000000000000300E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1338,38 +1370,6 @@
 				WRAPPER_EXTENSION = bundle;
 			};
 			name = Debug;
-		};
-		5A071000000000000000200F /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				DEAD_CODE_STRIPPING = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSPrincipalClass = LXMacPreviewHost;
-				LIBRARY_SEARCH_PATHS = (
-					"$(SDKROOT)/usr/lib/swift",
-					"$(inherited)",
-				);
-				"LIBRARY_SEARCH_PATHS[sdk=macosx*]" = (
-					"$(SDKROOT)/usr/lib/swift",
-					"$(SDKROOT)/System/iOSSupport/usr/lib/swift",
-					"$(inherited)",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 14.6;
-				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
-				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = io.robertying.learnX.MacPreview;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
-				SKIP_INSTALL = YES;
-				SUPPORTED_PLATFORMS = macosx;
-				SWIFT_VERSION = 6.0;
-				WRAPPER_EXTENSION = bundle;
-			};
-			name = Release;
 		};
 		5A071000000000000000300F /* Release */ = {
 			isa = XCBuildConfiguration;
