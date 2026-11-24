@@ -1,5 +1,6 @@
 import UIKit
 internal import Expo
+internal import LearnXMenuBar
 internal import LearnXWindows
 
 /// One per window. On iPad and Mac the app can have several windows, each its own React root on the one JS runtime
@@ -26,6 +27,13 @@ class SceneDelegate: ExpoAppSceneDelegate {
     willConnectTo session: UISceneSession,
     options connectionOptions: UIScene.ConnectionOptions
   ) {
+    #if targetEnvironment(macCatalyst)
+    guard MenuBar.windowWillConnect() else {
+      // Opened as a login item: the windows it would restore wait until the user asks for one.
+      UIApplication.shared.requestSceneSessionDestruction(session, options: nil)
+      return
+    }
+    #endif
     // Before React Native starts: what the connection delivers is for this window.
     WindowTracker.setTarget(scene)
     var properties: [AnyHashable: Any] = ["windowId": session.persistentIdentifier]
@@ -78,6 +86,11 @@ class SceneDelegate: ExpoAppSceneDelegate {
         .first
     }
     super.sceneDidDisconnect(scene)
+    #if targetEnvironment(macCatalyst)
+    MenuBar.windowDidDisconnect(
+      remainingWindows: UIApplication.shared.connectedScenes.count { $0 !== scene && $0 is UIWindowScene }
+    )
+    #endif
   }
 
   // What these deliver is for this window, so it becomes the target before JS hears of it.

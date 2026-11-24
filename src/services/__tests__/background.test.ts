@@ -24,6 +24,7 @@ import {
 } from 'data/userData';
 import {
   notifyContent,
+  runInMenuBar,
   setUpBackgroundFetch,
   syncContent,
   watchAssignmentChanges,
@@ -41,12 +42,16 @@ import { ContentDiff } from 'data/contentDiff';
 import { resetSyncLog, useSyncLogStore } from 'data/syncLog';
 import { recordError } from 'services/crashReporting';
 import { checkForUpdate } from 'services/updateNotifications';
+import { MenuBar } from 'modules/menubar';
 
 jest.mock('expo-background-task', () => ({
   BackgroundTaskResult: { Success: 1, Failed: 2 },
   registerTaskAsync: jest.fn(),
 }));
 jest.mock('expo-task-manager', () => ({ defineTask: jest.fn() }));
+jest.mock('modules/menubar', () => ({
+  MenuBar: { showItem: jest.fn(), addListener: jest.fn() },
+}));
 jest.mock('services/updateNotifications', () => ({
   checkForUpdate: jest.fn(() => Promise.resolve()),
 }));
@@ -663,6 +668,13 @@ describe('the background task', () => {
       error,
       'Posting new content notifications',
     );
+  });
+
+  it('has no menu bar item or timer of its own off the Mac', () => {
+    jest.useFakeTimers();
+    runInMenuBar();
+    expect(MenuBar!.showItem).not.toHaveBeenCalled();
+    expect(jest.getTimerCount()).toBe(0);
   });
 
   it('runs about every 15 minutes', async () => {

@@ -194,6 +194,10 @@ PODS:
     - ExpoModulesCore
   - LearnXCrashlytics/Tests (1.0.0):
     - ExpoModulesCore
+  - LearnXMenuBar (1.0.0):
+    - ExpoModulesCore
+  - LearnXMenuBar/Tests (1.0.0):
+    - ExpoModulesCore
   - LearnXMenus (1.0.0):
     - ExpoModulesCore
     - ExpoUI
@@ -2478,6 +2482,8 @@ DEPENDENCIES:
   - LearnXBackground/Tests (from `../modules/background/ios`)
   - LearnXCrashlytics (from `../modules/crashlytics/ios`)
   - LearnXCrashlytics/Tests (from `../modules/crashlytics/ios`)
+  - LearnXMenuBar (from `../modules/menubar/ios`)
+  - LearnXMenuBar/Tests (from `../modules/menubar/ios`)
   - LearnXMenus (from `../modules/menus/ios`)
   - LearnXMenus/Tests (from `../modules/menus/ios`)
   - LearnXPdf (from `../modules/pdf/ios`)
@@ -2681,6 +2687,8 @@ EXTERNAL SOURCES:
     :path: "../modules/background/ios"
   LearnXCrashlytics:
     :path: "../modules/crashlytics/ios"
+  LearnXMenuBar:
+    :path: "../modules/menubar/ios"
   LearnXMenus:
     :path: "../modules/menus/ios"
   LearnXPdf:
@@ -2924,6 +2932,7 @@ SPEC CHECKSUMS:
   hermes-engine: 79484fc4e58f328d01b9339ef899ca633d3702ee
   LearnXBackground: c67cd3c149af17b097e581c348fca80f581b7654
   LearnXCrashlytics: f54c9b50163ce8255ee9148b00819a6203273c3e
+  LearnXMenuBar: 7b4973e329c2b0939a3c7436c54732a48598f147
   LearnXMenus: 2dcfdffd7d21297d1235b14669f1256ec039f030
   LearnXPdf: 56c8308a1a67a23f6def9c35f208a0a3f16b52d1
   LearnXQuickLook: 5a07c6af2e517166ac3e4a896533d7f0e308abfb

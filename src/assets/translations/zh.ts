@@ -186,6 +186,9 @@ const zh: typeof en = {
   startAtLogin: '登录时启动',
   unsandboxedNote:
     'AppImage版learnX在Ubuntu 24.04及更高版本上无法启用Chromium沙盒。为提高运行时安全，建议改用deb安装包（.deb）。',
+  openAtLogin: '登录时打开',
+  openAtLoginCaption:
+    '登录Mac时在菜单栏中打开learnX（不打开窗口），以便持续同步并发送通知。关闭所有窗口后learnX仍在菜单栏中运行，可在其菜单中选择“退出learnX”。',
   startAtLoginCaption:
     '登录电脑时在系统托盘中启动learnX，以便持续同步并发送提醒。关闭窗口后learnX仍在托盘中运行，可在托盘菜单中选择“退出learnX”。',
   language: '语言',
@@ -197,6 +200,8 @@ const zh: typeof en = {
   trayOpen: '打开learnX',
   trayCheckForNewItems: '检查新内容',
   trayQuit: '退出learnX',
+  macNotificationsCaption:
+    'learnX运行时（包括没有打开窗口时）每15分钟检查一次新内容。要让learnX保持运行，请开启“设置 › 登录时打开”。',
   electronNotificationsCaption: 'learnX仅在运行时发送通知和提醒。',
   exportCalendar: '导出日历（.ics）',
   exportCalendarDescription:

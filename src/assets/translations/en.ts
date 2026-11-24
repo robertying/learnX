@@ -201,6 +201,9 @@ export default {
   startAtLogin: 'Start at Login',
   unsandboxedNote:
     "learnX is running without Chromium's sandbox, as the AppImage does on Ubuntu 24.04 and later. For better security, install the .deb instead.",
+  openAtLogin: 'Open at Login',
+  openAtLoginCaption:
+    'Opens learnX in the menu bar when you log in to your Mac, without a window, so it keeps syncing and sending notifications. Closing its last window keeps it running there; to quit, choose Quit learnX in its menu.',
   startAtLoginCaption:
     'Starts learnX in the system tray when you log in to your computer, so it keeps syncing and sending reminders. Closing the window keeps it running there; to quit, choose Quit learnX in the tray menu.',
   language: 'Language',
@@ -213,6 +216,8 @@ export default {
   trayOpen: 'Open learnX',
   trayCheckForNewItems: 'Check for New Content',
   trayQuit: 'Quit learnX',
+  macNotificationsCaption:
+    "learnX checks for new content every 15 minutes while it's running, also with no window open. To keep it running, turn on Settings › Open at Login.",
   electronNotificationsCaption:
     "learnX sends notifications and reminders only while it's running.",
   exportCalendar: 'Export Calendar (.ics)',
