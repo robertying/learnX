@@ -4,8 +4,9 @@ import WebKit
 
 /// What patches/react-native-webview@14.0.1.patch changes on iOS: a JavaScript panel that can't be presented (the
 /// web view isn't in a window) answers at once (WebKit throws when a panel's completion handler is released without
-/// being called, which is what happened when the presentation silently failed), and a page loaded at its top stays
-/// below a translucent header until it's scrolled.
+/// being called, which is what happened when the presentation silently failed), a page loaded at its top stays
+/// below a translucent header until it's scrolled, and a load that fails after it was committed (Quick Look's
+/// conversion of a document it can't read) is reported as an error.
 @MainActor
 @Suite struct WebViewPatchTests {
   private func webViewDelegate() throws -> WKUIDelegate {
@@ -100,5 +101,45 @@ import WebKit
     scrollView.delegate?.scrollViewWillBeginDragging?(scrollView)
     scrollView.contentOffset = CGPoint(x: 0, y: -50)
     #expect(scrollView.contentOffset.y == -50)
+  }
+
+  /// The `onLoadingError` events RNCWebViewImpl sends, as React Native's direct event block.
+  private func loadingErrors(of impl: UIView) -> () -> [[String: Any]] {
+    var events: [[String: Any]] = []
+    let block: @convention(block) ([AnyHashable: Any]?) -> Void = { body in
+      events.append((body as? [String: Any]) ?? [:])
+    }
+    impl.setValue(block, forKey: "onLoadingError")
+    return { events }
+  }
+
+  @Test func committedLoadThatFailsIsAnError() async throws {
+    let (impl, webView, window) = try await webViewInWindow()
+    defer { impl.removeFromSuperview() }
+    _ = window
+    let events = loadingErrors(of: impl)
+    let delegate = try #require(impl as? WKNavigationDelegate)
+
+    delegate.webView?(
+      webView, didFail: nil, withError: NSError(domain: "QuickLookErrorDomain", code: 912)
+    )
+    let event = try #require(events().first)
+    #expect(event["domain"] as? String == "QuickLookErrorDomain")
+    #expect(event["code"] as? Int == 912)
+    #expect(event["didFailProvisionalNavigation"] as? Bool == false)
+  }
+
+  @Test func cancelledCommittedLoadIsNotAnError() async throws {
+    let (impl, webView, window) = try await webViewInWindow()
+    defer { impl.removeFromSuperview() }
+    _ = window
+    let events = loadingErrors(of: impl)
+    let delegate = try #require(impl as? WKNavigationDelegate)
+
+    delegate.webView?(
+      webView, didFail: nil, withError: NSError(domain: NSURLErrorDomain, code: NSURLErrorCancelled)
+    )
+    delegate.webView?(webView, didFail: nil, withError: NSError(domain: "WebKitErrorDomain", code: 102))
+    #expect(events().isEmpty)
   }
 }

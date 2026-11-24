@@ -171,7 +171,7 @@ const zh: typeof en = {
   fileDownloadFailedDescription: '请检查网络连接后重试。',
   openFileFailed: '文件打开失败，请重新下载，或安装可打开此类文件的应用。',
   previewFailedTitle: '文件预览失败',
-  previewFailedDescription: '文件可能已损坏。',
+  previewFailedDescription: '文件可能已损坏，可在其他应用中打开或重新下载。',
   pdfPasswordTitle: '此PDF需要密码',
   pdfPasswordDescription: '可在其他应用中打开并输入密码。',
   downloadAgain: '重新下载',

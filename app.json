@@ -3,7 +3,7 @@
   "displayName": "learnX",
   "owner": "robertying",
   "slug": "learnx",
-  "runtimeVersion": "19.1.0",
+  "runtimeVersion": "19.2.0",
   "updates": {
     "url": "https://ota.tsinghua.app/manifest",
     "requestHeaders": {

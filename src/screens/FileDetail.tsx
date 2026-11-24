@@ -93,12 +93,14 @@ const FileDetailContent: React.FC<{
   }, [path, courseFileId]);
 
   const [showInfo, setShowInfo] = useState(false);
-  // Why the PDF viewer couldn't show the file: it needs a password, or it is
-  // damaged or not a PDF after all.
+  // Why the preview couldn't show the file: the PDF viewer's reason (it needs
+  // a password, or it is damaged or not a PDF after all), or the web view's
+  // failed load, such as a document WebKit's Quick Look conversion can't read.
   const [previewFailure, setPreviewFailure] = useState<PdfFailure | null>(null);
 
   const handlePreviewError = (event: { nativeEvent: { reason: PdfFailure } }) =>
     setPreviewFailure(event.nativeEvent.reason);
+  const handleWebPreviewError = () => setPreviewFailure('unreadable');
   // The Mac's Quick Look preview had no window to show in: the file's info
   // shows instead, as for a file it can't preview.
   const [quickLookUnavailable, setQuickLookUnavailable] = useState(false);
@@ -119,6 +121,18 @@ const FileDetailContent: React.FC<{
       void showQuickLookPanel(path);
     }
   };
+
+  // Hands a file the preview can't show to an app that may: Android's
+  // chooser, the default app on Windows and Linux, the Mac's Quick Look or
+  // iOS's share sheet.
+  const otherAppAction = isAndroid()
+    ? { label: t('open'), onPress: open }
+    : isElectron()
+      ? { label: t('openInDefaultApp'), onPress: open }
+      : isQuickLookAvailable
+        ? { label: t('quickLook'), onPress: handleQuickLook }
+        : { label: t('share'), onPress: share };
+
   // ⌘Y, as in Finder (the Mac's File menu).
   const isFocused = useIsFocused();
   useAppCommand(
@@ -164,21 +178,14 @@ const FileDetailContent: React.FC<{
           <Spinner progress={progress} />
         </View>
       ) : !showInfo && canRender && previewFailure === 'password' ? (
-        // The viewer can't ask for the password: another app can (Android's
-        // chooser, iOS's share sheet, the Mac's Quick Look).
+        // The viewer can't ask for the password: another app can.
         <StatusView
           key="preview-locked"
           testID="file-preview-locked"
           icon="locked"
           title={t('pdfPasswordTitle')}
           description={t('pdfPasswordDescription')}
-          actions={[
-            isAndroid()
-              ? { label: t('open'), onPress: open }
-              : isQuickLookAvailable
-                ? { label: t('quickLook'), onPress: handleQuickLook }
-                : { label: t('share'), onPress: share },
-          ]}
+          actions={[otherAppAction]}
         />
       ) : !showInfo && canRender && previewFailure ? (
         <StatusView
@@ -187,7 +194,10 @@ const FileDetailContent: React.FC<{
           icon="error"
           title={t('previewFailedTitle')}
           description={t('previewFailedDescription')}
-          actions={[{ label: t('downloadAgain'), onPress: handleRedownload }]}
+          actions={[
+            otherAppAction,
+            { label: t('downloadAgain'), onPress: handleRedownload },
+          ]}
         />
       ) : !showInfo && canRender ? (
         kind === 'pdf' ? (
@@ -218,6 +228,7 @@ const FileDetailContent: React.FC<{
             // .svg file don't run.
             javaScriptEnabled={false}
             originWhitelist={['*']}
+            onError={handleWebPreviewError}
             // The preview stays on the file: a web page in its place would
             // look like part of learnX. A tapped web or mail link opens
             // outside the app.

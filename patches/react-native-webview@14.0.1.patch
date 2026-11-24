@@ -1,5 +1,5 @@
 diff --git a/apple/RNCWebViewImpl.m b/apple/RNCWebViewImpl.m
-index 38904266dc37b006274104f4680778ffbfece369..37f90812d5ce295f70d948dcc5b458b4c39f8ed1 100644
+index 38904266dc37b006274104f4680778ffbfece369..879dd5e78647b8bd373aeabbccbd05257a3bdb5b 100644
 --- a/apple/RNCWebViewImpl.m
 +++ b/apple/RNCWebViewImpl.m
 @@ -148,6 +148,8 @@ RCTAutoInsetsProtocol>
@@ -124,7 +124,40 @@ index 38904266dc37b006274104f4680778ffbfece369..37f90812d5ce295f70d948dcc5b458b4
  #endif // !TARGET_OS_OSX
  
  /**
-@@ -1586,6 +1633,15 @@ didFinishNavigation:(WKNavigation *)navigation
+@@ -1498,6 +1545,23 @@ RCTAutoInsetsProtocol>
+ - (void)               webView:(WKWebView *)webView
+   didFailProvisionalNavigation:(WKNavigation *)navigation
+                      withError:(NSError *)error
++{
++  [self sendLoadingError:error provisional:YES];
++}
++
++/**
++ * A load that failed after it was committed, as WebKit's Quick Look conversion
++ * of a document it can't read does (QuickLookErrorDomain): without this the
++ * view never reports an end to the load.
++ */
++- (void)                    webView:(WKWebView *)webView
++  didFailNavigation:(WKNavigation *)navigation
++          withError:(NSError *)error
++{
++  [self sendLoadingError:error provisional:NO];
++}
++
++- (void)sendLoadingError:(NSError *)error provisional:(BOOL)provisional
+ {
+   if (_onLoadingError) {
+     if ([error.domain isEqualToString:NSURLErrorDomain] && error.code == NSURLErrorCancelled) {
+@@ -1518,7 +1582,7 @@ RCTAutoInsetsProtocol>
+ 
+     NSMutableDictionary<NSString *, id> *event = [self baseEvent];
+     [event addEntriesFromDictionary:@{
+-      @"didFailProvisionalNavigation": @YES,
++      @"didFailProvisionalNavigation": @(provisional),
+       @"domain": error.domain,
+       @"code": @(error.code),
+       @"description": error.localizedDescription,
+@@ -1586,6 +1650,15 @@ didFinishNavigation:(WKNavigation *)navigation
      [self forceIgnoreSilentHardwareSwitch:true];
    }
  

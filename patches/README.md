@@ -154,6 +154,7 @@ Mac Catalyst: leaves the pan gesture alone when KVO already subclassed the scrol
 ## `react-native-webview`
 
 - iOS: JavaScript alerts present from a view controller that is on screen, or are dismissed (crash); a page loaded at its top stays below a translucent header until scrolled (WebKit fits an image to the width and leaves it at offset 0).
+- iOS: a load that fails after it was committed (`didFailNavigation`) reaches `onError` like one that fails before (`didFailProvisionalNavigation`). WebKit's Quick Look conversion fails that way for a document it can't read (`QuickLookErrorDomain`), which otherwise showed WebKit's own error page and never ended the load, so File detail couldn't offer anything better.
 - Types: props no longer collapse to `never` ([#3977](https://github.com/react-native-webview/react-native-webview/issues/3977)).
 
 **Drop when:** Fixed upstream.
