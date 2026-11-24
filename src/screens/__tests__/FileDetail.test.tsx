@@ -47,6 +47,7 @@ jest.mock('react-native-webview', () => {
       decelerationRate?: string;
       javaScriptEnabled?: boolean;
       onShouldStartLoadWithRequest?: (request: object) => boolean;
+      onError?: () => void;
     }) => (
       <View
         testID="webview"
@@ -55,6 +56,7 @@ jest.mock('react-native-webview', () => {
           decelerationRate: props.decelerationRate,
           javaScriptEnabled: props.javaScriptEnabled,
           onShouldStartLoadWithRequest: props.onShouldStartLoadWithRequest,
+          onError: props.onError,
         }}
       />
     ),
@@ -141,9 +143,62 @@ it("offers to download again when the PDF can't be read", async () => {
   expect(screen.getByText(t('previewFailedTitle'))).toBeTruthy();
   expect(screen.getByText(t('previewFailedDescription'))).toBeTruthy();
 
+  await user.press(screen.getByText(t('share')));
+  expect(download.share).toHaveBeenCalledTimes(1);
   await user.press(screen.getByText(t('downloadAgain')));
   expect(download.redownload).toHaveBeenCalledTimes(1);
   expect(screen.getByTestId('pdf')).toBeTruthy();
+});
+
+describe("a file the web view can't show", () => {
+  // WebKit's Quick Look conversion fails on a damaged .ppt, which the web
+  // view reports as an error rather than a page.
+  const failedPpt = async () => {
+    downloaded({ path: 'file:///a.ppt' });
+    await renderScreen({
+      attachment: { ...zip, fileType: 'ppt', downloadUrl: 'https://x' },
+    });
+    await act(async () => {
+      screen.getByTestId('webview').props.onError({
+        nativeEvent: { domain: 'QuickLookErrorDomain', code: 912 },
+      });
+    });
+    expect(screen.queryByTestId('webview')).toBeNull();
+    expect(screen.getByText(t('previewFailedTitle'))).toBeTruthy();
+    expect(screen.getByText(t('previewFailedDescription'))).toBeTruthy();
+  };
+
+  it('offers the share sheet, to open it in another app, or downloading it again', async () => {
+    const user = userEvent.setup();
+    await failedPpt();
+    await user.press(screen.getByText(t('share')));
+    expect(download.share).toHaveBeenCalledTimes(1);
+    await user.press(screen.getByText(t('downloadAgain')));
+    expect(download.redownload).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('webview')).toBeTruthy();
+  });
+
+  it('opens it in the default app on Windows and Linux', async () => {
+    jest.replaceProperty(Platform, 'OS', 'web');
+    downloaded({ path: 'file:///a.png' });
+    await renderScreen({
+      attachment: { ...zip, fileType: 'png', downloadUrl: 'https://x' },
+    });
+    await act(async () => {
+      screen.getByTestId('webview').props.onError({ nativeEvent: {} });
+    });
+    expect(screen.getByText(t('previewFailedTitle'))).toBeTruthy();
+    await userEvent.press(screen.getByText(t('openInDefaultApp')));
+    expect(download.open).toHaveBeenCalledTimes(1);
+  });
+
+  it('still shows its info from the header', async () => {
+    await failedPpt();
+    const { onToggleInfo } = jest.mocked(useFileDetailHeader).mock.lastCall![0];
+    await act(() => onToggleInfo());
+    expect(screen.getByTestId('file-info')).toBeTruthy();
+    expect(screen.queryByText(t('previewFailedTitle'))).toBeNull();
+  });
 });
 
 const lockedPdf = async () => {

@@ -70,7 +70,7 @@ android {
         minSdk = rootProject.ext.minSdkVersion
         targetSdk = rootProject.ext.targetSdkVersion
         versionCode = 9204560
-        versionName = "19.1.0"
+        versionName = "19.2.0"
         // A release build's number, which is never committed: fastlane's build
         // lanes pass -PlearnxBuildNumber=<n> (the Xcode builds get the same n).
         def releaseBuild = findProperty("learnxBuildNumber")
