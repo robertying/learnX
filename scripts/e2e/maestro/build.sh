@@ -45,6 +45,7 @@ patches=(
   "$here/maestro-inner-display-tree.patch"
   "$here/maestro-inner-display-alerts.patch"
   "$here/maestro-pinch.patch"
+  "$here/maestro-look-alike-elements.patch"
 )
 # A checkout of the base with the patches applied, in folder $1.
 patched_checkout() {
