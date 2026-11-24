@@ -44,4 +44,21 @@ describe('LoginFields (Android)', () => {
     await fireEvent(password, 'submitEditing');
     expect(handlers.onSubmit).toHaveBeenCalledTimes(1);
   });
+
+  it('disables both fields when asked', async () => {
+    await render(
+      <LoginFields
+        username="student"
+        password="secret"
+        usernameLabel="Username"
+        passwordLabel="Password"
+        onUsernameChange={jest.fn()}
+        onPasswordChange={jest.fn()}
+        onSubmit={jest.fn()}
+        disabled
+      />,
+    );
+    expect(screen.getByTestId('login-username').props.editable).toBe(false);
+    expect(screen.getByTestId('login-password').props.editable).toBe(false);
+  });
 });

@@ -20,14 +20,16 @@ const LoginFields: React.FC<LoginFieldsProps> = ({
   onSubmit,
   usernameLabel,
   passwordLabel,
+  disabled,
   style,
 }) => {
   const passwordInput = useRef<HTMLInputElement>(null);
   return (
     <View style={[styles.fields, style]}>
-      <Field label={usernameLabel}>
+      <Field label={{ children: usernameLabel, disabled }}>
         <Input
           value={username}
+          disabled={disabled}
           autoComplete="username"
           autoCapitalize="off"
           autoCorrect="off"
@@ -41,11 +43,12 @@ const LoginFields: React.FC<LoginFieldsProps> = ({
           }}
         />
       </Field>
-      <Field label={passwordLabel}>
+      <Field label={{ children: passwordLabel, disabled }}>
         <Input
           ref={passwordInput}
           type="password"
           value={password}
+          disabled={disabled}
           autoComplete="current-password"
           data-testid="login-password"
           onChange={(_event, data) => onPasswordChange(trim(data.value))}

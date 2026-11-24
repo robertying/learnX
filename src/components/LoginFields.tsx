@@ -13,6 +13,8 @@ import {
   accessibilityLabel,
   autocorrectionDisabled,
   background,
+  disabled as disabledModifier,
+  foregroundStyle,
   clipShape,
   keyboardType,
   onSubmit,
@@ -54,8 +56,14 @@ const LoginFields: React.FC<LoginFieldsProps> = ({
   onSubmit: submit,
   usernameLabel,
   passwordLabel,
+  disabled,
   style,
 }) => {
+  // A disabled SwiftUI field looks the same as an enabled one: its text dims,
+  // as a disabled control's label does.
+  const disabledModifiers = disabled
+    ? [disabledModifier(true), foregroundStyle(PlatformColor('tertiaryLabel'))]
+    : [];
   const usernameText = useNativeState(username);
   useFieldText(usernameText, {
     value: username,
@@ -91,6 +99,7 @@ const LoginFields: React.FC<LoginFieldsProps> = ({
           testID="login-username"
           modifiers={[
             ...fieldModifiers,
+            ...disabledModifiers,
             textContentType('username'),
             submitLabel('next'),
             accessibilityLabel(usernameLabel),
@@ -106,6 +115,7 @@ const LoginFields: React.FC<LoginFieldsProps> = ({
           testID="login-password"
           modifiers={[
             ...fieldModifiers,
+            ...disabledModifiers,
             textContentType('password'),
             submitLabel('done'),
             accessibilityLabel(passwordLabel),

@@ -1,5 +1,7 @@
+import { PlatformColor } from 'react-native';
 import { Button } from '@expo/ui';
-import { buttonStyle, controlSize } from '@expo/ui/swift-ui/modifiers';
+import { HStack, ProgressView, Text } from '@expo/ui/swift-ui';
+import { buttonStyle, controlSize, tint } from '@expo/ui/swift-ui/modifiers';
 import DeviceInfo from 'constants/DeviceInfo';
 import ThemedHost from 'components/ThemedHost';
 import type { ContainedButtonProps } from './ContainedButton.shared';
@@ -11,15 +13,22 @@ export type { ContainedButtonProps } from './ContainedButton.shared';
 const glass = DeviceInfo.hasLiquidGlass()
   ? [buttonStyle('glassProminent')]
   : [];
+// The disabled label's color: left alone, the spinner takes the accent.
+const spinnerModifiers = [tint(PlatformColor('tertiaryLabel'))];
 const sizes = {
   regular: glass.length > 0 ? glass : undefined,
   large: [...glass, controlSize('large')],
 };
 
-/** The system's filled button, tinted with the theme's primary color. */
+/**
+ * The system's filled button, tinted with the theme's primary color. While
+ * loading, the system spinner sits before the label, which takes the
+ * button's disabled style, as in Apple's own sign-in buttons.
+ */
 const ContainedButton: React.FC<ContainedButtonProps> = ({
   label,
   disabled,
+  loading,
   size = 'regular',
   onPress,
   style,
@@ -30,10 +39,17 @@ const ContainedButton: React.FC<ContainedButtonProps> = ({
       <Button
         testID={testID}
         label={label}
-        disabled={disabled}
+        disabled={disabled || loading}
         onPress={onPress}
         modifiers={sizes[size]}
-      />
+      >
+        {loading ? (
+          <HStack spacing={8}>
+            <ProgressView modifiers={spinnerModifiers} />
+            <Text>{label}</Text>
+          </HStack>
+        ) : undefined}
+      </Button>
     </ThemedHost>
   );
 };

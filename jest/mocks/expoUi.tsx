@@ -45,7 +45,8 @@ export const Button = ({
     disabled={disabled}
     onPress={onPress}
   >
-    {label !== undefined ? <Text>{label}</Text> : children}
+    {/* As in @expo/ui, content replaces the label. */}
+    {children ?? <Text>{label}</Text>}
   </Pressable>
 );
 

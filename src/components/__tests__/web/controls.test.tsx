@@ -50,6 +50,24 @@ it('presses text and contained buttons unless disabled', () => {
   expect(onPress).toHaveBeenCalledTimes(3);
 });
 
+it('shows a tiny spinner as a loading contained button icon, disabled', () => {
+  const onPress = jest.fn();
+  renderFluent(
+    <ContainedButton
+      label="Logging in…"
+      onPress={onPress}
+      testID="busy"
+      loading
+    />,
+  );
+  const button = screen.getByTestId('busy') as HTMLButtonElement;
+  expect(button.disabled).toBe(true);
+  expect(button.textContent).toBe('Logging in…');
+  expect(screen.getByRole('progressbar')).toBeTruthy();
+  fireEvent.click(button);
+  expect(onPress).not.toHaveBeenCalled();
+});
+
 it('labels an icon button, with its badge and toggled state', () => {
   const onPress = jest.fn();
   renderFluent(
@@ -252,6 +270,27 @@ it('takes the account and password, moving on with Return', () => {
   expect(onPasswordChange).toHaveBeenCalledWith('pw');
   fireEvent.keyDown(password, { key: 'Enter' });
   expect(onSubmit).toHaveBeenCalled();
+});
+
+it('disables both login fields when asked', () => {
+  renderFluent(
+    <LoginFields
+      username="a"
+      password="b"
+      onUsernameChange={() => {}}
+      onPasswordChange={() => {}}
+      onSubmit={() => {}}
+      usernameLabel="Account"
+      passwordLabel="Password"
+      disabled
+    />,
+  );
+  expect((screen.getByLabelText('Account') as HTMLInputElement).disabled).toBe(
+    true,
+  );
+  expect((screen.getByLabelText('Password') as HTMLInputElement).disabled).toBe(
+    true,
+  );
 });
 
 describe('DateRangePicker', () => {

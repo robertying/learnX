@@ -17,6 +17,7 @@ import { clearLoginCookies } from 'data/source';
 import { MOCK_FINGER_PRINT } from 'helpers/mock';
 import { onTabKey } from 'modules/menus';
 import Login from 'screens/Login';
+import { BrandLightTheme } from 'theme';
 import env from 'test-utils/mocks/env';
 import { screenProps } from 'test-utils/screenProps';
 
@@ -215,10 +216,33 @@ describe('Login', () => {
     expect(toggle).toBeChecked();
   });
 
-  it('disables the login button while logging in', async () => {
+  it('locks the page and says it is logging in while logging in', async () => {
+    useCredentialsStore.setState({ credentials: saved });
     useAuthStore.setState({ loggingIn: true });
     await setup();
-    expect(screen.getByRole('button', { name: 'Log In' })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Log In' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Logging in…' })).toBeDisabled();
+    expect(screen.getByTestId('progress')).toBeTruthy();
+    expect(screen.getByTestId('login-username').props.editable).toBe(false);
+    expect(screen.getByTestId('login-password').props.editable).toBe(false);
+    expect(screen.getByRole('switch', { name: t('graduate') })).toBeDisabled();
+    expect(screen.getByText(t('graduate'))).toHaveStyle({
+      color: BrandLightTheme.colors.onSurfaceDisabled,
+    });
+    expect(
+      screen.getByRole('button', { name: 'Log In with Saved Account' }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Continue Offline' }),
+    ).toBeDisabled();
+
+    await act(() => useAuthStore.setState({ loggingIn: false }));
+    expect(screen.getByRole('button', { name: 'Log In' })).toBeEnabled();
+    expect(screen.queryByTestId('progress')).toBeNull();
+    expect(screen.getByTestId('login-username').props.editable).toBe(true);
+    expect(screen.getByText(t('graduate'))).not.toHaveStyle({
+      color: BrandLightTheme.colors.onSurfaceDisabled,
+    });
   });
 
   describe('with a saved login', () => {
