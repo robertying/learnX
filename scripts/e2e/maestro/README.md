@@ -13,7 +13,8 @@ display. Xcode 27's simulators take touches and keys from `dtuhidd`, a daemon
 inside the simulator, which names the display each touch is for.
 `maestro-sim-touch.patch` sends taps, long presses, swipes, typing and erasing
 through `scripts/e2e/sim-touch.swift`, which talks to it, whenever a display
-other than the main one is lit. `scripts/e2e/e2e.sh` builds the helper and
+other than the main one is lit, waiting first for the keyboard before typing, as Maestro's own
+typing does. `scripts/e2e/e2e.sh` builds the helper and
 names it in `MAESTRO_IOS_SIM_TOUCH`; without it, or on the main display,
 Maestro sends its own events. The helper only types ASCII.
 
