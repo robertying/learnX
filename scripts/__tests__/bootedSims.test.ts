@@ -139,6 +139,24 @@ test('reads the version from the runtime identifier when the runtime isn’t lis
   ]);
 });
 
+test('reads a runtime made for one device type, as the iPhone Duo’s', () => {
+  const duo = sim(
+    'learnX iPhone Duo',
+    '66666666-6666-6666-6666-666666666666',
+    'iPhone-19-4',
+    'Booted',
+  );
+  const runtime = 'com.apple.CoreSimulator.SimRuntime.iOS-27-2-iPhone19-4';
+  const row = ['27.2', 'false', duo.udid, 'learnX iPhone Duo'];
+  expect(
+    booted({
+      devices: { [runtime]: [duo] },
+      runtimes: [{ identifier: runtime, version: '27.2', platform: 'iOS' }],
+    }),
+  ).toEqual([row]);
+  expect(booted({ devices: { [runtime]: [duo] } })).toEqual([row]);
+});
+
 test('lists nothing when no simulator is booted', () => {
   expect(booted({ devices: {}, runtimes: [] })).toEqual([]);
 });

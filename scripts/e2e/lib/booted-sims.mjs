@@ -13,8 +13,10 @@ for await (const chunk of process.stdin) input += chunk;
 
 const { devices = {}, runtimes = [] } = JSON.parse(input);
 for (const [runtime, list] of Object.entries(devices)) {
-  // com.apple.CoreSimulator.SimRuntime.iOS-27-2; not watchOS, tvOS or visionOS.
-  const match = /\.iOS-(\d+(?:-\d+)*)$/.exec(runtime);
+  // com.apple.CoreSimulator.SimRuntime.iOS-27-2, or a runtime made for one
+  // device type, as the iPhone Duo's iOS-27-2-iPhone19-4; not watchOS, tvOS
+  // or visionOS.
+  const match = /\.iOS-(\d+(?:-\d+)*)(?:-[A-Za-z][\w-]*)?$/.exec(runtime);
   if (!match) continue;
   const version =
     runtimes.find(r => r.identifier === runtime)?.version ??
