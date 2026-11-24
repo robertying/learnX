@@ -35,6 +35,7 @@ const LoginFields: React.FC<LoginFieldsProps> = ({
   onSubmit,
   usernameLabel,
   passwordLabel,
+  disabled,
   style,
 }) => {
   const usernameText = useNativeState(username);
@@ -61,6 +62,7 @@ const LoginFields: React.FC<LoginFieldsProps> = ({
       <Column verticalArrangement={{ spacedBy: 12 }}>
         <OutlinedTextField
           value={usernameText}
+          enabled={!disabled}
           singleLine
           keyboardOptions={{
             ...keyboardOptions,
@@ -81,6 +83,7 @@ const LoginFields: React.FC<LoginFieldsProps> = ({
         <OutlinedTextField
           ref={setPasswordField}
           value={passwordText}
+          enabled={!disabled}
           singleLine
           visualTransformation="password"
           keyboardOptions={{

@@ -31,4 +31,22 @@ describe('ContainedButton (iOS)', () => {
     await render(<ContainedButton label="Continue" testID="continue" />);
     expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy();
   });
+
+  it('shows the system spinner before its label while loading, and is disabled', async () => {
+    const onPress = jest.fn();
+    await render(
+      <ContainedButton label="Logging in…" loading onPress={onPress} />,
+    );
+    const button = screen.getByRole('button', { name: 'Logging in…' });
+    expect(button).toBeDisabled();
+    expect(screen.getByTestId('progress')).toBeTruthy();
+    await userEvent.setup().press(button);
+    expect(onPress).not.toHaveBeenCalled();
+  });
+
+  it('shows no spinner otherwise', async () => {
+    await render(<ContainedButton label="Log In" />);
+    expect(screen.getByRole('button', { name: 'Log In' })).toBeEnabled();
+    expect(screen.queryByTestId('progress')).toBeNull();
+  });
 });

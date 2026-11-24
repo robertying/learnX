@@ -215,10 +215,27 @@ describe('Login', () => {
     expect(toggle).toBeChecked();
   });
 
-  it('disables the login button while logging in', async () => {
+  it('locks the page and says it is logging in while logging in', async () => {
+    useCredentialsStore.setState({ credentials: saved });
     useAuthStore.setState({ loggingIn: true });
     await setup();
-    expect(screen.getByRole('button', { name: 'Log In' })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Log In' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Logging in…' })).toBeDisabled();
+    expect(screen.getByTestId('progress')).toBeTruthy();
+    expect(screen.getByTestId('login-username').props.editable).toBe(false);
+    expect(screen.getByTestId('login-password').props.editable).toBe(false);
+    expect(screen.getByRole('switch', { name: t('graduate') })).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Log In with Saved Account' }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Continue Offline' }),
+    ).toBeDisabled();
+
+    await act(() => useAuthStore.setState({ loggingIn: false }));
+    expect(screen.getByRole('button', { name: 'Log In' })).toBeEnabled();
+    expect(screen.queryByTestId('progress')).toBeNull();
+    expect(screen.getByTestId('login-username').props.editable).toBe(true);
   });
 
   describe('with a saved login', () => {

@@ -10,6 +10,8 @@ export interface LoginFieldsProps {
   onSubmit: () => void;
   usernameLabel: string;
   passwordLabel: string;
+  /** Neither field can be edited or submitted, while logging in. */
+  disabled?: boolean;
   style?: StyleProp<ViewStyle>;
 }
 

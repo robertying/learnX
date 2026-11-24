@@ -188,6 +188,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
             <Switch
               accessibilityLabel={t('graduate')}
               value={graduate}
+              disabled={loggingIn}
               onValueChange={checked => {
                 setSetting('graduate', checked);
               }}
@@ -203,25 +204,31 @@ const Login: React.FC<Props> = ({ navigation }) => {
               onSubmit={handleLogin}
               usernameLabel={t('usernameOrId')}
               passwordLabel={t('password')}
+              disabled={loggingIn}
             />
           </View>
           <View style={styles.noteContainer}>
             <Caption style={styles.note}>{t('securityNote')}</Caption>
           </View>
           <View style={styles.buttons}>
+            {/* While logging in, nothing on the page changes the login under
+                it: the button says so, and the rest is disabled. */}
             <ContainedButton
-              label={t('login')}
-              disabled={loggingIn}
+              label={loggingIn ? t('loggingIn') : t('login')}
+              loading={loggingIn}
               onPress={handleLogin}
             />
             {hasCredential && (
               <>
                 {!refused && (
-                  <TextButton onPress={handleRetryLogin}>
+                  <TextButton disabled={loggingIn} onPress={handleRetryLogin}>
                     {t('retryLogin')}
                   </TextButton>
                 )}
-                <TextButton onPress={handleLoginWithOfflineMode}>
+                <TextButton
+                  disabled={loggingIn}
+                  onPress={handleLoginWithOfflineMode}
+                >
                   {t('offlineMode')}
                 </TextButton>
               </>
@@ -229,6 +236,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
             {__DEV__ && isMockUser(savedUsername) && (
               <TextButton
                 testID="login-mock-network"
+                disabled={loggingIn}
                 onPress={() => navigation.navigate('MockNetwork')}
               >
                 {mockNetworkTitle}

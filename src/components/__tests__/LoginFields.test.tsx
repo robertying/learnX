@@ -53,4 +53,16 @@ describe('LoginFields (iOS)', () => {
     await fireEvent(password, 'submitEditing');
     expect(onSubmit).toHaveBeenCalledTimes(1);
   });
+
+  it('disables both fields when asked', async () => {
+    await setup({ disabled: true });
+    expect(screen.getByTestId('login-username').props.editable).toBe(false);
+    expect(screen.getByTestId('login-password').props.editable).toBe(false);
+  });
+
+  it('leaves both fields editable otherwise', async () => {
+    await setup();
+    expect(screen.getByTestId('login-username').props.editable).toBe(true);
+    expect(screen.getByTestId('login-password').props.editable).toBe(true);
+  });
 });

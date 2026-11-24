@@ -13,6 +13,7 @@ import {
   accessibilityLabel,
   autocorrectionDisabled,
   background,
+  disabled as disabledModifier,
   clipShape,
   keyboardType,
   onSubmit,
@@ -54,6 +55,7 @@ const LoginFields: React.FC<LoginFieldsProps> = ({
   onSubmit: submit,
   usernameLabel,
   passwordLabel,
+  disabled,
   style,
 }) => {
   const usernameText = useNativeState(username);
@@ -91,6 +93,7 @@ const LoginFields: React.FC<LoginFieldsProps> = ({
           testID="login-username"
           modifiers={[
             ...fieldModifiers,
+            disabledModifier(!!disabled),
             textContentType('username'),
             submitLabel('next'),
             accessibilityLabel(usernameLabel),
@@ -106,6 +109,7 @@ const LoginFields: React.FC<LoginFieldsProps> = ({
           testID="login-password"
           modifiers={[
             ...fieldModifiers,
+            disabledModifier(!!disabled),
             textContentType('password'),
             submitLabel('done'),
             accessibilityLabel(passwordLabel),
