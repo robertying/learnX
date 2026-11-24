@@ -1,0 +1,206 @@
+From a178508efa31a3b03c3f428d1943628a92d0bf90 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 24 Nov 2026 03:30:42 +0000
+Subject: [PATCH] fix: find a tapped look-alike element again after the screen
+ moves
+
+A tap after a scroll waits for its element to stop moving, finding it in
+each new hierarchy by its attributes. Elements that look alike, such as the
+switches of a settings page that all read 1 or 0, matched more than once, so
+the element counted as gone and the tap landed where it had been before the
+list moved: on another row.
+
+- refreshElement tells look-alikes apart by the ids of the elements that
+  hold them in the hierarchy the element was found in, which a scroll
+  doesn't change.
+- An element found with childOf now carries the whole screen it was found
+  on, as one found without it does, rather than a hierarchy of the element
+  alone, which has no ids around it to tell look-alikes apart by.
+---
+ .../src/main/java/maestro/Maestro.kt          |  4 +-
+ .../src/main/java/maestro/ViewHierarchy.kt    | 33 +++++++-
+ .../test/java/maestro/ViewHierarchyTest.kt    | 82 +++++++++++++++++++
+ .../main/java/maestro/orchestra/Orchestra.kt  |  4 +-
+ 4 files changed, 117 insertions(+), 6 deletions(-)
+ create mode 100644 maestro-client/src/test/java/maestro/ViewHierarchyTest.kt
+
+diff --git a/maestro-client/src/main/java/maestro/Maestro.kt b/maestro-client/src/main/java/maestro/Maestro.kt
+index 7b57911..e7f469a 100644
+--- a/maestro-client/src/main/java/maestro/Maestro.kt
++++ b/maestro-client/src/main/java/maestro/Maestro.kt
+@@ -244,7 +244,7 @@ class Maestro(
+                 else "Tap aimed via trusted pre-wait hierarchy (null settle, no recent scroll)"
+             )
+             val hierarchy = settledHierarchy ?: initialHierarchy
+-            hierarchy to hierarchy.refreshElement(element.treeNode)?.toUiElementOrNull()
++            hierarchy to hierarchy.refreshElement(element.treeNode, initialHierarchy)?.toUiElementOrNull()
+         }
+ 
+         val center = (refreshedElement ?: element)
+@@ -311,7 +311,7 @@ class Maestro(
+                 delay(ELEMENT_STABILITY_POLL_INTERVAL_MS)
+                 continue
+             }
+-            val freshElement = freshHierarchy.refreshElement(element.treeNode)?.toUiElementOrNull()
++            val freshElement = freshHierarchy.refreshElement(element.treeNode, initialHierarchy)?.toUiElementOrNull()
+ 
+             when {
+                 freshElement == null ->
+diff --git a/maestro-client/src/main/java/maestro/ViewHierarchy.kt b/maestro-client/src/main/java/maestro/ViewHierarchy.kt
+index 67fe3d0..e800198 100644
+--- a/maestro-client/src/main/java/maestro/ViewHierarchy.kt
++++ b/maestro-client/src/main/java/maestro/ViewHierarchy.kt
+@@ -49,17 +49,44 @@ value class ViewHierarchy(val root: TreeNode) {
+         return node == elementAtPosition
+     }
+ 
+-    fun refreshElement(node: TreeNode): TreeNode? {
++    /**
++     * Finds [node] again in this hierarchy: the one element with the same attributes, bounds
++     * aside. Look-alikes, such as the switches of a settings page that all read 1 or 0, are told
++     * apart by the ids of the elements around them in [previous], the hierarchy [node] came
++     * from, which a scroll doesn't change.
++     */
++    fun refreshElement(node: TreeNode, previous: ViewHierarchy? = null): TreeNode? {
+         val matches = root.aggregate()
+             .filter {
+                 (it.attributes - "bounds") == (node.attributes - "bounds")
+             }
+ 
+-        if (matches.size != 1) {
++        if (matches.size == 1) {
++            return matches[0]
++        }
++        if (matches.isEmpty() || previous == null) {
+             return null
+         }
+ 
+-        return matches[0]
++        val ids = previous.ancestorIds(node) ?: return null
++        return matches.singleOrNull { ancestorIds(it) == ids }
++    }
++
++    /** The ids of the elements that hold [node], outermost first, or null when it isn't here. */
++    fun ancestorIds(node: TreeNode): List<String>? {
++        return pathTo(root, node)
++            ?.dropLast(1)
++            ?.mapNotNull { it.attributes["resource-id"]?.takeIf(String::isNotBlank) }
++    }
++
++    private fun pathTo(from: TreeNode, node: TreeNode): List<TreeNode>? {
++        if (from === node) {
++            return listOf(from)
++        }
++        for (child in from.children) {
++            pathTo(child, node)?.let { return listOf(from) + it }
++        }
++        return null
+     }
+ 
+     fun getElementAt(
+diff --git a/maestro-client/src/test/java/maestro/ViewHierarchyTest.kt b/maestro-client/src/test/java/maestro/ViewHierarchyTest.kt
+new file mode 100644
+index 0000000..cee00c3
+--- /dev/null
++++ b/maestro-client/src/test/java/maestro/ViewHierarchyTest.kt
+@@ -0,0 +1,82 @@
++package maestro
++
++import com.google.common.truth.Truth.assertThat
++import org.junit.jupiter.api.Test
++
++internal class ViewHierarchyTest {
++
++    // A settings page whose rows each hold a switch with no id, reading 1 or 0.
++    private fun page(offset: Int): Pair<ViewHierarchy, List<TreeNode>> {
++        val switches = (0 until 3).map { row ->
++            TreeNode(
++                attributes = mutableMapOf(
++                    "text" to "1",
++                    "bounds" to "[786,${row * 52 + offset}][849,${row * 52 + offset + 28}]",
++                ),
++            )
++        }
++        val rows = switches.mapIndexed { row, switch ->
++            TreeNode(
++                attributes = mutableMapOf(
++                    "resource-id" to "row-$row",
++                    "bounds" to "[340,${row * 52 + offset}][867,${row * 52 + offset + 52}]",
++                ),
++                children = listOf(switch),
++            )
++        }
++        val list = TreeNode(
++            attributes = mutableMapOf("resource-id" to "list", "bounds" to "[0,0][951,669]"),
++            children = rows,
++        )
++        return ViewHierarchy(TreeNode(children = listOf(list))) to switches
++    }
++
++    @Test
++    internal fun `finds a unique element again whatever the previous hierarchy`() {
++        val (before, switches) = page(100)
++        val unique = TreeNode(attributes = mutableMapOf("text" to "Done", "bounds" to "[0,0][50,20]"))
++        val after = ViewHierarchy(TreeNode(children = listOf(before.root, unique)))
++
++        assertThat(after.refreshElement(unique.copy(attributes = mutableMapOf("text" to "Done", "bounds" to "[9,9][59,29]"))))
++            .isSameInstanceAs(unique)
++        assertThat(after.refreshElement(switches[0])).isNull()
++    }
++
++    @Test
++    internal fun `tells look-alike elements apart by the ids around them after a scroll`() {
++        val (before, switchesBefore) = page(549)
++        val (after, switchesAfter) = page(603)
++
++        assertThat(after.refreshElement(switchesBefore[2], before)).isSameInstanceAs(switchesAfter[2])
++        assertThat(after.refreshElement(switchesBefore[0], before)).isSameInstanceAs(switchesAfter[0])
++    }
++
++    @Test
++    internal fun `finds nothing when look-alikes share the ids around them`() {
++        val twins = (0 until 2).map {
++            TreeNode(attributes = mutableMapOf("text" to "1", "bounds" to "[0,${it * 40}][10,${it * 40 + 10}]"))
++        }
++        val hierarchy = ViewHierarchy(
++            TreeNode(attributes = mutableMapOf("resource-id" to "list"), children = twins),
++        )
++
++        assertThat(hierarchy.refreshElement(twins[0], hierarchy)).isNull()
++    }
++
++    @Test
++    internal fun `finds nothing for an element that isn't in the previous hierarchy`() {
++        val (before, _) = page(100)
++        val (after, _) = page(200)
++        val stranger = TreeNode(attributes = mutableMapOf("text" to "1", "bounds" to "[0,0][10,10]"))
++
++        assertThat(after.refreshElement(stranger, before)).isNull()
++        assertThat(before.ancestorIds(stranger)).isNull()
++    }
++
++    @Test
++    internal fun `lists the ids that hold an element, outermost first`() {
++        val (hierarchy, switches) = page(100)
++
++        assertThat(hierarchy.ancestorIds(switches[1])).containsExactly("list", "row-1").inOrder()
++    }
++}
+diff --git a/maestro-orchestra/src/main/java/maestro/orchestra/Orchestra.kt b/maestro-orchestra/src/main/java/maestro/orchestra/Orchestra.kt
+index 277a700..db1ddf6 100644
+--- a/maestro-orchestra/src/main/java/maestro/orchestra/Orchestra.kt
++++ b/maestro-orchestra/src/main/java/maestro/orchestra/Orchestra.kt
+@@ -1566,7 +1566,9 @@ class Orchestra(
+                     debugMessage = childOfDebugMessage
+                 )
+             }
+-            return FindElementResult(found, ViewHierarchy(found.treeNode))
++            // The whole screen it was found on, as without childOf: a tap compares it with the
++            // screen afterwards and finds the element in it again, by the ids around it.
++            return FindElementResult(found, fullHierarchy)
+         }
+ 
+ 
+-- 
+2.43.0
+

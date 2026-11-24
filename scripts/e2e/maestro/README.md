@@ -56,6 +56,14 @@ sheet, too small to see or tap: the file picker's Cancel is 7×7 points on an
 iPhone and one point wide on the closed iPhone Duo, whose bars sit at the
 side. Maestro matched the copy first, and the tap did nothing.
 
+`maestro-look-alike-elements.patch` keeps a tap on its element when the screen moves first. A
+tap right after a scroll waits for the element to stop moving, finding it in each new hierarchy by
+its attributes, but elements that look alike (the switches of a settings page, which all read 1 or
+0) matched more than once: the element counted as gone and the tap landed where it had been before
+the list settled, on another row. The patch tells them apart by the ids of the elements that hold
+them, and gives an element found with `childOf` the whole screen it was found on, as one found
+without it has, rather than a hierarchy of the element alone.
+
 `maestro-springboard-alerts.patch` adds an alert SpringBoard shows over the
 app to the hierarchy, on top. Such an alert (an app asking to send
 notifications, as the system Calendar does on a simulator's first launches;
