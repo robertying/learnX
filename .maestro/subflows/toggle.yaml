@@ -16,6 +16,28 @@ appId: ${APP_ID}
     when:
       platform: iOS
     commands:
+      # A row cut off at the screen's lower edge counts as shown, but its
+      # switch is left out of the hierarchy until it's on screen too, and the
+      # tap below would then land on the row's middle (the half-open iPhone
+      # Duo): swipe once more when the switch isn't there.
+      - evalScript: ${output.switchShown = false}
+      - runFlow:
+          when:
+            visible:
+              id: ${ID}
+              containsChild:
+                text: '0|1'
+          commands:
+            - evalScript: ${output.switchShown = true}
+      - runFlow:
+          when:
+            true: ${!output.switchShown}
+          commands:
+            - runFlow:
+                file: swipe-list.yaml
+                env:
+                  LIST: ${LIST}
+                  DIRECTION: UP
       - tapOn:
           text: '0|1'
           childOf:

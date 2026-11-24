@@ -1,4 +1,4 @@
-From 1f3fe04d5c34ae8e5c52f376506f0a57395eed73 Mon Sep 17 00:00:00 2001
+From 460e25ed47a17bb91e971e1ed5c4ccddc867322c Mon Sep 17 00:00:00 2001
 From: Claude <noreply@anthropic.com>
 Date: Wed, 18 Nov 2026 10:11:07 -0800
 Subject: [PATCH] feat(ios): send touches and typing through an outside helper
@@ -8,14 +8,17 @@ XCUITest synthesizes events on the main display only, so nothing reached an app 
 display of an open iPhone Duo simulator. With MAESTRO_IOS_SIM_TOUCH set to a helper that speaks
 the simulator's HID service (learnX's scripts/e2e/sim-touch.swift), taps, long presses, swipes,
 typing and erasing go through it whenever a display other than the primary one is lit.
+
+Before the helper types, the driver waits up to a second for the keyboard, as the runner does
+before typing: keys sent to a field tapped a moment ago, before its keyboard is up, were lost.
 ---
- .../main/java/maestro/drivers/IOSDriver.kt    | 27 +++++--
+ .../main/java/maestro/drivers/IOSDriver.kt    | 41 ++++++++--
  .../src/main/java/maestro/drivers/SimTouch.kt | 77 +++++++++++++++++++
- 2 files changed, 99 insertions(+), 5 deletions(-)
+ 2 files changed, 113 insertions(+), 5 deletions(-)
  create mode 100644 maestro-client/src/main/java/maestro/drivers/SimTouch.kt
 
 diff --git a/maestro-client/src/main/java/maestro/drivers/IOSDriver.kt b/maestro-client/src/main/java/maestro/drivers/IOSDriver.kt
-index 4ab48f80..9fdaf576 100644
+index 4ab48f8..12090e5 100644
 --- a/maestro-client/src/main/java/maestro/drivers/IOSDriver.kt
 +++ b/maestro-client/src/main/java/maestro/drivers/IOSDriver.kt
 @@ -83,6 +83,10 @@ class IOSDriver(
@@ -71,18 +74,32 @@ index 4ab48f80..9fdaf576 100644
                  iosDevice.scroll(
                      xStart = startPoint.x.toDouble(),
                      yStart = startPoint.y.toDouble(),
-@@ -447,7 +460,9 @@ class IOSDriver(
+@@ -447,7 +460,23 @@ class IOSDriver(
  
      override fun inputText(text: String) {
          metrics.measured("operation", mapOf("command" to "inputText")) {
 -            runDeviceCall("inputText") { iosDevice.input(text = text) }
++            if (simTouch != null) {
++                waitForKeyboard()
++            }
 +            if (simTouch?.send("type ${SimTouch.escaped(text)}") != true) {
 +                runDeviceCall("inputText") { iosDevice.input(text = text) }
 +            }
++        }
++    }
++
++    // The runner waits up to a second for the keyboard before it types (TextInputHelper), since a
++    // field tapped a moment ago may not have it yet and keys sent before it are lost. The helper's
++    // typing gets the same wait.
++    private fun waitForKeyboard() {
++        val deadline = System.currentTimeMillis() + 1000
++        while (System.currentTimeMillis() < deadline) {
++            if (isKeyboardVisible()) return
++            Thread.sleep(200)
          }
      }
  
-@@ -471,7 +486,9 @@ class IOSDriver(
+@@ -471,7 +500,9 @@ class IOSDriver(
  
      override fun eraseText(charactersToErase: Int) {
          metrics.measured("operation", mapOf("command" to "eraseText")) {
@@ -95,7 +112,7 @@ index 4ab48f80..9fdaf576 100644
  
 diff --git a/maestro-client/src/main/java/maestro/drivers/SimTouch.kt b/maestro-client/src/main/java/maestro/drivers/SimTouch.kt
 new file mode 100644
-index 00000000..3a0b9247
+index 0000000..3a0b924
 --- /dev/null
 +++ b/maestro-client/src/main/java/maestro/drivers/SimTouch.kt
 @@ -0,0 +1,77 @@
@@ -177,5 +194,5 @@ index 00000000..3a0b9247
 +    }
 +}
 -- 
-2.56.1
+2.43.0
 
