@@ -15,6 +15,17 @@ const expect = (name, actual, expected) => {
     );
   }
 };
+// Whether version a (x.y.z) comes before b.
+const versionBefore = (a, b) => {
+  const x = a.split('.').map(Number);
+  const y = b.split('.').map(Number);
+  for (let i = 0; i < 3; i++) {
+    if (x[i] !== y[i]) {
+      return x[i] < y[i];
+    }
+  }
+  return false;
+};
 const check = (name, ok, detail) => {
   if (!ok) {
     failures.push(`${name}: ${JSON.stringify(detail)}`);
@@ -181,11 +192,14 @@ if (report !== null) {
     output.whatsNew = report.whatsNew;
   } else {
     expect('whatsNew left', report.whatsNew, null);
+    // Seeing it records the app's own version, which can be newer than the
+    // What's New shown (a release without highlights of its own).
     if (output.whatsNew) {
-      expect(
-        'appState.whatsNewSeenVersion',
-        report.appState.whatsNewSeenVersion,
-        output.whatsNew,
+      const seen = report.appState.whatsNewSeenVersion;
+      check(
+        `appState.whatsNewSeenVersion at least ${output.whatsNew}`,
+        seen !== null && !versionBefore(seen, output.whatsNew),
+        seen,
       );
     }
   }

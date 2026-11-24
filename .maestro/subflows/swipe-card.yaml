@@ -8,6 +8,9 @@
 # scripts/e2e/e2e.sh: iPad, the open iPhone Duo) the list is a column on the
 # left, so a right swipe crosses the whole card whatever its start: that's the
 # full swipe, which runs the action by itself, with no button left to tap.
+# A left swipe there is one too in landscape (ORIENTATION from
+# scripts/e2e/e2e.sh), where the list column starts past the sidebar, so the
+# 10% mark is more than half a card away.
 appId: ${APP_ID}
 ---
 - runFlow:
@@ -31,7 +34,7 @@ appId: ${APP_ID}
           duration: 300
 - runFlow:
     when:
-      true: ${DIRECTION == 'LEFT' || SPLIT != 'true'}
+      true: ${SPLIT != 'true' || (DIRECTION == 'LEFT' && ORIENTATION == 'PORTRAIT')}
     commands:
       - tapOn:
           id: ${ACTION}
