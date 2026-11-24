@@ -76,9 +76,16 @@ struct OpenAtLoginTests {
     }
   }
 
-  @Test func isNeverOnOffTheMac() throws {
-    // The tests run on iPhone, which has no login items.
-    #expect(SystemLoginItem().state == .off)
-    #expect(try OpenAtLogin.set(true, service: SystemLoginItem()) == .off)
-  }
+  #if targetEnvironment(macCatalyst)
+    @Test func readsTheStateOnTheMac() {
+      // Only reads it: registering would add the test host to the Mac's login items.
+      _ = SystemLoginItem().state
+    }
+  #else
+    @Test func isNeverOnOffTheMac() throws {
+      // iPhone and iPad have no login items.
+      #expect(SystemLoginItem().state == .off)
+      #expect(try OpenAtLogin.set(true, service: SystemLoginItem()) == .off)
+    }
+  #endif
 }
