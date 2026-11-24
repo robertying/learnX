@@ -38,3 +38,7 @@ appId: ${APP_ID}
       - swipe:
           start: 75%, 30%
           end: 75%, 70%
+# A list keeps moving for a moment after a swipe, and a tap on it before it
+# stops only stops it (a settings switch stayed as it was on the open iPhone
+# Duo), so the swipe ends once the screen is still.
+- waitForAnimationToEnd
