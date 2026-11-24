@@ -1,6 +1,7 @@
+import { PlatformColor } from 'react-native';
 import { Button } from '@expo/ui';
 import { HStack, ProgressView, Text } from '@expo/ui/swift-ui';
-import { buttonStyle, controlSize } from '@expo/ui/swift-ui/modifiers';
+import { buttonStyle, controlSize, tint } from '@expo/ui/swift-ui/modifiers';
 import DeviceInfo from 'constants/DeviceInfo';
 import ThemedHost from 'components/ThemedHost';
 import type { ContainedButtonProps } from './ContainedButton.shared';
@@ -12,6 +13,8 @@ export type { ContainedButtonProps } from './ContainedButton.shared';
 const glass = DeviceInfo.hasLiquidGlass()
   ? [buttonStyle('glassProminent')]
   : [];
+// The disabled label's color: left alone, the spinner takes the accent.
+const spinnerModifiers = [tint(PlatformColor('tertiaryLabel'))];
 const sizes = {
   regular: glass.length > 0 ? glass : undefined,
   large: [...glass, controlSize('large')],
@@ -42,7 +45,7 @@ const ContainedButton: React.FC<ContainedButtonProps> = ({
       >
         {loading ? (
           <HStack spacing={8}>
-            <ProgressView />
+            <ProgressView modifiers={spinnerModifiers} />
             <Text>{label}</Text>
           </HStack>
         ) : undefined}

@@ -26,7 +26,7 @@ const LoginFields: React.FC<LoginFieldsProps> = ({
   const passwordInput = useRef<HTMLInputElement>(null);
   return (
     <View style={[styles.fields, style]}>
-      <Field label={usernameLabel}>
+      <Field label={{ children: usernameLabel, disabled }}>
         <Input
           value={username}
           disabled={disabled}
@@ -43,7 +43,7 @@ const LoginFields: React.FC<LoginFieldsProps> = ({
           }}
         />
       </Field>
-      <Field label={passwordLabel}>
+      <Field label={{ children: passwordLabel, disabled }}>
         <Input
           ref={passwordInput}
           type="password"

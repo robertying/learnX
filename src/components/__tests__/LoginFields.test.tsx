@@ -1,5 +1,9 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import { submitLabel, textContentType } from '@expo/ui/swift-ui/modifiers';
+import {
+  foregroundStyle,
+  submitLabel,
+  textContentType,
+} from '@expo/ui/swift-ui/modifiers';
 import LoginFields from 'components/LoginFields';
 
 const setup = async (
@@ -54,14 +58,18 @@ describe('LoginFields (iOS)', () => {
     expect(onSubmit).toHaveBeenCalledTimes(1);
   });
 
-  it('disables both fields when asked', async () => {
+  it('disables both fields when asked, dimming their text', async () => {
+    jest.mocked(foregroundStyle).mockClear();
     await setup({ disabled: true });
+    expect(foregroundStyle).toHaveBeenCalled();
     expect(screen.getByTestId('login-username').props.editable).toBe(false);
     expect(screen.getByTestId('login-password').props.editable).toBe(false);
   });
 
   it('leaves both fields editable otherwise', async () => {
+    jest.mocked(foregroundStyle).mockClear();
     await setup();
+    expect(foregroundStyle).not.toHaveBeenCalled();
     expect(screen.getByTestId('login-username').props.editable).toBe(true);
     expect(screen.getByTestId('login-password').props.editable).toBe(true);
   });

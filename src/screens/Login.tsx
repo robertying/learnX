@@ -41,11 +41,13 @@ import { useWindowTitle } from 'hooks/useWindow';
 import { LoginStackParams } from 'navigation/types';
 import { Caption, Text } from 'components/Text';
 import { isAndroid, isApple } from 'helpers/platform';
+import { useTheme } from 'theme';
 
 type Props = NativeStackScreenProps<LoginStackParams, 'Login'>;
 
 const Login: React.FC<Props> = ({ navigation }) => {
   const loggingIn = useLoggingIn();
+  const theme = useTheme();
   const graduate = useSettings(settings => settings.graduate);
   const savedCredentials = useCredentials();
   const savedUsername = savedCredentials?.username;
@@ -193,7 +195,13 @@ const Login: React.FC<Props> = ({ navigation }) => {
                 setSetting('graduate', checked);
               }}
             />
-            <Text>{t('graduate')}</Text>
+            <Text
+              style={
+                loggingIn ? { color: theme.colors.onSurfaceDisabled } : null
+              }
+            >
+              {t('graduate')}
+            </Text>
           </View>
           <View ref={fields} style={styles.textInput} collapsable={false}>
             <LoginFields
