@@ -1,11 +1,11 @@
 {
   "runtimeVersion": "19.2.0",
-  "ios": "2c8a5ec7f6fc0ef2d69a51bf21b086dfcb6d1860",
+  "ios": "813f89e215483a59f68b2684124b2d119bfd12a4",
   "android": "26ad9b5116e48c2984715157cadfb3ab4cacb761",
   "sources": {
     "ios": {
       "file src/data/storeVersions.json": "46529c4a96147c7b238c1fb8a460668086e2e2d6",
-      "dir ios": "6b59ec8573e0eccbe4c16d742b263eb0c30724e9",
+      "dir ios": "1140664900d84a12c2f1540cde5c94da35d7f28b",
       "dir modules/background/ios": "25d6e379e5d468a86f92c5bc6622300d47751b1d",
       "dir modules/crashlytics/ios": "e1f7e29111e231cd015ba44f6484e6b9aeafc6c2",
       "dir modules/menubar/ios": "14d26bcb722a4ac906bbf7f316fc196bff95be71",

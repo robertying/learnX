@@ -43,7 +43,7 @@ class AppDelegate: ExpoAppDelegate, @MainActor ExpoReactNativeFactoryProvider {
       // Opened as a login item, with no window: JS starts without one, to sync and show the menu bar item. A
       // window opened later joins this runtime.
       factory.rootViewFactory.initializeReactHost(
-        withLaunchOptions: launchOptions,
+        launchOptions: launchOptions,
         bundleConfiguration: factory.bundleConfiguration,
         devMenuConfiguration: factory.devMenuConfiguration ?? .default()
       )
