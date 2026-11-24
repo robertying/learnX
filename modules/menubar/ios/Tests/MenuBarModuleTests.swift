@@ -12,6 +12,24 @@ import Testing
     #expect(Set(functions.keys) == ["showItem", "getOpenAtLogin", "setOpenAtLogin"])
   }
 
+  @Test func showsTheItemWithTheLabelsFromJS() {
+    // Off the Mac there's no plugin to show the item, so this only reads the labels.
+    MenuBar.reset()
+    let labels = MenuBarLabels()
+    labels.open = "Open learnX"
+    labels.checkForNewContent = "Check for New Content"
+    labels.quit = "Quit learnX"
+    MenuBarModule.showItem(labels)
+  }
+
+  #if !targetEnvironment(macCatalyst)
+    @Test func neverOpensAtLoginOffTheMac() throws {
+      #expect(MenuBarModule.getOpenAtLogin() == "off")
+      #expect(try MenuBarModule.setOpenAtLogin(true) == "off")
+      #expect(try MenuBarModule.setOpenAtLogin(false) == "off")
+    }
+  #endif
+
   @Test func forwardsCheckForNewContentWhileJSListens() {
     let module = MenuBarModule(appContext: AppContext())
     module.startObserving()

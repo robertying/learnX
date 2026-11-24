@@ -151,6 +151,22 @@ private final class FakeWindows: AppWindows {
     }
   }
 
+  #if !targetEnvironment(macCatalyst)
+    @Test func loadsNoPluginOffTheMac() {
+      MenuBar.reset()
+      MenuBar.start()
+      #expect(!MenuBar.opensHidden)
+      #expect(MenuBar.windowWillConnect())
+    }
+  #endif
+
+  @Test func seesTheAppsWindows() {
+    let app = UIApplication.shared
+    #expect(app.hasOpenWindow)
+    // The test host's window is open, so asking for one brings it to the front.
+    #expect(!app.showWindow())
+  }
+
   @Test func stopsListeningOnceReset() {
     start()
     MenuBar.reset(center: center)

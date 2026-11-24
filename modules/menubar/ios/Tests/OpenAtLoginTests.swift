@@ -86,6 +86,8 @@ struct OpenAtLoginTests {
       // iPhone and iPad have no login items.
       #expect(SystemLoginItem().state == .off)
       #expect(try OpenAtLogin.set(true, service: SystemLoginItem()) == .off)
+      try SystemLoginItem().unregister()
+      #expect(SystemLoginItem().state == .off)
     }
   #endif
 }

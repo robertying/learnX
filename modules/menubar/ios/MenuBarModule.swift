@@ -18,23 +18,29 @@ public final class MenuBarModule: Module {
     OnStartObserving(nil, startObserving)
     OnStopObserving(nil, stopObserving)
 
-    AsyncFunction("showItem") { (labels: MenuBarLabels) in
-      MainActor.assumeIsolated {
-        MenuBar.showItem(openTitle: labels.open, checkTitle: labels.checkForNewContent, quitTitle: labels.quit)
-      }
-    }.runOnQueue(.main)
+    AsyncFunction("showItem", Self.showItem).runOnQueue(.main)
+    AsyncFunction("getOpenAtLogin", Self.getOpenAtLogin).runOnQueue(.main)
+    AsyncFunction("setOpenAtLogin", Self.setOpenAtLogin).runOnQueue(.main)
+  }
 
-    AsyncFunction("getOpenAtLogin") { () -> String in
-      MainActor.assumeIsolated {
-        SystemLoginItem().state.rawValue
-      }
-    }.runOnQueue(.main)
+  // Run on the main queue (`runOnQueue(.main)`), so on the main actor.
 
-    AsyncFunction("setOpenAtLogin") { (on: Bool) throws -> String in
-      try MainActor.assumeIsolated {
-        try OpenAtLogin.set(on, service: SystemLoginItem()).rawValue
-      }
-    }.runOnQueue(.main)
+  static func showItem(_ labels: MenuBarLabels) {
+    MainActor.assumeIsolated {
+      MenuBar.showItem(openTitle: labels.open, checkTitle: labels.checkForNewContent, quitTitle: labels.quit)
+    }
+  }
+
+  static func getOpenAtLogin() -> String {
+    MainActor.assumeIsolated {
+      SystemLoginItem().state.rawValue
+    }
+  }
+
+  static func setOpenAtLogin(_ on: Bool) throws -> String {
+    try MainActor.assumeIsolated {
+      try OpenAtLogin.set(on, service: SystemLoginItem()).rawValue
+    }
   }
 
   func startObserving() {
