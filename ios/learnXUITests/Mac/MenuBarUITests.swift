@@ -18,18 +18,24 @@ final class MenuBarUITests: LearnXUITestCase {
 
     // Open learnX brings a window back.
     item.click()
-    try menuItem("T_trayOpen").click()
+    try itemMenu("T_trayOpen").click()
     try waitFor(id: "tab-notices", timeout: 30)
 
     // Quit learnX ends it.
     item.click()
-    try menuItem("T_trayQuit").click()
+    try itemMenu("T_trayQuit").click()
     XCTAssertTrue(app.wait(for: .notRunning, timeout: 10), "learnX didn't quit")
   }
 
   /// The app's item in the menu bar, named learnX for VoiceOver (`ios/MacMenuBar`).
   private var statusItem: XCUIElement {
     app.statusItems.matching(NSPredicate(format: "label == %@", "learnX")).firstMatch
+  }
+
+  /// An item of the menu bar item's menu: the app menu has a Quit learnX of its own.
+  private func itemMenu(_ name: String) throws -> XCUIElement {
+    let item = statusItem.menuItems.matching(predicate(name, "BEGINSWITH", ["label", "title"])).firstMatch
+    return try wait(item, "menu bar item's \(name)", 5)
   }
 }
 #endif
