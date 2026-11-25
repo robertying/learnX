@@ -67,4 +67,4 @@ What each section is for:
 
 - Install instructions don't go in release notes; the README has them.
 - Write the Chinese first, in natural Chinese, then the English from it; never translate the Chinese from the English. Chinese text uses full-width punctuation (，。) only. Every text types a space between Chinese and Latin letters or digits (`支持 Windows 和 Linux`), since neither GitHub nor the stores draw a gap (`src/assets/translations/AGENTS.md`).
-- Bullets are short, start with "Fix"/"Add"/"Improve" (修复/新增/改进), one change each.
+- Bullets are short, start with "Fix"/"Add"/"Improve" (修复/新增/改进), one change each, and end with a period (。 in Chinese) in every section, the stores' included. and end with a period (。 in Chinese) in every section, the stores' included.
