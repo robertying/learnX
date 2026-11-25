@@ -1,4 +1,4 @@
-import { Pressable, Text, View } from 'react-native';
+import { Platform, Pressable, Text, View } from 'react-native';
 import {
   act,
   render,
@@ -418,5 +418,19 @@ describe('pull to refresh', () => {
     expect(refreshControl()).toBeDefined();
     await act(() => header().onReorder());
     expect(refreshControl()).toBeUndefined();
+  });
+
+  // Taking the control away on Android would mount a new scroll view, at the
+  // top, under rows laid out for where the list was scrolled to.
+  it('stays on Android while selecting, turned off', async () => {
+    jest.replaceProperty(Platform, 'OS', 'android');
+    await renderList();
+    const before = refreshControl();
+    expect(before.props.enabled).toBe(true);
+    await act(() => header().onSelect());
+    expect(refreshControl().type).toBe(before.type);
+    expect(refreshControl().props.enabled).toBe(false);
+    await act(() => header().onSelect());
+    expect(refreshControl().props.enabled).toBe(true);
   });
 });
