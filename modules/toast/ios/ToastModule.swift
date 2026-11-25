@@ -7,16 +7,8 @@ public final class ToastModule: Module {
   public func definition() -> ModuleDefinition {
     Name("LearnXToast")
 
-    // Where the tab bar is, so the toast keeps clear of it wherever UIKit put it.
-    // In the toast's own window when there are several (iPad, Mac).
-    AsyncFunction("tabBarFrame") { (windowId: String?) -> [String: Double]? in
-      MainActor.assumeIsolated {
-        TabBarLocator.frame(windowId: windowId)
-      }
-    }.runOnQueue(.main)
-
     View(ToastView.self) {
-      Events("onHidden")
+      Events("onHidden", "onTabBarFrame")
 
       Prop("cornerRadius") { (view: ToastView, radius: Double) in
         view.cornerRadius = radius
@@ -42,11 +34,21 @@ public final class ToastModule: Module {
 
 /// The toast HUD: its backdrop (Liquid Glass on iOS 26 and later, the thick blur material system HUDs used before
 /// that) with the React children on top. It animates itself in and out, the backdrop, the content and the motion
-/// in one animation, so they arrive and leave together. A glass effect view under an ancestor with alpha below 1
+/// in one animation, so they arrive and leave together. While in a window it follows where the tab bar is, so the
+/// toast can keep clear of it. A glass effect view under an ancestor with alpha below 1
 /// never renders, so the backdrop fades by animating its effect, and JS must not fade this view or its ancestors.
 final class ToastView: ExpoView {
   /// Sent once the toast has animated away.
   let onHidden = EventDispatcher()
+  /// Sent as soon as the view is in a window, then whenever the tab bar moves, appears or goes: `frame` is
+  /// `TabBarLocator`'s answer, missing when no tab bar shows.
+  let onTabBarFrame = EventDispatcher()
+
+  /// Checks the tab bar every frame while the view is in a window. The tab bar can come or go under a toast that is
+  /// already up (the tabs appear at launch, a sheet over them closes), and UIKit posts nothing for either.
+  private var tabBarLink: CADisplayLink?
+  /// The last frame sent, or nil before the first.
+  private(set) var sentTabBarFrame: [String: Double]??
 
   /// Moves with the animation; holds the backdrop and the content.
   private let hud = UIView()
@@ -138,6 +140,28 @@ final class ToastView: ExpoView {
     }
   }
 
+  override func didMoveToWindow() {
+    super.didMoveToWindow()
+    tabBarLink?.invalidate()
+    tabBarLink = nil
+    sentTabBarFrame = nil
+    guard window != nil else { return }
+    // Before the first layout, so the toast is placed before it animates in.
+    followTabBar()
+    // The link holds its target strongly; invalidating it on leaving the window breaks the cycle.
+    let link = CADisplayLink(target: self, selector: #selector(followTabBar))
+    link.add(to: .main, forMode: .common)
+    tabBarLink = link
+  }
+
+  @objc func followTabBar() {
+    guard let window else { return }
+    let frame = TabBarLocator.frame(in: window)
+    guard sentTabBarFrame != .some(frame) else { return }
+    sentTabBarFrame = .some(frame)
+    onTabBarFrame(frame.map { ["frame": $0] } ?? [:])
+  }
+
   override func mountChildComponentView(_ childComponentView: UIView, index: Int) {
     contentView.insertSubview(childComponentView, at: index)
   }
@@ -190,20 +214,7 @@ final class ToastSymbolView: ExpoView {
 /// small display, at the top on iPad, where it floats and the bar itself is hidden), and nothing shows it on the
 /// login, under a sheet or on the Mac.
 enum TabBarLocator {
-  /// The visible tab bar's frame in its window, with the window's size, or nil when none shows. Only in the scene
-  /// whose session has the id `windowId`, when given.
-  @MainActor static func frame(windowId: String? = nil) -> [String: Double]? {
-    let scenes = UIApplication.shared.connectedScenes
-      .compactMap { $0 as? UIWindowScene }
-      .filter { windowId == nil || $0.session.persistentIdentifier == windowId }
-    for window in scenes.flatMap(\.windows) {
-      if let frame = frame(in: window) {
-        return frame
-      }
-    }
-    return nil
-  }
-
+  /// The visible tab bar's frame in `window`, with the window's size, or nil when none shows.
   @MainActor static func frame(in window: UIWindow) -> [String: Double]? {
     guard let root = window.rootViewController,
       // A sheet or a full screen modal covers the tab bar.

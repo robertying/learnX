@@ -72,7 +72,22 @@ import UIKit
     #expect(TabBarLocator.frame(in: window) == nil)
   }
 
-  @Test func looksOnlyInTheWindowAsked() {
-    #expect(TabBarLocator.frame(windowId: "no-such-window") == nil)
+  @Test func toastFollowsTheTabBarWhileInAWindow() throws {
+    let tabs = tabs()
+    let window = window(tabs)
+    let toast = ToastView(appContext: nil)
+    #expect(toast.sentTabBarFrame == nil)
+
+    window.addSubview(toast)
+    let shown = try #require(toast.sentTabBarFrame)
+    #expect(shown == TabBarLocator.frame(in: window))
+    #expect(shown != nil)
+
+    tabs.tabBar.isHidden = true
+    toast.followTabBar()
+    #expect(toast.sentTabBarFrame == .some(nil))
+
+    toast.removeFromSuperview()
+    #expect(toast.sentTabBarFrame == nil)
   }
 }
