@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import Animated, {
+  LinearTransition,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -231,9 +232,27 @@ const toastInsets = (insets: Margins, bar: TabBarFrame | null): Margins => {
   return { bottom: edge('bottom'), left: edge('left'), right: edge('right') };
 };
 
+/** How often the toast asks again where the tab bar is while it shows. */
+const tabBarCheckInterval = 250;
+
+const sameFrame = (a: TabBarFrame | null, b: TabBarFrame | null) =>
+  a === b ||
+  (!!a &&
+    !!b &&
+    a.x === b.x &&
+    a.y === b.y &&
+    a.width === b.width &&
+    a.height === b.height &&
+    a.windowWidth === b.windowWidth &&
+    a.windowHeight === b.windowHeight);
+
 /**
- * Where the tab bar is while the toast shows, asked again when the window
- * changes size. Undefined until UIKit answers, a moment after the toast mounts.
+ * Where the tab bar is, followed for as long as the toast shows: it can come
+ * or go under a toast that is already up, as when the tabs first appear at
+ * launch (where the logging-in toast shows before them) or a sheet over them
+ * closes. UIKit has nothing to observe for that, so it asks again every
+ * moment. Undefined until UIKit first answers, a moment after the toast
+ * mounts.
  */
 const useTabBarFrame = () => {
   // This window's size: React Native's window dimensions are the key
@@ -245,12 +264,19 @@ const useTabBarFrame = () => {
     let current = true;
     const answer = (value: TabBarFrame | null) => {
       if (current) {
-        setFrame(value);
+        setFrame(previous =>
+          previous !== undefined && sameFrame(previous, value)
+            ? previous
+            : value,
+        );
       }
     };
-    tabBarFrame(windowId).then(answer, () => answer(null));
+    const ask = () => tabBarFrame(windowId).then(answer, () => answer(null));
+    void ask();
+    const timer = setInterval(ask, tabBarCheckInterval);
     return () => {
       current = false;
+      clearInterval(timer);
     };
   }, [width, height, windowId]);
   return frame;
@@ -344,6 +370,8 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
         accessibilityRole="alert"
         accessibilityLabel={text}
         accessibilityHint=""
+        // Moves, rather than jumps, when the tab bar comes or goes under it.
+        layout={LinearTransition}
         style={[
           // The overlay's window doesn't hold its content to the screen's
           // width, so the wrapper's side padding alone lets a long toast run

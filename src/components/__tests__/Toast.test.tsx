@@ -239,6 +239,29 @@ describe('Toast (iOS)', () => {
       expect(margins().bottom).toBe(16);
     });
 
+    it('follows the tab bar as it comes and goes while it shows', async () => {
+      // At launch the logging-in toast shows before the tabs do.
+      await show(null);
+      expect(margins().bottom).toBe(16);
+
+      frame({ x: 0, y: 791, width: 402, height: 83 });
+      await act(() => jest.advanceTimersByTimeAsync(250));
+      expect(margins().bottom).toBe(83 + 16);
+
+      // A sheet over the tabs.
+      frame(null);
+      await act(() => jest.advanceTimersByTimeAsync(250));
+      expect(margins().bottom).toBe(16);
+    });
+
+    it('stops asking once the toast is gone', async () => {
+      await show(null);
+      await act(() => toast('', 'none'));
+      (tabBarFrame as jest.Mock).mockClear();
+      await act(() => jest.advanceTimersByTimeAsync(1000));
+      expect(tabBarFrame).not.toHaveBeenCalled();
+    });
+
     it('ignores an answer that comes after the toast is gone', async () => {
       let answer: (value: null) => void = () => {};
       (tabBarFrame as jest.Mock).mockReturnValue(
