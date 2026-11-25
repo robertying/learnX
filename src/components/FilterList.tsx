@@ -44,6 +44,7 @@ import ListBackground from './ListBackground';
 import { playHaptic } from 'services/haptics';
 import { useWindowRestoration, useWindowTitle } from 'hooks/useWindow';
 import { t } from 'helpers/i18n';
+import { isAndroid } from 'helpers/platform';
 
 export type { ItemComponentProps };
 
@@ -318,6 +319,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     />
   );
 
+  const pullToRefresh = !selectionMode && !reorderMode;
   const listProps = {
     style: { height: '100%' as const },
     contentInsetAdjustmentBehavior: scrollInsetBehavior,
@@ -328,11 +330,19 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     renderItem,
     keyExtractor: (item: T) => item.id,
     // No pull to refresh while selecting or reordering (a pull would start a
-    // drag in reorder mode), nor on the Mac, which has no pull.
-    refreshControl:
-      selectionMode || reorderMode || DeviceInfo.isMac() ? undefined : (
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      ),
+    // drag in reorder mode), nor on the Mac, which has no pull. Android keeps
+    // the control and turns it off: its scroll view sits inside the control,
+    // so taking the control away would mount a new scroll view at the top
+    // under rows laid out for where the list was scrolled to.
+    refreshControl: DeviceInfo.isMac() ? undefined : isAndroid() ? (
+      <RefreshControl
+        enabled={pullToRefresh}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+      />
+    ) : pullToRefresh ? (
+      <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+    ) : undefined,
   };
 
   return (
