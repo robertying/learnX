@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import Animated, {
+  LinearTransition,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -22,12 +23,7 @@ import { create } from 'zustand';
 import DeviceInfo from 'constants/DeviceInfo';
 import Spacing from 'constants/Spacing';
 import { Text, type TextVariant } from 'components/Text';
-import {
-  tabBarFrame,
-  ToastHUD,
-  ToastSymbol,
-  type TabBarFrame,
-} from 'modules/toast';
+import { ToastHUD, ToastSymbol, type TabBarFrame } from 'modules/toast';
 
 import { playHaptic } from 'services/haptics';
 import { targetWindow } from 'services/windows';
@@ -231,31 +227,6 @@ const toastInsets = (insets: Margins, bar: TabBarFrame | null): Margins => {
   return { bottom: edge('bottom'), left: edge('left'), right: edge('right') };
 };
 
-/**
- * Where the tab bar is while the toast shows, asked again when the window
- * changes size. Undefined until UIKit answers, a moment after the toast mounts.
- */
-const useTabBarFrame = () => {
-  // This window's size: React Native's window dimensions are the key
-  // window's.
-  const { width, height } = useSafeAreaFrame();
-  const { windowId } = useWindow();
-  const [frame, setFrame] = useState<TabBarFrame | null>();
-  useEffect(() => {
-    let current = true;
-    const answer = (value: TabBarFrame | null) => {
-      if (current) {
-        setFrame(value);
-      }
-    };
-    tabBarFrame(windowId).then(answer, () => answer(null));
-    return () => {
-      current = false;
-    };
-  }, [width, height, windowId]);
-  return frame;
-};
-
 /** The height of the keyboard while it is up, so the toast can sit above it. */
 const useKeyboardHeight = () => {
   const [height, setHeight] = useState(() =>
@@ -283,7 +254,20 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
   const insets = useSafeAreaInsets();
   const { width: windowWidth } = useSafeAreaFrame();
   const keyboardHeight = useKeyboardHeight();
-  const tabBar = useTabBarFrame();
+  // Where the tab bar is, as the HUD follows it. Undefined until the HUD is in
+  // a window, and the toast waits for it before it animates in, so it doesn't
+  // jump. Later moves, as when the tabs appear under the logging-in toast at
+  // launch or a sheet over them closes, glide.
+  const [tabBar, setTabBar] = useState<TabBarFrame | null>();
+  // The layout transition goes on in a commit after the first answer's, so
+  // that the toast takes its first place without gliding there.
+  const [placed, setPlaced] = useState(false);
+  useEffect(() => {
+    if (tabBar !== undefined) {
+      // oxlint-disable-next-line react/set-state-in-effect -- a commit after the first answer's, see above
+      setPlaced(true);
+    }
+  }, [tabBar]);
   const margins = toastInsets(insets, tabBar ?? null);
   const drag = useSharedValue(0);
 
@@ -320,11 +304,6 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
   const metrics = mac ? macMetrics : iosMetrics;
   const hud = mac ? macStyles : iosStyles;
 
-  // Placed once UIKit says where the tab bar is, so it doesn't jump.
-  if (tabBar === undefined) {
-    return null;
-  }
-
   return (
     <View
       pointerEvents="box-none"
@@ -344,6 +323,7 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
         accessibilityRole="alert"
         accessibilityLabel={text}
         accessibilityHint=""
+        layout={placed ? LinearTransition : undefined}
         style={[
           // The overlay's window doesn't hold its content to the screen's
           // width, so the wrapper's side padding alone lets a long toast run
@@ -359,8 +339,11 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
       >
         <ToastHUD
           cornerRadius={metrics.cornerRadius}
-          visible={visible}
+          visible={visible && tabBar !== undefined}
           onHidden={() => remove(id)}
+          onTabBarFrame={({ nativeEvent }) =>
+            setTabBar(nativeEvent.frame ?? null)
+          }
           style={hud.toast}
         >
           {symbol ? (

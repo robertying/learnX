@@ -10,7 +10,11 @@ import DeviceInfo from 'constants/DeviceInfo';
 import { textStyles } from 'components/Text';
 import { Toast, toast } from 'components/Toast';
 import { toast as androidToast } from 'components/Toast.android';
-import { tabBarFrame } from 'modules/toast';
+import {
+  holdTabBarFrame,
+  resetTabBarFrame,
+  setTabBarFrame,
+} from 'test-utils/mocks/toast';
 import { WindowProvider } from 'hooks/useWindow';
 import { registerWindow } from 'services/windows';
 import { Windows } from 'test-utils/mocks/windows';
@@ -24,6 +28,7 @@ beforeEach(() => {
 
 afterEach(async () => {
   await act(() => toast('', 'none'));
+  resetTabBarFrame();
 });
 
 describe('Toast (iOS)', () => {
@@ -82,7 +87,6 @@ describe('Toast (iOS)', () => {
     Windows.targetWindowId.mockReturnValue('a');
     await act(() => toast('Here', 'success'));
     expect(screen.getByText('Here')).toBeTruthy();
-    expect(tabBarFrame).toHaveBeenLastCalledWith('a');
     Windows.targetWindowId.mockReturnValue(null);
     unregister();
   });
@@ -167,12 +171,6 @@ describe('Toast (iOS)', () => {
   });
 
   describe('placement', () => {
-    afterEach(() => {
-      (tabBarFrame as jest.Mock).mockImplementation(() =>
-        Promise.resolve(null),
-      );
-    });
-
     const window = { windowWidth: 402, windowHeight: 874 };
     const margins = () => {
       const style = StyleSheet.flatten(
@@ -191,10 +189,7 @@ describe('Toast (iOS)', () => {
     };
     const frame = (
       bar: { x: number; y: number; width: number; height: number } | null,
-    ) =>
-      (tabBarFrame as jest.Mock).mockResolvedValue(
-        bar && { ...bar, ...window },
-      );
+    ) => setTabBarFrame(bar && { ...bar, ...window });
 
     it('sits a gap above a tab bar along the bottom', async () => {
       await show({ x: 0, y: 791, width: 402, height: 83 });
@@ -225,32 +220,38 @@ describe('Toast (iOS)', () => {
       expect(margins()).toEqual({ bottom: 21, left: 21, right: 21 });
     });
 
-    it('waits for the tab bar before it shows, and takes none if asking fails', async () => {
-      let fail: (error: Error) => void = () => {};
-      (tabBarFrame as jest.Mock).mockReturnValue(
-        new Promise((_, reject) => {
-          fail = reject;
-        }),
-      );
+    it('waits for the HUD to say where the tab bar is before it shows', async () => {
+      holdTabBarFrame();
       await render(<Toast />);
       await act(() => toast('Saved', 'success'));
-      expect(screen.queryByText('Saved')).toBeNull();
-      await act(() => fail(new Error('No window')));
+      expect(screen.getByTestId('toast-hud').props.visible).toBe(false);
+
+      await act(() => frame({ x: 0, y: 791, width: 402, height: 83 }));
+      expect(screen.getByTestId('toast-hud').props.visible).toBe(true);
+      expect(margins().bottom).toBe(83 + 16);
+    });
+
+    it('follows the tab bar as it comes and goes while it shows', async () => {
+      // At launch the logging-in toast shows before the tabs can be found.
+      await show(null);
+      expect(margins().bottom).toBe(16);
+
+      await act(() => frame({ x: 0, y: 791, width: 402, height: 83 }));
+      expect(margins().bottom).toBe(83 + 16);
+
+      // A sheet over the tabs.
+      await act(() => frame(null));
       expect(margins().bottom).toBe(16);
     });
 
-    it('ignores an answer that comes after the toast is gone', async () => {
-      let answer: (value: null) => void = () => {};
-      (tabBarFrame as jest.Mock).mockReturnValue(
-        new Promise(resolve => {
-          answer = resolve;
-        }),
-      );
+    it('glides to a new place only once it has been placed', async () => {
+      holdTabBarFrame();
       await render(<Toast />);
       await act(() => toast('Saved', 'success'));
-      await act(() => toast('', 'none'));
-      await act(() => answer(null));
-      expect(screen.queryByText('Saved')).toBeNull();
+      const layout = () => screen.getByRole('alert').props.layout;
+      expect(layout()).toBeUndefined();
+      await act(() => frame(null));
+      expect(layout()).toBeDefined();
     });
   });
 

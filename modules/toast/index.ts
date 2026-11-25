@@ -1,5 +1,15 @@
-import { requireNativeModule, requireNativeView } from 'expo';
-import type { ColorValue, ViewProps } from 'react-native';
+import { requireNativeView } from 'expo';
+import type { ColorValue, NativeSyntheticEvent, ViewProps } from 'react-native';
+
+/** A tab bar's frame in its window, in points, with the window's size. */
+export interface TabBarFrame {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  windowWidth: number;
+  windowHeight: number;
+}
 
 export interface ToastHUDProps extends ViewProps {
   cornerRadius: number;
@@ -11,6 +21,14 @@ export interface ToastHUDProps extends ViewProps {
   visible: boolean;
   /** Called once it has animated away after `visible` turned false. */
   onHidden: () => void;
+  /**
+   * Where the tab bar the person sees is, wherever UIKit put it: called as
+   * soon as the HUD is in a window, then whenever the tab bar moves, appears
+   * or goes. `frame` is missing when none shows: on the login, under a sheet,
+   * at the top on iPad (where it floats and the bar itself is hidden) and on
+   * the Mac.
+   */
+  onTabBarFrame: (event: NativeSyntheticEvent<{ frame?: TabBarFrame }>) => void;
 }
 
 export interface ToastSymbolProps extends ViewProps {
@@ -36,26 +54,3 @@ export const ToastSymbol = requireNativeView<ToastSymbolProps>(
   'LearnXToast',
   'ToastSymbolView',
 );
-
-/** A tab bar's frame in its window, in points, with the window's size. */
-export interface TabBarFrame {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  windowWidth: number;
-  windowHeight: number;
-}
-
-const ToastModule = requireNativeModule<{
-  tabBarFrame: (windowId?: string) => Promise<TabBarFrame | null>;
-}>('LearnXToast');
-
-/**
- * Where the tab bar the person sees is, wherever UIKit put it, or null when
- * none shows: on the login, under a sheet, at the top on iPad (where it
- * floats and the bar itself is hidden) and on the Mac. In the window
- * `windowId` (`services/windows`), or with none, in any. iOS only.
- */
-export const tabBarFrame = (windowId?: string) =>
-  ToastModule.tabBarFrame(windowId);
