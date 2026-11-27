@@ -13,7 +13,11 @@ import {
 import { Assignment, Course, File, Notice } from 'data/types/state';
 import { useCourse } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
-import { useUserData, type BookmarkType } from 'data/userData';
+import {
+  toggleFileCategory,
+  useUserData,
+  type BookmarkType,
+} from 'data/userData';
 import { toggleArchived, toggleFavorite } from 'services/listActions';
 import {
   useAssignments,
@@ -30,9 +34,17 @@ import Empty from 'components/Empty';
 import SafeArea from 'components/SafeArea';
 import FlatList from 'components/FlatList';
 import ListBackground from 'components/ListBackground';
+import SystemIcon from 'components/SystemIcon';
+import { Paragraph } from 'components/Text';
+import Touchable from 'components/Touchable';
+import {
+  groupCourseFiles,
+  type FileCategoryHeading,
+} from 'helpers/groupCourseFiles';
 import { t } from 'helpers/i18n';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import { SplitViewContext } from 'navigation/SplitView';
+import Spacing from 'constants/Spacing';
 import Styles from 'constants/Styles';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
@@ -50,6 +62,7 @@ import { hasGlassHeader } from 'navigation/options';
 import { isApple } from 'helpers/platform';
 import { scrollInsetBehavior } from 'constants/scrollInsetBehavior';
 import { useWindowTitle } from 'hooks/useWindow';
+import { useTheme } from 'theme';
 
 type NavigationProp = MainStackNavigationProp<
   CourseDetailParamList,
@@ -57,7 +70,9 @@ type NavigationProp = MainStackNavigationProp<
 >;
 
 interface CourseItemListProps<T extends Notice | Assignment | File> {
-  data: T[];
+  data: (T | FileCategoryHeading)[];
+  header?: React.ReactElement;
+  onToggleCategory?: (key: string) => void;
   card: React.FC<{
     data: T;
     fav?: boolean;
@@ -81,6 +96,8 @@ interface CourseItemListProps<T extends Notice | Assignment | File> {
 /** One of the course's notices, assignments and files tabs. */
 const CourseItemList = <T extends Notice | Assignment | File>({
   data,
+  header,
+  onToggleCategory,
   card: Card,
   detailScreen,
   type,
@@ -89,6 +106,7 @@ const CourseItemList = <T extends Notice | Assignment | File>({
 }: CourseItemListProps<T>) => {
   const navigation = useNavigation<NavigationProp>();
   const loggedIn = useLoggedIn();
+  const theme = useTheme();
   // Every item of the course, archived ones too, which their cards show as
   // such (Unarchive in their actions).
   const archivedIds = useUserData(userData => userData.archived[type]);
@@ -109,22 +127,54 @@ const CourseItemList = <T extends Notice | Assignment | File>({
       )}
       <FlatList
         data={data}
-        renderItem={({ item, index }) => (
-          <Card
-            data={item}
-            last={index === data.length - 1}
-            fav={!!item.isFavorite}
-            onToggleFav={() => toggleFavorite(type, item.id, !!item.isFavorite)}
-            archived={archivedSet.has(item.id)}
-            onToggleArchived={() =>
-              toggleArchived(type, [item.id], archivedSet.has(item.id))
-            }
-            hideCourseName
-            markArchived
-            onPress={() => navigation.push(detailScreen, { id: item.id })}
-          />
-        )}
-        keyExtractor={item => item.id}
+        ListHeaderComponent={header}
+        getItemType={item => ('heading' in item ? 'heading' : type)}
+        renderItem={({ item, index }) => {
+          if ('heading' in item) {
+            return (
+              <Touchable
+                accessibilityRole="button"
+                accessibilityLabel={item.heading}
+                aria-expanded={item.expanded}
+                onPress={() => onToggleCategory?.(item.key)}
+                style={styles.categoryHeading}
+                type="opacity"
+              >
+                <Paragraph variant="label" style={Styles.flex1}>
+                  {item.heading}
+                </Paragraph>
+                <SystemIcon
+                  name={
+                    item.expanded ? 'disclosureExpanded' : 'disclosureCollapsed'
+                  }
+                  size={16}
+                  color={theme.colors.onSurfaceMedium}
+                />
+              </Touchable>
+            );
+          }
+          const next = data[index + 1];
+          return (
+            <Card
+              data={item}
+              last={!next || 'heading' in next}
+              fav={!!item.isFavorite}
+              onToggleFav={() =>
+                toggleFavorite(type, item.id, !!item.isFavorite)
+              }
+              archived={archivedSet.has(item.id)}
+              onToggleArchived={() =>
+                toggleArchived(type, [item.id], archivedSet.has(item.id))
+              }
+              hideCourseName
+              markArchived
+              onPress={() => navigation.push(detailScreen, { id: item.id })}
+            />
+          );
+        }}
+        keyExtractor={item =>
+          'heading' in item ? item.key : `item:${item.id}`
+        }
         refreshing={refresh.isPending}
         onRefresh={handleRefresh}
         contentInsetAdjustmentBehavior={scrollInsetBehavior}
@@ -186,6 +236,10 @@ const CourseDetailContent: React.FC<{
   const refreshFiles = useRefreshCourseFiles(course.id);
 
   const [index, setIndex] = useState(0);
+  const [filesByCategory, setFilesByCategory] = useState(false);
+  const collapsedFileCategories = useUserData(
+    data => data.collapsedFileCategories[course.id],
+  );
   // The floating tabs' height, which the lists scroll clear of.
   const [tabsHeight, setTabsHeight] = useState(0);
 
@@ -241,10 +295,32 @@ const CourseDetailContent: React.FC<{
             topInset={tabsHeight}
           />
         );
-      case 'file':
+      case 'file': {
+        const courseFiles = files.filter(file => file.courseId === course.id);
         return (
           <CourseItemList
-            data={files.filter(i => i.courseId === course.id)}
+            data={
+              filesByCategory
+                ? groupCourseFiles(
+                    courseFiles,
+                    t('uncategorized'),
+                    collapsedFileCategories,
+                  )
+                : courseFiles
+            }
+            header={
+              courseFiles.length ? (
+                <SegmentedTabs
+                  accessibilityLabel={t('courseFileView')}
+                  titles={[t('filesByTime'), t('filesByCategory')]}
+                  selectedIndex={filesByCategory ? 1 : 0}
+                  onSelect={i => setFilesByCategory(i === 1)}
+                />
+              ) : undefined
+            }
+            onToggleCategory={categoryKey =>
+              toggleFileCategory(course.id, categoryKey)
+            }
             card={FileCard}
             detailScreen="FileDetail"
             type="file"
@@ -252,6 +328,7 @@ const CourseDetailContent: React.FC<{
             topInset={tabsHeight}
           />
         );
+      }
       default:
         return null;
     }
@@ -362,6 +439,14 @@ const CoursePage: React.FC<React.PropsWithChildren<{ selected: boolean }>> = ({
 };
 
 const styles = StyleSheet.create({
+  categoryHeading: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.s,
+    minHeight: 48,
+    paddingHorizontal: Spacing.m,
+    paddingVertical: Spacing.s,
+  },
   floatingTabs: {
     position: 'absolute',
     // Its own height, not the screen's (SafeAreaView flexes by default).

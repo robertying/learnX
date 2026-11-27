@@ -31,6 +31,8 @@ import {
   CheckmarkCircleRegular,
 } from '@fluentui/react-icons/svg/checkmark-circle';
 import { CheckmarkCircleWarningRegular } from '@fluentui/react-icons/svg/checkmark-circle-warning';
+import { ChevronDownRegular } from '@fluentui/react-icons/svg/chevron-down';
+import { ChevronRightRegular } from '@fluentui/react-icons/svg/chevron-right';
 import { CircleRegular } from '@fluentui/react-icons/svg/circle';
 import {
   ClipboardTaskListLtrFilled,
@@ -170,6 +172,8 @@ export const fluentIcons: Record<SystemIconWindowsName, FluentIcon> = {
   CheckmarkCircleRegular,
   CheckmarkCircleWarningRegular,
   CheckmarkRegular,
+  ChevronDownRegular,
+  ChevronRightRegular,
   CircleRegular,
   ClipboardTaskListLtrRegular,
   ClockAlarmRegular,

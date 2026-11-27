@@ -4,6 +4,7 @@ import {
   render,
   screen,
   userEvent,
+  within,
 } from '@testing-library/react-native';
 import { initialAuth, useAuthStore } from 'data/auth';
 import {
@@ -19,6 +20,7 @@ import { t } from 'helpers/i18n';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import * as options from 'navigation/options';
 import CourseDetail from 'screens/CourseDetail';
+import { file } from 'test-utils/fixtures/cards';
 import { fireLayout } from 'test-utils/layout';
 import { screenProps } from 'test-utils/screenProps';
 
@@ -29,6 +31,7 @@ jest.mock('@react-navigation/native', () => ({
   useIsFocused: () => true,
 }));
 jest.mock('data/queries', () => ({ useCourse: jest.fn() }));
+let mockListedFiles: typeof mockFiles;
 const mockRefresh = {
   notice: { isPending: false, mutate: jest.fn() },
   assignment: { isPending: false, mutate: jest.fn() },
@@ -39,7 +42,7 @@ jest.mock('data/content', () => ({
   useAssignments: () => ({
     assignments: require('data/mock').mockAssignments,
   }),
-  useFiles: () => ({ files: require('data/mock').mockFiles }),
+  useFiles: () => ({ files: mockListedFiles }),
   useRefreshCourseNotices: () => mockRefresh.notice,
   useRefreshCourseAssignments: () => mockRefresh.assignment,
   useRefreshCourseFiles: () => mockRefresh.file,
@@ -99,6 +102,7 @@ const selectTab = (index: number) =>
   fireEvent(screen.getByText(t('files')), 'selectionChange', index);
 
 beforeEach(() => {
+  mockListedFiles = mockFiles;
   jest.mocked(useCourse).mockReturnValue(course);
 });
 
@@ -136,6 +140,92 @@ it('says so when a tab has nothing yet', async () => {
   jest.mocked(useCourse).mockReturnValue({ ...course, id: 'new-course' });
   await renderScreen();
   expect(screen.getByText(t('noNotices'))).toBeTruthy();
+  await selectTab(2);
+  expect(screen.getByText(t('noFiles'))).toBeTruthy();
+  expect(screen.queryByText(t('filesByCategory'))).toBeNull();
+});
+
+it('switches the course files between upload order and category headings', async () => {
+  const syllabus = file({
+    id: 'syllabus',
+    courseId: course.id,
+    title: 'Syllabus',
+    category: undefined,
+  });
+  const lecture = file({ courseId: course.id });
+  const other = file({
+    id: 'other',
+    courseId: 'other-course',
+    title: 'Other course file',
+  });
+  mockListedFiles = [syllabus, other, lecture];
+  const firstFile = () => within(screen.getAllByTestId('file-card')[0]);
+  const slides = () =>
+    screen.queryByRole('button', { name: lecture.category!.title });
+
+  await renderScreen();
+  expect(screen.queryByText(t('filesByCategory'))).toBeNull();
+  await selectTab(2);
+  expect(firstFile().getByText(syllabus.title)).toBeTruthy();
+  expect(slides()).toBeNull();
+
+  await fireEvent(screen.getByText(t('filesByCategory')), 'selectionChange', 1);
+  expect(slides()).toBeTruthy();
+  expect(screen.getByRole('button', { name: t('uncategorized') })).toBeTruthy();
+  expect(firstFile().getByText(lecture.title)).toBeTruthy();
+  expect(screen.queryByText(other.title)).toBeNull();
+  expect(screen.queryAllByTestId('card-separator')).toHaveLength(0);
+  await userEvent.press(screen.getByText(lecture.title));
+  expect(mockPush).toHaveBeenCalledWith('FileDetail', { id: lecture.id });
+
+  await selectTab(1);
+  expect(screen.queryByText(t('filesByTime'))).toBeNull();
+  await selectTab(2);
+  expect(slides()).toBeTruthy();
+  await fireEvent(screen.getByText(t('filesByTime')), 'selectionChange', 0);
+  expect(slides()).toBeNull();
+  expect(firstFile().getByText(syllabus.title)).toBeTruthy();
+  expect(screen.getAllByTestId('card-separator')).toHaveLength(1);
+});
+
+it('toggles categories individually and remembers them when the course is reopened', async () => {
+  const lecture = file({ courseId: course.id });
+  const syllabus = file({
+    id: 'syllabus',
+    courseId: course.id,
+    title: 'Syllabus',
+    category: undefined,
+  });
+  mockListedFiles = [lecture, syllabus];
+  const selectCategories = () =>
+    fireEvent(screen.getByText(t('filesByCategory')), 'selectionChange', 1);
+  const slides = (expanded: boolean) =>
+    screen.getByRole('button', { name: lecture.category!.title, expanded });
+  const uncategorized = (expanded: boolean) =>
+    screen.getByRole('button', { name: t('uncategorized'), expanded });
+
+  const { unmount } = await renderScreen();
+  await selectTab(2);
+  await selectCategories();
+  expect(screen.getByText(lecture.title)).toBeTruthy();
+  await userEvent.press(slides(true));
+  expect(screen.queryByText(lecture.title)).toBeNull();
+  expect(screen.getByText(syllabus.title)).toBeTruthy();
+  await userEvent.press(uncategorized(true));
+  expect(screen.queryAllByTestId('file-card')).toHaveLength(0);
+  expect(screen.queryByText(t('noFiles'))).toBeNull();
+
+  await unmount();
+  await renderScreen();
+  await selectTab(2);
+  expect(screen.getByText(lecture.title)).toBeTruthy();
+  expect(screen.getByText(syllabus.title)).toBeTruthy();
+  await selectCategories();
+  expect(screen.queryAllByTestId('file-card')).toHaveLength(0);
+  await userEvent.press(slides(false));
+  expect(screen.getByText(lecture.title)).toBeTruthy();
+  expect(uncategorized(false)).toBeTruthy();
+  expect(screen.queryByText(syllabus.title)).toBeNull();
 });
 
 it('opens an item on top of the course', async () => {

@@ -6,6 +6,7 @@ import {
   setArchived,
   setCourseHidden,
   setCourseOrder,
+  toggleFileCategory,
   queueAction,
   removeAction,
   failAction,
@@ -31,6 +32,7 @@ describe('user data', () => {
       archived: { notice: [], assignment: [], file: [] },
       hiddenCourses: [],
       courseOrder: [],
+      collapsedFileCategories: {},
       currentSemester: null,
       latestSemester: null,
     });
@@ -116,6 +118,27 @@ describe('user data', () => {
     });
   });
 
+  it('restores file category choices independently for each course', async () => {
+    toggleFileCategory('a', 'category:slides');
+    toggleFileCategory('a', 'uncategorized');
+    toggleFileCategory('b', 'category:slides');
+    toggleFileCategory('a', 'category:slides');
+    const saved = Storage.getItemSync(USER_DATA_KEY)!;
+
+    resetUserData();
+    Storage.setItemSync(USER_DATA_KEY, saved);
+    await useUserDataStore.persist.rehydrate();
+    expect(getUserData().collapsedFileCategories).toEqual({
+      a: ['uncategorized'],
+      b: ['category:slides'],
+    });
+
+    toggleFileCategory('a', 'uncategorized');
+    expect(getUserData().collapsedFileCategories).toEqual({
+      b: ['category:slides'],
+    });
+  });
+
   it('keeps lists added later when reading older saved data', async () => {
     (Storage as unknown as { __store: Map<string, string> }).__store.set(
       USER_DATA_KEY,
@@ -132,6 +155,7 @@ describe('user data', () => {
     });
     expect(getUserData().hiddenCourses).toEqual(['c']);
     expect(getUserData().courseOrder).toEqual([]);
+    expect(getUserData().collapsedFileCategories).toEqual({});
   });
 
   describe('applyLatestSemester', () => {
